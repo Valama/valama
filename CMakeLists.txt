@@ -39,7 +39,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/vala")
 
 find_package(Vala "0.16" REQUIRED)
 find_package(PkgConfig)
-pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
+pkg_check_modules(GTK3 REQUIRED gtk+-3.0 gthread-2.0)
 pkg_check_modules(HIGHLIGHT REQUIRED gtksourceview-3.0)
 pkg_check_modules(VALA REQUIRED libvala-0.16)
 
