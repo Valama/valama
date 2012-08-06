@@ -89,7 +89,26 @@ namespace Guanako{
             Symbol[] internal_candidates = candidates;
 
             var txt = text;
-            int last_occurrence = int.max(-1, txt.last_index_of("("));
+            
+            int depth = -1;
+            int start_id = 0;
+            do {
+                for (int q = 0; q < txt.length; q++){
+                    if (txt[q] == (char)("(")){
+                        if (depth < 1)
+                            start_id = q;
+                        depth ++;
+                    }else if (txt[q] == (char)("(")){
+                        depth --;
+                        if (depth == 0){
+                            txt = txt.substring(start_id, q - start_id);
+                            break;
+                        }
+                    }
+                }
+            } while (depth > -1);
+            
+            int last_occurrence = int.max(-1, txt.last_index_of("."));
             last_occurrence = int.max(last_occurrence, txt.last_index_of(","));
             if (last_occurrence >= 0)
                 txt = txt.substring(last_occurrence + 1);
