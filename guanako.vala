@@ -64,10 +64,7 @@ namespace Guanako{
 				if (type == null){
 				    ret = accessible;
 				}else{
-					iter_symbol(type, (s, depth)=>{
-						ret += s;
-						return iter_callback_returns.abort_branch;
-					});
+					ret = get_child_symbols(type);
 				}
 			} else if (splt[1] == "="){
     			var accessible = get_accessible_symbols(file, line, col);
@@ -91,7 +88,7 @@ namespace Guanako{
  		Symbol? resolve_symbol(string text, Symbol[] candidates = null){
 			Symbol[] internal_candidates = candidates;
 
-			var txt = written.strip();
+			var txt = text.strip();
 			int last_bracket = txt.last_index_of("(");
 			if (last_bracket >= 0)
 				txt = txt.substring(txt.last_index_of("(") + 1);
@@ -130,7 +127,7 @@ namespace Guanako{
 					if (splt.length <= 2)
 						return type;
 					else
-						return resolve_symbol(text.substring(splt[0].length + 1), get_child_symbols(type));
+						return resolve_symbol(txt.substring(splt[0].length + 1), get_child_symbols(type));
  				}
  			}
  			return null;
