@@ -85,7 +85,7 @@ namespace Guanako{
              return ret;
          }
 
-        Symbol? resolve_symbol(string text, Symbol[] candidates = null){
+        Symbol? resolve_symbol(string text, Symbol[]? candidates = null){
             Symbol[] internal_candidates = candidates;
 
             var txt = text;
