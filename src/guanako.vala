@@ -90,25 +90,27 @@ namespace Guanako{
 
             var txt = text;
             
-            int depth = -1;
+            int depth = 0;
             int start_id = 0;
+            bool found = false;
             do {
+                found = false;
                 for (int q = 0; q < txt.length; q++){
-                    if (txt[q] == (char)("(")){
+                    if (txt[q].to_string() == "("){
                         if (depth < 1)
                             start_id = q;
                         depth ++;
-                    }else if (txt[q] == (char)("(")){
+                    }else if (txt[q].to_string() == ")"){
                         depth --;
                         if (depth == 0){
-                            txt = txt.substring(start_id, q - start_id);
-                            break;
+                            txt = txt.substring(0, start_id) + txt.substring(q + 1);
+                            found = true;
                         }
                     }
                 }
-            } while (depth > -1);
-            
-            int last_occurrence = int.max(-1, txt.last_index_of("."));
+            } while (found);
+
+            int last_occurrence = int.max(-1, txt.last_index_of("("));
             last_occurrence = int.max(last_occurrence, txt.last_index_of(","));
             if (last_occurrence >= 0)
                 txt = txt.substring(last_occurrence + 1);
