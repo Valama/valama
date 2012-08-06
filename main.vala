@@ -171,7 +171,7 @@ class TestProvider : Gtk.SourceCompletionProvider, Object
     context.add_proposals (this, props, true);
   }
 
-  public weak Gdk.Pixbuf? get_icon ()
+  public unowned Gdk.Pixbuf? get_icon ()
   {
       if (this.icon == null)
       {

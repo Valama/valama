@@ -23,7 +23,6 @@ public class symbol_browser {
         tree_view.insert_column_with_attributes (-1, "Symbol", new CellRendererText (), "text", 0, null);
         tree_view.insert_column_with_attributes (-1, "Type", new CellRendererText (), "text", 1, null);
 
-        TreeIter root;
         TreeIter category_iter;
         TreeIter[] iters = new TreeIter[0];
 
