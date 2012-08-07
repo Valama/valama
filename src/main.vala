@@ -4,7 +4,7 @@ using GLib;
 
 static Window window_main;
 
-static Guanako.project project;
+static valama_project project;
 static SourceView view;
 static SourceFile main_file;
 
@@ -12,51 +12,30 @@ public static void main(string[] args){
     Gtk.init(ref args);
 
     string sourcedir = Environment.get_current_dir();
+    if (args.length > 1)
+        sourcedir = args[1];
 
-    project = new Guanako.project();
+    project = new valama_project(sourcedir);
 
-    project.add_package ("gobject-2.0");
-    project.add_package ("glib-2.0");
-    project.add_package ("gio-2.0");
-    project.add_package ("gee-1.0");
-    project.add_package ("libvala-0.16");
-    project.add_package ("gdk-3.0");
-    project.add_package ("gtk+-3.0");
-    project.add_package ("gtksourceview-3.0");
+    project.guanako_project.add_package ("gobject-2.0");
+    project.guanako_project.add_package ("glib-2.0");
+    project.guanako_project.add_package ("gio-2.0");
+    project.guanako_project.add_package ("gee-1.0");
+    project.guanako_project.add_package ("libvala-0.16");
+    project.guanako_project.add_package ("gdk-3.0");
+    project.guanako_project.add_package ("gtk+-3.0");
+    project.guanako_project.add_package ("gtksourceview-3.0");
 
-    /*project.add_package ("gobject-2.0");
-    project.add_package ("glib-2.0");
-    project.add_package ("gio-2.0");
-    project.add_package ("libxml-2.0");
-    project.add_package ("gee-1.0");
-    project.add_package ("gmodule-2.0");
-    project.add_package ("gdk-3.0");
-    project.add_package ("gtk+-3.0");
-    project.add_package ("clutter-1.0");
-    project.add_package ("clutter-gtk-1.0");*/
-
-
-    var directory = File.new_for_path (sourcedir);
-
-    var enumerator = directory.enumerate_children (FileAttribute.STANDARD_NAME, 0);
-
-    main_file = null;
-
-    FileInfo file_info;
-    while ((file_info = enumerator.next_file ()) != null) {
-        string file = sourcedir + "/" + file_info.get_name ();
-        if (file.has_suffix(".vala")){
-            stdout.printf(@"Found file $file\n");
-            var source_file = new SourceFile (project.code_context, SourceFileType.SOURCE, file);
-            project.add_source_file (source_file);
-
-            if (file.has_suffix("main.vala"))
-                main_file = source_file;
-        }
-    }
-
-    project.update();
-
+    /*project.guanako_project.add_package ("gobject-2.0");
+    project.guanako_project.add_package ("glib-2.0");
+    project.guanako_project.add_package ("gio-2.0");
+    project.guanako_project.add_package ("libxml-2.0");
+    project.guanako_project.add_package ("gee-1.0");
+    project.guanako_project.add_package ("gmodule-2.0");
+    project.guanako_project.add_package ("gdk-3.0");
+    project.guanako_project.add_package ("gtk+-3.0");
+    project.guanako_project.add_package ("clutter-1.0");
+    project.guanako_project.add_package ("clutter-gtk-1.0");*/
 
 
 
@@ -81,19 +60,24 @@ public static void main(string[] args){
     var lang = langman.get_language("vala");
     bfr.set_language(lang);
 
-    string txt = "";
-    FileUtils.get_contents(sourcedir + "/main.vala", out txt);
-    bfr.text = txt;
+    //string txt = "";
+    //FileUtils.get_contents(sourcedir + "/main.vala", out txt);
+    //bfr.text = txt;
 
 
     var hbox = new HBox(false, 0);
+
+    var pbrw = new project_browser(project);
+    hbox.pack_start(pbrw.widget, true, true);
+    
+    
 
     var scrw = new ScrolledWindow(null, null);
     scrw.add(view);
     hbox.pack_start(scrw, true, true);
 
     var scrw2 = new ScrolledWindow(null, null);
-    var brw = new symbol_browser(project);
+    var brw = new symbol_browser(project.guanako_project);
     scrw2.add(brw.widget);
     hbox.pack_start(scrw2, true, true);
 
@@ -143,7 +127,7 @@ class TestProvider : Gtk.SourceCompletionProvider, Object
 
   public void populate (Gtk.SourceCompletionContext context)
   {
-    project.update_file(main_file);
+    project.guanako_project.update_file(main_file);
     
     var props = new GLib.List<Gtk.SourceCompletionItem> ();
 
@@ -162,7 +146,7 @@ class TestProvider : Gtk.SourceCompletionProvider, Object
     if (splt.length > 0)
         last = splt[splt.length - 1];
 
-    var proposals = project.propose_symbols(main_file, line, col, current_line);
+    var proposals = project.guanako_project.propose_symbols(main_file, line, col, current_line);
     foreach (Symbol proposal in proposals){
         if (proposal.name != null){
             if (proposal.name.has_prefix(last))
