@@ -7,10 +7,14 @@ namespace Guanako{
      public class project {
 
          CodeContext context;
-
+         SymbolResolver sym_resolver;
+        Vala.Parser parser;
+        
          public project(){
             context = new CodeContext ();
-            CodeContext.push(context);
+            sym_resolver = new SymbolResolver();
+            parser = new Vala.Parser();
+            
             context.profile = Profile.GOBJECT;
          }
          public Symbol root_symbol {
@@ -30,10 +34,10 @@ namespace Guanako{
             context.add_source_file (source_file);
         }*/
         public void update(){
-            Vala.Parser parser = new Vala.Parser();
+            CodeContext.push(context);
             parser.parse(context);
-             var res = new SymbolResolver();
-             res.resolve(context);
+            sym_resolver.resolve(context);
+            CodeContext.pop();
         }
 
          public Symbol[] propose_symbols(SourceFile file, int line, int col, string written){
@@ -280,7 +284,48 @@ namespace Guanako{
             return ret;
         }
 
+        public void update_file (Vala.SourceFile file) {
+            lock (context) {
+                /* Removing nodes in the same loop causes problems (probably due to ReadOnlyList)*/
+                var nodes = new Vala.ArrayList<Vala.CodeNode> ();
+                foreach (var node in file.get_nodes()) {
+                    nodes.add(node);
+                }
+                foreach (var node in nodes) {
+                    file.remove_node (node);
+                    if (node is Vala.Symbol) {
+                        var sym = (Vala.Symbol) node;
+                        if (sym.owner != null)
+                            /* we need to remove it from the scope*/
+                            sym.owner.remove(sym.name);
+                        if (context.entry_point == sym)
+                            context.entry_point = null;
+                    }
+                }
+                file.current_using_directives = new Vala.ArrayList<Vala.UsingDirective>();
+                var ns_ref = new Vala.UsingDirective (new Vala.UnresolvedSymbol (null, "GLib"));
+                file.add_using_directive (ns_ref);
+                context.root.add_using_directive (ns_ref);
+
+                //report.clear_error_indicators ();
+
+                Vala.CodeContext.push (context);
+
+                /* visit_source_file checks for the file extension */
+                parser.visit_source_file (file);
+
+                sym_resolver.resolve (context);
+                //analyzer.visit_source_file (file);
+
+                Vala.CodeContext.pop ();
+
+                //report.update_errors(current_editor);
+            }
+        }
+
      }
+
+
 
 
      //Helper function for checking whether a given source location is inside a SourceReference

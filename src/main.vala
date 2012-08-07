@@ -143,7 +143,9 @@ class TestProvider : Gtk.SourceCompletionProvider, Object
 
   public void populate (Gtk.SourceCompletionContext context)
   {
-      var props = new GLib.List<Gtk.SourceCompletionItem> ();
+    project.update_file(main_file);
+    
+    var props = new GLib.List<Gtk.SourceCompletionItem> ();
 
     var mark = view.buffer.get_insert();
     TextIter iter;

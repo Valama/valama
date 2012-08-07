@@ -47,10 +47,10 @@ public class symbol_browser {
                 else
                     store.append (out next, iters[depth - 2]);
                 store.set (next, 0, smb.name, 1, tpe, -1);
-                if (iters.length - 2 < depth)
+                if (iters.length < depth)
                     iters += next;
                 else
-                    iters[depth] = next;
+                    iters[depth - 1] = next;
             }
             return Guanako.iter_callback_returns.continue;
         });
