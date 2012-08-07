@@ -149,6 +149,7 @@ namespace Guanako{
                         type = ((Method)smb).return_type.data_type;
                     if (type == null)
                         continue;
+                    stdout.printf(smb.name + "##\n");
 
                     if (splt.length <= 2)
                         return type;
@@ -183,19 +184,19 @@ namespace Guanako{
                 return ret;
 
             // Propose all accessible non-local namespaces, classes etc
-            iter_symbol (context.root, (iter, depth)=>{
+            /*iter_symbol (context.root, (iter, depth)=>{
                 if (current_symbol.is_accessible(iter)){
                     ret += iter;
 
                     //TODO: Abort if inside other namespace
 
-                    /*if (iter is Namespace){
-                        if (!namespace_in_using_directives(file, iter))
-                            return iter_callback_returns.abort_branch;
-                    }*/
+                    //if (iter is Namespace){
+                    //    if (!namespace_in_using_directives(file, iter))
+                    //        return iter_callback_returns.abort_branch;
+                   //}
                 }
                 return iter_callback_returns.continue;
-            }, 0);
+            }, 0);*/
 
             //If we are inside a method, propose all parameters
             if (current_symbol is Method){
@@ -226,7 +227,7 @@ namespace Guanako{
                             last_depth = depth;
                         return iter_callback_returns.abort_tree;
                     }
-                    if (statement is DeclarationStatement){
+                    if (statement is DeclarationStatement || statement is ForeachStatement){
                         candidates += statement;
                         depths += depth;
                     }
@@ -236,6 +237,19 @@ namespace Guanako{
                 //Return all candidates with a lower or equal depth
                 for (int q = candidates.length - 1; q >= 0; q--){
                     if (depths[q] <= last_depth || last_depth == -1){
+                        if (candidates[q] is ForeachStatement){
+                            var fst = (ForeachStatement)candidates[q];
+            CodeContext.push(context);
+                            sym_resolver.visit_foreach_statement(fst);
+                            if (fst.type_reference != null){
+                                //sym_resolver.visit_data_type(fst.type_reference);
+                                stdout.printf(fst.type_reference.to_string() + "##\n");
+                                //var v = new Variable(fst.type_reference, fst.variable_name);
+                                //v.variable_type.data_type = fst.type_reference.data_type;
+                                ret += new Variable(fst.type_reference, fst.variable_name);
+                            }
+            CodeContext.pop();
+                        }
                         if (candidates[q] is DeclarationStatement){
                             var dsc = (DeclarationStatement)candidates[q];
                             if (dsc.declaration != null)

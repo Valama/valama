@@ -6,7 +6,7 @@ static Window window_main;
 
 static valama_project project;
 static SourceView view;
-static SourceFile main_file;
+static Label lbl_result;
 
 public static void main(string[] args){
     Gtk.init(ref args);
@@ -25,7 +25,7 @@ public static void main(string[] args){
     project.guanako_project.add_package ("gdk-3.0");
     project.guanako_project.add_package ("gtk+-3.0");
     project.guanako_project.add_package ("gtksourceview-3.0");
-
+project.guanako_project.update();
     /*project.guanako_project.add_package ("gobject-2.0");
     project.guanako_project.add_package ("glib-2.0");
     project.guanako_project.add_package ("gio-2.0");
@@ -47,7 +47,8 @@ public static void main(string[] args){
     view.show_line_numbers = true;
     var bfr = (SourceBuffer)view.buffer;
     bfr.set_highlight_syntax(true);
-
+    view.insert_spaces_instead_of_tabs = true;
+    
     TestProvider tp = new TestProvider ();
     tp.priority = 1;
     tp.name = "Test Provider 1";
@@ -60,34 +61,75 @@ public static void main(string[] args){
     var lang = langman.get_language("vala");
     bfr.set_language(lang);
 
-    //string txt = "";
-    //FileUtils.get_contents(sourcedir + "/main.vala", out txt);
-    //bfr.text = txt;
+    var vbox_main = new VBox(false, 0);
 
-
-    var hbox = new HBox(false, 0);
-
-    var pbrw = new project_browser(project);
-    hbox.pack_start(pbrw.widget, true, true);
+    var toolbar = new Toolbar();
+    vbox_main.pack_start(toolbar, false, true);
     
+    var btnSave = new ToolButton.from_stock(Stock.SAVE);
+    toolbar.add(btnSave);
+    btnSave.clicked.connect(write_current_source_file);
+    
+    var btnBuild = new Gtk.ToolButton.from_stock(Stock.EXECUTE);
+    btnBuild.clicked.connect(()=>{
+        lbl_result.label = project.build();
+    });
+    toolbar.add(btnBuild);
+
+        var hbox = new HBox(false, 0);
+
+        var pbrw = new project_browser(project);
+        hbox.pack_start(pbrw.widget, false, true);
+        pbrw.source_file_selected.connect(on_source_file_selected);
+        
+        var scrw = new ScrolledWindow(null, null);
+        scrw.add(view);
+        hbox.pack_start(scrw, true, true);
+
+        var scrw2 = new ScrolledWindow(null, null);
+        var brw = new symbol_browser(project.guanako_project);
+        scrw2.add(brw.widget);
+        hbox.pack_start(scrw2, true, true);
+    
+    vbox_main.pack_start(hbox, true, true);
+
+
+    lbl_result = new Label("");
+    var scrw3 = new ScrolledWindow(null, null);
+    scrw3.add_with_viewport(lbl_result);
+    scrw3.set_size_request(0, 150);
+    vbox_main.pack_start(scrw3, false, true);
     
 
-    var scrw = new ScrolledWindow(null, null);
-    scrw.add(view);
-    hbox.pack_start(scrw, true, true);
-
-    var scrw2 = new ScrolledWindow(null, null);
-    var brw = new symbol_browser(project.guanako_project);
-    scrw2.add(brw.widget);
-    hbox.pack_start(scrw2, true, true);
-
-    window_main.add(hbox);
+    window_main.add(vbox_main);
 
     window_main.set_default_size(700, 600);
     window_main.destroy.connect(Gtk.main_quit);
     window_main.show_all();
 
     Gtk.main();
+}
+
+static SourceFile current_source_file = null;
+static void on_source_file_selected(SourceFile file){
+    current_source_file = file;
+    
+    string txt = "";
+    FileUtils.get_contents(file.filename, out txt);
+    view.buffer.text = txt;
+}
+
+void write_current_source_file(){
+    var file = File.new_for_path (current_source_file.filename);
+    
+    // delete if file already exists
+    if (file.query_exists ()) {
+        file.delete ();
+    }
+    
+    var dos = new DataOutputStream (file.create (FileCreateFlags.REPLACE_DESTINATION));
+    dos.put_string (view.buffer.text);
+    project.guanako_project.update_file(current_source_file);
 }
 
 static void on_view_buffer_changed(){
@@ -127,8 +169,6 @@ class TestProvider : Gtk.SourceCompletionProvider, Object
 
   public void populate (Gtk.SourceCompletionContext context)
   {
-    project.guanako_project.update_file(main_file);
-    
     var props = new GLib.List<Gtk.SourceCompletionItem> ();
 
     var mark = view.buffer.get_insert();
@@ -146,7 +186,7 @@ class TestProvider : Gtk.SourceCompletionProvider, Object
     if (splt.length > 0)
         last = splt[splt.length - 1];
 
-    var proposals = project.guanako_project.propose_symbols(main_file, line, col, current_line);
+    var proposals = project.guanako_project.propose_symbols(current_source_file, line, col, current_line);
     foreach (Symbol proposal in proposals){
         if (proposal.name != null){
             if (proposal.name.has_prefix(last))

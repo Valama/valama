@@ -3,14 +3,12 @@ using Vala;
 
 public class valama_project{
     public valama_project(string project_path){
-
+        this.project_path = project_path;
         guanako_project = new Guanako.project();
 
         var directory = File.new_for_path (project_path + "/src");
 
         var enumerator = directory.enumerate_children (FileAttribute.STANDARD_NAME, 0);
-
-        main_file = null;
 
         SourceFile[] sf = new SourceFile[0];
         FileInfo file_info;
@@ -29,7 +27,14 @@ public class valama_project{
     
     public SourceFile[] source_files;
     public Guanako.project guanako_project;
+    string project_path;
     
+    public string build(){
+    	GLib.DirUtils.create(project_path + "/build", 0);
+    	string ret;
+    	GLib.Process.spawn_command_line_sync("sh -c 'cd " + project_path + "/build && cmake .. && make'", out ret);
+    	return ret;
+    }
 }
 
 public class project_browser {
@@ -40,12 +45,17 @@ public class project_browser {
 
         build();
 
-        widget = tree_view;
+        var scrw = new ScrolledWindow(null, null);
+        scrw.add(tree_view);
+        scrw.set_size_request(200,0);
+        widget = scrw;
     }
 
     valama_project project;
     TreeView tree_view;
     public Widget widget;
+
+    public signal void source_file_selected(SourceFile file);
 
     void build(){
         var store = new TreeStore (2, typeof (string), typeof (string));
@@ -61,8 +71,16 @@ public class project_browser {
         foreach (SourceFile sf in project.source_files){
             TreeIter iter_sf;
             store.append (out iter_sf, iter_source_files);
-            store.set (iter_sf, 0, sf.filename, 1, "", -1);
+            var name = sf.filename.substring(sf.filename.last_index_of("/") + 1);
+            store.set (iter_sf, 0, name, 1, "", -1);
         }
+        
+        tree_view.row_activated.connect((path)=>{
+            int[] indices = path.get_indices();
+            if (indices.length > 1){
+                source_file_selected(project.source_files[indices[1]]);
+            }
+        });
 
    }
 }
