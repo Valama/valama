@@ -23,16 +23,15 @@ public class valama_project{
             }
         }
         source_files = sf;
-
-    guanako_project.add_package ("gobject-2.0");
-    guanako_project.add_package ("glib-2.0");
-    guanako_project.add_package ("gio-2.0");
-    guanako_project.add_package ("gee-1.0");
-    guanako_project.add_package ("libvala-0.16");
-    guanako_project.add_package ("gdk-3.0");
-    guanako_project.add_package ("gtk+-3.0");
-    guanako_project.add_package ("gtksourceview-3.0");
-
+        
+        guanako_project.add_package ("gobject-2.0");
+        guanako_project.add_package ("glib-2.0");
+        guanako_project.add_package ("gio-2.0");
+        guanako_project.add_package ("gee-1.0");
+        guanako_project.add_package ("libvala-0.16");
+        guanako_project.add_package ("gdk-3.0");
+        guanako_project.add_package ("gtk+-3.0");
+        guanako_project.add_package ("gtksourceview-3.0");
 
         guanako_project.update();
     }
@@ -42,9 +41,8 @@ public class valama_project{
     string project_path;
     
     public string build(){
-    	GLib.DirUtils.create(project_path + "/build", 0);
     	string ret;
-    	GLib.Process.spawn_command_line_sync("sh -c 'cd " + project_path + "/build && cmake .. && make'", out ret);
+    	GLib.Process.spawn_command_line_sync("sh -c 'cd " + project_path + " && mkdir -p build && cd build && cmake .. && make'", null, out ret);
     	return ret;
     }
 }
