@@ -42,7 +42,7 @@ public class valama_project{
     
     public string build(){
     	string ret;
-    	GLib.Process.spawn_command_line_sync("sh -c 'cd " + project_path + " && mkdir build && cd build && cmake .. && make'", out ret);
+    	GLib.Process.spawn_command_line_sync("sh -c 'cd " + project_path + " && mkdir -p build && cd build && cmake .. && make'", null, out ret);
     	return ret;
     }
 }
