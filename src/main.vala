@@ -19,8 +19,6 @@ public static void main(string[] args){
 
     window_main = new Window();
 
-
-
     view = new SourceView();
     view.show_line_numbers = true;
     var bfr = (SourceBuffer)view.buffer;
@@ -110,7 +108,7 @@ void write_current_source_file(){
     
     var dos = new DataOutputStream (file.create (FileCreateFlags.REPLACE_DESTINATION));
     dos.put_string (view.buffer.text);
-    project.guanako_project.update_file(current_source_file);
+    project.guanako_project.update_file(current_source_file, view.buffer.text);
 }
 
 static void on_view_buffer_changed(){

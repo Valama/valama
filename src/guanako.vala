@@ -9,12 +9,14 @@ namespace Guanako{
         CodeContext context;
         SymbolResolver sym_resolver;
         Vala.Parser parser;
-
+        Vala.SemanticAnalyzer analyzer;
+        
         public project(){
             context = new CodeContext ();
             sym_resolver = new SymbolResolver();
             parser = new Vala.Parser();
-
+            analyzer = new Vala.SemanticAnalyzer ();
+            
             context.profile = Profile.GOBJECT;
         }
         public Symbol root_symbol {
@@ -48,8 +50,8 @@ namespace Guanako{
                 add_package(vapi);
                 stdout.printf("Adding package '" + vapi + "' for namespace '" + namesp + "'\n");
             }*/
-            
             sym_resolver.resolve(context);
+            //analyzer.analyze(context);
             CodeContext.pop();
         }
 
@@ -199,19 +201,19 @@ namespace Guanako{
 
             // Propose all accessible non-local namespaces, classes etc
             iter_symbol (context.root, (iter, depth)=>{
-                if (iter.is_accessible(current_symbol)){
+                if (current_symbol.is_accessible(iter)){
                     ret += iter;
-
-                    if (iter is Namespace)
-                        if (namespace_in_using_directives(file, iter))
-                            return iter_callback_returns.continue;
                 }
+
+                if (iter is Namespace)
+                    if (namespace_in_using_directives(file, iter))
+                        return iter_callback_returns.continue;
                 return iter_callback_returns.abort_branch;
             });
             var current_namespace = get_parent_namespace(current_symbol);
             if (current_namespace != null){
                 iter_symbol (current_namespace, (iter, depth)=>{
-                if (iter.is_accessible(current_symbol)){
+                    if (current_symbol.is_accessible(iter)){
                         ret += iter;
                     }
                     return iter_callback_returns.abort_branch;
@@ -219,7 +221,7 @@ namespace Guanako{
             }
             if (current_symbol.parent_symbol != null){
                 iter_symbol (current_symbol.parent_symbol, (iter, depth)=>{
-                if (iter.is_accessible(current_symbol)){
+                    if (current_symbol.is_accessible(iter)){
                         ret += iter;
                     }
                     return iter_callback_returns.abort_branch;
@@ -273,7 +275,7 @@ namespace Guanako{
                             //if (fst.type_reference != null)
                             //    ret += new Variable(fst.type_reference, fst.variable_name);
                         }*/
-                        if (candidates[q] is ForeachStatement){
+                        if (candidates[q] is ForeachStatement && depths[q] + 1 <= last_depth){//depth + 1, as iterator variable is only available inside the loop
                             var fst = (ForeachStatement)candidates[q];
                             if (fst.type_reference != null)
                                 ret += new Variable(fst.type_reference, fst.variable_name);
@@ -326,9 +328,13 @@ namespace Guanako{
             return ret;
         }
 
-        public void update_file (Vala.SourceFile file) {
+        public void update_file (Vala.SourceFile file, string new_content) {
+            file.content = new_content;
             lock (context) {
                 /* Removing nodes in the same loop causes problems (probably due to ReadOnlyList)*/
+                
+                Vala.CodeContext.push (context);
+                
                 var nodes = new Vala.ArrayList<Vala.CodeNode> ();
                 foreach (var node in file.get_nodes()) {
                     nodes.add(node);
@@ -351,7 +357,6 @@ namespace Guanako{
 
                 //report.clear_error_indicators ();
 
-                Vala.CodeContext.push (context);
 
                 /* visit_source_file checks for the file extension */
                 parser.visit_source_file (file);
