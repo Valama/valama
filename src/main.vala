@@ -48,9 +48,7 @@ public static void main(string[] args){
     btnSave.clicked.connect(write_current_source_file);
     
     var btnBuild = new Gtk.ToolButton.from_stock(Stock.EXECUTE);
-    btnBuild.clicked.connect(()=>{
-        lbl_result.label = project.build();
-    });
+    btnBuild.clicked.connect(on_build_button_clicked);
     toolbar.add(btnBuild);
 
         var hbox = new HBox(false, 0);
@@ -86,6 +84,11 @@ public static void main(string[] args){
     window_main.show_all();
 
     Gtk.main();
+}
+
+static void on_build_button_clicked(){
+        write_current_source_file();
+        lbl_result.label = project.build();
 }
 
 static SourceFile current_source_file = null;
