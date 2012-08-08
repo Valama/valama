@@ -161,7 +161,7 @@ namespace Guanako{
              foreach (Symbol smb in internal_candidates){
                  if (smb.name == splt[0]){
                     Symbol type = null;
-                    if (smb is Class || smb is Namespace)
+                    if (smb is Class || smb is Namespace || smb is Struct)
                         type = smb;
                     if (smb is Property)
                         type = ((Property)smb).property_type.data_type;
@@ -193,12 +193,13 @@ namespace Guanako{
          public Symbol[] get_accessible_symbols(SourceFile file, int line, int col){
             Symbol [] ret = new Symbol[0];
             var current_symbol = get_symbol_at_pos(file, line, col);
-            if (current_symbol == null)
+            if (current_symbol == null){
                 return ret;
+            }
 
             // Propose all accessible non-local namespaces, classes etc
             iter_symbol (context.root, (iter, depth)=>{
-                if (current_symbol.is_accessible(iter)){
+                if (iter.is_accessible(current_symbol)){
                     ret += iter;
 
                     if (iter is Namespace)
@@ -210,7 +211,7 @@ namespace Guanako{
             var current_namespace = get_parent_namespace(current_symbol);
             if (current_namespace != null){
                 iter_symbol (current_namespace, (iter, depth)=>{
-                    if (current_symbol.is_accessible(iter)){
+                if (iter.is_accessible(current_symbol)){
                         ret += iter;
                     }
                     return iter_callback_returns.abort_branch;
@@ -218,7 +219,7 @@ namespace Guanako{
             }
             if (current_symbol.parent_symbol != null){
                 iter_symbol (current_symbol.parent_symbol, (iter, depth)=>{
-                    if (current_symbol.is_accessible(iter)){
+                if (iter.is_accessible(current_symbol)){
                         ret += iter;
                     }
                     return iter_callback_returns.abort_branch;
