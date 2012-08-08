@@ -41,9 +41,8 @@ public class valama_project{
     string project_path;
     
     public string build(){
-    	GLib.DirUtils.create(project_path + "/build", 0);
     	string ret;
-    	GLib.Process.spawn_command_line_sync("sh -c 'cd " + project_path + "/build && cmake .. && make'", out ret);
+    	GLib.Process.spawn_command_line_sync("sh -c 'cd " + project_path + " && mkdir build && cd build && cmake .. && make'", out ret);
     	return ret;
     }
 }
