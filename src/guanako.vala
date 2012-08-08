@@ -6,24 +6,24 @@ namespace Guanako{
 
      public class project {
 
-         CodeContext context;
-         SymbolResolver sym_resolver;
+        CodeContext context;
+        SymbolResolver sym_resolver;
         Vala.Parser parser;
-        
-         public project(){
+
+        public project(){
             context = new CodeContext ();
             sym_resolver = new SymbolResolver();
             parser = new Vala.Parser();
-            
+
             context.profile = Profile.GOBJECT;
-         }
-         public Symbol root_symbol {
-             get { return context.root; }
-         }
-         public CodeContext code_context{
-             get { return context; }
-         }
-         public void add_package(string package_name){
+        }
+        public Symbol root_symbol {
+            get { return context.root; }
+        }
+        public CodeContext code_context{
+            get { return context; }
+        }
+        public void add_package(string package_name){
             context.add_external_package (package_name);
         }
         public void add_source_file(SourceFile source_file){
@@ -40,7 +40,7 @@ namespace Guanako{
             CodeContext.pop();
         }
 
-         public Symbol[] propose_symbols(SourceFile file, int line, int col, string written){
+        public Symbol[] propose_symbols(SourceFile file, int line, int col, string written){
             Symbol[] ret = new Symbol[0];
 
             string[] splt = written.strip().split(" ");
@@ -70,20 +70,37 @@ namespace Guanako{
                 }else{
                     ret = get_child_symbols(type);
                 }
-            } else if (splt[1] == "="){
+            } else if (splt[splt.length - 1] == "new"){
                 var accessible = get_accessible_symbols(file, line, col);
-
-                Symbol type = null;
-                if (splt.length >= 3)
-                    type = resolve_symbol(splt[2], accessible);
-
+                foreach (Symbol c in accessible)
+                    if (c is Namespace || c is Class)
+                        ret += c;
+            } else if (splt[splt.length - 2] == "new"){
+                var accessible = get_accessible_symbols(file, line, col);
+                Symbol type = resolve_symbol(splt[splt.length - 1], accessible);
+                
+                Symbol[] candidates = accessible;
+                if (type == null)
+                    candidates = accessible;
+                else
+                    candidates = get_child_symbols(type);
+                
+                foreach (Symbol c in candidates){
+                    if (c is Namespace || c is Class || c is CreationMethod)
+                        ret += c;
+                }
+            } else if (splt[splt.length - 1] == "="){
+                ret = get_accessible_symbols(file, line, col);
+            } else if (splt[splt.length - 2] == "="){
+                var accessible = get_accessible_symbols(file, line, col);
+                Symbol type = resolve_symbol(splt[splt.length - 1], accessible);
                 if (type == null){
                     ret = accessible;
                 }else{
                     ret = get_child_symbols(type);
                 }
-
             }
+
 
 
              return ret;
