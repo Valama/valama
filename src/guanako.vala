@@ -175,19 +175,33 @@ namespace Guanako{
                 return ret;
 
             // Propose all accessible non-local namespaces, classes etc
-            /*iter_symbol (context.root, (iter, depth)=>{
+            iter_symbol (context.root, (iter, depth)=>{
                 if (current_symbol.is_accessible(iter)){
                     ret += iter;
 
-                    //TODO: Abort if inside other namespace
-
-                    //if (iter is Namespace){
-                    //    if (!namespace_in_using_directives(file, iter))
-                    //        return iter_callback_returns.abort_branch;
-                   //}
+                    if (iter is Namespace)
+                        if (namespace_in_using_directives(file, iter))
+                            return iter_callback_returns.continue;
                 }
-                return iter_callback_returns.continue;
-            }, 0);*/
+                return iter_callback_returns.abort_branch;
+            });
+            var current_namespace = get_parent_namespace(current_symbol);
+            if (current_namespace != null){
+                iter_symbol (current_namespace, (iter, depth)=>{
+                    if (current_symbol.is_accessible(iter)){
+                        ret += iter;
+                    }
+                    return iter_callback_returns.abort_branch;
+                });
+            }
+            if (current_symbol.parent_symbol != null){
+                iter_symbol (current_symbol.parent_symbol, (iter, depth)=>{
+                    if (current_symbol.is_accessible(iter)){
+                        ret += iter;
+                    }
+                    return iter_callback_returns.abort_branch;
+                });
+            }
 
             //If we are inside a method, propose all parameters
             if (current_symbol is Method){
@@ -228,18 +242,18 @@ namespace Guanako{
                 //Return all candidates with a lower or equal depth
                 for (int q = candidates.length - 1; q >= 0; q--){
                     if (depths[q] <= last_depth || last_depth == -1){
+                        /*if (candidates[q] is ForStatement){
+                            var expressions = ((ForStatement)candidates[q]).get_initializer();
+                            foreach (Expression expr in expressions){
+                                stdout.printf(expr.symbol_reference.name + "!!\n");
+                            }
+                            //if (fst.type_reference != null)
+                            //    ret += new Variable(fst.type_reference, fst.variable_name);
+                        }*/
                         if (candidates[q] is ForeachStatement){
                             var fst = (ForeachStatement)candidates[q];
-            CodeContext.push(context);
-                            sym_resolver.visit_foreach_statement(fst);
-                            if (fst.type_reference != null){
-                                //sym_resolver.visit_data_type(fst.type_reference);
-                                stdout.printf(fst.type_reference.to_string() + "##\n");
-                                //var v = new Variable(fst.type_reference, fst.variable_name);
-                                //v.variable_type.data_type = fst.type_reference.data_type;
+                            if (fst.type_reference != null)
                                 ret += new Variable(fst.type_reference, fst.variable_name);
-                            }
-            CodeContext.pop();
                         }
                         if (candidates[q] is DeclarationStatement){
                             var dsc = (DeclarationStatement)candidates[q];
@@ -254,7 +268,13 @@ namespace Guanako{
 
             return ret;
         }
-
+        public Namespace get_parent_namespace(Symbol smb){
+            for (var iter = smb; iter != null; iter = iter.parent_symbol){
+                if (iter is Namespace)
+                        return (Namespace)iter;
+            }
+            return null;
+        }
         public Symbol? get_symbol_at_pos(SourceFile source_file, int line, int col){
             Symbol ret = null;
             int last_depth = -1;
