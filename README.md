@@ -11,7 +11,7 @@
  * libvala-0.16
 
 On Debian based system install following packages:
-`sudo apt-get install build-essential vala-0.16 libvala-0.16-dev cmake libgtk-3-dev`
+`sudo apt-get install build-essential vala-0.16 libvala-0.16-dev cmake pkg-config libgtk-3-dev libgtksourceview-3.0-dev`
 
 ### Building ###
  1. `mkdir build && cd build`
