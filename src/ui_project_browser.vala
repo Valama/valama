@@ -1,5 +1,6 @@
 using Gtk;
 using Vala;
+using GLib;
 
 public class valama_project{
     public valama_project(string project_path){
@@ -22,6 +23,17 @@ public class valama_project{
             }
         }
         source_files = sf;
+
+    guanako_project.add_package ("gobject-2.0");
+    guanako_project.add_package ("glib-2.0");
+    guanako_project.add_package ("gio-2.0");
+    guanako_project.add_package ("gee-1.0");
+    guanako_project.add_package ("libvala-0.16");
+    guanako_project.add_package ("gdk-3.0");
+    guanako_project.add_package ("gtk+-3.0");
+    guanako_project.add_package ("gtksourceview-3.0");
+
+
         guanako_project.update();
     }
     

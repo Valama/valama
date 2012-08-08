@@ -125,14 +125,6 @@ namespace Guanako{
 
             if (candidates == null){
                 internal_candidates = get_child_symbols(context.root);
-                /*internal_candidates = new Symbol[0];
-                iter_symbol (context.root, (iter, depth)=>{
-                    if (depth == 1){
-                        internal_candidates += iter;
-                        return iter_callback_returns.abort_branch;
-                    }
-                    return iter_callback_returns.continue;
-                }, 0);*/
             }
 
 
@@ -149,8 +141,7 @@ namespace Guanako{
                         type = ((Method)smb).return_type.data_type;
                     if (type == null)
                         continue;
-                    stdout.printf(smb.name + "##\n");
-
+                    
                     if (splt.length <= 2)
                         return type;
                     else

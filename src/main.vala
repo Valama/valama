@@ -17,15 +17,6 @@ public static void main(string[] args){
 
     project = new valama_project(sourcedir);
 
-    project.guanako_project.add_package ("gobject-2.0");
-    project.guanako_project.add_package ("glib-2.0");
-    project.guanako_project.add_package ("gio-2.0");
-    project.guanako_project.add_package ("gee-1.0");
-    project.guanako_project.add_package ("libvala-0.16");
-    project.guanako_project.add_package ("gdk-3.0");
-    project.guanako_project.add_package ("gtk+-3.0");
-    project.guanako_project.add_package ("gtksourceview-3.0");
-project.guanako_project.update();
     /*project.guanako_project.add_package ("gobject-2.0");
     project.guanako_project.add_package ("glib-2.0");
     project.guanako_project.add_package ("gio-2.0");
