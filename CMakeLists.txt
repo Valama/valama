@@ -52,6 +52,8 @@ vala_precompile(VALA_C
   src/ui_project_browser.vala
   src/ui_symbol_browser.vala
   src/guanako.vala
+  src/guanako_vapi_discoverer.vala
+  src/guanako_iterators.vala
 PACKAGES
   gtk+-3.0
   gtksourceview-3.0
