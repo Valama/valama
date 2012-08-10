@@ -1,3 +1,22 @@
+/**
+ * src/guanako.vala
+ * Copyright (C) 2012, Linus Seelinger <S.Linus@gmx.de>
+ *
+ * Valama is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Valama is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
 using GLib;
 using Vala;
 
@@ -10,13 +29,13 @@ namespace Guanako{
         SymbolResolver sym_resolver;
         Vala.Parser parser;
         Vala.SemanticAnalyzer analyzer;
-        
+
         public project(){
             context = new CodeContext ();
             sym_resolver = new SymbolResolver();
             parser = new Vala.Parser();
             analyzer = new Vala.SemanticAnalyzer ();
-            
+
             context.profile = Profile.GOBJECT;
         }
         public Symbol root_symbol {
@@ -82,7 +101,7 @@ namespace Guanako{
 
                 if (type == null){
                     ret = accessible;
-                }else{
+                } else {
                     ret = get_child_symbols(type);
                 }
             } else if (splt[splt.length - 1] == "new"){
@@ -93,13 +112,13 @@ namespace Guanako{
             } else if (splt[splt.length - 2] == "new"){
                 var accessible = get_accessible_symbols(file, line, col);
                 Symbol type = resolve_symbol(splt[splt.length - 1], accessible);
-                
+
                 Symbol[] candidates = accessible;
                 if (type == null)
                     candidates = accessible;
                 else
                     candidates = get_child_symbols(type);
-                
+
                 foreach (Symbol c in candidates){
                     if (c is Namespace || c is Class || c is CreationMethod)
                         ret += c;
@@ -125,7 +144,7 @@ namespace Guanako{
             Symbol[] internal_candidates = candidates;
 
             var txt = text;
-            
+
             int depth = 0;
             int start_id = 0;
             bool found = false;
@@ -136,7 +155,7 @@ namespace Guanako{
                         if (depth < 1)
                             start_id = q;
                         depth ++;
-                    }else if (txt[q].to_string() == ")"){
+                    } else if (txt[q].to_string() == ")"){
                         depth --;
                         if (depth == 0){
                             txt = txt.substring(0, start_id) + txt.substring(q + 1);
@@ -173,7 +192,7 @@ namespace Guanako{
                         type = ((Method)smb).return_type.data_type;
                     if (type == null)
                         continue;
-                    
+
                     if (splt.length <= 2)
                         return type;
                     else
@@ -293,7 +312,7 @@ namespace Guanako{
 
             return ret;
         }
- 
+
         public Symbol? get_symbol_at_pos(SourceFile source_file, int line, int col){
             Symbol ret = null;
             int last_depth = -1;
@@ -332,9 +351,9 @@ namespace Guanako{
             file.content = new_content;
             lock (context) {
                 /* Removing nodes in the same loop causes problems (probably due to ReadOnlyList)*/
-                
+
                 Vala.CodeContext.push (context);
-                
+
                 var nodes = new Vala.ArrayList<Vala.CodeNode> ();
                 foreach (var node in file.get_nodes()) {
                     nodes.add(node);
@@ -418,3 +437,4 @@ namespace Guanako{
 
 }
 
+// vim: set ai ts=4 sts=4 et sw=4

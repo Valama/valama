@@ -1,3 +1,22 @@
+/**
+ * src/ui_project_browser.vala
+ * Copyright (C) 2012, Linus Seelinger <S.Linus@gmx.de>
+ *
+ * Valama is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Valama is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
 using Gtk;
 using Vala;
 using GLib;
@@ -23,7 +42,7 @@ public class valama_project{
             }
         }
         source_files = sf;
-        
+
         guanako_project.add_package ("gobject-2.0");
         guanako_project.add_package ("glib-2.0");
         guanako_project.add_package ("gio-2.0");
@@ -35,15 +54,15 @@ public class valama_project{
 
         guanako_project.update();
     }
-    
+
     public SourceFile[] source_files;
     public Guanako.project guanako_project;
     string project_path;
-    
+
     public string build(){
-    	string ret;
-    	GLib.Process.spawn_command_line_sync("sh -c 'cd " + project_path + " && mkdir -p build && cd build && cmake .. && make'", null, out ret);
-    	return ret;
+        string ret;
+        GLib.Process.spawn_command_line_sync("sh -c 'cd " + project_path + " && mkdir -p build && cd build && cmake .. && make'", null, out ret);
+        return ret;
     }
 }
 
@@ -77,14 +96,14 @@ public class project_browser {
         TreeIter iter_source_files;
         store.append (out iter_source_files, null);
         store.set (iter_source_files, 0, "Sources", -1);
-        
+
         foreach (SourceFile sf in project.source_files){
             TreeIter iter_sf;
             store.append (out iter_sf, iter_source_files);
             var name = sf.filename.substring(sf.filename.last_index_of("/") + 1);
             store.set (iter_sf, 0, name, 1, "", -1);
         }
-        
+
         tree_view.row_activated.connect((path)=>{
             int[] indices = path.get_indices();
             if (indices.length > 1){
@@ -94,3 +113,5 @@ public class project_browser {
 
    }
 }
+
+// vim: set ai ts=4 sts=4 et sw=4
