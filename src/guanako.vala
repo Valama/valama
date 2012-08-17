@@ -26,15 +26,11 @@ namespace Guanako{
      public class project {
 
         CodeContext context;
-        SymbolResolver sym_resolver;
         Vala.Parser parser;
-        Vala.SemanticAnalyzer analyzer;
 
         public project(){
             context = new CodeContext ();
-            sym_resolver = new SymbolResolver();
             parser = new Vala.Parser();
-            analyzer = new Vala.SemanticAnalyzer ();
 
             context.profile = Profile.GOBJECT;
         }
@@ -69,8 +65,8 @@ namespace Guanako{
                 add_package(vapi);
                 stdout.printf("Adding package '" + vapi + "' for namespace '" + namesp + "'\n");
             }*/
-            sym_resolver.resolve(context);
-            //analyzer.analyze(context);
+            context.resolver.resolve(context);
+            context.analyzer.analyze(context);
             CodeContext.pop();
         }
 
@@ -380,8 +376,8 @@ namespace Guanako{
                 /* visit_source_file checks for the file extension */
                 parser.visit_source_file (file);
 
-                sym_resolver.resolve (context);
-                //analyzer.visit_source_file (file);
+                context.resolver.resolve (context);
+                //context.analyzer.visit_source_file (file);
 
                 Vala.CodeContext.pop ();
 
