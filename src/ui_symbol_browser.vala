@@ -25,6 +25,8 @@ public class symbol_browser {
         this.project = project;
 
         tree_view = new TreeView ();
+        tree_view.insert_column_with_attributes (-1, "Symbol", new CellRendererText (), "text", 0, null);
+        tree_view.insert_column_with_attributes (-1, "Type", new CellRendererText (), "text", 1, null);
 
         build();
 
@@ -35,12 +37,9 @@ public class symbol_browser {
     TreeView tree_view;
     public Widget widget;
 
-    void build(){
+    public void build(){
         var store = new TreeStore (2, typeof (string), typeof (string));
         tree_view.set_model (store);
-
-        tree_view.insert_column_with_attributes (-1, "Symbol", new CellRendererText (), "text", 0, null);
-        tree_view.insert_column_with_attributes (-1, "Type", new CellRendererText (), "text", 1, null);
 
         TreeIter category_iter;
         TreeIter[] iters = new TreeIter[0];

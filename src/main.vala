@@ -26,6 +26,7 @@ static Window window_main;
 static valama_project project;
 static SourceView view;
 static Label lbl_result;
+static symbol_browser smb_browser;
 
 public static void main(string[] args){
     Gtk.init(ref args);
@@ -79,8 +80,8 @@ public static void main(string[] args){
         hbox.pack_start(scrw, true, true);
 
         var scrw2 = new ScrolledWindow(null, null);
-        var brw = new symbol_browser(project.guanako_project);
-        scrw2.add(brw.widget);
+        smb_browser = new symbol_browser(project.guanako_project);
+        scrw2.add(smb_browser.widget);
         scrw2.set_size_request(300, 0);
         hbox.pack_start(scrw2, false, true);
 
@@ -128,6 +129,7 @@ void write_current_source_file(){
     var dos = new DataOutputStream (file.create (FileCreateFlags.REPLACE_DESTINATION));
     dos.put_string (view.buffer.text);
     project.guanako_project.update_file(current_source_file, view.buffer.text);
+    smb_browser.build();
 }
 
 static void on_view_buffer_changed(){
