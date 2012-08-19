@@ -58,8 +58,11 @@ namespace Guanako{
 
      //Iterate through a symbol and its children
     public static bool iter_symbol(Symbol smb, iter_callback callback, int depth = 0){
-
         if (depth > 0){
+            if (smb.name != null)//TODO: This is a part of a nasty workaround to ignore old symbols left after re-parsing
+                if (smb.name == "")
+                    return true;
+            
             var ret = callback(smb, depth);
             if (ret == iter_callback_returns.abort_branch)
                 return true;

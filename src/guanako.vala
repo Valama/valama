@@ -359,10 +359,11 @@ namespace Guanako{
                     if (node is Vala.Symbol) {
                         var sym = (Vala.Symbol) node;
                         if (sym.owner != null)
-                            /* we need to remove it from the scope*/
+                            // we need to remove it from the scope
                             sym.owner.remove(sym.name);
                         if (context.entry_point == sym)
                             context.entry_point = null;
+                        sym.name = ""; //TODO: Find a less stupid solution...
                     }
                 }
                 file.current_using_directives = new Vala.ArrayList<Vala.UsingDirective>();
@@ -377,8 +378,9 @@ namespace Guanako{
                 parser.visit_source_file (file);
 
                 context.resolver.resolve (context);
-                //context.analyzer.visit_source_file (file);
-
+                context.analyzer.visit_source_file (file);
+                context.check();
+                
                 Vala.CodeContext.pop ();
 
                 //report.update_errors(current_editor);
