@@ -27,6 +27,7 @@ static valama_project project;
 static SourceView view;
 static Label lbl_result;
 static symbol_browser smb_browser;
+static ReportWrapper report_wrapper;
 
 public static void main(string[] args){
     Gtk.init(ref args);
@@ -37,6 +38,8 @@ public static void main(string[] args){
 
     project = new valama_project(sourcedir);
 
+    report_wrapper = new ReportWrapper();
+    report_wrapper = project.guanako_project.code_context.report as ReportWrapper;
     window_main = new Window();
 
     view = new SourceView();
@@ -51,6 +54,9 @@ public static void main(string[] args){
 
     view.completion.add_provider (tp);
     view.buffer.changed.connect(on_view_buffer_changed);
+    view.buffer.create_tag("gray_bg", "background", "gray", null);
+    view.auto_indent = true;
+    view.indent_width = 4;
 
     var langman = new SourceLanguageManager();
     var lang = langman.get_language("vala");
@@ -106,7 +112,24 @@ public static void main(string[] args){
 
 static void on_build_button_clicked(){
     write_current_source_file();
-    lbl_result.label = project.build();
+    //report_wrapper.clear();
+    project.build();
+    /*lbl_result.label = "";
+    foreach (ReportWrapper.Error err in report_wrapper.errors_list){
+        if (err.error){
+            lbl_result.label += "Error: " + err.message + "\n";
+        } else
+            lbl_result.label += "Warning: " + err.message + "\n";
+    }*/
+    /*string[] lines = lbl_result.label.split("\n");
+    foreach (string line in lines){
+        string[] splt = line.split(" ");
+        if (splt.length > 2){
+            if (splt[1] == "warning:"){
+                stdout.printf("Warning: " + splt[3] + "\n");
+            }
+        }
+    }*/
 }
 
 static SourceFile current_source_file = null;
@@ -128,12 +151,59 @@ void write_current_source_file(){
 
     var dos = new DataOutputStream (file.create (FileCreateFlags.REPLACE_DESTINATION));
     dos.put_string (view.buffer.text);
+
+    report_wrapper.clear();
     project.guanako_project.update_file(current_source_file, view.buffer.text);
+    lbl_result.label = "";
+    /*foreach (ReportWrapper.Error? err in report_wrapper.errors_list){
+        if (err == null)
+            continue;
+        if (err.error){
+            lbl_result.label += "Error: " + err.message + "\n";
+        } else
+            lbl_result.label += "Warning: " + err.message + "\n";
+    }*/
+
     smb_browser.build();
 }
 
 static void on_view_buffer_changed(){
 }
+
+public class ReportWrapper : Vala.Report {
+    public struct Error {
+        public Vala.SourceReference source;
+        public bool error;
+        public string message;
+     }
+    public Vala.List<Error?> errors_list = new Vala.ArrayList<Error?>();
+    bool general_error = false;
+    public void clear(){
+        errors_list = new Vala.ArrayList<Error?>();
+    }
+     public override void warn (Vala.SourceReference? source, string message) {
+        warnings ++;
+
+         if (source == null)
+             return;
+         //lock (errors_list) {
+         errors_list.add(Error () {source = source, message = message, error = false});
+         //}
+     }
+     public override void err (Vala.SourceReference? source, string message) {
+         errors ++;
+
+         if (source == null) {
+             general_error = true;
+             return;
+         }
+         //lock (errors_list) {
+         errors_list.add(Error () {source = source, message = message, error = true});
+         //}
+    }
+}
+
+
 
 class TestProvider : Gtk.SourceCompletionProvider, Object
 {
@@ -184,7 +254,7 @@ class TestProvider : Gtk.SourceCompletionProvider, Object
         view.buffer.get_iter_at_line(out iter_start, line - 1);
         var current_line = view.buffer.get_text(iter_start, iter, false);
 
-        string[] splt = current_line.split_set(" .");
+        string[] splt = current_line.split_set(" .(");
         string last = "";
         if (splt.length > 0)
             last = splt[splt.length - 1];

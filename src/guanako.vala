@@ -20,7 +20,6 @@
 using GLib;
 using Vala;
 
-
 namespace Guanako{
 
      public class project {
@@ -46,10 +45,6 @@ namespace Guanako{
         public void add_source_file(SourceFile source_file){
             context.add_source_file (source_file);
         }
-        /*public void add_source_file_from_path(string path){
-            var source_file = new SourceFile (context, SourceFileType.SOURCE, path);
-            context.add_source_file (source_file);
-        }*/
         public void update(){
             CodeContext.push(context);
             parser.parse(context);
@@ -69,71 +64,121 @@ namespace Guanako{
             context.analyzer.analyze(context);
             CodeContext.pop();
         }
+        int index_of_symbol_end(string written){
+            int first_index = written.index_of(" ");
+            if (written.index_of(",") != -1 && written.index_of(",") < first_index)
+                first_index = written.index_of(",");
+            if (written.index_of(")") != -1 && written.index_of(")") < first_index)
+                first_index = written.index_of(")");
+            if (first_index == -1)
+                first_index = written.length;
+            return first_index;
+        }
 
-        public Symbol[] propose_symbols(SourceFile file, int line, int col, string written){
-            Symbol[] ret = new Symbol[0];
-
-            string[] splt = written.strip().split(" ");
-
-            if (splt[0] == "using"){
-
-                Symbol iterate = resolve_symbol(splt[1]);
-                if (iterate == null)
-                    iterate = context.root;
-
-                iter_symbol(iterate, (s, depth)=>{
-                    if (s is Namespace){
-                        ret += s;
-                        return iter_callback_returns.abort_branch;
-                    }
-                    return iter_callback_returns.continue;
-                });
-
-            } else if (splt.length < 2){
-
-                var accessible = get_accessible_symbols(file, line, col);
-
-                var type = resolve_symbol(written.strip(), accessible);
-
-                if (type == null){
-                    ret = accessible;
-                } else {
-                    ret = get_child_symbols(type);
-                }
-            } else if (splt[splt.length - 1] == "new"){
-                var accessible = get_accessible_symbols(file, line, col);
-                foreach (Symbol c in accessible)
-                    if (c is Namespace || c is Class)
-                        ret += c;
-            } else if (splt[splt.length - 2] == "new"){
-                var accessible = get_accessible_symbols(file, line, col);
-                Symbol type = resolve_symbol(splt[splt.length - 1], accessible);
-
-                Symbol[] candidates = accessible;
-                if (type == null)
-                    candidates = accessible;
+        bool type_offered(Symbol smb, string type){
+            if (type == "namespace")
+                if (smb is Namespace)
+                    return true;
+            if (type == "type")
+                if (smb is Namespace || smb is Class || smb is Struct)
+                    return true;
+            if (type == "object")
+                if (smb is Namespace || smb is Class || smb is Struct || smb is Variable || smb is Method || smb is Property)
+                    return true;
+            if (type == "creation")
+                if (smb is Namespace || smb is Class || smb is Method)
+                    return true;
+           if (type == "method")
+                if (smb is Namespace || smb is Class || smb is Method)
+                    return true;
+   return false;
+        }
+        bool type_required(Symbol smb, string type){
+            if (type == "namespace")
+                if (smb is Namespace)
+                    return true;
+            if (type == "type")
+                if (smb is Class || smb is Struct)
+                    return true;
+            if (type == "object")
+                if (smb is Variable || smb is Method || smb is Property)
+                    return true;
+            if (type == "creation"){
+                if (smb is Class || smb is CreationMethod)
+                    return true;
+           if (type == "method")
+                if (smb is Method)
+                    return true;
+                /*if (smb is Method){
+                    var mth = smb as Method;
+                    if (mth.return_type.data_type is Class)
+                        return true;
+                }*/
+            }
+            return false;
+        }
+        Symbol[]? cmp(string written, string[] compare, int step, Symbol[] accessible){
+stdout.printf("compare (step " + compare[step] + "): " + written + "\n");
+            if (compare.length == step)
+                return null;
+            if (compare[step] == "?")
+                return cmp (written.substring(index_of_symbol_end(written)), compare, step + 1, accessible);
+            if (compare[step] == "#"){
+                if (written.has_prefix(" "))
+                    return cmp (written.chomp(), compare, step + 1, accessible);
                 else
-                    candidates = get_child_symbols(type);
-
-                foreach (Symbol c in candidates){
-                    if (c is Namespace || c is Class || c is CreationMethod)
-                        ret += c;
-                }
-            } else if (splt[splt.length - 1] == "="){
-                ret = get_accessible_symbols(file, line, col);
-            } else if (splt[splt.length - 2] == "="){
-                var accessible = get_accessible_symbols(file, line, col);
-                Symbol type = resolve_symbol(splt[splt.length - 1], accessible);
-                if (type == null){
-                    ret = accessible;
-                }else{
-                    ret = get_child_symbols(type);
+                    return null;
+            }
+            if (compare[step] == "_")
+                return cmp (written.chug(), compare, step + 1, accessible);
+            if (compare[step] == "namespace" || compare[step] == "type" || compare[step] == "object" || compare[step] == "creation" || compare[step] == "method"){
+                string me = written.substring(0, index_of_symbol_end(written));
+                Symbol resolved = resolve_symbol(me, accessible);
+                if (me.length < written.length){
+                    if (resolved != null && type_required(resolved, compare[step]))
+                         return cmp (written.substring(me.length + 1), compare, step + 1, accessible);
+                    else
+                        return null;
+                } else {
+                    Symbol[] ret = new Symbol[0];
+                    Symbol[] check = accessible;
+                    if (resolved != null)
+                        check = get_child_symbols(resolved);
+                   foreach (Symbol s in check){
+                        if (type_offered(s, compare[step])){
+                            ret += s;
+                        }
+                    }
+                    return ret;
                 }
             }
+            if (written == compare[step])
+                return null;
+            if (written.has_prefix(compare[step]))
+                return cmp (written.substring(compare[step].length), compare, step + 1, accessible);
+            return null;
+        }
 
 
+string[] syntax  = new string[]{
+    "using _ namespace _ ;",
+    "foreach _ ( _ type _ in _ object _ ) _ ;",
+    "var _ ? _ = _ new _ creation _ ;",
+    "var _ ? _ = _ object _ ;",
+    "object _ = _ new _ creation _ ;",
+    "method _ ;"
+};
 
-             return ret;
+        public Symbol[] propose_symbols(SourceFile file, int line, int col, string written){
+            Symbol[] ret = null;
+            var accessible = get_accessible_symbols(file, line, col);
+            foreach (string snt in syntax){
+                var res = cmp(written, snt.split(" "), 0, accessible);
+                if (res != null)
+                    foreach (Symbol s in res)
+                        ret += s;
+            }
+            return ret;
          }
 
         Symbol? resolve_symbol(string text, Symbol[]? candidates = null){
@@ -167,8 +212,8 @@ namespace Guanako{
                 txt = txt.substring(last_occurrence + 1);
 
             string[] splt = txt.split(".");
-            if (splt.length == 1)
-                return null;
+            //if (splt.length == 1)
+            //    return null;
 
             if (candidates == null){
                 internal_candidates = get_child_symbols(context.root);
@@ -189,9 +234,16 @@ namespace Guanako{
                     if (type == null)
                         continue;
 
-                    if (splt.length <= 2)
+                    if (splt.length == 1)
                         return type;
-                    else
+                    else if (splt.length == 2){
+                        var rt = resolve_symbol(txt.substring(splt[0].length + 1), get_child_symbols(type));
+                        stdout.printf("RES: " + txt.substring(splt[0].length + 1) + "\n");
+                        stdout.printf("SYM: " + rt.name + "\n");
+                        if (rt != null)
+                            return rt;
+                        return type;
+                    }else
                         return resolve_symbol(txt.substring(splt[0].length + 1), get_child_symbols(type));
                  }
              }
@@ -342,6 +394,7 @@ namespace Guanako{
             }, 0);
             return ret;
         }
+
 
         public void update_file (Vala.SourceFile file, string new_content) {
             file.content = new_content;
