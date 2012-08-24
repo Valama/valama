@@ -90,8 +90,7 @@ public class project_browser {
         var store = new TreeStore (2, typeof (string), typeof (string));
         tree_view.set_model (store);
 
-        tree_view.insert_column_with_attributes (-1, "Symbol", new CellRendererText (), "text", 0, null);
-        //tree_view.insert_column_with_attributes (-1, "Type", new CellRendererText (), "text", 1, null);
+        tree_view.insert_column_with_attributes (-1, "Project", new CellRendererText (), "text", 0, null);
 
         TreeIter iter_source_files;
         store.append (out iter_source_files, null);

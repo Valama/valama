@@ -25,9 +25,9 @@ static Window window_main;
 
 static valama_project project;
 static SourceView view;
-static Label lbl_result;
 static symbol_browser smb_browser;
 static ReportWrapper report_wrapper;
+static ui_report wdg_report;
 
 public static void main(string[] args){
     Gtk.init(ref args);
@@ -39,7 +39,10 @@ public static void main(string[] args){
     project = new valama_project(sourcedir);
 
     report_wrapper = new ReportWrapper();
-    report_wrapper = project.guanako_project.code_context.report as ReportWrapper;
+    //report_wrapper = project.guanako_project.code_context.report as ReportWrapper;
+    project.guanako_project.code_context.report = report_wrapper;
+    //report_wrapper = project.guanako_project.code_context.report as ReportWrapper;
+    
     window_main = new Window();
 
     view = new SourceView();
@@ -94,15 +97,16 @@ public static void main(string[] args){
     vbox_main.pack_start(hbox, true, true);
 
 
-    lbl_result = new Label("");
+    wdg_report = new ui_report(report_wrapper);
+    wdg_report.error_selected.connect(on_error_selected);
     var scrw3 = new ScrolledWindow(null, null);
-    scrw3.add_with_viewport(lbl_result);
+    scrw3.add(wdg_report.widget);
     scrw3.set_size_request(0, 150);
     vbox_main.pack_start(scrw3, false, true);
 
 
     window_main.add(vbox_main);
-
+    window_main.hide_titlebar_when_maximized = true;
     window_main.set_default_size(700, 600);
     window_main.destroy.connect(Gtk.main_quit);
     window_main.show_all();
@@ -110,30 +114,30 @@ public static void main(string[] args){
     Gtk.main();
 }
 
+static void on_error_selected(ReportWrapper.Error err){
+    stdout.printf("Selected: " + err.source.file.filename + "\n");
+
+    on_source_file_selected(err.source.file);
+    
+    TextIter start;
+    view.buffer.get_iter_at_line_offset(out start, err.source.first_line - 1, err.source.first_column - 1);
+    TextIter end;
+    view.buffer.get_iter_at_line_offset(out end, err.source.last_line - 1, err.source.last_column - 1);
+    view.buffer.select_range(start, end);
+    
+}
+
 static void on_build_button_clicked(){
     write_current_source_file();
-    //report_wrapper.clear();
+    report_wrapper.clear();
     project.build();
-    /*lbl_result.label = "";
-    foreach (ReportWrapper.Error err in report_wrapper.errors_list){
-        if (err.error){
-            lbl_result.label += "Error: " + err.message + "\n";
-        } else
-            lbl_result.label += "Warning: " + err.message + "\n";
-    }*/
-    /*string[] lines = lbl_result.label.split("\n");
-    foreach (string line in lines){
-        string[] splt = line.split(" ");
-        if (splt.length > 2){
-            if (splt[1] == "warning:"){
-                stdout.printf("Warning: " + splt[3] + "\n");
-            }
-        }
-    }*/
+    wdg_report.build();
 }
 
 static SourceFile current_source_file = null;
 static void on_source_file_selected(SourceFile file){
+    if (current_source_file == file)
+        return;
     current_source_file = file;
 
     string txt = "";
@@ -152,17 +156,9 @@ void write_current_source_file(){
     var dos = new DataOutputStream (file.create (FileCreateFlags.REPLACE_DESTINATION));
     dos.put_string (view.buffer.text);
 
-    report_wrapper.clear();
+report_wrapper.clear();
     project.guanako_project.update_file(current_source_file, view.buffer.text);
-    lbl_result.label = "";
-    /*foreach (ReportWrapper.Error? err in report_wrapper.errors_list){
-        if (err == null)
-            continue;
-        if (err.error){
-            lbl_result.label += "Error: " + err.message + "\n";
-        } else
-            lbl_result.label += "Warning: " + err.message + "\n";
-    }*/
+wdg_report.build();
 
     smb_browser.build();
 }
@@ -173,21 +169,22 @@ static void on_view_buffer_changed(){
 public class ReportWrapper : Vala.Report {
     public struct Error {
         public Vala.SourceReference source;
-        public bool error;
         public string message;
      }
     public Vala.List<Error?> errors_list = new Vala.ArrayList<Error?>();
+    public Vala.List<Error?> warnings_list = new Vala.ArrayList<Error?>();
     bool general_error = false;
     public void clear(){
         errors_list = new Vala.ArrayList<Error?>();
+        warnings_list = new Vala.ArrayList<Error?>();
     }
-     public override void warn (Vala.SourceReference? source, string message) {
+    public override void warn (Vala.SourceReference? source, string message) {
         warnings ++;
 
          if (source == null)
              return;
          //lock (errors_list) {
-         errors_list.add(Error () {source = source, message = message, error = false});
+         warnings_list.add(Error () {source = source, message = message});
          //}
      }
      public override void err (Vala.SourceReference? source, string message) {
@@ -198,12 +195,55 @@ public class ReportWrapper : Vala.Report {
              return;
          }
          //lock (errors_list) {
-         errors_list.add(Error () {source = source, message = message, error = true});
+         errors_list.add(Error () {source = source, message = message});
          //}
     }
 }
 
+class ui_report {
+    public ui_report(ReportWrapper report){
+        this.report = report;
 
+        tree_view = new TreeView ();
+        tree_view.insert_column_with_attributes (-1, "Location", new CellRendererText (), "text", 0, null);
+        tree_view.insert_column_with_attributes (-1, "Error", new CellRendererText (), "text", 1, null);
+
+        build();
+
+        tree_view.row_activated.connect((path)=>{
+            int index = path.get_indices()[0];
+            if (report.errors_list.size > index)
+                error_selected(report.errors_list[index]);
+            else
+                error_selected(report.warnings_list[index - report.errors_list.size]);
+       });
+       tree_view.can_focus = false;
+
+        widget = tree_view;
+    }
+
+    ReportWrapper report;
+    TreeView tree_view;
+    public Widget widget;
+    
+    public signal void error_selected(ReportWrapper.Error error);
+
+    public void build(){
+        var store = new ListStore (2, typeof (string), typeof (string));
+        tree_view.set_model (store);
+
+        foreach (ReportWrapper.Error err in report.errors_list){
+            TreeIter next;
+            store.append (out next);
+            store.set (next, 0, err.source.first_line.to_string(), 1, err.message, -1);
+        }
+        foreach (ReportWrapper.Error err in report.warnings_list){
+            TreeIter next;
+            store.append (out next);
+            store.set (next, 0, err.source.first_line.to_string(), 1, err.message, -1);
+        }
+    }
+}
 
 class TestProvider : Gtk.SourceCompletionProvider, Object
 {

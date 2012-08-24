@@ -41,7 +41,6 @@ public class symbol_browser {
         var store = new TreeStore (2, typeof (string), typeof (string));
         tree_view.set_model (store);
 
-        TreeIter category_iter;
         TreeIter[] iters = new TreeIter[0];
 
         Guanako.iter_symbol (project.root_symbol, (smb, depth)=>{

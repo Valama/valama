@@ -118,14 +118,14 @@ namespace Guanako{
             return false;
         }
         Symbol[]? cmp(string written, string[] compare, int step, Symbol[] accessible){
-stdout.printf("compare (step " + compare[step] + "): " + written + "\n");
+//stdout.printf("compare (step " + compare[step] + "): " + written + "\n");
             if (compare.length == step)
                 return null;
             if (compare[step] == "?")
                 return cmp (written.substring(index_of_symbol_end(written)), compare, step + 1, accessible);
             if (compare[step] == "#"){
                 if (written.has_prefix(" "))
-                    return cmp (written.chomp(), compare, step + 1, accessible);
+                    return cmp (written.chug(), compare, step + 1, accessible);
                 else
                     return null;
             }
@@ -160,20 +160,47 @@ stdout.printf("compare (step " + compare[step] + "): " + written + "\n");
         }
 
 
-string[] syntax  = new string[]{
+string[] syntax_deep_space  = new string[]{
     "using _ namespace _ ;",
+    "namespace _ ? _",
+    "class _ ? _"
+};
+string[] syntax_class  = new string[]{
+    "class _ ? _",
+    "public _ type _ ? _",
+    "type _ ? _"
+};
+string[] syntax_function  = new string[]{
     "foreach _ ( _ type _ in _ object _ ) _ ;",
+    "for _ ( _ type _  ? _ = _ object _ ; _ object _ ? _ object _ ; _ object _ ? _  ) _ ;",
+    
     "var _ ? _ = _ new _ creation _ ;",
     "var _ ? _ = _ object _ ;",
     "object _ = _ new _ creation _ ;",
-    "method _ ;"
+    "method _ ;",
+    
+    "if _ ( _ object _ ? _ object _ )"
 };
 
         public Symbol[] propose_symbols(SourceFile file, int line, int col, string written){
             Symbol[] ret = null;
             var accessible = get_accessible_symbols(file, line, col);
+            
+            var inside_symbol = get_symbol_at_pos(file, line, col);
+            string[] syntax = null;
+            
+            if (inside_symbol == null){
+                syntax = syntax_deep_space;
+                accessible = get_child_symbols(context.root);
+            }else if (inside_symbol is Subroutine)
+                syntax = syntax_function;
+            else if (inside_symbol is Class)
+                syntax = syntax_class;
+            else
+                return ret;
+
             foreach (string snt in syntax){
-                var res = cmp(written, snt.split(" "), 0, accessible);
+                var res = cmp(written.chug() , snt.split(" "), 0, accessible);
                 if (res != null)
                     foreach (Symbol s in res)
                         ret += s;
@@ -265,8 +292,12 @@ string[] syntax  = new string[]{
             if (current_symbol == null){
                 return ret;
             }
+            
+            for (Scope scope = current_symbol.scope; scope != null; scope = scope.parent_scope)
+                foreach (Symbol s in scope.get_symbol_table().get_values())
+                    ret += s;
 
-            // Propose all accessible non-local namespaces, classes etc
+            /*// Propose all accessible non-local namespaces, classes etc
             iter_symbol (context.root, (iter, depth)=>{
                 if (current_symbol.is_accessible(iter)){
                     ret += iter;
@@ -302,6 +333,7 @@ string[] syntax  = new string[]{
                     ret += param;
                 }
             }
+            */
 
             //If we are inside a subroutine, propose all previously defined local variables
             if (current_symbol is Subroutine){
