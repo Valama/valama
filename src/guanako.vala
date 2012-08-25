@@ -89,9 +89,17 @@ namespace Guanako{
                 if (smb is Namespace || smb is Class || smb is Method)
                     return true;
            if (type == "method")
-                if (smb is Namespace || smb is Class || smb is Method)
+                if (smb is Namespace || smb is Class || smb is Method){
+                    /*if (smb is Method){
+                        var mth = smb as Method;
+                        if (mth.return_type.data_type is Class)
+                            return true;
+                        else
+                            return false;
+                    }*/
                     return true;
-   return false;
+                }
+           return false;
         }
         bool type_required(Symbol smb, string type){
             if (type == "namespace")
@@ -101,19 +109,22 @@ namespace Guanako{
                 if (smb is Class || smb is Struct)
                     return true;
             if (type == "object")
-                if (smb is Variable || smb is Method || smb is Property)
+                if (smb is Variable || smb is Method || smb is Property){
+                    /*if (smb is Method){
+                        var mth = smb as Method;
+                        if (mth.return_type.data_type is Class)
+                            return true;
+                        else
+                            return false;
+                    }*/
                     return true;
+                }
             if (type == "creation"){
                 if (smb is Class || smb is CreationMethod)
                     return true;
            if (type == "method")
                 if (smb is Method)
                     return true;
-                /*if (smb is Method){
-                    var mth = smb as Method;
-                    if (mth.return_type.data_type is Class)
-                        return true;
-                }*/
             }
             return false;
         }
@@ -296,6 +307,12 @@ string[] syntax_function  = new string[]{
             for (Scope scope = current_symbol.scope; scope != null; scope = scope.parent_scope)
                 foreach (Symbol s in scope.get_symbol_table().get_values())
                     ret += s;
+            
+            foreach (UsingDirective directive in file.current_using_directives){
+                var children = get_child_symbols(directive.namespace_symbol);
+                foreach (Symbol s in children)
+                    ret += s;
+            }
 
             /*// Propose all accessible non-local namespaces, classes etc
             iter_symbol (context.root, (iter, depth)=>{
