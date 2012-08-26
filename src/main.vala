@@ -42,7 +42,7 @@ public static void main(string[] args){
     //report_wrapper = project.guanako_project.code_context.report as ReportWrapper;
     project.guanako_project.code_context.report = report_wrapper;
     //report_wrapper = project.guanako_project.code_context.report as ReportWrapper;
-    
+
     window_main = new Window();
 
     view = new SourceView();
@@ -118,13 +118,13 @@ static void on_error_selected(ReportWrapper.Error err){
     stdout.printf("Selected: " + err.source.file.filename + "\n");
 
     on_source_file_selected(err.source.file);
-    
+
     TextIter start;
     view.buffer.get_iter_at_line_offset(out start, err.source.first_line - 1, err.source.first_column - 1);
     TextIter end;
     view.buffer.get_iter_at_line_offset(out end, err.source.last_line - 1, err.source.last_column - 1);
     view.buffer.select_range(start, end);
-    
+
 }
 
 static void on_build_button_clicked(){
@@ -225,7 +225,7 @@ class ui_report {
     ReportWrapper report;
     TreeView tree_view;
     public Widget widget;
-    
+
     public signal void error_selected(ReportWrapper.Error error);
 
     public void build(){

@@ -184,22 +184,22 @@ string[] syntax_class  = new string[]{
 string[] syntax_function  = new string[]{
     "foreach _ ( _ type _ in _ object _ ) _ ;",
     "for _ ( _ type _  ? _ = _ object _ ; _ object _ ? _ object _ ; _ object _ ? _  ) _ ;",
-    
+
     "var _ ? _ = _ new _ creation _ ;",
     "var _ ? _ = _ object _ ;",
     "object _ = _ new _ creation _ ;",
     "method _ ;",
-    
+
     "if _ ( _ object _ ? _ object _ )"
 };
 
         public Symbol[] propose_symbols(SourceFile file, int line, int col, string written){
             Symbol[] ret = null;
             var accessible = get_accessible_symbols(file, line, col);
-            
+
             var inside_symbol = get_symbol_at_pos(file, line, col);
             string[] syntax = null;
-            
+
             if (inside_symbol == null){
                 syntax = syntax_deep_space;
                 accessible = get_child_symbols(context.root);
@@ -303,11 +303,11 @@ string[] syntax_function  = new string[]{
             if (current_symbol == null){
                 return ret;
             }
-            
+
             for (Scope scope = current_symbol.scope; scope != null; scope = scope.parent_scope)
                 foreach (Symbol s in scope.get_symbol_table().get_values())
                     ret += s;
-            
+
             foreach (UsingDirective directive in file.current_using_directives){
                 var children = get_child_symbols(directive.namespace_symbol);
                 foreach (Symbol s in children)
@@ -482,7 +482,7 @@ string[] syntax_function  = new string[]{
                 context.resolver.resolve (context);
                 context.analyzer.visit_source_file (file);
                 context.check();
-                
+
                 Vala.CodeContext.pop ();
 
                 //report.update_errors(current_editor);

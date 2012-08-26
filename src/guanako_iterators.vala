@@ -62,7 +62,7 @@ namespace Guanako{
             if (smb.name != null)//TODO: This is a part of a nasty workaround to ignore old symbols left after re-parsing
                 if (smb.name == "")
                     return true;
-            
+
             var ret = callback(smb, depth);
             if (ret == iter_callback_returns.abort_branch)
                 return true;
