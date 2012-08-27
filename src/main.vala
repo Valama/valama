@@ -78,6 +78,10 @@ public static void main(string[] args){
     btnBuild.clicked.connect(on_build_button_clicked);
     toolbar.add(btnBuild);
 
+    var btnAutoIndent = new Gtk.ToolButton.from_stock(Stock.REFRESH);
+    btnAutoIndent.clicked.connect(on_auto_indent_button_clicked);
+    toolbar.add(btnAutoIndent);
+
         var hbox = new HBox(false, 0);
 
         var pbrw = new project_browser(project);
@@ -112,6 +116,10 @@ public static void main(string[] args){
     window_main.show_all();
 
     Gtk.main();
+}
+
+static void on_auto_indent_button_clicked(){
+    Guanako.auto_indent_buffer(view.buffer);
 }
 
 static void on_error_selected(ReportWrapper.Error err){

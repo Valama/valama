@@ -54,6 +54,7 @@ vala_precompile(VALA_C
   src/guanako.vala
   src/guanako_vapi_discoverer.vala
   src/guanako_iterators.vala
+  src/guanako_auto_indent.vala
 PACKAGES
   gtk+-3.0
   gtksourceview-3.0
