@@ -139,6 +139,19 @@ namespace Guanako{
         Symbol[]? cmp(string written, string[] compare, int step, Symbol[] accessible){
             if (compare.length == step)
                 return null;
+
+            if (compare[step].contains("|")){
+                Symbol[] ret = new Symbol[0];
+                foreach (string comp in compare[step].split("|")){
+                    string[] compare_option = compare; //Try every option
+                    compare_option[step] = comp;
+                    Symbol[] r = cmp(written, compare_option, step, accessible);
+                    foreach (Symbol smb in r)
+                        ret += smb;
+                }
+                return ret;
+            }
+
             if (compare[step] == "*")
                 return cmp (written.substring(index_of_symbol_end(written)), compare, step + 1, accessible);
             if (compare[step].has_prefix("?")){
@@ -183,7 +196,7 @@ namespace Guanako{
                     stdout.printf("FOUND!!" + resolved.name + "\n");
                 if (me.length < written.length){
                     if (resolved != null && type_required(resolved, compare[step]))
-                         return cmp (written.substring(me.length + 1), compare, step + 1, accessible);
+                         return cmp (written.substring(me.length), compare, step + 1, accessible);
                     else
                         return null;
                 } else {
@@ -211,8 +224,13 @@ namespace Guanako{
 
 void build_syntax_map(){
     map_syntax["method_call"] = "method _ ( _ ?$parameters _ ) _ ;";
+    map_syntax["if_statement"] = "if _ ( _ object _ ?$comparison _ )";
+
     map_syntax["parameters_decl"] = "type _ * _ ?, _ ?$parameters_decl";
     map_syntax["parameters"] = "object _ ?, _ ?$parameters";
+
+    map_syntax["comparison"] = "== _ object";
+
     map_syntax["begr"] = "123 _ abcde _ ?$begr";
     map_syntax["abegr"] = "(  _ $begr _ )";
 }
@@ -235,11 +253,13 @@ string[] syntax_function  = new string[]{
 
     "var _ * _ = _ new _ creation _ ( _ ?$parameters _ ) _  ;",
     "var _ * _ = _ object _ ;",
+    "var _ * _ = _ object _ ;",
     "object _ = _ new _ creation _ ( _ ?$parameters _ ) _  ;",
 
     "$method_call",
+    "$if_statement",
 
-    "Hallo _ ?$abegr _ Tag",
+    "Hallo|Hai _ ?$abegr _ Tag",
 
     "if _ ( _ object _ * _ object _ )"
 };
