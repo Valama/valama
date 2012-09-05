@@ -91,4 +91,8 @@ endif()
 #endif()
 
 install(TARGETS valama DESTINATION "bin")
+
+install(FILES "data/syntax" DESTINATION "share/valama")
+#install(DIRECTORY "data/folder" DESTINATION "share/valama")
+
 # vim: set ai ts=2 sts=2 et sw=2
