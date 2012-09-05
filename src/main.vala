@@ -302,7 +302,7 @@ class TestProvider : Gtk.SourceCompletionProvider, Object
         view.buffer.get_iter_at_line(out iter_start, line - 1);
         var current_line = view.buffer.get_text(iter_start, iter, false);
 
-        string[] splt = current_line.split_set(" .(");
+        string[] splt = current_line.split_set(" .(,");
         string last = "";
         if (splt.length > 0)
             last = splt[splt.length - 1];

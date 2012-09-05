@@ -107,7 +107,6 @@ namespace Guanako{
            return false;
         }
         bool type_required(Symbol smb, string type){
-            stdout.printf("required check type: " + type + " Symbol: " + smb.name + "\n");
             if (type == "namespace")
                 if (smb is Namespace)
                     return true;
@@ -129,10 +128,8 @@ namespace Guanako{
                 if (smb is Class || smb is CreationMethod)
                     return true;
            if (type == "method"){
-                stdout.printf("METHOD: " + smb.name + "\n");
                 if (smb is Method)
                     return true;
-                stdout.printf("NO!\n");
             }
             return false;
         }
@@ -220,19 +217,27 @@ namespace Guanako{
             if (written.has_prefix(compare[step]))
                 return cmp (written.substring(compare[step].length), compare, step + 1, accessible);
             return null;
+
         }
 
 void build_syntax_map(){
-    map_syntax["method_call"] = "method _ ( _ ?$parameters _ ) _ ;";
-    map_syntax["if_statement"] = "if _ ( _ object _ ?$comparison _ )";
+    map_syntax["method_call"] = "method _ ( _ ?$parameters _ )";
+    map_syntax["value"] = "object|$method_call";
+    map_syntax["if_statement"] = "if _ ( _ $value _ ?$comparison _ )";
 
-    map_syntax["parameters_decl"] = "type _ * _ ?, _ ?$parameters_decl";
-    map_syntax["parameters"] = "object _ ?, _ ?$parameters";
+    map_syntax["parameters_decl"] = "type _ * _ ?$parameters_decl_inner";
+    map_syntax["parameters_decl_inner"] = ", _ type _ ?$parameters_decl";
+    map_syntax["parameters"] = "$value _ ?, _ ?$parameters";
 
-    map_syntax["comparison"] = "== _ object";
+    map_syntax["comparison"] = "$rel_comparison|$is_comparison";
+    map_syntax["rel_comparison"] = "$relational_expression _ $value";
+    map_syntax["is_comparison"] = "is _ type";
 
-    map_syntax["begr"] = "123 _ abcde _ ?$begr";
-    map_syntax["abegr"] = "(  _ $begr _ )";
+    map_syntax["assign_operator"] = "=|+=|-=||=|&=|^=|/=|*=|%=|<<=|>>=";
+    map_syntax["relational_expression"] = "==|>|<|>=|<=";
+
+    map_syntax["access_keyword"] = "public|private|internal";
+
 }
 
 Gee.HashMap<string, string> map_syntax = new Gee.HashMap<string, string>();
@@ -240,28 +245,24 @@ Gee.HashMap<string, string> map_syntax = new Gee.HashMap<string, string>();
 string[] syntax_deep_space  = new string[]{
     "using _ namespace _ ;",
     "namespace _ * _",
-    "class _ * _"
+    "?$access_keyword class _ * _"
 };
 string[] syntax_class  = new string[]{
-    "class _ * _",
-    "public _ type _ * _",
-    "type _ * _"
+    "?$access_keyword _ class _ * _",
+    "?$access_keyword _ type _ * _",
+    "?$access_keyword _ type _ * _ ( _ $parameters_decl _ )"
 };
 string[] syntax_function  = new string[]{
     "foreach _ ( _ type _ in _ object _ )",
     "for _ ( _ type _  * _ = _ object _ ; _ object _ * _ object _ ; _ object _ * _  ) _ ;",
 
     "var _ * _ = _ new _ creation _ ( _ ?$parameters _ ) _  ;",
-    "var _ * _ = _ object _ ;",
-    "var _ * _ = _ object _ ;",
-    "object _ = _ new _ creation _ ( _ ?$parameters _ ) _  ;",
+    "var _ * _ = _ $value _ ;",
+    "object _ $assign_operator _ new _ creation _ ( _ ?$parameters _ ) _  ;",
+    "object _ $assign_operator _ $value",
 
     "$method_call",
-    "$if_statement",
-
-    "Hallo|Hai _ ?$abegr _ Tag",
-
-    "if _ ( _ object _ * _ object _ )"
+    "$if_statement"
 };
 
         public Symbol[] propose_symbols(SourceFile file, int line, int col, string written){
