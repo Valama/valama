@@ -221,22 +221,16 @@ namespace Guanako{
         }
 
 void build_syntax_map(){
-    map_syntax["method_call"] = "method _ ( _ ?$parameters _ )";
-    map_syntax["value"] = "object|$method_call";
-    map_syntax["if_statement"] = "if _ ( _ $value _ ?$comparison _ )";
 
-    map_syntax["parameters_decl"] = "type _ * _ ?$parameters_decl_inner";
-    map_syntax["parameters_decl_inner"] = ", _ type _ ?$parameters_decl";
-    map_syntax["parameters"] = "$value _ ?, _ ?$parameters";
+    var file = File.new_for_path ("/usr/share/valama/syntax");
 
-    map_syntax["comparison"] = "$rel_comparison|$is_comparison";
-    map_syntax["rel_comparison"] = "$relational_expression _ $value";
-    map_syntax["is_comparison"] = "is _ type";
-
-    map_syntax["assign_operator"] = "=|+=|-=||=|&=|^=|/=|*=|%=|<<=|>>=";
-    map_syntax["relational_expression"] = "==|>|<|>=|<=";
-
-    map_syntax["access_keyword"] = "public|private|internal";
+    var dis = new DataInputStream (file.read ());
+    string line;
+    while ((line = dis.read_line (null)) != null) {
+        if (line.strip() == "" || line.has_prefix("#"))
+            continue;
+        map_syntax[line] = dis.read_line (null);
+    }
 
 }
 
