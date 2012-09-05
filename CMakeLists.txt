@@ -42,9 +42,10 @@ find_package(PkgConfig)
 pkg_check_modules(GTK3 REQUIRED gtk+-3.0 gthread-2.0)
 pkg_check_modules(HIGHLIGHT REQUIRED gtksourceview-3.0)
 pkg_check_modules(VALA REQUIRED libvala-0.16)
+pkg_check_modules(GEE REQUIRED gee-1.0)
 
-add_definitions(${GTK3_CFLAGS} ${HIGHLIGHT_CFLAGS} ${VALA_CFLAGS})
-link_libraries(${GTK3_LIBRARIES} ${HIGHLIGHT_LIBRARIES} ${VALA_LIBRARIES})
+add_definitions(${GTK3_CFLAGS} ${HIGHLIGHT_CFLAGS} ${VALA_CFLAGS} ${GEE_CFLAGS})
+link_libraries(${GTK3_LIBRARIES} ${HIGHLIGHT_LIBRARIES} ${VALA_LIBRARIES} ${GEE_LIBRARIES})
 
 include(UseVala)
 vala_precompile(VALA_C
@@ -59,6 +60,7 @@ PACKAGES
   gtk+-3.0
   gtksourceview-3.0
   libvala-0.16
+  gee-1.0
 OPTIONS
   --thread
 )

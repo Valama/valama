@@ -19,6 +19,7 @@
 
 using GLib;
 using Vala;
+using Gee;
 
 namespace Guanako{
 
@@ -32,6 +33,8 @@ namespace Guanako{
             parser = new Vala.Parser();
 
             context.profile = Profile.GOBJECT;
+
+            build_syntax_map();
         }
         public Symbol root_symbol {
             get { return context.root; }
@@ -70,6 +73,8 @@ namespace Guanako{
                 first_index = written.index_of(",");
             if (written.index_of(")") != -1 && written.index_of(")") < first_index)
                 first_index = written.index_of(")");
+            if (written.index_of("(") != -1 && written.index_of("(") < first_index)
+                first_index = written.index_of("(");
             if (first_index == -1)
                 first_index = written.length;
             return first_index;
@@ -102,6 +107,7 @@ namespace Guanako{
            return false;
         }
         bool type_required(Symbol smb, string type){
+            stdout.printf("required check type: " + type + " Symbol: " + smb.name + "\n");
             if (type == "namespace")
                 if (smb is Namespace)
                     return true;
@@ -109,7 +115,7 @@ namespace Guanako{
                 if (smb is Class || smb is Struct)
                     return true;
             if (type == "object")
-                if (smb is Variable || smb is Method || smb is Property){
+                if (smb is Variable || smb is Method || smb is Property || smb is ObjectType){
                     /*if (smb is Method){
                         var mth = smb as Method;
                         if (mth.return_type.data_type is Class)
@@ -119,32 +125,62 @@ namespace Guanako{
                     }*/
                     return true;
                 }
-            if (type == "creation"){
+            if (type == "creation")
                 if (smb is Class || smb is CreationMethod)
                     return true;
-           if (type == "method")
+           if (type == "method"){
+                stdout.printf("METHOD: " + smb.name + "\n");
                 if (smb is Method)
                     return true;
+                stdout.printf("NO!\n");
             }
             return false;
         }
         Symbol[]? cmp(string written, string[] compare, int step, Symbol[] accessible){
-//stdout.printf("compare (step " + compare[step] + "): " + written + "\n");
             if (compare.length == step)
                 return null;
-            if (compare[step] == "?")
+            if (compare[step] == "*")
                 return cmp (written.substring(index_of_symbol_end(written)), compare, step + 1, accessible);
-            if (compare[step] == "#"){
+            if (compare[step].has_prefix("?")){
+                string[] compare_absolute = compare; //Try both with and without the current comparison, then return both results
+                compare_absolute[step] = compare_absolute[step].substring(1);
+                Symbol[] ret = new Symbol[0];
+                Symbol[]? one = cmp(written, compare_absolute, step, accessible);
+                Symbol[]? two = cmp(written, compare, step + 1, accessible);
+                if (one != null)
+                    foreach (Symbol s in one)
+                        ret += s;
+                if (two != null)
+                    foreach (Symbol s in two)
+                        ret += s;
+                return ret;
+            }
+            if (compare[step].has_prefix("$")){
+                string[] compare_resolved = map_syntax[compare[step].substring(1)].split(" ");
+                string[] new_compare = new string[0];
+                if (step > 0)
+                    new_compare = compare[0 : step];
+                foreach (string s in compare_resolved)
+                    new_compare += s;
+                for (int q = step + 1; q < compare.length; q++)
+                    new_compare += compare[q];
+                return cmp (written, new_compare, step, accessible);
+            }
+            /*if (compare[step] == "#"){
                 if (written.has_prefix(" "))
                     return cmp (written.chug(), compare, step + 1, accessible);
                 else
                     return null;
-            }
+            }*/
             if (compare[step] == "_")
                 return cmp (written.chug(), compare, step + 1, accessible);
             if (compare[step] == "namespace" || compare[step] == "type" || compare[step] == "object" || compare[step] == "creation" || compare[step] == "method"){
+                stdout.printf("compare step: " + compare[step] + " _ written: " + written + "\n");
                 string me = written.substring(0, index_of_symbol_end(written));
                 Symbol resolved = resolve_symbol(me, accessible);
+                stdout.printf("resolving: " + me + "\n");
+                if (resolved != null)
+                    stdout.printf("FOUND!!" + resolved.name + "\n");
                 if (me.length < written.length){
                     if (resolved != null && type_required(resolved, compare[step]))
                          return cmp (written.substring(me.length + 1), compare, step + 1, accessible);
@@ -165,41 +201,54 @@ namespace Guanako{
             }
             if (written == compare[step])
                 return null;
+            if (compare[step].length > written.length && compare[step].has_prefix(written)){
+                return new Symbol[1]{new Struct(compare[step], null, null)};
+            }
             if (written.has_prefix(compare[step]))
                 return cmp (written.substring(compare[step].length), compare, step + 1, accessible);
             return null;
         }
 
+void build_syntax_map(){
+    map_syntax["method_call"] = "method _ ( _ ?$parameters _ ) _ ;";
+    map_syntax["parameters_decl"] = "type _ * _ ?, _ ?$parameters_decl";
+    map_syntax["parameters"] = "object _ ?, _ ?$parameters";
+    map_syntax["begr"] = "123 _ abcde _ ?$begr";
+    map_syntax["abegr"] = "(  _ $begr _ )";
+}
+
+Gee.HashMap<string, string> map_syntax = new Gee.HashMap<string, string>();
 
 string[] syntax_deep_space  = new string[]{
     "using _ namespace _ ;",
-    "namespace _ ? _",
-    "class _ ? _"
+    "namespace _ * _",
+    "class _ * _"
 };
 string[] syntax_class  = new string[]{
-    "class _ ? _",
-    "public _ type _ ? _",
-    "type _ ? _"
+    "class _ * _",
+    "public _ type _ * _",
+    "type _ * _"
 };
 string[] syntax_function  = new string[]{
-    "foreach _ ( _ type _ in _ object _ ) _ ;",
-    "for _ ( _ type _  ? _ = _ object _ ; _ object _ ? _ object _ ; _ object _ ? _  ) _ ;",
+    "foreach _ ( _ type _ in _ object _ )",
+    "for _ ( _ type _  * _ = _ object _ ; _ object _ * _ object _ ; _ object _ * _  ) _ ;",
 
-    "var _ ? _ = _ new _ creation _ ;",
-    "var _ ? _ = _ object _ ;",
-    "object _ = _ new _ creation _ ;",
-    "method _ ;",
+    "var _ * _ = _ new _ creation _ ( _ ?$parameters _ ) _  ;",
+    "var _ * _ = _ object _ ;",
+    "object _ = _ new _ creation _ ( _ ?$parameters _ ) _  ;",
 
-    "if _ ( _ object _ ? _ object _ )"
+    "$method_call",
+
+    "Hallo _ ?$abegr _ Tag",
+
+    "if _ ( _ object _ * _ object _ )"
 };
 
         public Symbol[] propose_symbols(SourceFile file, int line, int col, string written){
             Symbol[] ret = null;
             var accessible = get_accessible_symbols(file, line, col);
-
             var inside_symbol = get_symbol_at_pos(file, line, col);
             string[] syntax = null;
-
             if (inside_symbol == null){
                 syntax = syntax_deep_space;
                 accessible = get_child_symbols(context.root);
@@ -260,6 +309,10 @@ string[] syntax_function  = new string[]{
 
              foreach (Symbol smb in internal_candidates){
                  if (smb.name == splt[0]){
+
+                    if (splt.length == 1)
+                        return smb;
+
                     Symbol type = null;
                     if (smb is Class || smb is Namespace || smb is Struct)
                         type = smb;
@@ -272,9 +325,7 @@ string[] syntax_function  = new string[]{
                     if (type == null)
                         continue;
 
-                    if (splt.length == 1)
-                        return type;
-                    else if (splt.length == 2){
+                    if (splt.length == 2){
                         var rt = resolve_symbol(txt.substring(splt[0].length + 1), get_child_symbols(type));
                         stdout.printf("RES: " + txt.substring(splt[0].length + 1) + "\n");
                         stdout.printf("SYM: " + rt.name + "\n");
@@ -286,15 +337,6 @@ string[] syntax_function  = new string[]{
                  }
              }
              return null;
-         }
-
-
-         bool namespace_in_using_directives(SourceFile file, Symbol nmspace){
-             foreach (UsingDirective directive in file.current_using_directives){
-                 if (directive.namespace_symbol == nmspace)
-                     return true;
-             }
-             return false;
          }
 
          public Symbol[] get_accessible_symbols(SourceFile file, int line, int col){
@@ -313,44 +355,6 @@ string[] syntax_function  = new string[]{
                 foreach (Symbol s in children)
                     ret += s;
             }
-
-            /*// Propose all accessible non-local namespaces, classes etc
-            iter_symbol (context.root, (iter, depth)=>{
-                if (current_symbol.is_accessible(iter)){
-                    ret += iter;
-                }
-
-                if (iter is Namespace)
-                    if (namespace_in_using_directives(file, iter))
-                        return iter_callback_returns.continue;
-                return iter_callback_returns.abort_branch;
-            });
-            var current_namespace = get_parent_namespace(current_symbol);
-            if (current_namespace != null){
-                iter_symbol (current_namespace, (iter, depth)=>{
-                    if (current_symbol.is_accessible(iter)){
-                        ret += iter;
-                    }
-                    return iter_callback_returns.abort_branch;
-                });
-            }
-            if (current_symbol.parent_symbol != null){
-                iter_symbol (current_symbol.parent_symbol, (iter, depth)=>{
-                    if (current_symbol.is_accessible(iter)){
-                        ret += iter;
-                    }
-                    return iter_callback_returns.abort_branch;
-                });
-            }
-
-            //If we are inside a method, propose all parameters
-            if (current_symbol is Method){
-                var mth = (Method)current_symbol;
-                foreach (Vala.Parameter param in mth.get_parameters()){
-                    ret += param;
-                }
-            }
-            */
 
             //If we are inside a subroutine, propose all previously defined local variables
             if (current_symbol is Subroutine){
@@ -429,14 +433,12 @@ string[] syntax_function  = new string[]{
                     //If the symbol is a subroutine, check its body's source reference
                     if (smb is Subroutine){
                         var sr = (Subroutine)smb;
-                        if (sr.body != null){
-                            if (inside_source_ref(source_file, line, col, sr.body.source_reference)){
+                        if (sr.body != null)
+                            if (inside_source_ref(source_file, line, col, sr.body.source_reference))
                                 if (depth > last_depth){//Get symbol deepest in the tree
                                     ret = smb;
                                     last_depth = depth;
                                 }
-                            }
-                        }
                     }
                 }
                 return iter_callback_returns.continue;
