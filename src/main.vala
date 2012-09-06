@@ -116,6 +116,8 @@ public static void main(string[] args){
     window_main.show_all();
 
     Gtk.main();
+
+    project.save();
 }
 
 static void on_auto_indent_button_clicked(){

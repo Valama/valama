@@ -1,13 +1,13 @@
 <project>
-    <packages>
-        <package>gobject-2.0</package>
-        <package>glib-2.0</package>
-        <package>gio-2.0</package>
-        <package>gee-1.0</package>
-        <package>libvala-0.16</package>
-        <package>gdk-3.0</package>
-        <package>gtk+-3.0</package>
-        <package>gtksourceview-3.0</package>
-        <package>libxml-2.0</package>
-    </packages>
+	<packages>
+		<package>gobject-2.0</package>
+		<package>glib-2.0</package>
+		<package>gio-2.0</package>
+		<package>gee-1.0</package>
+		<package>libvala-0.16</package>
+		<package>gdk-3.0</package>
+		<package>gtk+-3.0</package>
+		<package>gtksourceview-3.0</package>
+		<package>libxml-2.0</package>
+	</packages>
 </project>

@@ -25,6 +25,7 @@ using Xml;
 public class valama_project{
     public valama_project(string project_path, string project_name){
         this.project_path = project_path;
+        this.project_name = project_name;
         guanako_project = new Guanako.project();
 
         var directory = File.new_for_path (project_path + "/src");
@@ -44,7 +45,7 @@ public class valama_project{
         }
         source_files = sf;
 
-        load_project_file(project_path + "/" + project_name + ".vlp");
+        load_project_file();
 
         guanako_project.update();
     }
@@ -52,6 +53,7 @@ public class valama_project{
     public SourceFile[] source_files;
     public Guanako.project guanako_project;
     string project_path;
+    string project_name;
 
     public string build(){
         string ret;
@@ -59,7 +61,8 @@ public class valama_project{
         return ret;
     }
 
-    void load_project_file (string filename){
+    void load_project_file (){
+        string filename = project_path + "/" + project_name + ".vlp";
         Xml.Doc* doc = Xml.Parser.parse_file(filename);
 
         if (doc == null) {
@@ -86,5 +89,17 @@ public class valama_project{
         }
 
         delete doc;
+    }
+    public void save (){
+        var writer = new TextWriter.filename(project_path + "/" + project_name + ".vlp" );
+        writer.set_indent (true);
+        writer.set_indent_string ("\t");
+
+        writer.start_element("project");
+        writer.start_element("packages");
+        foreach (string pkg in guanako_project.packages)
+            writer.write_element("package", pkg);
+        writer.end_element();
+        writer.end_element();
     }
 }
