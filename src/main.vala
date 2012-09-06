@@ -310,10 +310,11 @@ class TestProvider : Gtk.SourceCompletionProvider, Object
         var proposals = project.guanako_project.propose_symbols(current_source_file, line, col, current_line);
         foreach (Symbol proposal in proposals){
             if (proposal.name != null){
-                if (proposal.name.has_prefix(last)){
+                /*if (proposal.name.has_prefix(last)){
                     props.append(new Gtk.SourceCompletionItem (proposal.name, proposal.name, null, null));
                     props_symbols += proposal;
-                }
+                }*/
+                props.append(new Gtk.SourceCompletionItem (proposal.name, proposal.name, null, null));
             }
         }
 

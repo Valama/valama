@@ -81,19 +81,19 @@ namespace Guanako{
         }
 
         bool type_offered(Symbol smb, string type){
-            if (type == "namespace")
+            if (type == "raw_namespace")
                 if (smb is Namespace)
                     return true;
-            if (type == "type")
+            if (type == "raw_type")
                 if (smb is Namespace || smb is Class || smb is Struct)
                     return true;
-            if (type == "object")
+            if (type == "raw_object")
                 if (smb is Namespace || smb is Class || smb is Struct || smb is Variable || smb is Method || smb is Property)
                     return true;
-            if (type == "creation")
+            if (type == "raw_creation")
                 if (smb is Namespace || smb is Class || smb is Method)
                     return true;
-           if (type == "method")
+           if (type == "raw_method")
                 if (smb is Namespace || smb is Class || smb is Method){
                     /*if (smb is Method){
                         var mth = smb as Method;
@@ -107,13 +107,13 @@ namespace Guanako{
            return false;
         }
         bool type_required(Symbol smb, string type){
-            if (type == "namespace")
+            if (type == "raw_namespace")
                 if (smb is Namespace)
                     return true;
-            if (type == "type")
+            if (type == "raw_type")
                 if (smb is Class || smb is Struct)
                     return true;
-            if (type == "object")
+            if (type == "raw_object")
                 if (smb is Variable || smb is Method || smb is Property || smb is ObjectType){
                     /*if (smb is Method){
                         var mth = smb as Method;
@@ -124,10 +124,10 @@ namespace Guanako{
                     }*/
                     return true;
                 }
-            if (type == "creation")
+            if (type == "raw_creation")
                 if (smb is Class || smb is CreationMethod)
                     return true;
-           if (type == "method"){
+           if (type == "raw_method"){
                 if (smb is Method)
                     return true;
             }
@@ -176,21 +176,11 @@ namespace Guanako{
                     new_compare += compare[q];
                 return cmp (written, new_compare, step, accessible);
             }
-            /*if (compare[step] == "#"){
-                if (written.has_prefix(" "))
-                    return cmp (written.chug(), compare, step + 1, accessible);
-                else
-                    return null;
-            }*/
             if (compare[step] == "_")
                 return cmp (written.chug(), compare, step + 1, accessible);
-            if (compare[step] == "namespace" || compare[step] == "type" || compare[step] == "object" || compare[step] == "creation" || compare[step] == "method"){
-                stdout.printf("compare step: " + compare[step] + " _ written: " + written + "\n");
+            if (compare[step] == "raw_namespace" || compare[step] == "raw_type" || compare[step] == "raw_object" || compare[step] == "raw_creation" || compare[step] == "raw_method"){
                 string me = written.substring(0, index_of_symbol_end(written));
                 Symbol resolved = resolve_symbol(me, accessible);
-                stdout.printf("resolving: " + me + "\n");
-                if (resolved != null)
-                    stdout.printf("FOUND!!" + resolved.name + "\n");
                 if (me.length < written.length){
                     if (resolved != null && type_required(resolved, compare[step]))
                          return cmp (written.substring(me.length), compare, step + 1, accessible);
@@ -200,10 +190,15 @@ namespace Guanako{
                     Symbol[] ret = new Symbol[0];
                     Symbol[] check = accessible;
                     if (resolved != null)
-                        check = get_child_symbols(resolved);
+                        check = get_child_symbols(get_type_of_symbol(resolved));
+                   string[] splt = me.split(".");
+                   string last_name = "";
+                   if (splt.length > 0)
+                       last_name = splt[splt.length - 1];
                    foreach (Symbol s in check){
                         if (type_offered(s, compare[step])){
-                            ret += s;
+                            if (s.name.has_prefix(last_name))
+                                ret += s;
                         }
                     }
                     return ret;
@@ -237,23 +232,21 @@ void build_syntax_map(){
 Gee.HashMap<string, string> map_syntax = new Gee.HashMap<string, string>();
 
 string[] syntax_deep_space  = new string[]{
-    "using _ namespace _ ;",
+    "using _ raw_namespace _ ;",
     "namespace _ * _",
-    "?$access_keyword class _ * _"
+    "?$access_keyword _ class _ * _"
 };
 string[] syntax_class  = new string[]{
     "?$access_keyword _ class _ * _",
-    "?$access_keyword _ type _ * _",
-    "?$access_keyword _ type _ * _ ( _ $parameters_decl _ )"
+    "?$access_keyword _ raw_type _ * _",
+    "?$access_keyword _ raw_type _ * _ ( _ $parameters_decl _ )"
 };
 string[] syntax_function  = new string[]{
-    "foreach _ ( _ type _ in _ object _ )",
-    "for _ ( _ type _  * _ = _ object _ ; _ object _ * _ object _ ; _ object _ * _  ) _ ;",
+    "$foreach_statement",
+    "$for_statement",
+    "$local_declaration",
 
-    "var _ * _ = _ new _ creation _ ( _ ?$parameters _ ) _  ;",
-    "var _ * _ = _ $value _ ;",
-    "object _ $assign_operator _ new _ creation _ ( _ ?$parameters _ ) _  ;",
-    "object _ $assign_operator _ $value",
+    "$assignment",
 
     "$method_call",
     "$if_statement"
@@ -283,7 +276,20 @@ string[] syntax_function  = new string[]{
             return ret;
          }
 
-        Symbol? resolve_symbol(string text, Symbol[]? candidates = null){
+        Symbol? get_type_of_symbol(Symbol smb){
+            Symbol type = null;
+            if (smb is Class || smb is Namespace || smb is Struct)
+                type = smb;
+            if (smb is Property)
+                type = ((Property)smb).property_type.data_type;
+            if (smb is Variable)
+                type = ((Variable)smb).variable_type.data_type;
+            if (smb is Method)
+                type = ((Method)smb).return_type.data_type;
+            return type;
+        }
+
+        Symbol? resolve_symbol(string text, Symbol[] candidates){
             Symbol[] internal_candidates = candidates;
 
             var txt = text;
@@ -308,45 +314,28 @@ string[] syntax_function  = new string[]{
                 }
             } while (found);
 
-            int last_occurrence = int.max(-1, txt.last_index_of("("));
-            last_occurrence = int.max(last_occurrence, txt.last_index_of(","));
-            if (last_occurrence >= 0)
-                txt = txt.substring(last_occurrence + 1);
+            string[] splt1 = txt.split_set("(,");
+            if (splt1.length > 0)
+                txt = splt1[splt1.length - 1];
 
             string[] splt = txt.split(".");
-            //if (splt.length == 1)
-            //    return null;
-
-            if (candidates == null){
-                internal_candidates = get_child_symbols(context.root);
-            }
-
 
              foreach (Symbol smb in internal_candidates){
                  if (smb.name == splt[0]){
 
+                    var type = get_type_of_symbol(smb);
+
                     if (splt.length == 1)
                         return smb;
 
-                    Symbol type = null;
-                    if (smb is Class || smb is Namespace || smb is Struct)
-                        type = smb;
-                    if (smb is Property)
-                        type = ((Property)smb).property_type.data_type;
-                    if (smb is Variable)
-                        type = ((Variable)smb).variable_type.data_type;
-                    if (smb is Method)
-                        type = ((Method)smb).return_type.data_type;
                     if (type == null)
                         continue;
 
                     if (splt.length == 2){
                         var rt = resolve_symbol(txt.substring(splt[0].length + 1), get_child_symbols(type));
-                        stdout.printf("RES: " + txt.substring(splt[0].length + 1) + "\n");
-                        stdout.printf("SYM: " + rt.name + "\n");
                         if (rt != null)
                             return rt;
-                        return type;
+                        return smb;
                     }else
                         return resolve_symbol(txt.substring(splt[0].length + 1), get_child_symbols(type));
                  }
@@ -490,10 +479,6 @@ string[] syntax_function  = new string[]{
                 file.add_using_directive (ns_ref);
                 context.root.add_using_directive (ns_ref);
 
-                //report.clear_error_indicators ();
-
-
-                /* visit_source_file checks for the file extension */
                 parser.visit_source_file (file);
 
                 context.resolver.resolve (context);
@@ -501,8 +486,6 @@ string[] syntax_function  = new string[]{
                 context.check();
 
                 Vala.CodeContext.pop ();
-
-                //report.update_errors(current_editor);
             }
         }
 

@@ -50,6 +50,7 @@ link_libraries(${GTK3_LIBRARIES} ${HIGHLIGHT_LIBRARIES} ${VALA_LIBRARIES} ${GEE_
 include(UseVala)
 vala_precompile(VALA_C
   src/main.vala
+  src/project.vala
   src/ui_project_browser.vala
   src/ui_symbol_browser.vala
   src/guanako.vala
