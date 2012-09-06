@@ -61,10 +61,20 @@ public class project_browser {
         tree_view.row_activated.connect((path)=>{
             int[] indices = path.get_indices();
             if (indices.length > 1){
-                source_file_selected(project.source_files[indices[1]]);
+                if (indices[0] == 0)
+                    source_file_selected(project.source_files[indices[1]]);
             }
         });
 
+        TreeIter iter_packages;
+        store.append (out iter_packages, null);
+        store.set (iter_packages, 0, "Packages", -1);
+
+        foreach (string pkg in project.guanako_project.packages){
+            TreeIter iter_sf;
+            store.append (out iter_sf, iter_packages);
+            store.set (iter_sf, 0, pkg, 1, "", -1);
+        }
    }
 }
 

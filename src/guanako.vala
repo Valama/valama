@@ -27,6 +27,7 @@ namespace Guanako{
 
         CodeContext context;
         Vala.Parser parser;
+        public Gee.ArrayList<string> packages = new Gee.ArrayList<string>();
 
         public project(){
             context = new CodeContext ();
@@ -43,6 +44,7 @@ namespace Guanako{
             get { return context; }
         }
         public void add_package(string package_name){
+            packages.add(package_name);
             context.add_external_package (package_name);
         }
         public void add_source_file(SourceFile source_file){

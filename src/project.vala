@@ -1,9 +1,29 @@
+/**
+ * src/project.vala
+ * Copyright (C) 2012, Linus Seelinger <S.Linus@gmx.de>
+ *
+ * Valama is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Valama is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
 using Vala;
 using GLib;
 using Gee;
+using Xml;
 
 public class valama_project{
-    public valama_project(string project_path){
+    public valama_project(string project_path, string project_name){
         this.project_path = project_path;
         guanako_project = new Guanako.project();
 
@@ -24,14 +44,7 @@ public class valama_project{
         }
         source_files = sf;
 
-        guanako_project.add_package ("gobject-2.0");
-        guanako_project.add_package ("glib-2.0");
-        guanako_project.add_package ("gio-2.0");
-        guanako_project.add_package ("gee-1.0");
-        guanako_project.add_package ("libvala-0.16");
-        guanako_project.add_package ("gdk-3.0");
-        guanako_project.add_package ("gtk+-3.0");
-        guanako_project.add_package ("gtksourceview-3.0");
+        load_project_file(project_path + "/" + project_name + ".vlp");
 
         guanako_project.update();
     }
@@ -40,11 +53,38 @@ public class valama_project{
     public Guanako.project guanako_project;
     string project_path;
 
-    public Gee.ArrayList<string> packages = new Gee.ArrayList<string>();
-
     public string build(){
         string ret;
         GLib.Process.spawn_command_line_sync("sh -c 'cd " + project_path + " && mkdir -p build && cd build && cmake .. && make'", null, out ret);
         return ret;
+    }
+
+    void load_project_file (string filename){
+        Xml.Doc* doc = Xml.Parser.parse_file(filename);
+
+        if (doc == null) {
+            stdout.printf (@"Cannot read file >$filename<\n");
+            delete doc;
+        }
+
+        Xml.Node* root_node = doc->get_root_element ();
+        if (root_node == null) {
+            stdout.printf (@"The file >$filename< is empty\n");
+            delete doc;
+        }
+
+        for (Xml.Node* i = root_node->children; i != null; i = i->next) {
+            if (i->type != ElementType.ELEMENT_NODE) {
+                continue;
+            }
+            if (i->name == "packages"){
+                for (Xml.Node* p = i->children; p != null; p = p->next) {
+                    if (p->name == "package")
+                        guanako_project.add_package(p->get_content());
+                }
+            }
+        }
+
+        delete doc;
     }
 }

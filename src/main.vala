@@ -36,7 +36,7 @@ public static void main(string[] args){
     if (args.length > 1)
         sourcedir = args[1];
 
-    project = new valama_project(sourcedir);
+    project = new valama_project(sourcedir, "valama");
 
     report_wrapper = new ReportWrapper();
     //report_wrapper = project.guanako_project.code_context.report as ReportWrapper;
