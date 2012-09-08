@@ -35,8 +35,10 @@ raw_object|$method_call
 # Parameters
 
 parameters
-$value _ ?, _ ?$parameters
+?$param_acc _ $value _ ?, _ ?$parameters
 
+param_acc
+ref|out
 
 parameters_decl
 raw_type _ * _ ?$parameters_decl_inner

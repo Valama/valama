@@ -336,6 +336,17 @@ class TestProvider : Gtk.SourceCompletionProvider, Object
     public bool activate_proposal (Gtk.SourceCompletionProposal proposal,
                                    Gtk.TextIter iter)
     {
+        TextIter start = iter;
+        start.backward_find_char((chr)=>{
+            string str = chr.to_string();
+            if (str == "." || str == ")" || str == "(" || str == " " || str == "\n")
+                return true;
+            return false;
+        }, null);
+        start.forward_char();
+        view.buffer.delete ( ref start, ref iter);
+        string text = proposal.get_text();
+        view.buffer.insert(ref start, text, text.length);
         return true;
     }
 

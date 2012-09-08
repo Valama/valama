@@ -87,7 +87,7 @@ namespace Guanako{
                 if (smb is Namespace)
                     return true;
             if (type == "raw_type")
-                if (smb is Namespace || smb is Class || smb is Struct)
+                if (smb is Namespace || smb is Class || smb is Struct || smb is Interface)
                     return true;
             if (type == "raw_object")
                 if (smb is Namespace || smb is Class || smb is Struct || smb is Variable || smb is Method || smb is Property)
@@ -96,7 +96,7 @@ namespace Guanako{
                 if (smb is Namespace || smb is Class || smb is Method)
                     return true;
            if (type == "raw_method")
-                if (smb is Namespace || smb is Class || smb is Method){
+                if (smb is Namespace || smb is Class || smb is Interface || smb is Method){
                     /*if (smb is Method){
                         var mth = smb as Method;
                         if (mth.return_type.data_type is Class)
@@ -113,7 +113,7 @@ namespace Guanako{
                 if (smb is Namespace)
                     return true;
             if (type == "raw_type")
-                if (smb is Class || smb is Struct)
+                if (smb is Class || smb is Struct || smb is Interface)
                     return true;
             if (type == "raw_object")
                 if (smb is Variable || smb is Method || smb is Property || smb is ObjectType){
