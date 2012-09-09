@@ -46,17 +46,23 @@ namespace Guanako{
         public void add_package(string package_name){
             packages.add(package_name);
             context.add_external_package (package_name);
+            SourceFile pkg_file = null;
+            foreach (SourceFile file in context.get_source_files())
+                if (file.filename == context.get_vapi_path(package_name))
+                    pkg_file = file;
+            if (pkg_file == null)
+                return;
+            update_file(pkg_file);
         }
         public void remove_package(string package_name){
+            SourceFile pkg_file = null;
+            foreach (SourceFile file in context.get_source_files())
+                if (file.filename == context.get_vapi_path(package_name))
+                    pkg_file = file;
+            if (pkg_file == null)
+                return;
+            vanish_file(pkg_file);
             packages.remove(package_name);
-            var source_files = context.get_source_files();
-            context = new CodeContext();
-            foreach (string pkg in packages)
-                context.add_external_package(pkg);
-            foreach (SourceFile file in source_files)
-                context.add_source_file(file);
-            update();
-            //context.add_external_package (package_name);
         }
         public void add_source_file(SourceFile source_file){
             context.add_source_file (source_file);
@@ -464,29 +470,35 @@ string[] syntax_function  = new string[]{
         }
 
 
-        public void update_file (Vala.SourceFile file, string new_content) {
-            file.content = new_content;
+        void vanish_file(SourceFile file){
+            var nodes = new Vala.ArrayList<Vala.CodeNode> ();
+            foreach (var node in file.get_nodes()) {
+                nodes.add(node);
+            }
+            foreach (var node in nodes) {
+                file.remove_node (node);
+                if (node is Vala.Symbol) {
+                    var sym = (Vala.Symbol) node;
+                    if (sym.owner != null)
+                        // we need to remove it from the scope
+                        sym.owner.remove(sym.name);
+                    if (context.entry_point == sym)
+                        context.entry_point = null;
+                    sym.name = ""; //TODO: Find a less stupid solution...
+                }
+            }
+        }
+
+        public void update_file (Vala.SourceFile file, string? new_content = null) {
+            if (new_content != null)
+                file.content = new_content;
             lock (context) {
                 /* Removing nodes in the same loop causes problems (probably due to ReadOnlyList)*/
 
                 Vala.CodeContext.push (context);
 
-                var nodes = new Vala.ArrayList<Vala.CodeNode> ();
-                foreach (var node in file.get_nodes()) {
-                    nodes.add(node);
-                }
-                foreach (var node in nodes) {
-                    file.remove_node (node);
-                    if (node is Vala.Symbol) {
-                        var sym = (Vala.Symbol) node;
-                        if (sym.owner != null)
-                            // we need to remove it from the scope
-                            sym.owner.remove(sym.name);
-                        if (context.entry_point == sym)
-                            context.entry_point = null;
-                        sym.name = ""; //TODO: Find a less stupid solution...
-                    }
-                }
+                vanish_file(file);
+
                 file.current_using_directives = new Vala.ArrayList<Vala.UsingDirective>();
                 var ns_ref = new Vala.UsingDirective (new Vala.UnresolvedSymbol (null, "GLib"));
                 file.add_using_directive (ns_ref);
