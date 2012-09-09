@@ -26,13 +26,51 @@ public class project_browser {
         this.project = project;
 
         tree_view = new TreeView ();
+        tree_view.insert_column_with_attributes (-1, "Project", new CellRendererText (), "text", 0, null);
 
         build();
 
         var scrw = new ScrolledWindow(null, null);
         scrw.add(tree_view);
         scrw.set_size_request(200,0);
-        widget = scrw;
+
+        var toolbar = new Toolbar();
+        toolbar.icon_size = 1;
+
+        var btn_add = new ToolButton(null, null);
+        btn_add.icon_name = "list-add-symbolic";
+        btn_add.clicked.connect(()=>{
+            var pkg = package_selection_dialog();
+            if (pkg != null){
+                project.guanako_project.add_package(pkg);
+                packages_changed();
+                build();
+            }
+        });
+        toolbar.add(btn_add);
+
+        var btn_rem = new ToolButton(null, null);
+        btn_rem.icon_name = "list-remove-symbolic";
+        btn_rem.clicked.connect(()=>{
+            TreeModel model;
+            var paths = tree_view.get_selection().get_selected_rows(out model);
+            foreach ( TreePath path in paths){
+                var indices = path.get_indices();
+                if (indices.length == 2 && indices[0] == 1){
+                    project.guanako_project.remove_package(project.guanako_project.packages[indices[1]]);
+                    packages_changed();
+                    build();
+                }
+            }
+        });
+        toolbar.add(btn_rem);
+
+        var vbox = new VBox(false, 0);
+
+        vbox.pack_start(scrw, true, true);
+        vbox.pack_start(toolbar, false, true);
+
+        widget = vbox;
     }
 
     valama_project project;
@@ -40,12 +78,11 @@ public class project_browser {
     public Widget widget;
 
     public signal void source_file_selected(SourceFile file);
+    public signal void packages_changed();
 
     void build(){
         var store = new TreeStore (2, typeof (string), typeof (string));
         tree_view.set_model (store);
-
-        tree_view.insert_column_with_attributes (-1, "Project", new CellRendererText (), "text", 0, null);
 
         TreeIter iter_source_files;
         store.append (out iter_source_files, null);
@@ -76,6 +113,10 @@ public class project_browser {
             store.set (iter_sf, 0, pkg, 1, "", -1);
         }
    }
+   
+    static string? package_selection_dialog(){
+        return "sdl";
+    }
 }
 
 // vim: set ai ts=4 sts=4 et sw=4

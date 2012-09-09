@@ -47,6 +47,17 @@ namespace Guanako{
             packages.add(package_name);
             context.add_external_package (package_name);
         }
+        public void remove_package(string package_name){
+            packages.remove(package_name);
+            var source_files = context.get_source_files();
+            context = new CodeContext();
+            foreach (string pkg in packages)
+                context.add_external_package(pkg);
+            foreach (SourceFile file in source_files)
+                context.add_source_file(file);
+            update();
+            //context.add_external_package (package_name);
+        }
         public void add_source_file(SourceFile source_file){
             context.add_source_file (source_file);
         }
@@ -90,7 +101,7 @@ namespace Guanako{
                 if (smb is Namespace || smb is Class || smb is Struct || smb is Interface)
                     return true;
             if (type == "raw_object")
-                if (smb is Namespace || smb is Class || smb is Struct || smb is Variable || smb is Method || smb is Property)
+                if (smb is Namespace || smb is Class || smb is Struct || smb is Variable || smb is Method || smb is Property || smb is Constant)
                     return true;
             if (type == "raw_creation")
                 if (smb is Namespace || smb is Class || smb is Method)
@@ -116,7 +127,7 @@ namespace Guanako{
                 if (smb is Class || smb is Struct || smb is Interface)
                     return true;
             if (type == "raw_object")
-                if (smb is Variable || smb is Method || smb is Property || smb is ObjectType){
+                if (smb is Variable || smb is Method || smb is Property || smb is ObjectType || smb is Constant){
                     /*if (smb is Method){
                         var mth = smb as Method;
                         if (mth.return_type.data_type is Class)

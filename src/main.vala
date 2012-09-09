@@ -86,7 +86,6 @@ public static void main(string[] args){
 
         var pbrw = new project_browser(project);
         hbox.pack_start(pbrw.widget, false, true);
-        pbrw.source_file_selected.connect(on_source_file_selected);
 
         var scrw = new ScrolledWindow(null, null);
         scrw.add(view);
@@ -102,12 +101,16 @@ public static void main(string[] args){
 
 
     wdg_report = new ui_report(report_wrapper);
-    wdg_report.error_selected.connect(on_error_selected);
     var scrw3 = new ScrolledWindow(null, null);
     scrw3.add(wdg_report.widget);
     scrw3.set_size_request(0, 150);
     vbox_main.pack_start(scrw3, false, true);
 
+    pbrw.source_file_selected.connect(on_source_file_selected);
+    pbrw.packages_changed.connect(()=>{
+        smb_browser.build();
+    });
+    wdg_report.error_selected.connect(on_error_selected);
 
     window_main.add(vbox_main);
     window_main.hide_titlebar_when_maximized = true;
