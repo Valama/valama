@@ -112,10 +112,56 @@ public class project_browser {
             store.append (out iter_sf, iter_packages);
             store.set (iter_sf, 0, pkg, 1, "", -1);
         }
-   }
+    }
+   
+   static string[] get_available_packages(){
+       string[] ret = new string[0];
+       string[] paths = new string[]{"/usr/share/vala-0.16/vapi", "/usr/share/vala/vapi"};
+       foreach (string path in paths){
+            var enumerator = File.new_for_path (path).enumerate_children (FileAttribute.STANDARD_NAME, 0);
+            FileInfo file_info;
+            while ((file_info = enumerator.next_file ()) != null) {
+                var filename = file_info.get_name();
+                if (filename.has_suffix(".vapi"))
+                    ret += filename.substring(0, filename.length - 5);
+            }
+        }
+        return ret;
+    }
    
     static string? package_selection_dialog(){
-        return "sdl";
+    
+        Dialog dlg = new Dialog.with_buttons("Select new packages", window_main, DialogFlags.MODAL, Stock.CANCEL, ResponseType.REJECT, Stock.OK, ResponseType.ACCEPT);
+        
+        var tree_view = new TreeView();
+        var listmodel = new ListStore (1, typeof (string));
+        tree_view.set_model (listmodel);
+
+        tree_view.insert_column_with_attributes (-1, "Packages", new CellRendererText (), "text", 0);
+
+        var avail_packages = get_available_packages();
+        foreach (string pkg in avail_packages){
+            TreeIter iter;
+            listmodel.append (out iter);
+            listmodel.set (iter, 0, pkg);
+        }
+        
+        var scrw = new ScrolledWindow(null, null);
+        scrw.add(tree_view);
+        scrw.show_all();
+        dlg.get_content_area().pack_start(scrw);
+        dlg.set_default_size(400, 600);
+
+        string ret = null;
+        if (dlg.run() == ResponseType.ACCEPT){
+            TreeModel mdl;
+            var selected_rows = tree_view.get_selection().get_selected_rows(out mdl);
+            foreach (TreePath path in selected_rows){
+                ret = avail_packages[path.get_indices()[0]];
+            }
+        }
+        dlg.destroy();
+        return ret;
     }
 }
 
