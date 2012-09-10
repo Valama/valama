@@ -20,3 +20,7 @@ On Debian based system install following packages:
 
 ### Installation ###
  1. `sudo make install`
+ 
+# Credits #
+
+element-* icons from Anjuta IDE (www.anjuta.org, GPL2 licensed)

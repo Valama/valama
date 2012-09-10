@@ -1,0 +1,72 @@
+
+method_call
+raw_method _ ( _ ?$parameters _ )
+
+foreach_statement
+foreach _ ( _ raw_type _ * _ in _ $value _ )
+
+for_statement
+for _ ( _ raw_type _ * _ = _ $value _ ; _ * _ $rel_comparison _ ; _ * _ * _)
+
+local_declaration
+var|raw_type _ * _ = _ $value|$local_declaration_new
+
+local_declaration_new
+new _ raw_creation _ ( _ ?$parameters _ ) _  ;
+
+if_statement
+if _ ( _ ?$comparison _ )
+
+
+
+assignment
+$assignment_new|$assignment_normal
+
+assignment_new
+raw_object _ $assign_operator _ new _ raw_creation _ ( _ ?$parameters _ ) _  ;
+
+assignment_normal
+raw_object _ $assign_operator _ $value
+
+
+value
+raw_object|$method_call
+
+# Parameters
+
+parameters
+?$param_acc _ $value _ ?, _ ?$parameters
+
+param_acc
+ref|out
+
+parameters_decl
+raw_type _ * _ ?$parameters_decl_inner
+
+parameters_decl_inner
+, _ raw_type _ ?$parameters_decl
+
+
+# Comparisons (Either is or ==,<=,> etc)
+
+comparison
+$value _ $rel_comparison|$is_comparison
+
+rel_comparison
+$relational_expression _ $value
+
+is_comparison
+is _ raw_type
+
+
+
+# Keywords, operators and stuff
+
+assign_operator
+=|+=|-=||=|&=|^=|/=|*=|%=|<<=|>>=
+
+relational_expression
+==|>|<|>=|<=
+
+access_keyword
+public|private|internal

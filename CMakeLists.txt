@@ -16,7 +16,7 @@
 # with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-cmake_minimum_required (VERSION 2.8)
+cmake_minimum_required(VERSION 2.8)
 project("Valama" C)
 
 set(Valama_VERSION_MAJOR "0")
@@ -38,28 +38,19 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/vala")
 #list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 find_package(Vala "0.16" REQUIRED)
-find_package(PkgConfig)
-pkg_check_modules(GTK3 REQUIRED gtk+-3.0 gthread-2.0)
-pkg_check_modules(HIGHLIGHT REQUIRED gtksourceview-3.0)
-pkg_check_modules(VALA REQUIRED libvala-0.16)
 
-add_definitions(${GTK3_CFLAGS} ${HIGHLIGHT_CFLAGS} ${VALA_CFLAGS})
-link_libraries(${GTK3_LIBRARIES} ${HIGHLIGHT_LIBRARIES} ${VALA_LIBRARIES})
 
-include(UseVala)
-vala_precompile(VALA_C
-  src/main.vala
-  src/ui_project_browser.vala
-  src/ui_symbol_browser.vala
-  src/guanako.vala
-  src/guanako_vapi_discoverer.vala
-  src/guanako_iterators.vala
-PACKAGES
-  gtk+-3.0
-  gtksourceview-3.0
-  libvala-0.16
-OPTIONS
-  --thread
+set(required_pkgs "gtk+-3.0" "gtksourceview-3.0" "libvala-0.16" "gee-1.0" "libxml-2.0")
+#set(optional_pkgs "libxml-2.0 >= 0.1")
+set(srcfiles "${PROJECT_SOURCE_DIR}/src/*.vala")
+include(ValaPkgs)
+vala_pkgs(VALA_C
+  PACKAGES
+    ${required_pkgs}
+  OPTIONAL
+    ${optional_pkgs}
+  SRCFILES
+    ${srcfiles}
 )
 
 add_executable(valama ${VALA_C})
@@ -88,4 +79,10 @@ endif()
 #endif()
 
 install(TARGETS valama DESTINATION "bin")
+
+# Additional files.
+install(FILES "data/syntax" DESTINATION "share/valama")
+install(DIRECTORY "pixmaps/" DESTINATION "share/pixmaps/valama")
+#install(DIRECTORY "data/folder" DESTINATION "share/valama")
+
 # vim: set ai ts=2 sts=2 et sw=2

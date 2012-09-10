@@ -1,3 +1,22 @@
+/**
+ * src/guanako_iterators.vala
+ * Copyright (C) 2012, Linus Seelinger <S.Linus@gmx.de>
+ *
+ * Valama is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Valama is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
 using GLib;
 using Vala;
 
@@ -12,14 +31,14 @@ namespace Guanako{
                 if (p.base_class != null)
                     ret = get_child_symbols(p.base_class);
             }
-        
+
         iter_symbol(parent, (s, depth)=>{
             ret += s;
             return iter_callback_returns.abort_branch;
         });
         return ret;
     }
-    
+
     //Find smb's namespace
     public Namespace? get_parent_namespace(Symbol smb){
         for (var iter = smb; iter != null; iter = iter.parent_symbol){
@@ -39,8 +58,11 @@ namespace Guanako{
 
      //Iterate through a symbol and its children
     public static bool iter_symbol(Symbol smb, iter_callback callback, int depth = 0){
-
         if (depth > 0){
+            if (smb.name != null)//TODO: This is a part of a nasty workaround to ignore old symbols left after re-parsing
+                if (smb.name == "")
+                    return true;
+
             var ret = callback(smb, depth);
             if (ret == iter_callback_returns.abort_branch)
                 return true;
@@ -51,28 +73,36 @@ namespace Guanako{
         if (smb is Namespace){
             var cv = (Namespace)smb;
             var ch = cv.get_namespaces();
-            foreach (Symbol s in ch){
+            foreach (Symbol s in ch)
                 if (!iter_symbol(s, callback, depth + 1))
                     return false;
-            }
             var mth = cv.get_methods();
-            foreach (Symbol s in mth){
+            foreach (Symbol s in mth)
                 if (!iter_symbol(s, callback, depth + 1))
                     return false;
-            }
             var cls = cv.get_classes();
-            foreach (Symbol s in cls){
+            foreach (Symbol s in cls)
                 if (!iter_symbol(s, callback, depth + 1))
                     return false;
-            }
+            var inf = cv.get_interfaces();
+            foreach (Interface s in inf)
+                if (!iter_symbol(s, callback, depth + 1))
+                    return false;
+            var cst = cv.get_constants();
+            foreach (Symbol s in cst)
+                if (!iter_symbol(s, callback, depth + 1))
+                    return false;
+            var fld = cv.get_fields();
+            foreach (Symbol s in fld)
+                if (!iter_symbol(s, callback, depth + 1))
+                    return false;
+            var enm = cv.get_enums();
+            foreach (Symbol s in enm)
+                if (!iter_symbol(s, callback, depth + 1))
+                    return false;
         }
         if (smb is Class){
             var cv = (Class)smb;
-            var mth = cv.get_methods();
-            foreach (Symbol s in mth){
-                if (!iter_symbol(s, callback, depth + 1))
-                    return false;
-            }
             var cls = cv.get_classes();
             foreach (Symbol s in cls){
                 if (!iter_symbol(s, callback, depth + 1))
@@ -88,6 +118,10 @@ namespace Guanako{
                 if (!iter_symbol(s, callback, depth + 1))
                     return false;
             }
+            var enm = cv.get_enums();
+            foreach (Symbol s in enm)
+                if (!iter_symbol(s, callback, depth + 1))
+                    return false;
         }
         if (smb is Struct){
             var cv = (Struct)smb;
@@ -114,6 +148,14 @@ namespace Guanako{
         }
         if (smb is ObjectTypeSymbol){
             var cv = (ObjectTypeSymbol)smb;
+            var mth = cv.get_methods();
+            foreach (Symbol s in mth)
+                if (!iter_symbol(s, callback, depth + 1))
+                    return false;
+            var sgn = cv.get_signals();
+            foreach (Symbol s in sgn)
+                if (!iter_symbol(s, callback, depth + 1))
+                    return false;
             var prp = cv.get_properties();
             foreach (Symbol s in prp){
                 if (!iter_symbol(s, callback, depth + 1))
@@ -216,3 +258,4 @@ namespace Guanako{
 
 }
 
+// vim: set ai ts=4 sts=4 et sw=4
