@@ -32,11 +32,13 @@ static ui_report wdg_report;
 public static void main(string[] args){
     Gtk.init(ref args);
 
-    string sourcedir = Environment.get_current_dir();
+    string proj_file;
     if (args.length > 1)
-        sourcedir = args[1];
+        proj_file = args[1];
+    else
+        return;
 
-    project = new valama_project(sourcedir, "valama");
+    project = new valama_project(proj_file);
 
     report_wrapper = new ReportWrapper();
     //report_wrapper = project.guanako_project.code_context.report as ReportWrapper;
