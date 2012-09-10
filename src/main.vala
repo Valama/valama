@@ -272,13 +272,9 @@ class TestProvider : Gtk.SourceCompletionProvider, Object
         Gdk.Pixbuf icon = this.get_icon ();
 
         this.proposals = new GLib.List<Gtk.SourceCompletionItem> ();
-        this.proposals.prepend (new Gtk.SourceCompletionItem ("Proposal 3", "Proposal 3", null, null));
-        this.proposals.prepend (new Gtk.SourceCompletionItem ("Proposal 2", "Proposal 2", null, null));
-        this.proposals.prepend (new Gtk.SourceCompletionItem ("Proposal 1", "Proposal 1", null, null));
-        
+
         foreach (string type in new string[]{"class", "enum", "field", "method", "namespace", "property", "struct"})
             map_icons[type] = new Gdk.Pixbuf.from_file("/usr/share/pixmaps/valama/element-" + type + "-16.png");
-        
     }
 
     Gee.HashMap<string, Gdk.Pixbuf> map_icons = new Gee.HashMap<string, Gdk.Pixbuf>();
@@ -345,7 +341,7 @@ class TestProvider : Gtk.SourceCompletionProvider, Object
         if (this.icon == null)
         {
             Gtk.IconTheme theme = Gtk.IconTheme.get_default ();
-            this.icon = theme.load_icon (Gtk.STOCK_DIALOG_INFO, 16, 0);
+            this.icon = theme.load_icon (Gtk.Stock.DIALOG_INFO, 16, 0);
         }
         return this.icon;
     }
