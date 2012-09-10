@@ -80,7 +80,9 @@ endif()
 
 install(TARGETS valama DESTINATION "bin")
 
+# Additional files.
 install(FILES "data/syntax" DESTINATION "share/valama")
+install(DIRECTORY "pixmaps/" DESTINATION "share/pixmaps/valama")
 #install(DIRECTORY "data/folder" DESTINATION "share/valama")
 
 # vim: set ai ts=2 sts=2 et sw=2

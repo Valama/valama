@@ -23,9 +23,14 @@ using Gee;
 using Xml;
 
 public class valama_project{
-    public valama_project(string project_path, string project_name){
-        this.project_path = project_path;
-        this.project_name = project_name;
+    public valama_project(string project_file){
+
+        this.project_file = project_file;
+
+        var proj_file = File.new_for_path (project_file);
+        project_path = proj_file.get_parent().get_path();
+        project_name = proj_file.get_basename();
+
         guanako_project = new Guanako.project();
 
         var directory = File.new_for_path (project_path + "/src");
@@ -53,6 +58,7 @@ public class valama_project{
     public SourceFile[] source_files;
     public Guanako.project guanako_project;
     string project_path;
+    string project_file;
     string project_name;
 
     public string build(){
@@ -62,17 +68,16 @@ public class valama_project{
     }
 
     void load_project_file (){
-        string filename = project_path + "/" + project_name + ".vlp";
-        Xml.Doc* doc = Xml.Parser.parse_file(filename);
+        Xml.Doc* doc = Xml.Parser.parse_file(project_file);
 
         if (doc == null) {
-            stdout.printf (@"Cannot read file >$filename<\n");
+            stdout.printf (@"Cannot read file >$project_file<\n");
             delete doc;
         }
 
         Xml.Node* root_node = doc->get_root_element ();
         if (root_node == null) {
-            stdout.printf (@"The file >$filename< is empty\n");
+            stdout.printf (@"The file >$project_file< is empty\n");
             delete doc;
         }
 
@@ -93,7 +98,7 @@ public class valama_project{
         delete doc;
     }
     public void save (){
-        var writer = new TextWriter.filename(project_path + "/" + project_name + ".vlp" );
+        var writer = new TextWriter.filename(project_file);
         writer.set_indent (true);
         writer.set_indent_string ("\t");
 

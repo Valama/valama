@@ -73,28 +73,36 @@ namespace Guanako{
         if (smb is Namespace){
             var cv = (Namespace)smb;
             var ch = cv.get_namespaces();
-            foreach (Symbol s in ch){
+            foreach (Symbol s in ch)
                 if (!iter_symbol(s, callback, depth + 1))
                     return false;
-            }
             var mth = cv.get_methods();
-            foreach (Symbol s in mth){
+            foreach (Symbol s in mth)
                 if (!iter_symbol(s, callback, depth + 1))
                     return false;
-            }
             var cls = cv.get_classes();
-            foreach (Symbol s in cls){
+            foreach (Symbol s in cls)
                 if (!iter_symbol(s, callback, depth + 1))
                     return false;
-            }
+            var inf = cv.get_interfaces();
+            foreach (Interface s in inf)
+                if (!iter_symbol(s, callback, depth + 1))
+                    return false;
+            var cst = cv.get_constants();
+            foreach (Symbol s in cst)
+                if (!iter_symbol(s, callback, depth + 1))
+                    return false;
+            var fld = cv.get_fields();
+            foreach (Symbol s in fld)
+                if (!iter_symbol(s, callback, depth + 1))
+                    return false;
+            var enm = cv.get_enums();
+            foreach (Symbol s in enm)
+                if (!iter_symbol(s, callback, depth + 1))
+                    return false;
         }
         if (smb is Class){
             var cv = (Class)smb;
-            var mth = cv.get_methods();
-            foreach (Symbol s in mth){
-                if (!iter_symbol(s, callback, depth + 1))
-                    return false;
-            }
             var cls = cv.get_classes();
             foreach (Symbol s in cls){
                 if (!iter_symbol(s, callback, depth + 1))
@@ -110,6 +118,10 @@ namespace Guanako{
                 if (!iter_symbol(s, callback, depth + 1))
                     return false;
             }
+            var enm = cv.get_enums();
+            foreach (Symbol s in enm)
+                if (!iter_symbol(s, callback, depth + 1))
+                    return false;
         }
         if (smb is Struct){
             var cv = (Struct)smb;
@@ -136,6 +148,14 @@ namespace Guanako{
         }
         if (smb is ObjectTypeSymbol){
             var cv = (ObjectTypeSymbol)smb;
+            var mth = cv.get_methods();
+            foreach (Symbol s in mth)
+                if (!iter_symbol(s, callback, depth + 1))
+                    return false;
+            var sgn = cv.get_signals();
+            foreach (Symbol s in sgn)
+                if (!iter_symbol(s, callback, depth + 1))
+                    return false;
             var prp = cv.get_properties();
             foreach (Symbol s in prp){
                 if (!iter_symbol(s, callback, depth + 1))
