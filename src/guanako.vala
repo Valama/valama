@@ -175,18 +175,18 @@ namespace Guanako{
             }
             return false;
         }
-        Symbol[]? cmp(string written, string[] compare, int step, Symbol[] accessible){
+        Gee.HashSet<Symbol?> cmp(string written, string[] compare, int step, Symbol[] accessible){
             if (compare.length == step)
                 return null;
 
             if (compare[step].contains("|")){
-                Symbol[] ret = new Symbol[0];
+                var ret = new Gee.HashSet<Symbol?>();
                 foreach (string comp in compare[step].split("|")){
                     string[] compare_option = compare; //Try every option
                     compare_option[step] = comp;
-                    Symbol[] r = cmp(written, compare_option, step, accessible);
+                    var r = cmp(written, compare_option, step, accessible);
                     foreach (Symbol smb in r)
-                        ret += smb;
+                        ret.add(smb);
                 }
                 return ret;
             }
@@ -196,15 +196,13 @@ namespace Guanako{
             if (compare[step].has_prefix("?")){
                 string[] compare_absolute = compare; //Try both with and without the current comparison, then return both results
                 compare_absolute[step] = compare_absolute[step].substring(1);
-                Symbol[] ret = new Symbol[0];
-                Symbol[]? one = cmp(written, compare_absolute, step, accessible);
-                Symbol[]? two = cmp(written, compare, step + 1, accessible);
+                var ret = new Gee.HashSet<Symbol?>();
+                var one = cmp(written, compare_absolute, step, accessible);
+                var two = cmp(written, compare, step + 1, accessible);
                 if (one != null)
-                    foreach (Symbol s in one)
-                        ret += s;
+                    ret.add_all(one);
                 if (two != null)
-                    foreach (Symbol s in two)
-                        ret += s;
+                    ret.add_all(two);
                 return ret;
             }
             if (compare[step].has_prefix("$")){
@@ -229,7 +227,7 @@ namespace Guanako{
                     else
                         return null;
                 } else {
-                    Symbol[] ret = new Symbol[0];
+                    var ret = new Gee.HashSet<Symbol?>();
                     Symbol[] check = accessible;
                     if (resolved != null)
                         check = get_child_symbols(get_type_of_symbol(resolved));
@@ -240,7 +238,7 @@ namespace Guanako{
                    foreach (Symbol s in check){
                         if (type_offered(s, compare[step])){
                             if (s.name.has_prefix(last_name))
-                                ret += s;
+                                ret.add(s);
                         }
                     }
                     return ret;
@@ -249,7 +247,9 @@ namespace Guanako{
             if (written == compare[step])
                 return null;
             if (compare[step].length > written.length && compare[step].has_prefix(written)){
-                return new Symbol[1]{new Struct(compare[step], null, null)};
+                var ret = new Gee.HashSet<Symbol?>();
+                ret.add(new Struct(compare[step], null, null));
+                return ret;
             }
             if (written.has_prefix(compare[step]))
                 return cmp (written.substring(compare[step].length), compare, step + 1, accessible);
@@ -294,8 +294,8 @@ string[] syntax_function  = new string[]{
     "$if_statement"
 };
 
-        public Symbol[] propose_symbols(SourceFile file, int line, int col, string written){
-            Symbol[] ret = null;
+        public Gee.HashSet<Symbol?> propose_symbols(SourceFile file, int line, int col, string written){
+            var ret = new Gee.HashSet<Symbol?>();
             var accessible = get_accessible_symbols(file, line, col);
             var inside_symbol = get_symbol_at_pos(file, line, col);
             string[] syntax = null;
@@ -312,8 +312,7 @@ string[] syntax_function  = new string[]{
             foreach (string snt in syntax){
                 var res = cmp(written.chug() , snt.split(" "), 0, accessible);
                 if (res != null)
-                    foreach (Symbol s in res)
-                        ret += s;
+                    ret.add_all(res);
             }
             return ret;
          }
