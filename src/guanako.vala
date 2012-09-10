@@ -44,25 +44,46 @@ namespace Guanako{
             get { return context; }
         }
         public void add_package(string package_name){
+            var deps = get_package_dependencies(packages.to_array());
+
+            var new_deps = new string[]{package_name};
+            foreach (string pkg in get_package_dependencies(new string[]{package_name}))
+                if (!(pkg in deps))
+                    new_deps += pkg;
+
             packages.add(package_name);
             context.add_external_package (package_name);
-            SourceFile pkg_file = null;
+
+            foreach (string pkg in new_deps){
+                var pkg_file = get_source_file(context.get_vapi_path(pkg));
+                if (pkg_file == null)
+                    continue;
+                update_file(pkg_file);
+            }
+        }
+        SourceFile? get_source_file(string filename){
             foreach (SourceFile file in context.get_source_files())
-                if (file.filename == context.get_vapi_path(package_name))
-                    pkg_file = file;
-            if (pkg_file == null)
-                return;
-            update_file(pkg_file);
+                if (file.filename == filename)
+                    return file;
+            return null;
         }
         public void remove_package(string package_name){
-            SourceFile pkg_file = null;
-            foreach (SourceFile file in context.get_source_files())
-                if (file.filename == context.get_vapi_path(package_name))
-                    pkg_file = file;
-            if (pkg_file == null)
-                return;
-            vanish_file(pkg_file);
+
             packages.remove(package_name);
+            var deps = get_package_dependencies(packages.to_array());
+
+            var unused = new string[]{package_name};
+            foreach (string pkg in get_package_dependencies(new string[]{package_name}))
+                if (!(pkg in deps))
+                    unused += pkg;
+
+            foreach (string pkg in unused){
+                packages.remove(pkg);
+                var pkg_file = get_source_file(context.get_vapi_path(pkg));
+                if (pkg_file == null)
+                    continue;
+                vanish_file(pkg_file);
+            }
         }
         public void add_source_file(SourceFile source_file){
             context.add_source_file (source_file);
@@ -466,6 +487,26 @@ string[] syntax_function  = new string[]{
                 }
                 return iter_callback_returns.continue;
             }, 0);
+            return ret;
+        }
+
+        public string[] get_package_dependencies(string[] package_names){
+            string[] ret = new string[0];
+            foreach (string package_name in package_names){
+                string vapi_path = context.get_vapi_path(package_name);
+
+                string deps_filename = vapi_path.substring(0, vapi_path.length - 5) + ".deps";
+
+                var deps_file = File.new_for_path(deps_filename);
+                if (deps_file.query_exists()){
+                    var dis = new DataInputStream (deps_file.read ());
+                    string line;
+                    while ((line = dis.read_line (null)) != null) {
+                        if (!(line in ret))
+                            ret += line;
+                    }
+                }
+            }
             return ret;
         }
 

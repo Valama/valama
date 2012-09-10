@@ -9,5 +9,6 @@
 		<package>gtk+-3.0</package>
 		<package>gtksourceview-3.0</package>
 		<package>libxml-2.0</package>
+		<package>clutter-gtk-1.0</package>
 	</packages>
 </project>
