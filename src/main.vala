@@ -273,7 +273,7 @@ class TestProvider : Gtk.SourceCompletionProvider, Object
 
         this.proposals = new GLib.List<Gtk.SourceCompletionItem> ();
 
-        foreach (string type in new string[]{"class", "enum", "field", "method", "namespace", "property", "struct"})
+        foreach (string type in new string[]{"class", "enum", "field", "method", "namespace", "property", "struct", "signal", "constant"})
             map_icons[type] = new Gdk.Pixbuf.from_file("/usr/share/pixmaps/valama/element-" + type + "-16.png");
     }
 
@@ -328,6 +328,8 @@ class TestProvider : Gtk.SourceCompletionProvider, Object
                 if (proposal is Variable) pixbuf = map_icons["field"];
                 if (proposal is Enum) pixbuf = map_icons["enum"];
                 if (proposal is Class) pixbuf = map_icons["class"];
+                if (proposal is Constant) pixbuf = map_icons["constant"];
+                if (proposal is Vala.Signal) pixbuf = map_icons["signal"];
 
                 props.append(new Gtk.SourceCompletionItem (proposal.name, proposal.name, pixbuf, null));
             }
