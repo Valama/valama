@@ -43,16 +43,18 @@ namespace Guanako{
         public CodeContext code_context{
             get { return context; }
         }
-        public void add_package(string package_name){
+        public void add_packages(string[] package_names){
             var deps = get_package_dependencies(packages.to_array());
 
-            var new_deps = new string[]{package_name};
-            foreach (string pkg in get_package_dependencies(new string[]{package_name}))
+            var new_deps = package_names;
+            foreach (string pkg in get_package_dependencies(package_names))
                 if (!(pkg in deps))
                     new_deps += pkg;
 
-            packages.add(package_name);
-            context.add_external_package (package_name);
+            foreach (string package_name in package_names){
+                packages.add(package_name);
+                context.add_external_package (package_name);
+            }
 
             foreach (string pkg in new_deps){
                 var pkg_file = get_source_file(context.get_vapi_path(pkg));
@@ -506,6 +508,11 @@ string[] syntax_function  = new string[]{
                             ret += line;
                     }
                 }
+            }
+            if (ret.length > 0){
+                var child_dep = get_package_dependencies(ret);
+                foreach (string dep in child_dep)
+                    ret += dep;
             }
             return ret;
         }

@@ -42,7 +42,7 @@ public class project_browser {
         btn_add.clicked.connect(()=>{
             var pkg = package_selection_dialog();
             if (pkg != null){
-                project.guanako_project.add_package(pkg);
+                project.guanako_project.add_packages(new string[]{pkg});
                 packages_changed();
                 build();
             }

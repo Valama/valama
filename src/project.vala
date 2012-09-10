@@ -76,6 +76,7 @@ public class valama_project{
             delete doc;
         }
 
+        var packages = new string[0];
         for (Xml.Node* i = root_node->children; i != null; i = i->next) {
             if (i->type != ElementType.ELEMENT_NODE) {
                 continue;
@@ -83,10 +84,11 @@ public class valama_project{
             if (i->name == "packages"){
                 for (Xml.Node* p = i->children; p != null; p = p->next) {
                     if (p->name == "package")
-                        guanako_project.add_package(p->get_content());
+                        packages += p->get_content();
                 }
             }
         }
+        guanako_project.add_packages(packages);
 
         delete doc;
     }
