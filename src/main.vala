@@ -275,7 +275,13 @@ class TestProvider : Gtk.SourceCompletionProvider, Object
         this.proposals.prepend (new Gtk.SourceCompletionItem ("Proposal 3", "Proposal 3", null, null));
         this.proposals.prepend (new Gtk.SourceCompletionItem ("Proposal 2", "Proposal 2", null, null));
         this.proposals.prepend (new Gtk.SourceCompletionItem ("Proposal 1", "Proposal 1", null, null));
+        
+        foreach (string type in new string[]{"class", "enum", "field", "method", "namespace", "property", "struct"})
+            map_icons[type] = new Gdk.Pixbuf.from_file("/usr/share/pixmaps/valama/element-" + type + "-16.png");
+        
     }
+
+    Gee.HashMap<string, Gdk.Pixbuf> map_icons = new Gee.HashMap<string, Gdk.Pixbuf>();
 
     public string get_name ()
     {
@@ -317,11 +323,17 @@ class TestProvider : Gtk.SourceCompletionProvider, Object
         var proposals = project.guanako_project.propose_symbols(current_source_file, line, col, current_line);
         foreach (Symbol proposal in proposals){
             if (proposal.name != null){
-                /*if (proposal.name.has_prefix(last)){
-                    props.append(new Gtk.SourceCompletionItem (proposal.name, proposal.name, null, null));
-                    props_symbols += proposal;
-                }*/
-                props.append(new Gtk.SourceCompletionItem (proposal.name, proposal.name, null, null));
+
+                Gdk.Pixbuf pixbuf = null;
+                if (proposal is Namespace) pixbuf = map_icons["namespace"];
+                if (proposal is Property) pixbuf = map_icons["property"];
+                if (proposal is Struct) pixbuf = map_icons["struct"];
+                if (proposal is Method) pixbuf = map_icons["method"];
+                if (proposal is Variable) pixbuf = map_icons["field"];
+                if (proposal is Enum) pixbuf = map_icons["enum"];
+                if (proposal is Class) pixbuf = map_icons["class"];
+
+                props.append(new Gtk.SourceCompletionItem (proposal.name, proposal.name, pixbuf, null));
             }
         }
 
