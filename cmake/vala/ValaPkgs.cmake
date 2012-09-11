@@ -34,6 +34,9 @@
 # VAPIS
 #   A list of custom .vapi files. Globbing is supported. (optional)
 #
+# OPTIONS
+#   A list of options passed to the valac compiler. (optional)
+#
 #
 # The following call is a simple example:
 #
@@ -54,7 +57,7 @@
 #
 include(CMakeParseArguments)
 function(vala_pkgs output)
-  cmake_parse_arguments(ARGS "" "" "PACKAGES;OPTIONAL;SRCFILES;VAPIS" ${ARGN})
+  cmake_parse_arguments(ARGS "" "" "PACKAGES;OPTIONAL;SRCFILES;VAPIS;OPTIONS" ${ARGN})
 
 
   if(ARGS_PACKAGES OR ARGS_OPTIONAL)
@@ -135,7 +138,7 @@ function(vala_pkgs output)
       CUSTOM_VAPIS
         ${vapifiles}
       OPTIONS
-        --thread
+        ${ARGS_OPTIONS}
     )
 
     set(${output} ${VALA_C} PARENT_SCOPE)

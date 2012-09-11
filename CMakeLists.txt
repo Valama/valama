@@ -27,13 +27,6 @@ set(VALAMA_VERSION "${Valama_VERSION_MAJOR}.${Valama_VERSION_MINOR}")
 
 set(CMAKE_INSTALL_PREFIX "/usr")
 
-#configure_file(
-#  "${PROJECT_SOURCE_DIR}/config.vala.in"
-#  "${PROJECT_SOURCE_DIR}/config.vala"
-#)
-#set_directory_properties(PROPERTY
-#  ADDITIONAL_MAKE_CLEAN_FILES "${PROJECT_SOURCE_DIR}/config.vala")
-
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/vala")
 #list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
@@ -42,8 +35,10 @@ find_package(Vala "0.16" REQUIRED)
 
 if(VALA_VERSION STRGREATER "0.17.0")
   set(valashort_ver "0.18")
+  set(valac_cond "")
 else()
   set(valashort_ver "0.16")
+  set(valac_cond "-D;VALA_LESS_0_18")
 endif()
 
 # Set Vala syntax depending on version.
@@ -51,6 +46,8 @@ configure_file(
   "${PROJECT_SOURCE_DIR}/config.vala.in"
   "${PROJECT_SOURCE_DIR}/config.vala"
 )
+set_directory_properties(PROPERTY
+  ADDITIONAL_MAKE_CLEAN_FILES "${PROJECT_SOURCE_DIR}/config.vala")
 
 set(required_pkgs "gtk+-3.0" "gtksourceview-3.0" "libvala-${valashort_ver}" "gee-1.0" "libxml-2.0")
 #set(optional_pkgs "libxml-2.0 >= 0.1")
@@ -64,6 +61,9 @@ vala_pkgs(VALA_C
   SRCFILES
     ${srcfiles}
     ${PROJECT_SOURCE_DIR}/config.vala
+  OPTIONS
+    --thread
+    ${valac_cond}
 )
 if(NOT PkgConfig_FOUND)
   find_package(PkgConfig)
