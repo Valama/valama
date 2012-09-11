@@ -582,7 +582,7 @@ string[] syntax_function  = new string[]{
 #endif
             return true;
 #if VALA_LESS_0_18
-        if (reference.sourceref.first_line == source_line && reference.sourceref.first_column > source_col)
+        if (reference.first_line == source_line && reference.first_column > source_col)
 #else
         if (reference.begin.line == source_line && reference.begin.column > source_col)
 #endif
