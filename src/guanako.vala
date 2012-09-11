@@ -494,7 +494,9 @@ string[] syntax_function  = new string[]{
         public string[] get_package_dependencies(string[] package_names){
             string[] ret = new string[0];
             foreach (string package_name in package_names){
-                string vapi_path = context.get_vapi_path(package_name);
+                var vapi_path = context.get_vapi_path(package_name);
+                if (vapi_path == null)
+                    continue;
 
                 string deps_filename = vapi_path.substring(0, vapi_path.length - 5) + ".deps";
 
