@@ -64,6 +64,10 @@ configure_file(
   "${PROJECT_SOURCE_DIR}/src/main.vala.in"
   "${PROJECT_SOURCE_DIR}/src/main.vala"
 )
+configure_file(
+  "${PROJECT_SOURCE_DIR}/config.vala.in"
+  "${PROJECT_SOURCE_DIR}/config.vala"
+)
 
 set(required_pkgs "gtk+-3.0" "gtksourceview-3.0" "libvala-${valashort_ver}" "gee-1.0" "libxml-2.0")
 #set(optional_pkgs "libxml-2.0 >= 0.1")
@@ -76,6 +80,7 @@ vala_pkgs(VALA_C
     ${optional_pkgs}
   SRCFILES
     ${srcfiles}
+    ${PROJECT_SOURCE_DIR}/config.vala
 )
 if(NOT PkgConfig_FOUND)
   find_package(PkgConfig)

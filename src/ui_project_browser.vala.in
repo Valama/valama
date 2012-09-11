@@ -116,7 +116,7 @@ public class project_browser {
 
    static string[] get_available_packages(){
        string[] ret = new string[0];
-       string[] paths = new string[]{"/usr/share/vala-@valashort_ver@/vapi", "/usr/share/vala/vapi"};
+       string[] paths = new string[]{"/usr/share/vala-" + Config.vala_version + "/vapi", "/usr/share/vala/vapi"};
        foreach (string path in paths){
             var enumerator = File.new_for_path (path).enumerate_children (FileAttribute.STANDARD_NAME, 0);
             FileInfo file_info;
