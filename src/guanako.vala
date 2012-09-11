@@ -573,9 +573,9 @@ string[] syntax_function  = new string[]{
 
         if (reference.file != source_file)
             return false;
-        if (reference.first_line > source_line)
+        if (reference.@sourceref_begin@line > source_line)
             return true;
-        if (reference.first_line == source_line && reference.first_column > source_col)
+        if (reference.@sourceref_begin@line == source_line && reference.@sourceref_begin@column > source_col)
             return true;
         return false;
     }
@@ -585,9 +585,9 @@ string[] syntax_function  = new string[]{
 
         if (reference.file != source_file)
             return false;
-        if (reference.last_line < source_line)
+        if (reference.@sourceref_end@line < source_line)
             return true;
-        if (reference.last_line == source_line && reference.last_column < source_col)
+        if (reference.@sourceref_end@line == source_line && reference.@sourceref_end@column < source_col)
             return true;
         return false;
     }
@@ -597,11 +597,11 @@ string[] syntax_function  = new string[]{
 
         if (reference.file != source_file)
             return false;
-        if (reference.first_line > source_line || reference.last_line < source_line)
+        if (reference.@sourceref_begin@line > source_line || reference.@sourceref_end@line < source_line)
             return false;
-        if (reference.first_line == source_line && reference.first_column > source_col)
+        if (reference.@sourceref_begin@line == source_line && reference.@sourceref_begin@column > source_col)
             return false;
-        if (reference.last_line == source_line && reference.last_column < source_col)
+        if (reference.@sourceref_end@line == source_line && reference.@sourceref_end@column < source_col)
             return false;
         return true;
     }

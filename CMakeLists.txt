@@ -37,13 +37,16 @@ set(CMAKE_INSTALL_PREFIX "/usr")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/vala")
 #list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
-find_package(Vala "0.16" EXACT)
+find_package(Vala "0.16" REQUIRED)
 
 if(VALA_VERSION EQUAL "0.16")
   set(valashort_ver "0.16")
-#elseif(VALA_VERSION EQUAL "0.17.5")
-#  set(valashort_ver "0.18")
+elseif(VALA_VERSION GREATER "0.17.0")
+  set(valashort_ver "0.18")
 endif()
+
+set(valashort_ver "0.18")
+
 set(required_pkgs "gtk+-3.0" "gtksourceview-3.0" "libvala-${valashort_ver}" "gee-1.0" "libxml-2.0")
 #set(optional_pkgs "libxml-2.0 >= 0.1")
 set(srcfiles "${PROJECT_SOURCE_DIR}/src/*.vala")
