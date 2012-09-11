@@ -135,9 +135,17 @@ static void on_error_selected(ReportWrapper.Error err){
     on_source_file_selected(err.source.file);
 
     TextIter start;
-    view.buffer.get_iter_at_line_offset(out start, err.source.@sourceref_begin@line - 1, err.source.@sourceref_begin@column - 1);
+#if VALA_LESS_0_18
+    view.buffer.get_iter_at_line_offset(out start, err.source.first_line - 1, err.source.first_column - 1);
+#else
+    view.buffer.get_iter_at_line_offset(out start, err.source.begin.line - 1, err.source.begin.column - 1);
+#endif
     TextIter end;
-    view.buffer.get_iter_at_line_offset(out end, err.source.@sourceref_end@line - 1, err.source.@sourceref_end@column - 1);
+#if VALA_LESS_0_18
+    view.buffer.get_iter_at_line_offset(out end, err.source.last_line - 1, err.source.last_column - 1);
+#else
+    view.buffer.get_iter_at_line_offset(out end, err.source.end.line - 1, err.source.end.column - 1);
+#endif
     view.buffer.select_range(start, end);
 
 }
@@ -250,12 +258,20 @@ class ui_report {
         foreach (ReportWrapper.Error err in report.errors_list){
             TreeIter next;
             store.append (out next);
-            store.set (next, 0, err.source.@sourceref_begin@line.to_string(), 1, err.message, -1);
+#if VALA_LESS_0_18
+            store.set (next, 0, err.source.first_line.to_string(), 1, err.message, -1);
+#else
+            store.set (next, 0, err.source.begin.line.to_string(), 1, err.message, -1);
+#endif
         }
         foreach (ReportWrapper.Error err in report.warnings_list){
             TreeIter next;
             store.append (out next);
-            store.set (next, 0, err.source.@sourceref_begin@line.to_string(), 1, err.message, -1);
+#if VALA_LESS_0_18
+            store.set (next, 0, err.source.first_line.to_string(), 1, err.message, -1);
+#else
+            store.set (next, 0, err.source.begin.line.to_string(), 1, err.message, -1);
+#endif
         }
     }
 }

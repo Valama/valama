@@ -42,28 +42,11 @@ find_package(Vala "0.16" REQUIRED)
 
 if(VALA_VERSION STRGREATER "0.17.0")
   set(valashort_ver "0.18")
-  set(sourceref_begin "begin.")
-  set(sourceref_end "end.")
 else()
   set(valashort_ver "0.16")
-  set(sourceref_begin "first_")
-  set(sourceref_end "last_")
 endif()
 
 # Set Vala syntax depending on version.
-# Replace @sourceref_begin@ and @sourceref_end@ .
-configure_file(
-  "${PROJECT_SOURCE_DIR}/src/ui_project_browser.vala.in"
-  "${PROJECT_SOURCE_DIR}/src/ui_project_browser.vala"
-)
-configure_file(
-  "${PROJECT_SOURCE_DIR}/src/guanako.vala.in"
-  "${PROJECT_SOURCE_DIR}/src/guanako.vala"
-)
-configure_file(
-  "${PROJECT_SOURCE_DIR}/src/main.vala.in"
-  "${PROJECT_SOURCE_DIR}/src/main.vala"
-)
 configure_file(
   "${PROJECT_SOURCE_DIR}/config.vala.in"
   "${PROJECT_SOURCE_DIR}/config.vala"
