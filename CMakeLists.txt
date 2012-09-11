@@ -39,13 +39,31 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/vala")
 
 find_package(Vala "0.16" REQUIRED)
 
-if(VALA_VERSION EQUAL "0.16")
-  set(valashort_ver "0.16")
-elseif(VALA_VERSION GREATER "0.17.0")
+
+if(VALA_VERSION STRGREATER "0.17.0")
   set(valashort_ver "0.18")
+  set(sourceref_begin "begin.")
+  set(sourceref_end "end.")
+else()
+  set(valashort_ver "0.16")
+  set(sourceref_begin "first_")
+  set(sourceref_end "last_")
 endif()
 
-set(valashort_ver "0.18")
+# Set Vala syntax depending on version.
+# Replace @sourceref_begin@ and @sourceref_end@ .
+configure_file(
+  "${PROJECT_SOURCE_DIR}/src/ui_project_browser.vala.in"
+  "${PROJECT_SOURCE_DIR}/src/ui_project_browser.vala"
+)
+configure_file(
+  "${PROJECT_SOURCE_DIR}/src/guanako.vala.in"
+  "${PROJECT_SOURCE_DIR}/src/guanako.vala"
+)
+configure_file(
+  "${PROJECT_SOURCE_DIR}/src/main.vala.in"
+  "${PROJECT_SOURCE_DIR}/src/main.vala"
+)
 
 set(required_pkgs "gtk+-3.0" "gtksourceview-3.0" "libvala-${valashort_ver}" "gee-1.0" "libxml-2.0")
 #set(optional_pkgs "libxml-2.0 >= 0.1")
