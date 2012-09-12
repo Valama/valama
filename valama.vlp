@@ -1,5 +1,10 @@
 <project>
-	<name>valama</name>
+	<name>Valama</name>
+	<version>
+		<major>0</major>
+		<minor>1</minor>
+		<patch>0</patch>
+	</version>
 	<packages>
 		<package>gobject-2.0</package>
 		<package>glib-2.0</package>

@@ -58,6 +58,9 @@ public class valama_project{
     public Guanako.project guanako_project;
     string project_path;
     string project_file;
+    int version_major;
+    int version_minor;
+    int version_patch;
     public string project_name = "valama_project";
 
     public string build(){
@@ -68,9 +71,10 @@ public class valama_project{
             pkg_list += pkg + "\n";
         pkg_list += ")";
 
-        var file_stream = File.new_for_path(project_path + "/cmake/packages.cmake").replace(null, false, FileCreateFlags.REPLACE_DESTINATION); //(FileCreateFlags.REPLACE_DESTINATION);
+        var file_stream = File.new_for_path(project_path + "/cmake/project.cmake").replace(null, false, FileCreateFlags.REPLACE_DESTINATION); //(FileCreateFlags.REPLACE_DESTINATION);
         var data_stream = new DataOutputStream (file_stream);
         data_stream.put_string ("set(project_name " + project_name + ")\n");
+        data_stream.put_string (@"set($(project_name)_VERSION $version_major.$version_minor.$version_patch)\n");
         data_stream.put_string (pkg_list);
         data_stream.close();
 
@@ -97,15 +101,22 @@ public class valama_project{
             if (i->type != ElementType.ELEMENT_NODE) {
                 continue;
             }
-            if (i->name == "name"){
+            if (i->name == "name")
                 project_name = i->get_content();
-            }
-            if (i->name == "packages"){
+            if (i->name == "packages")
                 for (Xml.Node* p = i->children; p != null; p = p->next) {
                     if (p->name == "package")
                         packages += p->get_content();
                 }
-            }
+            if (i->name == "version")
+                for (Xml.Node* p = i->children; p != null; p = p->next) {
+                    if (p->name == "major")
+                        version_major = p->get_content().to_int();
+                    else if (p->name == "minor")
+                        version_minor = p->get_content().to_int();
+                    else if (p->name == "patch")
+                        version_patch = p->get_content().to_int();
+                }
         }
         guanako_project.add_packages(packages);
 
@@ -118,6 +129,13 @@ public class valama_project{
 
         writer.start_element("project");
         writer.write_element("name", project_name);
+
+        writer.start_element("version");
+        writer.write_element("major", version_major.to_string());
+        writer.write_element("minor", version_minor.to_string());
+        writer.write_element("patch", version_patch.to_string());
+        writer.end_element();
+
         writer.start_element("packages");
         foreach (string pkg in guanako_project.packages)
             writer.write_element("package", pkg);

@@ -220,7 +220,7 @@ namespace Guanako{
                 return cmp (written.chug(), compare, step + 1, accessible);
             if (compare[step] == "raw_namespace" || compare[step] == "raw_type" || compare[step] == "raw_object" || compare[step] == "raw_creation" || compare[step] == "raw_method"){
                 string me = written.substring(0, index_of_symbol_end(written));
-                Symbol resolved = resolve_symbol(me, accessible);
+                Symbol resolved = resolve_symbol_parent(me, accessible);
                 if (me.length < written.length){
                     if (resolved != null && type_required(resolved, compare[step]))
                          return cmp (written.substring(me.length), compare, step + 1, accessible);
@@ -244,9 +244,9 @@ namespace Guanako{
                     return ret;
                 }
             }
-            if (written == compare[step])
-                return null;
-            if (compare[step].length > written.length && compare[step].has_prefix(written)){
+            //if (written == compare[step])
+            //    return null;
+            if (compare[step].length >= written.length && compare[step].has_prefix(written)){
                 var ret = new Gee.HashSet<Symbol?>();
                 ret.add(new Struct(compare[step], null, null));
                 return ret;
@@ -330,8 +330,7 @@ string[] syntax_function  = new string[]{
             return type;
         }
 
-        Symbol? resolve_symbol(string text, Symbol[] candidates){
-            Symbol[] internal_candidates = candidates;
+        Symbol? resolve_symbol_parent(string text, Symbol[] candidates){
 
             var txt = text;
 
@@ -361,24 +360,21 @@ string[] syntax_function  = new string[]{
 
             string[] splt = txt.split(".");
 
-             foreach (Symbol smb in internal_candidates){
+             foreach (Symbol smb in candidates){
                  if (smb.name == splt[0]){
 
                     var type = get_type_of_symbol(smb);
 
                     if (splt.length == 1)
-                        return smb;
+                        return null;
 
                     if (type == null)
                         continue;
 
                     if (splt.length == 2){
-                        var rt = resolve_symbol(txt.substring(splt[0].length + 1), get_child_symbols(type));
-                        if (rt != null)
-                            return rt;
                         return smb;
                     }else
-                        return resolve_symbol(txt.substring(splt[0].length + 1), get_child_symbols(type));
+                        return resolve_symbol_parent(txt.substring(splt[0].length + 1), get_child_symbols(type));
                  }
              }
              return null;

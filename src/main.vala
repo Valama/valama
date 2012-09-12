@@ -84,6 +84,10 @@ public static void main(string[] args){
     btnAutoIndent.clicked.connect(on_auto_indent_button_clicked);
     toolbar.add(btnAutoIndent);
 
+    var btnSettings = new Gtk.ToolButton.from_stock(Stock.PREFERENCES);
+    btnSettings.clicked.connect(()=>{ui_project_dialog(project);});
+    toolbar.add(btnSettings);
+
         var hbox = new HBox(false, 0);
 
         var pbrw = new project_browser(project);
