@@ -43,6 +43,13 @@ endif()
 
 include(${CMAKE_SOURCE_DIR}/cmake/packages.cmake)
 
+#Little fix to ignore a wrong libvala version
+if(VALA_VERSION STRGREATER "0.17.0")
+  list( REMOVE_ITEM required_pkgs "libvala-0.16" )
+else()
+  list( REMOVE_ITEM required_pkgs "libvala-0.18" )
+endif()
+
 # Set Vala syntax depending on version.
 configure_file(
   "${PROJECT_SOURCE_DIR}/config.vala.in"

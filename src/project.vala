@@ -63,6 +63,17 @@ public class valama_project{
 
     public string build(){
         string ret;
+
+        string pkg_list = "set(required_pkgs\n";
+        foreach (string pkg in guanako_project.packages)
+            pkg_list += pkg + "\n";
+        pkg_list += ")";
+
+        var file_stream = File.new_for_path(project_path + "/cmake/packages.cmake").replace(null, false, FileCreateFlags.REPLACE_DESTINATION); //(FileCreateFlags.REPLACE_DESTINATION);
+        var data_stream = new DataOutputStream (file_stream);
+        data_stream.put_string (pkg_list);
+        data_stream.close();
+
         GLib.Process.spawn_command_line_sync("sh -c 'cd " + project_path + " && mkdir -p build && cd build && cmake .. && make'", null, out ret);
         return ret;
     }
