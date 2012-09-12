@@ -113,10 +113,10 @@ public class project_browser {
             store.set (iter_sf, 0, pkg, 1, "", -1);
         }
     }
-   
+
    static string[] get_available_packages(){
        string[] ret = new string[0];
-       string[] paths = new string[]{"/usr/share/vala-0.16/vapi", "/usr/share/vala/vapi"};
+       string[] paths = new string[]{"/usr/share/vala-" + Config.vala_version + "/vapi", "/usr/share/vala/vapi"};
        foreach (string path in paths){
             var enumerator = File.new_for_path (path).enumerate_children (FileAttribute.STANDARD_NAME, 0);
             FileInfo file_info;
@@ -128,11 +128,11 @@ public class project_browser {
         }
         return ret;
     }
-   
+
     static string? package_selection_dialog(){
-    
+
         Dialog dlg = new Dialog.with_buttons("Select new packages", window_main, DialogFlags.MODAL, Stock.CANCEL, ResponseType.REJECT, Stock.OK, ResponseType.ACCEPT);
-        
+
         var tree_view = new TreeView();
         var listmodel = new ListStore (1, typeof (string));
         tree_view.set_model (listmodel);
@@ -145,7 +145,7 @@ public class project_browser {
             listmodel.append (out iter);
             listmodel.set (iter, 0, pkg);
         }
-        
+
         var scrw = new ScrolledWindow(null, null);
         scrw.add(tree_view);
         scrw.show_all();

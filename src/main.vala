@@ -135,9 +135,17 @@ static void on_error_selected(ReportWrapper.Error err){
     on_source_file_selected(err.source.file);
 
     TextIter start;
+#if VALA_LESS_0_18
     view.buffer.get_iter_at_line_offset(out start, err.source.first_line - 1, err.source.first_column - 1);
+#else
+    view.buffer.get_iter_at_line_offset(out start, err.source.begin.line - 1, err.source.begin.column - 1);
+#endif
     TextIter end;
+#if VALA_LESS_0_18
     view.buffer.get_iter_at_line_offset(out end, err.source.last_line - 1, err.source.last_column - 1);
+#else
+    view.buffer.get_iter_at_line_offset(out end, err.source.end.line - 1, err.source.end.column - 1);
+#endif
     view.buffer.select_range(start, end);
 
 }
@@ -250,12 +258,20 @@ class ui_report {
         foreach (ReportWrapper.Error err in report.errors_list){
             TreeIter next;
             store.append (out next);
+#if VALA_LESS_0_18
             store.set (next, 0, err.source.first_line.to_string(), 1, err.message, -1);
+#else
+            store.set (next, 0, err.source.begin.line.to_string(), 1, err.message, -1);
+#endif
         }
         foreach (ReportWrapper.Error err in report.warnings_list){
             TreeIter next;
             store.append (out next);
+#if VALA_LESS_0_18
             store.set (next, 0, err.source.first_line.to_string(), 1, err.message, -1);
+#else
+            store.set (next, 0, err.source.begin.line.to_string(), 1, err.message, -1);
+#endif
         }
     }
 }
@@ -295,6 +311,7 @@ class TestProvider : Gtk.SourceCompletionProvider, Object
     }
     GLib.List<Gtk.SourceCompletionItem> props;
     Symbol[] props_symbols;
+    Gee.HashMap<Gtk.SourceCompletionProposal, Symbol> map_proposals;
 
     public void populate (Gtk.SourceCompletionContext context)
     {
@@ -316,6 +333,8 @@ class TestProvider : Gtk.SourceCompletionProvider, Object
         if (splt.length > 0)
             last = splt[splt.length - 1];
 
+        map_proposals = new Gee.HashMap<Gtk.SourceCompletionProposal, Symbol>();
+
         var proposals = project.guanako_project.propose_symbols(current_source_file, line, col, current_line);
         foreach (Symbol proposal in proposals){
             if (proposal.name != null){
@@ -331,7 +350,9 @@ class TestProvider : Gtk.SourceCompletionProvider, Object
                 if (proposal is Constant) pixbuf = map_icons["constant"];
                 if (proposal is Vala.Signal) pixbuf = map_icons["signal"];
 
-                props.append(new Gtk.SourceCompletionItem (proposal.name, proposal.name, pixbuf, null));
+                var item = new Gtk.SourceCompletionItem (proposal.name, proposal.name, pixbuf, null);
+                props.append(item);
+                map_proposals[item] = proposal;
             }
         }
 
@@ -371,9 +392,11 @@ class TestProvider : Gtk.SourceCompletionProvider, Object
               Gtk.SourceCompletionActivation.USER_REQUESTED;
     }
 
+    Box box_info_frame = new Box(Orientation.VERTICAL, 0);
+    Widget info_inner_widget = null;
     public unowned Gtk.Widget? get_info_widget (Gtk.SourceCompletionProposal proposal)
     {
-        return null;
+        return box_info_frame;
     }
 
     public int get_interactive_delay ()
@@ -391,6 +414,30 @@ class TestProvider : Gtk.SourceCompletionProvider, Object
     public void update_info (Gtk.SourceCompletionProposal proposal,
                              Gtk.SourceCompletionInfo info)
     {
+        if (info_inner_widget != null){
+            info_inner_widget.destroy();
+            info_inner_widget = null;
+        }
+
+        var smb = map_proposals[proposal];
+        if (smb is Method){
+            var mth = smb as Method;
+            var vbox = new Box(Orientation.VERTICAL, 0);
+            string param_string = "";
+            foreach (Vala.Parameter param in mth.get_parameters()){
+                param_string += param.variable_type.data_type.name + " " + param.name + ", ";
+            }
+            if (param_string.length > 1)
+                param_string = param_string.substring(0, param_string.length - 2);
+            else
+                param_string = "none";
+            vbox.pack_start(new Label("Parameters:\n" + param_string + "\n\nReturns:\n" + mth.return_type.data_type.name));
+            info_inner_widget = vbox;
+        } else
+            info_inner_widget = new Label(smb.name);
+
+        info_inner_widget.show_all();
+        box_info_frame.pack_start(info_inner_widget, true, true);
     }
 }
 

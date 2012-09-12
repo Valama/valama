@@ -494,7 +494,9 @@ string[] syntax_function  = new string[]{
         public string[] get_package_dependencies(string[] package_names){
             string[] ret = new string[0];
             foreach (string package_name in package_names){
-                string vapi_path = context.get_vapi_path(package_name);
+                var vapi_path = context.get_vapi_path(package_name);
+                if (vapi_path == null)
+                    continue;
 
                 string deps_filename = vapi_path.substring(0, vapi_path.length - 5) + ".deps";
 
@@ -573,9 +575,17 @@ string[] syntax_function  = new string[]{
 
         if (reference.file != source_file)
             return false;
+#if VALA_LESS_0_18
         if (reference.first_line > source_line)
+#else
+        if (reference.begin.line > source_line)
+#endif
             return true;
+#if VALA_LESS_0_18
         if (reference.first_line == source_line && reference.first_column > source_col)
+#else
+        if (reference.begin.line == source_line && reference.begin.column > source_col)
+#endif
             return true;
         return false;
     }
@@ -585,9 +595,17 @@ string[] syntax_function  = new string[]{
 
         if (reference.file != source_file)
             return false;
+#if VALA_LESS_0_18
         if (reference.last_line < source_line)
+#else
+        if (reference.end.line < source_line)
+#endif
             return true;
+#if VALA_LESS_0_18
         if (reference.last_line == source_line && reference.last_column < source_col)
+#else
+        if (reference.end.line == source_line && reference.end.column < source_col)
+#endif
             return true;
         return false;
     }
@@ -597,11 +615,23 @@ string[] syntax_function  = new string[]{
 
         if (reference.file != source_file)
             return false;
-        if (reference.first_line > source_line || reference.last_line < source_line)
+#if VALA_LESS_0_18
+        if (reference.first_line > source_line || reference.first_line < source_line)
+#else
+        if (reference.begin.line > source_line || reference.end.line < source_line)
+#endif
             return false;
+#if VALA_LESS_0_18
         if (reference.first_line == source_line && reference.first_column > source_col)
+#else
+        if (reference.begin.line == source_line && reference.begin.column > source_col)
+#endif
             return false;
+#if VALA_LESS_0_18
         if (reference.last_line == source_line && reference.last_column < source_col)
+#else
+        if (reference.end.line == source_line && reference.end.column < source_col)
+#endif
             return false;
         return true;
     }
