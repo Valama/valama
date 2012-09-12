@@ -3,3 +3,6 @@ export DH_VERBOSE=1
 
 %:
 	dh $@ --parallel
+
+override_dh_clean:
+	dh_clean config.vala
