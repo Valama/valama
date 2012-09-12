@@ -29,12 +29,13 @@ public class valama_project{
 
         var proj_file = File.new_for_path (project_file);
         project_path = proj_file.get_parent().get_path();
-        project_name = proj_file.get_basename();
 
         guanako_project = new Guanako.project();
 
-        var directory = File.new_for_path (project_path + "/src");
+        load_project_file();
 
+        //Add files in src folder to the project
+        var directory = File.new_for_path (project_path + "/src");
         var enumerator = directory.enumerate_children (FileAttribute.STANDARD_NAME, 0);
 
         SourceFile[] sf = new SourceFile[0];
@@ -50,8 +51,6 @@ public class valama_project{
         }
         source_files = sf;
 
-        load_project_file();
-
         guanako_project.update();
     }
 
@@ -59,7 +58,7 @@ public class valama_project{
     public Guanako.project guanako_project;
     string project_path;
     string project_file;
-    string project_name;
+    public string project_name = "valama_project";
 
     public string build(){
         string ret;
@@ -71,6 +70,7 @@ public class valama_project{
 
         var file_stream = File.new_for_path(project_path + "/cmake/packages.cmake").replace(null, false, FileCreateFlags.REPLACE_DESTINATION); //(FileCreateFlags.REPLACE_DESTINATION);
         var data_stream = new DataOutputStream (file_stream);
+        data_stream.put_string ("set(project_name " + project_name + ")\n");
         data_stream.put_string (pkg_list);
         data_stream.close();
 
@@ -97,6 +97,9 @@ public class valama_project{
             if (i->type != ElementType.ELEMENT_NODE) {
                 continue;
             }
+            if (i->name == "name"){
+                project_name = i->get_content();
+            }
             if (i->name == "packages"){
                 for (Xml.Node* p = i->children; p != null; p = p->next) {
                     if (p->name == "package")
@@ -114,6 +117,7 @@ public class valama_project{
         writer.set_indent_string ("\t");
 
         writer.start_element("project");
+        writer.write_element("name", project_name);
         writer.start_element("packages");
         foreach (string pkg in guanako_project.packages)
             writer.write_element("package", pkg);

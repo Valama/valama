@@ -1,3 +1,4 @@
+set(project_name valama)
 set(required_pkgs
 gobject-2.0
 glib-2.0

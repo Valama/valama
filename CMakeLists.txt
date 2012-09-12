@@ -42,7 +42,7 @@ else()
 endif()
 
 include(${CMAKE_SOURCE_DIR}/cmake/packages.cmake)
-
+message("Prj name: ${project_name}")
 #Little fix to ignore a wrong libvala version
 if(VALA_VERSION STRGREATER "0.17.0")
   list( REMOVE_ITEM required_pkgs "libvala-0.16" )
