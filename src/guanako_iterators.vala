@@ -146,6 +146,12 @@ namespace Guanako{
                     return false;
             }
         }
+        if (smb is Enum){
+            var enm = (Enum)smb;
+            foreach (Symbol s in enm.get_values())
+                if (!iter_symbol(s, callback, depth + 1))
+                    return false;
+        }
         if (smb is ObjectTypeSymbol){
             var cv = (ObjectTypeSymbol)smb;
             var mth = cv.get_methods();

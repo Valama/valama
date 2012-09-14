@@ -159,7 +159,7 @@ namespace Guanako{
                 if (smb is Class || smb is Struct || smb is Interface)
                     return true;
             if (type == "raw_object")
-                if (smb is Variable || smb is Method || smb is Property || smb is ObjectType || smb is Constant){
+                if (smb is Variable || smb is Method || smb is Property || smb is ObjectType || smb is Constant || smb is Enum){
                     /*if (smb is Method){
                         var mth = smb as Method;
                         if (mth.return_type.data_type is Class)
@@ -299,7 +299,7 @@ Gee.HashMap<string, string> map_syntax = new Gee.HashMap<string, string>();
 
         Symbol? get_type_of_symbol(Symbol smb){
             Symbol type = null;
-            if (smb is Class || smb is Namespace || smb is Struct)
+            if (smb is Class || smb is Namespace || smb is Struct || smb is Enum)
                 type = smb;
             if (smb is Property)
                 type = ((Property)smb).property_type.data_type;

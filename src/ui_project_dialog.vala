@@ -35,6 +35,26 @@ public void ui_project_dialog(valama_project project){
             box_project.pack_start(ent_proj_name, false, false);
             frame_project.add(box_project);
 
+            var box_version = new Box(Orientation.HORIZONTAL, 0);
+
+            var ent_major = new Entry();
+            ent_major.text = project.version_major.to_string();
+            ent_major.changed.connect(()=>{project.version_major = ent_major.text.to_int();});
+            box_version.pack_start(ent_major, true, true);
+
+            var ent_minor = new Entry();
+            ent_minor.text = project.version_minor.to_string();
+            ent_minor.changed.connect(()=>{project.version_minor = ent_minor.text.to_int();});
+            box_version.pack_start(ent_minor, true, true);
+
+            var ent_patch = new Entry();
+            ent_patch.text = project.version_patch.to_string();
+            ent_patch.changed.connect(()=>{project.version_patch = ent_patch.text.to_int();});
+            box_version.pack_start(ent_patch, true, true);
+
+            box_project.pack_start(new Label("Version"), false, false);
+            box_project.pack_start(box_version, false, false);
+
         box_main.pack_start(frame_project, true, true);
         box_main.show_all();
 

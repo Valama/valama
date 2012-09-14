@@ -58,9 +58,9 @@ public class valama_project{
     public Guanako.project guanako_project;
     string project_path;
     string project_file;
-    int version_major;
-    int version_minor;
-    int version_patch;
+    public int version_major;
+    public int version_minor;
+    public int version_patch;
     public string project_name = "valama_project";
 
     public string build(){
