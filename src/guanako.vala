@@ -133,7 +133,10 @@ namespace Guanako{
                 if (smb is Namespace || smb is Class || smb is Struct || smb is Variable || smb is Method || smb is Property || smb is Constant)
                     return true;
             if (type == "raw_creation")
-                if (smb is Namespace || smb is Class || smb is Method)
+                if (smb is Namespace || smb is Class || smb is CreationMethod)
+                    return true;
+           if (type == "raw_signal")
+                if (smb is Namespace || smb is Class || smb is Interface || smb is Vala.Signal)
                     return true;
            if (type == "raw_method")
                 if (smb is Namespace || smb is Class || smb is Interface || smb is Method){
@@ -168,6 +171,9 @@ namespace Guanako{
                 }
             if (type == "raw_creation")
                 if (smb is Class || smb is CreationMethod)
+                    return true;
+           if (type == "raw_signal")
+                if (smb is Vala.Signal)
                     return true;
            if (type == "raw_method"){
                 if (smb is Method)
@@ -218,7 +224,7 @@ namespace Guanako{
             }
             if (compare[step] == "_")
                 return cmp (written.chug(), compare, step + 1, accessible);
-            if (compare[step] == "raw_namespace" || compare[step] == "raw_type" || compare[step] == "raw_object" || compare[step] == "raw_creation" || compare[step] == "raw_method"){
+            if (compare[step] == "raw_namespace" || compare[step] == "raw_type" || compare[step] == "raw_object" || compare[step] == "raw_creation" || compare[step] == "raw_method" || compare[step] == "raw_signal"){
                 string me = written.substring(0, index_of_symbol_end(written));
                 Symbol resolved = resolve_symbol_parent(me, accessible);
                 if (me.length < written.length){
@@ -273,48 +279,22 @@ void build_syntax_map(){
 
 Gee.HashMap<string, string> map_syntax = new Gee.HashMap<string, string>();
 
-string[] syntax_deep_space  = new string[]{
-    "using _ raw_namespace _ ;",
-    "namespace _ * _",
-    "?$access_keyword _ class _ * _"
-};
-string[] syntax_class  = new string[]{
-    "?$access_keyword _ class _ * _",
-    "?$access_keyword _ raw_type _ * _",
-    "?$access_keyword _ raw_type _ * _ ( _ $parameters_decl _ )"
-};
-string[] syntax_function  = new string[]{
-    "$foreach_statement",
-    "$for_statement",
-    "$local_declaration",
-
-    "$assignment",
-
-    "$method_call",
-    "$if_statement"
-};
-
-        public Gee.HashSet<Symbol?> propose_symbols(SourceFile file, int line, int col, string written){
-            var ret = new Gee.HashSet<Symbol?>();
+        public Gee.HashSet<Symbol>? propose_symbols(SourceFile file, int line, int col, string written){
             var accessible = get_accessible_symbols(file, line, col);
             var inside_symbol = get_symbol_at_pos(file, line, col);
-            string[] syntax = null;
+
+            string region = "";
             if (inside_symbol == null){
-                syntax = syntax_deep_space;
+                region = "$inside_deep_space";
                 accessible = get_child_symbols(context.root);
             }else if (inside_symbol is Subroutine)
-                syntax = syntax_function;
+                 region = "$inside_function";
             else if (inside_symbol is Class)
-                syntax = syntax_class;
+                region = "$inside_class";
             else
-                return ret;
+                return null;
 
-            foreach (string snt in syntax){
-                var res = cmp(written.chug() , snt.split(" "), 0, accessible);
-                if (res != null)
-                    ret.add_all(res);
-            }
-            return ret;
+            return cmp(written.chug() , new string[]{region}, 0, accessible);
          }
 
         Symbol? get_type_of_symbol(Symbol smb){

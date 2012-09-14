@@ -1,3 +1,11 @@
+inside_function
+$foreach_statement|$for_statement|$local_declaration|$assignment|$method_call|$if_statement|$signal_connect|$return_statement
+
+inside_class
+?$access_keyword _ class _ * _|?$access_keyword _ raw_type _ * _|?$access_keyword _ raw_type _ * _ ( _ $parameters_decl _ )
+
+inside_deep_space
+using _ raw_namespace _ ;|namespace _ * _|?$access_keyword _ class _ * _
 
 method_call
 raw_method _ ( _ ?$parameters _ )
@@ -17,6 +25,11 @@ new _ raw_creation _ ( _ ?$parameters _ ) _  ;
 if_statement
 if _ ( _ ?$comparison _ )
 
+return_statement
+return _ raw_object _ ;
+
+signal_connect
+raw_signal .connect _ ( _ raw_method _ ) _ ;
 
 
 assignment
