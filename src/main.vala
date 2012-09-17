@@ -156,7 +156,9 @@ static void* update_current_file() {
 }
 
 static void on_auto_indent_button_clicked(){
-    Guanako.auto_indent_buffer(view.buffer);
+    string indented = Guanako.auto_indent_buffer(project.guanako_project, current_source_file);
+    current_source_file.content = indented;
+    view.buffer.text = indented;
 }
 
 static void on_error_selected(ReportWrapper.Error err){
