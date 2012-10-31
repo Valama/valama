@@ -7,4 +7,16 @@ Object
 %Parameter{a} ?$ChildObject{a}
 
 ChildObject : parent
-. {parent}>Variable{child} ?$ChildObject{child}
+. $ChildVar{parent}|$ChildMeth{parent}
+
+ChildVar : parent
+{parent}>Variable{child} ?$ChildObject{child}
+
+ChildMeth : parent
+{parent}>Method{mth} ( ?$MethodParameters ) ?$ChildObject{mth}
+
+MethodParameters
+$Object ?$MethodParametersIter
+
+MethodParametersIter
+_ , _ $MethodParameters
