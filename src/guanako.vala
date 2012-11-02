@@ -169,6 +169,8 @@ namespace Guanako{
         }
 
         bool symbol_is_type(Symbol smb, string type){
+            if (type == "Parameter" && smb is Vala.Parameter)
+                return true;
             if (type == "Variable" && smb is Variable)
                 return true;
             if (type == "Method" && smb is Method)
@@ -274,9 +276,10 @@ stdout.printf(depth_string + "Written: " + written + "\n");
                 }
                 return ret;
             }
-            if (current_rule.expr.has_prefix("%Parameter")){
+            if (current_rule.expr.has_prefix("%")){
+                string filter_type = current_rule.expr.substring(1);
                 foreach (Symbol smb in accessible)
-                    if (smb is Vala.Parameter){
+                    if (symbol_is_type(smb, filter_type)){
                         var eq = match(written, smb.name);
                         if (eq == matchres.STARTED)
                             ret.add(smb);
@@ -300,7 +303,7 @@ stdout.printf(depth_string + "Written: " + written + "\n");
                 rule_id_count ++;
                 foreach (RuleExpression subexp in composit_rule)
                     subexp.rule_id = rule_id_count;
-                
+
                 foreach (RuleExpression exp in rule[1:rule.length])
                     composit_rule += exp;
 

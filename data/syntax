@@ -1,10 +1,17 @@
-
-
 init_method
+$ReturnStatement|$AssignStatement|$CallStatement
+
+CallStatement
+$Object ?_ ;
+
+AssignStatement
+$Object ?_ = ?_ $Object ?_ ;
+
+ReturnStatement
 return _ $Object ?_ ;
 
 Object
-%Parameter{a} ?$ChildObject{a}
+%Parameter{a}|%Variable{a} ?$ChildObject{a}
 
 ChildObject : parent
 . $ChildVar{parent}|$ChildMeth{parent}
