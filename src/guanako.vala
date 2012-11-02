@@ -155,9 +155,8 @@ namespace Guanako{
 
             //return begin_inside_function(inside_symbol, accessible, written);
 
-            string wrt = written;
             rule_id_count = 0;
-            return compare(map_syntax["init_method"].rule, accessible, ref wrt, new Gee.ArrayList<CallParameter>());
+            return compare(map_syntax["init_method"].rule, accessible, written, new Gee.ArrayList<CallParameter>(), 0);
 
         }
 
@@ -203,7 +202,10 @@ namespace Guanako{
 
 int rule_id_count = 0;
 
-        Gee.HashSet<Symbol>? compare (RuleExpression[] compare_rule, Symbol[] accessible, ref string written, Gee.ArrayList<CallParameter> call_params){//
+        Gee.HashSet<Symbol>? compare (RuleExpression[] compare_rule, Symbol[] accessible, string written2, Gee.ArrayList<CallParameter> call_params, int depth){//
+
+            string written = written2; //For some reason need to create a copy... otherwise assigning new values to written doesn't work
+
             Gee.HashSet<Symbol> ret = new Gee.HashSet<Symbol>();
             
             RuleExpression[] rule = new RuleExpression[compare_rule.length];
@@ -211,20 +213,25 @@ int rule_id_count = 0;
                 rule[q] = compare_rule[q].clone();
             RuleExpression current_rule = rule[0];
 
-stdout.printf("Current rule: " + current_rule.expr + "\n");
+string depth_string = "";
+for (int q = 0; q < depth; q++)
+    depth_string += " ";
+stdout.printf("\n" + depth_string + "Current rule: " + current_rule.expr + "\n");
+stdout.printf(depth_string + "Written: " + written + "\n");
+
             if (current_rule.expr.contains("|")){
                 var splt = current_rule.expr.split("|");
                 foreach (string s in splt){
                     rule[0].expr = s;
-                    ret.add_all(compare(rule, accessible, ref written, call_params));
+                    ret.add_all(compare(rule, accessible, written, call_params, depth + 1));
                 }
                 return ret;
             }
 
             if (current_rule.expr.has_prefix("?")){
-                var r1 = compare(rule[1:rule.length], accessible, ref written, call_params);
+                var r1 = compare(rule[1:rule.length], accessible, written, call_params, depth + 1);
                 rule[0].expr = rule[0].expr.substring(1);
-                var r2 = compare(rule, accessible, ref written, call_params);
+                var r2 = compare(rule, accessible, written, call_params, depth + 1);
                 ret.add_all(r1);
                 ret.add_all(r2);
                 return ret;
@@ -237,13 +244,12 @@ stdout.printf("Current rule: " + current_rule.expr + "\n");
                 write_to_param = current_rule.expr.substring(bracket_start + 1, current_rule.expr.length - bracket_start - 2);
                 current_rule.expr = current_rule.expr.substring(0, bracket_start);
             }
-stdout.printf("write_to_param: " + write_to_param + "\n");
 
             if (current_rule.expr == "_"){
                 if (!(written.has_prefix(" ") || written.has_prefix("\t")))
                     return new Gee.HashSet<Symbol>();
                 written = written.chug();
-                return compare (rule[1:rule.length], accessible, ref written, call_params);
+                return compare (rule[1:rule.length], accessible, written, call_params, depth + 1);
             }
             if (current_rule.expr.has_prefix("{")){
                 int bracket_end = current_rule.expr.index_of("}>");
@@ -259,9 +265,8 @@ stdout.printf("write_to_param: " + write_to_param + "\n");
                             child_param.name = write_to_param;
                             child_param.symbol = child;
                             call_params.add(child_param);
-                            stdout.printf(@"======Set param:$write_to_param\n");
                             written = written.substring(child.name.length);
-                            return compare (rule[1:rule.length], accessible, ref written, call_params);
+                            return compare (rule[1:rule.length], accessible, written, call_params, depth + 1);
                         }
                         if (child.name.has_prefix(written))
                             ret.add(child);
@@ -284,7 +289,7 @@ stdout.printf("write_to_param: " + write_to_param + "\n");
                                 call_params.add(child_param);
                             }
                             written = written.substring(smb.name.length);
-                            return compare(rule[1:rule.length], accessible, ref written, call_params);
+                            return compare(rule[1:rule.length], accessible, written, call_params, depth + 1);
                         }
                     }
                 return ret;
@@ -299,22 +304,16 @@ stdout.printf("write_to_param: " + write_to_param + "\n");
                 foreach (RuleExpression exp in rule[1:rule.length])
                     composit_rule += exp;
 
-                //var subcall_params = new Gee.HashMap<string, Symbol>();
                 if (write_to_param != null){
-                    //subcall_params.set(map_syntax[call].parameters[0], call_params[write_to_param]);
                     var child_param = new CallParameter();
                     child_param.for_rule_id = rule_id_count;
                     child_param.name = map_syntax[call].parameters[0];
                     child_param.symbol = find_param(call_params, write_to_param, current_rule.rule_id).symbol;// call_params[write_to_param];
                     call_params.add(child_param);
 
-                    stdout.printf(@"Call: $call\n");
-                    stdout.printf(@"Call write_to_param: $write_to_param\n");
-                    stdout.printf(@"Subcall param name: $(map_syntax[call].parameters[0])\n");
                 }
-                stdout.printf("3\n");
 
-                return compare(composit_rule, accessible, ref written, call_params);
+                return compare(composit_rule, accessible, written, call_params, depth + 1);
 
                 /*Regex r = /^\s*(?P<parameter>.*)\s*=\s*(?P<value>.*)\s*$/;
                 MatchInfo info;
@@ -326,12 +325,11 @@ stdout.printf("write_to_param: " + write_to_param + "\n");
 
             var mres = match (written, current_rule.expr);
 
-            stdout.printf("End: " + written + "\n");
-            stdout.printf("Compare: " + current_rule.expr + "\n");
-            
             if (mres == matchres.COMPLETE){
                 written = written.substring(current_rule.expr.length);
-                return compare(rule[1 : rule.length], accessible, ref written, call_params);
+                if (rule.length == 1)
+                    return ret;
+                return compare(rule[1 : rule.length], accessible, written, call_params, depth + 1);
             }
             else if (mres == matchres.STARTED){
                 ret.add(new Struct(current_rule.expr, null, null));
