@@ -175,6 +175,10 @@ namespace Guanako{
                 return true;
             if (type == "Method" && smb is Method)
                 return true;
+            if (type == "Class" && smb is Class)
+                return true;
+            if (type == "Namespace" && smb is Namespace)
+                return true;
             return false;
         }
 

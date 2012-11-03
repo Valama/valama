@@ -1,14 +1,41 @@
 init_method
-$ReturnStatement|$AssignStatement|$CallStatement
+$ReturnStatement|$AssignStatement|$CallStatement|$IfStatement
+
+IfStatement
+if ?_ ( ?_ $Object ?_ ==|<|>|<=|>= ?_ $Object ?_ )
 
 CallStatement
 $Object ?_ ;
 
 AssignStatement
-$Object ?_ = ?_ $Object ?_ ;
+$Object ?_ = ?_ $Object|$NewExpression ?_ ;
 
 ReturnStatement
-return _ $Object ?_ ;
+return _ $Object|$NewExpression ?_ ;
+
+
+
+NewExpression
+new _ $Type ?_ ( ?$MethodParameters )
+
+
+
+Type
+$TypeClassStart|$TypeNamespaceStart
+
+TypeClassStart
+%Class{a} ?$TypeIterClass{a}
+
+TypeNamespaceStart
+%Namespace{a} $TypeIterNamespace{a}|$TypeIterClass{a}
+
+TypeIterNamespace : parent
+. {parent}>Namespace{child} $TypeIterNamespace{child}|$TypeIterClass{child}
+
+TypeIterClass : parent
+. {parent}>Class{child} ?$TypeIterClass{child}
+
+
 
 Object
 %Parameter{a}|%Variable{a} ?$ChildObject{a}
@@ -21,6 +48,8 @@ ChildVar : parent
 
 ChildMeth : parent
 {parent}>Method{mth} ( ?$MethodParameters ) ?$ChildObject{mth}
+
+
 
 MethodParameters
 $Object ?$MethodParametersIter
