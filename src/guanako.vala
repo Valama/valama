@@ -156,7 +156,10 @@ namespace Guanako{
             //return begin_inside_function(inside_symbol, accessible, written);
 
             rule_id_count = 0;
-            return compare(map_syntax["init_method"].rule, accessible, written, new Gee.ArrayList<CallParameter>(), 0);
+            if (inside_symbol == null)
+                return compare(map_syntax["init_deep_space"].rule, accessible, written, new Gee.ArrayList<CallParameter>(), 0);
+            else
+                return compare(map_syntax["init_method"].rule, accessible, written, new Gee.ArrayList<CallParameter>(), 0);
 
         }
 
@@ -375,6 +378,13 @@ stdout.printf(depth_string + "Written: " + written + "\n");
         public Symbol[] get_accessible_symbols(SourceFile file, int line, int col){
             Symbol [] ret = new Symbol[0];
             var current_symbol = get_symbol_at_pos(file, line, col);
+
+            foreach (UsingDirective directive in file.current_using_directives){
+                var children = get_child_symbols(directive.namespace_symbol);
+                foreach (Symbol s in children)
+                    ret += s;
+            }
+
             if (current_symbol == null){
                 return ret;
             }
@@ -382,12 +392,6 @@ stdout.printf(depth_string + "Written: " + written + "\n");
             for (Scope scope = current_symbol.scope; scope != null; scope = scope.parent_scope)
                 foreach (Symbol s in scope.get_symbol_table().get_values())
                     ret += s;
-
-            foreach (UsingDirective directive in file.current_using_directives){
-                var children = get_child_symbols(directive.namespace_symbol);
-                foreach (Symbol s in children)
-                    ret += s;
-            }
 
             //If we are inside a subroutine, propose all previously defined local variables
             if (current_symbol is Subroutine){
