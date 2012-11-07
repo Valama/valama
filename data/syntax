@@ -9,7 +9,7 @@ UsingStatement
 using _ %Namespace{child} ?$NamespaceChild{child} ?_ ;
 
 NamespaceChild : parent
-. {parent}>Namespace ?$NamespaceChild{child}
+. {parent}>Namespace{child} ?$NamespaceChild{child}
 
 
 IfStatement

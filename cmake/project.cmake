@@ -1,5 +1,5 @@
 set(project_name Valama)
-set(Valama_VERSION 0.1.0)
+set(Valama_VERSION 0.0.0)
 set(required_pkgs
 gobject-2.0
 glib-2.0
