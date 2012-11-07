@@ -202,7 +202,7 @@ namespace Guanako{
             }
         }
 
-        CallParameter find_param(Gee.ArrayList<CallParameter> array, string name, int rule_id){
+        CallParameter? find_param(Gee.ArrayList<CallParameter> array, string name, int rule_id){
             foreach (CallParameter param in array)
                 if (param.name == name && param.for_rule_id == rule_id)
                     return param;
@@ -269,10 +269,15 @@ stdout.printf(depth_string + "Written: " + written + "\n");
                     return ret;
                 }
 
-                var parent_param = info.fetch_named("parent");
+                var parent_param_name = info.fetch_named("parent");
                 var child_type = info.fetch_named("child");
 
-                Symbol parent = find_param(call_params, parent_param, current_rule.rule_id).symbol;
+                var parent_param = find_param(call_params, parent_param_name, current_rule.rule_id);
+                if (parent_param == null){
+                    stdout.printf(@"Variable $parent_param_name not found! >$(compare_rule[0].expr)<\n");
+                    return ret;
+                }
+                var parent = parent_param.symbol;
 
                 var children = get_child_symbols(get_type_of_symbol(parent));
                 foreach (Symbol child in children){
@@ -332,7 +337,12 @@ stdout.printf(depth_string + "Written: " + written + "\n");
                     var child_param = new CallParameter();
                     child_param.for_rule_id = rule_id_count;
                     child_param.name = map_syntax[call].parameters[0];
-                    child_param.symbol = find_param(call_params, write_to_param, current_rule.rule_id).symbol;// call_params[write_to_param];
+                    var param = find_param(call_params, write_to_param, current_rule.rule_id);// call_params[write_to_param];
+                    if (param == null){
+                        stdout.printf(@"Parameter $write_to_param not found in >$(compare_rule[0].expr)<\n");
+                        return ret;
+                    }
+                    child_param.symbol = param.symbol;
                     call_params.add(child_param);
 
                 }
