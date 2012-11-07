@@ -157,7 +157,7 @@ namespace Guanako{
 
             rule_id_count = 0;
             if (inside_symbol == null)
-                return compare(map_syntax["init_deep_space"].rule, accessible, written, new Gee.ArrayList<CallParameter>(), 0);
+                return compare(map_syntax["init_deep_space"].rule, get_child_symbols(context.root), written, new Gee.ArrayList<CallParameter>(), 0);
             else
                 return compare(map_syntax["init_method"].rule, accessible, written, new Gee.ArrayList<CallParameter>(), 0);
 
@@ -379,14 +379,14 @@ stdout.printf(depth_string + "Written: " + written + "\n");
             Symbol [] ret = new Symbol[0];
             var current_symbol = get_symbol_at_pos(file, line, col);
 
+            if (current_symbol == null){
+                return ret;
+            }
+
             foreach (UsingDirective directive in file.current_using_directives){
                 var children = get_child_symbols(directive.namespace_symbol);
                 foreach (Symbol s in children)
                     ret += s;
-            }
-
-            if (current_symbol == null){
-                return ret;
             }
 
             for (Scope scope = current_symbol.scope; scope != null; scope = scope.parent_scope)

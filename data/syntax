@@ -4,8 +4,13 @@ init_method
 init_deep_space
 ?_ $UsingStatement
 
+
 UsingStatement
-using _ %Namespace ?_ ;
+using _ %Namespace{child} ?$NamespaceChild{child} ?_ ;
+
+NamespaceChild : parent
+. {parent}>Namespace ?$NamespaceChild{child}
+
 
 IfStatement
 if ?_ ( ?_ $Object ?_ ==|<|>|<=|>= ?_ $Object ?_ )
