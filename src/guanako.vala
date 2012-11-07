@@ -261,13 +261,22 @@ stdout.printf(depth_string + "Written: " + written + "\n");
                 return compare (rule[1:rule.length], accessible, written, call_params, depth + 1);
             }
             if (current_rule.expr.has_prefix("{")){
-                int bracket_end = current_rule.expr.index_of("}>");
-                Symbol parent = find_param(call_params, current_rule.expr.substring(1, bracket_end - 1), current_rule.rule_id).symbol;
-                current_rule.expr = current_rule.expr.substring(bracket_end + 2);
+
+                Regex r = /^{(?P<parent>.*)}>(?P<child>.*)$/;
+                MatchInfo info;
+                if(!r.match(current_rule.expr, 0, out info)) {
+                    stdout.printf("Malformed rule! >" + compare_rule[0].expr + "<\n");
+                    return ret;
+                }
+
+                var parent_param = info.fetch_named("parent");
+                var child_type = info.fetch_named("child");
+
+                Symbol parent = find_param(call_params, parent_param, current_rule.rule_id).symbol;
 
                 var children = get_child_symbols(get_type_of_symbol(parent));
                 foreach (Symbol child in children){
-                    if (symbol_is_type(child, current_rule.expr)){
+                    if (symbol_is_type(child, child_type)){
                         if (written.has_prefix(child.name)){
                             var child_param = new CallParameter();
                             child_param.for_rule_id = current_rule.rule_id;
@@ -306,6 +315,11 @@ stdout.printf(depth_string + "Written: " + written + "\n");
             }
             if (current_rule.expr.has_prefix("$")){
                 string call = current_rule.expr.substring(1);
+                if (!map_syntax.has_key(call)){
+                    stdout.printf(@"Call $call not found in >$(compare_rule[0].expr)<\n");
+                    return ret;
+                }
+
                 RuleExpression[] composit_rule = map_syntax[call].rule;
                 rule_id_count ++;
                 foreach (RuleExpression subexp in composit_rule)
@@ -325,12 +339,6 @@ stdout.printf(depth_string + "Written: " + written + "\n");
 
                 return compare(composit_rule, accessible, written, call_params, depth + 1);
 
-                /*Regex r = /^\s*(?P<parameter>.*)\s*=\s*(?P<value>.*)\s*$/;
-                MatchInfo info;
-                if(r.match(the_string, 0, out info)) {
-                    var parameter = info.fetch_named("parameter");
-                    var value = info.fetch_named("value");
-                }*/
             }
 
             var mres = match (written, current_rule.expr);
