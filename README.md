@@ -22,7 +22,7 @@ The next gen Vala IDE.
 On Debian based system install following packages:
 `sudo apt-get install build-essential valac-0.18 libvala-0.18-dev cmake pkg-config libgtk-3-dev libgtksourceview-3.0-dev libgee-dev libxml2-dev`
 
-If `valac-0.18` and `libvala-0.18-dev` aren't available, replacte them with `valac-0.18` and `libvala-0.18-dev`.
+If `valac-0.18` and `libvala-0.18-dev` aren't available, replace them with `valac-0.18` and `libvala-0.18-dev`.
 
 ### Building ###
  1. `mkdir build && cd build`
