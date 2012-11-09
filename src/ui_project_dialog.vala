@@ -25,8 +25,11 @@ public void ui_project_dialog(valama_project project){
     var dlg = new Dialog.with_buttons("Project settings",
                                     window_main,
                                     DialogFlags.MODAL,
+                                    Stock.CANCEL,
+                                    ResponseType.CANCEL,
                                     Stock.OK,
-                                    ResponseType.OK);
+                                    ResponseType.OK,
+                                    null);
     dlg.set_size_request(400, 200);
 
     var box_main = new Box(Orientation.VERTICAL, 0);
@@ -60,13 +63,7 @@ public void ui_project_dialog(valama_project project){
             ent_proj_name_err.set_label("");
         }
         else {
-            /*
-             * TODO: This could be probably done better (string formatting %s)
-             *       to make life easier for translators.
-             */
-            ent_proj_name_err.set_label("Invalid character: '" +
-                                        match_info.get_string() +
-                                        "' Please choose one from [0-9a-zA-Z.:-].");
+            ent_proj_name_err.set_label(@"Invalid character: '$(match_info.get_string())' Please choose one from [0-9a-zA-Z.:_-].");
             if (timer_id != 0)
                 Source.remove(timer_id);  // reset timer to let it start again
             /* Set timeout of help dialog to 5 seconds. */
