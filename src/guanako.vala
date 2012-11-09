@@ -114,28 +114,36 @@ namespace Guanako{
 
             var file = File.new_for_path ("/usr/share/valama/syntax");
 
-            var dis = new DataInputStream (file.read ());
-            string line;
-            while ((line = dis.read_line (null)) != null) {
-                if (line.strip() == "" || line.has_prefix("#"))
-                    continue;
+            try {
+                var dis = new DataInputStream (file.read ());
+                string line;
+                while ((line = dis.read_line (null)) != null) {
+                    if (line.strip() == "" || line.has_prefix("#"))
+                        continue;
 
-                string[] rule_line_split = dis.read_line (null).split(" ");
-                RuleExpression[] rule_exprs = new RuleExpression[rule_line_split.length];
-                for(int q = 0; q < rule_line_split.length; q++){
-                    rule_exprs[q] = new RuleExpression();
-                    rule_exprs[q].expr = rule_line_split[q];
+                    string[] rule_line_split = dis.read_line (null).split(" ");
+                    RuleExpression[] rule_exprs = new RuleExpression[rule_line_split.length];
+                    for(int q = 0; q < rule_line_split.length; q++){
+                        rule_exprs[q] = new RuleExpression();
+                        rule_exprs[q].expr = rule_line_split[q];
+                    }
+
+                    string[] namesplit = line.split_set(" :,");
+
+                    string[] parameters = new string[0];
+                    foreach (string splt in namesplit[1 : namesplit.length])
+                        if (splt != "")
+                            parameters += splt;
+
+
+                    map_syntax[namesplit[0]] = new SyntaxRule(parameters, rule_exprs);
                 }
-
-                string[] namesplit = line.split_set(" :,");
-
-                string[] parameters = new string[0];
-                foreach (string splt in namesplit[1 : namesplit.length])
-                    if (splt != "")
-                        parameters += splt;
-
-
-                map_syntax[namesplit[0]] = new SyntaxRule(parameters, rule_exprs);
+            } catch (IOError e) {
+                stderr.printf("Could not read syntax file: %s", e.message);
+                //TODO: Softly crash here.
+            } catch (Error e) {
+                stderr.printf("An error occured: %s", e.message);
+                //TODO: Softly crash here.
             }
 
         }
@@ -512,11 +520,19 @@ stdout.printf(depth_string + "Written: " + written + "\n");
 
                 var deps_file = File.new_for_path(deps_filename);
                 if (deps_file.query_exists()){
-                    var dis = new DataInputStream (deps_file.read ());
-                    string line;
-                    while ((line = dis.read_line (null)) != null) {
-                        if (!(line in ret))
-                            ret += line;
+                    try {
+                        var dis = new DataInputStream (deps_file.read ());
+                        string line;
+                        while ((line = dis.read_line (null)) != null) {
+                            if (!(line in ret))
+                                ret += line;
+                        }
+                    } catch (IOError e) {
+                        stderr.printf("Could not read line: %s", e.message);
+                        //TODO: Softly crash here.
+                    } catch (Error e) {
+                        stderr.printf("Could not read file: %s", e.message);
+                        //TODO: Softly crash here.
                     }
                 }
             }

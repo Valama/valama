@@ -65,7 +65,7 @@ public class project_browser {
         });
         toolbar.add(btn_rem);
 
-        var vbox = new VBox(false, 0);
+        var vbox = new Box(Orientation.VERTICAL, 0);
 
         vbox.pack_start(scrw, true, true);
         vbox.pack_start(toolbar, false, true);
@@ -117,14 +117,19 @@ public class project_browser {
    static string[] get_available_packages(){
        string[] ret = new string[0];
        string[] paths = new string[]{"/usr/share/vala-" + Config.vala_version + "/vapi", "/usr/share/vala/vapi"};
-       foreach (string path in paths){
-            var enumerator = File.new_for_path (path).enumerate_children (FileAttribute.STANDARD_NAME, 0);
-            FileInfo file_info;
-            while ((file_info = enumerator.next_file ()) != null) {
-                var filename = file_info.get_name();
-                if (filename.has_suffix(".vapi"))
-                    ret += filename.substring(0, filename.length - 5);
+       try {
+        foreach (string path in paths){
+                var enumerator = File.new_for_path (path).enumerate_children (FileAttribute.STANDARD_NAME, 0);
+                FileInfo file_info;
+                while ((file_info = enumerator.next_file ()) != null) {
+                    var filename = file_info.get_name();
+                    if (filename.has_suffix(".vapi"))
+                        ret += filename.substring(0, filename.length - 5);
+                }
             }
+        } catch (GLib.Error e) {
+            stderr.printf("Could not operate on directory: %s", e.message);
+            //TODO: Softly crash here.
         }
         return ret;
     }

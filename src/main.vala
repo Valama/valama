@@ -61,7 +61,12 @@ public static void main(string[] args){
     tp.priority = 1;
     tp.name = "Test Provider 1";
 
-    view.completion.add_provider (tp);
+    try {
+        view.completion.add_provider (tp);
+    } catch (GLib.Error e) {
+        stderr.printf("Could not load completion: %s", e.message);
+        //TODO: Softly crash here.
+    }
     view.buffer.changed.connect(on_view_buffer_changed);
     view.buffer.create_tag("gray_bg", "background", "gray", null);
     view.auto_indent = true;
@@ -69,7 +74,13 @@ public static void main(string[] args){
     view.buffer.changed.connect(()=>{
         if (!parsing){
             update_text = view.buffer.text;
-            Thread.create<void*> (update_current_file, true);
+            //FIXME: warning: GLib.Thread.create has been deprecated since 2.32. Use new Thread<T> ()
+            try {
+                Thread.create<void*> (update_current_file, true);
+            } catch (GLib.ThreadError e) {
+                stderr.printf("Could not load pximaps file: %s", e.message);
+                //TODO: Softly crash here.
+            }
         }
     });
 
@@ -77,7 +88,7 @@ public static void main(string[] args){
     var lang = langman.get_language("vala");
     bfr.set_language(lang);
 
-    var vbox_main = new VBox(false, 0);
+    var vbox_main = new Box(Orientation.VERTICAL, 0);
 
     var toolbar = new Toolbar();
     vbox_main.pack_start(toolbar, false, true);
@@ -98,7 +109,7 @@ public static void main(string[] args){
     btnSettings.clicked.connect(()=>{ui_project_dialog(project);});
     toolbar.add(btnSettings);
 
-        var hbox = new HBox(false, 0);
+        var hbox = new Box(Orientation.HORIZONTAL, 0);
 
         var pbrw = new project_browser(project);
         hbox.pack_start(pbrw.widget, false, true);
@@ -196,8 +207,13 @@ static void on_source_file_selected(SourceFile file){
     current_source_file = file;
 
     string txt = "";
-    FileUtils.get_contents(file.filename, out txt);
-    view.buffer.text = txt;
+    try {
+        FileUtils.get_contents(file.filename, out txt);
+        view.buffer.text = txt;
+    } catch (GLib.FileError e) {
+        stderr.printf("Could not load file: %s", e.message);
+        //TODO: Softly crash here.
+    }
 }
 
 void write_current_source_file(){
@@ -205,15 +221,28 @@ void write_current_source_file(){
 
     // delete if file already exists
     if (file.query_exists ()) {
-        file.delete ();
+        try {
+            file.delete ();
+        } catch (GLib.Error e) {
+            stderr.printf("Could not delete file: %s", e.message);
+            //TODO: Softly crash here.
+        }
     }
 
-    var dos = new DataOutputStream (file.create (FileCreateFlags.REPLACE_DESTINATION));
-    dos.put_string (view.buffer.text);
+    try {
+        var dos = new DataOutputStream (file.create (FileCreateFlags.REPLACE_DESTINATION));
+        dos.put_string (view.buffer.text);
+    } catch (GLib.IOError e) {
+        stderr.printf("Could not update source file: %s", e.message);
+        //TODO: Softly crash here.
+    } catch (GLib.Error e) {
+        stderr.printf("Could not create file: %s", e.message);
+        //TODO: Softly crash here.
+    }
 
-report_wrapper.clear();
+    report_wrapper.clear();
     project.guanako_project.update_file(current_source_file, view.buffer.text);
-wdg_report.build();
+    wdg_report.build();
 
     smb_browser.build();
 }
@@ -321,8 +350,13 @@ class TestProvider : Gtk.SourceCompletionProvider, Object
 
         this.proposals = new GLib.List<Gtk.SourceCompletionItem> ();
 
-        foreach (string type in new string[]{"class", "enum", "field", "method", "namespace", "property", "struct", "signal", "constant"})
-            map_icons[type] = new Gdk.Pixbuf.from_file("/usr/share/pixmaps/valama/element-" + type + "-16.png");
+        try {
+            foreach (string type in new string[]{"class", "enum", "field", "method", "namespace", "property", "struct", "signal", "constant"})
+                map_icons[type] = new Gdk.Pixbuf.from_file("/usr/share/pixmaps/valama/element-" + type + "-16.png");
+        } catch (GLib.Error e) {
+            stderr.printf("Could not load pximaps file: %s", e.message);
+            //TODO: Softly crash here.
+        }
     }
 
     Gee.HashMap<string, Gdk.Pixbuf> map_icons = new Gee.HashMap<string, Gdk.Pixbuf>();
@@ -398,7 +432,12 @@ class TestProvider : Gtk.SourceCompletionProvider, Object
         if (this.icon == null)
         {
             Gtk.IconTheme theme = Gtk.IconTheme.get_default ();
-            this.icon = theme.load_icon (Gtk.Stock.DIALOG_INFO, 16, 0);
+            try {
+                this.icon = theme.load_icon (Gtk.Stock.DIALOG_INFO, 16, 0);
+            } catch (GLib.Error e) {
+                stderr.printf("Could not load icon: %s", e.message);
+                //TODO: Softly crash here.
+            }
         }
         return this.icon;
     }

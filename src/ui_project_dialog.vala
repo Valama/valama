@@ -118,9 +118,9 @@ public void ui_project_dialog(valama_project project){
     dlg.response.connect((response_id) => {
         if (response_id == ResponseType.OK) {
             project.project_name = ent_proj_name.text;
-            project.version_major = ent_major.text.to_int();
-            project.version_minor = ent_minor.text.to_int();
-            project.version_patch = ent_patch.text.to_int();
+            project.version_major = int.parse(ent_major.text);
+            project.version_minor = int.parse(ent_minor.text);
+            project.version_patch = int.parse(ent_patch.text);
         }
     });
 

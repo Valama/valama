@@ -35,21 +35,26 @@ public class valama_project{
         load_project_file();
 
         //Add files in src folder to the project
-        var directory = File.new_for_path (project_path + "/src");
-        var enumerator = directory.enumerate_children (FileAttribute.STANDARD_NAME, 0);
+        try {
+            var directory = File.new_for_path (project_path + "/src");
+            var enumerator = directory.enumerate_children (FileAttribute.STANDARD_NAME, 0);
 
-        SourceFile[] sf = new SourceFile[0];
-        FileInfo file_info;
-        while ((file_info = enumerator.next_file ()) != null) {
-            string file = project_path + "/src/" + file_info.get_name ();
-            if (file.has_suffix(".vala")){
-                stdout.printf(@"Found file $file\n");
-                var source_file = new SourceFile (guanako_project.code_context, SourceFileType.SOURCE, file);
-                guanako_project.add_source_file (source_file);
-                sf += source_file;
+            SourceFile[] sf = new SourceFile[0];
+            FileInfo file_info;
+            while ((file_info = enumerator.next_file ()) != null) {
+                string file = project_path + "/src/" + file_info.get_name ();
+                if (file.has_suffix(".vala")){
+                    stdout.printf(@"Found file $file\n");
+                    var source_file = new SourceFile (guanako_project.code_context, SourceFileType.SOURCE, file);
+                    guanako_project.add_source_file (source_file);
+                    sf += source_file;
+                }
             }
+            source_files = sf;
+        } catch (GLib.Error e) {
+            stderr.printf("Could not open file: %s", e.message);
+            //TODO: Softly crash here.
         }
-        source_files = sf;
 
         guanako_project.update();
     }
@@ -66,19 +71,32 @@ public class valama_project{
     public string build(){
         string ret;
 
-        string pkg_list = "set(required_pkgs\n";
-        foreach (string pkg in guanako_project.packages)
-            pkg_list += pkg + "\n";
-        pkg_list += ")";
+        try {
+            string pkg_list = "set(required_pkgs\n";
+            foreach (string pkg in guanako_project.packages)
+                pkg_list += pkg + "\n";
+            pkg_list += ")";
 
-        var file_stream = File.new_for_path(project_path + "/cmake/project.cmake").replace(null, false, FileCreateFlags.REPLACE_DESTINATION); //(FileCreateFlags.REPLACE_DESTINATION);
-        var data_stream = new DataOutputStream (file_stream);
-        data_stream.put_string ("set(project_name " + project_name + ")\n");
-        data_stream.put_string (@"set($(project_name)_VERSION $version_major.$version_minor.$version_patch)\n");
-        data_stream.put_string (pkg_list);
-        data_stream.close();
+            var file_stream = File.new_for_path(project_path + "/cmake/project.cmake").replace(null, false, FileCreateFlags.REPLACE_DESTINATION); //(FileCreateFlags.REPLACE_DESTINATION);
+            var data_stream = new DataOutputStream (file_stream);
+            data_stream.put_string ("set(project_name " + project_name + ")\n");
+            data_stream.put_string (@"set($(project_name)_VERSION $version_major.$version_minor.$version_patch)\n");
+            data_stream.put_string (pkg_list);
+            data_stream.close();
+        } catch (GLib.IOError e) {
+            stderr.printf("Could not read file: %s", e.message);
+            //TODO: Softly crash here.
+        } catch (GLib.Error e) {
+            stderr.printf("Could not open file: %s", e.message);
+            //TODO: Softly crash here.
+        }
 
-        GLib.Process.spawn_command_line_sync("sh -c 'cd " + project_path + " && mkdir -p build && cd build && cmake .. && make'", null, out ret);
+        try {
+            GLib.Process.spawn_command_line_sync("sh -c 'cd " + project_path + " && mkdir -p build && cd build && cmake .. && make'", null, out ret);
+        } catch (GLib.SpawnError e) {
+            stderr.printf("Could not execute build process: %s", e.message);
+            //TODO: Softly crash here.
+        }
         return ret;
     }
 
@@ -111,11 +129,11 @@ public class valama_project{
             if (i->name == "version")
                 for (Xml.Node* p = i->children; p != null; p = p->next) {
                     if (p->name == "major")
-                        version_major = p->get_content().to_int();
+                        version_major = int.parse(p->get_content());
                     else if (p->name == "minor")
-                        version_minor = p->get_content().to_int();
+                        version_minor = int.parse(p->get_content());
                     else if (p->name == "patch")
-                        version_patch = p->get_content().to_int();
+                        version_patch = int.parse(p->get_content());
                 }
         }
         guanako_project.add_packages(packages);
