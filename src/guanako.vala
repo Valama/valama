@@ -251,6 +251,8 @@ stdout.printf(depth_string + "Written: " + written + "\n");
                 MatchInfo info;
                 if(!r.match(written, 0, out info))
                     return ret;
+                if (info.fetch_named("word") == "")
+                    return ret;
                 return compare(rule[1:rule.length], accessible, info.fetch_named("rest"), call_params, depth+1);
             }
 

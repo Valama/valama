@@ -7,7 +7,7 @@ init_deep_space
 
 
 DeclarationStatement
-var _ *word ?_ = ?_ $Object|$NewExpression ?_ ;
+var|$Type _ *word ?_ = ?_ $Object|$NewExpression ?_ ;
 
 UsingStatement
 using _ %Namespace{child} ?$NamespaceChild{child} ?_ ;
