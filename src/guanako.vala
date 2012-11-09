@@ -163,14 +163,6 @@ namespace Guanako{
 
         }
 
-        string str_until(string str){
-            //return str.substring(0, str.index_of(until));
-            int index = str.index_of(" ");
-            if (index == -1)
-                return str;
-            return str.substring(0, index);
-        }
-
         bool symbol_is_type(Symbol smb, string type){
             if (type == "Parameter" && smb is Vala.Parameter)
                 return true;
