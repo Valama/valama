@@ -5,4 +5,5 @@ export DH_VERBOSE=1
 	dh $@ --parallel
 
 override_dh_clean:
+	-rm build -r
 	dh_clean config.vala

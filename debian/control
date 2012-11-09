@@ -4,15 +4,13 @@ Priority: optional
 Maintainer: Dominique Lasserre <lasserre.d@gmail.com>
 Build-Depends: debhelper (>= 9),
          cmake,
-         valac-0.16 | valac-0.18,
-         libvala-0.16-dev | valac-0.18,
-         valac-0.16 | libvala-0.18-dev,
-         libvala-0.16-dev | libvala-0.18-dev,
+         valac-0.18 | valac-0.16,
+         libvala-0.18-dev | libvala-0.16-dev,
          pkg-config,
          libgtk-3-dev,
          libgtksourceview-3.0-dev,
          libgee-dev
-Standards-Version: 3.9.3
+Standards-Version: 3.9.4
 Homepage: https://github.com/Valama
 Vcs-Git: git://github.com/Valama/valama.git
 Vcs-Browser: https://github.com/Valama/valama
@@ -22,3 +20,5 @@ Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: Vala IDE
  Valama is the next generation Vala IDE.
+ It comes with the guanako Vala autocompletion library and provides easy symbol
+ lookups and supports cmake build system.
