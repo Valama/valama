@@ -57,6 +57,4 @@ namespace Guanako{
         }
         return new_content;
     }
-    
-
 }
