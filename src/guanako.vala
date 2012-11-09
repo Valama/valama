@@ -109,217 +109,280 @@ namespace Guanako{
             context.analyzer.analyze(context);
             CodeContext.pop();
         }
-        int index_of_symbol_end(string written){
-            int first_index = written.index_of(" ");
-            if (written.index_of(",") != -1 && written.index_of(",") < first_index)
-                first_index = written.index_of(",");
-            if (written.index_of(")") != -1 && written.index_of(")") < first_index)
-                first_index = written.index_of(")");
-            if (written.index_of("(") != -1 && written.index_of("(") < first_index)
-                first_index = written.index_of("(");
-            if (first_index == -1)
-                first_index = written.length;
-            return first_index;
-        }
 
-        bool type_offered(Symbol smb, string type){
-            if (type == "raw_namespace")
-                if (smb is Namespace)
-                    return true;
-            if (type == "raw_type")
-                if (smb is Namespace || smb is Class || smb is Struct || smb is Interface)
-                    return true;
-            if (type == "raw_object")
-                if (smb is Namespace || smb is Class || smb is Struct || smb is Variable || smb is Method || smb is Property || smb is Constant)
-                    return true;
-            if (type == "raw_creation")
-                if (smb is Namespace || smb is Class || smb is Method)
-                    return true;
-           if (type == "raw_method")
-                if (smb is Namespace || smb is Class || smb is Interface || smb is Method){
-                    /*if (smb is Method){
-                        var mth = smb as Method;
-                        if (mth.return_type.data_type is Class)
-                            return true;
-                        else
-                            return false;
-                    }*/
-                    return true;
-                }
-           return false;
-        }
-        bool type_required(Symbol smb, string type){
-            if (type == "raw_namespace")
-                if (smb is Namespace)
-                    return true;
-            if (type == "raw_type")
-                if (smb is Class || smb is Struct || smb is Interface)
-                    return true;
-            if (type == "raw_object")
-                if (smb is Variable || smb is Method || smb is Property || smb is ObjectType || smb is Constant){
-                    /*if (smb is Method){
-                        var mth = smb as Method;
-                        if (mth.return_type.data_type is Class)
-                            return true;
-                        else
-                            return false;
-                    }*/
-                    return true;
-                }
-            if (type == "raw_creation")
-                if (smb is Class || smb is CreationMethod)
-                    return true;
-           if (type == "raw_method"){
-                if (smb is Method)
-                    return true;
-            }
-            return false;
-        }
-        Gee.HashSet<Symbol?> cmp(string written, string[] compare, int step, Symbol[] accessible){
-            if (compare.length == step)
-                return null;
+        void build_syntax_map(){
 
-            if (compare[step].contains("|")){
-                var ret = new Gee.HashSet<Symbol?>();
-                foreach (string comp in compare[step].split("|")){
-                    string[] compare_option = compare; //Try every option
-                    compare_option[step] = comp;
-                    var r = cmp(written, compare_option, step, accessible);
-                    foreach (Symbol smb in r)
-                        ret.add(smb);
-                }
-                return ret;
-            }
+            var file = File.new_for_path ("/usr/share/valama/syntax");
 
-            if (compare[step] == "*")
-                return cmp (written.substring(index_of_symbol_end(written)), compare, step + 1, accessible);
-            if (compare[step].has_prefix("?")){
-                string[] compare_absolute = compare; //Try both with and without the current comparison, then return both results
-                compare_absolute[step] = compare_absolute[step].substring(1);
-                var ret = new Gee.HashSet<Symbol?>();
-                var one = cmp(written, compare_absolute, step, accessible);
-                var two = cmp(written, compare, step + 1, accessible);
-                if (one != null)
-                    ret.add_all(one);
-                if (two != null)
-                    ret.add_all(two);
-                return ret;
-            }
-            if (compare[step].has_prefix("$")){
-                string[] compare_resolved = map_syntax[compare[step].substring(1)].split(" ");
-                string[] new_compare = new string[0];
-                if (step > 0)
-                    new_compare = compare[0 : step];
-                foreach (string s in compare_resolved)
-                    new_compare += s;
-                for (int q = step + 1; q < compare.length; q++)
-                    new_compare += compare[q];
-                return cmp (written, new_compare, step, accessible);
-            }
-            if (compare[step] == "_")
-                return cmp (written.chug(), compare, step + 1, accessible);
-            if (compare[step] == "raw_namespace" || compare[step] == "raw_type" || compare[step] == "raw_object" || compare[step] == "raw_creation" || compare[step] == "raw_method"){
-                string me = written.substring(0, index_of_symbol_end(written));
-                Symbol resolved = resolve_symbol(me, accessible);
-                if (me.length < written.length){
-                    if (resolved != null && type_required(resolved, compare[step]))
-                         return cmp (written.substring(me.length), compare, step + 1, accessible);
-                    else
-                        return null;
-                } else {
-                    var ret = new Gee.HashSet<Symbol?>();
-                    Symbol[] check = accessible;
-                    if (resolved != null)
-                        check = get_child_symbols(get_type_of_symbol(resolved));
-                   string[] splt = me.split(".");
-                   string last_name = "";
-                   if (splt.length > 0)
-                       last_name = splt[splt.length - 1];
-                   foreach (Symbol s in check){
-                        if (type_offered(s, compare[step])){
-                            if (s.name.has_prefix(last_name))
-                                ret.add(s);
-                        }
-                    }
-                    return ret;
+            var dis = new DataInputStream (file.read ());
+            string line;
+            while ((line = dis.read_line (null)) != null) {
+                if (line.strip() == "" || line.has_prefix("#"))
+                    continue;
+
+                string[] rule_line_split = dis.read_line (null).split(" ");
+                RuleExpression[] rule_exprs = new RuleExpression[rule_line_split.length];
+                for(int q = 0; q < rule_line_split.length; q++){
+                    rule_exprs[q] = new RuleExpression();
+                    rule_exprs[q].expr = rule_line_split[q];
                 }
+
+                string[] namesplit = line.split_set(" :,");
+
+                string[] parameters = new string[0];
+                foreach (string splt in namesplit[1 : namesplit.length])
+                    if (splt != "")
+                        parameters += splt;
+
+
+                map_syntax[namesplit[0]] = new SyntaxRule(parameters, rule_exprs);
             }
-            if (written == compare[step])
-                return null;
-            if (compare[step].length > written.length && compare[step].has_prefix(written)){
-                var ret = new Gee.HashSet<Symbol?>();
-                ret.add(new Struct(compare[step], null, null));
-                return ret;
-            }
-            if (written.has_prefix(compare[step]))
-                return cmp (written.substring(compare[step].length), compare, step + 1, accessible);
-            return null;
 
         }
+        class SyntaxRule{
+            public SyntaxRule (string[] parameters, RuleExpression[] rule){
+                this.parameters = parameters;
+                this.rule = rule;
+            }
+            public string[] parameters;
+            public RuleExpression[] rule;
+        }
+        Gee.HashMap<string, SyntaxRule> map_syntax = new Gee.HashMap<string, SyntaxRule>();
 
-void build_syntax_map(){
-
-    var file = File.new_for_path ("/usr/share/valama/syntax");
-
-    var dis = new DataInputStream (file.read ());
-    string line;
-    while ((line = dis.read_line (null)) != null) {
-        if (line.strip() == "" || line.has_prefix("#"))
-            continue;
-        map_syntax[line] = dis.read_line (null);
-    }
-
-}
-
-Gee.HashMap<string, string> map_syntax = new Gee.HashMap<string, string>();
-
-string[] syntax_deep_space  = new string[]{
-    "using _ raw_namespace _ ;",
-    "namespace _ * _",
-    "?$access_keyword _ class _ * _"
-};
-string[] syntax_class  = new string[]{
-    "?$access_keyword _ class _ * _",
-    "?$access_keyword _ raw_type _ * _",
-    "?$access_keyword _ raw_type _ * _ ( _ $parameters_decl _ )"
-};
-string[] syntax_function  = new string[]{
-    "$foreach_statement",
-    "$for_statement",
-    "$local_declaration",
-
-    "$assignment",
-
-    "$method_call",
-    "$if_statement"
-};
-
-        public Gee.HashSet<Symbol?> propose_symbols(SourceFile file, int line, int col, string written){
-            var ret = new Gee.HashSet<Symbol?>();
+        public Gee.HashSet<Symbol>? propose_symbols(SourceFile file, int line, int col, string written){
             var accessible = get_accessible_symbols(file, line, col);
             var inside_symbol = get_symbol_at_pos(file, line, col);
-            string[] syntax = null;
-            if (inside_symbol == null){
-                syntax = syntax_deep_space;
-                accessible = get_child_symbols(context.root);
-            }else if (inside_symbol is Subroutine)
-                syntax = syntax_function;
-            else if (inside_symbol is Class)
-                syntax = syntax_class;
-            else
-                return ret;
 
-            foreach (string snt in syntax){
-                var res = cmp(written.chug() , snt.split(" "), 0, accessible);
-                if (res != null)
-                    ret.add_all(res);
+            //return begin_inside_function(inside_symbol, accessible, written);
+
+            rule_id_count = 0;
+            if (inside_symbol == null)
+                return compare(map_syntax["init_deep_space"].rule, get_child_symbols(context.root), written, new Gee.ArrayList<CallParameter>(), 0);
+            else
+                return compare(map_syntax["init_method"].rule, accessible, written, new Gee.ArrayList<CallParameter>(), 0);
+
+        }
+
+        string str_until(string str){
+            //return str.substring(0, str.index_of(until));
+            int index = str.index_of(" ");
+            if (index == -1)
+                return str;
+            return str.substring(0, index);
+        }
+
+        bool symbol_is_type(Symbol smb, string type){
+            if (type == "Parameter" && smb is Vala.Parameter)
+                return true;
+            if (type == "Variable" && smb is Variable)
+                return true;
+            if (type == "Method" && smb is Method)
+                return true;
+            if (type == "Class" && smb is Class)
+                return true;
+            if (type == "Namespace" && smb is Namespace)
+                return true;
+            return false;
+        }
+
+        class CallParameter{
+            public int for_rule_id;
+            public string name;
+            public Symbol symbol;
+        }
+
+        class RuleExpression{
+            public string expr;
+            public int rule_id;
+            public RuleExpression clone(){
+                var ret = new RuleExpression();
+                ret.expr = this.expr;
+                ret.rule_id = this.rule_id;
+                return ret;
+            }
+        }
+
+        CallParameter? find_param(Gee.ArrayList<CallParameter> array, string name, int rule_id){
+            foreach (CallParameter param in array)
+                if (param.name == name && param.for_rule_id == rule_id)
+                    return param;
+            return null;
+        }
+
+int rule_id_count = 0;
+
+        Gee.HashSet<Symbol>? compare (RuleExpression[] compare_rule, Symbol[] accessible, string written2, Gee.ArrayList<CallParameter> call_params, int depth){//
+
+            string written = written2; //For some reason need to create a copy... otherwise assigning new values to written doesn't work
+
+            Gee.HashSet<Symbol> ret = new Gee.HashSet<Symbol>();
+            
+            RuleExpression[] rule = new RuleExpression[compare_rule.length];
+            for (int q = 0; q < rule.length; q++)
+                rule[q] = compare_rule[q].clone();
+            RuleExpression current_rule = rule[0];
+
+string depth_string = "";
+for (int q = 0; q < depth; q++)
+    depth_string += " ";
+stdout.printf("\n" + depth_string + "Current rule: " + current_rule.expr + "\n");
+stdout.printf(depth_string + "Written: " + written + "\n");
+
+            if (current_rule.expr.contains("|")){
+                var splt = current_rule.expr.split("|");
+                foreach (string s in splt){
+                    rule[0].expr = s;
+                    ret.add_all(compare(rule, accessible, written, call_params, depth + 1));
+                }
+                return ret;
+            }
+
+            if (current_rule.expr.has_prefix("?")){
+                var r1 = compare(rule[1:rule.length], accessible, written, call_params, depth + 1);
+                rule[0].expr = rule[0].expr.substring(1);
+                var r2 = compare(rule, accessible, written, call_params, depth + 1);
+                ret.add_all(r1);
+                ret.add_all(r2);
+                return ret;
+            }
+
+            string write_to_param = null;
+            if (current_rule.expr.has_suffix("}")){
+                int bracket_start = current_rule.expr.last_index_of("{");
+
+                write_to_param = current_rule.expr.substring(bracket_start + 1, current_rule.expr.length - bracket_start - 2);
+                current_rule.expr = current_rule.expr.substring(0, bracket_start);
+            }
+
+            if (current_rule.expr == "_"){
+                if (!(written.has_prefix(" ") || written.has_prefix("\t")))
+                    return new Gee.HashSet<Symbol>();
+                written = written.chug();
+                return compare (rule[1:rule.length], accessible, written, call_params, depth + 1);
+            }
+            if (current_rule.expr.has_prefix("{")){
+
+                Regex r = /^{(?P<parent>.*)}>(?P<child>.*)$/;
+                MatchInfo info;
+                if(!r.match(current_rule.expr, 0, out info)) {
+                    stdout.printf("Malformed rule! >" + compare_rule[0].expr + "<\n");
+                    return ret;
+                }
+
+                var parent_param_name = info.fetch_named("parent");
+                var child_type = info.fetch_named("child");
+
+                var parent_param = find_param(call_params, parent_param_name, current_rule.rule_id);
+                if (parent_param == null){
+                    stdout.printf(@"Variable $parent_param_name not found! >$(compare_rule[0].expr)<\n");
+                    return ret;
+                }
+                var parent = parent_param.symbol;
+
+                var children = get_child_symbols(get_type_of_symbol(parent));
+                foreach (Symbol child in children){
+                    if (symbol_is_type(child, child_type)){
+                        if (written.has_prefix(child.name)){
+                            var child_param = new CallParameter();
+                            child_param.for_rule_id = current_rule.rule_id;
+                            child_param.name = write_to_param;
+                            child_param.symbol = child;
+                            call_params.add(child_param);
+                            written = written.substring(child.name.length);
+                            return compare (rule[1:rule.length], accessible, written, call_params, depth + 1);
+                        }
+                        if (child.name.has_prefix(written))
+                            ret.add(child);
+                    }
+                }
+                return ret;
+            }
+            if (current_rule.expr.has_prefix("%")){
+                string filter_type = current_rule.expr.substring(1);
+                foreach (Symbol smb in accessible)
+                    if (symbol_is_type(smb, filter_type)){
+                        var eq = match(written, smb.name);
+                        if (eq == matchres.STARTED)
+                            ret.add(smb);
+                        if (eq == matchres.COMPLETE){
+                            if (write_to_param != null){
+                                var child_param = new CallParameter();
+                                child_param.for_rule_id = current_rule.rule_id;
+                                child_param.name = write_to_param;
+                                child_param.symbol = smb;
+                                call_params.add(child_param);
+                            }
+                            written = written.substring(smb.name.length);
+                            return compare(rule[1:rule.length], accessible, written, call_params, depth + 1);
+                        }
+                    }
+                return ret;
+            }
+            if (current_rule.expr.has_prefix("$")){
+                string call = current_rule.expr.substring(1);
+                if (!map_syntax.has_key(call)){
+                    stdout.printf(@"Call $call not found in >$(compare_rule[0].expr)<\n");
+                    return ret;
+                }
+
+                RuleExpression[] composit_rule = map_syntax[call].rule;
+                rule_id_count ++;
+                foreach (RuleExpression subexp in composit_rule)
+                    subexp.rule_id = rule_id_count;
+
+                foreach (RuleExpression exp in rule[1:rule.length])
+                    composit_rule += exp;
+
+                if (write_to_param != null){
+                    var child_param = new CallParameter();
+                    child_param.for_rule_id = rule_id_count;
+                    child_param.name = map_syntax[call].parameters[0];
+                    var param = find_param(call_params, write_to_param, current_rule.rule_id);// call_params[write_to_param];
+                    if (param == null){
+                        stdout.printf(@"Parameter $write_to_param not found in >$(compare_rule[0].expr)<\n");
+                        return ret;
+                    }
+                    child_param.symbol = param.symbol;
+                    call_params.add(child_param);
+
+                }
+
+                return compare(composit_rule, accessible, written, call_params, depth + 1);
+
+            }
+
+            var mres = match (written, current_rule.expr);
+
+            if (mres == matchres.COMPLETE){
+                written = written.substring(current_rule.expr.length);
+                if (rule.length == 1)
+                    return ret;
+                return compare(rule[1 : rule.length], accessible, written, call_params, depth + 1);
+            }
+            else if (mres == matchres.STARTED){
+                ret.add(new Struct(current_rule.expr, null, null));
+                return ret;
             }
             return ret;
-         }
+        }
+
+        enum matchres{
+            UNEQUAL,
+            STARTED,
+            COMPLETE
+        }
+        matchres match(string written, string target){
+            if (written.length >= target.length)
+                if (written.has_prefix(target))
+                    return matchres.COMPLETE;
+            if (target.length > written.length && target.has_prefix(written))
+                return matchres.STARTED;
+            return matchres.UNEQUAL;
+        }
 
         Symbol? get_type_of_symbol(Symbol smb){
             Symbol type = null;
-            if (smb is Class || smb is Namespace || smb is Struct)
+            if (smb is Class || smb is Namespace || smb is Struct || smb is Enum)
                 type = smb;
             if (smb is Property)
                 type = ((Property)smb).property_type.data_type;
@@ -330,76 +393,23 @@ string[] syntax_function  = new string[]{
             return type;
         }
 
-        Symbol? resolve_symbol(string text, Symbol[] candidates){
-            Symbol[] internal_candidates = candidates;
-
-            var txt = text;
-
-            int depth = 0;
-            int start_id = 0;
-            bool found = false;
-            do {
-                found = false;
-                for (int q = 0; q < txt.length; q++){
-                    if (txt[q].to_string() == "("){
-                        if (depth < 1)
-                            start_id = q;
-                        depth ++;
-                    } else if (txt[q].to_string() == ")"){
-                        depth --;
-                        if (depth == 0){
-                            txt = txt.substring(0, start_id) + txt.substring(q + 1);
-                            found = true;
-                        }
-                    }
-                }
-            } while (found);
-
-            string[] splt1 = txt.split_set("(,");
-            if (splt1.length > 0)
-                txt = splt1[splt1.length - 1];
-
-            string[] splt = txt.split(".");
-
-             foreach (Symbol smb in internal_candidates){
-                 if (smb.name == splt[0]){
-
-                    var type = get_type_of_symbol(smb);
-
-                    if (splt.length == 1)
-                        return smb;
-
-                    if (type == null)
-                        continue;
-
-                    if (splt.length == 2){
-                        var rt = resolve_symbol(txt.substring(splt[0].length + 1), get_child_symbols(type));
-                        if (rt != null)
-                            return rt;
-                        return smb;
-                    }else
-                        return resolve_symbol(txt.substring(splt[0].length + 1), get_child_symbols(type));
-                 }
-             }
-             return null;
-         }
-
-         public Symbol[] get_accessible_symbols(SourceFile file, int line, int col){
+        public Symbol[] get_accessible_symbols(SourceFile file, int line, int col){
             Symbol [] ret = new Symbol[0];
             var current_symbol = get_symbol_at_pos(file, line, col);
+
             if (current_symbol == null){
                 return ret;
             }
-
-            for (Scope scope = current_symbol.scope; scope != null; scope = scope.parent_scope)
-                foreach (Symbol s in scope.get_symbol_table().get_values())
-                    ret += s;
 
             foreach (UsingDirective directive in file.current_using_directives){
                 var children = get_child_symbols(directive.namespace_symbol);
                 foreach (Symbol s in children)
                     ret += s;
             }
+
+            for (Scope scope = current_symbol.scope; scope != null; scope = scope.parent_scope)
+                foreach (Symbol s in scope.get_symbol_table().get_values())
+                    ret += s;
 
             //If we are inside a subroutine, propose all previously defined local variables
             if (current_symbol is Subroutine){
@@ -564,77 +574,6 @@ string[] syntax_function  = new string[]{
         }
 
      }
-
-
-
-
-     //Helper function for checking whether a given source location is inside a SourceReference
-    public static bool before_source_ref(SourceFile source_file, int source_line, int source_col, SourceReference? reference){
-        if (reference == null)
-            return false;
-
-        if (reference.file != source_file)
-            return false;
-#if VALA_LESS_0_18
-        if (reference.first_line > source_line)
-#else
-        if (reference.begin.line > source_line)
-#endif
-            return true;
-#if VALA_LESS_0_18
-        if (reference.first_line == source_line && reference.first_column > source_col)
-#else
-        if (reference.begin.line == source_line && reference.begin.column > source_col)
-#endif
-            return true;
-        return false;
-    }
-    public static bool after_source_ref(SourceFile source_file, int source_line, int source_col, SourceReference? reference){
-        if (reference == null)
-            return false;
-
-        if (reference.file != source_file)
-            return false;
-#if VALA_LESS_0_18
-        if (reference.last_line < source_line)
-#else
-        if (reference.end.line < source_line)
-#endif
-            return true;
-#if VALA_LESS_0_18
-        if (reference.last_line == source_line && reference.last_column < source_col)
-#else
-        if (reference.end.line == source_line && reference.end.column < source_col)
-#endif
-            return true;
-        return false;
-    }
-    public static bool inside_source_ref(SourceFile source_file, int source_line, int source_col, SourceReference? reference){
-        if (reference == null)
-            return false;
-
-        if (reference.file != source_file)
-            return false;
-#if VALA_LESS_0_18
-        if (reference.first_line > source_line || reference.first_line < source_line)
-#else
-        if (reference.begin.line > source_line || reference.end.line < source_line)
-#endif
-            return false;
-#if VALA_LESS_0_18
-        if (reference.first_line == source_line && reference.first_column > source_col)
-#else
-        if (reference.begin.line == source_line && reference.begin.column > source_col)
-#endif
-            return false;
-#if VALA_LESS_0_18
-        if (reference.last_line == source_line && reference.last_column < source_col)
-#else
-        if (reference.end.line == source_line && reference.end.column < source_col)
-#endif
-            return false;
-        return true;
-    }
 
 
 }

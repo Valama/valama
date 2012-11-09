@@ -19,33 +19,44 @@
 
 using GLib;
 using Gtk;
+using Vala;
 
 namespace Guanako{
-    public static void auto_indent_buffer(TextBuffer buffer){
+    public static string auto_indent_buffer(project project, SourceFile file){
+        string[] lines = file.content.split("\n");
+        for (int q = 0; q < lines.length; q++)
+            lines[q] = lines[q].strip();
 
-        int lines = buffer.get_line_count();
-        int depth = 0;
-
-        for (int q = 0; q < lines - 1; q++){
-            stdout.printf(q.to_string() + "\n");
-            TextIter iter_start;
-            buffer.get_iter_at_line(out iter_start, q);
-            TextIter iter_end;
-            buffer.get_iter_at_line(out iter_end, q);
-
-            string text = buffer.get_slice(iter_start, iter_end, true);
-            if (text.contains("{"))
-                depth ++;
-            else if (text.contains("{"))
-                depth --;
-
-            string new_text = text.strip();
-            for (int i = 0; i < depth; i++)
-                new_text = "    " + new_text;
-
-            buffer.delete(ref iter_start, ref iter_end);
-            buffer.insert(ref iter_start, new_text, new_text.length);
+        foreach (var node in file.get_nodes()) {
+            if (node is Symbol){
+                var cls = node as Symbol;
+                iter_symbol(cls, (smb, depth)=>{
+                    if (smb is Subroutine){
+                        var sr = smb as Subroutine;
+                        iter_subroutine(sr, (s, depth2)=>{
+#if VALA_LESS_0_18
+                            for (int q = s.source_reference.first_line - 1; q <= s.source_reference.last_line - 1; q++)
+#else
+                            for (int q = s.source_reference.begin.line - 1; q <= s.source_reference.end.line - 1; q++)
+#endif
+                                for (int i = 0; i < 1 + depth2; i++)
+                                    lines[q] = "    " + lines[q];
+                            return iter_callback_returns.continue;
+                        });
+                    }
+                    return iter_callback_returns.continue;
+                });
+            }
         }
+
+        string new_content = "";
+        for (int q = 0; q < lines.length; q++) {
+            new_content += lines[q];
+            if (q < lines.length - 1)
+                new_content += "\n";
+        }
+        return new_content;
     }
+    
 
 }

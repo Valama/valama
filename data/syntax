@@ -1,72 +1,69 @@
+init_method
+?_ $ReturnStatement|$AssignStatement|$CallStatement|$IfStatement
 
-method_call
-raw_method _ ( _ ?$parameters _ )
-
-foreach_statement
-foreach _ ( _ raw_type _ * _ in _ $value _ )
-
-for_statement
-for _ ( _ raw_type _ * _ = _ $value _ ; _ * _ $rel_comparison _ ; _ * _ * _)
-
-local_declaration
-var|raw_type _ * _ = _ $value|$local_declaration_new
-
-local_declaration_new
-new _ raw_creation _ ( _ ?$parameters _ ) _  ;
-
-if_statement
-if _ ( _ ?$comparison _ )
+init_deep_space
+?_ $UsingStatement
 
 
+UsingStatement
+using _ %Namespace{child} ?$NamespaceChild{child} ?_ ;
 
-assignment
-$assignment_new|$assignment_normal
-
-assignment_new
-raw_object _ $assign_operator _ new _ raw_creation _ ( _ ?$parameters _ ) _  ;
-
-assignment_normal
-raw_object _ $assign_operator _ $value
+NamespaceChild : parent
+. {parent}>Namespace{child} ?$NamespaceChild{child}
 
 
-value
-raw_object|$method_call
+IfStatement
+if ?_ ( ?_ $Object ?_ ==|<|>|<=|>= ?_ $Object ?_ )
 
-# Parameters
+CallStatement
+$Object ?_ ;
 
-parameters
-?$param_acc _ $value _ ?, _ ?$parameters
+AssignStatement
+$Object ?_ = ?_ $Object|$NewExpression ?_ ;
 
-param_acc
-ref|out
-
-parameters_decl
-raw_type _ * _ ?$parameters_decl_inner
-
-parameters_decl_inner
-, _ raw_type _ ?$parameters_decl
-
-
-# Comparisons (Either is or ==,<=,> etc)
-
-comparison
-$value _ $rel_comparison|$is_comparison
-
-rel_comparison
-$relational_expression _ $value
-
-is_comparison
-is _ raw_type
+ReturnStatement
+return _ $Object|$NewExpression ?_ ;
 
 
 
-# Keywords, operators and stuff
+NewExpression
+new _ $Type ?_ ( ?$MethodParameters )
 
-assign_operator
-=|+=|-=||=|&=|^=|/=|*=|%=|<<=|>>=
 
-relational_expression
-==|>|<|>=|<=
 
-access_keyword
-public|private|internal
+Type
+$TypeClassStart|$TypeNamespaceStart
+
+TypeClassStart
+%Class{a} ?$TypeIterClass{a}
+
+TypeNamespaceStart
+%Namespace{a} $TypeIterNamespace{a}|$TypeIterClass{a}
+
+TypeIterNamespace : parent
+. {parent}>Namespace{child} $TypeIterNamespace{child}|$TypeIterClass{child}
+
+TypeIterClass : parent
+. {parent}>Class{child} ?$TypeIterClass{child}
+
+
+
+Object
+%Parameter{a}|%Variable{a} ?$ChildObject{a}
+
+ChildObject : parent
+. $ChildVar{parent}|$ChildMeth{parent}
+
+ChildVar : parent
+{parent}>Variable{child} ?$ChildObject{child}
+
+ChildMeth : parent
+{parent}>Method{mth} ( ?$MethodParameters ) ?$ChildObject{mth}
+
+
+
+MethodParameters
+$Object ?$MethodParametersIter
+
+MethodParametersIter
+_ , _ $MethodParameters

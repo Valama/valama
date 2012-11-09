@@ -29,8 +29,12 @@ static symbol_browser smb_browser;
 static ReportWrapper report_wrapper;
 static ui_report wdg_report;
 
+static bool parsing = false;
+
 public static void main(string[] args){
     Gtk.init(ref args);
+
+    loop_update  = new MainLoop();
 
     string proj_file;
     if (args.length > 1)
@@ -62,6 +66,12 @@ public static void main(string[] args){
     view.buffer.create_tag("gray_bg", "background", "gray", null);
     view.auto_indent = true;
     view.indent_width = 4;
+    view.buffer.changed.connect(()=>{
+        if (!parsing){
+            update_text = view.buffer.text;
+            Thread.create<void*> (update_current_file, true);
+        }
+    });
 
     var langman = new SourceLanguageManager();
     var lang = langman.get_language("vala");
@@ -83,6 +93,10 @@ public static void main(string[] args){
     var btnAutoIndent = new Gtk.ToolButton.from_stock(Stock.REFRESH);
     btnAutoIndent.clicked.connect(on_auto_indent_button_clicked);
     toolbar.add(btnAutoIndent);
+
+    var btnSettings = new Gtk.ToolButton.from_stock(Stock.PREFERENCES);
+    btnSettings.clicked.connect(()=>{ui_project_dialog(project);});
+    toolbar.add(btnSettings);
 
         var hbox = new HBox(false, 0);
 
@@ -125,8 +139,26 @@ public static void main(string[] args){
     project.save();
 }
 
+MainLoop loop_update;
+string update_text;
+static void* update_current_file() {
+    parsing = true;
+    report_wrapper.clear();
+    project.guanako_project.update_file(current_source_file, update_text);
+    Idle.add(()=>{
+        wdg_report.build();
+        parsing = false;
+        if (loop_update.is_running())
+            loop_update.quit();
+        return false;
+    });
+    return null;
+}
+
 static void on_auto_indent_button_clicked(){
-    Guanako.auto_indent_buffer(view.buffer);
+    string indented = Guanako.auto_indent_buffer(project.guanako_project, current_source_file);
+    current_source_file.content = indented;
+    view.buffer.text = indented;
 }
 
 static void on_error_selected(ReportWrapper.Error err){
@@ -333,8 +365,10 @@ class TestProvider : Gtk.SourceCompletionProvider, Object
         if (splt.length > 0)
             last = splt[splt.length - 1];
 
-        map_proposals = new Gee.HashMap<Gtk.SourceCompletionProposal, Symbol>();
+        if (parsing)
+            loop_update.run();
 
+        map_proposals = new Gee.HashMap<Gtk.SourceCompletionProposal, Symbol>();
         var proposals = project.guanako_project.propose_symbols(current_source_file, line, col, current_line);
         foreach (Symbol proposal in proposals){
             if (proposal.name != null){

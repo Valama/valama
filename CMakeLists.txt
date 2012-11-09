@@ -16,14 +16,10 @@
 # with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+include(${CMAKE_SOURCE_DIR}/cmake/project.cmake)
+
 cmake_minimum_required(VERSION 2.8)
-project("Valama" C)
-
-set(Valama_VERSION_MAJOR "0")
-set(Valama_VERSION_MINOR "1")
-#set(Valama_PATCH_VERSION_ "0")
-
-set(VALAMA_VERSION "${Valama_VERSION_MAJOR}.${Valama_VERSION_MINOR}")
+project(${project_name} C)
 
 set(CMAKE_INSTALL_PREFIX "/usr")
 
@@ -41,7 +37,12 @@ else()
   set(valac_cond "-D;VALA_LESS_0_18")
 endif()
 
-include(${CMAKE_SOURCE_DIR}/cmake/packages.cmake)
+#Little fix to ignore a wrong libvala version
+if(VALA_VERSION STRGREATER "0.17.0")
+  list( REMOVE_ITEM required_pkgs "libvala-0.16" )
+else()
+  list( REMOVE_ITEM required_pkgs "libvala-0.18" )
+endif()
 
 # Set Vala syntax depending on version.
 configure_file(

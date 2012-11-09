@@ -29,12 +29,13 @@ public class valama_project{
 
         var proj_file = File.new_for_path (project_file);
         project_path = proj_file.get_parent().get_path();
-        project_name = proj_file.get_basename();
 
         guanako_project = new Guanako.project();
 
-        var directory = File.new_for_path (project_path + "/src");
+        load_project_file();
 
+        //Add files in src folder to the project
+        var directory = File.new_for_path (project_path + "/src");
         var enumerator = directory.enumerate_children (FileAttribute.STANDARD_NAME, 0);
 
         SourceFile[] sf = new SourceFile[0];
@@ -50,8 +51,6 @@ public class valama_project{
         }
         source_files = sf;
 
-        load_project_file();
-
         guanako_project.update();
     }
 
@@ -59,10 +58,26 @@ public class valama_project{
     public Guanako.project guanako_project;
     string project_path;
     string project_file;
-    string project_name;
+    public int version_major;
+    public int version_minor;
+    public int version_patch;
+    public string project_name = "valama_project";
 
     public string build(){
         string ret;
+
+        string pkg_list = "set(required_pkgs\n";
+        foreach (string pkg in guanako_project.packages)
+            pkg_list += pkg + "\n";
+        pkg_list += ")";
+
+        var file_stream = File.new_for_path(project_path + "/cmake/project.cmake").replace(null, false, FileCreateFlags.REPLACE_DESTINATION); //(FileCreateFlags.REPLACE_DESTINATION);
+        var data_stream = new DataOutputStream (file_stream);
+        data_stream.put_string ("set(project_name " + project_name + ")\n");
+        data_stream.put_string (@"set($(project_name)_VERSION $version_major.$version_minor.$version_patch)\n");
+        data_stream.put_string (pkg_list);
+        data_stream.close();
+
         GLib.Process.spawn_command_line_sync("sh -c 'cd " + project_path + " && mkdir -p build && cd build && cmake .. && make'", null, out ret);
         return ret;
     }
@@ -86,12 +101,22 @@ public class valama_project{
             if (i->type != ElementType.ELEMENT_NODE) {
                 continue;
             }
-            if (i->name == "packages"){
+            if (i->name == "name")
+                project_name = i->get_content();
+            if (i->name == "packages")
                 for (Xml.Node* p = i->children; p != null; p = p->next) {
                     if (p->name == "package")
                         packages += p->get_content();
                 }
-            }
+            if (i->name == "version")
+                for (Xml.Node* p = i->children; p != null; p = p->next) {
+                    if (p->name == "major")
+                        version_major = p->get_content().to_int();
+                    else if (p->name == "minor")
+                        version_minor = p->get_content().to_int();
+                    else if (p->name == "patch")
+                        version_patch = p->get_content().to_int();
+                }
         }
         guanako_project.add_packages(packages);
 
@@ -103,6 +128,14 @@ public class valama_project{
         writer.set_indent_string ("\t");
 
         writer.start_element("project");
+        writer.write_element("name", project_name);
+
+        writer.start_element("version");
+        writer.write_element("major", version_major.to_string());
+        writer.write_element("minor", version_minor.to_string());
+        writer.write_element("patch", version_patch.to_string());
+        writer.end_element();
+
         writer.start_element("packages");
         foreach (string pkg in guanako_project.packages)
             writer.write_element("package", pkg);
