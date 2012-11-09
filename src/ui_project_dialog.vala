@@ -61,14 +61,7 @@ public void ui_project_dialog(valama_project project){
     Regex valid_char = /^[a-zA-Z0-9.:_-]+$/;  // keep "-" at the end!
     MatchInfo match_info = null;  // init to null to make valac happy
     ent_proj_name.insert_text.connect((new_text) => {
-        if (valid_char.match(new_text, 0, out match_info)) {
-            if (timer_id != 0) {
-                Source.remove(timer_id);
-                timer_id = 0;  // reset to zero to avoid race conditions - TODO: is this necessary?
-            }
-            ent_proj_name_err.set_label("");
-        }
-        else {
+        if (! valid_char.match(new_text, 0, out match_info)) {
             ent_proj_name_err.set_label(@"Invalid character: '$(match_info.get_string())' Please choose one from [0-9a-zA-Z.:_-].");
             if (timer_id != 0)
                 Source.remove(timer_id);  // reset timer to let it start again
@@ -79,15 +72,6 @@ public void ui_project_dialog(valama_project project){
             }));
             Signal.stop_emission_by_name(ent_proj_name, "insert_text");
         }
-    });
-    /* Clear label if character was deleted. */
-    /*FIXME: Code duplication. */
-    ent_proj_name.delete_text.connect(() => {
-        if (timer_id != 0) {
-            Source.remove(timer_id);
-            timer_id = 0;  // reset to zero to avoid race conditions - TODO: is this necessary?
-        }
-        ent_proj_name_err.set_label("");
     });
 
     box_project_name.pack_start(ent_proj_name, false, false);
@@ -127,12 +111,18 @@ public void ui_project_dialog(valama_project project){
                 project.version_major = ent_major.text.to_int();
                 project.version_minor = ent_minor.text.to_int();
                 project.version_patch = ent_patch.text.to_int();
+                if (timer_id != 0)
+                    Source.remove(timer_id);
                 dlg.destroy();
                 break;
             case ResponseType.CANCEL:
+                if (timer_id != 0)
+                    Source.remove(timer_id);
                 dlg.destroy();
                 break;
             case ResponseType.DELETE_EVENT:  // window manager close
+                if (timer_id != 0)
+                    Source.remove(timer_id);
                 dlg.destroy();
                 break;
             case  ResponseType.REJECT:
@@ -140,6 +130,8 @@ public void ui_project_dialog(valama_project project){
                  * unwanted characters (but this would be a bug if it is not
                  * already recognized before). */
                 ent_proj_name_err.set_label("");
+                if (timer_id != 0)
+                    Source.remove(timer_id);
                 ent_proj_name.text = project.project_name;
                 ent_major.text = project.version_major.to_string();
                 ent_minor.text = project.version_minor.to_string();
@@ -147,6 +139,8 @@ public void ui_project_dialog(valama_project project){
                 break;
             default:
                 stderr.printf("Unknown dialog respone id (please report a bug):%d", response_id);
+                if (timer_id != 0)
+                    Source.remove(timer_id);
                 dlg.destroy();
                 break;
         }
