@@ -254,6 +254,15 @@ stdout.printf(depth_string + "Written: " + written + "\n");
                 current_rule.expr = current_rule.expr.substring(0, bracket_start);
             }
 
+            if (current_rule.expr.has_prefix("*word")){
+                Regex r = /^(?P<word>\w*)(?P<rest>.*)$/;
+                MatchInfo info;
+                if(!r.match(written, 0, out info))
+                    return ret;
+                return compare(rule[1:rule.length], accessible, info.fetch_named("rest"), call_params, depth+1);
+            }
+
+
             if (current_rule.expr == "_"){
                 if (!(written.has_prefix(" ") || written.has_prefix("\t")))
                     return new Gee.HashSet<Symbol>();

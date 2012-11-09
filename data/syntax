@@ -1,9 +1,13 @@
 init_method
-?_ $ReturnStatement|$AssignStatement|$CallStatement|$IfStatement
+?_ $ReturnStatement|$AssignStatement|$CallStatement|$IfStatement|$DeclarationStatement
 
 init_deep_space
 ?_ $UsingStatement
 
+
+
+DeclarationStatement
+var _ *word ?_ = ?_ $Object|$NewExpression ?_ ;
 
 UsingStatement
 using _ %Namespace{child} ?$NamespaceChild{child} ?_ ;
