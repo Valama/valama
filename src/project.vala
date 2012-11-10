@@ -54,7 +54,7 @@ public class valama_project{
     }
 
     public Guanako.project guanako_project;
-    string project_path;
+    public string project_path;
     string project_file;
     public int version_major;
     public int version_minor;

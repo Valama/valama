@@ -80,7 +80,7 @@ public class project_browser {
     public signal void source_file_selected(SourceFile file);
     public signal void packages_changed();
 
-    void build(){
+    public void build(){
         var store = new TreeStore (2, typeof (string), typeof (string));
         tree_view.set_model (store);
 

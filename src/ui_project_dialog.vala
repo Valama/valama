@@ -19,6 +19,7 @@
 */
 
 using Gtk;
+using GLib;
 
 /* Settings window. */
 public void ui_project_dialog(valama_project project){
@@ -32,7 +33,7 @@ public void ui_project_dialog(valama_project project){
                                     Stock.OK,
                                     ResponseType.OK,
                                     null);
-    dlg.set_size_request(400, 200);
+    dlg.set_size_request(420, 200);
     dlg.resizable = false;
 
     var box_main = new Box(Orientation.VERTICAL, 0);
@@ -47,31 +48,13 @@ public void ui_project_dialog(valama_project project){
     box_project_name.pack_start(new Label("Project name:"), false, false);
     var ent_proj_name_err = new Label("");
     ent_proj_name_err.sensitive = false;
-    var ent_proj_name = new Entry();
+
+    Regex valid_chars = /^[a-zA-Z0-9.:_-]+$/;  // keep "-" at the end!
+    var ent_proj_name = new Entry.with_inputcheck(ent_proj_name_err, valid_chars, 5);
     ent_proj_name.text = project.project_name;
 
-    /*
-     * Check proper user input. Project names have to consist of "normal"
-     * characters only (see regex below). Otherwise cmake would break.
-     *
-     *TODO: Perhaps we should internally handle special characters with
-     *      underscore.
-     */
-    uint timer_id = 0;  // init timer for help dialog
-    Regex valid_char = /^[a-zA-Z0-9.:_-]+$/;  // keep "-" at the end!
-    MatchInfo match_info = null;  // init to null to make valac happy
     ent_proj_name.insert_text.connect((new_text) => {
-        if (! valid_char.match(new_text, 0, out match_info)) {
-            ent_proj_name_err.set_label(@"Invalid character: '$(match_info.get_string())' Please choose one from [0-9a-zA-Z.:_-].");
-            if (timer_id != 0)
-                Source.remove(timer_id);  // reset timer to let it start again
-            /* Set timeout of help dialog to 5 seconds. */
-            timer_id = Timeout.add_seconds(5, (() => {
-                ent_proj_name_err.set_label("");
-                return true;
-            }));
-            Signal.stop_emission_by_name(ent_proj_name, "insert_text");
-        }
+        ent_proj_name.ui_check_input(new_text);
     });
 
     box_project_name.pack_start(ent_proj_name, false, false);
@@ -119,18 +102,12 @@ public void ui_project_dialog(valama_project project){
                 project.version_minor = (int) ent_minor.value;
                 project.version_patch = (int) ent_patch.value;
                 //project.version_special = ent_version_special;
-                if (timer_id != 0)
-                    Source.remove(timer_id);
                 dlg.destroy();
                 break;
             case ResponseType.CANCEL:
-                if (timer_id != 0)
-                    Source.remove(timer_id);
                 dlg.destroy();
                 break;
             case ResponseType.DELETE_EVENT:  // window manager close
-                if (timer_id != 0)
-                    Source.remove(timer_id);
                 dlg.destroy();
                 break;
             case  ResponseType.REJECT:
@@ -138,8 +115,8 @@ public void ui_project_dialog(valama_project project){
                  * unwanted characters (but this would be a bug if it is not
                  * already recognized before). */
                 ent_proj_name_err.set_label("");
-                if (timer_id != 0)
-                    Source.remove(timer_id);
+                ent_proj_name.disable_timer();
+
                 ent_proj_name.text = project.project_name;
                 ent_major.value = (double) project.version_major;
                 ent_minor.value = (double) project.version_minor;
@@ -148,8 +125,6 @@ public void ui_project_dialog(valama_project project){
                 break;
             default:
                 stderr.printf("Unknown dialog respone id (please report a bug):%d", response_id);
-                if (timer_id != 0)
-                    Source.remove(timer_id);
                 dlg.destroy();
                 break;
         }
@@ -163,3 +138,5 @@ public void ui_project_dialog(valama_project project){
     dlg.get_content_area().pack_start(box_main);
     dlg.run();
 }
+
+// vim: set ai ts=4 sts=4 et sw=4

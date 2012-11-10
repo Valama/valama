@@ -28,6 +28,7 @@ static SourceView view;
 static symbol_browser smb_browser;
 static ReportWrapper report_wrapper;
 static ui_report wdg_report;
+static project_browser pbrw;
 
 static bool parsing = false;
 
@@ -82,25 +83,36 @@ public static void main(string[] args){
     var toolbar = new Toolbar();
     vbox_main.pack_start(toolbar, false, true);
 
+    var btnNewFile = new ToolButton.from_stock(Stock.FILE);
+    toolbar.add(btnNewFile);
+    btnNewFile.set_tooltip_text ("Create new file");
+    btnNewFile.clicked.connect(() => {
+        ui_create_file_dialog(project);
+    });
+
     var btnSave = new ToolButton.from_stock(Stock.SAVE);
     toolbar.add(btnSave);
+    btnSave.set_tooltip_text ("Save current file");
     btnSave.clicked.connect(write_current_source_file);
 
     var btnBuild = new Gtk.ToolButton.from_stock(Stock.EXECUTE);
+    btnBuild.set_tooltip_text ("Save current file an build project");
     btnBuild.clicked.connect(on_build_button_clicked);
     toolbar.add(btnBuild);
 
     var btnAutoIndent = new Gtk.ToolButton.from_stock(Stock.REFRESH);
+    btnAutoIndent.set_tooltip_text ("Auto Indent");
     btnAutoIndent.clicked.connect(on_auto_indent_button_clicked);
     toolbar.add(btnAutoIndent);
 
     var btnSettings = new Gtk.ToolButton.from_stock(Stock.PREFERENCES);
+    btnSettings.set_tooltip_text ("Settings");
     btnSettings.clicked.connect(()=>{ui_project_dialog(project);});
     toolbar.add(btnSettings);
 
         var hbox = new HBox(false, 0);
 
-        var pbrw = new project_browser(project);
+        pbrw = new project_browser(project);
         hbox.pack_start(pbrw.widget, false, true);
 
         var scrw = new ScrolledWindow(null, null);
