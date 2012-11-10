@@ -171,14 +171,6 @@ namespace Guanako{
 
         }
 
-        string str_until(string str){
-            //return str.substring(0, str.index_of(until));
-            int index = str.index_of(" ");
-            if (index == -1)
-                return str;
-            return str.substring(0, index);
-        }
-
         bool symbol_is_type(Symbol smb, string type){
             if (type == "Parameter" && smb is Vala.Parameter)
                 return true;
@@ -261,6 +253,17 @@ stdout.printf(depth_string + "Written: " + written + "\n");
                 write_to_param = current_rule.expr.substring(bracket_start + 1, current_rule.expr.length - bracket_start - 2);
                 current_rule.expr = current_rule.expr.substring(0, bracket_start);
             }
+
+            if (current_rule.expr.has_prefix("*word")){
+                Regex r = /^(?P<word>\w*)(?P<rest>.*)$/;
+                MatchInfo info;
+                if(!r.match(written, 0, out info))
+                    return ret;
+                if (info.fetch_named("word") == "")
+                    return ret;
+                return compare(rule[1:rule.length], accessible, info.fetch_named("rest"), call_params, depth+1);
+            }
+
 
             if (current_rule.expr == "_"){
                 if (!(written.has_prefix(" ") || written.has_prefix("\t")))

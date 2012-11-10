@@ -62,14 +62,7 @@ public void ui_project_dialog(valama_project project){
     Regex valid_char = /^[a-zA-Z0-9.:_-]+$/;  // keep "-" at the end!
     MatchInfo match_info = null;  // init to null to make valac happy
     ent_proj_name.insert_text.connect((new_text) => {
-        if (valid_char.match(new_text, 0, out match_info)) {
-            if (timer_id != 0) {
-                Source.remove(timer_id);
-                timer_id = 0;  // reset to zero to avoid race conditions - TODO: is this necessary?
-            }
-            ent_proj_name_err.set_label("");
-        }
-        else {
+        if (! valid_char.match(new_text, 0, out match_info)) {
             ent_proj_name_err.set_label(@"Invalid character: '$(match_info.get_string())' Please choose one from [0-9a-zA-Z.:_-].");
             if (timer_id != 0)
                 Source.remove(timer_id);  // reset timer to let it start again
@@ -81,40 +74,38 @@ public void ui_project_dialog(valama_project project){
             Signal.stop_emission_by_name(ent_proj_name, "insert_text");
         }
     });
-    /* Clear label if character was deleted. */
-    /*FIXME: Code duplication. */
-    ent_proj_name.delete_text.connect(() => {
-        if (timer_id != 0) {
-            Source.remove(timer_id);
-            timer_id = 0;  // reset to zero to avoid race conditions - TODO: is this necessary?
-        }
-        ent_proj_name_err.set_label("");
-    });
 
     box_project_name.pack_start(ent_proj_name, false, false);
     box_project_name.pack_start(ent_proj_name_err, false, false);
     box_project.pack_start(box_project_name, false, false);
+    //box_project.pack_start(new Separator(Orientation.HORIZONTAL), false, false);
 
 
     /*
      * Set project version.
      * Format: X.Y.Z (major version, minor version, patch version)
+     * Restrict major and minor version number to 999 which should be enough.
      */
     var box_version = new Box(Orientation.VERTICAL, 0);
     var box_version_types = new Box(Orientation.HORIZONTAL, 0);
     box_version.pack_start(new Label("Version:"), false, false);
 
-    var ent_major = new Entry();
-    ent_major.text = project.version_major.to_string();
-    box_version_types.pack_start(ent_major, true, true);
+    var ent_major = new SpinButton.with_range(0, 999, 1);
+    ent_major.value = (double) project.version_major;
+    box_version_types.pack_start(ent_major, false, false);
 
-    var ent_minor = new Entry();
-    ent_minor.text = project.version_minor.to_string();
-    box_version_types.pack_start(ent_minor, true, true);
+    var ent_minor = new SpinButton.with_range(0, 999, 1);
+    ent_minor.value = (double) project.version_minor;
+    box_version_types.pack_start(ent_minor, false, false);
 
-    var ent_patch = new Entry();
-    ent_patch.text = project.version_patch.to_string();
-    box_version_types.pack_start(ent_patch, true, true);
+    var ent_patch = new SpinButton.with_range(0, 9999, 1);
+    ent_patch.value = (double) project.version_patch;
+    box_version_types.pack_start(ent_patch, false, false);
+
+    //TODO: Freely customizable version string (perhaps expert settings?).
+    //var ent_version_special = new Entry();
+    //ent_version_special.text = project.version_special;
+    //box_version_types.pack_start(ent_version_special, false, false);
 
     box_version.pack_start(box_version_types, false, false);
     box_project.pack_start(box_version, false, false);
@@ -125,15 +116,22 @@ public void ui_project_dialog(valama_project project){
         switch (response_id) {
             case ResponseType.OK:
                 project.project_name = ent_proj_name.text;
-                project.version_major = int.parse(ent_major.text);
-                project.version_minor = int.parse(ent_minor.text);
-                project.version_patch = int.parse(ent_patch.text);
+                project.version_major = (int) ent_major.value;
+                project.version_minor = (int) ent_minor.value;
+                project.version_patch = (int) ent_patch.value;
+                //project.version_special = ent_version_special;
+                if (timer_id != 0)
+                    Source.remove(timer_id);
                 dlg.destroy();
                 break;
             case ResponseType.CANCEL:
+                if (timer_id != 0)
+                    Source.remove(timer_id);
                 dlg.destroy();
                 break;
             case ResponseType.DELETE_EVENT:  // window manager close
+                if (timer_id != 0)
+                    Source.remove(timer_id);
                 dlg.destroy();
                 break;
             case  ResponseType.REJECT:
@@ -141,13 +139,18 @@ public void ui_project_dialog(valama_project project){
                  * unwanted characters (but this would be a bug if it is not
                  * already recognized before). */
                 ent_proj_name_err.set_label("");
+                if (timer_id != 0)
+                    Source.remove(timer_id);
                 ent_proj_name.text = project.project_name;
-                ent_major.text = project.version_major.to_string();
-                ent_minor.text = project.version_minor.to_string();
-                ent_patch.text = project.version_patch.to_string();
+                ent_major.value = (double) project.version_major;
+                ent_minor.value = (double) project.version_minor;
+                ent_patch.value = (double) project.version_patch;
+                //ent_version_special.text = project.version_special;
                 break;
             default:
                 stderr.printf("Unknown dialog respone id (please report a bug):%d", response_id);
+                if (timer_id != 0)
+                    Source.remove(timer_id);
                 dlg.destroy();
                 break;
         }
