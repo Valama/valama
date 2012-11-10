@@ -82,6 +82,11 @@ public static void main(string[] args){
     var toolbar = new Toolbar();
     vbox_main.pack_start(toolbar, false, true);
 
+    var btnNewFile = new ToolButton.from_stock(Stock.FILE);
+    toolbar.add(btnNewFile);
+    btnNewFile.set_tooltip_text ("Create new file");
+    btnNewFile.clicked.connect(open_new_source_file);
+
     var btnSave = new ToolButton.from_stock(Stock.SAVE);
     toolbar.add(btnSave);
     btnSave.set_tooltip_text ("Save current file");
@@ -184,6 +189,47 @@ static void on_error_selected(ReportWrapper.Error err){
 #endif
     view.buffer.select_range(start, end);
 
+}
+
+/* Create new file and add it to project. */
+static void open_new_source_file() {
+    var fcd = new FileChooserDialog ("Add new file to project",
+                                     window_main,
+                                     FileChooserAction.SAVE,
+                                     Stock.CANCEL,
+                                     ResponseType.CANCEL,
+                                     Stock.OPEN,  // FIXME: Open button not intuitive
+                                     ResponseType.ACCEPT,
+                                     null);
+    /* FIXME: Use absolute path (or path relative to current source file).
+     *        Also restrict paths and file names. */
+    fcd.set_current_folder (".");
+
+    SourceFile source_file = null;
+    if (fcd.run() == ResponseType.ACCEPT) {
+        var f = File.new_for_path (fcd.get_filename());
+        if (!f.query_exists()) {
+            try {
+                    f.create (FileCreateFlags.NONE).close();
+            } catch (GLib.IOError e) {
+                stderr.printf ("Could not write to new file: %s", e.message);
+                return;
+            } catch (GLib.Error e) {
+                stderr.printf ("Could not create new file: %s", e.message);
+                return;
+            }
+        }
+        source_file = new SourceFile (project.guanako_project.code_context,
+                                          SourceFileType.SOURCE,
+                                          fcd.get_filename());
+    };
+    fcd.destroy();
+
+    // FIXME: Update tree view.
+    if (source_file != null) {
+        project.guanako_project.add_source_file (source_file);
+        on_source_file_selected (source_file);
+    }
 }
 
 static void on_build_button_clicked(){
