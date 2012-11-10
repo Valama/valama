@@ -114,51 +114,71 @@ public class project_browser {
         }
     }
 
-   static string[] get_available_packages(){
-       string[] ret = new string[0];
-       string[] paths = new string[]{"/usr/share/vala-" + Config.vala_version + "/vapi", "/usr/share/vala/vapi"};
-       foreach (string path in paths){
+    /*
+     * Get Vala packages from filenames and sort them.
+     */
+    static GLib.List<string>? get_available_packages() {
+        GLib.List<string> list = null;
+        /* FIXME: Hardcoded paths. */
+        string[] paths = new string[] {"/usr/share/vala-" +
+                                       Config.vala_version +
+                                       "/vapi",
+                                       "/usr/share/vala/vapi"};
+        foreach (string path in paths) {
             var enumerator = File.new_for_path (path).enumerate_children (FileAttribute.STANDARD_NAME, 0);
             FileInfo file_info;
             while ((file_info = enumerator.next_file ()) != null) {
                 var filename = file_info.get_name();
-                if (filename.has_suffix(".vapi"))
-                    ret += filename.substring(0, filename.length - 5);
+                if (filename.has_suffix (".vapi"))
+                    list.insert_sorted(filename.substring (0, filename.length - 5), strcmp);
             }
         }
-        return ret;
+        return list;
     }
 
+    /*
+     * Select Vala packages to add/remove to/from build system (with valac).
+     */
     static string? package_selection_dialog(){
 
-        Dialog dlg = new Dialog.with_buttons("Select new packages", window_main, DialogFlags.MODAL, Stock.CANCEL, ResponseType.REJECT, Stock.OK, ResponseType.ACCEPT);
+        Dialog dlg = new Dialog.with_buttons("Select new packages",
+                                            window_main,
+                                            DialogFlags.MODAL,
+                                            Stock.CANCEL,
+                                            ResponseType.REJECT,
+                                            Stock.OK,
+                                            ResponseType.ACCEPT);
 
         var tree_view = new TreeView();
         var listmodel = new ListStore (1, typeof (string));
         tree_view.set_model (listmodel);
 
-        tree_view.insert_column_with_attributes (-1, "Packages", new CellRendererText (), "text", 0);
+        tree_view.insert_column_with_attributes (-1,
+                                                 "Packages",
+                                                 new CellRendererText(),
+                                                 "text",
+                                                 0);
 
+        /* TODO: Implement this with checkbutton. */
         var avail_packages = get_available_packages();
-        foreach (string pkg in avail_packages){
+        foreach (string pkg in avail_packages) {
             TreeIter iter;
             listmodel.append (out iter);
             listmodel.set (iter, 0, pkg);
         }
 
-        var scrw = new ScrolledWindow(null, null);
-        scrw.add(tree_view);
+        var scrw = new ScrolledWindow (null, null);
+        scrw.add (tree_view);
         scrw.show_all();
-        dlg.get_content_area().pack_start(scrw);
-        dlg.set_default_size(400, 600);
+        dlg.get_content_area().pack_start (scrw);
+        dlg.set_default_size (400, 600);
 
         string ret = null;
-        if (dlg.run() == ResponseType.ACCEPT){
+        if (dlg.run() == ResponseType.ACCEPT) {
             TreeModel mdl;
-            var selected_rows = tree_view.get_selection().get_selected_rows(out mdl);
-            foreach (TreePath path in selected_rows){
-                ret = avail_packages[path.get_indices()[0]];
-            }
+            var selected_rows = tree_view.get_selection().get_selected_rows (out mdl);
+            foreach (TreePath path in selected_rows)
+                ret = avail_packages.nth_data(path.get_indices()[0]);
         }
         dlg.destroy();
         return ret;
