@@ -80,11 +80,10 @@ public void ui_create_file_dialog(valama_project project) {
     };
     dlg.destroy();
 
-    // FIXME: Update tree view.
     if (source_file != null) {
         project.guanako_project.add_source_file (source_file);
-        on_source_file_selected (source_file);
         pbrw.build();
+        on_source_file_selected (source_file);
     }
 }
 
