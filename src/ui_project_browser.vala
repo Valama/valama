@@ -40,7 +40,7 @@ public class project_browser {
         var btn_add = new ToolButton(null, null);
         btn_add.icon_name = "list-add-symbolic";
         btn_add.clicked.connect(()=>{
-            var pkg = package_selection_dialog();
+            var pkg = package_selection_dialog(project);
             if (pkg != null){
                 project.guanako_project.add_packages(new string[]{pkg});
                 packages_changed();
@@ -139,7 +139,7 @@ public class project_browser {
     /*
      * Select Vala packages to add/remove to/from build system (with valac).
      */
-    static string? package_selection_dialog(){
+    static string? package_selection_dialog(valama_project project){
 
         Dialog dlg = new Dialog.with_buttons("Select new packages",
                                             window_main,
@@ -162,6 +162,8 @@ public class project_browser {
         /* TODO: Implement this with checkbutton. */
         var avail_packages = get_available_packages();
         foreach (string pkg in avail_packages) {
+            if (pkg in project.guanako_project.packages) //Ignore packages that are already selected
+                continue;
             TreeIter iter;
             listmodel.append (out iter);
             listmodel.set (iter, 0, pkg);
