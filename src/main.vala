@@ -84,17 +84,21 @@ public static void main(string[] args){
 
     var btnSave = new ToolButton.from_stock(Stock.SAVE);
     toolbar.add(btnSave);
+    btnSave.set_tooltip_text ("Save current file");
     btnSave.clicked.connect(write_current_source_file);
 
     var btnBuild = new Gtk.ToolButton.from_stock(Stock.EXECUTE);
+    btnBuild.set_tooltip_text ("Save current file an build project");
     btnBuild.clicked.connect(on_build_button_clicked);
     toolbar.add(btnBuild);
 
     var btnAutoIndent = new Gtk.ToolButton.from_stock(Stock.REFRESH);
+    btnAutoIndent.set_tooltip_text ("Auto Indent");
     btnAutoIndent.clicked.connect(on_auto_indent_button_clicked);
     toolbar.add(btnAutoIndent);
 
     var btnSettings = new Gtk.ToolButton.from_stock(Stock.PREFERENCES);
+    btnSettings.set_tooltip_text ("Settings");
     btnSettings.clicked.connect(()=>{ui_project_dialog(project);});
     toolbar.add(btnSettings);
 
