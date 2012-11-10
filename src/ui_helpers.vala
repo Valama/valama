@@ -41,6 +41,9 @@ public class Entry : Gtk.Entry {
         this.err_label = err_label;
         this.valid_chars = valid_chars;
         this.delay_sec = delay_sec;
+        insert_text.connect((new_text) => {
+            ui_check_input(new_text);
+        });
     }
 
     ~Entry() {

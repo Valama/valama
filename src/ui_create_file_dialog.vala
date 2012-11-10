@@ -49,10 +49,6 @@ public void ui_create_file_dialog(valama_project project) {
     var ent_filename = new Entry.with_inputcheck(ent_filename_err, valid_chars, 5);
     ent_filename.set_placeholder_text("filename");  // this is i.g. not visible
 
-    ent_filename.insert_text.connect((new_text) => {
-        ent_filename.ui_check_input(new_text);
-    });
-
     box_filename.pack_start (ent_filename, false, false);
     box_filename.pack_start (ent_filename_err, false, false);
     box_main.pack_start (frame_filename, true, true);

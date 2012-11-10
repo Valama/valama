@@ -53,10 +53,6 @@ public void ui_project_dialog(valama_project project){
     var ent_proj_name = new Entry.with_inputcheck(ent_proj_name_err, valid_chars, 5);
     ent_proj_name.text = project.project_name;
 
-    ent_proj_name.insert_text.connect((new_text) => {
-        ent_proj_name.ui_check_input(new_text);
-    });
-
     box_project_name.pack_start(ent_proj_name, false, false);
     box_project_name.pack_start(ent_proj_name_err, false, false);
     box_project.pack_start(box_project_name, false, false);
