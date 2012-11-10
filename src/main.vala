@@ -83,13 +83,6 @@ public static void main(string[] args){
     var toolbar = new Toolbar();
     vbox_main.pack_start(toolbar, false, true);
 
-    var btnNewFile = new ToolButton.from_stock(Stock.FILE);
-    toolbar.add(btnNewFile);
-    btnNewFile.set_tooltip_text ("Create new file");
-    btnNewFile.clicked.connect(() => {
-        ui_create_file_dialog(project);
-    });
-
     var btnSave = new ToolButton.from_stock(Stock.SAVE);
     toolbar.add(btnSave);
     btnSave.set_tooltip_text ("Save current file");
@@ -135,7 +128,7 @@ public static void main(string[] args){
     vbox_main.pack_start(scrw3, false, true);
 
     pbrw.source_file_selected.connect(on_source_file_selected);
-    pbrw.packages_changed.connect(()=>{
+    pbrw.symbols_changed.connect(()=>{
         smb_browser.build();
     });
     wdg_report.error_selected.connect(on_error_selected);

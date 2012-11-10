@@ -45,6 +45,18 @@ namespace Guanako{
 
             build_syntax_map();
         }
+        public void remove_file(SourceFile file){
+            var old_files = context.get_source_files();
+            var old_packages = context.get_packages();
+            context = new CodeContext ();
+            parser = new Vala.Parser();
+            foreach (SourceFile old_file in old_files)
+                if (old_file != file)
+                    context.add_source_file(old_file);
+            foreach (string pkg in old_packages)
+                context.add_package(pkg);
+            update();
+        }
         public Symbol root_symbol {
             get { return context.root; }
         }
