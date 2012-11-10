@@ -88,7 +88,7 @@ public class project_browser {
         store.append (out iter_source_files, null);
         store.set (iter_source_files, 0, "Sources", -1);
 
-        foreach (SourceFile sf in project.source_files){
+        foreach (SourceFile sf in project.guanako_project.get_source_files()){
             TreeIter iter_sf;
             store.append (out iter_sf, iter_source_files);
             var name = sf.filename.substring(sf.filename.last_index_of("/") + 1);
@@ -99,7 +99,7 @@ public class project_browser {
             int[] indices = path.get_indices();
             if (indices.length > 1){
                 if (indices[0] == 0)
-                    source_file_selected(project.source_files[indices[1]]);
+                    source_file_selected(project.guanako_project.get_source_files()[indices[1]]);
             }
         });
 

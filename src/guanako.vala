@@ -26,6 +26,14 @@ namespace Guanako{
      public class project {
 
         CodeContext context;
+        public SourceFile[] get_source_files(){ //Not a beautiful piece of code, but necessary to convert from Vala.List
+            SourceFile[] files = new SourceFile[0];
+            foreach (SourceFile file in context.get_source_files())
+                if (file.file_type == SourceFileType.SOURCE)
+                    files += file;
+            return files;
+        }
+
         Vala.Parser parser;
         public Gee.ArrayList<string> packages = new Gee.ArrayList<string>();
 
