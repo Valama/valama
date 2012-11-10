@@ -298,16 +298,15 @@ stdout.printf(depth_string + "Written: " + written + "\n");
                 var children = get_child_symbols(get_type_of_symbol(parent));
                 foreach (Symbol child in children){
                     if (symbol_is_type(child, child_type)){
-                        if (rest != "" && word == child.name){
+                        if (word == child.name){
                             var child_param = new CallParameter();
                             child_param.for_rule_id = current_rule.rule_id;
                             child_param.name = write_to_param;
                             child_param.symbol = child;
                             call_params.add(child_param);
-                            written = written.substring(child.name.length);
-                            return compare (rule[1:rule.length], accessible, written, call_params, depth + 1);
+                            ret.add_all(compare (rule[1:rule.length], accessible, rest, call_params, depth + 1));
                         }
-                        if (rest == "" && child.name.has_prefix(word))
+                        if (rest == "" && child.name.has_prefix(word) && child.name.length > word.length)
                             ret.add(child);
                     }
                 }
@@ -324,9 +323,9 @@ stdout.printf(depth_string + "Written: " + written + "\n");
                 string filter_type = current_rule.expr.substring(1);
                 foreach (Symbol smb in accessible)
                     if (symbol_is_type(smb, filter_type)){
-                        if (rest == "" && smb.name.has_prefix(word))
+                        if (rest == "" && smb.name.has_prefix(word) && smb.name.length > word.length)
                             ret.add(smb);
-                        if (rest != "" && word == smb.name){
+                        if (word == smb.name){
                             if (write_to_param != null){
                                 var child_param = new CallParameter();
                                 child_param.for_rule_id = current_rule.rule_id;
