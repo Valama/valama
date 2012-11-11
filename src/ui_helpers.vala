@@ -26,14 +26,13 @@ using GLib;
  *
  * TODO: Perhaps we should internally handle special characters with
  *       underscore.
- *
- * TODO: Modify input_text signal directly.
  */
 public class Entry : Gtk.Entry {
     uint timer_id = 0;
     Label err_label;
     Regex valid_chars;
     uint delay_sec;
+    bool label_resettable;  // label can be resetted when valid input is provided
 
     public Entry.with_inputcheck (Label err_label,
                                   Regex valid_chars,
@@ -41,8 +40,10 @@ public class Entry : Gtk.Entry {
         this.err_label = err_label;
         this.valid_chars = valid_chars;
         this.delay_sec = delay_sec;
+        this.label_resettable = false;
+
         insert_text.connect((new_text) => {
-            ui_check_input(new_text);
+            this.ui_check_input(new_text);
         });
     }
 
@@ -55,13 +56,30 @@ public class Entry : Gtk.Entry {
         if (!this.valid_chars.match (input_text, 0, out match_info)) {
             this.err_label.set_label (@"Invalid character: '$(match_info.get_string())' Please choose one from: " +
                                 this.valid_chars.get_pattern());
+            this.label_resettable = false;
             this.disable_timer();  // reset timer to let it start again
             this.timer_id = Timeout.add_seconds (this.delay_sec, (() => {
                 this.err_label.set_label ("");
                 return true;
             }));
             Signal.stop_emission_by_name(this, "insert_text");
+        } else if (this.label_resettable) {
+            this.label_resettable = false;
+            this.err_label.set_label ("");
         }
+    }
+
+    /*
+     * If resettable is true. Label will be resettet with next user input.
+     */
+    public void set_label_timer (string error_msg, uint delay, bool resettable = true) {
+        this.err_label.set_label (error_msg);
+        this.label_resettable = resettable;
+        this.disable_timer();
+        this.timer_id = Timeout.add_seconds (delay, (() => {
+            this.err_label.set_label ("");
+            return true;
+        }));
     }
 
     public void disable_timer() {

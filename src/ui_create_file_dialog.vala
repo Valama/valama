@@ -56,25 +56,32 @@ public void ui_create_file_dialog(valama_project project) {
     dlg.get_content_area().pack_start (box_main);
 
     SourceFile source_file = null;
-    if (dlg.run() == ResponseType.ACCEPT) {
-        string filename = project.project_path + "/src/" + ent_filename.text;
-        if (!filename.has_suffix(".vala"))
-            filename += ".vala";
-        var f = File.new_for_path (filename);
-        if (!f.query_exists()) {
-            try {
-                    f.create (FileCreateFlags.NONE).close();
-            } catch (GLib.IOError e) {
-                stderr.printf ("Could not write to new file: %s", e.message);
-            } catch (GLib.Error e) {
-                stderr.printf ("Could not create new file: %s", e.message);
+    dlg.response.connect((response_id) => {
+        if (response_id == ResponseType.ACCEPT) {
+            if (ent_filename.text == "") {
+                ent_filename.set_label_timer ("Don't let this field empty. Name a file.", 10);
+                return;
             }
+            string filename = project.project_path + "/src/" + ent_filename.text;
+            if (!filename.has_suffix(".vala"))
+                filename += ".vala";
+            var f = File.new_for_path (filename);
+            if (!f.query_exists()) {
+                try {
+                        f.create (FileCreateFlags.NONE).close();
+                } catch (GLib.IOError e) {
+                    stderr.printf ("Could not write to new file: %s", e.message);
+                } catch (GLib.Error e) {
+                    stderr.printf ("Could not create new file: %s", e.message);
+                }
+            }
+            source_file = new SourceFile (project.guanako_project.code_context,
+                                        SourceFileType.SOURCE,
+                                        filename);
         }
-        source_file = new SourceFile (project.guanako_project.code_context,
-                                      SourceFileType.SOURCE,
-                                      filename);
-    };
-    dlg.destroy();
+        dlg.destroy();
+    });
+    dlg.run();
 
     if (source_file != null) {
         project.guanako_project.add_source_file (source_file);
