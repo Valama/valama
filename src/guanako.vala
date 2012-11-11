@@ -26,6 +26,14 @@ namespace Guanako{
      public class project {
 
         CodeContext context;
+        public SourceFile[] get_source_files(){ //Not a beautiful piece of code, but necessary to convert from Vala.List
+            SourceFile[] files = new SourceFile[0];
+            foreach (SourceFile file in context.get_source_files())
+                if (file.file_type == SourceFileType.SOURCE)
+                    files += file;
+            return files;
+        }
+
         Vala.Parser parser;
         public Gee.ArrayList<string> packages = new Gee.ArrayList<string>();
 
@@ -36,6 +44,18 @@ namespace Guanako{
             context.profile = Profile.GOBJECT;
 
             build_syntax_map();
+        }
+        public void remove_file(SourceFile file){
+            var old_files = context.get_source_files();
+            var old_packages = context.get_packages();
+            context = new CodeContext ();
+            parser = new Vala.Parser();
+            foreach (SourceFile old_file in old_files)
+                if (old_file != file)
+                    context.add_source_file(old_file);
+            foreach (string pkg in old_packages)
+                context.add_package(pkg);
+            update();
         }
         public Symbol root_symbol {
             get { return context.root; }
@@ -160,8 +180,6 @@ namespace Guanako{
         public Gee.HashSet<Symbol>? propose_symbols(SourceFile file, int line, int col, string written){
             var accessible = get_accessible_symbols(file, line, col);
             var inside_symbol = get_symbol_at_pos(file, line, col);
-
-            //return begin_inside_function(inside_symbol, accessible, written);
 
             rule_id_count = 0;
             if (inside_symbol == null)
@@ -290,32 +308,44 @@ stdout.printf(depth_string + "Written: " + written + "\n");
                 }
                 var parent = parent_param.symbol;
 
+                Regex r2 = /^(?P<word>\w*)(?P<rest>.*)$/;
+                MatchInfo info2;
+                if(!r2.match(written, 0, out info2))
+                    return ret;
+                var word = info2.fetch_named("word");
+                var rest = info2.fetch_named("rest");
+
                 var children = get_child_symbols(get_type_of_symbol(parent));
                 foreach (Symbol child in children){
                     if (symbol_is_type(child, child_type)){
-                        if (written.has_prefix(child.name)){
+                        if (word == child.name){
                             var child_param = new CallParameter();
                             child_param.for_rule_id = current_rule.rule_id;
                             child_param.name = write_to_param;
                             child_param.symbol = child;
                             call_params.add(child_param);
-                            written = written.substring(child.name.length);
-                            return compare (rule[1:rule.length], accessible, written, call_params, depth + 1);
+                            ret.add_all(compare (rule[1:rule.length], accessible, rest, call_params, depth + 1));
                         }
-                        if (child.name.has_prefix(written))
+                        if (rest == "" && child.name.has_prefix(word) && child.name.length > word.length)
                             ret.add(child);
                     }
                 }
                 return ret;
             }
             if (current_rule.expr.has_prefix("%")){
+                Regex r = /^(?P<word>\w*)(?P<rest>.*)$/;
+                MatchInfo info;
+                if(!r.match(written, 0, out info))
+                    return ret;
+                var word = info.fetch_named("word");
+                var rest = info.fetch_named("rest");
+
                 string filter_type = current_rule.expr.substring(1);
                 foreach (Symbol smb in accessible)
                     if (symbol_is_type(smb, filter_type)){
-                        var eq = match(written, smb.name);
-                        if (eq == matchres.STARTED)
+                        if (rest == "" && smb.name.has_prefix(word) && smb.name.length > word.length)
                             ret.add(smb);
-                        if (eq == matchres.COMPLETE){
+                        if (word == smb.name){
                             if (write_to_param != null){
                                 var child_param = new CallParameter();
                                 child_param.for_rule_id = current_rule.rule_id;
@@ -323,8 +353,7 @@ stdout.printf(depth_string + "Written: " + written + "\n");
                                 child_param.symbol = smb;
                                 call_params.add(child_param);
                             }
-                            written = written.substring(smb.name.length);
-                            return compare(rule[1:rule.length], accessible, written, call_params, depth + 1);
+                            ret.add_all(compare(rule[1:rule.length], accessible, rest, call_params, depth + 1));
                         }
                     }
                 return ret;

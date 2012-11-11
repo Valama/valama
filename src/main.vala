@@ -45,6 +45,7 @@ public static int main (string[] args) {
     }
 
     project = new valama_project (proj_file);
+    var pbrw = new project_browser (project);
 
     report_wrapper = new ReportWrapper();
     //report_wrapper = project.guanako_project.code_context.report as ReportWrapper;
@@ -99,7 +100,21 @@ public static int main (string[] args) {
     btnNewFile.set_tooltip_text ("Create new file");
     btnNewFile.clicked.connect (open_new_source_file);
 
+    var btnNewFile = new ToolButton.from_stock (Stock.FILE);
+    toolbar.add (btnNewFile);
+    btnNewFile.set_tooltip_text ("Create new file");
+    btnNewFile.clicked.connect(() => {
+        var source_file = ui_create_file_dialog (project);
+        if (source_file != null) {
+            project.guanako_project.add_source_file (source_file);
+            on_source_file_selected (source_file);
+            pbrw.build();
+            pbrw.symbols_changed();
+        }
+    });
+
     var btnSave = new ToolButton.from_stock (Stock.SAVE);
+    toolbar.add (btnSave);
     btnSave.set_tooltip_text ("Save current file");
     btnSave.clicked.connect (write_current_source_file);
     toolbar.add (btnSave);
@@ -123,8 +138,7 @@ public static int main (string[] args) {
 
     var hbox = new Box (Orientation.HORIZONTAL, 0);
 
-    var pbrw = new project_browser (project);
-    hbox.pack_start (pbrw.widget, false, true);
+    hbox.pack_start(pbrw.widget, false, true);
 
     var scrw = new ScrolledWindow (null, null);
     scrw.add(view);
@@ -145,9 +159,11 @@ public static int main (string[] args) {
     scrw3.set_size_request (0, 150);
     vbox_main.pack_start (scrw3, false, true);
 
-    pbrw.source_file_selected.connect (on_source_file_selected);
-    pbrw.packages_changed.connect (smb_browser.build);
-    wdg_report.error_selected.connect (on_error_selected);
+    pbrw.source_file_selected.connect(on_source_file_selected);
+    pbrw.symbols_changed.connect(()=>{
+        smb_browser.build();
+    });
+    wdg_report.error_selected.connect(on_error_selected);
 
     window_main.add (vbox_main);
     window_main.hide_titlebar_when_maximized = true;
