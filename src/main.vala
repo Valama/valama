@@ -83,6 +83,19 @@ public static void main(string[] args){
     var toolbar = new Toolbar();
     vbox_main.pack_start(toolbar, false, true);
 
+    var btnNewFile = new ToolButton.from_stock(Stock.FILE);
+    toolbar.add (btnNewFile);
+    btnNewFile.set_tooltip_text ("Create new file");
+    btnNewFile.clicked.connect(() => {
+        var source_file = ui_create_file_dialog (project);
+        if (source_file != null) {
+            project.guanako_project.add_source_file (source_file);
+            on_source_file_selected (source_file);
+            pbrw.build();
+            pbrw.symbols_changed();
+        }
+    });
+
     var btnSave = new ToolButton.from_stock(Stock.SAVE);
     toolbar.add(btnSave);
     btnSave.set_tooltip_text ("Save current file");
