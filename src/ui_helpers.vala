@@ -87,3 +87,17 @@ public class Entry : Gtk.Entry {
             Source.remove(this.timer_id);
     }
 }
+
+/*
+ * Simple warning dialog. Check ResponseType.YES or NO.
+ */
+int ui_ask_warning (string warn_msg) {
+    var dlg = new MessageDialog (window_main,
+                                 DialogFlags.MODAL,
+                                 MessageType.WARNING,
+                                 ButtonsType.YES_NO,
+                                 warn_msg);
+    int ret = dlg.run();
+    dlg.destroy();
+    return ret;
+}

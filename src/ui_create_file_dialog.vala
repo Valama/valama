@@ -22,15 +22,15 @@ using GLib;
 using Vala;
 
 /*
- * Create new file and add it to project. If file already exists, it will open.
+ * Create new file and add it to project. If file already exists, open it.
  */
-public void ui_create_file_dialog(valama_project project) {
+public SourceFile? ui_create_file_dialog (valama_project project) {
     var dlg = new Dialog.with_buttons ("Choose filename",
                                        window_main,
                                        DialogFlags.MODAL,
                                        Stock.CANCEL,
                                        ResponseType.CANCEL,
-                                       Stock.OPEN,  // FIXME: Open button not intuitive
+                                       Stock.OPEN,
                                        ResponseType.ACCEPT,
                                        null);
 
@@ -76,18 +76,14 @@ public void ui_create_file_dialog(valama_project project) {
                 }
             }
             source_file = new SourceFile (project.guanako_project.code_context,
-                                        SourceFileType.SOURCE,
-                                        filename);
+                                          SourceFileType.SOURCE,
+                                          filename);
         }
         dlg.destroy();
     });
     dlg.run();
 
-    if (source_file != null) {
-        project.guanako_project.add_source_file (source_file);
-        pbrw.build();
-        on_source_file_selected (source_file);
-    }
+    return source_file;
 }
 
 // vim: set ai ts=4 sts=4 et sw=4

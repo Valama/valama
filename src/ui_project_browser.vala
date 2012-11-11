@@ -39,49 +39,12 @@ public class project_browser {
 
         var btn_add = new ToolButton(null, null);
         btn_add.icon_name = "list-add-symbolic";
-        btn_add.clicked.connect(()=>{
-            TreeModel model;
-            var paths = tree_view.get_selection().get_selected_rows(out model);
-            foreach (TreePath path in paths){
-                var indices = path.get_indices();
-                if (indices.length == 2 && indices[0] == 0){
-                    ui_create_file_dialog(project);
-                    symbols_changed();
-                }
-                if (indices.length == 2 && indices[0] == 1){
-                    var pkg = package_selection_dialog(project);
-                    if (pkg != null){
-                        project.guanako_project.add_packages(new string[]{pkg});
-                        symbols_changed();
-                        build();
-                    }
-                }
-            }
-        });
+        btn_add.clicked.connect(on_add_button);
         toolbar.add(btn_add);
 
         var btn_rem = new ToolButton(null, null);
         btn_rem.icon_name = "list-remove-symbolic";
-        btn_rem.clicked.connect(()=>{
-            TreeModel model;
-            var paths = tree_view.get_selection().get_selected_rows(out model);
-            foreach (TreePath path in paths){
-                var indices = path.get_indices();
-                if (indices.length == 2 && indices[0] == 0){
-                    //TODO: Ask the user before deleting the file!!
-                    var source_file = project.guanako_project.get_source_files()[indices[1]];
-                    File.new_for_path(source_file.filename).delete();
-                    project.guanako_project.remove_file(source_file);
-                    symbols_changed();
-                    build();
-                }
-                if (indices.length == 2 && indices[0] == 1){
-                    project.guanako_project.remove_package(project.guanako_project.packages[indices[1]]);
-                    symbols_changed();
-                    build();
-                }
-            }
-        });
+        btn_rem.clicked.connect(on_remove_button);
         toolbar.add(btn_rem);
 
         var vbox = new VBox(false, 0);
@@ -203,6 +166,74 @@ public class project_browser {
         }
         dlg.destroy();
         return ret;
+    }
+
+    void on_add_button() {
+        TreeModel model;
+        var paths = tree_view.get_selection().get_selected_rows(out model);
+        foreach (TreePath path in paths){
+            var indices = path.get_indices();
+            /*
+             * Allow adding of items also from toplevel trees (don't check
+             * indices.length).
+             */
+            switch (indices[0]) {
+                case 0:
+                    var source_file = ui_create_file_dialog (project);
+                    if (source_file != null) {
+                        //TODO: Check if already loaded.
+                        project.guanako_project.add_source_file (source_file);
+                        on_source_file_selected (source_file);
+                        build();
+                        symbols_changed();
+                    }
+                    break;
+                case 1:
+                    var pkg = package_selection_dialog (project);
+                    if (pkg != null) {
+                        project.guanako_project.add_packages (new string[]{pkg});
+                        build();
+                        symbols_changed();
+                    }
+                    break;
+                default:
+                    stderr.printf ("Unexpected enum value: btn_add.clicked.connect: %d", indices[0]);
+                    stderr.printf ("Please report a bug!");
+                    break;
+            }
+        }
+    }
+
+    void on_remove_button() {
+        TreeModel model;
+        var paths = tree_view.get_selection().get_selected_rows(out model);
+        foreach (TreePath path in paths){
+            var indices = path.get_indices();
+            if (indices.length == 2) {
+                switch (indices[0]) {
+                    case 0:
+                        if (ui_ask_warning ("Do you wan't to delete this file?") == ResponseType.YES) {
+                            var source_file = project.guanako_project.get_source_files()[indices[1]];
+                            if (current_source_file == source_file) //TODO: Switch to file opened last.
+                                on_source_file_selected (project.guanako_project.get_source_files()[0]);
+                            File.new_for_path (source_file.filename).delete();
+                            project.guanako_project.remove_file (source_file);
+                            build();
+                            symbols_changed();
+                        }
+                        break;
+                    case 1:
+                        project.guanako_project.remove_package (project.guanako_project.packages[indices[1]]);
+                        build();
+                        symbols_changed();
+                        break;
+                    default:
+                        stderr.printf ("Unexpected enum value: btn_rem.clicked.connect: %d", indices[0]);
+                        stderr.printf ("Please report a bug!");
+                        break;
+                }
+            }
+        }
     }
 }
 

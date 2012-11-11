@@ -28,7 +28,6 @@ static SourceView view;
 static symbol_browser smb_browser;
 static ReportWrapper report_wrapper;
 static ui_report wdg_report;
-static project_browser pbrw;
 
 static bool parsing = false;
 
@@ -44,6 +43,7 @@ public static void main(string[] args){
         return;
 
     project = new valama_project(proj_file);
+    var pbrw = new project_browser(project);
 
     report_wrapper = new ReportWrapper();
     //report_wrapper = project.guanako_project.code_context.report as ReportWrapper;
@@ -105,7 +105,6 @@ public static void main(string[] args){
 
         var hbox = new HBox(false, 0);
 
-        pbrw = new project_browser(project);
         hbox.pack_start(pbrw.widget, false, true);
 
         var scrw = new ScrolledWindow(null, null);
