@@ -40,11 +40,22 @@ public class project_browser {
         var btn_add = new ToolButton(null, null);
         btn_add.icon_name = "list-add-symbolic";
         btn_add.clicked.connect(()=>{
-            var pkg = package_selection_dialog(project);
-            if (pkg != null){
-                project.guanako_project.add_packages(new string[]{pkg});
-                packages_changed();
-                build();
+            TreeModel model;
+            var paths = tree_view.get_selection().get_selected_rows(out model);
+            foreach (TreePath path in paths){
+                var indices = path.get_indices();
+                if (indices.length == 2 && indices[0] == 0){
+                    ui_create_file_dialog(project);
+                    symbols_changed();
+                }
+                if (indices.length == 2 && indices[0] == 1){
+                    var pkg = package_selection_dialog(project);
+                    if (pkg != null){
+                        project.guanako_project.add_packages(new string[]{pkg});
+                        symbols_changed();
+                        build();
+                    }
+                }
             }
         });
         toolbar.add(btn_add);
@@ -54,11 +65,19 @@ public class project_browser {
         btn_rem.clicked.connect(()=>{
             TreeModel model;
             var paths = tree_view.get_selection().get_selected_rows(out model);
-            foreach ( TreePath path in paths){
+            foreach (TreePath path in paths){
                 var indices = path.get_indices();
+                if (indices.length == 2 && indices[0] == 0){
+                    //TODO: Ask the user before deleting the file!!
+                    var source_file = project.guanako_project.get_source_files()[indices[1]];
+                    File.new_for_path(source_file.filename).delete();
+                    project.guanako_project.remove_file(source_file);
+                    symbols_changed();
+                    build();
+                }
                 if (indices.length == 2 && indices[0] == 1){
                     project.guanako_project.remove_package(project.guanako_project.packages[indices[1]]);
-                    packages_changed();
+                    symbols_changed();
                     build();
                 }
             }
@@ -78,7 +97,7 @@ public class project_browser {
     public Widget widget;
 
     public signal void source_file_selected(SourceFile file);
-    public signal void packages_changed();
+    public signal void symbols_changed();
 
     public void build(){
         var store = new TreeStore (2, typeof (string), typeof (string));
