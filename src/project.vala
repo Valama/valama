@@ -49,14 +49,12 @@ public class valama_project{
                 sf += source_file;
             }
         }
-        source_files = sf;
 
         guanako_project.update();
     }
 
-    public SourceFile[] source_files;
     public Guanako.project guanako_project;
-    string project_path;
+    public string project_path;
     string project_file;
     public int version_major;
     public int version_minor;

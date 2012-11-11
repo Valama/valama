@@ -2,8 +2,8 @@
 	<name>Valama</name>
 	<version>
 		<major>0</major>
-		<minor>0</minor>
-		<patch>0</patch>
+		<minor>1</minor>
+		<patch>2</patch>
 	</version>
 	<packages>
 		<package>gobject-2.0</package>
