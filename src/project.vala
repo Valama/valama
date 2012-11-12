@@ -22,8 +22,8 @@ using GLib;
 using Gee;
 using Xml;
 
-public class valama_project{
-    public valama_project(string project_file){
+public class valama_project {
+    public valama_project (string project_file) {
 
         this.project_file = project_file;
 
@@ -34,20 +34,26 @@ public class valama_project{
 
         load_project_file();
 
-        //Add files in src folder to the project
-        var directory = File.new_for_path (project_path + "/src");
-        var enumerator = directory.enumerate_children (FileAttribute.STANDARD_NAME, 0);
+        /*
+         * Add files in src folder to the project.
+         */
+        try {
+            var directory = File.new_for_path (project_path + "/src");
+            var enumerator = directory.enumerate_children (FileAttribute.STANDARD_NAME, 0);
 
-        SourceFile[] sf = new SourceFile[0];
-        FileInfo file_info;
-        while ((file_info = enumerator.next_file ()) != null) {
-            string file = project_path + "/src/" + file_info.get_name ();
-            if (file.has_suffix(".vala")){
-                stdout.printf(@"Found file $file\n");
-                var source_file = new SourceFile (guanako_project.code_context, SourceFileType.SOURCE, file);
-                guanako_project.add_source_file (source_file);
-                sf += source_file;
+            SourceFile[] sf = new SourceFile[0];
+            FileInfo file_info;
+            while ((file_info = enumerator.next_file()) != null) {
+                string file = project_path + "/src/" + file_info.get_name();
+                if (file.has_suffix (".vala")){
+                    stdout.printf (@"Found file $file\n");
+                    var source_file = new SourceFile (guanako_project.code_context, SourceFileType.SOURCE, file);
+                    guanako_project.add_source_file (source_file);
+                    sf += source_file;
+                }
             }
+        } catch (GLib.Error e) {
+            stderr.printf("Could not open file: %s", e.message);
         }
 
         guanako_project.update();
@@ -61,34 +67,50 @@ public class valama_project{
     public int version_patch;
     public string project_name = "valama_project";
 
-    public string build(){
+    public string build() {
         string ret;
 
-        string pkg_list = "set(required_pkgs\n";
-        foreach (string pkg in guanako_project.packages)
-            pkg_list += pkg + "\n";
-        pkg_list += ")";
+        try {
+            string pkg_list = "set(required_pkgs\n";
+            foreach (string pkg in guanako_project.packages)
+                pkg_list += pkg + "\n";
+            pkg_list += ")";
 
-        var file_stream = File.new_for_path(project_path + "/cmake/project.cmake").replace(null, false, FileCreateFlags.REPLACE_DESTINATION); //(FileCreateFlags.REPLACE_DESTINATION);
-        var data_stream = new DataOutputStream (file_stream);
-        data_stream.put_string ("set(project_name " + project_name + ")\n");
-        data_stream.put_string (@"set($(project_name)_VERSION $version_major.$version_minor.$version_patch)\n");
-        data_stream.put_string (pkg_list);
-        data_stream.close();
+            var file_stream = File.new_for_path (project_path +
+                                    "/cmake/project.cmake").replace(null,
+                                                                    false,
+                                                                    FileCreateFlags.REPLACE_DESTINATION);
+            var data_stream = new DataOutputStream (file_stream);
+            data_stream.put_string ("set(project_name " + project_name + ")\n");
+            data_stream.put_string (@"set($(project_name)_VERSION $version_major.$version_minor.$version_patch)\n");
+            data_stream.put_string (pkg_list);
+            data_stream.close();
+        } catch (GLib.IOError e) {
+            stderr.printf("Could not read file: %s", e.message);
+        } catch (GLib.Error e) {
+            stderr.printf("Could not open file: %s", e.message);
+        }
 
-        GLib.Process.spawn_command_line_sync("sh -c 'cd " + project_path + " && mkdir -p build && cd build && cmake .. && make'", null, out ret);
+        try {
+            GLib.Process.spawn_command_line_sync("sh -c 'cd " + project_path +
+                                                    " && mkdir -p build && cd build && cmake .. && make'",
+                                                 null,
+                                                 out ret);
+        } catch (GLib.SpawnError e) {
+            stderr.printf("Could not execute build process: %s", e.message);
+        }
         return ret;
     }
 
-    void load_project_file (){
-        Xml.Doc* doc = Xml.Parser.parse_file(project_file);
+    void load_project_file(){
+        Xml.Doc* doc = Xml.Parser.parse_file (project_file);
 
         if (doc == null) {
             stdout.printf (@"Cannot read file >$project_file<\n");
             delete doc;
         }
 
-        Xml.Node* root_node = doc->get_root_element ();
+        Xml.Node* root_node = doc->get_root_element();
         if (root_node == null) {
             stdout.printf (@"The file >$project_file< is empty\n");
             delete doc;
@@ -96,47 +118,46 @@ public class valama_project{
 
         var packages = new string[0];
         for (Xml.Node* i = root_node->children; i != null; i = i->next) {
-            if (i->type != ElementType.ELEMENT_NODE) {
+            if (i->type != ElementType.ELEMENT_NODE)
                 continue;
-            }
             if (i->name == "name")
                 project_name = i->get_content();
             if (i->name == "packages")
-                for (Xml.Node* p = i->children; p != null; p = p->next) {
+                for (Xml.Node* p = i->children; p != null; p = p->next)
                     if (p->name == "package")
                         packages += p->get_content();
-                }
             if (i->name == "version")
                 for (Xml.Node* p = i->children; p != null; p = p->next) {
                     if (p->name == "major")
-                        version_major = p->get_content().to_int();
+                        version_major = int.parse (p->get_content());
                     else if (p->name == "minor")
-                        version_minor = p->get_content().to_int();
+                        version_minor = int.parse (p->get_content());
                     else if (p->name == "patch")
-                        version_patch = p->get_content().to_int();
+                        version_patch = int.parse (p->get_content());
                 }
         }
-        guanako_project.add_packages(packages);
+        guanako_project.add_packages (packages);
 
         delete doc;
     }
-    public void save (){
-        var writer = new TextWriter.filename(project_file);
+
+    public void save() {
+        var writer = new TextWriter.filename (project_file);
         writer.set_indent (true);
         writer.set_indent_string ("\t");
 
-        writer.start_element("project");
-        writer.write_element("name", project_name);
+        writer.start_element ("project");
+        writer.write_element ("name", project_name);
 
-        writer.start_element("version");
-        writer.write_element("major", version_major.to_string());
-        writer.write_element("minor", version_minor.to_string());
-        writer.write_element("patch", version_patch.to_string());
+        writer.start_element ("version");
+        writer.write_element ("major", version_major.to_string());
+        writer.write_element ("minor", version_minor.to_string());
+        writer.write_element ("patch", version_patch.to_string());
         writer.end_element();
 
-        writer.start_element("packages");
+        writer.start_element ("packages");
         foreach (string pkg in guanako_project.packages)
-            writer.write_element("package", pkg);
+            writer.write_element ("package", pkg);
         writer.end_element();
         writer.end_element();
     }

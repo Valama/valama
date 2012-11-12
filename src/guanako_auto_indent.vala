@@ -21,19 +21,19 @@ using GLib;
 using Gtk;
 using Vala;
 
-namespace Guanako{
-    public static string auto_indent_buffer(project project, SourceFile file){
-        string[] lines = file.content.split("\n");
+namespace Guanako {
+    public static string auto_indent_buffer (project project, SourceFile file) {
+        string[] lines = file.content.split ("\n");
         for (int q = 0; q < lines.length; q++)
             lines[q] = lines[q].strip();
 
         foreach (var node in file.get_nodes()) {
-            if (node is Symbol){
+            if (node is Symbol) {
                 var cls = node as Symbol;
-                iter_symbol(cls, (smb, depth)=>{
-                    if (smb is Subroutine){
+                iter_symbol(cls, (smb, depth) => {
+                    if (smb is Subroutine) {
                         var sr = smb as Subroutine;
-                        iter_subroutine(sr, (s, depth2)=>{
+                        iter_subroutine (sr, (s, depth2) => {
 #if VALA_LESS_0_18
                             for (int q = s.source_reference.first_line - 1; q <= s.source_reference.last_line - 1; q++)
 #else
@@ -57,6 +57,6 @@ namespace Guanako{
         }
         return new_content;
     }
-    
-
 }
+
+// vim: set ai ts=4 sts=4 et sw=4

@@ -23,7 +23,10 @@ using Vala;
 namespace Guanako{
 
      //Helper function for checking whether a given source location is inside a SourceReference
-    public static bool before_source_ref(SourceFile source_file, int source_line, int source_col, SourceReference? reference){
+    public static bool before_source_ref (SourceFile source_file,
+                                          int source_line,
+                                          int source_col,
+                                          SourceReference? reference) {
         if (reference == null)
             return false;
 
@@ -43,7 +46,11 @@ namespace Guanako{
             return true;
         return false;
     }
-    public static bool after_source_ref(SourceFile source_file, int source_line, int source_col, SourceReference? reference){
+
+    public static bool after_source_ref (SourceFile source_file,
+                                         int source_line,
+                                         int source_col,
+                                         SourceReference? reference) {
         if (reference == null)
             return false;
 
@@ -63,7 +70,11 @@ namespace Guanako{
             return true;
         return false;
     }
-    public static bool inside_source_ref(SourceFile source_file, int source_line, int source_col, SourceReference? reference){
+
+    public static bool inside_source_ref (SourceFile source_file,
+                                          int source_line,
+                                          int source_col,
+                                          SourceReference? reference) {
         if (reference == null)
             return false;
 
@@ -90,3 +101,5 @@ namespace Guanako{
         return true;
     }
 }
+
+// vim: set ai ts=4 sts=4 et sw=4

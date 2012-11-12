@@ -21,12 +21,23 @@ using Gtk;
 using Vala;
 
 public class symbol_browser {
-    public symbol_browser(Guanako.project project){
+    public symbol_browser (Guanako.project project) {
         this.project = project;
 
-        tree_view = new TreeView ();
-        tree_view.insert_column_with_attributes (-1, "Symbol", new CellRendererText (), "text", 0, null);
-        tree_view.insert_column_with_attributes (-1, "Type", new CellRendererText (), "text", 1, null);
+        tree_view = new TreeView();
+        tree_view.insert_column_with_attributes (-1,
+                                                 "Symbol",
+                                                 new CellRendererText(),
+                                                 "text",
+                                                 0,
+                                                 null);
+
+        tree_view.insert_column_with_attributes (-1,
+                                                 "Type",
+                                                 new CellRendererText(),
+                                                 "text",
+                                                 1,
+                                                 null);
 
         build();
 
@@ -37,26 +48,20 @@ public class symbol_browser {
     TreeView tree_view;
     public Widget widget;
 
-    public void build(){
+    public void build() {
         var store = new TreeStore (2, typeof (string), typeof (string));
         tree_view.set_model (store);
 
         TreeIter[] iters = new TreeIter[0];
 
-        Guanako.iter_symbol (project.root_symbol, (smb, depth)=>{
-            if (smb.name != null){
-
+        Guanako.iter_symbol (project.root_symbol, (smb, depth) => {
+            if (smb.name != null) {
                 string tpe = "";
-                if (smb is Class)
-                    tpe = "Class";
-                if (smb is Method)
-                    tpe = "Method";
-                if (smb is Field)
-                    tpe = "Field";
-                if (smb is Constant)
-                    tpe = "Constant";
-                if (smb is Property)
-                    tpe = "Property";
+                if (smb is Class)    tpe = "Class";
+                if (smb is Method)   tpe = "Method";
+                if (smb is Field)    tpe = "Field";
+                if (smb is Constant) tpe = "Constant";
+                if (smb is Property) tpe = "Property";
 
                 TreeIter next;
                 if (depth == 1)
