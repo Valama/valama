@@ -50,7 +50,6 @@ public class valama_project{
                     sf += source_file;
                 }
             }
-            source_files = sf;
         } catch (GLib.Error e) {
             stderr.printf("Could not open file: %s", e.message);
             //TODO: Softly crash here.
