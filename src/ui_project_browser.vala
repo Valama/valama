@@ -22,35 +22,39 @@ using Vala;
 using GLib;
 
 public class project_browser {
-    public project_browser(valama_project project){
+    public project_browser (valama_project project) {
         this.project = project;
 
-        tree_view = new TreeView ();
-        tree_view.insert_column_with_attributes (-1, "Project", new CellRendererText (), "text", 0, null);
-
+        tree_view = new TreeView();
+        tree_view.insert_column_with_attributes (-1,
+                                                 "Project",
+                                                 new CellRendererText(),
+                                                 "text",
+                                                 0,
+                                                 null);
         build();
 
-        var scrw = new ScrolledWindow(null, null);
-        scrw.add(tree_view);
-        scrw.set_size_request(200,0);
+        var scrw = new ScrolledWindow (null, null);
+        scrw.add (tree_view);
+        scrw.set_size_request (200,0);
 
         var toolbar = new Toolbar();
         toolbar.icon_size = 1;
 
-        var btn_add = new ToolButton(null, null);
+        var btn_add = new ToolButton (null, null);
         btn_add.icon_name = "list-add-symbolic";
-        btn_add.clicked.connect(on_add_button);
-        toolbar.add(btn_add);
+        btn_add.clicked.connect (on_add_button);
+        toolbar.add (btn_add);
 
-        var btn_rem = new ToolButton(null, null);
+        var btn_rem = new ToolButton (null, null);
         btn_rem.icon_name = "list-remove-symbolic";
-        btn_rem.clicked.connect(on_remove_button);
-        toolbar.add(btn_rem);
+        btn_rem.clicked.connect (on_remove_button);
+        toolbar.add (btn_rem);
 
-        var vbox = new Box(Orientation.VERTICAL, 0);
+        var vbox = new Box (Orientation.VERTICAL, 0);
 
-        vbox.pack_start(scrw, true, true);
-        vbox.pack_start(toolbar, false, true);
+        vbox.pack_start (scrw, true, true);
+        vbox.pack_start (toolbar, false, true);
 
         widget = vbox;
     }
@@ -59,10 +63,10 @@ public class project_browser {
     TreeView tree_view;
     public Widget widget;
 
-    public signal void source_file_selected(SourceFile file);
+    public signal void source_file_selected (SourceFile file);
     public signal void symbols_changed();
 
-    public void build(){
+    public void build() {
         var store = new TreeStore (2, typeof (string), typeof (string));
         tree_view.set_model (store);
 
@@ -70,18 +74,18 @@ public class project_browser {
         store.append (out iter_source_files, null);
         store.set (iter_source_files, 0, "Sources", -1);
 
-        foreach (SourceFile sf in project.guanako_project.get_source_files()){
+        foreach (SourceFile sf in project.guanako_project.get_source_files()) {
             TreeIter iter_sf;
             store.append (out iter_sf, iter_source_files);
-            var name = sf.filename.substring(sf.filename.last_index_of("/") + 1);
+            var name = sf.filename.substring (sf.filename.last_index_of("/") + 1);
             store.set (iter_sf, 0, name, 1, "", -1);
         }
 
-        tree_view.row_activated.connect((path)=>{
+        tree_view.row_activated.connect ((path) => {
             int[] indices = path.get_indices();
-            if (indices.length > 1){
+            if (indices.length > 1) {
                 if (indices[0] == 0)
-                    source_file_selected(project.guanako_project.get_source_files()[indices[1]]);
+                    source_file_selected (project.guanako_project.get_source_files()[indices[1]]);
             }
         });
 
@@ -89,7 +93,7 @@ public class project_browser {
         store.append (out iter_packages, null);
         store.set (iter_packages, 0, "Packages", -1);
 
-        foreach (string pkg in project.guanako_project.packages){
+        foreach (string pkg in project.guanako_project.packages) {
             TreeIter iter_sf;
             store.append (out iter_sf, iter_packages);
             store.set (iter_sf, 0, pkg, 1, "", -1);
@@ -126,7 +130,7 @@ public class project_browser {
     /*
      * Select Vala packages to add/remove to/from build system (with valac).
      */
-    static string? package_selection_dialog(valama_project project){
+    static string? package_selection_dialog(valama_project project) {
 
         Dialog dlg = new Dialog.with_buttons("Select new packages",
                                             window_main,
@@ -149,7 +153,7 @@ public class project_browser {
         /* TODO: Implement this with checkbutton. */
         var avail_packages = get_available_packages();
         foreach (string pkg in avail_packages) {
-            if (pkg in project.guanako_project.packages) //Ignore packages that are already selected
+            if (pkg in project.guanako_project.packages)  //Ignore packages that are already selected
                 continue;
             TreeIter iter;
             listmodel.append (out iter);
@@ -167,7 +171,7 @@ public class project_browser {
             TreeModel mdl;
             var selected_rows = tree_view.get_selection().get_selected_rows (out mdl);
             foreach (TreePath path in selected_rows)
-                ret = avail_packages.nth_data(path.get_indices()[0]);
+                ret = avail_packages.nth_data (path.get_indices()[0]);
         }
         dlg.destroy();
         return ret;
@@ -175,8 +179,8 @@ public class project_browser {
 
     void on_add_button() {
         TreeModel model;
-        var paths = tree_view.get_selection().get_selected_rows(out model);
-        foreach (TreePath path in paths){
+        var paths = tree_view.get_selection().get_selected_rows (out model);
+        foreach (TreePath path in paths) {
             var indices = path.get_indices();
             /*
              * Allow adding of items also from toplevel trees (don't check
@@ -196,7 +200,7 @@ public class project_browser {
                 case 1:
                     var pkg = package_selection_dialog (project);
                     if (pkg != null) {
-                        project.guanako_project.add_packages (new string[]{pkg});
+                        project.guanako_project.add_packages (new string[] {pkg});
                         build();
                         symbols_changed();
                     }
@@ -211,20 +215,24 @@ public class project_browser {
 
     void on_remove_button() {
         TreeModel model;
-        var paths = tree_view.get_selection().get_selected_rows(out model);
-        foreach (TreePath path in paths){
+        var paths = tree_view.get_selection().get_selected_rows (out model);
+        foreach (TreePath path in paths) {
             var indices = path.get_indices();
             if (indices.length == 2) {
                 switch (indices[0]) {
                     case 0:
                         if (ui_ask_warning ("Do you wan't to delete this file?") == ResponseType.YES) {
                             var source_file = project.guanako_project.get_source_files()[indices[1]];
-                            if (current_source_file == source_file) //TODO: Switch to file opened last.
+                            if (current_source_file == source_file)  //TODO: Switch to file opened last.
                                 on_source_file_selected (project.guanako_project.get_source_files()[0]);
-                            File.new_for_path (source_file.filename).delete();
-                            project.guanako_project.remove_file (source_file);
-                            build();
-                            symbols_changed();
+                            try {
+                                File.new_for_path (source_file.filename).delete();
+                                project.guanako_project.remove_file (source_file);
+                                build();
+                                symbols_changed();
+                            } catch (GLib.Error e) {
+                                stderr.printf ("Unable to delete source file: %s", e.message);
+                            }
                         }
                         break;
                     case 1:

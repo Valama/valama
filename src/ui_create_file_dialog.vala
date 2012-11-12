@@ -34,7 +34,7 @@ public SourceFile? ui_create_file_dialog (valama_project project) {
                                        ResponseType.ACCEPT,
                                        null);
 
-    dlg.set_size_request(420, 100);
+    dlg.set_size_request (420, 100);
     dlg.resizable = false;
 
     var box_main = new Box (Orientation.VERTICAL, 0);
@@ -46,7 +46,7 @@ public SourceFile? ui_create_file_dialog (valama_project project) {
     ent_filename_err.sensitive = false;
 
     Regex valid_chars = /^[a-zA-Z0-9.:_-]+$/;  // keep "-" at the end!
-    var ent_filename = new Entry.with_inputcheck(ent_filename_err, valid_chars, 5);
+    var ent_filename = new Entry.with_inputcheck (ent_filename_err, valid_chars, 5);
     ent_filename.set_placeholder_text("filename");  // this is i.g. not visible
 
     box_filename.pack_start (ent_filename, false, false);
@@ -56,14 +56,14 @@ public SourceFile? ui_create_file_dialog (valama_project project) {
     dlg.get_content_area().pack_start (box_main);
 
     SourceFile source_file = null;
-    dlg.response.connect((response_id) => {
+    dlg.response.connect ((response_id) => {
         if (response_id == ResponseType.ACCEPT) {
             if (ent_filename.text == "") {
                 ent_filename.set_label_timer ("Don't let this field empty. Name a file.", 10);
                 return;
             }
             string filename = project.project_path + "/src/" + ent_filename.text;
-            if (!filename.has_suffix(".vala"))
+            if (!filename.has_suffix (".vala"))
                 filename += ".vala";
             var f = File.new_for_path (filename);
             if (!f.query_exists()) {

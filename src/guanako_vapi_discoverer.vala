@@ -19,9 +19,9 @@
 
 using GLib;
 
-namespace Guanako{
+namespace Guanako {
 
-    public static string? discover_vapi_file(string needle_namespace){
+    public static string? discover_vapi_file (string needle_namespace) {
         var directory = File.new_for_path ("/usr/share/vala-0.16/vapi");
 
         try {
@@ -29,26 +29,25 @@ namespace Guanako{
 
             FileInfo file_info;
             while ((file_info = enumerator.next_file ()) != null) {
-                if (file_info.get_name().has_suffix(".vapi")){
+                if (file_info.get_name().has_suffix (".vapi")) {
                     var file = File.new_for_path ("/usr/share/vala-0.16/vapi/" + file_info.get_name ());
-                    var dis = new DataInputStream (file.read ());
+                    var dis = new DataInputStream (file.read());
                     string line;
-                    // Read lines until end of file (null) is reached
+                    /*
+                     * Read lines until end of file (null) is reached.
+                     */
                     while ((line = dis.read_line (null)) != null)
-                        if (line.contains("namespace " + needle_namespace + " "))
-                            return file_info.get_name().substring(0, file_info.get_name().length - 5);
+                        if (line.contains ("namespace " + needle_namespace + " "))
+                            return file_info.get_name().substring (0, file_info.get_name().length - 5);
                 }
             }
         } catch (GLib.IOError e) {
             stderr.printf("Could not read file: %s", e.message);
-            //TODO: Softly crash here.
         } catch (GLib.Error e) {
             stderr.printf("Could not operate on directory: %s", e.message);
-            //TODO: Softly crash here.
         }
         return null;
     }
-
 }
 
 // vim: set ai ts=4 sts=4 et sw=4

@@ -22,41 +22,41 @@ using Gtk;
 using GLib;
 
 /* Settings window. */
-public void ui_project_dialog(valama_project project){
-    var dlg = new Dialog.with_buttons("Project settings",
-                                    window_main,
-                                    DialogFlags.MODAL,
-                                    Stock.DISCARD,
-                                    ResponseType.REJECT,
-                                    Stock.CANCEL,
-                                    ResponseType.CANCEL,
-                                    Stock.OK,
-                                    ResponseType.OK,
-                                    null);
-    dlg.set_size_request(420, 200);
+public void ui_project_dialog (valama_project project) {
+    var dlg = new Dialog.with_buttons ("Project settings",
+                                       window_main,
+                                        DialogFlags.MODAL,
+                                        Stock.DISCARD,
+                                        ResponseType.REJECT,
+                                        Stock.CANCEL,
+                                        ResponseType.CANCEL,
+                                        Stock.OK,
+                                        ResponseType.OK,
+                                        null);
+    dlg.set_size_request (420, 200);
     dlg.resizable = false;
 
-    var box_main = new Box(Orientation.VERTICAL, 0);
+    var box_main = new Box (Orientation.VERTICAL, 0);
 
-    var frame_project = new Frame("Project");
-    var box_project = new Box(Orientation.VERTICAL, 10);
-    frame_project.add(box_project);
+    var frame_project = new Frame ("Project");
+    var box_project = new Box (Orientation.VERTICAL, 10);
+    frame_project.add (box_project);
 
 
     /* Set project name. */
-    var box_project_name = new Box(Orientation.VERTICAL, 0);
-    box_project_name.pack_start(new Label("Project name:"), false, false);
-    var ent_proj_name_err = new Label("");
+    var box_project_name = new Box (Orientation.VERTICAL, 0);
+    box_project_name.pack_start(new Label ("Project name:"), false, false);
+    var ent_proj_name_err = new Label ("");
     ent_proj_name_err.sensitive = false;
 
     Regex valid_chars = /^[a-zA-Z0-9.:_-]+$/;  // keep "-" at the end!
-    var ent_proj_name = new Entry.with_inputcheck(ent_proj_name_err, valid_chars, 5);
+    var ent_proj_name = new Entry.with_inputcheck (ent_proj_name_err, valid_chars, 5);
     ent_proj_name.text = project.project_name;
 
-    box_project_name.pack_start(ent_proj_name, false, false);
-    box_project_name.pack_start(ent_proj_name_err, false, false);
-    box_project.pack_start(box_project_name, false, false);
-    //box_project.pack_start(new Separator(Orientation.HORIZONTAL), false, false);
+    box_project_name.pack_start (ent_proj_name, false, false);
+    box_project_name.pack_start (ent_proj_name_err, false, false);
+    box_project.pack_start (box_project_name, false, false);
+    //box_project.pack_start (new Separator(Orientation.HORIZONTAL), false, false);
 
 
     /*
@@ -64,33 +64,33 @@ public void ui_project_dialog(valama_project project){
      * Format: X.Y.Z (major version, minor version, patch version)
      * Restrict major and minor version number to 999 which should be enough.
      */
-    var box_version = new Box(Orientation.VERTICAL, 0);
-    var box_version_types = new Box(Orientation.HORIZONTAL, 0);
-    box_version.pack_start(new Label("Version:"), false, false);
+    var box_version = new Box (Orientation.VERTICAL, 0);
+    var box_version_types = new Box (Orientation.HORIZONTAL, 0);
+    box_version.pack_start(new Label ("Version:"), false, false);
 
-    var ent_major = new SpinButton.with_range(0, 999, 1);
+    var ent_major = new SpinButton.with_range (0, 999, 1);
     ent_major.value = (double) project.version_major;
-    box_version_types.pack_start(ent_major, false, false);
+    box_version_types.pack_start (ent_major, false, false);
 
-    var ent_minor = new SpinButton.with_range(0, 999, 1);
+    var ent_minor = new SpinButton.with_range (0, 999, 1);
     ent_minor.value = (double) project.version_minor;
-    box_version_types.pack_start(ent_minor, false, false);
+    box_version_types.pack_start (ent_minor, false, false);
 
-    var ent_patch = new SpinButton.with_range(0, 9999, 1);
+    var ent_patch = new SpinButton.with_range (0, 9999, 1);
     ent_patch.value = (double) project.version_patch;
-    box_version_types.pack_start(ent_patch, false, false);
+    box_version_types.pack_start (ent_patch, false, false);
 
     //TODO: Freely customizable version string (perhaps expert settings?).
     //var ent_version_special = new Entry();
     //ent_version_special.text = project.version_special;
-    //box_version_types.pack_start(ent_version_special, false, false);
+    //box_version_types.pack_start (ent_version_special, false, false);
 
-    box_version.pack_start(box_version_types, false, false);
-    box_project.pack_start(box_version, false, false);
+    box_version.pack_start (box_version_types, false, false);
+    box_project.pack_start (box_version, false, false);
 
 
     /* Save changes only when "OK" button is clicked. Reset on "Discard". */
-    dlg.response.connect((response_id) => {
+    dlg.response.connect ((response_id) => {
         switch (response_id) {
             case ResponseType.OK:
                 project.project_name = ent_proj_name.text;
@@ -110,7 +110,7 @@ public void ui_project_dialog(valama_project project){
                 /* Set label this first, perhaps insert_text will recognize
                  * unwanted characters (but this would be a bug if it is not
                  * already recognized before). */
-                ent_proj_name_err.set_label("");
+                ent_proj_name_err.set_label ("");
                 ent_proj_name.disable_timer();
 
                 ent_proj_name.text = project.project_name;
@@ -120,7 +120,7 @@ public void ui_project_dialog(valama_project project){
                 //ent_version_special.text = project.version_special;
                 break;
             default:
-                stderr.printf("Unknown dialog respone id (please report a bug):%d", response_id);
+                stderr.printf ("Unknown dialog respone id (please report a bug):%d", response_id);
                 dlg.destroy();
                 break;
         }
@@ -128,10 +128,10 @@ public void ui_project_dialog(valama_project project){
 
 
     /* Raise window. */
-    box_main.pack_start(frame_project, true, true);
+    box_main.pack_start (frame_project, true, true);
     box_main.show_all();
 
-    dlg.get_content_area().pack_start(box_main);
+    dlg.get_content_area().pack_start (box_main);
     dlg.run();
 }
 

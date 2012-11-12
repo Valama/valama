@@ -42,8 +42,8 @@ public class Entry : Gtk.Entry {
         this.delay_sec = delay_sec;
         this.label_resettable = false;
 
-        insert_text.connect((new_text) => {
-            this.ui_check_input(new_text);
+        insert_text.connect ((new_text) => {
+            this.ui_check_input (new_text);
         });
     }
 
@@ -62,7 +62,7 @@ public class Entry : Gtk.Entry {
                 this.err_label.set_label ("");
                 return true;
             }));
-            Signal.stop_emission_by_name(this, "insert_text");
+            Signal.stop_emission_by_name (this, "insert_text");
         } else if (this.label_resettable) {
             this.label_resettable = false;
             this.err_label.set_label ("");
@@ -84,7 +84,7 @@ public class Entry : Gtk.Entry {
 
     public void disable_timer() {
         if (this.timer_id != 0)
-            Source.remove(this.timer_id);
+            Source.remove (this.timer_id);
     }
 }
 
