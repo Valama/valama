@@ -1,5 +1,5 @@
 init_method
-?_ $ReturnStatement|$AssignStatement|$CallStatement|$IfStatement|$DeclarationStatement
+?_ $ReturnStatement|$AssignStatement|$CallStatement|$IfStatement|$DeclarationStatement|$SignalConnect
 
 init_deep_space
 ?_ $UsingStatement
@@ -7,7 +7,14 @@ init_deep_space
 
 
 DeclarationStatement
-var|$Type _ *word ?_ = ?_ $Object|$NewExpression ?_ ;
+$TypedDeclaration|$VarDeclaration
+
+VarDeclaration
+var _ *word $Assignment ?_ ;
+
+TypedDeclaration
+$Type _ *word ?$Assignment ?_ ;
+
 
 UsingStatement
 using _ %Namespace{child} ?$NamespaceChild{child} ?_ ;
@@ -17,16 +24,19 @@ NamespaceChild : parent
 
 
 IfStatement
-if ?_ ( ?_ $Object ?_ ==|<|>|<=|>= ?_ $Object ?_ )
+if ?_ ( ?_ $Value ?_ ==|<|>|<=|>= ?_ $Value ?_ )
 
 CallStatement
-$Object ?_ ;
+$MethodCall ?_ ;
 
 AssignStatement
-$Object ?_ = ?_ $Object|$NewExpression ?_ ;
+$Object $Assignment ?_ ;
+
+Assignment
+?_ = ?_ $Value|$NewExpression
 
 ReturnStatement
-return _ $Object|$NewExpression ?_ ;
+return _ $Value|$NewExpression ?_ ;
 
 
 
@@ -52,17 +62,102 @@ TypeIterClass : parent
 
 
 
+SignalConnect
+$SignalALL{@}
+
+SignalIter : parent
+. $SignalALL{parent}
+
+SignalALL : parent
+$SignalChildMethod{parent}|$SignalChildStuff{parent}|$SignalChildVariables{parent}|$SignalChildConnect{parent}
+
+SignalChildStuff : parent
+{parent}>Namespace{a}|{parent}>Class{a} $SignalIter{a}
+
+SignalChildVariables : parent
+{parent}>Variable{a}|{parent}>Property{a} $SignalIter{a}
+
+SignalChildMethod : parent
+{parent}>Method{a} ?_ $MethodCallBrackets{a} ?$SignalIter{a}
+
+SignalChildConnect : parent
+{parent}>Signal{a} .connect ?_ ( ?_ ) ?_ ;
+
+
+
+MethodCall
+$MethodALL{@}
+
+MethodIter : parent
+. $MethodALL{parent}
+
+MethodALL : parent
+$MethodChildMethod{parent}|$MethodChildStuff{parent}|$MethodChildVariables{parent}
+
+MethodChildStuff : parent
+{parent}>Namespace{a}|{parent}>Class{a} $MethodIter{a}
+
+MethodChildVariables : parent
+{parent}>Variable{a}|{parent}>Property{a} $MethodIter{a}
+
+MethodChildMethod : parent
+{parent}>Method{a} ?_ $MethodCallBrackets{a} ?$MethodIter{a}
+
+
+
+Value
+null|$ValueALL{@}
+
+ValueIter : parent
+. $ValueALL{parent}
+
+ValueALL : parent
+$ValueChildMethod{parent}|$ValueChildEnum{parent}|$ValueChildStuff{parent}|$ValueChildConstant{parent}|$ValueChildVariables{parent}
+
+ValueChildStuff : parent
+{parent}>Namespace{a}|{parent}>Class{a} $ValueIter{a}
+
+ValueChildVariables : parent
+{parent}>Variable{a}|{parent}>Property{a} ?$ValueIter{a}
+
+ValueChildConstant : parent
+{parent}>Constant
+
+ValueChildEnum : parent
+{parent}>Enum{child} . {child}>Constant
+
+ValueChildMethod : parent
+{parent}>Method{a} ?_ $MethodCallBrackets{a} ?$ValueIter{a}
+
+
+
+MethodCallBrackets : method
+?_ ( ?$MethodCallParam ?_ )
+
+MethodCallParam
+?_ $Value ?MethodCallParamIter
+
+MethodCallParamIter
+?_ , ?_ $Value ?MethodCallParamIter
+
+
+
+
+
 Object
-%Parameter{a}|%Variable{a} ?$ChildObject{a}
+%Variable{a} ?$ChildObject{a}
 
 ChildObject : parent
-. $ChildVar{parent}|$ChildMeth{parent}
+. $ChildVar{parent}|$ChildMeth{parent}|$ChildEnum{parent}
 
 ChildVar : parent
 {parent}>Variable{child} ?$ChildObject{child}
 
 ChildMeth : parent
 {parent}>Method{mth} ( ?$MethodParameters ) ?$ChildObject{mth}
+
+ChildEnum : parent
+{parent}>Enum{child} . {child}>Constant
 
 
 

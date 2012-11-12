@@ -43,6 +43,10 @@ namespace Guanako{
 
             context.profile = Profile.GOBJECT;
 
+            universal_parameter = new CallParameter();
+            universal_parameter.name = "@";
+            universal_parameter.symbol = null;
+
             build_syntax_map();
         }
         public void remove_file(SourceFile file){
@@ -200,14 +204,23 @@ namespace Guanako{
                 return true;
             if (type == "Namespace" && smb is Namespace)
                 return true;
+            if (type == "Enum" && smb is Enum)
+                return true;
+            if (type == "Constant" && smb is Constant)
+                return true;
+            if (type == "Property" && smb is Property)
+                return true;
+            if (type == "Signal" && smb is Vala.Signal)
+                return true;
             return false;
         }
 
         class CallParameter{
             public int for_rule_id;
             public string name;
-            public Symbol symbol;
+            public Symbol? symbol;
         }
+        CallParameter universal_parameter;
 
         class RuleExpression{
             public string expr;
@@ -221,6 +234,8 @@ namespace Guanako{
         }
 
         CallParameter? find_param(Gee.ArrayList<CallParameter> array, string name, int rule_id){
+            if (name == "@")
+                return universal_parameter;
             foreach (CallParameter param in array)
                 if (param.name == name && param.for_rule_id == rule_id)
                     return param;
@@ -306,7 +321,11 @@ stdout.printf(depth_string + "Written: " + written + "\n");
                     stdout.printf(@"Variable $parent_param_name not found! >$(compare_rule[0].expr)<\n");
                     return ret;
                 }
-                var parent = parent_param.symbol;
+                Symbol[] children;
+                if (parent_param.symbol == null)
+                    children = accessible;
+                else
+                    children = get_child_symbols(get_type_of_symbol(parent_param.symbol));
 
                 Regex r2 = /^(?P<word>\w*)(?P<rest>.*)$/;
                 MatchInfo info2;
@@ -315,7 +334,6 @@ stdout.printf(depth_string + "Written: " + written + "\n");
                 var word = info2.fetch_named("word");
                 var rest = info2.fetch_named("rest");
 
-                var children = get_child_symbols(get_type_of_symbol(parent));
                 foreach (Symbol child in children){
                     if (symbol_is_type(child, child_type)){
                         if (word == child.name){
@@ -375,14 +393,15 @@ stdout.printf(depth_string + "Written: " + written + "\n");
 
                 if (write_to_param != null){
                     var child_param = new CallParameter();
-                    child_param.for_rule_id = rule_id_count;
                     child_param.name = map_syntax[call].parameters[0];
+                    child_param.for_rule_id = rule_id_count;
                     var param = find_param(call_params, write_to_param, current_rule.rule_id);// call_params[write_to_param];
                     if (param == null){
                         stdout.printf(@"Parameter $write_to_param not found in >$(compare_rule[0].expr)<\n");
                         return ret;
                     }
                     child_param.symbol = param.symbol;
+
                     call_params.add(child_param);
 
                 }
