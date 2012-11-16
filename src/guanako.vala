@@ -240,15 +240,26 @@ namespace Guanako {
         }
 
         bool symbol_has_binding(Symbol smb, string binding){
-            if (smb is Method)
+            if (smb is Method){
                 if (binding == "<static>" && ((Method)smb).binding == MemberBinding.STATIC)
                     return true;
-            if (smb is Field)
+                else if (binding == "<instance>" && ((Method)smb).binding == MemberBinding.INSTANCE)
+                    return true;
+            } else if (smb is Field){
                 if (binding == "<static>" && ((Field)smb).binding == MemberBinding.STATIC)
                     return true;
-            if (smb is Property)
+                else if (binding == "<instance>" && ((Field)smb).binding == MemberBinding.INSTANCE)
+                    return true;
+            } else if (smb is Property){
                 if (binding == "<static>" && ((Property)smb).binding == MemberBinding.STATIC)
                     return true;
+                else if (binding == "<instance>" && ((Property)smb).binding == MemberBinding.INSTANCE)
+                    return true;
+                else return false;
+            } else if (smb is Variable){
+                if (binding == "<instance>")
+                    return true;
+            }
             return false;
         }
 

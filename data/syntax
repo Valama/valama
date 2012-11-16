@@ -17,7 +17,7 @@ $Type _ *word ?$Assignment ?_ ;
 
 
 UsingStatement
-using _ %Namespace{child} ?$NamespaceChild{child} ?_ ;
+using _ {@}>Namespace{child} ?$NamespaceChild{child} ?_ ;
 
 NamespaceChild : parent
 . {parent}>Namespace{child} ?$NamespaceChild{child}
@@ -49,10 +49,10 @@ Type
 $TypeClassStart|$TypeNamespaceStart
 
 TypeClassStart
-%Class{a} ?$TypeIterClass{a}
+{@}Class{a} ?$TypeIterClass{a}
 
 TypeNamespaceStart
-%Namespace{a} $TypeIterNamespace{a}|$TypeIterClass{a}
+{@}Namespace{a} $TypeIterNamespace{a}|$TypeIterClass{a}
 
 TypeIterNamespace : parent
 . {parent}>Namespace{child} $TypeIterNamespace{child}|$TypeIterClass{child}
@@ -129,7 +129,7 @@ ValueChildMethodSt : parent
 
 
 ValueChildVariables : parent
-{parent}>Variable{a}|{parent}>Property{a} ?$ValueIter{a}
+{parent}>Variable<instance>{a}|{parent}>Property{a} ?$ValueIter{a}
 
 ValueChildConstant : parent
 {parent}>Constant
@@ -138,7 +138,7 @@ ValueChildEnum : parent
 {parent}>Enum{child} . {child}>Constant
 
 ValueChildMethod : parent
-{parent}>Method{a} ?_ $MethodCallBrackets{a} ?$ValueIter{a}
+{parent}>Method<instance>{a} ?_ $MethodCallBrackets{a} ?$ValueIter{a}
 
 
 
