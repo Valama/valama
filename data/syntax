@@ -106,16 +106,27 @@ MethodChildMethod : parent
 
 
 Value
-null|$ValueALL{@}
+null|$ValueALL{@}|$ValueChildALLSt{@}
 
 ValueIter : parent
 . $ValueALL{parent}
 
 ValueALL : parent
-$ValueChildMethod{parent}|$ValueChildEnum{parent}|$ValueChildStuff{parent}|$ValueChildConstant{parent}|$ValueChildVariables{parent}
+$ValueChildMethod{parent}|$ValueChildEnum{parent}|$ValueChildConstant{parent}|$ValueChildVariables{parent}
 
-ValueChildStuff : parent
-{parent}>Namespace{a}|{parent}>Class{a} $ValueIter{a}
+
+ValueIterSt : parent
+. $ValueChildALLSt{parent}
+
+ValueChildALLSt : parent
+$ValueChildStuffSt{parent}|$ValueChildMethodSt{parent}
+
+ValueChildStuffSt : parent
+{parent}>Namespace{a}|{parent}>Class{a} $ValueIterSt{a}
+
+ValueChildMethodSt : parent
+{parent}>Method<static>{a} ?_ $MethodCallBrackets{a} ?$ValueIterSt{a}
+
 
 ValueChildVariables : parent
 {parent}>Variable{a}|{parent}>Property{a} ?$ValueIter{a}
