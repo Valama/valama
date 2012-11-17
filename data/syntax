@@ -24,7 +24,7 @@ NamespaceChild : parent
 
 
 IfStatement
-if ?_ ( ?_ $Value ?_ ==|<|>|<=|>= ?_ $Value ?_ )
+if ?_ ( ?_ $Comparison ?_ )
 
 CallStatement
 $MethodCall ?_ ;
@@ -45,14 +45,25 @@ new _ $Type ?_ ( ?$MethodParameters )
 
 
 
+Comparison
+$Value ?_ $ValueComparison|$TypeComparison
+
+ValueComparison
+==|<|>|<=|>=|!= ?_ $Value
+
+TypeComparison
+is ?_ $Type
+
+
+
 Type
 $TypeClassStart|$TypeNamespaceStart
 
 TypeClassStart
-{@}Class{a} ?$TypeIterClass{a}
+{@}>Class{a} ?$TypeIterClass{a}
 
 TypeNamespaceStart
-{@}Namespace{a} $TypeIterNamespace{a}|$TypeIterClass{a}
+{@}>Namespace{a} $TypeIterNamespace{a}|$TypeIterClass{a}
 
 TypeIterNamespace : parent
 . {parent}>Namespace{child} $TypeIterNamespace{child}|$TypeIterClass{child}
@@ -69,10 +80,7 @@ SignalIter : parent
 . $SignalALL{parent}
 
 SignalALL : parent
-$SignalChildMethod{parent}|$SignalChildStuff{parent}|$SignalChildVariables{parent}|$SignalChildConnect{parent}
-
-SignalChildStuff : parent
-{parent}>Namespace{a}|{parent}>Class{a} $SignalIter{a}
+$SignalChildMethod{parent}|$SignalChildVariables{parent}|$SignalChildConnect{parent}
 
 SignalChildVariables : parent
 {parent}>Variable{a}|{parent}>Property{a} $SignalIter{a}
@@ -81,7 +89,28 @@ SignalChildMethod : parent
 {parent}>Method{a} ?_ $MethodCallBrackets{a} ?$SignalIter{a}
 
 SignalChildConnect : parent
-{parent}>Signal{a} .connect ?_ ( ?_ ) ?_ ;
+{parent}>Signal{a} . connect ?_ ( ?_ ?$MethodName ?_ ) ?_ ;
+
+
+
+MethodName
+$MethodNameALL{@}
+
+MethodNameIter : parent
+. $MethodNameALL{parent}
+
+MethodNameALL : parent
+$MethodNameChildMethod{parent}|$MethodNameChildStuff{parent}|$MethodNameChildVariables{parent}
+
+MethodNameChildStuff : parent
+{parent}>Namespace{a}|{parent}>Class{a} $MethodNameIter{a}
+
+MethodNameChildVariables : parent
+{parent}>Variable{a}|{parent}>Property{a} $MethodNameIter{a}
+
+MethodNameChildMethod : parent
+{parent}>Method{a}
+
 
 
 
@@ -156,7 +185,7 @@ MethodCallParamIter
 
 
 Object
-%Variable{a} ?$ChildObject{a}
+{@}>Variable{a} ?$ChildObject{a}
 
 ChildObject : parent
 . $ChildVar{parent}|$ChildMeth{parent}|$ChildEnum{parent}
