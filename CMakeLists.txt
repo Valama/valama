@@ -37,7 +37,7 @@ else()
   set(valac_cond "-D;VALA_LESS_0_18")
 endif()
 
-#Little fix to ignore a wrong libvala version
+# Little fix to ignore a wrong libvala version.
 if(VALA_VERSION STRGREATER "0.17.0")
   list( REMOVE_ITEM required_pkgs "libvala-0.16" )
 else()
@@ -53,6 +53,8 @@ set_directory_properties(PROPERTY
   ADDITIONAL_MAKE_CLEAN_FILES "${PROJECT_SOURCE_DIR}/config.vala")
 
 
+add_subdirectory(guanako)
+
 #set(optional_pkgs "libxml-2.0 >= 0.1")
 set(srcfiles "${PROJECT_SOURCE_DIR}/src/*.vala")
 include(ValaPkgs)
@@ -66,6 +68,8 @@ vala_pkgs(VALA_C
     ${PROJECT_SOURCE_DIR}/config.vala
   OPTIONS
     --thread
+    --vapidir=${CMAKE_BINARY_DIR}/guanako  # for guanako.vapi
+    --pkg=guanako
     ${valac_cond}
 )
 if(NOT PkgConfig_FOUND)
@@ -75,7 +79,9 @@ pkg_check_modules(GTHREAD REQUIRED gthread-2.0)
 add_definitions(${GTHREAD_CFLAGS})
 link_libraries(${GTHREAD_LIBRARIES})
 
+include_directories("${PROJECT_BINARY_DIR}/guanako")
 add_executable(valama ${VALA_C})
+target_link_libraries(valama guanako)
 
 # Create changelog on release.
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
@@ -103,7 +109,6 @@ endif()
 install(TARGETS valama DESTINATION "bin")
 
 # Additional files.
-install(FILES "data/syntax" DESTINATION "share/valama")
 install(DIRECTORY "pixmaps/" DESTINATION "share/pixmaps/valama")
 #install(DIRECTORY "data/folder" DESTINATION "share/valama")
 

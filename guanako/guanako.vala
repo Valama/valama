@@ -239,6 +239,30 @@ namespace Guanako {
             return false;
         }
 
+        bool symbol_has_binding(Symbol smb, string binding){
+            if (smb is Method){
+                if (binding == "<static>" && ((Method)smb).binding == MemberBinding.STATIC)
+                    return true;
+                else if (binding == "<instance>" && ((Method)smb).binding == MemberBinding.INSTANCE)
+                    return true;
+            } else if (smb is Field){
+                if (binding == "<static>" && ((Field)smb).binding == MemberBinding.STATIC)
+                    return true;
+                else if (binding == "<instance>" && ((Field)smb).binding == MemberBinding.INSTANCE)
+                    return true;
+            } else if (smb is Property){
+                if (binding == "<static>" && ((Property)smb).binding == MemberBinding.STATIC)
+                    return true;
+                else if (binding == "<instance>" && ((Property)smb).binding == MemberBinding.INSTANCE)
+                    return true;
+                else return false;
+            } else if (smb is Variable){
+                if (binding == "<instance>")
+                    return true;
+            }
+            return false;
+        }
+
         class CallParameter {
             public int for_rule_id;
             public string name;
@@ -289,11 +313,12 @@ namespace Guanako {
                 rule[q] = compare_rule[q].clone();
             RuleExpression current_rule = rule[0];
 
-            string depth_string = "";
+            //Uncomment this to see every step the parser takes in a tree structure
+            /*string depth_string = "";
             for (int q = 0; q < depth; q++)
                 depth_string += " ";
             stdout.printf ("\n" + depth_string + "Current rule: " + current_rule.expr + "\n");
-            stdout.printf (depth_string + "Written: " + written + "\n");
+            stdout.printf (depth_string + "Written: " + written + "\n");*/
 
             if (current_rule.expr.contains ("|")) {
                 var splt = current_rule.expr.split ("|");
@@ -340,7 +365,7 @@ namespace Guanako {
             }
 
             if (current_rule.expr.has_prefix ("{")) {
-                Regex r = /^{(?P<parent>.*)}>(?P<child>.*)$/;
+                Regex r = /^{(?P<parent>.*)}>(?P<child>\w*)(?P<binding>.*)$/;
                 MatchInfo info;
                 if (!r.match (current_rule.expr, 0, out info)) {
                     stdout.printf ("Malformed rule! >" + compare_rule[0].expr + "<\n");
@@ -349,6 +374,7 @@ namespace Guanako {
 
                 var parent_param_name = info.fetch_named ("parent");
                 var child_type = info.fetch_named ("child");
+                var binding = info.fetch_named ("binding");
 
                 var parent_param = find_param (call_params, parent_param_name, current_rule.rule_id);
                 if (parent_param == null){
@@ -370,6 +396,9 @@ namespace Guanako {
 
                 foreach (Symbol child in children){
                     if (symbol_is_type (child, child_type)){
+                        if (binding != "")
+                            if (!symbol_has_binding(child, binding))
+                                continue;
                         if (word == child.name){
                             var child_param = new CallParameter();
                             child_param.for_rule_id = current_rule.rule_id;
@@ -382,32 +411,6 @@ namespace Guanako {
                             ret.add (child);
                     }
                 }
-                return ret;
-            }
-            if (current_rule.expr.has_prefix ("%")) {
-                Regex r = /^(?P<word>\w*)(?P<rest>.*)$/;
-                MatchInfo info;
-                if(!r.match (written, 0, out info))
-                    return ret;
-                var word = info.fetch_named ("word");
-                var rest = info.fetch_named ("rest");
-
-                string filter_type = current_rule.expr.substring (1);
-                foreach (Symbol smb in accessible)
-                    if (symbol_is_type (smb, filter_type)) {
-                        if (rest == "" && smb.name.has_prefix (word) && smb.name.length > word.length)
-                            ret.add (smb);
-                        if (word == smb.name){
-                            if (write_to_param != null) {
-                                var child_param = new CallParameter();
-                                child_param.for_rule_id = current_rule.rule_id;
-                                child_param.name = write_to_param;
-                                child_param.symbol = smb;
-                                call_params.add (child_param);
-                            }
-                            ret.add_all (compare (rule[1:rule.length], accessible, rest, call_params, depth + 1));
-                        }
-                    }
                 return ret;
             }
             if (current_rule.expr.has_prefix ("$")) {
