@@ -1,5 +1,5 @@
 # SymbolsHelper-Confirmed: 1.0 amd64
-libguanako.so.1.0 libguanako1 #MINVER#
+libguanako.so.1 libguanako1 #MINVER#
  guanako_after_source_ref@Base 1.0
  guanako_auto_indent_buffer@Base 1.0
  guanako_before_source_ref@Base 1.0
