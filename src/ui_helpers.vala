@@ -96,7 +96,8 @@ int ui_ask_warning (string warn_msg) {
                                  DialogFlags.MODAL,
                                  MessageType.WARNING,
                                  ButtonsType.YES_NO,
-                                 warn_msg);
+                                 warn_msg,
+                                 null);
     int ret = dlg.run();
     dlg.destroy();
     return ret;
