@@ -22,3 +22,19 @@ Description: Vala IDE
  Valama is the next generation Vala IDE.
  It comes with the guanako Vala autocompletion library and provides easy symbol
  lookups and supports cmake build system.
+
+Package: libguanako-dev
+Section: libdevel
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Guanako development files
+ Guanako is a Vala code completion library.
+ .
+ This package contains development files.
+
+Package: libguanako-1.0
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Guanako runtime files
+ Guanako is a Vala code completion library.

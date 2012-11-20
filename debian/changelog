@@ -1,8 +1,9 @@
-valama (0.1.2-1) UNRELEASED; urgency=low
+valama (1.0-1) UNRELEASED; urgency=low
 
   * New upstream release.
+  * Separate Guanako library.
 
- -- Dominique Lasserre <lasserre.d@gmail.com>  Fri, 09 Nov 2012 02:35:06 +0100
+ -- Dominique Lasserre <dominique@debsidl>  Tue, 20 Nov 2012 17:09:27 +0100
 
 valama (0.1.1-1) unstable; urgency=low
 
