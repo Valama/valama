@@ -255,7 +255,6 @@ namespace Guanako {
                     return true;
                 else if (binding == "<instance>" && ((Property)smb).binding == MemberBinding.INSTANCE)
                     return true;
-                else return false;
             } else if (smb is Variable){
                 if (binding == "<instance>")
                     return true;
@@ -330,10 +329,10 @@ namespace Guanako {
             }
 
             if (current_rule.expr.has_prefix ("?")) {
-                var r1 = compare (rule[1:rule.length], accessible, written, call_params, depth + 1);
+                if (rule.length > 1)
+                    ret.add_all (compare (rule[1:rule.length], accessible, written, call_params, depth + 1));
                 rule[0].expr = rule[0].expr.substring (1);
                 var r2 = compare (rule, accessible, written, call_params, depth + 1);
-                ret.add_all (r1);
                 ret.add_all (r2);
                 return ret;
             }

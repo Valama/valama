@@ -26,14 +26,17 @@ NamespaceChild : parent
 IfStatement
 if ?_ ( ?_ $Comparison ?_ )
 
+
 CallStatement
 $MethodCall ?_ ;
 
+
 AssignStatement
-$Object $Assignment ?_ ;
+$Assignable $Assignment ?_ ;
 
 Assignment
 ?_ = ?_ $Value|$NewExpression
+
 
 ReturnStatement
 return _ $Value|$NewExpression ?_ ;
@@ -115,22 +118,36 @@ MethodNameChildMethod : parent
 
 
 MethodCall
-$MethodALL{@}
+$MethodInst{@}|$MethodChildStuffStat{@}
+#$MethodInst{@}|$MethodStat{@}
 
-MethodIter : parent
-. $MethodALL{parent}
+MethodIterInst : parent
+. $MethodInst{parent}
 
-MethodALL : parent
-$MethodChildMethod{parent}|$MethodChildStuff{parent}|$MethodChildVariables{parent}
+MethodIterStat : parent
+. $MethodStat{parent}
 
-MethodChildStuff : parent
-{parent}>Namespace{a}|{parent}>Class{a} $MethodIter{a}
+MethodInst : parent
+$MethodChildMethodInst{parent}|$MethodChildVariablesInst{parent}
 
-MethodChildVariables : parent
-{parent}>Variable{a}|{parent}>Property{a} $MethodIter{a}
+MethodStat : parent
+$MethodChildMethodStat{parent}|$MethodChildStuffStat{parent}|$MethodChildVariablesStat{parent}
 
-MethodChildMethod : parent
-{parent}>Method{a} ?_ $MethodCallBrackets{a} ?$MethodIter{a}
+MethodChildStuffStat : parent
+{parent}>Namespace{a}|{parent}>Class{a} $MethodIterStat{a}
+
+MethodChildVariablesStat : parent
+{parent}>Variable<static>{a}|{parent}>Property<static>{a} $MethodIterStat{a}
+
+MethodChildMethodStat : parent
+{parent}>Method<static>{a} ?_ $MethodCallBrackets{a} ?$MethodIterStat{a}
+
+
+MethodChildMethodInst : parent
+{parent}>Method<instance>{a} ?_ $MethodCallBrackets{a} ?$MethodIterInst{a}
+
+MethodChildVariablesInst : parent
+{parent}>Variable<instance>{a}|{parent}>Property<instance>{a} $MethodIterInst{a}
 
 
 
@@ -180,6 +197,31 @@ MethodCallParam
 MethodCallParamIter
 ?_ , ?_ $Value ?MethodCallParamIter
 
+
+Assignable
+$AssgInst{@}|$AssgChildStuffStat{@}
+
+AssgIterInst : parent
+. $AssgInst{parent}
+
+AssgIterStat : parent
+. $AssgStat{parent}
+
+AssgInst : parent
+$AssgChildVariablesInst{parent}
+
+AssgStat : parent
+$AssgChildStuffStat{parent}|$AssgChildVariablesStat{parent}
+
+AssgChildStuffStat : parent
+{parent}>Namespace{a}|{parent}>Class{a} $AssgIterStat{a}
+
+AssgChildVariablesStat : parent
+{parent}>Variable<static>{a}|{parent}>Property<static>{a} ?$AssgIterStat{a}
+
+
+AssgChildVariablesInst : parent
+{parent}>Variable<instance>{a}|{parent}>Property<instance>{a} ?$AssgIterInst{a}
 
 
 
