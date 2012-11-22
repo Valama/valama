@@ -75,7 +75,7 @@ namespace Guanako {
             get { return context; }
         }
 
-        public void add_packages (string[] package_names) {
+        public void add_packages (string[] package_names, bool auto_update) {
             var deps = get_package_dependencies (packages.to_array());
 
             var new_deps = package_names;
@@ -88,12 +88,13 @@ namespace Guanako {
                 context.add_external_package (package_name);
             }
 
-            foreach (string pkg in new_deps) {
-                var pkg_file = get_source_file (context.get_vapi_path (pkg));
-                if (pkg_file == null)
-                    continue;
-                update_file (pkg_file);
-            }
+            if (auto_update)
+                foreach (string pkg in new_deps) {
+                    var pkg_file = get_source_file (context.get_vapi_path (pkg));
+                    if (pkg_file == null)
+                        continue;
+                    update_file (pkg_file);
+                }
         }
 
         SourceFile? get_source_file (string filename) {

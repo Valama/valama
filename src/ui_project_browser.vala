@@ -200,7 +200,7 @@ public class project_browser {
                 case 1:
                     var pkg = package_selection_dialog (project);
                     if (pkg != null) {
-                        project.guanako_project.add_packages (new string[] {pkg});
+                        project.guanako_project.add_packages (new string[] {pkg}, true);
                         build();
                         symbols_changed();
                     }
