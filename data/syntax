@@ -165,7 +165,7 @@ ValueIterSt : parent
 . $ValueChildALLSt{parent}
 
 ValueChildALLSt : parent
-$ValueChildStuffSt{parent}|$ValueChildMethodSt{parent}
+$ValueChildStuffSt{parent}|$ValueChildMethodSt{parent}|$ValueChildEnum{parent}|$ValueChildConstant{parent}
 
 ValueChildStuffSt : parent
 {parent}>Namespace{a}|{parent}>Class{a} $ValueIterSt{a}
@@ -225,26 +225,8 @@ AssgChildVariablesInst : parent
 
 
 
-
-Object
-{@}>Variable{a} ?$ChildObject{a}
-
-ChildObject : parent
-. $ChildVar{parent}|$ChildMeth{parent}|$ChildEnum{parent}
-
-ChildVar : parent
-{parent}>Variable{child} ?$ChildObject{child}
-
-ChildMeth : parent
-{parent}>Method{mth} ( ?$MethodParameters ) ?$ChildObject{mth}
-
-ChildEnum : parent
-{parent}>Enum{child} . {child}>Constant
-
-
-
 MethodParameters
-$Object ?$MethodParametersIter
+$Value ?$MethodParametersIter
 
 MethodParametersIter
 _ , _ $MethodParameters
