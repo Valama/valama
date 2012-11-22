@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="256"
+   height="256"
+   id="svg4466"
+   version="1.1"
+   inkscape:version="0.48.3.1 r9886"
+   sodipodi:docname="V4_logo.svg">
+  <title
+     id="title5339">Valama Logo</title>
+  <defs
+     id="defs4468">
+    <inkscape:path-effect
+       effect="skeletal"
+       id="path-effect4531"
+       is_visible="true"
+       pattern="M 0,5 C 0,2.24 2.24,0 5,0 7.76,0 10,2.24 10,5 10,7.76 7.76,10 5,10 2.24,10 0,7.76 0,5 z"
+       copytype="single_stretched"
+       prop_scale="1"
+       scale_y_rel="false"
+       spacing="0"
+       normal_offset="0"
+       tang_offset="0"
+       prop_units="false"
+       vertical_pattern="false"
+       fuse_tolerance="0" />
+    <inkscape:path-effect
+       effect="skeletal"
+       id="path-effect4527"
+       is_visible="true"
+       pattern="M 0,5 C 0,2.24 2.24,0 5,0 7.76,0 10,2.24 10,5 10,7.76 7.76,10 5,10 2.24,10 0,7.76 0,5 z"
+       copytype="single_stretched"
+       prop_scale="1"
+       scale_y_rel="false"
+       spacing="0"
+       normal_offset="0"
+       tang_offset="0"
+       prop_units="false"
+       vertical_pattern="false"
+       fuse_tolerance="0" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient8383"
+       id="linearGradient3476"
+       gradientUnits="userSpaceOnUse"
+       x1="368.81577"
+       y1="663.32343"
+       x2="371.42651"
+       y2="601.18878" />
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient8383">
+      <stop
+         style="stop-color:#f8334f;stop-opacity:1;"
+         offset="0"
+         id="stop8385" />
+      <stop
+         style="stop-color:#f8334f;stop-opacity:0;"
+         offset="1"
+         id="stop8387" />
+    </linearGradient>
+    <filter
+       color-interpolation-filters="sRGB"
+       inkscape:collect="always"
+       id="filter6210-1-1-9">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="1.6477947"
+         id="feGaussianBlur6212-2-0-1" />
+    </filter>
+    <filter
+       inkscape:collect="always"
+       id="filter5316">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="0.14707809"
+         id="feGaussianBlur5318" />
+    </filter>
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="1.979899"
+     inkscape:cx="192.13338"
+     inkscape:cy="89.979411"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="1920"
+     inkscape:window-height="1016"
+     inkscape:window-x="-2"
+     inkscape:window-y="-3"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata4471">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title>Valama Logo</dc:title>
+        <cc:license
+           rdf:resource="http://www.gnu.org/licenses/gpl.html" />
+        <dc:creator>
+          <cc:Agent>
+            <dc:title>Dominique Lasserre</dc:title>
+          </cc:Agent>
+        </dc:creator>
+        <dc:rights>
+          <cc:Agent>
+            <dc:title>GPLv3+</dc:title>
+          </cc:Agent>
+        </dc:rights>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-796.36218)">
+    <path
+       transform="matrix(0.78420834,0,0,1.371426,-178.02471,95.237794)"
+       style="opacity:0.88999999;fill:url(#linearGradient3476);fill-opacity:1;stroke:#000000;stroke-width:1.62540436px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:0;filter:url(#filter6210-1-1-9)"
+       d="m 349.42207,574.44506 c 0.95467,34.41681 8.21174,110.59712 13.28664,117.2743 12.10212,-13.82828 54.26093,-119.38478 54.26093,-119.38478"
+       id="path3466"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="ccc" />
+    <path
+       style="font-size:medium;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;baseline-shift:baseline;color:#000000;fill:#000000;fill-opacity:1;stroke:none;stroke-width:6.98116635999999957;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Sans;-inkscape-font-specification:Sans;filter:url(#filter5316)"
+       d="m 652.125,884.25 c -1.24103,-0.0478 -2.48432,0.62355 -3.125,1.6875 -6.31968,10.17009 -11.66427,28.93212 -16.78125,49.90625 -5.11698,20.97413 -9.76758,43.96455 -13.75,61.46875 -1.98567,8.7278 -3.83624,16.0841 -5.40625,21.0313 -0.15904,-1.147 -0.32588,-1.6783 -0.46875,-3.1563 -0.72743,-7.5253 -2.19689,-20.23339 -2.40983,-37.14863 -1.33653,-18.25613 -1.94902,-34.81124 -7.15267,-52.13262 -0.53178,-1.75078 -2.60859,-2.8599 -4.35937,-2.32812 -1.75079,0.53178 -2.85991,2.60859 -2.32813,4.35937 5.01597,16.69664 6.65809,33.27744 8.09031,50.70305 0.56496,16.15518 2.58326,45.25495 3.30548,47.53095 0.78222,3.074 1.68868,3.8776 3.38546,4.3597 1.73327,0.7698 4.8234,-3.2357 7.80799,-10.1271 1.01747,-1.9314 4.31004,-12.7077 6.31701,-21.5291 4.01394,-17.64275 8.68,-40.59345 13.75,-61.375 5.07,-20.78155 10.79993,-39.60724 15.9375,-47.875 0.66205,-1.03096 0.7237,-2.41918 0.15566,-3.50478 -0.56805,-1.08559 -1.74372,-1.82637 -2.96816,-1.87022 z"
+       id="path3468"
+       inkscape:connector-curvature="0"
+       transform="matrix(2.2214722,0,0,1.7168986,-1253.9468,-719.03521)"
+       sodipodi:nodetypes="ccsscsccscccccsscsc" />
+    <path
+       style="fill:#d3d5e6;fill-opacity:0.24637685;fill-rule:nonzero;stroke-width:0.92040807;stroke-miterlimit:4;stroke-dasharray:0.46020404, 0.46020404;stroke-dashoffset:0"
+       id="path3470"
+       d="m 189.75369,968.18082 c 2.06108,-0.19938 4.12912,-0.31803 6.1993,-0.38661 0.33179,-0.007 0.6636,-0.0138 0.9954,-0.0194 0,0 -2.04874,0.63345 -2.04874,0.63345 l 0,0 c -0.33101,0.007 -0.66205,0.0155 -0.99306,0.0216 -2.07377,0.0738 -4.14589,0.19448 -6.20954,0.40582 0,0 2.05664,-0.65509 2.05664,-0.65509 z"
+       inkscape:connector-curvature="0" />
+  </g>
+</svg>
