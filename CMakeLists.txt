@@ -49,8 +49,6 @@ configure_file(
   "${PROJECT_SOURCE_DIR}/config.vala.in"
   "${PROJECT_SOURCE_DIR}/config.vala"
 )
-set_directory_properties(PROPERTY
-  ADDITIONAL_MAKE_CLEAN_FILES "${PROJECT_SOURCE_DIR}/config.vala")
 
 
 add_subdirectory(guanako)
@@ -68,8 +66,8 @@ vala_pkgs(VALA_C
     ${PROJECT_SOURCE_DIR}/config.vala
   OPTIONS
     --thread
-    --vapidir=${CMAKE_BINARY_DIR}/guanako  # for guanako.vapi
-    --pkg=guanako
+    --vapidir=${CMAKE_BINARY_DIR}/guanako  # for local guanako.vapi
+    --pkg=guanako  # force it, otherwise it is not included with fst cmake run
     ${valac_cond}
 )
 if(NOT PkgConfig_FOUND)
