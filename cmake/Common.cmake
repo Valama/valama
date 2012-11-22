@@ -32,6 +32,7 @@
 # BASE_LIST
 #   The list which will be transformed to a single string.
 #
+#
 # Simple example:
 #
 #   set(packages "abc" "def" "fhi" "jkl" "mno")
@@ -60,4 +61,73 @@ function(base_list_to_delimited_string output)
   endforeach()
 
   set("${output}" "${list_string}" PARENT_SCOPE)
+endfunction()
+
+
+##
+# Convert svg to png and set up installation places. convert tool from
+# imagemagick is required.
+#
+# Usage:
+# The first parameter is set to all png files. Add them later to a custom
+# target. Generated directories are:
+#   ${prefix}/share/icons/hicolor/${size}x${size}/apps/${png_name}.png
+#
+# ICON
+#   svg icon path
+#
+# SIZES
+#   List of all supported sizes.
+#
+# PNG_NAME
+#   Name of png file (without suffix) which is the target file name.
+#
+#
+# Simple example:
+#
+#   set(sizes 42 43 44)
+#   convert_svg_to_png(png_files
+#     ICON
+#       my_really_cool_icon.svg
+#     SIZES
+#       "${sizes}"
+#     PNG_NAME
+#       freshy
+#   )
+#   add_custom_target(my_target_name ALL DEPENDS ${png_files})
+#
+#   # This will build and install my_really_cool_icon.svg to:
+#   #   /usr/share/icons/hicolor/42x42/apps/freshy.png
+#   #   /usr/share/icons/hicolor/43x43/apps/freshy.png
+#   #   /usr/share/icons/hicolor/44x44/apps/freshy.png
+#
+function(convert_svg_to_png output)
+  cmake_parse_arguments(ARGS "" "" "ICON;SIZES;PNG_NAME" ${ARGN})
+
+  set(png_list)
+  if(ARGS_ICON)
+    if(ARGS_PNG_NAME)
+      find_program(CONVERT convert)
+
+      foreach(size ${ARGS_SIZES})
+        set(tmppath "icons/hicolor/${size}x${size}/apps")
+        set(iconpath "${CMAKE_CURRENT_BINARY_DIR}/${tmppath}/${ARGS_PNG_NAME}.png")
+        execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/${tmppath}")
+        add_custom_command(
+          OUTPUT
+            "${iconpath}"
+          DEPENDS
+            "${ARGS_ICON}"
+          COMMAND
+            ${CONVERT}
+          ARGS
+            -background none -resize "${size}x${size}" "${ARGS_ICON}" "${iconpath}"
+        )
+        list(APPEND png_list "${iconpath}")
+        install(FILES "${iconpath}" DESTINATION "share/${tmppath}")
+      endforeach()
+    endif()
+  endif()
+
+  set(${output} "${png_list}" PARENT_SCOPE)
 endfunction()

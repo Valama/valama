@@ -52,6 +52,7 @@ configure_file(
 
 
 add_subdirectory(guanako)
+add_subdirectory(icons)
 
 #set(optional_pkgs "libxml-2.0 >= 0.1")
 set(srcfiles "${PROJECT_SOURCE_DIR}/src/*.vala")
