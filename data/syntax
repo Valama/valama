@@ -44,7 +44,7 @@ return _ $Value|$NewExpression ?_ ;
 
 
 NewExpression
-new _ $Type ?_ ( ?$MethodParameters )
+new _ $Type ?_ $MethodCallBrackets
 
 
 
@@ -89,7 +89,7 @@ SignalChildVariables : parent
 {parent}>Variable{a}|{parent}>Property{a} $SignalIter{a}
 
 SignalChildMethod : parent
-{parent}>Method{a} ?_ $MethodCallBrackets{a} ?$SignalIter{a}
+{parent}>Method{a} ?_ $MethodCallBrackets ?$SignalIter{a}
 
 SignalChildConnect : parent
 {parent}>Signal{a} . connect ?_ ( ?_ ?$MethodName ?_ ) ?_ ;
@@ -140,11 +140,11 @@ MethodChildVariablesStat : parent
 {parent}>Variable<static>{a}|{parent}>Property<static>{a} $MethodIterStat{a}
 
 MethodChildMethodStat : parent
-{parent}>Method<static>{a} ?_ $MethodCallBrackets{a} ?$MethodIterStat{a}
+{parent}>Method<static>{a} ?_ $MethodCallBrackets ?$MethodIterStat{a}
 
 
 MethodChildMethodInst : parent
-{parent}>Method<instance>{a} ?_ $MethodCallBrackets{a} ?$MethodIterInst{a}
+{parent}>Method<instance>{a} ?_ $MethodCallBrackets ?$MethodIterInst{a}
 
 MethodChildVariablesInst : parent
 {parent}>Variable<instance>{a}|{parent}>Property<instance>{a} $MethodIterInst{a}
@@ -171,7 +171,7 @@ ValueChildStuffSt : parent
 {parent}>Namespace{a}|{parent}>Class{a} $ValueIterSt{a}
 
 ValueChildMethodSt : parent
-{parent}>Method<static>{a} ?_ $MethodCallBrackets{a} ?$ValueIterSt{a}
+{parent}>Method<static>{a} ?_ $MethodCallBrackets ?$ValueIterSt{a}
 
 
 ValueChildVariables : parent
@@ -184,18 +184,18 @@ ValueChildEnum : parent
 {parent}>Enum{child} . {child}>Constant
 
 ValueChildMethod : parent
-{parent}>Method<instance>{a} ?_ $MethodCallBrackets{a} ?$ValueIter{a}
+{parent}>Method<instance>{a} ?_ $MethodCallBrackets ?$ValueIter{a}
 
 
 
-MethodCallBrackets : method
-?_ ( ?$MethodCallParam ?_ )
+MethodCallBrackets
+( ?_ ?$MethodCallParams ?_ )
 
-MethodCallParam
-?_ $Value ?MethodCallParamIter
+MethodCallParams
+$Value ?$MethodCallParamIter
 
 MethodCallParamIter
-?_ , ?_ $Value ?MethodCallParamIter
+?_ , ?_ $Value ?$MethodCallParamIter
 
 
 Assignable
@@ -222,11 +222,3 @@ AssgChildVariablesStat : parent
 
 AssgChildVariablesInst : parent
 {parent}>Variable<instance>{a}|{parent}>Property<instance>{a} ?$AssgIterInst{a}
-
-
-
-MethodParameters
-$Value ?$MethodParametersIter
-
-MethodParametersIter
-_ , _ $MethodParameters
