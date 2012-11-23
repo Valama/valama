@@ -1,19 +1,28 @@
 init_method
-?_ $ReturnStatement|$AssignStatement|$CallStatement|$IfStatement|$DeclarationStatement|$SignalConnect
+?_ $ReturnStatement|$AssignStatement|$CallStatement|$IfStatement|$DeclarationStatement|$SignalConnect|$ForStatement|$ForeachStatement
 
 init_deep_space
 ?_ $UsingStatement
 
 
+ForStatement
+for ?_ ( ?_ $TypedDeclaration ?_ ; ?_ *word ?_ $ValueComparison|$TypeComparison ?_ ; ?_ *word ?_ $Assignment )
+
+ForeachStatement
+foreach ?_ ( ?_ $Type _ *word _ in _ $Value ?_ )
+
+WhileStatement
+while ?_ ( ?_ $Comparison ?_ )
+
 
 DeclarationStatement
-$TypedDeclaration|$VarDeclaration
+$TypedDeclaration|$VarDeclaration  ?_ ;
 
 VarDeclaration
-var _ *word $Assignment ?_ ;
+var _ *word ?_ $Assignment
 
 TypedDeclaration
-$Type _ *word ?$Assignment ?_ ;
+$Type _ *word ?_ ?$Assignment
 
 
 UsingStatement
@@ -32,10 +41,10 @@ $MethodCall ?_ ;
 
 
 AssignStatement
-$Assignable $Assignment ?_ ;
+$Assignable ?_ $Assignment ?_ ;
 
 Assignment
-?_ = ?_ $Value|$NewExpression
+= ?_ $Value|$NewExpression
 
 
 ReturnStatement
@@ -58,9 +67,8 @@ TypeComparison
 is ?_ $Type
 
 
-
 Type
-$TypeClassStart|$TypeNamespaceStart
+$TypeClassStart|$TypeNamespaceStart ?$TemplateBrackets
 
 TypeClassStart
 {@}>Class{a} ?$TypeIterClass{a}
@@ -74,6 +82,12 @@ TypeIterNamespace : parent
 TypeIterClass : parent
 . {parent}>Class{child} ?$TypeIterClass{child}
 
+
+TemplateBrackets
+?_ < ?_ $Type ?$TemplateBracketsIter ?_ >
+
+TemplateBracketsIter
+?_ , ?_ $Type ?$TemplateBracketsIter
 
 
 SignalConnect
@@ -119,7 +133,6 @@ MethodNameChildMethod : parent
 
 MethodCall
 $MethodInst{@}|$MethodChildStuffStat{@}
-#$MethodInst{@}|$MethodStat{@}
 
 MethodIterInst : parent
 . $MethodInst{parent}
