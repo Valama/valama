@@ -75,7 +75,7 @@ namespace Guanako {
             get { return context; }
         }
 
-        public void add_packages (string[] package_names) {
+        public void add_packages (string[] package_names, bool auto_update) {
             var deps = get_package_dependencies (packages.to_array());
 
             var new_deps = package_names;
@@ -88,12 +88,13 @@ namespace Guanako {
                 context.add_external_package (package_name);
             }
 
-            foreach (string pkg in new_deps) {
-                var pkg_file = get_source_file (context.get_vapi_path (pkg));
-                if (pkg_file == null)
-                    continue;
-                update_file (pkg_file);
-            }
+            if (auto_update)
+                foreach (string pkg in new_deps) {
+                    var pkg_file = get_source_file (context.get_vapi_path (pkg));
+                    if (pkg_file == null)
+                        continue;
+                    update_file (pkg_file);
+                }
         }
 
         SourceFile? get_source_file (string filename) {
@@ -255,7 +256,6 @@ namespace Guanako {
                     return true;
                 else if (binding == "<instance>" && ((Property)smb).binding == MemberBinding.INSTANCE)
                     return true;
-                else return false;
             } else if (smb is Variable){
                 if (binding == "<instance>")
                     return true;
@@ -330,10 +330,10 @@ namespace Guanako {
             }
 
             if (current_rule.expr.has_prefix ("?")) {
-                var r1 = compare (rule[1:rule.length], accessible, written, call_params, depth + 1);
+                if (rule.length > 1)
+                    ret.add_all (compare (rule[1:rule.length], accessible, written, call_params, depth + 1));
                 rule[0].expr = rule[0].expr.substring (1);
                 var r2 = compare (rule, accessible, written, call_params, depth + 1);
-                ret.add_all (r1);
                 ret.add_all (r2);
                 return ret;
             }

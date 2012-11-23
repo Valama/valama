@@ -16,5 +16,6 @@
 		<package>gtk+-3.0</package>
 		<package>gtksourceview-3.0</package>
 		<package>libxml-2.0</package>
+		<package>guanako</package>
 	</packages>
 </project>

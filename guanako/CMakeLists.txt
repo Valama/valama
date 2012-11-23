@@ -19,6 +19,16 @@
 include(${CMAKE_SOURCE_DIR}/cmake/guanako.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/Common.cmake)
 
+cmake_minimum_required(VERSION 2.8)
+project("guanako" C)
+
+set(CMAKE_INSTALL_PREFIX "/usr")
+
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/vala")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+
+
+find_package(Vala "0.16" REQUIRED)
 # Little fix to ignore a wrong libvala version.
 if(VALA_VERSION STRGREATER "0.17.0")
   list(REMOVE_ITEM guanako_required_pkgs "libvala-0.16" )
@@ -51,7 +61,7 @@ base_list_to_delimited_string(guanako_deps_requirements
 )
 configure_file("guanako.deps.in" "guanako.deps")
 
-set(srcfiles "${PROJECT_SOURCE_DIR}/guanako/*.vala")
+set(srcfiles "${CMAKE_CURRENT_SOURCE_DIR}/*.vala")
 include(ValaPkgs)
 vala_pkgs(VALA_C
   PACKAGES
@@ -81,11 +91,11 @@ set_target_properties(guanako PROPERTIES
 
 
 install(TARGETS guanako DESTINATION "lib")
-install(FILES "${PROJECT_BINARY_DIR}/guanako/guanako.pc" DESTINATION "lib/pkgconfig")
-install(FILES "${PROJECT_BINARY_DIR}/guanako/guanako.h" DESTINATION "include")
-set(vapi_files "${PROJECT_BINARY_DIR}/guanako/guanako.deps" "${PROJECT_BINARY_DIR}/guanako/guanako.vapi")
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/guanako.pc" DESTINATION "lib/pkgconfig")
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/guanako.h" DESTINATION "include")
+set(vapi_files "${CMAKE_CURRENT_BINARY_DIR}/guanako.deps" "${CMAKE_CURRENT_BINARY_DIR}/guanako.vapi")
 install(FILES ${vapi_files} DESTINATION "${prefix}/share/vala-${vala_version_short}/vapi")
-install(FILES "${PROJECT_BINARY_DIR}/guanako/Guanako-${guanako_version}.gir" DESTINATION "share/gir-1.0")
-install(FILES "${PROJECT_SOURCE_DIR}/data/syntax" DESTINATION "share/valama")
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/Guanako-${guanako_version}.gir" DESTINATION "share/gir-1.0")
+install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/data/syntax" DESTINATION "share/valama")
 
 # vim: set ai ts=2 sts=2 et sw=2

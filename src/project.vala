@@ -136,7 +136,7 @@ public class valama_project {
                         version_patch = int.parse (p->get_content());
                 }
         }
-        guanako_project.add_packages (packages);
+        guanako_project.add_packages (packages, false);
 
         delete doc;
     }
