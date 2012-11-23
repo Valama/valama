@@ -9,7 +9,8 @@ Build-Depends: debhelper (>= 9),
          pkg-config,
          libgtk-3-dev,
          libgtksourceview-3.0-dev,
-         libgee-dev
+         libgee-dev,
+         imagemagick
 Standards-Version: 3.9.4
 Homepage: https://github.com/Valama
 Vcs-Git: git://github.com/Valama/valama.git
