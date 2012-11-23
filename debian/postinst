@@ -1,0 +1,8 @@
+#!/bin/sh
+set -e
+
+if which gtk-update-icon-cache >/dev/null 2>&1 ; then
+  gtk-update-icon-cache -f /usr/share/icons/hicolor
+fi
+
+#DEBHELPER#
