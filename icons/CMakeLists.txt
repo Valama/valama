@@ -1,5 +1,5 @@
 #
-# CMakeLists.txt
+# icons/CMakeLists.txt
 # Copyright (C) 2012, Dominique Lasserre <lasserre.d@gmail.com>
 #
 # Valama is free software: you can redistribute it and/or modify it
