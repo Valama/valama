@@ -106,7 +106,7 @@ SignalChildMethod : parent
 {parent}>Method{a} ?_ $MethodCallBrackets ?$SignalIter{a}
 
 SignalChildConnect : parent
-{parent}>Signal{a} . connect ?_ ( ?_ ?$MethodName ?_ ) ?_ ;
+{parent}>Signal{a} .connect ?_ ( ?_ ?$MethodName ?_ ) ?_ ;
 
 
 
@@ -205,11 +205,13 @@ MethodCallBrackets
 ( ?_ ?$MethodCallParams ?_ )
 
 MethodCallParams
-$Value ?$MethodCallParamIter
+?$RefModif $Value ?$MethodCallParamIter
 
 MethodCallParamIter
-?_ , ?_ $Value ?$MethodCallParamIter
+?_ , ?_ ?$RefModif $Value ?$MethodCallParamIter
 
+RefModif
+ref|out _
 
 Assignable
 $AssgInst{@}|$AssgChildStuffStat{@}

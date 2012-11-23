@@ -20,6 +20,7 @@
 using Gtk;
 using Vala;
 using GLib;
+using Guanako;
 
 static Window window_main;
 
@@ -403,7 +404,7 @@ class TestProvider : Gtk.SourceCompletionProvider, Object {
     }
     GLib.List<Gtk.SourceCompletionItem> props;
     Symbol[] props_symbols;
-    Gee.HashMap<Gtk.SourceCompletionProposal, Symbol> map_proposals;
+    Gee.HashMap<Gtk.SourceCompletionProposal, CompletionProposal> map_proposals;
 
     public void populate (Gtk.SourceCompletionContext context) {
         props = new GLib.List<Gtk.SourceCompletionItem>();
@@ -427,23 +428,23 @@ class TestProvider : Gtk.SourceCompletionProvider, Object {
         if (parsing)
             loop_update.run();
 
-        map_proposals = new Gee.HashMap<Gtk.SourceCompletionProposal, Symbol>();
+        map_proposals = new Gee.HashMap<Gtk.SourceCompletionProposal, CompletionProposal>();
         var proposals = project.guanako_project.propose_symbols (current_source_file, line, col, current_line);
-        foreach (Symbol proposal in proposals) {
-            if (proposal.name != null) {
+        foreach (CompletionProposal proposal in proposals) {
+            if (proposal.symbol.name != null) {
 
                 Gdk.Pixbuf pixbuf = null;
-                if (proposal is Namespace)   pixbuf = map_icons["namespace"];
-                if (proposal is Property)    pixbuf = map_icons["property"];
-                if (proposal is Struct)      pixbuf = map_icons["struct"];
-                if (proposal is Method)      pixbuf = map_icons["method"];
-                if (proposal is Variable)    pixbuf = map_icons["field"];
-                if (proposal is Enum)        pixbuf = map_icons["enum"];
-                if (proposal is Class)       pixbuf = map_icons["class"];
-                if (proposal is Constant)    pixbuf = map_icons["constant"];
-                if (proposal is Vala.Signal) pixbuf = map_icons["signal"];
+                if (proposal.symbol is Namespace)   pixbuf = map_icons["namespace"];
+                if (proposal.symbol is Property)    pixbuf = map_icons["property"];
+                if (proposal.symbol is Struct)      pixbuf = map_icons["struct"];
+                if (proposal.symbol is Method)      pixbuf = map_icons["method"];
+                if (proposal.symbol is Variable)    pixbuf = map_icons["field"];
+                if (proposal.symbol is Enum)        pixbuf = map_icons["enum"];
+                if (proposal.symbol is Class)       pixbuf = map_icons["class"];
+                if (proposal.symbol is Constant)    pixbuf = map_icons["constant"];
+                if (proposal.symbol is Vala.Signal) pixbuf = map_icons["signal"];
 
-                var item = new Gtk.SourceCompletionItem (proposal.name, proposal.name, pixbuf, null);
+                var item = new Gtk.SourceCompletionItem (proposal.symbol.name, proposal.symbol.name, pixbuf, null);
                 props.append (item);
                 map_proposals[item] = proposal;
             }
@@ -468,17 +469,13 @@ class TestProvider : Gtk.SourceCompletionProvider, Object {
 
     public bool activate_proposal (Gtk.SourceCompletionProposal proposal,
                                    Gtk.TextIter iter) {
+        var prop = map_proposals[proposal];
+
         TextIter start = iter;
-        start.backward_find_char ((chr) => {
-            string str = chr.to_string();
-            if (str == "." || str == ")" || str == "(" || str == " " || str == "\n")
-                return true;
-            return false;
-        }, null);
-        start.forward_char();
+        start.backward_chars(prop.replace_length);
+
         view.buffer.delete (ref start, ref iter);
-        string text = proposal.get_text();
-        view.buffer.insert (ref start, text, text.length);
+        view.buffer.insert (ref start, prop.symbol.name, prop.symbol.name.length);
         return true;
     }
 
@@ -510,9 +507,9 @@ class TestProvider : Gtk.SourceCompletionProvider, Object {
             info_inner_widget = null;
         }
 
-        var smb = map_proposals[proposal];
-        if (smb is Method) {
-            var mth = smb as Method;
+        var prop = map_proposals[proposal];
+        if (prop is Method) {
+            var mth = prop.symbol as Method;
             var vbox = new Box(Orientation.VERTICAL, 0);
             string param_string = "";
             foreach (Vala.Parameter param in mth.get_parameters())
@@ -526,7 +523,7 @@ class TestProvider : Gtk.SourceCompletionProvider, Object {
                                         mth.return_type.data_type.name));
             info_inner_widget = vbox;
         } else
-            info_inner_widget = new Label (smb.name);
+            info_inner_widget = new Label (prop.symbol.name);
 
         info_inner_widget.show_all();
         box_info_frame.pack_start (info_inner_widget, true, true);
