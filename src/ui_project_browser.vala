@@ -101,6 +101,14 @@ public class project_browser {
     }
 
     /*
+     * Build project browser with new project.
+     */
+    public void rebuild (valama_project project) {
+        this.project = project;
+        this.build();
+    }
+
+    /*
      * Get Vala packages from filenames and sort them.
      */
     static GLib.List<string>? get_available_packages() {

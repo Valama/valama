@@ -77,6 +77,14 @@ public class symbol_browser {
             return Guanako.iter_callback_returns.continue;
         });
     }
+
+    /*
+     * Build symbols browser with new Guanako project.
+     */
+    public void rebuild (Guanako.project project) {
+        this.project = project;
+        this.build();
+    }
 }
 
 // vim: set ai ts=4 sts=4 et sw=4
