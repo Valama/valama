@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Valama
+GenericName=IDE
+Comment=Create Vala projects.
+Icon=valama
+Exec=valama
+MimeType=application/x-valama
+Categories=GNOME;GTK;Development;IDE;
+Keywords=Vala
