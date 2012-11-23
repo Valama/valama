@@ -95,10 +95,17 @@ public static int main (string[] args) {
     var toolbar = new Toolbar();
     vbox_main.pack_start (toolbar, false, true);
 
+    var btnLoadProject = new ToolButton.from_stock (Stock.OPEN);
+    toolbar.add (btnLoadProject);
+    btnLoadProject.set_tooltip_text ("Open project");
+    btnLoadProject.clicked.connect (() => {
+        ui_load_project(pbrw, smb_browser);
+    });
+
     var btnNewFile = new ToolButton.from_stock (Stock.FILE);
     toolbar.add (btnNewFile);
     btnNewFile.set_tooltip_text ("Create new file");
-    btnNewFile.clicked.connect(() => {
+    btnNewFile.clicked.connect (() => {
         var source_file = ui_create_file_dialog (project);
         if (source_file != null) {
             project.guanako_project.add_source_file (source_file);

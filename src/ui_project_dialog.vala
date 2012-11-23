@@ -21,8 +21,49 @@
 using Gtk;
 using GLib;
 
+/* Load new projects (with dialog). */
+public void ui_load_project(project_browser pbrw, symbol_browser smb_browser) {
+    var dlg = new FileChooserDialog ("Open project",
+                                     window_main,
+                                     FileChooserAction.OPEN,
+                                     Stock.CANCEL,
+                                     ResponseType.CANCEL,
+                                     Stock.OPEN,
+                                     ResponseType.ACCEPT,
+                                     null);
+    valama_project new_project;
+
+    var filter_all = new FileFilter();
+    filter_all.set_filter_name ("View all files");
+    filter_all.add_pattern ("*");
+
+    var filter_vlp = new FileFilter();
+    filter_vlp.set_filter_name ("Valama project files");
+    filter_vlp.add_pattern ("*.vlp");
+
+    dlg.add_filter (filter_all);
+    dlg.add_filter (filter_vlp);
+    dlg.set_filter (filter_vlp);  // set default filter
+
+    if (dlg.run() == ResponseType.ACCEPT) {
+        //FIXME: Save dialog!
+        //TODO: Detect if new project is current project.
+        new_project = new valama_project (dlg.get_filename());
+        //TODO: Check for failures during new project constructor.
+        if (new_project != null) {
+            project = new_project;
+            //TODO: do that with threads
+            pbrw.rebuild (project);
+            smb_browser.rebuild (project.guanako_project);
+            on_source_file_selected (project.guanako_project.get_source_files()[0]);
+        }
+        //TODO: Show failure.
+    }
+    dlg.close();
+}
+
 /* Settings window. */
-public void ui_project_dialog (valama_project project) {
+public void ui_project_dialog (valama_project? project) {
     var dlg = new Dialog.with_buttons ("Project settings",
                                        window_main,
                                         DialogFlags.MODAL,
