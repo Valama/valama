@@ -71,7 +71,7 @@ Type
 $TypeClassStart|$TypeNamespaceStart ?$TemplateBrackets
 
 TypeClassStart
-{@}>Class{a} ?$TypeIterClass{a}
+{@}>Class{a}|{@}>Struct{a} ?$TypeIterClass{a}
 
 TypeNamespaceStart
 {@}>Namespace{a} $TypeIterNamespace{a}|$TypeIterClass{a}
@@ -80,7 +80,7 @@ TypeIterNamespace : parent
 . {parent}>Namespace{child} $TypeIterNamespace{child}|$TypeIterClass{child}
 
 TypeIterClass : parent
-. {parent}>Class{child} ?$TypeIterClass{child}
+. {parent}>Class{child}|{parent}>Struct{child} ?$TypeIterClass{child}
 
 
 TemplateBrackets

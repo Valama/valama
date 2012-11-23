@@ -237,6 +237,8 @@ namespace Guanako {
                 return true;
             if (type == "Signal" && smb is Vala.Signal)
                 return true;
+            if (type == "Struct" && smb is Struct)
+                return true;
             return false;
         }
 
