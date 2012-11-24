@@ -23,7 +23,7 @@ using Gee;
 using Xml;
 
 public class valama_project {
-    public valama_project (string project_file) {
+    public valama_project (string project_file) throws LoadingError {
         var proj_file = File.new_for_path (project_file);
         this.project_file = proj_file.get_path();
         project_path = proj_file.get_parent().get_path();
@@ -31,7 +31,7 @@ public class valama_project {
         guanako_project = new Guanako.project();
 
         stdout.printf ("Load project file: %s\n", this.project_file);
-        load_project_file();
+        load_project_file();  // can throw LoadingError
 
         /*
          * Add file type files in source directory folders to the project.
@@ -114,18 +114,18 @@ public class valama_project {
         return ret;
     }
 
-    void load_project_file(){
+    void load_project_file() throws LoadingError {
         Xml.Doc* doc = Xml.Parser.parse_file (project_file);
 
         if (doc == null) {
-            stdout.printf (@"Cannot read file >$project_file<\n");
             delete doc;
+            throw new LoadingError.FILE_IS_GARBAGE ("Cannot parse file.");
         }
 
         Xml.Node* root_node = doc->get_root_element();
         if (root_node == null) {
-            stdout.printf (@"The file >$project_file< is empty\n");
             delete doc;
+            throw new LoadingError.FILE_IS_EMPTY ("File does not contain enough information");
         }
 
         var packages = new string[0];
@@ -173,4 +173,10 @@ public class valama_project {
         writer.end_element();
         writer.end_element();
     }
+
+}
+
+errordomain LoadingError {
+    FILE_IS_EMPTY,
+    FILE_IS_GARBAGE
 }

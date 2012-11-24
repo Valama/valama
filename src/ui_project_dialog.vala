@@ -31,14 +31,14 @@ public void ui_load_project(project_browser pbrw, symbol_browser smb_browser) {
                                      Stock.OPEN,
                                      ResponseType.ACCEPT,
                                      null);
-    valama_project new_project;
+    valama_project new_project = null;
 
     var filter_all = new FileFilter();
-    filter_all.set_filter_name ("View all files");
+    filter_all.set_filter_name ("View all files (*)");
     filter_all.add_pattern ("*");
 
     var filter_vlp = new FileFilter();
-    filter_vlp.set_filter_name ("Valama project files");
+    filter_vlp.set_filter_name ("Valama project files (*.vlp)");
     filter_vlp.add_pattern ("*.vlp");
 
     dlg.add_filter (filter_all);
@@ -48,20 +48,37 @@ public void ui_load_project(project_browser pbrw, symbol_browser smb_browser) {
     if (dlg.run() == ResponseType.ACCEPT) {
         var new_filename = dlg.get_filename();
         /*
-         * NOTE: This does not check for symlinks etc. but it is very cheap.
+         * On unixoide systems compare inodes. On others only compare file names.
          */
+#if NOT_UNIX
         if (project.project_file != new_filename) {
+#else
+        //TODO: Check if there is a better solution.
+        bool comp;
+        try {
+            comp = (File.new_for_path (new_filename).query_info (FileAttribute.UNIX_INODE,
+                    FileQueryInfoFlags.NONE).get_attribute_as_string (FileAttribute.UNIX_INODE) !=
+                    File.new_for_path (project.project_file).query_info (FileAttribute.UNIX_INODE,
+                    FileQueryInfoFlags.NONE).get_attribute_as_string (FileAttribute.UNIX_INODE));
+        } catch (GLib.Error e) {
+            stderr.printf ("Couln't compare project files inodes: %s", e.message);
+            comp = false;
+        }
+        if (comp) {
+#endif
             //FIXME: Save dialog!
-            new_project = new valama_project (new_filename);
-            //TODO: Check for failures during new project constructor.
-            if (new_project != null) {
-                project = new_project;
-                //TODO: do that with threads
-                pbrw.rebuild (project);
-                smb_browser.rebuild (project.guanako_project);
-                on_source_file_selected (project.guanako_project.get_source_files()[0]);
+            try {
+                new_project = new valama_project (new_filename);
+            } catch (LoadingError e) {
+                stderr.printf ("Couldn't load new project: %s\n", e.message);
+                dlg.close();
+                return;
             }
-            //TODO: Show failure.
+            project = new_project;
+            //TODO: do that with threads
+            pbrw.rebuild (project);
+            smb_browser.rebuild (project.guanako_project);
+            on_source_file_selected (project.guanako_project.get_source_files()[0]);
         } else {
             stdout.printf ("Skip already loaded project: %s\n", new_filename);
         }
