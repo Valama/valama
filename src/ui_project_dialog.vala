@@ -97,7 +97,7 @@ public void ui_project_dialog (valama_project? project) {
     var ent_proj_name_err = new Label ("");
     ent_proj_name_err.sensitive = false;
 
-    Regex valid_chars = /^[a-zA-Z0-9.:_-]+$/;  // keep "-" at the end!
+    Regex valid_chars = /^[a-z0-9.:_-]+$/i;  // keep "-" at the end!
     var ent_proj_name = new Entry.with_inputcheck (ent_proj_name_err, valid_chars, 5);
     ent_proj_name.text = project.project_name;
 
