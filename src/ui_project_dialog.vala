@@ -46,18 +46,25 @@ public void ui_load_project(project_browser pbrw, symbol_browser smb_browser) {
     dlg.set_filter (filter_vlp);  // set default filter
 
     if (dlg.run() == ResponseType.ACCEPT) {
-        //FIXME: Save dialog!
-        //TODO: Detect if new project is current project.
-        new_project = new valama_project (dlg.get_filename());
-        //TODO: Check for failures during new project constructor.
-        if (new_project != null) {
-            project = new_project;
-            //TODO: do that with threads
-            pbrw.rebuild (project);
-            smb_browser.rebuild (project.guanako_project);
-            on_source_file_selected (project.guanako_project.get_source_files()[0]);
+        var new_filename = dlg.get_filename();
+        /*
+         * NOTE: This does not check for symlinks etc. but it is very cheap.
+         */
+        if (project.project_file != new_filename) {
+            //FIXME: Save dialog!
+            new_project = new valama_project (new_filename);
+            //TODO: Check for failures during new project constructor.
+            if (new_project != null) {
+                project = new_project;
+                //TODO: do that with threads
+                pbrw.rebuild (project);
+                smb_browser.rebuild (project.guanako_project);
+                on_source_file_selected (project.guanako_project.get_source_files()[0]);
+            }
+            //TODO: Show failure.
+        } else {
+            stdout.printf ("Skip already loaded project: %s\n", new_filename);
         }
-        //TODO: Show failure.
     }
     dlg.close();
 }
@@ -66,14 +73,14 @@ public void ui_load_project(project_browser pbrw, symbol_browser smb_browser) {
 public void ui_project_dialog (valama_project? project) {
     var dlg = new Dialog.with_buttons ("Project settings",
                                        window_main,
-                                        DialogFlags.MODAL,
-                                        Stock.DISCARD,
-                                        ResponseType.REJECT,
-                                        Stock.CANCEL,
-                                        ResponseType.CANCEL,
-                                        Stock.OK,
-                                        ResponseType.OK,
-                                        null);
+                                       DialogFlags.MODAL,
+                                       Stock.DISCARD,
+                                       ResponseType.REJECT,
+                                       Stock.CANCEL,
+                                       ResponseType.CANCEL,
+                                       Stock.OK,
+                                       ResponseType.OK,
+                                       null);
     dlg.set_size_request (420, 200);
     dlg.resizable = false;
 

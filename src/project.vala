@@ -24,32 +24,42 @@ using Xml;
 
 public class valama_project {
     public valama_project (string project_file) {
-
-        this.project_file = project_file;
-
         var proj_file = File.new_for_path (project_file);
+        this.project_file = proj_file.get_path();
         project_path = proj_file.get_parent().get_path();
 
         guanako_project = new Guanako.project();
 
+        stdout.printf ("Load project file: %s\n", this.project_file);
         load_project_file();
 
         /*
-         * Add files in src folder to the project.
+         * Add file type files in source directory folders to the project.
+         * Default file suffix is .vala and default source directory is src/.
          */
         try {
-            var directory = File.new_for_path (project_path + "/src");
-            var enumerator = directory.enumerate_children (FileAttribute.STANDARD_NAME, 0);
-
-            SourceFile[] sf = new SourceFile[0];
+            File directory;
+            FileEnumerator enumerator;
             FileInfo file_info;
-            while ((file_info = enumerator.next_file()) != null) {
-                string file = project_path + "/src/" + file_info.get_name();
-                if (file.has_suffix (".vala")){
-                    stdout.printf (@"Found file $file\n");
-                    var source_file = new SourceFile (guanako_project.code_context, SourceFileType.SOURCE, file);
-                    guanako_project.add_source_file (source_file);
-                    sf += source_file;
+            SourceFile[] sf = new SourceFile[0];
+
+            foreach (string source_dir in project_source_dirs) {
+                directory = File.new_for_path (project_path + source_dir);
+                enumerator = directory.enumerate_children (FileAttribute.STANDARD_NAME, 0);
+
+                while ((file_info = enumerator.next_file()) != null) {
+                    string file = project_path + source_dir + "/" + file_info.get_name();
+
+                    foreach (string suffix in project_file_types) {
+                        if (file.has_suffix (suffix)){
+                            stdout.printf (@"Found file $file\n");
+                            var source_file = new SourceFile (guanako_project.code_context,
+                                                              SourceFileType.SOURCE,
+                                                              file);
+                            guanako_project.add_source_file (source_file);
+                            sf += source_file;
+                        }
+                    }
                 }
             }
         } catch (GLib.Error e) {
@@ -59,9 +69,11 @@ public class valama_project {
         guanako_project.update();
     }
 
-    public Guanako.project guanako_project;
-    public string project_path;
-    string project_file;
+    public Guanako.project guanako_project { get; private set; }
+    public string project_path { get; private set; }
+    public string project_file { get; private set; }
+    public string[] project_source_dirs { get; private set; default = {"/src",}; }
+    public string[] project_file_types { get; private set; default = {".vala",}; }
     public int version_major;
     public int version_minor;
     public int version_patch;
