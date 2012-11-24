@@ -472,7 +472,7 @@ class TestProvider : Gtk.SourceCompletionProvider, Object {
         var prop = map_proposals[proposal];
 
         TextIter start = iter;
-        start.backward_chars(prop.replace_length);
+        start.backward_chars (prop.replace_length);
 
         view.buffer.delete (ref start, ref iter);
         view.buffer.insert (ref start, prop.symbol.name, prop.symbol.name.length);
