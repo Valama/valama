@@ -45,7 +45,13 @@ public static int main (string[] args) {
         return 1;
     }
 
-    project = new valama_project (proj_file);
+    try {
+        project = new valama_project (proj_file);
+    } catch (LoadingError e) {
+       //FIXME: Handle this error (properly) instead of this pseudo hack.
+        stderr.printf ("Couldn'l load Valama project: %s", e.message);
+        project = null;
+    }
     var pbrw = new project_browser (project);
 
     report_wrapper = new ReportWrapper();
