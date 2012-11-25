@@ -34,7 +34,7 @@ static bool parsing = false;
 
 public static int main (string[] args) {
     Gtk.init (ref args);
-
+ui_create_project_dialog();
     loop_update  = new MainLoop();
 
     string proj_file;
