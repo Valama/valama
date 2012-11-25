@@ -20,37 +20,46 @@
 using Gtk;
 using Vala;
 using GLib;
+using Guanako;
 
 static Window window_main;
 
-static valama_project project;
+static ValamaProject project;
 static SourceView view;
-static symbol_browser smb_browser;
 static ReportWrapper report_wrapper;
 static ui_report wdg_report;
 
 static bool parsing = false;
 
 public static int main (string[] args) {
+    //TODO: Command line parsing.
     Gtk.init (ref args);
 
     loop_update  = new MainLoop();
 
-    string proj_file;
-    if (args.length > 1)
-        proj_file = args[1];
-    else {
-        stderr.printf ("Please pass a .vlp Valama project file. This will change later.");
+    try {
+        if (args.length > 1)
+            project = new ValamaProject(args[1]);
+        else {
+            project = ui_create_project_dialog();
+        }
+    } catch (LoadingError e) {
+        //FIXME: Handle this error (properly) instead of this pseudo hack
+        //       (same as above).
+        stderr.printf ("Couldn't load Valama project: %s", e.message);
+        project = null;
         return 1;
     }
 
-    project = new valama_project (proj_file);
-    var pbrw = new project_browser (project);
+    var ui_elements_pool = new UiElementPool();
+    var pbrw = new ProjectBrowser (project);
+    var smb_browser = new SymbolBrowser();
+    pbrw.connect (smb_browser);
+    ui_elements_pool.add (pbrw);
+    //ui_elements_pool.add (smb_browser);  // dangerous (circulare deps)
 
-    report_wrapper = new ReportWrapper();
-    //report_wrapper = project.guanako_project.code_context.report as ReportWrapper;
+    var report_wrapper = new ReportWrapper();
     project.guanako_project.code_context.report = report_wrapper;
-    //report_wrapper = project.guanako_project.code_context.report as ReportWrapper;
 
     window_main = new Window();
 
@@ -77,10 +86,9 @@ public static int main (string[] args) {
     view.buffer.changed.connect (() => {
         if (!parsing) {
             update_text = view.buffer.text;
-            //FIXME: warning: GLib.Thread.create has been deprecated since 2.32. Use new Thread<T> ()
             try {
-                Thread.create<void*> (update_current_file, true);
-            } catch (GLib.ThreadError e) {
+                new Thread<void*>.try ("Buffer update", update_current_file);
+            } catch (GLib.Error e) {
                 stderr.printf ("Could not create thread to update buffer completion: %s", e.message);
             }
         }
@@ -95,28 +103,38 @@ public static int main (string[] args) {
     var toolbar = new Toolbar();
     vbox_main.pack_start (toolbar, false, true);
 
+    var btnLoadProject = new ToolButton.from_stock (Stock.OPEN);
+    toolbar.add (btnLoadProject);
+    btnLoadProject.set_tooltip_text ("Open project");
+    btnLoadProject.clicked.connect (() => {
+        ui_load_project (ui_elements_pool);
+    });
+
     var btnNewFile = new ToolButton.from_stock (Stock.FILE);
     toolbar.add (btnNewFile);
     btnNewFile.set_tooltip_text ("Create new file");
-    btnNewFile.clicked.connect(() => {
+    btnNewFile.clicked.connect (() => {
         var source_file = ui_create_file_dialog (project);
         if (source_file != null) {
             project.guanako_project.add_source_file (source_file);
             on_source_file_selected (source_file);
-            pbrw.build();
-            pbrw.symbols_changed();
+            pbrw.update();
         }
     });
 
     var btnSave = new ToolButton.from_stock (Stock.SAVE);
     toolbar.add (btnSave);
     btnSave.set_tooltip_text ("Save current file");
-    btnSave.clicked.connect (write_current_source_file);
+    btnSave.clicked.connect (() => {
+        write_current_source_file (ref smb_browser);
+    });
     toolbar.add (btnSave);
 
     var btnBuild = new Gtk.ToolButton.from_stock (Stock.EXECUTE);
     btnBuild.set_tooltip_text ("Save current file an build project");
-    btnBuild.clicked.connect (on_build_button_clicked);
+    btnBuild.clicked.connect (() => {
+        on_build_button_clicked (ref smb_browser);
+    });
     toolbar.add (btnBuild);
 
     var btnAutoIndent = new Gtk.ToolButton.from_stock (Stock.REFRESH);
@@ -133,14 +151,13 @@ public static int main (string[] args) {
 
     var hbox = new Box (Orientation.HORIZONTAL, 0);
 
-    hbox.pack_start(pbrw.widget, false, true);
+    hbox.pack_start (pbrw.widget, false, true);
 
     var scrw = new ScrolledWindow (null, null);
     scrw.add(view);
     hbox.pack_start (scrw, true, true);
 
     var scrw2 = new ScrolledWindow (null, null);
-    smb_browser = new symbol_browser (project.guanako_project);
     scrw2.add (smb_browser.widget);
     scrw2.set_size_request (300, 0);
     hbox.pack_start (scrw2, false, true);
@@ -154,11 +171,8 @@ public static int main (string[] args) {
     scrw3.set_size_request (0, 150);
     vbox_main.pack_start (scrw3, false, true);
 
-    pbrw.source_file_selected.connect(on_source_file_selected);
-    pbrw.symbols_changed.connect(()=>{
-        smb_browser.build();
-    });
-    wdg_report.error_selected.connect(on_error_selected);
+    pbrw.source_file_selected.connect (on_source_file_selected);
+    wdg_report.error_selected.connect (on_error_selected);
 
     window_main.add (vbox_main);
     window_main.hide_titlebar_when_maximized = true;
@@ -200,23 +214,28 @@ static void on_error_selected (ReportWrapper.Error err) {
     on_source_file_selected(err.source.file);
 
     TextIter start;
+    view.buffer.get_iter_at_line_offset (out start,
 #if VALA_LESS_0_18
-    view.buffer.get_iter_at_line_offset (out start, err.source.first_line - 1, err.source.first_column - 1);
+                                         err.source.first_line - 1,
+                                         err.source.first_column - 1);
 #else
-    view.buffer.get_iter_at_line_offset (out start, err.source.begin.line - 1, err.source.begin.column - 1);
+                                         err.source.begin.line - 1,
+                                         err.source.begin.column - 1);
 #endif
     TextIter end;
+    view.buffer.get_iter_at_line_offset (out end,
 #if VALA_LESS_0_18
-    view.buffer.get_iter_at_line_offset (out end, err.source.last_line - 1, err.source.last_column - 1);
+                                         err.source.last_line - 1,
+                                         err.source.last_column - 1);
 #else
-    view.buffer.get_iter_at_line_offset (out end, err.source.end.line - 1, err.source.end.column - 1);
+                                         err.source.end.line - 1,
+                                         err.source.end.column - 1);
 #endif
     view.buffer.select_range (start, end);
-
 }
 
-static void on_build_button_clicked() {
-    write_current_source_file();
+static void on_build_button_clicked (ref SymbolBrowser smb_browser) {
+    write_current_source_file (ref smb_browser);
     report_wrapper.clear();
     project.build();
     wdg_report.build();
@@ -237,7 +256,7 @@ static void on_source_file_selected (SourceFile file){
     }
 }
 
-void write_current_source_file() {
+void write_current_source_file (ref SymbolBrowser smb_browser) {
     var file = File.new_for_path (current_source_file.filename);
     /* TODO: First parameter can be used to check if file has changed.
      *       The second parameter can enable/disable backup file. */
@@ -257,7 +276,7 @@ void write_current_source_file() {
     project.guanako_project.update_file (current_source_file, view.buffer.text);
     wdg_report.build();
 
-    smb_browser.build();
+    smb_browser.update();
 }
 
 static void on_view_buffer_changed(){
@@ -396,7 +415,7 @@ class TestProvider : Gtk.SourceCompletionProvider, Object {
     }
     GLib.List<Gtk.SourceCompletionItem> props;
     Symbol[] props_symbols;
-    Gee.HashMap<Gtk.SourceCompletionProposal, Symbol> map_proposals;
+    Gee.HashMap<Gtk.SourceCompletionProposal, CompletionProposal> map_proposals;
 
     public void populate (Gtk.SourceCompletionContext context) {
         props = new GLib.List<Gtk.SourceCompletionItem>();
@@ -420,23 +439,23 @@ class TestProvider : Gtk.SourceCompletionProvider, Object {
         if (parsing)
             loop_update.run();
 
-        map_proposals = new Gee.HashMap<Gtk.SourceCompletionProposal, Symbol>();
+        map_proposals = new Gee.HashMap<Gtk.SourceCompletionProposal, CompletionProposal>();
         var proposals = project.guanako_project.propose_symbols (current_source_file, line, col, current_line);
-        foreach (Symbol proposal in proposals) {
-            if (proposal.name != null) {
+        foreach (CompletionProposal proposal in proposals) {
+            if (proposal.symbol.name != null) {
 
                 Gdk.Pixbuf pixbuf = null;
-                if (proposal is Namespace)   pixbuf = map_icons["namespace"];
-                if (proposal is Property)    pixbuf = map_icons["property"];
-                if (proposal is Struct)      pixbuf = map_icons["struct"];
-                if (proposal is Method)      pixbuf = map_icons["method"];
-                if (proposal is Variable)    pixbuf = map_icons["field"];
-                if (proposal is Enum)        pixbuf = map_icons["enum"];
-                if (proposal is Class)       pixbuf = map_icons["class"];
-                if (proposal is Constant)    pixbuf = map_icons["constant"];
-                if (proposal is Vala.Signal) pixbuf = map_icons["signal"];
+                if (proposal.symbol is Namespace)   pixbuf = map_icons["namespace"];
+                if (proposal.symbol is Property)    pixbuf = map_icons["property"];
+                if (proposal.symbol is Struct)      pixbuf = map_icons["struct"];
+                if (proposal.symbol is Method)      pixbuf = map_icons["method"];
+                if (proposal.symbol is Variable)    pixbuf = map_icons["field"];
+                if (proposal.symbol is Enum)        pixbuf = map_icons["enum"];
+                if (proposal.symbol is Class)       pixbuf = map_icons["class"];
+                if (proposal.symbol is Constant)    pixbuf = map_icons["constant"];
+                if (proposal.symbol is Vala.Signal) pixbuf = map_icons["signal"];
 
-                var item = new Gtk.SourceCompletionItem (proposal.name, proposal.name, pixbuf, null);
+                var item = new Gtk.SourceCompletionItem (proposal.symbol.name, proposal.symbol.name, pixbuf, null);
                 props.append (item);
                 map_proposals[item] = proposal;
             }
@@ -461,17 +480,13 @@ class TestProvider : Gtk.SourceCompletionProvider, Object {
 
     public bool activate_proposal (Gtk.SourceCompletionProposal proposal,
                                    Gtk.TextIter iter) {
+        var prop = map_proposals[proposal];
+
         TextIter start = iter;
-        start.backward_find_char ((chr) => {
-            string str = chr.to_string();
-            if (str == "." || str == ")" || str == "(" || str == " " || str == "\n")
-                return true;
-            return false;
-        }, null);
-        start.forward_char();
+        start.backward_chars (prop.replace_length);
+
         view.buffer.delete (ref start, ref iter);
-        string text = proposal.get_text();
-        view.buffer.insert (ref start, text, text.length);
+        view.buffer.insert (ref start, prop.symbol.name, prop.symbol.name.length);
         return true;
     }
 
@@ -503,9 +518,9 @@ class TestProvider : Gtk.SourceCompletionProvider, Object {
             info_inner_widget = null;
         }
 
-        var smb = map_proposals[proposal];
-        if (smb is Method) {
-            var mth = smb as Method;
+        var prop = map_proposals[proposal];
+        if (prop is Method) {
+            var mth = prop.symbol as Method;
             var vbox = new Box(Orientation.VERTICAL, 0);
             string param_string = "";
             foreach (Vala.Parameter param in mth.get_parameters())
@@ -519,7 +534,7 @@ class TestProvider : Gtk.SourceCompletionProvider, Object {
                                         mth.return_type.data_type.name));
             info_inner_widget = vbox;
         } else
-            info_inner_widget = new Label (smb.name);
+            info_inner_widget = new Label (prop.symbol.name);
 
         info_inner_widget.show_all();
         box_info_frame.pack_start (info_inner_widget, true, true);

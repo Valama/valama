@@ -21,9 +21,11 @@ using Gtk;
 using Vala;
 using GLib;
 
-public class project_browser {
-    public project_browser (valama_project project) {
-        this.project = project;
+public class ProjectBrowser : UiElement {
+    public ProjectBrowser (ValamaProject? vproject=null) {
+        if (vproject != null)
+            project = vproject;
+        element_name = "ProjectBrowser";
 
         tree_view = new TreeView();
         tree_view.insert_column_with_attributes (-1,
@@ -59,14 +61,15 @@ public class project_browser {
         widget = vbox;
     }
 
-    valama_project project;
     TreeView tree_view;
     public Widget widget;
 
     public signal void source_file_selected (SourceFile file);
-    public signal void symbols_changed();
 
-    public void build() {
+    protected override void build() {
+#if DEBUG
+        stderr.printf ("Run project browser update!\n");
+#endif
         var store = new TreeStore (2, typeof (string), typeof (string));
         tree_view.set_model (store);
 
@@ -98,12 +101,15 @@ public class project_browser {
             store.append (out iter_sf, iter_packages);
             store.set (iter_sf, 0, pkg, 1, "", -1);
         }
+#if DEBUG
+        stderr.printf ("Project browser update finished!\n");
+#endif
     }
 
     /*
      * Get Vala packages from filenames and sort them.
      */
-    static GLib.List<string>? get_available_packages() {
+    private static GLib.List<string>? get_available_packages() {
         GLib.List<string> list = null;
         /* FIXME: Hardcoded paths. */
         string[] paths = new string[] {"/usr/share/vala-" +
@@ -130,7 +136,7 @@ public class project_browser {
     /*
      * Select Vala packages to add/remove to/from build system (with valac).
      */
-    static string? package_selection_dialog(valama_project project) {
+    private static string? package_selection_dialog(ValamaProject project) {
 
         Dialog dlg = new Dialog.with_buttons("Select new packages",
                                             window_main,
@@ -177,7 +183,7 @@ public class project_browser {
         return ret;
     }
 
-    void on_add_button() {
+    private void on_add_button() {
         TreeModel model;
         var paths = tree_view.get_selection().get_selected_rows (out model);
         foreach (TreePath path in paths) {
@@ -193,16 +199,14 @@ public class project_browser {
                         //TODO: Check if already loaded.
                         project.guanako_project.add_source_file (source_file);
                         on_source_file_selected (source_file);
-                        build();
-                        symbols_changed();
+                        update();
                     }
                     break;
                 case 1:
                     var pkg = package_selection_dialog (project);
                     if (pkg != null) {
                         project.guanako_project.add_packages (new string[] {pkg}, true);
-                        build();
-                        symbols_changed();
+                        update();
                     }
                     break;
                 default:
@@ -213,7 +217,7 @@ public class project_browser {
         }
     }
 
-    void on_remove_button() {
+    private void on_remove_button() {
         TreeModel model;
         var paths = tree_view.get_selection().get_selected_rows (out model);
         foreach (TreePath path in paths) {
@@ -228,8 +232,7 @@ public class project_browser {
                             try {
                                 File.new_for_path (source_file.filename).delete();
                                 project.guanako_project.remove_file (source_file);
-                                build();
-                                symbols_changed();
+                                update();
                             } catch (GLib.Error e) {
                                 stderr.printf ("Unable to delete source file: %s", e.message);
                             }
@@ -237,8 +240,7 @@ public class project_browser {
                         break;
                     case 1:
                         project.guanako_project.remove_package (project.guanako_project.packages[indices[1]]);
-                        build();
-                        symbols_changed();
+                        update();
                         break;
                     default:
                         stderr.printf ("Unexpected enum value: btn_rem.clicked.connect: %d", indices[0]);

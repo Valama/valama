@@ -23,6 +23,16 @@ using Gee;
 
 namespace Guanako {
 
+    public class CompletionProposal {
+        public CompletionProposal (Symbol smb, int rep_length) {
+            this.symbol = smb;
+            this.replace_length = rep_length;
+        }
+        public Symbol symbol;
+        public int replace_length;
+    }
+
+
      public class project {
 
         CodeContext context;
@@ -197,17 +207,17 @@ namespace Guanako {
         }
         Gee.HashMap<string, SyntaxRule> map_syntax = new Gee.HashMap<string, SyntaxRule>();
 
-        public Gee.HashSet<Symbol>? propose_symbols (SourceFile file,
-                                                     int line,
-                                                     int col,
-                                                     string written) {
+        public Gee.HashSet<CompletionProposal>? propose_symbols (SourceFile file,
+                                                                 int line,
+                                                                 int col,
+                                                                 string written) {
             var accessible = get_accessible_symbols (file, line, col);
             var inside_symbol = get_symbol_at_pos (file, line, col);
 
             rule_id_count = 0;
             if (inside_symbol == null)
                 return compare (map_syntax["init_deep_space"].rule,
-                                get_child_symbols(context.root),
+                                get_child_symbols (context.root),
                                 written, new Gee.ArrayList<CallParameter>(),
                                 0);
             else
@@ -236,6 +246,8 @@ namespace Guanako {
             if (type == "Property" && smb is Property)
                 return true;
             if (type == "Signal" && smb is Vala.Signal)
+                return true;
+            if (type == "Struct" && smb is Struct)
                 return true;
             return false;
         }
@@ -294,7 +306,7 @@ namespace Guanako {
 
         int rule_id_count = 0;
 
-        Gee.HashSet<Symbol>? compare (RuleExpression[] compare_rule,
+        Gee.HashSet<CompletionProposal>? compare (RuleExpression[] compare_rule,
                                       Symbol[] accessible,
                                       string written2,
                                       Gee.ArrayList<CallParameter> call_params,
@@ -306,7 +318,7 @@ namespace Guanako {
              */
             string written = written2;
 
-            Gee.HashSet<Symbol> ret = new Gee.HashSet<Symbol>();
+            Gee.HashSet<CompletionProposal> ret = new Gee.HashSet<CompletionProposal>();
 
             RuleExpression[] rule = new RuleExpression[compare_rule.length];
             for (int q = 0; q < rule.length; q++)
@@ -359,7 +371,7 @@ namespace Guanako {
 
             if (current_rule.expr == "_") {
                 if (!(written.has_prefix (" ") || written.has_prefix ("\t")))
-                    return new Gee.HashSet<Symbol>();
+                    return ret;
                 written = written.chug();
                 return compare (rule[1:rule.length], accessible, written, call_params, depth + 1);
             }
@@ -408,7 +420,7 @@ namespace Guanako {
                             ret.add_all (compare (rule[1:rule.length], accessible, rest, call_params, depth + 1));
                         }
                         if (rest == "" && child.name.has_prefix (word) && child.name.length > word.length)
-                            ret.add (child);
+                            ret.add (new CompletionProposal (child, word.length));
                     }
                 }
                 return ret;
@@ -456,7 +468,7 @@ namespace Guanako {
                 return compare (rule[1:rule.length], accessible, written, call_params, depth + 1);
             }
             else if (mres == matchres.STARTED) {
-                ret.add (new Struct(current_rule.expr, null, null));
+                ret.add (new CompletionProposal (new Struct (current_rule.expr, null, null), written.length));
                 return ret;
             }
             return ret;

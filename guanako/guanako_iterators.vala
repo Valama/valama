@@ -108,6 +108,10 @@ namespace Guanako {
             foreach (Symbol s in enm)
                 if (!iter_symbol (s, callback, depth + 1))
                     return false;
+            var str = cv.get_structs();
+            foreach (Symbol s in str)
+                if (!iter_symbol (s, callback, depth + 1))
+                    return false;
         }
         if (smb is Class) {
             var cv = (Class) smb;
@@ -128,6 +132,10 @@ namespace Guanako {
             }
             var enm = cv.get_enums();
             foreach (Symbol s in enm)
+                if (!iter_symbol (s, callback, depth + 1))
+                    return false;
+            var str = cv.get_structs();
+            foreach (Symbol s in str)
                 if (!iter_symbol (s, callback, depth + 1))
                     return false;
         }

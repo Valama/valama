@@ -20,9 +20,11 @@
 using Gtk;
 using Vala;
 
-public class symbol_browser {
-    public symbol_browser (Guanako.project project) {
-        this.project = project;
+public class SymbolBrowser : UiElement {
+    public SymbolBrowser (ValamaProject? vproject=null) {
+        if (vproject != null)
+            project = vproject;
+        element_name = "SymbolBrowser";
 
         tree_view = new TreeView();
         tree_view.insert_column_with_attributes (-1,
@@ -44,17 +46,19 @@ public class symbol_browser {
         widget = tree_view;
     }
 
-    Guanako.project project;
     TreeView tree_view;
     public Widget widget;
 
-    public void build() {
+    public override void build() {
+#if DEBUG
+        stderr.printf ("Run symbol browser update!\n");
+#endif
         var store = new TreeStore (2, typeof (string), typeof (string));
         tree_view.set_model (store);
 
         TreeIter[] iters = new TreeIter[0];
 
-        Guanako.iter_symbol (project.root_symbol, (smb, depth) => {
+        Guanako.iter_symbol (project.guanako_project.root_symbol, (smb, depth) => {
             if (smb.name != null) {
                 string tpe = "";
                 if (smb is Class)    tpe = "Class";
@@ -76,6 +80,9 @@ public class symbol_browser {
             }
             return Guanako.iter_callback_returns.continue;
         });
+#if DEBUG
+        stderr.printf ("Symbol browser update finished!\n");
+#endif
     }
 }
 

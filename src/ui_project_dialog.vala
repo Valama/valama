@@ -21,18 +21,84 @@
 using Gtk;
 using GLib;
 
+/* Load new projects (with dialog). */
+public void ui_load_project(UiElementPool ui_elements_pool) {
+    var dlg = new FileChooserDialog ("Open project",
+                                     window_main,
+                                     FileChooserAction.OPEN,
+                                     Stock.CANCEL,
+                                     ResponseType.CANCEL,
+                                     Stock.OPEN,
+                                     ResponseType.ACCEPT,
+                                     null);
+    ValamaProject new_project = null;
+
+    var filter_all = new FileFilter();
+    filter_all.set_filter_name ("View all files (*)");
+    filter_all.add_pattern ("*");
+
+    var filter_vlp = new FileFilter();
+    filter_vlp.set_filter_name ("Valama project files (*.vlp)");
+    filter_vlp.add_pattern ("*.vlp");
+
+    dlg.add_filter (filter_all);
+    dlg.add_filter (filter_vlp);
+    dlg.set_filter (filter_vlp);  // set default filter
+
+    if (dlg.run() == ResponseType.ACCEPT) {
+        var new_filename = dlg.get_filename();
+        /*
+         * On unixoide systems compare inodes. On others only compare file names.
+         */
+#if NOT_UNIX
+        if (project.project_file != new_filename) {
+#else
+        //TODO: Check if there is a better solution.
+        bool comp;
+        try {
+            comp = (File.new_for_path (new_filename).query_info (FileAttribute.UNIX_INODE,
+                    FileQueryInfoFlags.NONE).get_attribute_as_string (FileAttribute.UNIX_INODE) !=
+                    File.new_for_path (project.project_file).query_info (FileAttribute.UNIX_INODE,
+                    FileQueryInfoFlags.NONE).get_attribute_as_string (FileAttribute.UNIX_INODE));
+        } catch (GLib.Error e) {
+            stderr.printf ("Couln't compare project files inodes: %s", e.message);
+            comp = false;
+        }
+        if (comp) {
+#endif
+            //FIXME: Save dialog!
+            try {
+                new_project = new ValamaProject (new_filename);
+            } catch (LoadingError e) {
+                stderr.printf ("Couldn't load new project: %s\n", e.message);
+                dlg.close();
+                return;
+            }
+            dlg.close();
+            project = new_project;
+            foreach (UiElement element in ui_elements_pool)
+                element.update (project);
+            on_source_file_selected (project.guanako_project.get_source_files()[0]);
+            return;
+        } else {
+            stdout.printf ("Skip already loaded project: %s\n", new_filename);
+        }
+    }
+    dlg.close();
+}
+
 /* Settings window. */
-public void ui_project_dialog (valama_project project) {
+public void ui_project_dialog (ValamaProject? project) {
     var dlg = new Dialog.with_buttons ("Project settings",
                                        window_main,
-                                        DialogFlags.MODAL,
-                                        Stock.DISCARD,
-                                        ResponseType.REJECT,
-                                        Stock.CANCEL,
-                                        ResponseType.CANCEL,
-                                        Stock.OK,
-                                        ResponseType.OK,
-                                        null);
+                                       DialogFlags.MODAL,
+                                       Stock.DISCARD,
+                                       ResponseType.REJECT,
+                                       Stock.CANCEL,
+                                       ResponseType.CANCEL,
+                                       Stock.OK,
+                                       ResponseType.OK,
+                                       null);
     dlg.set_size_request (420, 200);
     dlg.resizable = false;
 
@@ -49,7 +115,7 @@ public void ui_project_dialog (valama_project project) {
     var ent_proj_name_err = new Label ("");
     ent_proj_name_err.sensitive = false;
 
-    Regex valid_chars = /^[a-zA-Z0-9.:_-]+$/;  // keep "-" at the end!
+    Regex valid_chars = /^[a-z0-9.:_-]+$/i;  // keep "-" at the end!
     var ent_proj_name = new Entry.with_inputcheck (ent_proj_name_err, valid_chars, 5);
     ent_proj_name.text = project.project_name;
 

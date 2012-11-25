@@ -1,0 +1,8 @@
+<template>
+    <name>
+        <en>Plain vala</en>
+    </name>
+    <description>
+        <en>Simple vala project</en>
+    </description>
+</template>

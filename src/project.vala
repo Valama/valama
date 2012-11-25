@@ -22,34 +22,44 @@ using GLib;
 using Gee;
 using Xml;
 
-public class valama_project {
-    public valama_project (string project_file) {
-
-        this.project_file = project_file;
-
+public class ValamaProject {
+    public ValamaProject (string project_file) throws LoadingError {
         var proj_file = File.new_for_path (project_file);
+        this.project_file = proj_file.get_path();
         project_path = proj_file.get_parent().get_path();
 
         guanako_project = new Guanako.project();
 
-        load_project_file();
+        stdout.printf ("Load project file: %s\n", this.project_file);
+        load_project_file();  // can throw LoadingError
 
         /*
-         * Add files in src folder to the project.
+         * Add file type files in source directory folders to the project.
+         * Default file suffix is .vala and default source directory is src/.
          */
         try {
-            var directory = File.new_for_path (project_path + "/src");
-            var enumerator = directory.enumerate_children (FileAttribute.STANDARD_NAME, 0);
-
-            SourceFile[] sf = new SourceFile[0];
+            File directory;
+            FileEnumerator enumerator;
             FileInfo file_info;
-            while ((file_info = enumerator.next_file()) != null) {
-                string file = project_path + "/src/" + file_info.get_name();
-                if (file.has_suffix (".vala")){
-                    stdout.printf (@"Found file $file\n");
-                    var source_file = new SourceFile (guanako_project.code_context, SourceFileType.SOURCE, file);
-                    guanako_project.add_source_file (source_file);
-                    sf += source_file;
+            SourceFile[] sf = new SourceFile[0];
+
+            foreach (string source_dir in project_source_dirs) {
+                directory = File.new_for_path (project_path + source_dir);
+                enumerator = directory.enumerate_children (FileAttribute.STANDARD_NAME, 0);
+
+                while ((file_info = enumerator.next_file()) != null) {
+                    string file = project_path + source_dir + "/" + file_info.get_name();
+
+                    foreach (string suffix in project_file_types) {
+                        if (file.has_suffix (suffix)){
+                            stdout.printf (@"Found file $file\n");
+                            var source_file = new SourceFile (guanako_project.code_context,
+                                                              SourceFileType.SOURCE,
+                                                              file);
+                            guanako_project.add_source_file (source_file);
+                            sf += source_file;
+                        }
+                    }
                 }
             }
         } catch (GLib.Error e) {
@@ -59,9 +69,11 @@ public class valama_project {
         guanako_project.update();
     }
 
-    public Guanako.project guanako_project;
-    public string project_path;
-    string project_file;
+    public Guanako.project guanako_project { get; private set; }
+    public string project_path { get; private set; }
+    public string project_file { get; private set; }
+    public string[] project_source_dirs { get; private set; default = {"/src",}; }
+    public string[] project_file_types { get; private set; default = {".vala",}; }
     public int version_major;
     public int version_minor;
     public int version_patch;
@@ -102,18 +114,18 @@ public class valama_project {
         return ret;
     }
 
-    void load_project_file(){
+    void load_project_file() throws LoadingError {
         Xml.Doc* doc = Xml.Parser.parse_file (project_file);
 
         if (doc == null) {
-            stdout.printf (@"Cannot read file >$project_file<\n");
             delete doc;
+            throw new LoadingError.FILE_IS_GARBAGE ("Cannot parse file.");
         }
 
         Xml.Node* root_node = doc->get_root_element();
         if (root_node == null) {
-            stdout.printf (@"The file >$project_file< is empty\n");
             delete doc;
+            throw new LoadingError.FILE_IS_EMPTY ("File does not contain enough information");
         }
 
         var packages = new string[0];
@@ -161,4 +173,10 @@ public class valama_project {
         writer.end_element();
         writer.end_element();
     }
+
+}
+
+errordomain LoadingError {
+    FILE_IS_EMPTY,
+    FILE_IS_GARBAGE
 }
