@@ -24,7 +24,7 @@ using Vala;
 /*
  * Create new file and add it to project. If file already exists, open it.
  */
-public SourceFile? ui_create_file_dialog (valama_project project) {
+public SourceFile? ui_create_file_dialog (ValamaProject project) {
     var dlg = new Dialog.with_buttons ("Choose filename",
                                        window_main,
                                        DialogFlags.MODAL,
