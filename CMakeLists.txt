@@ -110,6 +110,6 @@ install(TARGETS valama DESTINATION "bin")
 # Additional files.
 install(DIRECTORY "pixmaps/" DESTINATION "share/pixmaps/valama")
 install(FILES "data/valama.desktop" DESTINATION "share/applications")
-#install(DIRECTORY "data/folder" DESTINATION "share/valama")
+install(DIRECTORY "data/templates" DESTINATION "share/valama")
 
 # vim: set ai ts=2 sts=2 et sw=2
