@@ -24,37 +24,42 @@ using Guanako;
 
 static Window window_main;
 
-static valama_project project;
+static ValamaProject project;
 static SourceView view;
-static symbol_browser smb_browser;
 static ReportWrapper report_wrapper;
 static ui_report wdg_report;
 
 static bool parsing = false;
 
 public static int main (string[] args) {
+    //TODO: Command line parsing.
     Gtk.init (ref args);
 
     loop_update  = new MainLoop();
 
     try {
         if (args.length > 1)
-            project = new valama_project(args[1]);
+            project = new ValamaProject(args[1]);
         else {
             project = ui_create_project_dialog();
         }
     } catch (LoadingError e) {
-       //FIXME: Handle this error (properly) instead of this pseudo hack.
-        stderr.printf ("Couldn'l load Valama project: %s", e.message);
+        //FIXME: Handle this error (properly) instead of this pseudo hack
+        //       (same as above).
+        stderr.printf ("Couldn't load Valama project: %s", e.message);
         project = null;
+        return 1;
     }
 
-    var pbrw = new project_browser (project);
+    var ui_elements_pool = new UiElementPool();
+    var pbrw = new ProjectBrowser (project);
+    var smb_browser = new SymbolBrowser();
+    pbrw.connect (smb_browser);
+    ui_elements_pool.add (pbrw);
+    //ui_elements_pool.add (smb_browser);  // dangerous (circulare deps)
 
-    report_wrapper = new ReportWrapper();
-    //report_wrapper = project.guanako_project.code_context.report as ReportWrapper;
+    var report_wrapper = new ReportWrapper();
     project.guanako_project.code_context.report = report_wrapper;
-    //report_wrapper = project.guanako_project.code_context.report as ReportWrapper;
 
     window_main = new Window();
 
@@ -81,10 +86,9 @@ public static int main (string[] args) {
     view.buffer.changed.connect (() => {
         if (!parsing) {
             update_text = view.buffer.text;
-            //FIXME: warning: GLib.Thread.create has been deprecated since 2.32. Use new Thread<T> ()
             try {
-                Thread.create<void*> (update_current_file, true);
-            } catch (GLib.ThreadError e) {
+                new Thread<void*>.try ("Buffer update", update_current_file);
+            } catch (GLib.Error e) {
                 stderr.printf ("Could not create thread to update buffer completion: %s", e.message);
             }
         }
@@ -103,7 +107,7 @@ public static int main (string[] args) {
     toolbar.add (btnLoadProject);
     btnLoadProject.set_tooltip_text ("Open project");
     btnLoadProject.clicked.connect (() => {
-        ui_load_project(pbrw, smb_browser);
+        ui_load_project (ui_elements_pool);
     });
 
     var btnNewFile = new ToolButton.from_stock (Stock.FILE);
@@ -114,20 +118,23 @@ public static int main (string[] args) {
         if (source_file != null) {
             project.guanako_project.add_source_file (source_file);
             on_source_file_selected (source_file);
-            pbrw.build();
-            pbrw.symbols_changed();
+            pbrw.update();
         }
     });
 
     var btnSave = new ToolButton.from_stock (Stock.SAVE);
     toolbar.add (btnSave);
     btnSave.set_tooltip_text ("Save current file");
-    btnSave.clicked.connect (write_current_source_file);
+    btnSave.clicked.connect (() => {
+        write_current_source_file (ref smb_browser);
+    });
     toolbar.add (btnSave);
 
     var btnBuild = new Gtk.ToolButton.from_stock (Stock.EXECUTE);
     btnBuild.set_tooltip_text ("Save current file an build project");
-    btnBuild.clicked.connect (on_build_button_clicked);
+    btnBuild.clicked.connect (() => {
+        on_build_button_clicked (ref smb_browser);
+    });
     toolbar.add (btnBuild);
 
     var btnAutoIndent = new Gtk.ToolButton.from_stock (Stock.REFRESH);
@@ -144,14 +151,13 @@ public static int main (string[] args) {
 
     var hbox = new Box (Orientation.HORIZONTAL, 0);
 
-    hbox.pack_start(pbrw.widget, false, true);
+    hbox.pack_start (pbrw.widget, false, true);
 
     var scrw = new ScrolledWindow (null, null);
     scrw.add(view);
     hbox.pack_start (scrw, true, true);
 
     var scrw2 = new ScrolledWindow (null, null);
-    smb_browser = new symbol_browser (project.guanako_project);
     scrw2.add (smb_browser.widget);
     scrw2.set_size_request (300, 0);
     hbox.pack_start (scrw2, false, true);
@@ -165,11 +171,8 @@ public static int main (string[] args) {
     scrw3.set_size_request (0, 150);
     vbox_main.pack_start (scrw3, false, true);
 
-    pbrw.source_file_selected.connect(on_source_file_selected);
-    pbrw.symbols_changed.connect(()=>{
-        smb_browser.build();
-    });
-    wdg_report.error_selected.connect(on_error_selected);
+    pbrw.source_file_selected.connect (on_source_file_selected);
+    wdg_report.error_selected.connect (on_error_selected);
 
     window_main.add (vbox_main);
     window_main.hide_titlebar_when_maximized = true;
@@ -211,23 +214,28 @@ static void on_error_selected (ReportWrapper.Error err) {
     on_source_file_selected(err.source.file);
 
     TextIter start;
+    view.buffer.get_iter_at_line_offset (out start,
 #if VALA_LESS_0_18
-    view.buffer.get_iter_at_line_offset (out start, err.source.first_line - 1, err.source.first_column - 1);
+                                         err.source.first_line - 1,
+                                         err.source.first_column - 1);
 #else
-    view.buffer.get_iter_at_line_offset (out start, err.source.begin.line - 1, err.source.begin.column - 1);
+                                         err.source.begin.line - 1,
+                                         err.source.begin.column - 1);
 #endif
     TextIter end;
+    view.buffer.get_iter_at_line_offset (out end,
 #if VALA_LESS_0_18
-    view.buffer.get_iter_at_line_offset (out end, err.source.last_line - 1, err.source.last_column - 1);
+                                         err.source.last_line - 1,
+                                         err.source.last_column - 1);
 #else
-    view.buffer.get_iter_at_line_offset (out end, err.source.end.line - 1, err.source.end.column - 1);
+                                         err.source.end.line - 1,
+                                         err.source.end.column - 1);
 #endif
     view.buffer.select_range (start, end);
-
 }
 
-static void on_build_button_clicked() {
-    write_current_source_file();
+static void on_build_button_clicked (ref SymbolBrowser smb_browser) {
+    write_current_source_file (ref smb_browser);
     report_wrapper.clear();
     project.build();
     wdg_report.build();
@@ -248,7 +256,7 @@ static void on_source_file_selected (SourceFile file){
     }
 }
 
-void write_current_source_file() {
+void write_current_source_file (ref SymbolBrowser smb_browser) {
     var file = File.new_for_path (current_source_file.filename);
     /* TODO: First parameter can be used to check if file has changed.
      *       The second parameter can enable/disable backup file. */
@@ -268,7 +276,7 @@ void write_current_source_file() {
     project.guanako_project.update_file (current_source_file, view.buffer.text);
     wdg_report.build();
 
-    smb_browser.build();
+    smb_browser.update();
 }
 
 static void on_view_buffer_changed(){

@@ -26,3 +26,12 @@ convert_svg_to_png(png_list
     "valama"
 )
 add_custom_target(icons ALL DEPENDS ${png_list})
+
+# Install application icon.
+install(
+  FILES
+    "${CMAKE_CURRENT_BINARY_DIR}/icons/hicolor/24x24/apps/valama.png"
+  DESTINATION
+    "share/pixmaps"
+
+)

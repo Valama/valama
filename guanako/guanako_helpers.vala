@@ -20,7 +20,7 @@
 using GLib;
 using Vala;
 
-namespace Guanako{
+namespace Guanako {
 
      //Helper function for checking whether a given source location is inside a SourceReference
     public static bool before_source_ref (SourceFile source_file,

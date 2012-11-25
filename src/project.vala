@@ -22,8 +22,8 @@ using GLib;
 using Gee;
 using Xml;
 
-public class valama_project {
-    public valama_project (string project_file) throws LoadingError {
+public class ValamaProject {
+    public ValamaProject (string project_file) throws LoadingError {
         var proj_file = File.new_for_path (project_file);
         this.project_file = proj_file.get_path();
         project_path = proj_file.get_parent().get_path();

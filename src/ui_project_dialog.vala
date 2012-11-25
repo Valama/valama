@@ -22,7 +22,7 @@ using Gtk;
 using GLib;
 
 /* Load new projects (with dialog). */
-public void ui_load_project(project_browser pbrw, symbol_browser smb_browser) {
+public void ui_load_project(UiElementPool ui_elements_pool) {
     var dlg = new FileChooserDialog ("Open project",
                                      window_main,
                                      FileChooserAction.OPEN,
@@ -31,7 +31,7 @@ public void ui_load_project(project_browser pbrw, symbol_browser smb_browser) {
                                      Stock.OPEN,
                                      ResponseType.ACCEPT,
                                      null);
-    valama_project new_project = null;
+    ValamaProject new_project = null;
 
     var filter_all = new FileFilter();
     filter_all.set_filter_name ("View all files (*)");
@@ -68,17 +68,18 @@ public void ui_load_project(project_browser pbrw, symbol_browser smb_browser) {
 #endif
             //FIXME: Save dialog!
             try {
-                new_project = new valama_project (new_filename);
+                new_project = new ValamaProject (new_filename);
             } catch (LoadingError e) {
                 stderr.printf ("Couldn't load new project: %s\n", e.message);
                 dlg.close();
                 return;
             }
+            dlg.close();
             project = new_project;
-            //TODO: do that with threads
-            pbrw.rebuild (project);
-            smb_browser.rebuild (project.guanako_project);
+            foreach (UiElement element in ui_elements_pool)
+                element.update (project);
             on_source_file_selected (project.guanako_project.get_source_files()[0]);
+            return;
         } else {
             stdout.printf ("Skip already loaded project: %s\n", new_filename);
         }
@@ -87,7 +88,7 @@ public void ui_load_project(project_browser pbrw, symbol_browser smb_browser) {
 }
 
 /* Settings window. */
-public void ui_project_dialog (valama_project? project) {
+public void ui_project_dialog (ValamaProject? project) {
     var dlg = new Dialog.with_buttons ("Project settings",
                                        window_main,
                                        DialogFlags.MODAL,
