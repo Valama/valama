@@ -34,24 +34,21 @@ static bool parsing = false;
 
 public static int main (string[] args) {
     Gtk.init (ref args);
-ui_create_project_dialog();
+
     loop_update  = new MainLoop();
 
-    string proj_file;
-    if (args.length > 1)
-        proj_file = args[1];
-    else {
-        stderr.printf ("Please pass a .vlp Valama project file. This will change later.");
-        return 1;
-    }
-
     try {
-        project = new valama_project (proj_file);
+        if (args.length > 1)
+            project = new valama_project(args[1]);
+        else {
+            project = ui_create_project_dialog();
+        }
     } catch (LoadingError e) {
        //FIXME: Handle this error (properly) instead of this pseudo hack.
         stderr.printf ("Couldn'l load Valama project: %s", e.message);
         project = null;
     }
+
     var pbrw = new project_browser (project);
 
     report_wrapper = new ReportWrapper();

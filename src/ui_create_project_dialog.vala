@@ -126,6 +126,9 @@ public valama_project? ui_create_project_dialog () {
         return null;
 
     Process.spawn_command_line_sync(@"cp -R '$(template.path)' '$target_folder/$proj_name'");
+    Process.spawn_command_line_sync(@"mv '$target_folder/$proj_name/template.vlp' '$target_folder/$proj_name/$proj_name.vlp'");
 
-    return new valama_project(@"$target_folder/$proj_name/$proj_name.vlp");
+    var new_proj = new valama_project(@"$target_folder/$proj_name/$proj_name.vlp");
+    new_proj.project_name = proj_name;
+    return new_proj;
 }
