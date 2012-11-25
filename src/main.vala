@@ -42,6 +42,8 @@ public static int main (string[] args) {
             project = new ValamaProject(args[1]);
         else {
             project = ui_create_project_dialog();
+            if (project == null)
+                return 1;
         }
     } catch (LoadingError e) {
         //FIXME: Handle this error (properly) instead of this pseudo hack
