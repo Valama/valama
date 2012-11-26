@@ -125,16 +125,12 @@ public static int main (string[] args) {
     var btnSave = new ToolButton.from_stock (Stock.SAVE);
     toolbar.add (btnSave);
     btnSave.set_tooltip_text ("Save current file");
-    btnSave.clicked.connect (() => {
-        write_current_source_file (ref smb_browser);
-    });
+    btnSave.clicked.connect (write_current_source_file);
     toolbar.add (btnSave);
 
     var btnBuild = new Gtk.ToolButton.from_stock (Stock.EXECUTE);
     btnBuild.set_tooltip_text ("Save current file an build project");
-    btnBuild.clicked.connect (() => {
-        on_build_button_clicked (ref smb_browser);
-    });
+    btnBuild.clicked.connect (on_build_button_clicked);
     toolbar.add (btnBuild);
 
     var btnAutoIndent = new Gtk.ToolButton.from_stock (Stock.REFRESH);
@@ -234,8 +230,8 @@ static void on_error_selected (ReportWrapper.Error err) {
     view.buffer.select_range (start, end);
 }
 
-static void on_build_button_clicked (ref SymbolBrowser smb_browser) {
-    write_current_source_file (ref smb_browser);
+static void on_build_button_clicked() {
+    write_current_source_file();
     report_wrapper.clear();
     project.build();
     wdg_report.build();
@@ -256,7 +252,7 @@ static void on_source_file_selected (SourceFile file){
     }
 }
 
-void write_current_source_file (ref SymbolBrowser smb_browser) {
+void write_current_source_file() {
     var file = File.new_for_path (current_source_file.filename);
     /* TODO: First parameter can be used to check if file has changed.
      *       The second parameter can enable/disable backup file. */
@@ -275,8 +271,6 @@ void write_current_source_file (ref SymbolBrowser smb_browser) {
     report_wrapper.clear();
     project.guanako_project.update_file (current_source_file, view.buffer.text);
     wdg_report.build();
-
-    smb_browser.update();
 }
 
 static void on_view_buffer_changed(){
