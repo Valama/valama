@@ -1,9 +1,9 @@
 <template>
     <author>Linus Seelinger S.Linus@quantentunnel.de</author>
     <name>
-        <en>Plain vala</en>
+        <en>Simple GTK</en>
     </name>
     <description>
-        <en>Simple vala project</en>
+        <en>Simple GTK+ 3 project</en>
     </description>
 </template>
