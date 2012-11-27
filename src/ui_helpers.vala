@@ -24,6 +24,9 @@ using GLib;
  * Check proper user input. Project names have to consist of "normal"
  * characters only (see regex below). Otherwise cmake would break.
  *
+ * Provide two signals valid_input and invalid_input to signal if text is empty
+ * or not.
+ *
  * TODO: Perhaps we should internally handle special characters with
  *       underscore.
  */
@@ -44,6 +47,12 @@ public class Entry : Gtk.Entry {
 
         insert_text.connect ((new_text) => {
             this.ui_check_input (new_text);
+        });
+        changed.connect (() => {
+            if (this.text != "")
+                valid_input();
+            else
+                invalid_input();
         });
     }
 
@@ -68,6 +77,9 @@ public class Entry : Gtk.Entry {
             this.err_label.set_label ("");
         }
     }
+
+    public signal void valid_input();
+    public signal void invalid_input();
 
     /*
      * If resettable is true. Label will be resettet with next user input.

@@ -116,7 +116,7 @@ public void ui_project_dialog (ValamaProject? project) {
     ent_proj_name_err.sensitive = false;
 
     Regex valid_chars = /^[a-z0-9.:_-]+$/i;  // keep "-" at the end!
-    var ent_proj_name = new Entry.with_inputcheck (ent_proj_name_err, valid_chars, 5);
+    var ent_proj_name = new Entry.with_inputcheck (ent_proj_name_err, valid_chars);
     ent_proj_name.text = project.project_name;
 
     box_project_name.pack_start (ent_proj_name, false, false);
@@ -186,7 +186,7 @@ public void ui_project_dialog (ValamaProject? project) {
                 //ent_version_special.text = project.version_special;
                 break;
             default:
-                stderr.printf ("Unknown dialog respone id (please report a bug):%d", response_id);
+                stderr.printf ("Unknown dialog respone id (please report a bug): %d\n", response_id);
                 dlg.destroy();
                 break;
         }

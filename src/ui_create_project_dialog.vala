@@ -98,10 +98,18 @@ public ValamaProject? ui_create_project_dialog() {
     ent_proj_name_err.sensitive = false;
 
     Regex valid_chars = /^[a-z0-9.:_-]+$/i;  // keep "-" at the end!
-    var ent_proj_name = new Entry.with_inputcheck (ent_proj_name_err, valid_chars, 5);
+    var ent_proj_name = new Entry.with_inputcheck (ent_proj_name_err, valid_chars);
     ent_proj_name.set_placeholder_text ("Project name");
     box_main.pack_start (ent_proj_name, false, false);
     box_main.pack_start (ent_proj_name_err, false, false);
+
+    ent_proj_name.valid_input.connect (() => {
+        dlg.set_response_sensitive (ResponseType.ACCEPT, true);
+    });
+    ent_proj_name.invalid_input.connect (() => {
+        dlg.set_response_sensitive (ResponseType.ACCEPT, false);
+    });
+
 
     lbl = new Label ("Location");
     lbl.halign = Align.START;
@@ -112,6 +120,8 @@ public ValamaProject? ui_create_project_dialog() {
 
     box_main.show_all();
     dlg.get_content_area().pack_start (box_main);
+    dlg.set_response_sensitive (ResponseType.ACCEPT, false);
+
     var res = dlg.run();
 
     var template = selector.get_selected_template();
@@ -119,10 +129,7 @@ public ValamaProject? ui_create_project_dialog() {
     string proj_name = ent_proj_name.text;
 
     dlg.destroy();
-    if (res == ResponseType.CANCEL)
-        return null;
-
-    if (template == null || proj_name.length == 0)
+    if (res == ResponseType.CANCEL || template == null)
         return null;
 
     try {
