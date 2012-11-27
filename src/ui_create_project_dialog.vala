@@ -125,8 +125,13 @@ public ValamaProject? ui_create_project_dialog() {
     if (template == null || proj_name.length == 0)
         return null;
 
-    Process.spawn_command_line_sync (@"cp -R '$(template.path)' '$target_folder/$proj_name'");
-    Process.spawn_command_line_sync (@"mv '$target_folder/$proj_name/template.vlp' '$target_folder/$proj_name/$proj_name.vlp'");
+    try {
+        copy_recursively (template.path, target_folder + "/" + proj_name);
+        var proj_file = File.new_for_path (target_folder + "/" + proj_name + "/template.vlp");
+        proj_file.move (proj_file.resolve_relative_path ("../" + proj_name + ".vlp"), 0, null);
+    } catch (GLib.Error e) {
+        stderr.printf ("Could not copy templates for new project: %s", e.message);
+    }
 
 
     ValamaProject new_proj = null;
