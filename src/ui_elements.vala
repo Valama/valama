@@ -96,12 +96,20 @@ public abstract class UiElement {
 
         /* Then run all updates. */
         try {
+#if VALA_LESS_0_18
+            var tp = new ThreadPool<UiElement> ((worker) => {worker.build();},
+#else
             var tp = new ThreadPool<UiElement>.with_owned_data ((worker) => {worker.build();},
+#endif
                                                                 q.size,
                                                                 false);
             UiElement queue_element;
             while ((queue_element = q.poll()) != null)
+#if VALA_LESS_0_18
+                tp.push (queue_element);
+#else
                 tp.add (queue_element);
+#endif
             q.clear();
         } catch (GLib.ThreadError e) {
             stderr.printf ("Could not start new thread: %s", e.message);
