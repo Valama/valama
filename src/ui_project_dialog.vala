@@ -119,6 +119,13 @@ public void ui_project_dialog (ValamaProject? project) {
     var ent_proj_name = new Entry.with_inputcheck (ent_proj_name_err, valid_chars);
     ent_proj_name.text = project.project_name;
 
+    ent_proj_name.valid_input.connect (() => {
+        dlg.set_response_sensitive (ResponseType.OK, true);
+    });
+    ent_proj_name.invalid_input.connect (() => {
+        dlg.set_response_sensitive (ResponseType.OK, false);
+    });
+
     box_project_name.pack_start (ent_proj_name, false, false);
     box_project_name.pack_start (ent_proj_name_err, false, false);
     box_project.pack_start (box_project_name, false, false);
