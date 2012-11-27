@@ -1,5 +1,5 @@
 /**
- * src/project.vala
+ * src/ui_create_project_dialog.vala
  * Copyright (C) 2012, Linus Seelinger <S.Linus@gmx.de>
  *
  * Valama is free software: you can redistribute it and/or modify it
@@ -128,7 +128,13 @@ public ValamaProject? ui_create_project_dialog() {
     Process.spawn_command_line_sync (@"cp -R '$(template.path)' '$target_folder/$proj_name'");
     Process.spawn_command_line_sync (@"mv '$target_folder/$proj_name/template.vlp' '$target_folder/$proj_name/$proj_name.vlp'");
 
-    var new_proj = new ValamaProject (@"$target_folder/$proj_name/$proj_name.vlp");
-    new_proj.project_name = proj_name;
+
+    ValamaProject new_proj = null;
+    try {
+        new_proj = new ValamaProject (@"$target_folder/$proj_name/$proj_name.vlp");
+        new_proj.project_name = proj_name;
+    } catch (LoadingError e) {
+        stderr.printf ("Couln't load new project: %s", e.message);
+    }
     return new_proj;
 }
