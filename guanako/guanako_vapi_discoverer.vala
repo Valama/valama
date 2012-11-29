@@ -1,5 +1,5 @@
 /**
- * src/guanako_vapi_discoverer.vala
+ * guanako/guanako_vapi_discoverer.vala
  * Copyright (C) 2012, Linus Seelinger <S.Linus@gmx.de>
  *
  * Valama is free software: you can redistribute it and/or modify it

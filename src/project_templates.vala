@@ -1,5 +1,5 @@
 /**
- * src/project.vala
+ * src/project_templates.vala
  * Copyright (C) 2012, Linus Seelinger <S.Linus@gmx.de>
  *
  * Valama is free software: you can redistribute it and/or modify it
@@ -101,3 +101,5 @@ public ProjectTemplate[] load_templates(string language){
 
     return ret;
 }
+
+// vim: set ai ts=4 sts=4 et sw=4

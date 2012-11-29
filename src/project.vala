@@ -180,3 +180,5 @@ errordomain LoadingError {
     FILE_IS_EMPTY,
     FILE_IS_GARBAGE
 }
+
+// vim: set ai ts=4 sts=4 et sw=4
