@@ -75,6 +75,7 @@ vala_pkgs(VALA_C
     -H guanako.h
     --gir "Guanako-${guanako_version}.gir"
     --library guanako
+    "-D;DEBUG"
     ${valac_cond}
 )
 if(NOT PkgConfig_FOUND)

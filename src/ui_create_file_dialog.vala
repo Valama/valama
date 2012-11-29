@@ -46,7 +46,7 @@ public SourceFile? ui_create_file_dialog (ValamaProject project) {
     ent_filename_err.sensitive = false;
 
     Regex valid_chars = /^[a-z0-9.:_-]+$/i;  // keep "-" at the end!
-    var ent_filename = new Entry.with_inputcheck (ent_filename_err, valid_chars, 5);
+    var ent_filename = new Entry.with_inputcheck (ent_filename_err, valid_chars);
     ent_filename.set_placeholder_text("filename");  // this is i.g. not visible
 
     box_filename.pack_start (ent_filename, false, false);

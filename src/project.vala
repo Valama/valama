@@ -72,8 +72,8 @@ public class ValamaProject {
     public Guanako.project guanako_project { get; private set; }
     public string project_path { get; private set; }
     public string project_file { get; private set; }
-    public string[] project_source_dirs { get; private set; default = {"/src",}; }
-    public string[] project_file_types { get; private set; default = {".vala",}; }
+    public string[] project_source_dirs { get; private set; default = {"/src"}; }
+    public string[] project_file_types { get; private set; default = {".vala"}; }
     public int version_major;
     public int version_minor;
     public int version_patch;

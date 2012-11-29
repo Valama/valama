@@ -90,11 +90,30 @@ namespace Guanako {
 
             var new_deps = package_names;
             foreach (string pkg in get_package_dependencies (package_names))
-                if (!(pkg in deps))
+                if (!(pkg in deps) && !(pkg in new_deps)) {
+                    var vapi_path = context.get_vapi_path (pkg);
+                    if (vapi_path == null) {
+                        stderr.printf("Warning: Vapi for package %s not found.\n", pkg);
+                        continue;
+                    }
+#if DEBUG
+                    stdout.printf("Vapi found: %s\n", vapi_path);
+#endif
                     new_deps += pkg;
+                }
 
             foreach (string package_name in package_names) {
+                /* Add .vapi even if not found. */
+                //FIXME: Send signal to let apps show a warning.
                 packages.add (package_name);
+                var vapi_path = context.get_vapi_path (package_name);
+                if (vapi_path == null) {
+                    stderr.printf("Warning: Vapi for package %s not found.\n", package_name);
+                    continue;
+                }
+#if DEBUG
+                stdout.printf("Vapi found: %s\n", vapi_path);
+#endif
                 context.add_external_package (package_name);
             }
 
@@ -683,6 +702,9 @@ namespace Guanako {
                  * Removing nodes in the same loop causes problems (probably
                  * due to ReadOnlyList).
                  */
+#if DEBUG
+                stdout.printf ("Update source file: %s\n", file.filename);
+#endif
 
                 Vala.CodeContext.push (context);
 

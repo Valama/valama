@@ -1,5 +1,5 @@
 /**
- * src/project.vala
+ * src/ui_create_project_dialog.vala
  * Copyright (C) 2012, Linus Seelinger <S.Linus@gmx.de>
  *
  * Valama is free software: you can redistribute it and/or modify it
@@ -98,10 +98,18 @@ public ValamaProject? ui_create_project_dialog() {
     ent_proj_name_err.sensitive = false;
 
     Regex valid_chars = /^[a-z0-9.:_-]+$/i;  // keep "-" at the end!
-    var ent_proj_name = new Entry.with_inputcheck (ent_proj_name_err, valid_chars, 5);
+    var ent_proj_name = new Entry.with_inputcheck (ent_proj_name_err, valid_chars);
     ent_proj_name.set_placeholder_text ("Project name");
     box_main.pack_start (ent_proj_name, false, false);
     box_main.pack_start (ent_proj_name_err, false, false);
+
+    ent_proj_name.valid_input.connect (() => {
+        dlg.set_response_sensitive (ResponseType.ACCEPT, true);
+    });
+    ent_proj_name.invalid_input.connect (() => {
+        dlg.set_response_sensitive (ResponseType.ACCEPT, false);
+    });
+
 
     lbl = new Label ("Location");
     lbl.halign = Align.START;
@@ -112,6 +120,8 @@ public ValamaProject? ui_create_project_dialog() {
 
     box_main.show_all();
     dlg.get_content_area().pack_start (box_main);
+    dlg.set_response_sensitive (ResponseType.ACCEPT, false);
+
     var res = dlg.run();
 
     var template = selector.get_selected_template();
@@ -119,16 +129,29 @@ public ValamaProject? ui_create_project_dialog() {
     string proj_name = ent_proj_name.text;
 
     dlg.destroy();
-    if (res == ResponseType.CANCEL)
+    if (res == ResponseType.CANCEL || template == null)
         return null;
 
-    if (template == null || proj_name.length == 0)
-        return null;
+    try {
+        //TODO: Add progress bar and at least warn on overwrite (don't skip
+        //      without warning).
+        new FileTransfer (template.path,
+                          target_folder + "/" + proj_name,
+                          CopyRecursiveFlags.SKIP_EXISTENT).copy();
+        new FileTransfer (target_folder + "/" + proj_name + "/template.vlp",
+                          target_folder + "/" + proj_name + "/" + proj_name +".vlp",
+                          CopyRecursiveFlags.SKIP_EXISTENT).move();
+    } catch (GLib.Error e) {
+        stderr.printf ("Could not copy templates for new project: %s", e.message);
+    }
 
-    Process.spawn_command_line_sync (@"cp -R '$(template.path)' '$target_folder/$proj_name'");
-    Process.spawn_command_line_sync (@"mv '$target_folder/$proj_name/template.vlp' '$target_folder/$proj_name/$proj_name.vlp'");
 
-    var new_proj = new ValamaProject (@"$target_folder/$proj_name/$proj_name.vlp");
-    new_proj.project_name = proj_name;
+    ValamaProject new_proj = null;
+    try {
+        new_proj = new ValamaProject (@"$target_folder/$proj_name/$proj_name.vlp");
+        new_proj.project_name = proj_name;
+    } catch (LoadingError e) {
+        stderr.printf ("Couln't load new project: %s", e.message);
+    }
     return new_proj;
 }
