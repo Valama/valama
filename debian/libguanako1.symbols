@@ -3,6 +3,11 @@ libguanako.so.1 libguanako1 #MINVER#
  guanako_after_source_ref@Base 1.0
  guanako_auto_indent_buffer@Base 1.0
  guanako_before_source_ref@Base 1.0
+ guanako_completion_proposal_construct@Base 1.0
+ guanako_completion_proposal_get_type@Base 1.0
+ guanako_completion_proposal_new@Base 1.0
+ guanako_completion_proposal_ref@Base 1.0
+ guanako_completion_proposal_unref@Base 1.0
  guanako_discover_vapi_file@Base 1.0
  guanako_get_child_symbols@Base 1.0
  guanako_get_parent_namespace@Base 1.0
@@ -11,6 +16,7 @@ libguanako.so.1 libguanako1 #MINVER#
  guanako_iter_statement@Base 1.0
  guanako_iter_subroutine@Base 1.0
  guanako_iter_symbol@Base 1.0
+ guanako_param_spec_completion_proposal@Base 1.0
  guanako_param_spec_project@Base 1.0
  guanako_project_add_packages@Base 1.0
  guanako_project_add_source_file@Base 1.0
@@ -30,6 +36,9 @@ libguanako.so.1 libguanako1 #MINVER#
  guanako_project_unref@Base 1.0
  guanako_project_update@Base 1.0
  guanako_project_update_file@Base 1.0
+ guanako_value_get_completion_proposal@Base 1.0
  guanako_value_get_project@Base 1.0
+ guanako_value_set_completion_proposal@Base 1.0
  guanako_value_set_project@Base 1.0
+ guanako_value_take_completion_proposal@Base 1.0
  guanako_value_take_project@Base 1.0
