@@ -240,11 +240,9 @@ namespace Guanako {
                 var b_case = ((CompletionProposal)b).symbol.name.casefold();
                 if (a_case < b_case)
                     return -1;
-                if (b_case > a_case)
+                if (a_case > b_case)
                     return 1;
-                if (b_case == a_case)
-                    return 0;
-                return 1; //??? Should never reach this line, but it does. Funny.
+                return 0;
             });
 
 
