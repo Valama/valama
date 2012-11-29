@@ -61,7 +61,7 @@ public static int main (string[] args) {
     ui_elements_pool.add (pbrw);
     //ui_elements_pool.add (smb_browser);  // dangerous (circulare deps)
 
-    var report_wrapper = new ReportWrapper();
+    report_wrapper = new ReportWrapper();
     project.guanako_project.set_report_wrapper(report_wrapper);
 
     window_main = new Window();
