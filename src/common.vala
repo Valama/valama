@@ -155,6 +155,7 @@ public class FileTransfer : Object {
             if (!f_to.query_exists())
                 f_to.make_directory_with_parents();
             do_recursively (f_from, f_to);
+            f_from.delete();
         }
     }
 
@@ -211,6 +212,10 @@ public class FileTransfer : Object {
                     size_to_trans += size;
 
                 do_recursively (new_from, new_dest);
+
+                /* Clean directory on move. */
+                if (action == RecursiveAction.MOVE)
+                    new_from.delete (cancellable);
 
             /* Current processed file object is a file. */
             } else {
