@@ -177,7 +177,7 @@ public static int main (string[] args) {
 
     window_main.add (vbox_main);
     window_main.hide_titlebar_when_maximized = true;
-    window_main.set_default_size (1000, 600);
+    window_main.maximize();
     window_main.destroy.connect (Gtk.main_quit);
     window_main.show_all();
 
