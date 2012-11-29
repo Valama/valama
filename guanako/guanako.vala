@@ -233,18 +233,33 @@ namespace Guanako {
             var accessible = get_accessible_symbols (file, line, col);
             var inside_symbol = get_symbol_at_pos (file, line, col);
 
+
+            // TreeSet with custom sorting function
+            Gee.TreeSet<CompletionProposal> ret = new Gee.TreeSet<CompletionProposal>((a,b)=>{
+                var a_case = ((CompletionProposal)a).symbol.name.casefold();
+                var b_case = ((CompletionProposal)b).symbol.name.casefold();
+                if (a_case < b_case)
+                    return -1;
+                if (b_case > a_case)
+                    return 1;
+                if (b_case == a_case)
+                    return 0;
+                return 1; //??? Should never reach this line, but it does. Funny.
+            });
+
+
             rule_id_count = 0;
             if (inside_symbol == null)
-                return compare (map_syntax["init_deep_space"].rule,
+                compare (map_syntax["init_deep_space"].rule,
                                 get_child_symbols (context.root),
                                 written, new Gee.ArrayList<CallParameter>(),
-                                0);
+                                0, ref ret);
             else
-                return compare (map_syntax["init_method"].rule,
+                compare (map_syntax["init_method"].rule,
                                 accessible,
                                 written, new Gee.ArrayList<CallParameter>(),
-                                0);
-
+                                0, ref ret);
+            return ret;
         }
 
         bool symbol_is_type (Symbol smb, string type) {
@@ -325,30 +340,17 @@ namespace Guanako {
 
         int rule_id_count = 0;
 
-        Gee.TreeSet<CompletionProposal>? compare (RuleExpression[] compare_rule,
+        void compare (RuleExpression[] compare_rule,
                                       Symbol[] accessible,
                                       string written2,
                                       Gee.ArrayList<CallParameter> call_params,
-                                      int depth) {
+                                      int depth, ref Gee.TreeSet<CompletionProposal> ret) {
 
             /*
              * For some reason need to create a copy... otherwise assigning new
              * values to written doesn't work
              */
             string written = written2;
-
-            // TreeSet with custom sorting function
-            Gee.TreeSet<CompletionProposal> ret = new Gee.TreeSet<CompletionProposal>((a,b)=>{
-                var a_case = ((CompletionProposal)a).symbol.name.casefold();
-                var b_case = ((CompletionProposal)b).symbol.name.casefold();
-                if (a_case < b_case)
-                    return -1;
-                if (b_case > a_case)
-                    return 1;
-                if (b_case == a_case)
-                    return 0;
-                return 1; //??? Should never reach this line, but it does. Funny.
-            });
 
             RuleExpression[] rule = new RuleExpression[compare_rule.length];
             for (int q = 0; q < rule.length; q++)
@@ -366,18 +368,17 @@ namespace Guanako {
                 var splt = current_rule.expr.split ("|");
                 foreach (string s in splt) {
                     rule[0].expr = s;
-                    ret.add_all (compare (rule, accessible, written, call_params, depth + 1));
+                    compare (rule, accessible, written, call_params, depth + 1, ref ret);
                 }
-                return ret;
+                return;
             }
 
             if (current_rule.expr.has_prefix ("?")) {
                 if (rule.length > 1)
-                    ret.add_all (compare (rule[1:rule.length], accessible, written, call_params, depth + 1));
+                    compare (rule[1:rule.length], accessible, written, call_params, depth + 1, ref ret);
                 rule[0].expr = rule[0].expr.substring (1);
-                var r2 = compare (rule, accessible, written, call_params, depth + 1);
-                ret.add_all (r2);
-                return ret;
+                compare (rule, accessible, written, call_params, depth + 1, ref ret);
+                return;
             }
 
             string write_to_param = null;
@@ -392,18 +393,20 @@ namespace Guanako {
                 Regex r = /^(?P<word>\w*)(?P<rest>.*)$/;
                 MatchInfo info;
                 if (!r.match (written, 0, out info))
-                    return ret;
+                    return;
                 if (info.fetch_named ("word") == "")
-                    return ret;
-                return compare (rule[1:rule.length], accessible, info.fetch_named ("rest"), call_params, depth + 1);
+                    return;
+                compare (rule[1:rule.length], accessible, info.fetch_named ("rest"), call_params, depth + 1, ref ret);
+                return;
             }
 
 
             if (current_rule.expr == "_") {
                 if (!(written.has_prefix (" ") || written.has_prefix ("\t")))
-                    return ret;
+                    return;
                 written = written.chug();
-                return compare (rule[1:rule.length], accessible, written, call_params, depth + 1);
+                compare (rule[1:rule.length], accessible, written, call_params, depth + 1, ref ret);
+                return;
             }
 
             if (current_rule.expr.has_prefix ("{")) {
@@ -411,7 +414,7 @@ namespace Guanako {
                 MatchInfo info;
                 if (!r.match (current_rule.expr, 0, out info)) {
                     stdout.printf ("Malformed rule! >" + compare_rule[0].expr + "<\n");
-                    return ret;
+                    return;
                 }
 
                 var parent_param_name = info.fetch_named ("parent");
@@ -421,7 +424,7 @@ namespace Guanako {
                 var parent_param = find_param (call_params, parent_param_name, current_rule.rule_id);
                 if (parent_param == null){
                     stdout.printf (@"Variable $parent_param_name not found! >$(compare_rule[0].expr)<\n");
-                    return ret;
+                    return;
                 }
                 Symbol[] children;
                 if (parent_param.symbol == null)
@@ -432,7 +435,7 @@ namespace Guanako {
                 Regex r2 = /^(?P<word>\w*)(?P<rest>.*)$/;
                 MatchInfo info2;
                 if(!r2.match (written, 0, out info2))
-                    return ret;
+                    return;
                 var word = info2.fetch_named ("word");
                 var rest = info2.fetch_named ("rest");
 
@@ -447,19 +450,19 @@ namespace Guanako {
                             child_param.name = write_to_param;
                             child_param.symbol = child;
                             call_params.add (child_param);
-                            ret.add_all (compare (rule[1:rule.length], accessible, rest, call_params, depth + 1));
+                            compare (rule[1:rule.length], accessible, rest, call_params, depth + 1, ref ret);
                         }
                         if (rest == "" && child.name.has_prefix (word) && child.name.length > word.length)
                             ret.add (new CompletionProposal (child, word.length));
                     }
                 }
-                return ret;
+                return;
             }
             if (current_rule.expr.has_prefix ("$")) {
                 string call = current_rule.expr.substring (1);
                 if (!map_syntax.has_key (call)) {
                     stdout.printf (@"Call $call not found in >$(compare_rule[0].expr)<\n");
-                    return ret;
+                    return;
                 }
 
                 RuleExpression[] composit_rule = map_syntax[call].rule;
@@ -477,7 +480,7 @@ namespace Guanako {
                     var param = find_param (call_params, write_to_param, current_rule.rule_id);  // call_params[write_to_param];
                     if (param == null) {
                         stdout.printf (@"Parameter $write_to_param not found in >$(compare_rule[0].expr)<\n");
-                        return ret;
+                        return;
                     }
                     child_param.symbol = param.symbol;
 
@@ -485,8 +488,8 @@ namespace Guanako {
 
                 }
 
-                return compare (composit_rule, accessible, written, call_params, depth + 1);
-
+                compare (composit_rule, accessible, written, call_params, depth + 1, ref ret);
+                return;
             }
 
             var mres = match (written, current_rule.expr);
@@ -494,14 +497,14 @@ namespace Guanako {
             if (mres == matchres.COMPLETE) {
                 written = written.substring (current_rule.expr.length);
                 if (rule.length == 1)
-                    return ret;
-                return compare (rule[1:rule.length], accessible, written, call_params, depth + 1);
+                    return;
+                compare (rule[1:rule.length], accessible, written, call_params, depth + 1, ref ret);
             }
             else if (mres == matchres.STARTED) {
                 ret.add (new CompletionProposal (new Struct (current_rule.expr, null, null), written.length));
-                return ret;
+                return;
             }
-            return ret;
+            return;
         }
 
         enum matchres {
