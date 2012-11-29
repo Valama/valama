@@ -71,12 +71,8 @@ public static int main (string[] args) {
     var bfr = (SourceBuffer) view.buffer;
     bfr.set_highlight_syntax (true);
     view.insert_spaces_instead_of_tabs = true;
-    // set-up automatic identation
-    view.auto_indent = true;
-    view.indent_width = 3;
-    view.tab_width = 3;
 
-    view.override_font(FontDescription.from_string ("Ubuntu Mono 11"));
+    view.override_font(FontDescription.from_string ("Monospace 10"));
 
     TestProvider tp = new TestProvider();
     tp.priority = 1;
