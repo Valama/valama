@@ -226,7 +226,7 @@ namespace Guanako {
         }
         Gee.HashMap<string, SyntaxRule> map_syntax = new Gee.HashMap<string, SyntaxRule>();
 
-        public Gee.HashSet<CompletionProposal>? propose_symbols (SourceFile file,
+        public Gee.TreeSet<CompletionProposal>? propose_symbols (SourceFile file,
                                                                  int line,
                                                                  int col,
                                                                  string written) {
@@ -325,7 +325,7 @@ namespace Guanako {
 
         int rule_id_count = 0;
 
-        Gee.HashSet<CompletionProposal>? compare (RuleExpression[] compare_rule,
+        Gee.TreeSet<CompletionProposal>? compare (RuleExpression[] compare_rule,
                                       Symbol[] accessible,
                                       string written2,
                                       Gee.ArrayList<CallParameter> call_params,
@@ -337,7 +337,18 @@ namespace Guanako {
              */
             string written = written2;
 
-            Gee.HashSet<CompletionProposal> ret = new Gee.HashSet<CompletionProposal>();
+            // TreeSet with custom sorting function
+            Gee.TreeSet<CompletionProposal> ret = new Gee.TreeSet<CompletionProposal>((a,b)=>{
+                var a_case = ((CompletionProposal)a).symbol.name.casefold();
+                var b_case = ((CompletionProposal)b).symbol.name.casefold();
+                if (a_case < b_case)
+                    return -1;
+                if (b_case > a_case)
+                    return 1;
+                if (b_case == a_case)
+                    return 0;
+                return 1; //??? Should never reach this line, but it does. Funny.
+            });
 
             RuleExpression[] rule = new RuleExpression[compare_rule.length];
             for (int q = 0; q < rule.length; q++)
