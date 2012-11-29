@@ -75,9 +75,9 @@ public SourceFile? ui_create_file_dialog (ValamaProject project) {
                     stderr.printf ("Could not create new file: %s", e.message);
                 }
             }
-            source_file = new SourceFile (project.guanako_project.code_context,
+            source_file = project.guanako_project.add_source_file_by_name(filename); /*new SourceFile (project.guanako_project.code_context,
                                           SourceFileType.SOURCE,
-                                          filename);
+                                          filename);*/
         }
         dlg.destroy();
     });

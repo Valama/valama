@@ -47,6 +47,20 @@ namespace Guanako {
                     files += file;
             return files;
         }
+        public void add_source_file (SourceFile source_file) {
+            context.add_source_file (source_file);
+        }
+        public SourceFile add_source_file_by_name (string filename) {
+            var source_file = new SourceFile (context,
+                                              SourceFileType.SOURCE,
+                                              filename);
+            context.add_source_file (source_file);
+            return source_file;
+        }
+
+        public void set_report_wrapper(Report report_wrapper){
+            context.report = report_wrapper;
+        }
 
         Vala.Parser parser;
         public Gee.ArrayList<string> packages = new Gee.ArrayList<string>();
@@ -67,7 +81,9 @@ namespace Guanako {
         public void remove_file (SourceFile file) {
             var old_files = context.get_source_files();
             var old_packages = context.get_packages();
+            var old_report = context.report;
             context = new CodeContext();
+            context.report = old_report;
             parser = new Vala.Parser();
             foreach (SourceFile old_file in old_files)
                 if (old_file != file)
@@ -79,10 +95,6 @@ namespace Guanako {
 
         public Symbol root_symbol {
             get { return context.root; }
-        }
-
-        public CodeContext code_context {
-            get { return context; }
         }
 
         public void add_packages (string[] package_names, bool auto_update) {
@@ -149,10 +161,6 @@ namespace Guanako {
                     continue;
                 vanish_file (pkg_file);
             }
-        }
-
-        public void add_source_file (SourceFile source_file) {
-            context.add_source_file (source_file);
         }
 
         public void update() {

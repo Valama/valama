@@ -41,7 +41,6 @@ public class ValamaProject {
             File directory;
             FileEnumerator enumerator;
             FileInfo file_info;
-            SourceFile[] sf = new SourceFile[0];
 
             foreach (string source_dir in project_source_dirs) {
                 directory = File.new_for_path (project_path + source_dir);
@@ -53,11 +52,8 @@ public class ValamaProject {
                     foreach (string suffix in project_file_types) {
                         if (file.has_suffix (suffix)){
                             stdout.printf (@"Found file $file\n");
-                            var source_file = new SourceFile (guanako_project.code_context,
-                                                              SourceFileType.SOURCE,
-                                                              file);
-                            guanako_project.add_source_file (source_file);
-                            sf += source_file;
+                            guanako_project.add_source_file_by_name (file);
+                            break;
                         }
                     }
                 }
