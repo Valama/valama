@@ -138,10 +138,10 @@ public static int main (string[] args) {
     btnBuild.clicked.connect (on_build_button_clicked);
     toolbar.add (btnBuild);
 
-    var btnAutoIndent = new Gtk.ToolButton.from_stock (Stock.REFRESH);
+    /*var btnAutoIndent = new Gtk.ToolButton.from_stock (Stock.REFRESH);
     btnAutoIndent.set_tooltip_text ("Auto Indent");
     btnAutoIndent.clicked.connect (on_auto_indent_button_clicked);
-    toolbar.add (btnAutoIndent);
+    toolbar.add (btnAutoIndent);*/
 
     var btnSettings = new Gtk.ToolButton.from_stock (Stock.PREFERENCES);
     btnSettings.set_tooltip_text ("Settings");
