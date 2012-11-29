@@ -133,9 +133,14 @@ public ValamaProject? ui_create_project_dialog() {
         return null;
 
     try {
-        copy_recursively (template.path, target_folder + "/" + proj_name);
-        var proj_file = File.new_for_path (target_folder + "/" + proj_name + "/template.vlp");
-        proj_file.move (proj_file.resolve_relative_path ("../" + proj_name + ".vlp"), 0, null);
+        //TODO: Add progress bar and at least warn on overwrite (don't skip
+        //      without warning).
+        new FileTransfer (template.path,
+                          target_folder + "/" + proj_name,
+                          CopyRecursiveFlags.SKIP_EXISTENT).copy();
+        new FileTransfer (target_folder + "/" + proj_name + "/template.vlp",
+                          target_folder + "/" + proj_name + "/" + proj_name +".vlp",
+                          CopyRecursiveFlags.SKIP_EXISTENT).move();
     } catch (GLib.Error e) {
         stderr.printf ("Could not copy templates for new project: %s", e.message);
     }
