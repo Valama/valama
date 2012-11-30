@@ -142,7 +142,7 @@ public ValamaProject? ui_create_project_dialog() {
                           target_folder + "/" + proj_name + "/" + proj_name +".vlp",
                           CopyRecursiveFlags.SKIP_EXISTENT).move();
     } catch (GLib.Error e) {
-        stderr.printf ("Could not copy templates for new project: %s", e.message);
+        stderr.printf ("Could not copy templates for new project: %s\n", e.message);
     }
 
 

@@ -155,7 +155,8 @@ public class FileTransfer : Object {
             if (!f_to.query_exists())
                 f_to.make_directory_with_parents();
             do_recursively (f_from, f_to);
-            f_from.delete();
+            if (this.action == RecursiveAction.MOVE)
+                f_from.delete();
         }
     }
 
