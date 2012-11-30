@@ -47,14 +47,19 @@ namespace Guanako {
                     files += file;
             return files;
         }
-        public void add_source_file (SourceFile source_file) {
+        public bool add_source_file (SourceFile source_file) {
+            foreach (SourceFile file in get_source_files())
+                if (file.filename == source_file.filename)
+                    return false;
             context.add_source_file (source_file);
+            return true;
         }
-        public SourceFile add_source_file_by_name (string filename) {
+        public SourceFile? add_source_file_by_name (string filename) {
             var source_file = new SourceFile (context,
                                               SourceFileType.SOURCE,
                                               filename);
-            context.add_source_file (source_file);
+            if (!add_source_file (source_file))
+                return null;
             return source_file;
         }
 
