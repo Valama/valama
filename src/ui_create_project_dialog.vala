@@ -129,7 +129,7 @@ public ValamaProject? ui_create_project_dialog() {
     string proj_name = ent_proj_name.text;
 
     dlg.destroy();
-    if (res == ResponseType.CANCEL || template == null)
+    if (res == ResponseType.CANCEL || res == ResponseType.DELETE_EVENT || template == null)
         return null;
 
     try {
