@@ -132,7 +132,7 @@ MethodNameChildMethod : parent
 
 
 MethodCall
-$MethodInst{@}|$MethodChildStuffStat{@}
+$MethodInst{@}|$MethodStat{@}
 
 MethodIterInst : parent
 . $MethodInst{parent}
