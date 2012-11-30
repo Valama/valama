@@ -214,7 +214,7 @@ RefModif
 ref|out _
 
 Assignable
-$AssgInst{@}|$AssgChildStuffStat{@}
+$AssgInst{@}|$AssgStat{@}
 
 AssgIterInst : parent
 . $AssgInst{parent}
