@@ -244,12 +244,19 @@ namespace Guanako {
 
             // TreeSet with custom sorting function
             Gee.TreeSet<CompletionProposal> ret = new Gee.TreeSet<CompletionProposal>((a,b)=>{
-                var a_case = ((CompletionProposal)a).symbol.name.casefold();
-                var b_case = ((CompletionProposal)b).symbol.name.casefold();
-                if (a_case < b_case)
+                var name_a = ((CompletionProposal)a).symbol.name;
+                var name_b = ((CompletionProposal)b).symbol.name;
+                var name_a_case = name_a.casefold();
+                var name_b_case = name_b.casefold();
+                if (name_a_case < name_b_case)
                     return -1;
-                if (a_case > b_case)
+                if (name_a_case > name_b_case)
                     return 1;
+                if (name_a < name_b)
+                    return -1;
+                if (name_a > name_b)
+                    return 1;
+
                 return 0;
             });
 
@@ -505,6 +512,7 @@ namespace Guanako {
                 if (rule.length == 1)
                     return;
                 compare (rule[1:rule.length], accessible, written, call_params, depth + 1, ref ret);
+                return;
             }
             else if (mres == matchres.STARTED) {
                 ret.add (new CompletionProposal (new Struct (current_rule.expr, null, null), written.length));

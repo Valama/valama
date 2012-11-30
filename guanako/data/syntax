@@ -16,7 +16,7 @@ while ?_ ( ?_ $Comparison ?_ )
 
 
 DeclarationStatement
-$TypedDeclaration|$VarDeclaration  ?_ ;
+$TypedDeclaration|$VarDeclaration ?_ ;
 
 VarDeclaration
 var _ *word ?_ $Assignment
