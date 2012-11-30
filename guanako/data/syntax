@@ -150,7 +150,7 @@ MethodChildStuffStat : parent
 {parent}>Namespace{a}|{parent}>Class{a} $MethodIterStat{a}
 
 MethodChildVariablesStat : parent
-{parent}>Variable<static>{a}|{parent}>Property<static>{a} $MethodIterStat{a}
+{parent}>Variable<static>{a}|{parent}>Property<static>{a} $MethodIterInst{a}
 
 MethodChildMethodStat : parent
 {parent}>Method<static>{a} ?_ $MethodCallBrackets ?$MethodIterStat{a}
@@ -232,7 +232,7 @@ AssgChildStuffStat : parent
 {parent}>Namespace{a}|{parent}>Class{a} $AssgIterStat{a}
 
 AssgChildVariablesStat : parent
-{parent}>Variable<static>{a}|{parent}>Property<static>{a} ?$AssgIterStat{a}
+{parent}>Variable<static>{a}|{parent}>Property<static>{a} ?$AssgIterInst{a}
 
 
 AssgChildVariablesInst : parent
