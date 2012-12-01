@@ -304,33 +304,57 @@ namespace Guanako {
             return false;
         }
 
-        bool symbol_has_binding(Symbol smb, string binding){
+        bool symbol_has_binding(Symbol smb, string? binding){
+            if (binding == null)
+                return true;
+
+            bool stat = binding.contains("static");
+            bool inst = binding.contains("instance");
+            bool arr = binding.contains("array");
+
             if (smb is Method){
-                if (binding == "<static>" && ((Method)smb).binding == MemberBinding.STATIC)
-                    return true;
-                else if (binding == "<instance>" && ((Method)smb).binding == MemberBinding.INSTANCE)
-                    return true;
+                if (inst && ((Method)smb).binding == MemberBinding.STATIC)
+                    return false;
+                else if (stat && ((Method)smb).binding == MemberBinding.INSTANCE)
+                    return false;
             } else if (smb is Field){
-                if (binding == "<static>" && ((Field)smb).binding == MemberBinding.STATIC)
-                    return true;
-                else if (binding == "<instance>" && ((Field)smb).binding == MemberBinding.INSTANCE)
-                    return true;
+                if (inst && ((Field)smb).binding == MemberBinding.STATIC)
+                    return false;
+                else if (stat && ((Field)smb).binding == MemberBinding.INSTANCE)
+                    return false;
             } else if (smb is Property){
-                if (binding == "<static>" && ((Property)smb).binding == MemberBinding.STATIC)
-                    return true;
-                else if (binding == "<instance>" && ((Property)smb).binding == MemberBinding.INSTANCE)
-                    return true;
-            } else if (smb is Variable){
-                if (binding == "<instance>")
-                    return true;
+                if (inst && ((Property)smb).binding == MemberBinding.STATIC)
+                    return false;
+                else if (stat && ((Property)smb).binding == MemberBinding.INSTANCE)
+                    return false;
             }
-            return false;
+            DataType type = null;
+            if (smb is Property)
+                type = ((Property) smb).property_type;
+            if (smb is Variable)
+                type = ((Variable) smb).variable_type;
+            if (smb is Method)
+                type = ((Method) smb).return_type;
+            if (type != null)
+                if (type.is_array() != arr)
+                    return false;
+            return true;
         }
 
         class CallParameter {
             public int for_rule_id;
             public string name;
-            public Symbol? symbol;
+
+            public Symbol? symbol { get {return _symbol;}
+                set {
+                    _symbol = value;
+                    if (return_to_param != null)
+                        return_to_param.symbol = value;
+                }
+            }
+            private Symbol _symbol;
+
+            public CallParameter? return_to_param = null;
         }
         CallParameter universal_parameter;
 
@@ -399,14 +423,6 @@ namespace Guanako {
                 return;
             }
 
-            string write_to_param = null;
-            if (current_rule.expr.has_suffix ("}")) {
-                int bracket_start = current_rule.expr.last_index_of ("{");
-
-                write_to_param = current_rule.expr.substring (bracket_start + 1, current_rule.expr.length - bracket_start - 2);
-                current_rule.expr = current_rule.expr.substring (0, bracket_start);
-            }
-
             if (current_rule.expr.has_prefix ("*word")) {
                 Regex r = /^(?P<word>\w*)(?P<rest>.*)$/;
                 MatchInfo info;
@@ -428,7 +444,7 @@ namespace Guanako {
             }
 
             if (current_rule.expr.has_prefix ("{")) {
-                Regex r = /^{(?P<parent>.*)}>(?P<child>\w*)(?P<binding>.*)$/;
+                Regex r = /^\{(?P<parent>.*)\}\>(?P<child>\w*)(\<(?P<binding>.*)\>)?(\{(?P<write_to>\w*)\})?$/;
                 MatchInfo info;
                 if (!r.match (current_rule.expr, 0, out info)) {
                     stdout.printf ("Malformed rule! >" + compare_rule[0].expr + "<\n");
@@ -438,6 +454,7 @@ namespace Guanako {
                 var parent_param_name = info.fetch_named ("parent");
                 var child_type = info.fetch_named ("child");
                 var binding = info.fetch_named ("binding");
+                var write_to_param = info.fetch_named ("write_to");
 
                 var parent_param = find_param (call_params, parent_param_name, current_rule.rule_id);
                 if (parent_param == null){
@@ -447,8 +464,9 @@ namespace Guanako {
                 Symbol[] children;
                 if (parent_param.symbol == null)
                     children = accessible;
-                else
+                else{
                     children = get_child_symbols (get_type_of_symbol (parent_param.symbol));
+                }
 
                 Regex r2 = /^(?P<word>\w*)(?P<rest>.*)$/;
                 MatchInfo info2;
@@ -463,11 +481,14 @@ namespace Guanako {
                             if (!symbol_has_binding(child, binding))
                                 continue;
                         if (word == child.name){
-                            var child_param = new CallParameter();
-                            child_param.for_rule_id = current_rule.rule_id;
-                            child_param.name = write_to_param;
+                            var child_param = find_param (call_params, write_to_param, current_rule.rule_id);
+                            if (child_param == null){
+                                child_param = new CallParameter();
+                                child_param.name = write_to_param;
+                                child_param.for_rule_id = current_rule.rule_id;
+                                call_params.add (child_param);
+                            }
                             child_param.symbol = child;
-                            call_params.add (child_param);
                             compare (rule[1:rule.length], accessible, rest, call_params, depth + 1, ref ret);
                         }
                         if (rest == "" && child.name.has_prefix (word) && child.name.length > word.length)
@@ -477,7 +498,16 @@ namespace Guanako {
                 return;
             }
             if (current_rule.expr.has_prefix ("$")) {
-                string call = current_rule.expr.substring (1);
+                Regex r = /^\$(?P<call>\w*)(\{(?P<pass>(\w*|\@))\})?(\>\{(?P<ret>.*)\})?$/;
+                MatchInfo info;
+                if (!r.match (current_rule.expr, 0, out info)) {
+                    stdout.printf ("Malformed rule! >" + compare_rule[0].expr + "<\n");
+                    return;
+                }
+                var call = info.fetch_named ("call");
+                var pass_param = info.fetch_named ("pass");
+                var ret_param = info.fetch_named ("ret");
+
                 if (!map_syntax.has_key (call)) {
                     stdout.printf (@"Call $call not found in >$(compare_rule[0].expr)<\n");
                     return;
@@ -491,19 +521,32 @@ namespace Guanako {
                 foreach (RuleExpression exp in rule[1:rule.length])
                     composit_rule += exp;
 
-                if (write_to_param != null) {
+                if (pass_param != null) {
                     var child_param = new CallParameter();
                     child_param.name = map_syntax[call].parameters[0];
                     child_param.for_rule_id = rule_id_count;
-                    var param = find_param (call_params, write_to_param, current_rule.rule_id);  // call_params[write_to_param];
+                    var param = find_param (call_params, pass_param, current_rule.rule_id);
                     if (param == null) {
-                        stdout.printf (@"Parameter $write_to_param not found in >$(compare_rule[0].expr)<\n");
+                        stdout.printf (@"Parameter $pass_param not found in >$(compare_rule[0].expr)<\n");
                         return;
                     }
                     child_param.symbol = param.symbol;
-
                     call_params.add (child_param);
 
+                    if (ret_param != null){
+                        var ret_p = find_param (call_params, ret_param, current_rule.rule_id);
+                        if (ret_p == null){
+                            ret_p = new CallParameter();
+                            ret_p.name = ret_param;
+                            ret_p.for_rule_id = current_rule.rule_id;
+                            call_params.add (ret_p);
+                        }
+                        var child_ret_p = new CallParameter();
+                        child_ret_p.name = "ret";
+                        child_ret_p.for_rule_id = rule_id_count;
+                        child_ret_p.return_to_param = ret_p;
+                        call_params.add(child_ret_p);
+                    }
                 }
 
                 compare (composit_rule, accessible, written, call_params, depth + 1, ref ret);
@@ -542,16 +585,23 @@ namespace Guanako {
         }
 
         Symbol? get_type_of_symbol (Symbol smb){
-            Symbol type = null;
             if (smb is Class || smb is Namespace || smb is Struct || smb is Enum)
-                type = smb;
+                return smb;
+
+            DataType type = null;
             if (smb is Property)
-                type = ((Property) smb).property_type.data_type;
+                type = ((Property) smb).property_type;
             if (smb is Variable)
-                type = ((Variable) smb).variable_type.data_type;
+                type = ((Variable) smb).variable_type;
             if (smb is Method)
-                type = ((Method) smb).return_type.data_type;
-            return type;
+                type = ((Method) smb).return_type;
+
+            if (type == null)
+                return null;
+            if (type is ArrayType)
+                return ((ArrayType)type).element_type.data_type;
+            else
+                return type.data_type;
         }
 
         public Symbol[] get_accessible_symbols (SourceFile file, int line, int col) {

@@ -157,11 +157,20 @@ MethodChildMethodStat : parent
 
 
 MethodChildMethodInst : parent
-{parent}>Method<instance>{a} ?_ $MethodCallBrackets ?$MethodIterInst{a}
+$MethodGeneralCall{parent}>{a} ?$MethodIterInst{a}
 
 MethodChildVariablesInst : parent
 {parent}>Variable<instance>{a}|{parent}>Property<instance>{a} $MethodIterInst{a}
 
+
+MethodGeneralCall : parent
+$MethodGeneralCallSingle{parent}>{ret}|$MethodGeneralCallArray{parent}>{ret}
+
+MethodGeneralCallSingle : parent
+{parent}>Method<instance>{ret} ?_ $MethodCallBrackets
+
+MethodGeneralCallArray : parent
+{parent}>Method<instance,array>{ret} ?_ $MethodCallBrackets ?_ [ ?_ $Value ?_ ]
 
 
 Value
