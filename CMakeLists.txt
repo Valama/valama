@@ -120,7 +120,7 @@ if(VALADOC_FOUND)
     DEPENDS clear_doc
     COMMENT "Generating documentation with valadoc." VERBATIM)
 
-  install(DIRECTORY "${PROJECT_BINARY_DIR}/docs/${project_name}/"
+  install(DIRECTORY "${PROJECT_BINARY_DIR}/docs/"
           DESTINATION "share/valama/doc" OPTIONAL)
 endif()
 
