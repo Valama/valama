@@ -98,5 +98,6 @@ set(vapi_files "${CMAKE_CURRENT_BINARY_DIR}/guanako.deps" "${CMAKE_CURRENT_BINAR
 install(FILES ${vapi_files} DESTINATION "${prefix}/share/vala-${vala_version_short}/vapi")
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/Guanako-${guanako_version}.gir" DESTINATION "share/gir-1.0")
 install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/data/syntax" DESTINATION "share/valama")
+install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/data/guanako.lang" DESTINATION "share/gtksourceview-3.0/language-specs")
 
 # vim: set ai ts=2 sts=2 et sw=2
