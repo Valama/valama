@@ -1,4 +1,4 @@
-/**
+/*
  * src/ui_elements.vala
  * Copyright (C) 2012, Dominique Lasserre <lasserre.d@gmail.com>
  *
@@ -20,7 +20,7 @@
 using GLib;
 using Gee;
 
-/*
+/**
  * Provide an abstraction for all pluggable UI elements.
  * Do not use an interface because we already have some precise definitions
  * (e.g. an instance field ui_connections).

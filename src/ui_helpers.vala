@@ -1,4 +1,4 @@
-/**
+/*
  * src/ui_helpers.vala
  * Copyright (C) 2012, Dominique Lasserre <lasserre.d@gmail.com>
  *

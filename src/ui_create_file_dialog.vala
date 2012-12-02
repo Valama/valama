@@ -1,4 +1,4 @@
-/**
+/*
  * src/ui_create_file_dialog.vala
  * Copyright (C) 2012, Dominique Lasserre <lasserre.d@gmail.com>
  *

@@ -1,4 +1,4 @@
-/**
+/*
  * guanako/guanako_auto_indent.vala
  * Copyright (C) 2012, Linus Seelinger <S.Linus@gmx.de>
  *

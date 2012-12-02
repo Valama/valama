@@ -1,4 +1,4 @@
-/**
+/*
  * src/ui_project_dialog.vala
  * Copyright (C) 2012, Linus Seelinger <S.Linus@gmx.de>
  *               2012, Dominique Lasserre <lasserre.d@gmail.com>

@@ -1,4 +1,4 @@
-/**
+/*
  * src/ui_project_browser.vala
  * Copyright (C) 2012, Linus Seelinger <S.Linus@gmx.de>
  *

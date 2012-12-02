@@ -1,4 +1,4 @@
-/**
+/*
  * src/project_templates.vala
  * Copyright (C) 2012, Linus Seelinger <S.Linus@gmx.de>
  *

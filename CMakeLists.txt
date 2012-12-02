@@ -39,9 +39,9 @@ endif()
 
 # Little fix to ignore a wrong libvala version.
 if(VALA_VERSION STRGREATER "0.17.0")
-  list( REMOVE_ITEM required_pkgs "libvala-0.16" )
+  list(REMOVE_ITEM required_pkgs "libvala-0.16")
 else()
-  list( REMOVE_ITEM required_pkgs "libvala-0.18" )
+  list(REMOVE_ITEM required_pkgs "libvala-0.18")
 endif()
 
 # Set Vala syntax depending on version.
@@ -83,6 +83,46 @@ link_libraries(${GTHREAD_LIBRARIES})
 include_directories("${PROJECT_BINARY_DIR}/guanako")
 add_executable(valama ${VALA_C})
 target_link_libraries(valama guanako)
+
+# Create the docs.
+find_package(Valadoc)
+if(VALADOC_FOUND)
+  set(globexpr "")
+  set(all_srcfiles "")
+  foreach(globexpr "${PROJECT_SOURCE_DIR}/src/*.vala" "${PROJECT_SOURCE_DIR}/guanako/*.vala")
+    set(tmpsrcfiles "")
+    file(GLOB tmpsrcfiles ${globexpr})
+    set(tmpsrcfile "")
+    foreach(tmpsrcfile ${tmpsrcfiles})
+      file(RELATIVE_PATH srcfile ${CMAKE_CURRENT_BINARY_DIR} ${tmpsrcfile})
+      list(APPEND all_srcfiles ${srcfile})
+    endforeach()
+  endforeach()
+  set(vala_pkg_opts "")
+  list(REMOVE_ITEM required_pkgs "guanako")
+  foreach(pkg ${required_pkgs};${optional_pkgs})
+    list(APPEND vala_pkg_opts "--pkg=${pkg}")
+  endforeach()
+
+  add_custom_target(clear_doc
+    ${CMAKE_COMMAND} -E remove_directory "${PROJECT_BINARY_DIR}/docs"
+    COMMENT "Clear old documentations." VERBATIM)
+
+  add_custom_target(doc
+    ${VALADOC_EXECUTABLE} "-o" "docs"
+        "${PROJECT_SOURCE_DIR}/config.vala" ${all_srcfiles} ${vala_pkg_opts} ${custom_vapi_arguments}
+        "--vapidir=/usr/share/vala-${valashort_ver}/vapi"
+        "--target-glib=2.32"
+        "--private"
+        "--internal"
+        "--verbose"
+        "--package-name=${project_name}"
+    DEPENDS clear_doc
+    COMMENT "Generating documentation with valadoc." VERBATIM)
+
+  install(DIRECTORY "${PROJECT_BINARY_DIR}/docs/${project_name}/"
+          DESTINATION "share/valama/doc" OPTIONAL)
+endif()
 
 # Create changelog on release.
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
