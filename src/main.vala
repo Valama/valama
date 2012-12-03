@@ -27,10 +27,10 @@ static Window window_main;
 
 static ValamaProject project;
 static SourceView view;
-static ReportWrapper report_wrapper;
-static ui_report wdg_report;
 
 static bool parsing = false;
+MainLoop loop_update;
+static SourceFile current_source_file = null;
 
 public static int main (string[] args) {
     //TODO: Command line parsing.
@@ -61,8 +61,10 @@ public static int main (string[] args) {
     ui_elements_pool.add (pbrw);
     //ui_elements_pool.add (smb_browser);  // dangerous (circulare deps)
 
-    report_wrapper = new ReportWrapper();
-    project.guanako_project.set_report_wrapper(report_wrapper);
+    var report_wrapper = new ReportWrapper();
+    project.guanako_project.set_report_wrapper (report_wrapper);
+    var wdg_report = new UiReport (report_wrapper);
+    ui_elements_pool.add (wdg_report);
 
     window_main = new Window();
 
@@ -84,15 +86,33 @@ public static int main (string[] args) {
         stderr.printf ("Could not load completion: %s", e.message);
         return 1;
     }
-    view.buffer.changed.connect (on_view_buffer_changed);
+    view.buffer.changed.connect (on_view_buffer_changed); // Nothing to do yet.
     view.buffer.create_tag ("gray_bg", "background", "gray", null);
     view.auto_indent = true;
     view.indent_width = 4;
     view.buffer.changed.connect (() => {
         if (!parsing) {
-            update_text = view.buffer.text;
             try {
-                new Thread<void*>.try ("Buffer update", update_current_file);
+#if NOT_THREADED
+                Thread<void*> t = new Thread<void*>.try ("Buffer update", () => {
+#else
+                new Thread<void*>.try ("Buffer update", () => {
+#endif
+                    parsing = true;
+                    report_wrapper.clear();
+                    project.guanako_project.update_file (current_source_file, view.buffer.text);
+                    Idle.add (() => {
+                        wdg_report.update();
+                        parsing = false;
+                        if (loop_update.is_running())
+                            loop_update.quit();
+                        return false;
+                    });
+                    return null;
+                });
+#if NOT_THREADED
+                t.join();
+#endif
             } catch (GLib.Error e) {
                 stderr.printf ("Could not create thread to update buffer completion: %s", e.message);
             }
@@ -130,12 +150,18 @@ public static int main (string[] args) {
     var btnSave = new ToolButton.from_stock (Stock.SAVE);
     toolbar.add (btnSave);
     btnSave.set_tooltip_text ("Save current file");
-    btnSave.clicked.connect (write_current_source_file);
+    btnSave.clicked.connect (() => {
+        write_current_source_file(report_wrapper);
+        wdg_report.update();
+    });
     toolbar.add (btnSave);
 
     var btnBuild = new Gtk.ToolButton.from_stock (Stock.EXECUTE);
-    btnBuild.set_tooltip_text ("Save current file an build project");
-    btnBuild.clicked.connect (on_build_button_clicked);
+    btnBuild.set_tooltip_text ("Save current file and build project");
+    btnBuild.clicked.connect (() => {
+        on_build_button_clicked (report_wrapper);
+        wdg_report.update();
+    });
     toolbar.add (btnBuild);
 
     /*var btnAutoIndent = new Gtk.ToolButton.from_stock (Stock.REFRESH);
@@ -166,7 +192,6 @@ public static int main (string[] args) {
     vbox_main.pack_start (hbox, true, true);
 
 
-    wdg_report = new ui_report (report_wrapper);
     var scrw3 = new ScrolledWindow (null, null);
     scrw3.add (wdg_report.widget);
     scrw3.set_size_request (0, 150);
@@ -187,22 +212,6 @@ public static int main (string[] args) {
     return 0;
 }
 
-MainLoop loop_update;
-string update_text;
-static void* update_current_file() {
-    parsing = true;
-    report_wrapper.clear();
-    project.guanako_project.update_file (current_source_file, update_text);
-    Idle.add (() => {
-        wdg_report.build();
-        parsing = false;
-        if (loop_update.is_running())
-            loop_update.quit();
-        return false;
-    });
-    return null;
-}
-
 static void on_auto_indent_button_clicked() {
     string indented = Guanako.auto_indent_buffer (project.guanako_project, current_source_file);
     current_source_file.content = indented;
@@ -210,9 +219,7 @@ static void on_auto_indent_button_clicked() {
 }
 
 static void on_error_selected (ReportWrapper.Error err) {
-    stdout.printf ("Selected: " + err.source.file.filename + "\n");
-
-    on_source_file_selected(err.source.file);
+    on_source_file_selected (err.source.file);
 
     TextIter start;
     view.buffer.get_iter_at_line_offset (out start,
@@ -235,14 +242,11 @@ static void on_error_selected (ReportWrapper.Error err) {
     view.buffer.select_range (start, end);
 }
 
-static void on_build_button_clicked() {
-    write_current_source_file();
-    report_wrapper.clear();
+static void on_build_button_clicked (ReportWrapper report_wrapper) {
+    write_current_source_file (report_wrapper);
     project.build();
-    wdg_report.build();
 }
 
-static SourceFile current_source_file = null;
 static void on_source_file_selected (SourceFile file){
     if (current_source_file == file)
         return;
@@ -257,7 +261,7 @@ static void on_source_file_selected (SourceFile file){
     }
 }
 
-void write_current_source_file() {
+void write_current_source_file (ReportWrapper report_wrapper) {
     var file = File.new_for_path (current_source_file.filename);
     /* TODO: First parameter can be used to check if file has changed.
      *       The second parameter can enable/disable backup file. */
@@ -275,97 +279,9 @@ void write_current_source_file() {
 
     report_wrapper.clear();
     project.guanako_project.update_file (current_source_file, view.buffer.text);
-    wdg_report.build();
 }
 
 static void on_view_buffer_changed(){
-}
-
-public class ReportWrapper : Vala.Report {
-    public struct Error {
-        public Vala.SourceReference source;
-        public string message;
-    }
-    public Vala.List<Error?> errors_list = new Vala.ArrayList<Error?>();
-    public Vala.List<Error?> warnings_list = new Vala.ArrayList<Error?>();
-    bool general_error = false;
-    public void clear() {
-        errors_list = new Vala.ArrayList<Error?>();
-        warnings_list = new Vala.ArrayList<Error?>();
-    }
-    public override void warn (Vala.SourceReference? source, string message) {
-        warnings ++;
-
-        if (source == null)
-            return;
-        //lock (errors_list) {
-        warnings_list.add(Error() {source = source, message = message});
-        //}
-     }
-     public override void err (Vala.SourceReference? source, string message) {
-         errors ++;
-
-         if (source == null) {
-             general_error = true;
-             return;
-         }
-         //lock (errors_list) {
-         errors_list.add (Error() {source = source, message = message});
-         //}
-    }
-}
-
-class ui_report {
-    public ui_report (ReportWrapper report){
-        this.report = report;
-
-        tree_view = new TreeView();
-        tree_view.insert_column_with_attributes (-1, "Location", new CellRendererText(), "text", 0, null);
-        tree_view.insert_column_with_attributes (-1, "Error", new CellRendererText(), "text", 1, null);
-
-        build();
-
-        tree_view.row_activated.connect((path) => {
-            int index = path.get_indices()[0];
-            if (report.errors_list.size > index)
-                error_selected (report.errors_list[index]);
-            else
-                error_selected (report.warnings_list[index - report.errors_list.size]);
-        });
-        tree_view.can_focus = false;
-
-        widget = tree_view;
-    }
-
-    ReportWrapper report;
-    TreeView tree_view;
-    public Widget widget;
-
-    public signal void error_selected (ReportWrapper.Error error);
-
-    public void build() {
-        var store = new ListStore (2, typeof (string), typeof (string));
-        tree_view.set_model (store);
-
-        foreach (ReportWrapper.Error err in report.errors_list) {
-            TreeIter next;
-            store.append (out next);
-#if VALA_LESS_0_18
-            store.set (next, 0, err.source.first_line.to_string(), 1, err.message, -1);
-#else
-            store.set (next, 0, err.source.begin.line.to_string(), 1, err.message, -1);
-#endif
-        }
-        foreach (ReportWrapper.Error err in report.warnings_list) {
-            TreeIter next;
-            store.append (out next);
-#if VALA_LESS_0_18
-            store.set (next, 0, err.source.first_line.to_string(), 1, err.message, -1);
-#else
-            store.set (next, 0, err.source.begin.line.to_string(), 1, err.message, -1);
-#endif
-        }
-    }
 }
 
 class TestProvider : Gtk.SourceCompletionProvider, Object {

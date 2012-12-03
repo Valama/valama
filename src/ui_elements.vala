@@ -65,6 +65,9 @@ public abstract class UiElement {
             project = vproject;
         /* Already start first update. */
         t = new Thread<void*> (element_name, (ThreadFunc<void*>) build);
+#if NOT_THREADED
+        t.join();
+#endif
         update_deps();
     }
 
@@ -136,7 +139,11 @@ public abstract class UiElement {
 #else
             var tp = new ThreadPool<UiElement>.with_owned_data ((worker) => {worker.build();},
 #endif
+#if NOT_THREADED
+                                                                0,
+#else
                                                                 q.size,
+#endif
                                                                 false);
             UiElement queue_element;
             while ((queue_element = q.poll()) != null)
