@@ -71,7 +71,8 @@ vala_pkgs(VALA_C
     --pkg=guanako  # force it, otherwise it is not included with fst cmake run
     --target-glib=2.32  # enable this to use new(tm) thread syntax
     "-D;DEBUG"
-    #"-D;NOT_THREADED"
+    "-D;NOT_THREADED"
+    -g
     ${valac_cond}
 )
 if(NOT PkgConfig_FOUND)

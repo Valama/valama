@@ -64,9 +64,9 @@ public abstract class UiElement {
         if (vproject != null)
             project = vproject;
         /* Already start first update. */
-        t = new Thread<void*> (element_name, (ThreadFunc<void*>) build);
+        //t = new Thread<void*> (element_name, (ThreadFunc<void*>) build);
 #if NOT_THREADED
-        t.join();
+        //t.join();
 #endif
         update_deps();
     }
