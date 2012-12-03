@@ -33,9 +33,13 @@ namespace Guanako {
     }
 
 
-     public class project {
+    public class project {
 
         CodeContext context;
+        Vala.Parser parser;
+        int glib_major = 2;  //TODO: Make this an option.
+        int glib_minor = 32;
+
         /*
          * Not a beautiful piece of code, but necessary to convert from
          * Vala.List.
@@ -47,6 +51,7 @@ namespace Guanako {
                     files += file;
             return files;
         }
+
         public bool add_source_file (SourceFile source_file) {
             foreach (SourceFile file in get_source_files())
                 if (file.filename == source_file.filename)
@@ -54,6 +59,7 @@ namespace Guanako {
             context.add_source_file (source_file);
             return true;
         }
+
         public SourceFile? add_source_file_by_name (string filename) {
             var source_file = new SourceFile (context,
                                               SourceFileType.SOURCE,
@@ -67,14 +73,13 @@ namespace Guanako {
             context.report = report_wrapper;
         }
 
-        Vala.Parser parser;
         public Gee.ArrayList<string> packages = new Gee.ArrayList<string>();
 
         public project(){
             context = new CodeContext();
             parser = new Vala.Parser();
 
-            context.profile = Profile.GOBJECT;
+            context_prep();
 
             universal_parameter = new CallParameter();
             universal_parameter.name = "@";
@@ -83,12 +88,26 @@ namespace Guanako {
             build_syntax_map();
         }
 
+        /**
+         * Set {@link Vala.CodeContext} options and flags.
+         */
+        private void context_prep() {
+            context.target_glib_major = glib_major;
+            context.target_glib_minor = glib_minor;
+            for (int i = 16; i <= glib_minor; i += 2) {
+			    context.add_define ("GLIB_%d_%d".printf (glib_major, i));
+		    }
+            context.profile = Profile.GOBJECT;
+        }
+
         public void remove_file (SourceFile file) {
             var old_files = context.get_source_files();
             var old_packages = context.get_packages();
             var old_report = context.report;
             context = new CodeContext();
             context.report = old_report;
+            context_prep();
+
             parser = new Vala.Parser();
             foreach (SourceFile old_file in old_files)
                 if (old_file != file)
