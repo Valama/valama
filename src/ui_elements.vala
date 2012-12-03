@@ -17,30 +17,49 @@
  *
  */
 
+/**
+ * Valadoc test comment.
+ */
+
 using GLib;
 using Gee;
 
 /**
- * Provide an abstraction for all pluggable UI elements.
+ * Provides an abstraction for all pluggable UI elements.
+ *
+ */
+/*
  * Do not use an interface because we already have some precise definitions
  * (e.g. an instance field ui_connections).
  * Depencency interface is implented (update calls).
  */
 public abstract class UiElement {
-    /* Element name to identify elements easily. */
+    /**
+      * Element name to identify elements easily.
+      */
     protected string element_name;
 
-    /* Share the Valama project between all elements. */
+    /**
+     * Share the project ({@link ValamaProject}) between all elements.
+     */
     public static ValamaProject project { get; set; }
 
-    /* Implement update for this single element in derived element class. */
+    /**
+      * Update and generate this {@link UiElement}.
+      *
+      * This build method is not called directly by others. Instead
+      * {@link update} is used (which calls all dependent build methods).
+      */
     protected abstract void build();
 
-    /*
-     * Call the update method to update this single element and all (reverse)
-     * dependencies.
-     */
     private Thread<void*> t;
+    /**
+     * Call {@link build} methods from this and all dependent
+     * {@link UiElement} class instances.
+     *
+     * Dependencies can be added with {@link add_deps}. They are invoked in
+     * parallel with {@link GLib.Thread} instances.
+     */
     public void update(ValamaProject? vproject=null) {
         if (vproject != null)
             project = vproject;
@@ -49,13 +68,20 @@ public abstract class UiElement {
         update_deps();
     }
 
-    /* Queue of (reverse) dependencies to resolve in parallel. */
+    /**
+      * Queue of dependencies which have same priority (resolve in parallel).
+      */
     private static Gee.PriorityQueue<UiElement> q = new Gee.PriorityQueue<UiElement>();
-    /* Queue of (reverse) dependencies to resolve sequencially. */
+    /**
+      * Queue of dependencies which have different priorities (resolve
+      * sequencially).
+      */
     //TODO: Not implemented.
     //private static Gee.PriorityQueue<UiElement> s_q = new Gee.PriorityQueue<UiElement>();
 
-    /* Add all dependencies to queue. */
+    /**
+     * Add all dependencies to queue {@link q} and avoid duplicates.
+     */
     private void add_deps() {
         if (!q.contains (this))
             q.add (this);
@@ -63,8 +89,8 @@ public abstract class UiElement {
             ui_element.add_deps();
     }
 
-    /*
-     * Dependencies between elements.
+    /**
+     * Dependencies between {@link UiElement} instances.
      * Be careful to avoid circular dependencies and deadlocks.
      */
     /* Order is not interesting. These "dependencies" are equitable. */
@@ -75,9 +101,15 @@ public abstract class UiElement {
      */
     //TODO: Not implemented.
     //private ArrayList<UiElement> ui_dependencies;
+    /**
+     * Add an existing {@link UiElement} to equitable dependencies.
+     */
     public void connect (UiElement element) {
         ui_connections.add (element);
     }
+    /**
+     * Remove an existing {@link UiElement} from equitable dependencies.
+     */
     public void disconnect (UiElement element) {
         ui_connections.remove (element);
     }
@@ -88,7 +120,10 @@ public abstract class UiElement {
     //    ui_connections.remove (element);
     //}
 
-    /* Calculate order of dependencies then update all. */
+    /**
+     * Calculate order of dependencies then update everything in pool
+     * {@link q}.
+     */
     private void update_deps() {
         /* First of all mark all dependencies as dirty (add it to queue). */
         foreach (UiElement ui_element in ui_connections)
@@ -121,7 +156,9 @@ public abstract class UiElement {
     //public void abort() {}
 }
 
-/* Toplevel UiElement pool. This is only transitional until gdl... */
+/**
+ * Toplevel UiElement pool. This is only transitional until gdl...
+ */
 //FIXME: Replace this.
 public class UiElementPool : ArrayList<UiElement> {}
 

@@ -19,55 +19,174 @@
 
 using GLib;
 
-/* Flags to control FileTransfer class. */
+/**
+ * Flags to control FileTransfer class.
+ */
 public enum CopyRecursiveFlags {
+    /**
+     * Don't count and don't skip or warn on existing files.
+     */
     NONE,
-    SKIP_EXISTENT,          // skip if file already exists, count before transfer
-    WARN_OVERWRITE,         // warn if file already exists
+    /**
+     * Skip if file already exists and count before transfer.
+     */
+    SKIP_EXISTENT,
+    /**
+     * Warn if file already exists and count before transfer.
+     */
+    WARN_OVERWRITE,
+    /**
+     * Skip if file already exists.
+     */
     NO_COUNT_SKIP_EXISTENT, //FIXME: Is it possible to pass multiple enum vars to method arguments?
+    /**
+     * Warn if file already exists.
+     */
     NO_COUNT_WARN_OVERWRITE
 }
 
-/*
+/**
  * Transfer class to easily copy or move files or file trees.
  * The byte_count_changed and num_count_changed signals provides an comfortable
  * interface to connect a progress bar.
  *
- * CopyRecursiveFlags enum can be used to control some features:
- *   - skip if files already exists
- *   - warn if files already exists
+ * {@link CopyRecursiveFlags} can be used to control some features:
+ *
+ *   * skip if files already exists
+ *   * warn if files already exists
+ *
  * Both options can be used with or without a run before to calculate size of
  * transfer (and signal interface with percentage / counts).
  *
- * Remember to use special FileCopyFlags or FileQueryInfoFlags or Cancellable.
+ * Remember to use special {@link GLib.FileCopyFlags} or
+ * {@link GLib.FileQueryInfoFlags} or {@link GLib.Cancellable}.
+ *
+ *
+ * = Example =
+ *
+ * {{{
+ * using GLib;
+ *
+ * public static int main (string[] args) {
+ * 	Gtk.init (ref args);
+ * 	window_main = new Window();
+ * 	window_main.title = "Test progress bar";
+ * 	window_main.window_position = WindowPosition.CENTER;;
+ * 	window_main.destroy.connect (main_quit);
+ *
+ * 	var bar = new ProgressBar();
+ * 	window_main.add (bar);
+ *
+ * 	bar.set_text ("Test progress");
+ * 	bar.set_show_text (true);
+ *
+ * 	window_main.show_all();
+ *
+ * 	var ft = new FileTransfer ("/path/to/directory1",
+ * 				"/path/to/directory2",
+ * 				CopyRecursiveFlags.WARN_OVERWRITE);
+ *
+ * 	ft.byte_count_changed.connect (bar.set_fraction);
+ * 	ft.warn_overwrite.connect ((from, to) => {
+ * 		stdout.printf ("We have some time to relax.\n");
+ * 		Thread.usleep (100000);
+ * 		return false;
+ * 	});
+ * 	ft.num_count_changed.connect ((cur, tot) => {
+ * 		bar.set_text (@"$cur/$tot");
+ * 	});
+ *
+ * 	new Thread<void*>.try ("Copy file", (ThreadFunc<void*>) ft.move);
+ * 	Gtk.main();
+ *
+ * 	return 0;
+ * }
+ * }}}
+ *
+ * {{{
+ * valac --pkg glib-2.0 --pkg gtk+-3.0 --target-glib=2.32 FileTransferTest.vala
+ * }}}
+ *
+ *
+ *
  */
 public class FileTransfer : Object {
+    /**
+     * File object to transfer (recursively).
+     */
     public File f_from { get; private set; }
+    /**
+     * File object to transfer to (recursively).
+     */
     public File f_to { get; private set; }
+    /**
+     * Flag for {@link CopyRecursiveFlags}.
+     */
     public CopyRecursiveFlags rec_flag { get; set; }
+    /**
+     * Flag for {@link GLib.File.move} or {@link GLib.File.copy}.
+     */
     public FileCopyFlags copy_flag { get; set; }
+    /**
+     * Flag for {@link GLib.FileInfo}.
+     */
     public FileQueryInfoFlags query_flag  { get; set; }
+    /**
+     * Flag for {@link GLib.Cancellable}.
+     */
     public Cancellable? cancellable { get; set; }
-    public bool create_dest { get; set; default = true; }  // enable to create base destination directory
+    /**
+     * Enable to create base destination directory.
+     */
+    public bool create_dest { get; set; default = true; }
+    /**
+     * Flag for {@link RecursiveAction} to indicate which action to perform
+     * on iterating over files.
+     */
     private RecursiveAction action;
-    private double current_size = 0;   // size of transfers done
-    private double total_size = 0;     // total size of transfers (also files already there)
-    private double size_to_trans = 0;  // size of transfers to do
-    private int count_total = 0;       // number of total transfers
-    private int count_current = 0;     // number of transfers done
-    private bool counter_on = false;   // flag to indicate if counter is on on copy/move step
-    private bool is_file = false;      // flag to indicate if recursive or non-recursive operation is to be done
+    /**
+     * Size of transfers currently done.
+     */
+    private double current_size = 0;
+    /**
+     * Total size of transfers (also existing files).
+     */
+    private double total_size = 0;
+    /**
+     * Size of transfers to do.
+     *
+     * {@link total_size} without existing files.
+     */
+    private double size_to_trans = 0;
+    /**
+     * Number of total transfers (to do).
+     */
+    private int count_total = 0;
+    /**
+     * Number of transfers done.
+     */
+    private int count_current = 0;
+    /**
+     * Flag to indicate if counter is on on copy/move step.
+     *
+     * This is used to avoid tests for all {@link CopyRecursiveFlags}
+     * combinations  count vs. no-count.
+     */
+    private bool counter_on = false;
+    /**
+     * Flag to indicate if recursive or non-recursive operation is to do.
+     */
+    private bool is_file = false;
 
+    /**
+     * Flag to indicate which file transfer action to do.
+     */
     private enum RecursiveAction {
         COPY,
         MOVE,
         COUNT
     }
 
-    /*
-     * Constructor takes all different flags. But they are all properties that
-     * can be set up later.
-     */
     public FileTransfer (string from, string to,
                               CopyRecursiveFlags rec_flag = CopyRecursiveFlags.NONE,
                               FileCopyFlags copy_flag = FileCopyFlags.NONE,
@@ -103,23 +222,29 @@ public class FileTransfer : Object {
         }
     }
 
-    /*
-     * Signal if percentage of file transfer has changed. Connector takes
-     * method which requires on double as argument. percent_done is a double
-     * from 0.0 to 1.0.
+    /**
+     * Percentage of file transfer.
      */
     public signal void byte_count_changed (double percent_done);
 
-    /* Signal to show number of current transferred files (and total amount). */
+    /**
+     * Number of current transferred files (and total amount).
+     *
+     * Emit on change.
+     */
     public signal void num_count_changed (int cur, int tot);
 
     /*
      * Signal with both file names to indicate if file should be overwritten.
      * Return true to overwrite file. To skip return false.
+     *
+     * Emit on change.
      */
     public signal bool warn_overwrite (string from_name, string to_name);
 
-    /* Calculate total size of transfers. */
+    /**
+     * Calculate total size of transfers.
+     */
     //TODO: Provide public interface to provide information without doing
     //      anything?
     private void calc_size() throws GLib.Error {
@@ -139,7 +264,7 @@ public class FileTransfer : Object {
         }
     }
 
-    /*
+    /**
      * Call the transfer methods properly, calulcate before transfer and create
      * destination directory if needed.
      */
@@ -160,7 +285,9 @@ public class FileTransfer : Object {
         }
     }
 
-    /* Wrapper to call recursive copy method (to avoid file names here). */
+    /**
+     * Wrapper to call recursive copy method (and avoid file names here).
+     */
     public void copy() throws GLib.Error, GLib.IOError {
         transfer (RecursiveAction.COPY);
 #if DEBUG
@@ -168,7 +295,9 @@ public class FileTransfer : Object {
 #endif
     }
 
-    /* Wrapper to call recursive move method (to avoid file names here). */
+    /**
+     * Wrapper to call recursive move method (and avoid file names here).
+     */
     public void move() throws GLib.Error, GLib.IOError {
         transfer (RecursiveAction.MOVE);
 #if DEBUG
@@ -176,8 +305,8 @@ public class FileTransfer : Object {
 #endif
     }
 
-    /*
-     * Do all the recursive work and take care of all different (4) flag types.
+    /**
+     * Do all the recursive work and take care of all different flag types.
      */
     private void do_recursively (File from, File dest) throws Error, IOError {
         FileEnumerator enumerator = from.enumerate_children ("standard::*",
@@ -234,7 +363,9 @@ public class FileTransfer : Object {
             throw new IOError.CANCELLED ("File copying cancelled.");
     }
 
-    /* Do the file transfer of a single file. */
+    /**
+     * Do the file transfer of a single file.
+     */
     private void transfer_file (File from, File dest, double size = 0) throws GLib.Error {
         /*
         * Cancel here if file should not be overwritten (either skip
