@@ -20,7 +20,11 @@
 
 -->
 <language id="guanako" _name="Guanko" version="2.0" _section="Others">
+    <metadata>
+        <property name="line-comment-start">#</property>
+    </metadata>
     <styles>
+        <style id="comment" _name="Comment" map-to="def:comment"/>
         <style id="entry-point" _name="Entry Point" map-to="def:function"/>
         <style id="operator" _name="Operator" map-to="def:keyword"/>
         <style id="whitespace" _name="Whitespace Keyword" map-to="def:string"/>
@@ -32,6 +36,16 @@
     </styles>
 
     <definitions>
+
+        <!-- Use this from sh.lang. -->
+        <!-- we cannot use def:shell-like-comment, because
+             m4.lang needs to replace this context -->
+        <context id="comment" style-ref="comment" end-at-line-end="true" class="comment" class-disabled="no-spell-check">
+          <start>(?&lt;!\S)#</start>
+          <include>
+            <context ref="def:in-comment"/>
+          </include>
+        </context>
 
         <context id="entry-point" style-ref="entry-point">
             <match>\b^init_[a-zA-Z_]+[ \t]*$</match>
@@ -68,6 +82,7 @@
 
         <context id="guanako" class="no-spell-check">
             <include>
+                <context ref="comment"/>
                 <context ref="entry-point"/>
                 <context ref="function"/>
                 <context ref="operator"/>
