@@ -55,6 +55,7 @@ add_subdirectory(guanako)
 add_subdirectory(icons)
 
 #set(optional_pkgs "libxml-2.0 >= 0.1")
+list(REMOVE_ITEM required_pkgs "guanako")
 set(srcfiles "${PROJECT_SOURCE_DIR}/src/*.vala")
 include(ValaPkgs)
 vala_pkgs(VALA_C
