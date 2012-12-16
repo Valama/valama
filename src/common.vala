@@ -58,6 +58,9 @@ public enum CopyRecursiveFlags {
  * Both options can be used with or without a run before to calculate size of
  * transfer (and signal interface with percentage / counts).
  *
+ * If size is counted a {@link GLib.IOError.NO_SPACE} Error is raised if not
+ * enough space is available.
+ *
  * Remember to use special {@link GLib.FileCopyFlags} or
  * {@link GLib.FileQueryInfoFlags} or {@link GLib.Cancellable}.
  *
@@ -163,6 +166,10 @@ public class FileTransfer : Object {
      */
     private int count_total = 0;
     /**
+     * Free space available on filesystem to transfer.
+     */
+    private uint64 fs_free;
+    /**
      * Number of transfers done.
      */
     private int count_current = 0;
@@ -177,6 +184,10 @@ public class FileTransfer : Object {
      * Flag to indicate if recursive or non-recursive operation is to do.
      */
     private bool is_file = false;
+    /**
+     * Flag to indicate that operation performs on same filesystem.
+     */
+    private bool same_fs = false;
 
     /**
      * Flag to indicate which file transfer action to do.
@@ -202,8 +213,24 @@ public class FileTransfer : Object {
         if (!f_from.query_exists())
             throw new IOError.NOT_FOUND ("No such file.");
 
-        var info = f_from.query_info ("standard::*", query_flag, cancellable);
-        var filetype = info.get_file_type();
+        var filetype = f_from.query_file_type (query_flag, cancellable);
+        var info = f_from.query_info ("id::*", query_flag, cancellable);
+
+        var f_to_tmp = f_to;
+        while (!f_to_tmp.query_exists()) {
+            f_to_tmp = f_to_tmp.get_parent();
+            if (f_to_tmp == null)  // this should never happen so no further checks below
+                break;
+        }
+        var info_to = f_to_tmp.query_info ("*", query_flag, cancellable);
+
+        if (info.get_attribute_as_string (FileAttribute.ID_FILESYSTEM) ==
+            info_to.get_attribute_as_string (FileAttribute.ID_FILESYSTEM))
+            same_fs = true;
+        else {
+            var fsinfo_to = f_to_tmp.query_filesystem_info (FileAttribute.FILESYSTEM_FREE, cancellable);
+            fs_free = fsinfo_to.get_attribute_uint64 (FileAttribute.FILESYSTEM_FREE);
+        }
 
         /* Set the no-recursion flag accordingly. */
         if (filetype == FileType.REGULAR ||
@@ -215,7 +242,6 @@ public class FileTransfer : Object {
              * f_to to a child of it.
              */
             if (f_to.query_exists()) {
-                var info_to = f_to.query_info ("standard::*", query_flag, cancellable);
                 if (info_to.get_file_type() == FileType.DIRECTORY)
                     f_to = f_to.resolve_relative_path (f_from.get_basename());
             }
@@ -247,8 +273,7 @@ public class FileTransfer : Object {
      */
     //TODO: Provide public interface to provide information without doing
     //      anything?
-    private void calc_size() throws GLib.Error {
-        //TODO: Check if enough space is available on file system.
+    private void calc_size() throws GLib.Error, GLib.IOError {
         if (CopyRecursiveFlags.SKIP_EXISTENT == rec_flag ||
                 CopyRecursiveFlags.WARN_OVERWRITE == rec_flag) {
             counter_on = true;  // use this boolean to name counter flags only here
@@ -262,6 +287,10 @@ public class FileTransfer : Object {
             current_size = total_size - size_to_trans;
             num_count_changed (count_current, count_total);
         }
+        /* Check if enough free space is available on filesystem. */
+        if (!same_fs && fs_free <= size_to_trans) {
+            throw new GLib.IOError.NO_SPACE ("Not enough space available.");
+        }
     }
 
     /**
@@ -271,7 +300,7 @@ public class FileTransfer : Object {
     private void transfer (RecursiveAction action) throws GLib.Error, GLib.IOError {
         calc_size();
         this.action = action;
-        if (is_file) {
+        if (is_file || (same_fs && action == RecursiveAction.MOVE)) {
             var f_to_parent = f_to.get_parent();
             if (f_to_parent != null && !f_to_parent.query_exists())
                 f_to_parent.make_directory_with_parents();
