@@ -48,7 +48,7 @@
 function(base_list_to_delimited_string output)
   cmake_parse_arguments(ARGS "" "" "DELIM;BASE_LIST" ${ARGN})
 
-  set(list_string "")
+  set(list_string)
   foreach(element ${ARGS_BASE_LIST})
     if(list_string)
       set(list_string "${list_string}${ARGS_DELIM}")
@@ -102,6 +102,7 @@ endfunction()
 #   #   /usr/share/icons/hicolor/44x44/apps/freshy.png
 #
 function(convert_svg_to_png output)
+  include(CMakeParseArguments)
   cmake_parse_arguments(ARGS "" "" "ICON;SIZES;PNG_NAME" ${ARGN})
 
   set(png_list)

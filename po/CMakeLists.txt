@@ -1,28 +1,32 @@
-# Translation stuff.
-set(VERSION "${${project_name}_VERSION}")
+#
+# po/CMakeLists.txt
+# Copyright (C) 2012, Dominique Lasserre <lasserre.d@gmail.com>
+#
+# Valama is free software: you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by the
+# Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Valama is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
 include(Gettext)
-IF(XGETTEXT_FOUND)
-  set(all_srcfiles "")
-  foreach(globexpr "${PROJECT_SOURCE_DIR}/src/*.vala")
-    set(tmpsrcfiles "")
-    file(GLOB tmpsrcfiles ${globexpr})
-    set(tmpsrcfile "")
-    foreach(tmpsrcfile ${tmpsrcfiles})
-      file(RELATIVE_PATH srcfile ${CMAKE_CURRENT_BINARY_DIR} ${tmpsrcfile})
-      list(APPEND all_srcfiles "${CMAKE_CURRENT_BINARY_DIR}/${srcfile}")
-    endforeach()
-  endforeach()
+if(XGETTEXT_FOUND)
   set(potfile "${PROJECT_SOURCE_DIR}/po/valama.pot")
-  GETTEXT_CREATE_POT("${potfile}"
-    OPTION
-      ${XGETTEXT_OPTIONS_DEFAULT}
-      #"--msgid-bugs-address" "mail@mail.org"
-    SRC
-      ${all_srcfiles}
+  gettext_create_pot("${potfile}"
+    SRCFILES
+      "${PROJECT_SOURCE_DIR}/src/*.vala"
   )
-  file(GLOB pofiles "${CMAKE_CURRENT_SOURCE_DIR}/*.po")
-  GETTEXT_CREATE_TRANSLATIONS("${potfile}"
-    ALL ${pofiles}
-    COMMENT "Create translation."
+
+  gettext_create_translations("${potfile}"
+    ALL
+    COMMENT
+      "Build translations."
   )
 endif()

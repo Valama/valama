@@ -38,26 +38,12 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/vala")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 
-option(DEBUG "Debug output on console." ON)
-option(THREADED "Run multi-threaded." OFF)
-
-if(DEBUG)
-  set(debug_opt "-D;DEBUG")
-else()
-  set(debug_opt "")
-endif()
-if(NOT THREADED)
-  set(threaded_opt "-D;NOT_THREADED")
-else()
-  set(threaded_opt "")
-endif()
-
 find_package(Vala "0.16" REQUIRED)
 
 if(VALA_VERSION STRGREATER "0.17.0")
   list(REMOVE_ITEM required_pkgs "libvala-0.16" )
   set(valashort_ver "0.18")
-  set(valac_cond "")
+  set(valac_cond)
 else()
   list(REMOVE_ITEM required_pkgs "libvala-0.18" )
   set(valashort_ver "0.16")
@@ -67,22 +53,50 @@ set(vala_datadir "/usr/share/vala")
 set(vapidir "${vala_datadir}-${valashort_ver}/vapi")
 
 
-add_subdirectory("guanako")
-add_subdirectory("icons")
-add_subdirectory("po")
+option(DEBUG "Debug output on console." ON)
+option(THREADED "Run multi-threaded." OFF)
+option(TRANSLATION "Build translation." ON)
+option(ICONS "Generate icons." ON)
+option(GUANAKO "Build guanako library." ON)
+
+if(DEBUG)
+  set(debug_opt "-D;DEBUG")
+else()
+  set(debug_opt)
+endif()
+if(NOT THREADED)
+  set(threaded_opt "-D;NOT_THREADED")
+else()
+  set(threaded_opt)
+endif()
+if(GUANAKO)
+  add_subdirectory("guanako")
+  list(REMOVE_ITEM required_pkgs "guanako")
+  set(guanako_opt
+    "--vapidir" "${CMAKE_BINARY_DIR}/guanako"  # for local guanako.vapi
+    "--pkg" "guanako"  # force it, otherwise it is not included with fst cmake run
+  )
+else()
+  set(guanako_opt)
+endif()
+if(ICONS)
+  add_subdirectory("icons")
+endif()
+if(TRANSLATION)
+  add_subdirectory("po")
+endif()
 
 #set(optional_pkgs "libxml-2.0 >= 0.1")
-list(REMOVE_ITEM required_pkgs "guanako")
 set(srcfiles "${PROJECT_SOURCE_DIR}/src/*.vala")
 set(default_vala_flags
   "--thread"
-  "--vapidir" "${CMAKE_BINARY_DIR}/guanako"  # for local guanako.vapi
-  "--pkg" "guanako"  # force it, otherwise it is not included with fst cmake run
   "--target-glib" "2.32"  # enable this to use new(tm) thread syntax
+  ${guanako_opt}
   ${debug_opt}
   ${threaded_opt}
   ${valac_cond}
 )
+
 include(ValaPkgs)
 vala_pkgs(VALA_C
   PACKAGES
@@ -99,9 +113,7 @@ vala_pkgs(VALA_C
 if(NOT PkgConfig_FOUND)
   find_package(PkgConfig)
 endif()
-pkg_check_modules(GTHREAD REQUIRED gthread-2.0)
-add_definitions(${GTHREAD_CFLAGS})
-link_libraries(${GTHREAD_LIBRARIES})
+
 
 # Set common C-macros.
 add_definitions(-DPACKAGE_NAME="${project_name}")
@@ -124,18 +136,18 @@ target_link_libraries("${project_name_lower}" "guanako")
 #TODO: Add configuration options.
 find_package(Valadoc)
 if(VALADOC_FOUND)
-  set(globexpr "")
-  set(all_srcfiles "")
+  set(globexpr)
+  set(all_srcfiles)
   foreach(globexpr "${PROJECT_SOURCE_DIR}/src/*.vala" "${PROJECT_SOURCE_DIR}/guanako/*.vala")
-    set(tmpsrcfiles "")
+    set(tmpsrcfiles)
     file(GLOB tmpsrcfiles ${globexpr})
-    set(tmpsrcfile "")
+    set(tmpsrcfile)
     foreach(tmpsrcfile ${tmpsrcfiles})
       file(RELATIVE_PATH srcfile ${CMAKE_CURRENT_BINARY_DIR} ${tmpsrcfile})
       list(APPEND all_srcfiles ${srcfile})
     endforeach()
   endforeach()
-  set(vala_pkg_opts "")
+  set(vala_pkg_opts)
   list(REMOVE_ITEM required_pkgs "guanako")
   foreach(pkg ${required_pkgs};${optional_pkgs})
     list(APPEND vala_pkg_opts "--pkg=${pkg}")
@@ -161,6 +173,7 @@ if(VALADOC_FOUND)
           DESTINATION "${docdir}" OPTIONAL)
 endif()
 
+
 # Create changelog on release.
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
   execute_process(COMMAND git log
@@ -172,6 +185,7 @@ else(CMAKE_BUILD_TYPE STREQUAL "Debug")
   set(CMAKE_VERBOSE_MAKEFILE ON)
 endif()
 
+
 # Compress and install manpage.
 #if(NOT MANPAGE_DISABLED)
 #  add_custom_command(COMMAND gzip -cf9 "${PROJECT_SOURCE_DIR}/man/${project_name_lower}.1" >
@@ -181,6 +195,7 @@ endif()
 #  add_custom_target(manpage ALL DEPENDS "${PROJECT_SOURCE_DIR}/man/${project_name_lower}.1.gz")
 #  install(FILES "${PROJECT_SOURCE_DIR}/man/${project_name_lower}.1.gz" DESTINATION "${mandir}/man1")
 #endif()
+
 
 install(TARGETS ${project_name_lower} DESTINATION "${bindir}")
 
@@ -237,6 +252,18 @@ if(VALADOC_FOUND)
   message("Docs building support:  enabled")
 else()
   message("Docs building support:  disabled")
+endif()
+if(TRANSLATION_BUILD)
+  message("Build translations:     enabled")
+else()
+  message("Build translations:     disabled")
+endif()
+if(GETTEXT_PACKAGE_NAME)
+  if(GETTEXT_PACKAGE_VERSION)
+    message("Gettext package:        ${GETTEXT_PACKAGE_NAME} (${GETTEXT_PACKAGE_VERSION})")
+  else()
+    message("Gettext package:        ${GETTEXT_PACKAGE_NAME}")
+  endif()
 endif()
 if(CMAKE_VERBOSE_MAKEFILE)
   message("Verbose build:          enabled")

@@ -15,22 +15,28 @@
 # You should have received a copy of the GNU General Public License along
 # with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-## Add find_package handler for valadoc.
+##
+# Add find_package handler for valadoc.
+##
 
 # Search for the valac executable in the usual system paths.
-find_program(VALADOC_EXECUTABLE valadoc)
+find_program(VALADOC_EXECUTABLE "valadoc")
 mark_as_advanced(VALADOC_EXECUTABLE)
 
 # Determine the valadoc version
 if(VALADOC_EXECUTABLE)
   execute_process(COMMAND ${VALADOC_EXECUTABLE} "--version"
                   OUTPUT_VARIABLE VALADOC_VERSION
-                  OUTPUT_STRIP_TRAILING_WHITESPACE)
+                  OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
   string(REPLACE "Valadoc " "" VALADOC_VERSION "${VALADOC_VERSION}")
 endif()
 
 # Add find_package handler for valadoc.
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(Valadoc
-  REQUIRED_VARS VALADOC_EXECUTABLE
-  VERSION_VAR VALADOC_VERSION)
+  REQUIRED_VARS
+    VALADOC_EXECUTABLE
+  VERSION_VAR
+    VALADOC_VERSION
+)
