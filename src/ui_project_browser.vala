@@ -111,11 +111,8 @@ public class ProjectBrowser : UiElement {
      */
     private static GLib.List<string>? get_available_packages() {
         GLib.List<string> list = null;
-        /* FIXME: Hardcoded paths. */
-        string[] paths = new string[] {"/usr/share/vala-" +
-                                       Config.vala_version +
-                                       "/vapi",
-                                       "/usr/share/vala/vapi"};
+        string[] paths = new string[] {Config.VALA_DATA_DIR + "-" + Config.VALA_VERSION + "/vapi",
+                                       Config.VALA_DATA_DIR + "/vapi"};
         try {
             foreach (string path in paths) {
                 var enumerator = File.new_for_path (path).enumerate_children (FileAttribute.STANDARD_NAME, 0);

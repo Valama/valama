@@ -211,7 +211,7 @@ namespace Guanako {
         }
 
         void build_syntax_map() {
-            var file = File.new_for_path ("/usr/share/valama/syntax");
+            var file = File.new_for_path (Config.PACKAGE_DATA_DIR + "/syntax");
 
             try {
                 var dis = new DataInputStream (file.read());

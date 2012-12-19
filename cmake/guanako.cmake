@@ -1,6 +1,7 @@
-set(guanako_version 1.0)
-set(guanako_soversion 1)
-set(guanako_required_pkgs
+set(project_name Guanako)
+set(Guanako_VERSION 1.0)
+set(soversion 1)
+set(required_pkgs
 gobject-2.0
 glib-2.0
 gee-1.0

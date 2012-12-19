@@ -33,6 +33,9 @@ MainLoop loop_update;
 static SourceFile current_source_file = null;
 
 public static int main (string[] args) {
+    Intl.textdomain(Config.GETTEXT_PACKAGE);
+    Intl.bindtextdomain(Config.GETTEXT_PACKAGE, Config.LOCALE_DIR);
+
     //TODO: Command line parsing.
     Gtk.init (ref args);
 
@@ -305,7 +308,7 @@ class TestProvider : Gtk.SourceCompletionProvider, Object {
                                                   "struct",
                                                   "signal",
                                                   "constant"})
-                map_icons[type] = new Gdk.Pixbuf.from_file ("/usr/share/pixmaps/valama/element-" + type + "-16.png");
+                map_icons[type] = new Gdk.Pixbuf.from_file (Config.PIXMAP_DIR + "/element-" + type + "-16.png");
         } catch (Gdk.PixbufError e) {
             stderr.printf ("Could not load pixmap: %s", e.message);
         } catch (GLib.FileError e) {
