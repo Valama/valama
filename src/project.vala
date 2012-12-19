@@ -30,7 +30,7 @@ public class ValamaProject {
 
         guanako_project = new Guanako.project();
 
-        stdout.printf ("Load project file: %s\n", this.project_file);
+        stdout.printf (_("Load project file: %s\n"), this.project_file);
         load_project_file();  // can throw LoadingError
 
         /*
@@ -51,7 +51,7 @@ public class ValamaProject {
 
                     foreach (string suffix in project_file_types) {
                         if (file.has_suffix (suffix)){
-                            stdout.printf (@"Found file $file\n");
+                            stdout.printf (_("Found file %s\n"), file);
                             guanako_project.add_source_file_by_name (file);
                             break;
                         }
@@ -59,7 +59,7 @@ public class ValamaProject {
                 }
             }
         } catch (GLib.Error e) {
-            stderr.printf("Could not open file: %s", e.message);
+            stderr.printf(_("Could not open file: %s"), e.message);
         }
 
         guanako_project.update();
@@ -73,7 +73,7 @@ public class ValamaProject {
     public int version_major;
     public int version_minor;
     public int version_patch;
-    public string project_name = "valama_project";
+    public string project_name = _("valama_project");
 
     public string build() {
         string ret;
@@ -94,9 +94,9 @@ public class ValamaProject {
             data_stream.put_string (pkg_list);
             data_stream.close();
         } catch (GLib.IOError e) {
-            stderr.printf("Could not read file: %s", e.message);
+            stderr.printf(_("Could not read file: %s"), e.message);
         } catch (GLib.Error e) {
-            stderr.printf("Could not open file: %s", e.message);
+            stderr.printf(_("Could not open file: %s"), e.message);
         }
 
         try {
@@ -105,7 +105,7 @@ public class ValamaProject {
                                                  null,
                                                  out ret);
         } catch (GLib.SpawnError e) {
-            stderr.printf("Could not execute build process: %s", e.message);
+            stderr.printf(_("Could not execute build process: %s"), e.message);
         }
         return ret;
     }
@@ -115,13 +115,13 @@ public class ValamaProject {
 
         if (doc == null) {
             delete doc;
-            throw new LoadingError.FILE_IS_GARBAGE ("Cannot parse file.");
+            throw new LoadingError.FILE_IS_GARBAGE (_("Cannot parse file."));
         }
 
         Xml.Node* root_node = doc->get_root_element();
         if (root_node == null) {
             delete doc;
-            throw new LoadingError.FILE_IS_EMPTY ("File does not contain enough information");
+            throw new LoadingError.FILE_IS_EMPTY (_("File does not contain enough information"));
         }
 
         var packages = new string[0];

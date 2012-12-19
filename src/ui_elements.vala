@@ -154,7 +154,7 @@ public abstract class UiElement {
 #endif
             q.clear();
         } catch (GLib.ThreadError e) {
-            stderr.printf ("Could not start new thread: %s", e.message);
+            stderr.printf (_("Could not start new thread: %s\n"), e.message);
         }
     }
 

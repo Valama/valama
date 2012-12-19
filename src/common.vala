@@ -211,7 +211,7 @@ public class FileTransfer : Object {
         this.cancellable = cancellable;
 
         if (!f_from.query_exists())
-            throw new IOError.NOT_FOUND ("No such file.");
+            throw new IOError.NOT_FOUND (_("No such file."));
 
         var filetype = f_from.query_file_type (query_flag, cancellable);
         var info = f_from.query_info ("id::*", query_flag, cancellable);
@@ -289,7 +289,7 @@ public class FileTransfer : Object {
         }
         /* Check if enough free space is available on filesystem. */
         if (!same_fs && fs_free <= size_to_trans) {
-            throw new GLib.IOError.NO_SPACE ("Not enough space available.");
+            throw new GLib.IOError.NO_SPACE (_("Not enough space available."));
         }
     }
 
@@ -320,7 +320,7 @@ public class FileTransfer : Object {
     public void copy() throws GLib.Error, GLib.IOError {
         transfer (RecursiveAction.COPY);
 #if DEBUG
-        stdout.printf ("Copying finished.\n");
+        stdout.printf (_("Copying finished.\n"));
 #endif
     }
 
@@ -330,7 +330,7 @@ public class FileTransfer : Object {
     public void move() throws GLib.Error, GLib.IOError {
         transfer (RecursiveAction.MOVE);
 #if DEBUG
-        stdout.printf ("Moving finished.\n");
+        stdout.printf (_("Moving finished.\n"));
 #endif
     }
 
@@ -389,7 +389,7 @@ public class FileTransfer : Object {
         }
 
         if (cancellable.is_cancelled())
-            throw new IOError.CANCELLED ("File copying cancelled.");
+            throw new IOError.CANCELLED (_("File copying cancelled."));
     }
 
     /**
@@ -406,7 +406,7 @@ public class FileTransfer : Object {
                     rec_flag == CopyRecursiveFlags.NO_COUNT_SKIP_EXISTENT) {
 #if DEBUG
                 if (action != RecursiveAction.COUNT)
-                    stdout.printf ("Skip %s\n", dest.get_path());
+                    stdout.printf (_("Skip %s\n"), dest.get_path());
 #endif
                 if (counter_on) {
                     current_size += size;
@@ -420,7 +420,7 @@ public class FileTransfer : Object {
                     rec_flag == CopyRecursiveFlags.NO_COUNT_WARN_OVERWRITE) &&
                     !warn_overwrite (from.get_path(), dest.get_path())) {
 #if DEBUG
-                stdout.printf ("Skip overwrite from '%s' to '%s'.\n", from.get_path(),
+                stdout.printf (_("Skip overwrite from '%s' to '%s'.\n"), from.get_path(),
                                                                       dest.get_path());
 #endif
                 if (counter_on) {
@@ -438,7 +438,7 @@ public class FileTransfer : Object {
         switch (action) {
             case RecursiveAction.COPY:
 #if DEBUG
-                stdout.printf ("Copy from '%s' to '%s'.\n", from.get_path(),
+                stdout.printf (_("Copy from '%s' to '%s'.\n"), from.get_path(),
                                                             dest.get_path());
 #endif
                 if (counter_on) {
@@ -454,7 +454,7 @@ public class FileTransfer : Object {
             //TODO: Exactly same as copying. Do this the more elegant way.
             case RecursiveAction.MOVE:
 #if DEBUG
-                stdout.printf ("Move from '%s' to '%s'.\n", from.get_path(),
+                stdout.printf (_("Move from '%s' to '%s'.\n"), from.get_path(),
                                                             dest.get_path());
 #endif
                 if (counter_on) {
@@ -470,7 +470,8 @@ public class FileTransfer : Object {
             case RecursiveAction.COUNT:
                 break;
             default:
-                stderr.printf ("Unknown action to perform (please report a bug): %d\n", action);
+                stderr.printf (_("Unexpected enum value: %s: %d\n"), "common - RecursiveAction", action);
+                stderr.printf (_("Please report a bug!"));
                 break;
         }
     }

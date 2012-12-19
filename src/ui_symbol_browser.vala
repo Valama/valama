@@ -28,14 +28,14 @@ public class SymbolBrowser : UiElement {
 
         tree_view = new TreeView();
         tree_view.insert_column_with_attributes (-1,
-                                                 "Symbol",
+                                                 _("Symbol"),
                                                  new CellRendererText(),
                                                  "text",
                                                  0,
                                                  null);
 
         tree_view.insert_column_with_attributes (-1,
-                                                 "Type",
+                                                 _("Type"),
                                                  new CellRendererText(),
                                                  "text",
                                                  1,
@@ -51,7 +51,7 @@ public class SymbolBrowser : UiElement {
 
     public override void build() {
 #if DEBUG
-        stderr.printf ("Run symbol browser update!\n");
+        stderr.printf (_("Run %s update!\n"), element_name);
 #endif
         var store = new TreeStore (2, typeof (string), typeof (string));
         tree_view.set_model (store);
@@ -81,7 +81,7 @@ public class SymbolBrowser : UiElement {
             return Guanako.iter_callback_returns.continue;
         });
 #if DEBUG
-        stderr.printf ("Symbol browser update finished!\n");
+        stderr.printf (_("%s update finished!\n"), element_name);
 #endif
     }
 }

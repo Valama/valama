@@ -29,7 +29,7 @@ public class ProjectBrowser : UiElement {
 
         tree_view = new TreeView();
         tree_view.insert_column_with_attributes (-1,
-                                                 "Project",
+                                                 _("Project"),
                                                  new CellRendererText(),
                                                  "text",
                                                  0,
@@ -68,14 +68,14 @@ public class ProjectBrowser : UiElement {
 
     protected override void build() {
 #if DEBUG
-        stderr.printf ("Run project browser update!\n");
+        stderr.printf (_("Run %s update!\n"), element_name);
 #endif
         var store = new TreeStore (2, typeof (string), typeof (string));
         tree_view.set_model (store);
 
         TreeIter iter_source_files;
         store.append (out iter_source_files, null);
-        store.set (iter_source_files, 0, "Sources", -1);
+        store.set (iter_source_files, 0, _("Sources"), -1);
 
         foreach (SourceFile sf in project.guanako_project.get_source_files()) {
             TreeIter iter_sf;
@@ -94,7 +94,7 @@ public class ProjectBrowser : UiElement {
 
         TreeIter iter_packages;
         store.append (out iter_packages, null);
-        store.set (iter_packages, 0, "Packages", -1);
+        store.set (iter_packages, 0, _("Packages"), -1);
 
         foreach (string pkg in project.guanako_project.packages) {
             TreeIter iter_sf;
@@ -102,7 +102,7 @@ public class ProjectBrowser : UiElement {
             store.set (iter_sf, 0, pkg, 1, "", -1);
         }
 #if DEBUG
-        stderr.printf ("Project browser update finished!\n");
+        stderr.printf (_("%s update finished!\n"), element_name);
 #endif
     }
 
@@ -124,7 +124,7 @@ public class ProjectBrowser : UiElement {
                 }
             }
         } catch (GLib.Error e) {
-            stderr.printf ("Could not update vapi files: %s", e.message);
+            stderr.printf (_("Could not update vapi files: %s\n"), e.message);
             return null;
         }
         return list;
@@ -135,7 +135,7 @@ public class ProjectBrowser : UiElement {
      */
     private static string? package_selection_dialog(ValamaProject project) {
 
-        Dialog dlg = new Dialog.with_buttons("Select new packages",
+        Dialog dlg = new Dialog.with_buttons(_("Select new packages"),
                                             window_main,
                                             DialogFlags.MODAL,
                                             Stock.CANCEL,
@@ -148,7 +148,7 @@ public class ProjectBrowser : UiElement {
         tree_view.set_model (listmodel);
 
         tree_view.insert_column_with_attributes (-1,
-                                                 "Packages",
+                                                 _("Packages"),
                                                  new CellRendererText(),
                                                  "text",
                                                  0);
@@ -207,8 +207,8 @@ public class ProjectBrowser : UiElement {
                     }
                     break;
                 default:
-                    stderr.printf ("Unexpected enum value: btn_add.clicked.connect: %d", indices[0]);
-                    stderr.printf ("Please report a bug!");
+                    stderr.printf (_("Unexpected enum value: %s: %d\n"), "btn_add.clicked.connect", indices[0]);
+                    stderr.printf (_("Please report a bug!"));
                     break;
             }
         }
@@ -222,7 +222,7 @@ public class ProjectBrowser : UiElement {
             if (indices.length == 2) {
                 switch (indices[0]) {
                     case 0:
-                        if (ui_ask_warning ("Do you wan't to delete this file?") == ResponseType.YES) {
+                        if (ui_ask_warning (_("Do you wan't to delete this file?")) == ResponseType.YES) {
                             var source_file = project.guanako_project.get_source_files()[indices[1]];
                             if (current_source_file == source_file)  //TODO: Switch to file opened last.
                                 on_source_file_selected (project.guanako_project.get_source_files()[0]);
@@ -231,7 +231,7 @@ public class ProjectBrowser : UiElement {
                                 project.guanako_project.remove_file (source_file);
                                 update();
                             } catch (GLib.Error e) {
-                                stderr.printf ("Unable to delete source file: %s", e.message);
+                                stderr.printf (_("Unable to delete source file: %s\n"), e.message);
                             }
                         }
                         break;
@@ -240,8 +240,8 @@ public class ProjectBrowser : UiElement {
                         update();
                         break;
                     default:
-                        stderr.printf ("Unexpected enum value: btn_rem.clicked.connect: %d", indices[0]);
-                        stderr.printf ("Please report a bug!");
+                        stderr.printf (_("Unexpected enum value: %s: %d\n"), "btn_rem.clicked.connect", indices[0]);
+                        stderr.printf (_("Please report a bug!"));
                         break;
                 }
             }

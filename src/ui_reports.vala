@@ -32,8 +32,8 @@ class UiReport : UiElement {
         element_name = "UiReport";
 
         tree_view = new TreeView();
-        tree_view.insert_column_with_attributes (-1, "Location", new CellRendererText(), "text", 0, null);
-        tree_view.insert_column_with_attributes (-1, "Error", new CellRendererText(), "text", 1, null);
+        tree_view.insert_column_with_attributes (-1, _("Location"), new CellRendererText(), "text", 0, null);
+        tree_view.insert_column_with_attributes (-1, _("Error"), new CellRendererText(), "text", 1, null);
 
         build();
 
@@ -53,7 +53,7 @@ class UiReport : UiElement {
 
     public override void build() {
 #if DEBUG
-        stderr.printf ("Run reports widget update!\n");
+        stderr.printf (_("Run %s update!\n"), element_name);
 #endif
         var store = new ListStore (2, typeof (string), typeof (string));
         tree_view.set_model (store);
@@ -81,10 +81,10 @@ class UiReport : UiElement {
                                                                    1, err.message, -1);
         }
 #if DEBUG
-        stdout.printf ("Errors: %d, Warnings: %d\n", report.get_errors(), report.get_warnings());
+        stdout.printf (_("Errors: %d, Warnings: %d\n"), report.get_errors(), report.get_warnings());
 #endif
 #if DEBUG
-        stderr.printf ("Report widget update finished!\n");
+        stderr.printf (_("%s update finished!\n"), element_name);
 #endif
     }
 }
@@ -106,7 +106,7 @@ public class ReportWrapper : Vala.Report {
 
     public override void warn (Vala.SourceReference? source, string message) {
 #if DEBUG
-        stdout.printf ("Warning found: %s: %d(%d)-%d(%d): %s\n",
+        stdout.printf (_("Warning found: %s: %d(%d)-%d(%d): %s\n"),
                                                source.file.filename,
 #if VALA_LESS_0_18
                                                source.first_line.line,
@@ -132,7 +132,7 @@ public class ReportWrapper : Vala.Report {
 
      public override void err (Vala.SourceReference? source, string message) {
 #if DEBUG
-        stdout.printf ("Error found: %s: %d(%d)-%d(%d): %s\n",
+        stdout.printf (_("Error found: %s: %d(%d)-%d(%d): %s\n"),
                                                source.file.filename,
 #if VALA_LESS_0_18
                                                source.first_line.line,

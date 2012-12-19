@@ -63,15 +63,15 @@ public class Entry : Gtk.Entry {
     public void ui_check_input (string input_text) {
         MatchInfo match_info = null;  // init to null to make valac happy
         if (!this.valid_chars.match (input_text, 0, out match_info)) {
-            this.err_label.set_label (@"Invalid character: '$(match_info.get_string())' Please choose one from: " +
-                                this.valid_chars.get_pattern());
+            this.err_label.set_label (_("Invalid character: '") + match_info.get_string() +
+                                    _("' Please choose one from: ") + this.valid_chars.get_pattern());
             this.label_resettable = false;
             this.disable_timer();  // reset timer to let it start again
             this.timer_id = Timeout.add_seconds (this.delay_sec, (() => {
                 this.err_label.set_label ("");
                 return true;
             }));
-            Signal.stop_emission_by_name (this, "insert_text");
+            Signal.stop_emission_by_name (this, _("insert_text"));
         } else if (this.label_resettable) {
             this.label_resettable = false;
             this.err_label.set_label ("");

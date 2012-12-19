@@ -36,7 +36,7 @@ public class uiTemplateSelector {
                                                  "pixbuf",
                                                  1);
         tree_view.insert_column_with_attributes (-1,
-                                                 "Templates",
+                                                 _("Templates"),
                                                  new CellRendererText(),
                                                  "markup",
                                                  0);
@@ -72,7 +72,7 @@ public class uiTemplateSelector {
  */
 
 public ValamaProject? ui_create_project_dialog() {
-    var dlg = new Dialog.with_buttons ("Choose project template",
+    var dlg = new Dialog.with_buttons (_("Choose project template"),
                                        window_main,
                                        DialogFlags.MODAL,
                                        Stock.CANCEL,
@@ -90,7 +90,7 @@ public ValamaProject? ui_create_project_dialog() {
     box_main.pack_start (selector.widget, true, true);
 
 
-    var lbl = new Label("Project name");
+    var lbl = new Label(_("Project name"));
     lbl.halign = Align.START;
     box_main.pack_start(lbl, false, false);
 
@@ -99,7 +99,7 @@ public ValamaProject? ui_create_project_dialog() {
 
     Regex valid_chars = /^[a-z0-9.:_-]+$/i;  // keep "-" at the end!
     var ent_proj_name = new Entry.with_inputcheck (ent_proj_name_err, valid_chars);
-    ent_proj_name.set_placeholder_text ("Project name");
+    ent_proj_name.set_placeholder_text (_("Project name"));
     box_main.pack_start (ent_proj_name, false, false);
     box_main.pack_start (ent_proj_name_err, false, false);
 
@@ -111,11 +111,11 @@ public ValamaProject? ui_create_project_dialog() {
     });
 
 
-    lbl = new Label ("Location");
+    lbl = new Label (_("Location"));
     lbl.halign = Align.START;
     box_main.pack_start (lbl, false, false);
 
-    var chooser_target = new FileChooserButton ("New project location", Gtk.FileChooserAction.SELECT_FOLDER);
+    var chooser_target = new FileChooserButton (_("New project location"), Gtk.FileChooserAction.SELECT_FOLDER);
     box_main.pack_start (chooser_target, false, false);
 
     box_main.show_all();
@@ -142,7 +142,7 @@ public ValamaProject? ui_create_project_dialog() {
                           target_folder + "/" + proj_name + "/" + proj_name +".vlp",
                           CopyRecursiveFlags.SKIP_EXISTENT).move();
     } catch (GLib.Error e) {
-        stderr.printf ("Could not copy templates for new project: %s\n", e.message);
+        stderr.printf (_("Could not copy templates for new project: %s\n"), e.message);
     }
 
 
@@ -151,7 +151,7 @@ public ValamaProject? ui_create_project_dialog() {
         new_proj = new ValamaProject (@"$target_folder/$proj_name/$proj_name.vlp");
         new_proj.project_name = proj_name;
     } catch (LoadingError e) {
-        stderr.printf ("Couln't load new project: %s", e.message);
+        stderr.printf (_("Couln't load new project: %s\n"), e.message);
     }
     return new_proj;
 }

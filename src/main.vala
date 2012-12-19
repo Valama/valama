@@ -52,7 +52,7 @@ public static int main (string[] args) {
     } catch (LoadingError e) {
         //FIXME: Handle this error (properly) instead of this pseudo hack
         //       (same as above).
-        stderr.printf ("Couldn't load Valama project: %s", e.message);
+        stderr.printf (_("Couldn't load Valama project: %s"), e.message);
         project = null;
         return 1;
     }
@@ -81,12 +81,12 @@ public static int main (string[] args) {
 
     TestProvider tp = new TestProvider();
     tp.priority = 1;
-    tp.name = "Test Provider 1";
+    tp.name = _("Test Provider 1");
 
     try {
         view.completion.add_provider (tp);
     } catch (GLib.Error e) {
-        stderr.printf ("Could not load completion: %s", e.message);
+        stderr.printf (_("Could not load completion: %s"), e.message);
         return 1;
     }
     view.buffer.changed.connect (on_view_buffer_changed); // Nothing to do yet.
@@ -97,9 +97,9 @@ public static int main (string[] args) {
         if (!parsing) {
             try {
 #if NOT_THREADED
-                Thread<void*> t = new Thread<void*>.try ("Buffer update", () => {
+                Thread<void*> t = new Thread<void*>.try (_("Buffer update"), () => {
 #else
-                new Thread<void*>.try ("Buffer update", () => {
+                new Thread<void*>.try (_("Buffer update"), () => {
 #endif
                     parsing = true;
                     report_wrapper.clear();
@@ -117,7 +117,7 @@ public static int main (string[] args) {
                 t.join();
 #endif
             } catch (GLib.Error e) {
-                stderr.printf ("Could not create thread to update buffer completion: %s", e.message);
+                stderr.printf (_("Could not create thread to update buffer completion: %s"), e.message);
             }
         }
     });
@@ -133,14 +133,14 @@ public static int main (string[] args) {
 
     var btnLoadProject = new ToolButton.from_stock (Stock.OPEN);
     toolbar.add (btnLoadProject);
-    btnLoadProject.set_tooltip_text ("Open project");
+    btnLoadProject.set_tooltip_text (_("Open project"));
     btnLoadProject.clicked.connect (() => {
         ui_load_project (ui_elements_pool);
     });
 
     var btnNewFile = new ToolButton.from_stock (Stock.FILE);
     toolbar.add (btnNewFile);
-    btnNewFile.set_tooltip_text ("Create new file");
+    btnNewFile.set_tooltip_text (_("Create new file"));
     btnNewFile.clicked.connect (() => {
         var source_file = ui_create_file_dialog (project);
         if (source_file != null) {
@@ -152,7 +152,7 @@ public static int main (string[] args) {
 
     var btnSave = new ToolButton.from_stock (Stock.SAVE);
     toolbar.add (btnSave);
-    btnSave.set_tooltip_text ("Save current file");
+    btnSave.set_tooltip_text (_("Save current file"));
     btnSave.clicked.connect (() => {
         write_current_source_file(report_wrapper);
         wdg_report.update();
@@ -160,7 +160,7 @@ public static int main (string[] args) {
     toolbar.add (btnSave);
 
     var btnBuild = new Gtk.ToolButton.from_stock (Stock.EXECUTE);
-    btnBuild.set_tooltip_text ("Save current file and build project");
+    btnBuild.set_tooltip_text (_("Save current file and build project"));
     btnBuild.clicked.connect (() => {
         on_build_button_clicked (report_wrapper);
         wdg_report.update();
@@ -168,12 +168,12 @@ public static int main (string[] args) {
     toolbar.add (btnBuild);
 
     /*var btnAutoIndent = new Gtk.ToolButton.from_stock (Stock.REFRESH);
-    btnAutoIndent.set_tooltip_text ("Auto Indent");
+    btnAutoIndent.set_tooltip_text (_("Auto Indent"));
     btnAutoIndent.clicked.connect (on_auto_indent_button_clicked);
     toolbar.add (btnAutoIndent);*/
 
     var btnSettings = new Gtk.ToolButton.from_stock (Stock.PREFERENCES);
-    btnSettings.set_tooltip_text ("Settings");
+    btnSettings.set_tooltip_text (_("Settings"));
     btnSettings.clicked.connect (() => {
         ui_project_dialog (project);
     });
@@ -260,7 +260,7 @@ static void on_source_file_selected (SourceFile file){
         FileUtils.get_contents (file.filename, out txt);
         view.buffer.text = txt;
     } catch (GLib.FileError e) {
-        stderr.printf ("Could not load file: %s", e.message);
+        stderr.printf (_("Could not load file: %s"), e.message);
     }
 }
 
@@ -275,9 +275,9 @@ void write_current_source_file (ReportWrapper report_wrapper) {
         dos.flush();
         dos.close();
     } catch (GLib.IOError e) {
-        stderr.printf ("Could not update source file: %s", e.message);
+        stderr.printf (_("Could not update source file: %s"), e.message);
     } catch (GLib.Error e) {
-        stderr.printf ("Could not open file to write: %s", e.message);
+        stderr.printf (_("Could not open file to write: %s"), e.message);
     }
 
     report_wrapper.clear();
@@ -310,11 +310,11 @@ class TestProvider : Gtk.SourceCompletionProvider, Object {
                                                   "constant"})
                 map_icons[type] = new Gdk.Pixbuf.from_file (Config.PIXMAP_DIR + "/element-" + type + "-16.png");
         } catch (Gdk.PixbufError e) {
-            stderr.printf ("Could not load pixmap: %s", e.message);
+            stderr.printf (_("Could not load pixmap: %s"), e.message);
         } catch (GLib.FileError e) {
-            stderr.printf ("Could not open pximaps file: %s", e.message);
+            stderr.printf (_("Could not open pximaps file: %s"), e.message);
         } catch (GLib.Error e) {
-            stderr.printf ("Pixmap loading failed: %s", e.message);
+            stderr.printf (_("Pixmap loading failed: %s"), e.message);
         }
     }
 
@@ -390,7 +390,7 @@ class TestProvider : Gtk.SourceCompletionProvider, Object {
             try {
                 this.icon = theme.load_icon (Gtk.Stock.DIALOG_INFO, 16, 0);
             } catch (GLib.Error e) {
-                stderr.printf ("Could not load icon theme: %s", e.message);
+                stderr.printf (_("Could not load icon theme: %s"), e.message);
             }
         }
         return this.icon;
@@ -446,9 +446,9 @@ class TestProvider : Gtk.SourceCompletionProvider, Object {
             if (param_string.length > 1)
                 param_string = param_string.substring(0, param_string.length - 2);
             else
-                param_string = "none";
-            vbox.pack_start (new Label ("Parameters:\n" + param_string +
-                                        "\n\nReturns:\n" +
+                param_string = _("none");
+            vbox.pack_start (new Label (_("Parameters:\n") + param_string +
+                                        _("\n\nReturns:\n") +
                                         mth.return_type.data_type.name));
             info_inner_widget = vbox;
         } else

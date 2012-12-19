@@ -25,7 +25,7 @@ using Vala;
  * Create new file and add it to project. If file already exists, open it.
  */
 public SourceFile? ui_create_file_dialog (ValamaProject project) {
-    var dlg = new Dialog.with_buttons ("Choose filename",
+    var dlg = new Dialog.with_buttons (_("Choose filename"),
                                        window_main,
                                        DialogFlags.MODAL,
                                        Stock.CANCEL,
@@ -38,7 +38,7 @@ public SourceFile? ui_create_file_dialog (ValamaProject project) {
     dlg.resizable = false;
 
     var box_main = new Box (Orientation.VERTICAL, 0);
-    var frame_filename = new Frame ("Add new file to project");
+    var frame_filename = new Frame (_("Add new file to project"));
     var box_filename = new Box (Orientation.VERTICAL, 0);
     frame_filename.add (box_filename);
 
@@ -47,7 +47,7 @@ public SourceFile? ui_create_file_dialog (ValamaProject project) {
 
     Regex valid_chars = /^[a-z0-9.:_-]+$/i;  // keep "-" at the end!
     var ent_filename = new Entry.with_inputcheck (ent_filename_err, valid_chars);
-    ent_filename.set_placeholder_text("filename");  // this is i.g. not visible
+    ent_filename.set_placeholder_text(_("filename"));  // this is i.g. not visible
 
     box_filename.pack_start (ent_filename, false, false);
     box_filename.pack_start (ent_filename_err, false, false);
@@ -59,7 +59,7 @@ public SourceFile? ui_create_file_dialog (ValamaProject project) {
     dlg.response.connect ((response_id) => {
         if (response_id == ResponseType.ACCEPT) {
             if (ent_filename.text == "") {
-                ent_filename.set_label_timer ("Don't let this field empty. Name a file.", 10);
+                ent_filename.set_label_timer (_("Don't let this field empty. Name a file."), 10);
                 return;
             }
             string filename = project.project_path + "/src/" + ent_filename.text;
@@ -70,14 +70,12 @@ public SourceFile? ui_create_file_dialog (ValamaProject project) {
                 try {
                         f.create (FileCreateFlags.NONE).close();
                 } catch (GLib.IOError e) {
-                    stderr.printf ("Could not write to new file: %s", e.message);
+                    stderr.printf (_("Could not write to new file: %s"), e.message);
                 } catch (GLib.Error e) {
-                    stderr.printf ("Could not create new file: %s", e.message);
+                    stderr.printf (_("Could not create new file: %s"), e.message);
                 }
             }
-            source_file = project.guanako_project.add_source_file_by_name(filename); /*new SourceFile (project.guanako_project.code_context,
-                                          SourceFileType.SOURCE,
-                                          filename);*/
+            source_file = project.guanako_project.add_source_file_by_name(filename);
         }
         dlg.destroy();
     });

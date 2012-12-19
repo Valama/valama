@@ -57,13 +57,13 @@ public ProjectTemplate[] load_templates(string language){
 
             if (doc == null) {
                 delete doc;
-                throw new LoadingError.FILE_IS_GARBAGE ("Cannot parse file.");
+                throw new LoadingError.FILE_IS_GARBAGE (_("Cannot parse file."));
             }
 
             Xml.Node* root_node = doc->get_root_element();
             if (root_node == null) {
                 delete doc;
-                throw new LoadingError.FILE_IS_EMPTY ("File does not contain enough information");
+                throw new LoadingError.FILE_IS_EMPTY (_("File does not contain enough information"));
             }
 
             for (Xml.Node* i = root_node->children; i != null; i = i->next) {
@@ -98,7 +98,7 @@ public ProjectTemplate[] load_templates(string language){
             ret += new_template;
         }
     } catch (GLib.Error e) {
-        stderr.printf ("Couln't get template information: %s", e.message);
+        stderr.printf (_("Couln't get template information: %s"), e.message);
     }
 
     return ret;

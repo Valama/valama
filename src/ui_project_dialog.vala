@@ -23,7 +23,7 @@ using GLib;
 
 /* Load new projects (with dialog). */
 public void ui_load_project(UiElementPool ui_elements_pool) {
-    var dlg = new FileChooserDialog ("Open project",
+    var dlg = new FileChooserDialog (_("Open project"),
                                      window_main,
                                      FileChooserAction.OPEN,
                                      Stock.CANCEL,
@@ -34,11 +34,11 @@ public void ui_load_project(UiElementPool ui_elements_pool) {
     ValamaProject new_project = null;
 
     var filter_all = new FileFilter();
-    filter_all.set_filter_name ("View all files (*)");
+    filter_all.set_filter_name (_("View all files (*)"));
     filter_all.add_pattern ("*");
 
     var filter_vlp = new FileFilter();
-    filter_vlp.set_filter_name ("Valama project files (*.vlp)");
+    filter_vlp.set_filter_name (_("Valama project files (*.vlp)"));
     filter_vlp.add_pattern ("*.vlp");
 
     dlg.add_filter (filter_all);
@@ -61,7 +61,7 @@ public void ui_load_project(UiElementPool ui_elements_pool) {
                     File.new_for_path (project.project_file).query_info (FileAttribute.UNIX_INODE,
                     FileQueryInfoFlags.NONE).get_attribute_as_string (FileAttribute.UNIX_INODE));
         } catch (GLib.Error e) {
-            stderr.printf ("Couln't compare project files inodes: %s", e.message);
+            stderr.printf (_("Couln't compare project files inodes: %s\n"), e.message);
             comp = false;
         }
         if (comp) {
@@ -70,7 +70,7 @@ public void ui_load_project(UiElementPool ui_elements_pool) {
             try {
                 new_project = new ValamaProject (new_filename);
             } catch (LoadingError e) {
-                stderr.printf ("Couldn't load new project: %s\n", e.message);
+                stderr.printf (_("Couldn't load new project: %s\n"), e.message);
                 dlg.close();
                 return;
             }
@@ -81,7 +81,7 @@ public void ui_load_project(UiElementPool ui_elements_pool) {
             on_source_file_selected (project.guanako_project.get_source_files()[0]);
             return;
         } else {
-            stdout.printf ("Skip already loaded project: %s\n", new_filename);
+            stdout.printf (_("Skip already loaded project: %s\n"), new_filename);
         }
     }
     dlg.close();
@@ -89,7 +89,7 @@ public void ui_load_project(UiElementPool ui_elements_pool) {
 
 /* Settings window. */
 public void ui_project_dialog (ValamaProject? project) {
-    var dlg = new Dialog.with_buttons ("Project settings",
+    var dlg = new Dialog.with_buttons (_("Project settings"),
                                        window_main,
                                        DialogFlags.MODAL,
                                        Stock.DISCARD,
@@ -104,14 +104,14 @@ public void ui_project_dialog (ValamaProject? project) {
 
     var box_main = new Box (Orientation.VERTICAL, 0);
 
-    var frame_project = new Frame ("Project");
+    var frame_project = new Frame (_("Project"));
     var box_project = new Box (Orientation.VERTICAL, 10);
     frame_project.add (box_project);
 
 
     /* Set project name. */
     var box_project_name = new Box (Orientation.VERTICAL, 0);
-    box_project_name.pack_start(new Label ("Project name:"), false, false);
+    box_project_name.pack_start(new Label (_("Project name:")), false, false);
     var ent_proj_name_err = new Label ("");
     ent_proj_name_err.sensitive = false;
 
@@ -139,7 +139,7 @@ public void ui_project_dialog (ValamaProject? project) {
      */
     var box_version = new Box (Orientation.VERTICAL, 0);
     var box_version_types = new Box (Orientation.HORIZONTAL, 0);
-    box_version.pack_start(new Label ("Version:"), false, false);
+    box_version.pack_start(new Label (_("Version:")), false, false);
 
     var ent_major = new SpinButton.with_range (0, 999, 1);
     ent_major.value = (double) project.version_major;
@@ -193,7 +193,8 @@ public void ui_project_dialog (ValamaProject? project) {
                 //ent_version_special.text = project.version_special;
                 break;
             default:
-                stderr.printf ("Unknown dialog respone id (please report a bug): %d\n", response_id);
+                stderr.printf (_("Unexpected enum value: %s: %d\n"), "project_dialog - dlg.response.connect", response_id);
+                stderr.printf (_("Please report a bug!"));
                 dlg.destroy();
                 break;
         }
