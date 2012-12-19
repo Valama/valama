@@ -399,4 +399,4 @@ msgstr "rien"
 
 #: /home/dominique/projects/valama/valama/src/project.vala:76
 msgid "valama_project"
-msgstr "Projet_Valama"
+msgstr "Projet Valama"
