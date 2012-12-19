@@ -69,7 +69,7 @@ set(vapidir "${vala_datadir}-${valashort_ver}/vapi")
 
 add_subdirectory("guanako")
 add_subdirectory("icons")
-#add_subdirectory("po")
+add_subdirectory("po")
 
 #set(optional_pkgs "libxml-2.0 >= 0.1")
 list(REMOVE_ITEM required_pkgs "guanako")
@@ -118,6 +118,7 @@ add_definitions(-DVALA_DATA_DIR="${vala_datadir}")
 include_directories("${PROJECT_BINARY_DIR}/guanako")
 add_executable("${project_name_lower}" ${VALA_C})
 target_link_libraries("${project_name_lower}" "guanako")
+
 
 # Create the docs.
 #TODO: Add configuration options.

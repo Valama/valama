@@ -1,0 +1,402 @@
+# German translations for Valama package.
+# Copyright (C) 2012 THE Valama'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the Valama package.
+# Dominique Lasserre <lasserre.d@gmail.com>, 2012.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Valama 0.1.2\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2012-12-19 02:56+0100\n"
+"PO-Revision-Date: 2012-12-19 03:00+0100\n"
+"Last-Translator: Dominique Lasserre <lasserre.d@gmail.com>\n"
+"Language-Team: German\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: /home/dominique/projects/valama/valama/src/main.vala:451
+msgid ""
+"\n"
+"\n"
+"Returns:\n"
+msgstr "\n"
+"\n"
+"Rückgabe:\n"
+
+#: /home/dominique/projects/valama/valama/src/ui_symbol_browser.vala:84
+#: /home/dominique/projects/valama/valama/src/ui_project_browser.vala:105
+#: /home/dominique/projects/valama/valama/src/ui_reports.vala:87
+#, c-format
+msgid "%s update finished!\n"
+msgstr "%s-Update beendet!\n"
+
+#: /home/dominique/projects/valama/valama/src/ui_helpers.vala:67
+msgid "' Please choose one from: "
+msgstr ""
+
+#: /home/dominique/projects/valama/valama/src/ui_create_file_dialog.vala:41
+msgid "Add new file to project"
+msgstr "Neue Datei zum Projekt hinzufügen"
+
+#: /home/dominique/projects/valama/valama/src/main.vala:100
+#: /home/dominique/projects/valama/valama/src/main.vala:102
+msgid "Buffer update"
+msgstr "Buffer-Update"
+
+#: /home/dominique/projects/valama/valama/src/project_templates.vala:60
+#: /home/dominique/projects/valama/valama/src/project.vala:118
+msgid "Cannot parse file."
+msgstr "Kann Datei nicht parsen."
+
+#: /home/dominique/projects/valama/valama/src/ui_create_file_dialog.vala:28
+msgid "Choose filename"
+msgstr "Wählen Sie einen Dateiname"
+
+#: /home/dominique/projects/valama/valama/src/ui_create_project_dialog.vala:75
+msgid "Choose project template"
+msgstr "Wählen Sie eine Projektvorlage"
+
+#: /home/dominique/projects/valama/valama/src/common.vala:441
+#, c-format
+msgid "Copy from '%s' to '%s'.\n"
+msgstr "Von '%s' nach '%s' kopieren.\n"
+
+#: /home/dominique/projects/valama/valama/src/common.vala:323
+#, c-format
+msgid "Copying finished.\n"
+msgstr "Kopieren beendet.\n"
+
+#: /home/dominique/projects/valama/valama/src/ui_create_project_dialog.vala:145
+#, c-format
+msgid "Could not copy templates for new project: %s\n"
+msgstr "Konnte Vorlagen für neues Projekt nicht kopieren: %s\n"
+
+#: /home/dominique/projects/valama/valama/src/ui_create_file_dialog.vala:75
+#, c-format
+msgid "Could not create new file: %s"
+msgstr "Konnte neue Datei nicht anlegen: %s"
+
+#: /home/dominique/projects/valama/valama/src/main.vala:120
+#, c-format
+msgid "Could not create thread to update buffer completion: %s"
+msgstr "Thread zum Aktualisierung der Vervollständigung konnte nicht "
+"gestartet werden: %s"
+
+#: /home/dominique/projects/valama/valama/src/project.vala:108
+#, c-format
+msgid "Could not execute build process: %s"
+msgstr "Konnte Build-Prozess nciht ausführen: %s"
+
+#: /home/dominique/projects/valama/valama/src/main.vala:89
+#, c-format
+msgid "Could not load completion: %s"
+msgstr "Konnte Autovervollständigung nicht laden: %s"
+
+#: /home/dominique/projects/valama/valama/src/main.vala:263
+#, c-format
+msgid "Could not load file: %s"
+msgstr "Konnte Datei nicht laden: %s"
+
+#: /home/dominique/projects/valama/valama/src/main.vala:393
+#, c-format
+msgid "Could not load icon theme: %s"
+msgstr "Konnte Icon-Theme nicht laden: %s"
+
+#: /home/dominique/projects/valama/valama/src/main.vala:313
+#, c-format
+msgid "Could not load pixmap: %s"
+msgstr "Konnte Pixmap nicht laden: %s"
+
+#: /home/dominique/projects/valama/valama/src/main.vala:280
+#, c-format
+msgid "Could not open file to write: %s"
+msgstr "Konnte Datei nicht schreibbar öffnen: %s"
+
+#: /home/dominique/projects/valama/valama/src/project.vala:62
+#: /home/dominique/projects/valama/valama/src/project.vala:99
+#, c-format
+msgid "Could not open file: %s"
+msgstr "Konnte Datei nicht öffnen: %s"
+
+#: /home/dominique/projects/valama/valama/src/main.vala:315
+#, c-format
+msgid "Could not open pximaps file: %s"
+msgstr "Konnte Pixmap-Datei nicht öffnen: %s"
+
+#: /home/dominique/projects/valama/valama/src/project.vala:97
+#, c-format
+msgid "Could not read file: %s"
+msgstr "Konnte Datei nicht lesen: %s"
+
+#: /home/dominique/projects/valama/valama/src/ui_elements.vala:157
+#, c-format
+msgid "Could not start new thread: %s\n"
+msgstr "Konnte keinen neuen Thread starten: %s\n"
+
+#: /home/dominique/projects/valama/valama/src/main.vala:278
+#, c-format
+msgid "Could not update source file: %s"
+msgstr "Konnte Quelldatei nicht aktualisieren: %s"
+
+#: /home/dominique/projects/valama/valama/src/ui_project_browser.vala:127
+#, c-format
+msgid "Could not update vapi files: %s\n"
+msgstr "Konnte vapi-Dateien nicht aktualisieren: %s\n"
+
+#: /home/dominique/projects/valama/valama/src/ui_create_file_dialog.vala:73
+#, c-format
+msgid "Could not write to new file: %s"
+msgstr "Konnte neue Datei nicht beschreiben: %s"
+
+#: /home/dominique/projects/valama/valama/src/main.vala:55
+#, c-format
+msgid "Couldn't load Valama project: %s"
+msgstr "Konnte Valama-Projekt nicht laden: %s"
+
+#: /home/dominique/projects/valama/valama/src/ui_project_dialog.vala:73
+#, c-format
+msgid "Couldn't load new project: %s\n"
+msgstr "Konnte neues Projekt nicht laden: %s\n"
+
+#: /home/dominique/projects/valama/valama/src/ui_project_dialog.vala:64
+#, c-format
+msgid "Couln't compare project files inodes: %s\n"
+msgstr "Konnte Projektdatei-Inodes nicht vergleichen: %s\n"
+
+#: /home/dominique/projects/valama/valama/src/project_templates.vala:101
+#, c-format
+msgid "Couln't get template information: %s"
+msgstr "Konnte Vorlageninformationen nicht auslesen: %s"
+
+#: /home/dominique/projects/valama/valama/src/ui_create_project_dialog.vala:154
+#, c-format
+msgid "Couln't load new project: %s\n"
+msgstr "Konnte neues Projekt nicht laden: %s\n"
+
+#: /home/dominique/projects/valama/valama/src/main.vala:143
+msgid "Create new file"
+msgstr "Neue Datei erstellen"
+
+#: /home/dominique/projects/valama/valama/src/ui_project_browser.vala:225
+msgid "Do you wan't to delete this file?"
+msgstr "Soll diese Datei gelöscht werden?"
+
+#: /home/dominique/projects/valama/valama/src/ui_create_file_dialog.vala:62
+msgid "Don't let this field empty. Name a file."
+msgstr "Lassen Sie das Feld nicht leer. Geben Sie einen Dateinamen an."
+
+#: /home/dominique/projects/valama/valama/src/ui_reports.vala:36
+msgid "Error"
+msgstr "Fehler"
+
+#: /home/dominique/projects/valama/valama/src/ui_reports.vala:135
+#, c-format
+msgid "Error found: %s: %d(%d)-%d(%d): %s\n"
+msgstr "Fehler gefunden: %s: %d(%d)-%d(%d): %s\n"
+
+#: /home/dominique/projects/valama/valama/src/ui_reports.vala:84
+#, c-format
+msgid "Errors: %d, Warnings: %d\n"
+msgstr "Fehler: %s, Warnungen: %d\n"
+
+#: /home/dominique/projects/valama/valama/src/common.vala:392
+msgid "File copying cancelled."
+msgstr "Kopieroperation abgebrochen."
+
+#: /home/dominique/projects/valama/valama/src/project_templates.vala:66
+#: /home/dominique/projects/valama/valama/src/project.vala:124
+msgid "File does not contain enough information"
+msgstr "Datei enthält nicht genug Infomrationen"
+
+#: /home/dominique/projects/valama/valama/src/project.vala:54
+#, c-format
+msgid "Found file %s\n"
+msgstr "Datei gefunden %s\n"
+
+#: /home/dominique/projects/valama/valama/src/ui_helpers.vala:66
+msgid "Invalid character: '"
+msgstr "Ungültiges Zeichen: '"
+
+#: /home/dominique/projects/valama/valama/src/project.vala:33
+#, c-format
+msgid "Load project file: %s\n"
+msgstr "Projektdatei wird geladen: %s\n"
+
+#: /home/dominique/projects/valama/valama/src/ui_reports.vala:35
+#: /home/dominique/projects/valama/valama/src/ui_create_project_dialog.vala:114
+msgid "Location"
+msgstr "Ort"
+
+#: /home/dominique/projects/valama/valama/src/common.vala:457
+#, c-format
+msgid "Move from '%s' to '%s'.\n"
+msgstr "Von '%s' nach '%s' verschieben.\n"
+
+#: /home/dominique/projects/valama/valama/src/common.vala:333
+#, c-format
+msgid "Moving finished.\n"
+msgstr "Verschiebevorgang beendet.\n"
+
+#: /home/dominique/projects/valama/valama/src/ui_create_project_dialog.vala:118
+msgid "New project location"
+msgstr "Neuen Projektort"
+
+#: /home/dominique/projects/valama/valama/src/common.vala:214
+msgid "No such file."
+msgstr "Datei nicht vorhanden."
+
+#: /home/dominique/projects/valama/valama/src/common.vala:292
+msgid "Not enough space available."
+msgstr "Nicht genug freier Speicher verfügbar."
+
+#: /home/dominique/projects/valama/valama/src/main.vala:136
+#: /home/dominique/projects/valama/valama/src/ui_project_dialog.vala:26
+msgid "Open project"
+msgstr "Projekt öffnen"
+
+#: /home/dominique/projects/valama/valama/src/ui_project_browser.vala:97
+#: /home/dominique/projects/valama/valama/src/ui_project_browser.vala:151
+msgid "Packages"
+msgstr "Pakete"
+
+#: /home/dominique/projects/valama/valama/src/main.vala:450
+msgid "Parameters:\n"
+msgstr "Parameter:\n"
+
+#: /home/dominique/projects/valama/valama/src/main.vala:317
+#, c-format
+msgid "Pixmap loading failed: %s"
+msgstr "Laden des Pixmaps fehlgeschlagen: %s"
+
+#: /home/dominique/projects/valama/valama/src/ui_project_browser.vala:211
+#: /home/dominique/projects/valama/valama/src/ui_project_browser.vala:244
+#: /home/dominique/projects/valama/valama/src/common.vala:474
+#: /home/dominique/projects/valama/valama/src/ui_project_dialog.vala:197
+#, c-format
+msgid "Please report a bug!"
+msgstr "Bitte melden Sie diesen Fehler!"
+
+#: /home/dominique/projects/valama/valama/src/ui_project_browser.vala:32
+#: /home/dominique/projects/valama/valama/src/ui_project_dialog.vala:107
+msgid "Project"
+msgstr "Projekt"
+
+#: /home/dominique/projects/valama/valama/src/ui_create_project_dialog.vala:93
+#: /home/dominique/projects/valama/valama/src/ui_create_project_dialog.vala:102
+msgid "Project name"
+msgstr "Projektname"
+
+#: /home/dominique/projects/valama/valama/src/ui_project_dialog.vala:114
+msgid "Project name:"
+msgstr "Projektname:"
+
+#: /home/dominique/projects/valama/valama/src/ui_project_dialog.vala:92
+msgid "Project settings"
+msgstr "Projekteinstellungen"
+
+#: /home/dominique/projects/valama/valama/src/ui_symbol_browser.vala:54
+#: /home/dominique/projects/valama/valama/src/ui_project_browser.vala:71
+#: /home/dominique/projects/valama/valama/src/ui_reports.vala:56
+#, c-format
+msgid "Run %s update!\n"
+msgstr "Aktualisierung von %s wird gestartet!\n"
+
+#: /home/dominique/projects/valama/valama/src/main.vala:155
+msgid "Save current file"
+msgstr "Aktuelle Datei speichern"
+
+#: /home/dominique/projects/valama/valama/src/main.vala:163
+msgid "Save current file and build project"
+msgstr "Aktualle Datei speichern und Projekt kompilieren"
+
+#: /home/dominique/projects/valama/valama/src/ui_project_browser.vala:138
+msgid "Select new packages"
+msgstr "Zusätzliche Pakete auswählen"
+
+#: /home/dominique/projects/valama/valama/src/main.vala:176
+msgid "Settings"
+msgstr "Einstellungen"
+
+#: /home/dominique/projects/valama/valama/src/common.vala:409
+#, c-format
+msgid "Skip %s\n"
+msgstr "Überspringe %s\n"
+
+#: /home/dominique/projects/valama/valama/src/ui_project_dialog.vala:84
+#, c-format
+msgid "Skip already loaded project: %s\n"
+msgstr "Überspringe bereits geladenes Projekt: %s\n"
+
+#: /home/dominique/projects/valama/valama/src/common.vala:423
+#, c-format
+msgid "Skip overwrite from '%s' to '%s'.\n"
+msgstr "Überspringe Überschreiben von '%s' nach '%s'.\n"
+
+#: /home/dominique/projects/valama/valama/src/ui_project_browser.vala:78
+msgid "Sources"
+msgstr "Quellen"
+
+#: /home/dominique/projects/valama/valama/src/ui_symbol_browser.vala:31
+msgid "Symbol"
+msgstr "Symbol"
+
+#: /home/dominique/projects/valama/valama/src/ui_create_project_dialog.vala:39
+msgid "Templates"
+msgstr "Vorlagen"
+
+#: /home/dominique/projects/valama/valama/src/main.vala:84
+msgid "Test Provider 1"
+msgstr "Autovervollständigung"
+
+#: /home/dominique/projects/valama/valama/src/ui_symbol_browser.vala:38
+msgid "Type"
+msgstr "Typ"
+
+#: /home/dominique/projects/valama/valama/src/ui_project_browser.vala:234
+#, c-format
+msgid "Unable to delete source file: %s\n"
+msgstr "Löschen von Quelldatei nicht möglich: %s\n"
+
+#: /home/dominique/projects/valama/valama/src/ui_project_browser.vala:210
+#: /home/dominique/projects/valama/valama/src/ui_project_browser.vala:243
+#: /home/dominique/projects/valama/valama/src/common.vala:473
+#: /home/dominique/projects/valama/valama/src/ui_project_dialog.vala:196
+#, c-format
+msgid "Unexpected enum value: %s: %d\n"
+msgstr "Unerwarteter Wert: %s: %d\n"
+
+#: /home/dominique/projects/valama/valama/src/ui_project_dialog.vala:41
+msgid "Valama project files (*.vlp)"
+msgstr "Valama-Projektdateien (*.vlp)"
+
+#: /home/dominique/projects/valama/valama/src/ui_project_dialog.vala:142
+msgid "Version:"
+msgstr "Version:"
+
+#: /home/dominique/projects/valama/valama/src/ui_project_dialog.vala:37
+msgid "View all files (*)"
+msgstr "Alle Dateien (*)"
+
+#: /home/dominique/projects/valama/valama/src/ui_reports.vala:109
+#, c-format
+msgid "Warning found: %s: %d(%d)-%d(%d): %s\n"
+msgstr "Warnung gefunden: %s: %d(%d)-%d(%d): %s\n"
+
+#: /home/dominique/projects/valama/valama/src/ui_create_file_dialog.vala:50
+msgid "filename"
+msgstr "Dateiname"
+
+#: /home/dominique/projects/valama/valama/src/ui_helpers.vala:74
+msgid "insert_text"
+msgstr "Text"
+
+#: /home/dominique/projects/valama/valama/src/main.vala:449
+msgid "none"
+msgstr "nichts"
+
+#: /home/dominique/projects/valama/valama/src/project.vala:76
+msgid "valama_project"
+msgstr "Valama-Projekt"
