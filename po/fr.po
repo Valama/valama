@@ -391,7 +391,7 @@ msgstr "Nom de fichier"
 
 #: /home/dominique/projects/valama/valama/src/ui_helpers.vala:74
 msgid "insert_text"
-msgstr "Texte"
+msgstr "Insérer texte"
 
 #: /home/dominique/projects/valama/valama/src/main.vala:449
 msgid "none"
