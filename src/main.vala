@@ -33,8 +33,8 @@ MainLoop loop_update;
 static SourceFile current_source_file = null;
 
 public static int main (string[] args) {
-    Intl.textdomain(Config.GETTEXT_PACKAGE);
-    Intl.bindtextdomain(Config.GETTEXT_PACKAGE, Config.LOCALE_DIR);
+    Intl.textdomain (Config.GETTEXT_PACKAGE);
+    Intl.bindtextdomain (Config.GETTEXT_PACKAGE, Config.LOCALE_DIR);
 
     //TODO: Command line parsing.
     Gtk.init (ref args);

@@ -58,6 +58,8 @@ option(THREADED "Run multi-threaded." OFF)
 option(TRANSLATION "Build translation." ON)
 option(ICONS "Generate icons." ON)
 option(GUANAKO "Build guanako library." ON)
+option(DOCS "Build documentation." OFF)
+option(DEVELOPERS "Enable some features interesting for developers" OFF)
 
 if(DEBUG)
   set(debug_opt "-D;DEBUG")
@@ -70,6 +72,8 @@ else()
   set(threaded_opt)
 endif()
 if(GUANAKO)
+  set(project_root "${project_name_lower}")
+  set(project_root_version "${${project_name}_VERSION}")
   add_subdirectory("guanako")
   list(REMOVE_ITEM required_pkgs "guanako")
   set(guanako_opt
@@ -86,8 +90,6 @@ if(TRANSLATION)
   add_subdirectory("po")
 endif()
 
-#set(optional_pkgs "libxml-2.0 >= 0.1")
-set(srcfiles "${PROJECT_SOURCE_DIR}/src/*.vala")
 set(default_vala_flags
   "--thread"
   "--target-glib" "2.32"  # enable this to use new(tm) thread syntax
@@ -101,18 +103,13 @@ include(ValaPkgs)
 vala_pkgs(VALA_C
   PACKAGES
     ${required_pkgs}
-  OPTIONAL
-    ${optional_pkgs}
   SRCFILES
-    ${srcfiles}
+    "${PROJECT_SOURCE_DIR}/src/*.vala"
   VAPIS
-    "${PROJECT_SOURCE_DIR}/vapi/config.vapi"
+    "${CMAKE_CURRENT_SOURCE_DIR}/vapi/config.vapi"
   OPTIONS
     ${default_vala_flags}
 )
-if(NOT PkgConfig_FOUND)
-  find_package(PkgConfig)
-endif()
 
 
 # Set common C-macros.
@@ -133,44 +130,44 @@ target_link_libraries("${project_name_lower}" "guanako")
 
 
 # Create the docs.
-#TODO: Add configuration options.
 find_package(Valadoc)
 if(VALADOC_FOUND)
-  set(globexpr)
-  set(all_srcfiles)
-  foreach(globexpr "${PROJECT_SOURCE_DIR}/src/*.vala" "${PROJECT_SOURCE_DIR}/guanako/*.vala")
-    set(tmpsrcfiles)
-    file(GLOB tmpsrcfiles ${globexpr})
-    set(tmpsrcfile)
-    foreach(tmpsrcfile ${tmpsrcfiles})
-      file(RELATIVE_PATH srcfile ${CMAKE_CURRENT_BINARY_DIR} ${tmpsrcfile})
-      list(APPEND all_srcfiles ${srcfile})
-    endforeach()
-  endforeach()
-  set(vala_pkg_opts)
-  list(REMOVE_ITEM required_pkgs "guanako")
-  foreach(pkg ${required_pkgs};${optional_pkgs})
-    list(APPEND vala_pkg_opts "--pkg=${pkg}")
-  endforeach()
+  include(ValaDocs)
 
-  add_custom_target(clear_doc
-    ${CMAKE_COMMAND} -E remove_directory "${PROJECT_BINARY_DIR}/docs"
-    COMMENT "Clear old documentations." VERBATIM)
+  if(DEVELOPERS)
+    set(extra_valadoc_opts
+      "--private"
+      "--internal"
+    )
+  else()
+    set(extra_valadoc_opts)
+  endif()
+  if(DEBUG)
+    set(valadoc_debug "--verbose")
+  else()
+    set(valadoc_debug)
+  endif()
 
-  add_custom_target(doc
-    ${VALADOC_EXECUTABLE} "-o" "docs"
-        "${PROJECT_SOURCE_DIR}/vapi/config.vapi" ${all_srcfiles} ${vala_pkg_opts} ${custom_vapi_arguments}
-        "--vapidir=${vapidir}"
-        "--target-glib=2.32"
-        "--private"
-        "--internal"
-        "--verbose"
-        "--package-name=${project_name}"
-    DEPENDS clear_doc
-    COMMENT "Generating documentation with valadoc." VERBATIM)
-
-  install(DIRECTORY "${PROJECT_BINARY_DIR}/docs/"
-          DESTINATION "${docdir}" OPTIONAL)
+  if(DOCS)
+    set(make_all "ALL")
+  else()
+    set(make_all)
+  endif()
+  valadoc_gen("${project_name}"
+    ${make_all}
+    PACKAGES
+      ${required_pkgs}
+    SRCFILES
+      "${CMAKE_CURRENT_SOURCE_DIR}/src/*.vala"
+      "${CMAKE_CURRENT_SOURCE_DIR}/vapi/*.vapi"
+      "${CMAKE_CURRENT_SOURCE_DIR}/guanako/*.vala"
+      #"${CMAKE_CURRENT_SOURCE_DIR}/guanako/*.vapi"
+    OPTIONS
+      "--vapidir" "${vapidir}"
+      "--target-glib" "2.32"
+      ${extra_valadoc_opts}
+      ${valadoc_debug}
+  )
 endif()
 
 
@@ -180,6 +177,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
                   WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
                   OUTPUT_FILE "Changelog")
   #set(debug_opt "")
+  #set(DOCS ON)
 else(CMAKE_BUILD_TYPE STREQUAL "Debug")
   set(debug_opt "-D;DEBUG")
   set(CMAKE_VERBOSE_MAKEFILE ON)
@@ -248,10 +246,10 @@ if(THREADED)
 else()
   message("Multithreading support: disabled")
 endif()
-if(VALADOC_FOUND)
-  message("Docs building support:  enabled")
+if(DOCS)
+  message("Build documentation:    enabled")
 else()
-  message("Docs building support:  disabled")
+  message("Build documentation:    enabled")
 endif()
 if(TRANSLATION_BUILD)
   message("Build translations:     enabled")

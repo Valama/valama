@@ -22,6 +22,7 @@ if(XGETTEXT_FOUND)
   gettext_create_pot("${potfile}"
     SRCFILES
       "${PROJECT_SOURCE_DIR}/src/*.vala"
+      "${PROJECT_SOURCE_DIR}/guanako/*.vala"
   )
 
   gettext_create_translations("${potfile}"

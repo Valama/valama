@@ -22,7 +22,6 @@ using Vala;
 using Gee;
 
 namespace Guanako {
-
     public class CompletionProposal {
         public CompletionProposal (Symbol smb, int rep_length) {
             this.symbol = smb;
@@ -34,7 +33,6 @@ namespace Guanako {
 
 
     public class project {
-
         CodeContext context;
         Vala.Parser parser;
         int glib_major = 2;  //TODO: Make this an option.
@@ -129,11 +127,11 @@ namespace Guanako {
                 if (!(pkg in deps) && !(pkg in new_deps)) {
                     var vapi_path = context.get_vapi_path (pkg);
                     if (vapi_path == null) {
-                        stderr.printf("Warning: Vapi for package %s not found.\n", pkg);
+                        stderr.printf(_("Warning: Vapi for package %s not found.\n"), pkg);
                         continue;
                     }
 #if DEBUG
-                    stdout.printf("Vapi found: %s\n", vapi_path);
+                    stdout.printf(_("Vapi found: %s\n"), vapi_path);
 #endif
                     new_deps += pkg;
                 }
@@ -144,11 +142,11 @@ namespace Guanako {
                 packages.add (package_name);
                 var vapi_path = context.get_vapi_path (package_name);
                 if (vapi_path == null) {
-                    stderr.printf("Warning: Vapi for package %s not found.\n", package_name);
+                    stderr.printf(_("Warning: Vapi for package %s not found.\n"), package_name);
                     continue;
                 }
 #if DEBUG
-                stdout.printf("Vapi found: %s\n", vapi_path);
+                stdout.printf(_("Vapi found: %s\n"), vapi_path);
 #endif
                 context.add_external_package (package_name);
             }
@@ -200,10 +198,9 @@ namespace Guanako {
             foreach (var namesp in namespaces) {
                 var vapi = discover_vapi_file (namesp);
                 add_package (vapi);
-                stdout.printf ("Adding package '" +
-                               vapi +
-                               "' for namespace '" +
-                               namesp + "'\n");
+#if DEBUG
+                stdout.printf (_("Adding package '%s' for namespace '%s'\n"), vapi, namesp);
+#endif
             }*/
             context.resolver.resolve (context);
             context.analyzer.analyze (context);
@@ -237,11 +234,11 @@ namespace Guanako {
                     map_syntax[namesplit[0]] = new SyntaxRule (parameters, rule_exprs);
                 }
             } catch (IOError e) {
-                stderr.printf ("Could not read syntax file: %s", e.message);
+                stderr.printf (_("Could not read syntax file: %s"), e.message);
                 Gtk.main_quit();
                 // return 1;
             } catch (Error e) {
-                stderr.printf ("An error occured: %s", e.message);
+                stderr.printf (_("An error occured: %s"), e.message);
                 Gtk.main_quit();
                 // return 1;
             }
@@ -477,7 +474,7 @@ namespace Guanako {
 
                 var parent_param = find_param (call_params, parent_param_name, current_rule.rule_id);
                 if (parent_param == null){
-                    stdout.printf (@"Variable $parent_param_name not found! >$(compare_rule[0].expr)<\n");
+                    stdout.printf (_("Variable '%s' not found! >%s<\n"), parent_param_name, compare_rule[0].expr);
                     return;
                 }
                 Symbol[] children;
@@ -528,7 +525,7 @@ namespace Guanako {
                 var ret_param = info.fetch_named ("ret");
 
                 if (!map_syntax.has_key (call)) {
-                    stdout.printf (@"Call $call not found in >$(compare_rule[0].expr)<\n");
+                    stdout.printf (_("Call '%s' not found in >%s<\n"), call, compare_rule[0].expr);
                     return;
                 }
 
@@ -546,7 +543,7 @@ namespace Guanako {
                     child_param.for_rule_id = rule_id_count;
                     var param = find_param (call_params, pass_param, current_rule.rule_id);
                     if (param == null) {
-                        stdout.printf (@"Parameter $pass_param not found in >$(compare_rule[0].expr)<\n");
+                        stdout.printf (_("Parameter '%s' not found in >%s<\n"), pass_param, compare_rule[0].expr);
                         return;
                     }
                     child_param.symbol = param.symbol;
@@ -761,9 +758,9 @@ namespace Guanako {
                                 ret += line;
                         }
                     } catch (IOError e) {
-                        stderr.printf ("Could not read line: %s", e.message);
+                        stderr.printf (_("Could not read line: %s"), e.message);
                     } catch (Error e) {
-                        stderr.printf ("Could not read file: %s", e.message);
+                        stderr.printf (_("Could not read file: %s"), e.message);
                     }
                 }
             }

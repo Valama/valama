@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Valama 0.1.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-12-19 02:56+0100\n"
+"POT-Creation-Date: 2012-12-20 14:11+0100\n"
 "PO-Revision-Date: 2012-12-19 03:00+0100\n"
 "Last-Translator: Martin Lorang <martin@lorang.net>\n"
 "Language-Team: French\n"
@@ -22,7 +22,8 @@ msgid ""
 "\n"
 "\n"
 "Returns:\n"
-msgstr "\n"
+msgstr ""
+"\n"
 "\n"
 "Retours chariots:\n"
 
@@ -41,10 +42,20 @@ msgstr "Sélectionner un de : "
 msgid "Add new file to project"
 msgstr "Ajouter un nouveau fichier au projet"
 
+#: /home/dominique/projects/valama/valama/guanako/guanako.vala:245
+#, c-format
+msgid "An error occured: %s"
+msgstr ""
+
 #: /home/dominique/projects/valama/valama/src/main.vala:100
 #: /home/dominique/projects/valama/valama/src/main.vala:102
 msgid "Buffer update"
 msgstr "Mise à jour du buffer"
+
+#: /home/dominique/projects/valama/valama/guanako/guanako.vala:532
+#, c-format
+msgid "Call '%s' not found in >%s<\n"
+msgstr ""
 
 #: /home/dominique/projects/valama/valama/src/project_templates.vala:60
 #: /home/dominique/projects/valama/valama/src/project.vala:118
@@ -82,8 +93,8 @@ msgstr "Impossible de créer le nouveau fichier : %s"
 #: /home/dominique/projects/valama/valama/src/main.vala:120
 #, c-format
 msgid "Could not create thread to update buffer completion: %s"
-msgstr "Le procesus pour la mise à jour de l'auto-complétion "
-"n'a pas pu démarrer : %s"
+msgstr ""
+"Le procesus pour la mise à jour de l'auto-complétion n'a pas pu démarrer : %s"
 
 #: /home/dominique/projects/valama/valama/src/project.vala:108
 #, c-format
@@ -126,9 +137,26 @@ msgstr "Impossible d'ouvrir le fichier : %s"
 msgid "Could not open pximaps file: %s"
 msgstr "Impossible d'ouvrir le fichier image : %s"
 
+#: /home/dominique/projects/valama/valama/guanako/guanako_vapi_discoverer.vala:51
+#, c-format
+msgid "Could not operate on directory: %s"
+msgstr "Impossible d'ouvrir le fichier : %s"
+
 #: /home/dominique/projects/valama/valama/src/project.vala:97
+#: /home/dominique/projects/valama/valama/guanako/guanako_vapi_discoverer.vala:49
+#: /home/dominique/projects/valama/valama/guanako/guanako.vala:767
 #, c-format
 msgid "Could not read file: %s"
+msgstr "Impossible de lire le fichier : %s"
+
+#: /home/dominique/projects/valama/valama/guanako/guanako.vala:765
+#, c-format
+msgid "Could not read line: %s"
+msgstr "Impossible de lire le fichier : %s"
+
+#: /home/dominique/projects/valama/valama/guanako/guanako.vala:241
+#, c-format
+msgid "Could not read syntax file: %s"
 msgstr "Impossible de lire le fichier : %s"
 
 #: /home/dominique/projects/valama/valama/src/ui_elements.vala:157
@@ -173,8 +201,8 @@ msgstr "Impossible de lire les informations du modèle : %s"
 
 #: /home/dominique/projects/valama/valama/src/ui_create_project_dialog.vala:154
 #, c-format
-msgid "Impossible de charger le nouveau projet : %s\n"
-msgstr "Konnte neues Projekt nicht laden: %s\n"
+msgid "Couln't load new project: %s\n"
+msgstr "Impossible de charger le nouveau projet : %s\n"
 
 #: /home/dominique/projects/valama/valama/src/main.vala:143
 msgid "Create new file"
@@ -261,6 +289,11 @@ msgstr "Ouvrir projet"
 #: /home/dominique/projects/valama/valama/src/ui_project_browser.vala:151
 msgid "Packages"
 msgstr "Paquets"
+
+#: /home/dominique/projects/valama/valama/guanako/guanako.vala:550
+#, c-format
+msgid "Parameter '%s' not found in >%s<\n"
+msgstr ""
 
 #: /home/dominique/projects/valama/valama/src/main.vala:450
 msgid "Parameters:\n"
@@ -372,6 +405,17 @@ msgstr "Valeur enum innatendu : %s: %d\n"
 msgid "Valama project files (*.vlp)"
 msgstr "Fichiers projet Valama (*.vlp)"
 
+#: /home/dominique/projects/valama/valama/guanako/guanako.vala:138
+#: /home/dominique/projects/valama/valama/guanako/guanako.vala:153
+#, c-format
+msgid "Vapi found: %s\n"
+msgstr ""
+
+#: /home/dominique/projects/valama/valama/guanako/guanako.vala:481
+#, c-format
+msgid "Variable '%s' not found! >%s<\n"
+msgstr ""
+
 #: /home/dominique/projects/valama/valama/src/ui_project_dialog.vala:142
 msgid "Version:"
 msgstr "Version :"
@@ -384,6 +428,12 @@ msgstr "Tous les fichiers (*)"
 #, c-format
 msgid "Warning found: %s: %d(%d)-%d(%d): %s\n"
 msgstr "Avertissement trouvé : %s: %d(%d)-%d(%d): %s\n"
+
+#: /home/dominique/projects/valama/valama/guanako/guanako.vala:134
+#: /home/dominique/projects/valama/valama/guanako/guanako.vala:149
+#, c-format
+msgid "Warning: Vapi for package %s not found.\n"
+msgstr ""
 
 #: /home/dominique/projects/valama/valama/src/ui_create_file_dialog.vala:50
 msgid "filename"

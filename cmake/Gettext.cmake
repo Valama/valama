@@ -361,7 +361,7 @@ if(XGETTEXT_FOUND)
         DEPENDS
           ${_gmoFiles}
         COMMENT
-          "${ARGS_COMMENT}"
+          "${ARGS_COMMENT}" VERBATIM
       )
     else()
       add_custom_target(translations

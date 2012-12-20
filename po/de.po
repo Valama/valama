@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Valama 0.1.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-12-19 02:56+0100\n"
+"POT-Creation-Date: 2012-12-20 14:11+0100\n"
 "PO-Revision-Date: 2012-12-19 03:00+0100\n"
 "Last-Translator: Dominique Lasserre <lasserre.d@gmail.com>\n"
 "Language-Team: German\n"
@@ -22,7 +22,8 @@ msgid ""
 "\n"
 "\n"
 "Returns:\n"
-msgstr "\n"
+msgstr ""
+"\n"
 "\n"
 "Rückgabe:\n"
 
@@ -41,10 +42,20 @@ msgstr ""
 msgid "Add new file to project"
 msgstr "Neue Datei zum Projekt hinzufügen"
 
+#: /home/dominique/projects/valama/valama/guanako/guanako.vala:245
+#, c-format
+msgid "An error occured: %s"
+msgstr "Ein Fehler ist aufgetreten: %s"
+
 #: /home/dominique/projects/valama/valama/src/main.vala:100
 #: /home/dominique/projects/valama/valama/src/main.vala:102
 msgid "Buffer update"
 msgstr "Buffer-Update"
+
+#: /home/dominique/projects/valama/valama/guanako/guanako.vala:532
+#, c-format
+msgid "Call '%s' not found in >%s<\n"
+msgstr "Aufruf '%s' nicht gefunden in >%s<\n"
 
 #: /home/dominique/projects/valama/valama/src/project_templates.vala:60
 #: /home/dominique/projects/valama/valama/src/project.vala:118
@@ -82,8 +93,9 @@ msgstr "Konnte neue Datei nicht anlegen: %s"
 #: /home/dominique/projects/valama/valama/src/main.vala:120
 #, c-format
 msgid "Could not create thread to update buffer completion: %s"
-msgstr "Thread zum Aktualisierung der Vervollständigung konnte nicht "
-"gestartet werden: %s"
+msgstr ""
+"Thread zum Aktualisierung der Vervollständigung konnte nicht gestartet "
+"werden: %s"
 
 #: /home/dominique/projects/valama/valama/src/project.vala:108
 #, c-format
@@ -126,9 +138,26 @@ msgstr "Konnte Datei nicht öffnen: %s"
 msgid "Could not open pximaps file: %s"
 msgstr "Konnte Pixmap-Datei nicht öffnen: %s"
 
+#: /home/dominique/projects/valama/valama/guanako/guanako_vapi_discoverer.vala:51
+#, c-format
+msgid "Could not operate on directory: %s"
+msgstr "Konnte Datei nicht öffnen: %s"
+
 #: /home/dominique/projects/valama/valama/src/project.vala:97
+#: /home/dominique/projects/valama/valama/guanako/guanako_vapi_discoverer.vala:49
+#: /home/dominique/projects/valama/valama/guanako/guanako.vala:767
 #, c-format
 msgid "Could not read file: %s"
+msgstr "Konnte Datei nicht lesen: %s"
+
+#: /home/dominique/projects/valama/valama/guanako/guanako.vala:765
+#, c-format
+msgid "Could not read line: %s"
+msgstr "Konnte Datei nicht lesen: %s"
+
+#: /home/dominique/projects/valama/valama/guanako/guanako.vala:241
+#, c-format
+msgid "Could not read syntax file: %s"
 msgstr "Konnte Datei nicht lesen: %s"
 
 #: /home/dominique/projects/valama/valama/src/ui_elements.vala:157
@@ -262,6 +291,11 @@ msgstr "Projekt öffnen"
 msgid "Packages"
 msgstr "Pakete"
 
+#: /home/dominique/projects/valama/valama/guanako/guanako.vala:550
+#, c-format
+msgid "Parameter '%s' not found in >%s<\n"
+msgstr "Parameter '%s' nicht gefunden in >%s<\n"
+
 #: /home/dominique/projects/valama/valama/src/main.vala:450
 msgid "Parameters:\n"
 msgstr "Parameter:\n"
@@ -372,6 +406,17 @@ msgstr "Unerwarteter Wert: %s: %d\n"
 msgid "Valama project files (*.vlp)"
 msgstr "Valama-Projektdateien (*.vlp)"
 
+#: /home/dominique/projects/valama/valama/guanako/guanako.vala:138
+#: /home/dominique/projects/valama/valama/guanako/guanako.vala:153
+#, c-format
+msgid "Vapi found: %s\n"
+msgstr "Vapi gefunden: %s\n"
+
+#: /home/dominique/projects/valama/valama/guanako/guanako.vala:481
+#, c-format
+msgid "Variable '%s' not found! >%s<\n"
+msgstr "Variable '%s' nicht gefunden! >%s<\n"
+
 #: /home/dominique/projects/valama/valama/src/ui_project_dialog.vala:142
 msgid "Version:"
 msgstr "Version:"
@@ -384,6 +429,12 @@ msgstr "Alle Dateien (*)"
 #, c-format
 msgid "Warning found: %s: %d(%d)-%d(%d): %s\n"
 msgstr "Warnung gefunden: %s: %d(%d)-%d(%d): %s\n"
+
+#: /home/dominique/projects/valama/valama/guanako/guanako.vala:134
+#: /home/dominique/projects/valama/valama/guanako/guanako.vala:149
+#, c-format
+msgid "Warning: Vapi for package %s not found.\n"
+msgstr "Warnung: Vapi für Paket %s nicht gefunden.\n"
 
 #: /home/dominique/projects/valama/valama/src/ui_create_file_dialog.vala:50
 msgid "filename"

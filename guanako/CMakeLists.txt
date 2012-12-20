@@ -24,14 +24,18 @@ project("${project_name}" C)
 string(TOLOWER "${project_name}" project_name_lower)
 
 # export (sub)project version
-set("${project_name}_VERSION" "${${project_name}_VERSION}" CACHE INTERNAL "${project_name} version")
+if(project_root)
+  set("${project_name}_VERSION" "${${project_name}_VERSION}" PARENT_SCOPE)
+endif()
 
 set(CMAKE_INSTALL_PREFIX "/usr")
 set(bindir "bin")
 set(datarootdir "share")
 set(libdir "lib")
 set(includedir "include")
-set(datadir "${datarootdir}/${project_name_lower}")
+if(NOT project_root OR NOT datadir)
+  set(datadir "${datarootdir}/${project_name_lower}")
+endif()
 set(localedir "${datarootdir}/locale")
 set(appdir "${datarootdir}/applications")
 set(pixdir "${datarootdir}/pixmaps/${project_name_lower}")
@@ -109,16 +113,10 @@ vala_pkgs(VALA_C
   SRCFILES
     ${srcfiles}
   VAPIS
-    "config.vapi"
+    "${CMAKE_CURRENT_SOURCE_DIR}/config.vapi"
   OPTIONS
     ${default_vala_flags}
 )
-if(NOT PkgConfig_FOUND)
-  find_package(PkgConfig)
-endif()
-pkg_check_modules(GTHREAD REQUIRED gthread-2.0)
-add_definitions(${GTHREAD_CFLAGS})
-link_libraries(${GTHREAD_LIBRARIES})
 
 add_library("${project_name_lower}" SHARED ${VALA_C})
 set_target_properties("${project_name_lower}" PROPERTIES
@@ -129,7 +127,11 @@ set_target_properties("${project_name_lower}" PROPERTIES
 # Set common C-macros.
 add_definitions(-DPACKAGE_NAME="${project_name}")
 add_definitions(-DPACKAGE_VERSION="${${project_name}_VERSION}")
-add_definitions(-DGETTEXT_PACKAGE="${project_name_lower}")
+if(project_root)
+  add_definitions(-DGETTEXT_PACKAGE="${project_root}")
+else()
+  add_definitions(-DGETTEXT_PACKAGE="${project_name_lower}")
+endif()
 add_definitions(-DPACKAGE_DATA_DIR="${CMAKE_INSTALL_PREFIX}/${datadir}")
 add_definitions(-DLOCALE_DIR="${CMAKE_INSTALL_PREFIX}/${localedir}")
 add_definitions(-DPIXMAP_DIR="${CMAKE_INSTALL_PREFIX}/${pixdir}")
@@ -144,7 +146,7 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${project_name_lower}.h" DESTINATION 
 set(vapi_files "${CMAKE_CURRENT_BINARY_DIR}/${project_name_lower}.deps" "${CMAKE_CURRENT_BINARY_DIR}/${project_name_lower}.vapi")
 install(FILES ${vapi_files} DESTINATION "${vapidir}")
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${project_name}-${${project_name}_VERSION}.gir" DESTINATION "${datarootdir}/gir-1.0")
-install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/data/syntax" DESTINATION "${datarootdir}/valama")
+install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/data/syntax" DESTINATION "${datadir}")
 install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/data/${project_name_lower}.lang" DESTINATION "${datarootdir}/gtksourceview-3.0/language-specs")
 
 # vim: set ai ts=2 sts=2 et sw=2
