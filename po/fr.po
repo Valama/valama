@@ -45,7 +45,7 @@ msgstr "Ajouter un nouveau fichier au projet"
 #: /home/dominique/projects/valama/valama/guanako/guanako.vala:245
 #, c-format
 msgid "An error occured: %s"
-msgstr ""
+msgstr "Une erreur est survenue : %s"
 
 #: /home/dominique/projects/valama/valama/src/main.vala:100
 #: /home/dominique/projects/valama/valama/src/main.vala:102
@@ -55,7 +55,7 @@ msgstr "Mise à jour du buffer"
 #: /home/dominique/projects/valama/valama/guanako/guanako.vala:532
 #, c-format
 msgid "Call '%s' not found in >%s<\n"
-msgstr ""
+msgstr "Appel '%s' non trouvé dans >%s<\n"
 
 #: /home/dominique/projects/valama/valama/src/project_templates.vala:60
 #: /home/dominique/projects/valama/valama/src/project.vala:118
@@ -64,7 +64,7 @@ msgstr "Impossible de parser le fichier."
 
 #: /home/dominique/projects/valama/valama/src/ui_create_file_dialog.vala:28
 msgid "Choose filename"
-msgstr "Choisissez un nom de fichier"
+msgstr "Choisissez un fichier"
 
 #: /home/dominique/projects/valama/valama/src/ui_create_project_dialog.vala:75
 msgid "Choose project template"
@@ -93,8 +93,7 @@ msgstr "Impossible de créer le nouveau fichier : %s"
 #: /home/dominique/projects/valama/valama/src/main.vala:120
 #, c-format
 msgid "Could not create thread to update buffer completion: %s"
-msgstr ""
-"Le procesus pour la mise à jour de l'auto-complétion n'a pas pu démarrer : %s"
+msgstr "Le procesus pour la mise à jour de l'auto-complétion n'a pas pu démarrer : %s"
 
 #: /home/dominique/projects/valama/valama/src/project.vala:108
 #, c-format
@@ -256,7 +255,7 @@ msgstr "Chargement du fichier projet : %s\n"
 #: /home/dominique/projects/valama/valama/src/ui_reports.vala:35
 #: /home/dominique/projects/valama/valama/src/ui_create_project_dialog.vala:114
 msgid "Location"
-msgstr "Lieu"
+msgstr "Répertoire"
 
 #: /home/dominique/projects/valama/valama/src/common.vala:457
 #, c-format
@@ -293,7 +292,7 @@ msgstr "Paquets"
 #: /home/dominique/projects/valama/valama/guanako/guanako.vala:550
 #, c-format
 msgid "Parameter '%s' not found in >%s<\n"
-msgstr ""
+msgstr "Paramètre '%s' non trouvé dans >%s<\n"
 
 #: /home/dominique/projects/valama/valama/src/main.vala:450
 msgid "Parameters:\n"
@@ -339,7 +338,7 @@ msgstr "Mise à jour de %s démarrée !\n"
 
 #: /home/dominique/projects/valama/valama/src/main.vala:155
 msgid "Save current file"
-msgstr "Sauvegarder du fichier en cours"
+msgstr "Sauvegarde du fichier en cours"
 
 #: /home/dominique/projects/valama/valama/src/main.vala:163
 msgid "Save current file and build project"
@@ -409,12 +408,12 @@ msgstr "Fichiers projet Valama (*.vlp)"
 #: /home/dominique/projects/valama/valama/guanako/guanako.vala:153
 #, c-format
 msgid "Vapi found: %s\n"
-msgstr ""
+msgstr "Vapi trouvé : %s\n"
 
 #: /home/dominique/projects/valama/valama/guanako/guanako.vala:481
 #, c-format
 msgid "Variable '%s' not found! >%s<\n"
-msgstr ""
+msgstr "Variable '%s' non trouvée >%s<\n"
 
 #: /home/dominique/projects/valama/valama/src/ui_project_dialog.vala:142
 msgid "Version:"
@@ -433,7 +432,7 @@ msgstr "Avertissement trouvé : %s: %d(%d)-%d(%d): %s\n"
 #: /home/dominique/projects/valama/valama/guanako/guanako.vala:149
 #, c-format
 msgid "Warning: Vapi for package %s not found.\n"
-msgstr ""
+msgstr "Avertissement : Vapi pour le paquet %s non trouvé.\n"
 
 #: /home/dominique/projects/valama/valama/src/ui_create_file_dialog.vala:50
 msgid "filename"
