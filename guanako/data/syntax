@@ -164,13 +164,18 @@ MethodChildVariablesInst : parent
 
 
 MethodGeneralCall : parent
-$MethodGeneralCallSingle{parent}>{ret}|$MethodGeneralCallArray{parent}>{ret}
+$MethodGeneralCallArray{parent}>{ret}
+#|$MethodGeneralCallArrayEl{parent}>{ret}
+#$MethodGeneralCallSingle{parent}>{ret}|
 
 MethodGeneralCallSingle : parent
-{parent}>Method<instance>{ret} ?_ $MethodCallBrackets
+{parent}>Method<instance,single>{ret} ?_ $MethodCallBrackets
 
 MethodGeneralCallArray : parent
-{parent}>Method<instance,array>{ret} ?_ $MethodCallBrackets ?_ [ ?_ $Value ?_ ]
+{parent}>Method<instance,array>{ret} ?_ $MethodCallBrackets
+
+MethodGeneralCallArrayEl : parent
+{parent}>Method<instance,arr_el>{ret} ?_ $MethodCallBrackets ?_ [ ?_ $Value ?_ ]
 
 
 Value
@@ -206,7 +211,7 @@ ValueChildEnum : parent
 {parent}>Enum{child} . {child}>Constant
 
 ValueChildMethod : parent
-{parent}>Method<instance>{a} ?_ $MethodCallBrackets ?$ValueIter{a}
+$MethodGeneralCall{parent}>{a} ?$ValueIter{a}
 
 
 

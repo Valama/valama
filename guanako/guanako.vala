@@ -81,7 +81,6 @@ namespace Guanako {
 
             universal_parameter = new CallParameter();
             universal_parameter.name = "@";
-            universal_parameter.symbol = null;
 
             build_syntax_map();
         }
@@ -326,7 +325,8 @@ namespace Guanako {
 
             bool stat = binding.contains("static");
             bool inst = binding.contains("instance");
-            bool arr = binding.contains("array");
+            bool arr = binding.contains("array") || binding.contains("arr_el");
+            bool sng = binding.contains("single");
 
             if (smb is Method){
                 if (inst && ((Method)smb).binding == MemberBinding.STATIC)
@@ -351,9 +351,12 @@ namespace Guanako {
                 type = ((Variable) smb).variable_type;
             if (smb is Method)
                 type = ((Method) smb).return_type;
-            if (type != null)
-                if (type.is_array() != arr)
+            if (type != null){
+                if (!type.is_array() && arr)
                     return false;
+                if (type.is_array() && sng)
+                    return false;
+            }
             return true;
         }
 
@@ -361,14 +364,32 @@ namespace Guanako {
             public int for_rule_id;
             public string name;
 
-            public Symbol? symbol { get {return _symbol;}
+            /*public Symbol? symbol { get {return _symbol;}
                 set {
                     _symbol = value;
                     if (return_to_param != null)
                         return_to_param.symbol = value;
                 }
+            }*/
+            public void set_symbol(Symbol smb){
+                _symbols = new Symbol[0];
+                _symbols += smb;
+                if (return_to_param != null)
+                    return_to_param.add_symbol(smb);
             }
-            private Symbol _symbol;
+            public void add_symbols(Symbol[] smbs){
+                foreach (Symbol s in smbs)
+                    _symbols += s;
+                if (return_to_param != null)
+                    return_to_param.add_symbols(smbs);
+            }
+            public void add_symbol(Symbol smb){
+                _symbols += smb;
+                if (return_to_param != null)
+                    return_to_param.add_symbol(smb);
+            }
+            private Symbol[] _symbols = new Symbol[0];
+            public Symbol[] symbols {get{return _symbols;}}
 
             public CallParameter? return_to_param = null;
         }
@@ -477,11 +498,19 @@ namespace Guanako {
                     stdout.printf (_("Variable '%s' not found! >%s<\n"), parent_param_name, compare_rule[0].expr);
                     return;
                 }
-                Symbol[] children;
-                if (parent_param.symbol == null)
+                Symbol[] children = new Symbol[0];
+                if (parent_param.symbols.length == 0)
                     children = accessible;
                 else{
-                    children = get_child_symbols (get_type_of_symbol (parent_param.symbol));
+                    bool resolve_array = false;
+                    if (binding != null)
+                        resolve_array = binding.contains("arr_el");
+                    foreach (Symbol parent in parent_param.symbols){
+                        var tpe = get_type_of_symbol (parent, resolve_array);
+                        stdout.printf(@"============ Parent: $(parent.name) Resolve array: $resolve_array Resolved: $(tpe.name) ===========\n");
+                        foreach (Symbol new_child in get_child_symbols (tpe))
+                            children += new_child;
+                    }
                 }
 
                 Regex r2 = /^(?P<word>\w*)(?P<rest>.*)$/;
@@ -493,8 +522,8 @@ namespace Guanako {
 
                 foreach (Symbol child in children){
                     if (symbol_is_type (child, child_type)){
-                        if (binding != "")
-                            if (!symbol_has_binding(child, binding))
+                        if (binding != null)
+                            if (!symbol_has_binding(child, binding.replace("arr_el", "")))
                                 continue;
                         if (word == child.name){
                             var child_param = find_param (call_params, write_to_param, current_rule.rule_id);
@@ -504,7 +533,7 @@ namespace Guanako {
                                 child_param.for_rule_id = current_rule.rule_id;
                                 call_params.add (child_param);
                             }
-                            child_param.symbol = child;
+                            child_param.set_symbol(child);
                             compare (rule[1:rule.length], accessible, rest, call_params, depth + 1, ref ret);
                         }
                         if (rest == "" && child.name.has_prefix (word) && child.name.length > word.length)
@@ -546,7 +575,7 @@ namespace Guanako {
                         stdout.printf (_("Parameter '%s' not found in >%s<\n"), pass_param, compare_rule[0].expr);
                         return;
                     }
-                    child_param.symbol = param.symbol;
+                    child_param.add_symbols(param.symbols);
                     call_params.add (child_param);
 
                     if (ret_param != null){
@@ -600,7 +629,7 @@ namespace Guanako {
             return matchres.UNEQUAL;
         }
 
-        Symbol? get_type_of_symbol (Symbol smb){
+        Symbol? get_type_of_symbol (Symbol smb, bool resolve_array){
             if (smb is Class || smb is Namespace || smb is Struct || smb is Enum)
                 return smb;
 
@@ -614,10 +643,13 @@ namespace Guanako {
 
             if (type == null)
                 return null;
-            if (type is ArrayType)
-                return ((ArrayType)type).element_type.data_type;
-            else
-                return type.data_type;
+            if (type is ArrayType){
+                if (resolve_array)
+                    return ((ArrayType)type).element_type.data_type;
+                else
+                    return new Class("Array");
+            }
+            return type.data_type;
         }
 
         public Symbol[] get_accessible_symbols (SourceFile file, int line, int col) {
