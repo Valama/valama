@@ -416,10 +416,31 @@ namespace Guanako {
                     return param;
             return null;
         }
+        Gee.ArrayList<CallParameter> clone_param_list (Gee.ArrayList<CallParameter> param){
+
+            var ret = new Gee.ArrayList<CallParameter>();
+            foreach (CallParameter p in param){
+                var new_param = new CallParameter();
+                new_param.for_rule_id = p.for_rule_id;
+                var smblist = new Symbol[0];
+                foreach (Symbol s in p.symbols)
+                    smblist += s;
+                new_param.add_symbols(smblist);
+                new_param.name = p.name;
+                new_param.return_to_param = p.return_to_param;
+                ret.add(new_param);
+            }
+            foreach (CallParameter r in ret){
+                if (r.return_to_param != null){
+                    r.return_to_param = find_param(ret, r.return_to_param.name, r.return_to_param.for_rule_id);
+                }
+            }
+            return ret;
+        }
 
         int rule_id_count = 0;
 
-        void compare (RuleExpression[] compare_rule,
+        bool compare (RuleExpression[] compare_rule,
                                       Symbol[] accessible,
                                       string written2,
                                       Gee.ArrayList<CallParameter> call_params,
@@ -437,47 +458,49 @@ namespace Guanako {
             RuleExpression current_rule = rule[0];
 
             //Uncomment this to see every step the parser takes in a tree structure
-            /*string depth_string = "";
+            string depth_string = "";
             for (int q = 0; q < depth; q++)
                 depth_string += " ";
             stdout.printf ("\n" + depth_string + "Current rule: " + current_rule.expr + "\n");
-            stdout.printf (depth_string + "Written: " + written + "\n");*/
+            stdout.printf (depth_string + "Written: " + written + "\n");
 
             if (current_rule.expr.contains ("|")) {
                 var splt = current_rule.expr.split ("|");
+                bool retbool = false;
                 foreach (string s in splt) {
                     rule[0].expr = s;
-                    compare (rule, accessible, written, call_params, depth + 1, ref ret);
+                    if (compare (rule, accessible, written, call_params, depth + 1, ref ret))
+                        retbool = true;
                 }
-                return;
+                return retbool;
             }
 
             if (current_rule.expr.has_prefix ("?")) {
+                bool ret1 = false;
                 if (rule.length > 1)
-                    compare (rule[1:rule.length], accessible, written, call_params, depth + 1, ref ret);
+                    ret1 = compare (rule[1:rule.length], accessible, written, call_params, depth + 1, ref ret);
                 rule[0].expr = rule[0].expr.substring (1);
-                compare (rule, accessible, written, call_params, depth + 1, ref ret);
-                return;
+                var ret2 = compare (rule, accessible, written, call_params, depth + 1, ref ret);
+                return ret1 || ret2;
             }
 
             if (current_rule.expr.has_prefix ("*word")) {
                 Regex r = /^(?P<word>\w*)(?P<rest>.*)$/;
                 MatchInfo info;
                 if (!r.match (written, 0, out info))
-                    return;
-                if (info.fetch_named ("word") == "")
-                    return;
-                compare (rule[1:rule.length], accessible, info.fetch_named ("rest"), call_params, depth + 1, ref ret);
-                return;
+                    return false;
+                if (info.fetch_named ("word") == null)
+                    return false;
+                return compare (rule[1:rule.length], accessible, info.fetch_named ("rest"), call_params, depth + 1, ref ret);
             }
 
 
             if (current_rule.expr == "_") {
                 if (!(written.has_prefix (" ") || written.has_prefix ("\t")))
-                    return;
+                    return false;
                 written = written.chug();
                 compare (rule[1:rule.length], accessible, written, call_params, depth + 1, ref ret);
-                return;
+                return true;
             }
 
             if (current_rule.expr.has_prefix ("{")) {
@@ -485,7 +508,7 @@ namespace Guanako {
                 MatchInfo info;
                 if (!r.match (current_rule.expr, 0, out info)) {
                     stdout.printf ("Malformed rule! >" + compare_rule[0].expr + "<\n");
-                    return;
+                    return false;
                 }
 
                 var parent_param_name = info.fetch_named ("parent");
@@ -496,7 +519,7 @@ namespace Guanako {
                 var parent_param = find_param (call_params, parent_param_name, current_rule.rule_id);
                 if (parent_param == null){
                     stdout.printf (_("Variable '%s' not found! >%s<\n"), parent_param_name, compare_rule[0].expr);
-                    return;
+                    return false;
                 }
                 Symbol[] children = new Symbol[0];
                 if (parent_param.symbols.length == 0)
@@ -516,14 +539,14 @@ namespace Guanako {
                 Regex r2 = /^(?P<word>\w*)(?P<rest>.*)$/;
                 MatchInfo info2;
                 if(!r2.match (written, 0, out info2))
-                    return;
+                    return false;
                 var word = info2.fetch_named ("word");
                 var rest = info2.fetch_named ("rest");
-
+                bool retbool = false;
                 foreach (Symbol child in children){
                     if (symbol_is_type (child, child_type)){
                         if (binding != null)
-                            if (!symbol_has_binding(child, binding.replace("arr_el", "")))
+                            if (!symbol_has_binding(child, binding))
                                 continue;
                         if (word == child.name){
                             var child_param = find_param (call_params, write_to_param, current_rule.rule_id);
@@ -533,21 +556,30 @@ namespace Guanako {
                                 child_param.for_rule_id = current_rule.rule_id;
                                 call_params.add (child_param);
                             }
-                            child_param.set_symbol(child);
-                            compare (rule[1:rule.length], accessible, rest, call_params, depth + 1, ref ret);
+                            if (binding != null && binding.contains("arr_el"))
+                                child_param.set_symbol(get_type_of_symbol(child, true));
+                            else
+                                child_param.set_symbol(child);
+                            //var rets = new Gee.TreeSet<CompletionProposal>();
+                            if (compare (rule[1:rule.length], accessible, rest, call_params, depth + 1, ref ret)) {
+                                //ret.add_all(rets);
+                                retbool = true;
+                            }
                         }
-                        if (rest == "" && child.name.has_prefix (word) && child.name.length > word.length)
+                        if (rest == "" && child.name.has_prefix (word) && child.name.length > word.length){
                             ret.add (new CompletionProposal (child, word.length));
+                            retbool = true;
+                        }
                     }
                 }
-                return;
+                return retbool;
             }
             if (current_rule.expr.has_prefix ("$")) {
                 Regex r = /^\$(?P<call>\w*)(\{(?P<pass>(\w*|\@))\})?(\>\{(?P<ret>.*)\})?$/;
                 MatchInfo info;
                 if (!r.match (current_rule.expr, 0, out info)) {
                     stdout.printf ("Malformed rule! >" + compare_rule[0].expr + "<\n");
-                    return;
+                    return false;
                 }
                 var call = info.fetch_named ("call");
                 var pass_param = info.fetch_named ("pass");
@@ -555,7 +587,7 @@ namespace Guanako {
 
                 if (!map_syntax.has_key (call)) {
                     stdout.printf (_("Call '%s' not found in >%s<\n"), call, compare_rule[0].expr);
-                    return;
+                    return false;
                 }
 
                 RuleExpression[] composit_rule = map_syntax[call].rule;
@@ -566,14 +598,16 @@ namespace Guanako {
                 foreach (RuleExpression exp in rule[1:rule.length])
                     composit_rule += exp;
 
+                //var pass_call_params = call_params;// clone_param_list(call_params);
                 if (pass_param != null) {
+
                     var child_param = new CallParameter();
                     child_param.name = map_syntax[call].parameters[0];
                     child_param.for_rule_id = rule_id_count;
                     var param = find_param (call_params, pass_param, current_rule.rule_id);
                     if (param == null) {
                         stdout.printf (_("Parameter '%s' not found in >%s<\n"), pass_param, compare_rule[0].expr);
-                        return;
+                        return false;
                     }
                     child_param.add_symbols(param.symbols);
                     call_params.add (child_param);
@@ -593,9 +627,13 @@ namespace Guanako {
                         call_params.add(child_ret_p);
                     }
                 }
-
-                compare (composit_rule, accessible, written, call_params, depth + 1, ref ret);
-                return;
+                
+                //var rets = new Gee.TreeSet<CompletionProposal>();
+                if(compare (composit_rule, accessible, written, call_params, depth + 1, ref ret)){
+                    //ret.add_all(rets);
+                    return true;
+                }
+                return false;
             }
 
             var mres = match (written, current_rule.expr);
@@ -603,15 +641,14 @@ namespace Guanako {
             if (mres == matchres.COMPLETE) {
                 written = written.substring (current_rule.expr.length);
                 if (rule.length == 1)
-                    return;
-                compare (rule[1:rule.length], accessible, written, call_params, depth + 1, ref ret);
-                return;
+                    return true;
+                return compare (rule[1:rule.length], accessible, written, call_params, depth + 1, ref ret);
             }
             else if (mres == matchres.STARTED) {
                 ret.add (new CompletionProposal (new Struct (current_rule.expr, null, null), written.length));
-                return;
+                return true;
             }
-            return;
+            return false;
         }
 
         enum matchres {

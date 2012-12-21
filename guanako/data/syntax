@@ -164,9 +164,7 @@ MethodChildVariablesInst : parent
 
 
 MethodGeneralCall : parent
-$MethodGeneralCallArray{parent}>{ret}
-#|$MethodGeneralCallArrayEl{parent}>{ret}
-#$MethodGeneralCallSingle{parent}>{ret}|
+$MethodGeneralCallSingle{parent}>{ret}|$MethodGeneralCallArray{parent}>{ret}|$MethodGeneralCallArrayEl{parent}>{ret}
 
 MethodGeneralCallSingle : parent
 {parent}>Method<instance,single>{ret} ?_ $MethodCallBrackets
