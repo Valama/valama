@@ -364,25 +364,15 @@ namespace Guanako {
             public int for_rule_id;
             public string name;
 
-            public void set_symbol(Symbol smb){
-                _symbols = new Symbol[0];
-                _symbols += smb;
-                if (return_to_param != null)
-                    return_to_param.add_symbol(smb);
+            Symbol _symbol = null;
+            public Symbol symbol{
+                get {return _symbol;}
+                set {
+                    _symbol = value;
+                    if (return_to_param != null)
+                        return_to_param.symbol = value;
+                }
             }
-            public void add_symbols(Symbol[] smbs){
-                foreach (Symbol s in smbs)
-                    _symbols += s;
-                if (return_to_param != null)
-                    return_to_param.add_symbols(smbs);
-            }
-            public void add_symbol(Symbol smb){
-                _symbols += smb;
-                if (return_to_param != null)
-                    return_to_param.add_symbol(smb);
-            }
-            private Symbol[] _symbols = new Symbol[0];
-            public Symbol[] symbols {get{return _symbols;}}
 
             public CallParameter? return_to_param = null;
         }
@@ -419,10 +409,7 @@ namespace Guanako {
             foreach (CallParameter p in param){
                 var new_param = new CallParameter();
                 new_param.for_rule_id = p.for_rule_id;
-                var smblist = new Symbol[0];
-                foreach (Symbol s in p.symbols)
-                    smblist += s;
-                new_param.add_symbols(smblist);
+                new_param.symbol = p.symbol;
                 new_param.name = p.name;
                 new_param.return_to_param = p.return_to_param;
                 ret.add(new_param);
@@ -463,21 +450,18 @@ namespace Guanako {
 
             if (current_rule.expr.contains ("|")) {
                 var splt = current_rule.expr.split ("|");
-                bool retbool = false;
                 foreach (string s in splt) {
                     rule[0].expr = s;
                     /*
                      * Need create a separate set of parameters here, as each branch might
                      * assign different values (resulting in scrambled eggs)
                      */
-                    var pass_params = clone_param_list(call_params);
-                    compare (rule, accessible, written, pass_params, depth + 1, ref ret);
+                    compare (rule, accessible, written, clone_param_list(call_params), depth + 1, ref ret);
                 }
                 return;
             }
 
             if (current_rule.expr.has_prefix ("?")) {
-                bool ret1 = false;
                 if (rule.length > 1)
                     compare (rule[1:rule.length], accessible, written, call_params, depth + 1, ref ret);
                 rule[0].expr = rule[0].expr.substring (1);
@@ -524,15 +508,13 @@ namespace Guanako {
                     return;
                 }
                 Symbol[] children = new Symbol[0];
-                if (parent_param.symbols.length == 0)
+                if (parent_param.symbol == null)
                     children = accessible;
                 else{
                     bool resolve_array = false;
                     if (binding != null)
                         resolve_array = binding.contains("arr_el");
-                    foreach (Symbol parent in parent_param.symbols)
-                        foreach (Symbol new_child in get_child_symbols (get_type_of_symbol (parent, resolve_array)))
-                            children += new_child;
+                    children = get_child_symbols (get_type_of_symbol (parent_param.symbol, resolve_array));
                 }
 
                 Regex r2 = /^(?P<word>\w*)(?P<rest>.*)$/;
@@ -556,9 +538,9 @@ namespace Guanako {
                                 call_params.add (child_param);
                             }
                             if (binding != null && binding.contains("arr_el"))
-                                child_param.set_symbol(get_type_of_symbol(child, true));
+                                child_param.symbol = get_type_of_symbol(child, true);
                             else
-                                child_param.set_symbol(child);
+                                child_param.symbol = child;
                             compare (rule[1:rule.length], accessible, rest, call_params, depth + 1, ref ret);
                         }
                         if (rest == "" && child.name.has_prefix (word) && child.name.length > word.length){
@@ -602,7 +584,7 @@ namespace Guanako {
                         stdout.printf (_("Parameter '%s' not found in >%s<\n"), pass_param, compare_rule[0].expr);
                         return;
                     }
-                    child_param.add_symbols(param.symbols);
+                    child_param.symbol = param.symbol;
                     call_params.add (child_param);
 
                     if (ret_param != null){
