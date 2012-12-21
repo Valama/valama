@@ -463,7 +463,7 @@ namespace Guanako {
 
             if (current_rule.expr.has_prefix ("?")) {
                 if (rule.length > 1)
-                    compare (rule[1:rule.length], accessible, written, call_params, depth + 1, ref ret);
+                    compare (rule[1:rule.length], accessible, written, clone_param_list(call_params), depth + 1, ref ret);
                 rule[0].expr = rule[0].expr.substring (1);
                 compare (rule, accessible, written, call_params, depth + 1, ref ret);
                 return;
