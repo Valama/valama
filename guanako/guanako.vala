@@ -91,9 +91,8 @@ namespace Guanako {
         private void context_prep() {
             context.target_glib_major = glib_major;
             context.target_glib_minor = glib_minor;
-            for (int i = 16; i <= glib_minor; i += 2) {
-			    context.add_define ("GLIB_%d_%d".printf (glib_major, i));
-		    }
+            for (int i = 16; i <= glib_minor; i += 2)
+                context.add_define ("GLIB_%d_%d".printf (glib_major, i));
             context.profile = Profile.GOBJECT;
         }
 
@@ -188,19 +187,6 @@ namespace Guanako {
             CodeContext.push (context);
             parser.parse (context);
 
-            //TODO: Find missing packages automatically
-            /*var namespaces = new string[0];
-            foreach (SourceFile file in context.get_source_files())
-                foreach (UsingDirective dir in file.current_using_directives)
-                        if (!(dir.namespace_symbol.name in namespaces))
-                            namespaces += dir.namespace_symbol.name;
-            foreach (var namesp in namespaces) {
-                var vapi = discover_vapi_file (namesp);
-                add_package (vapi);
-#if DEBUG
-                stdout.printf (_("Adding package '%s' for namespace '%s'\n"), vapi, namesp);
-#endif
-            }*/
             context.resolver.resolve (context);
             context.analyzer.analyze (context);
             CodeContext.pop();
@@ -323,22 +309,22 @@ namespace Guanako {
             if (binding == null)
                 return true;
 
-            bool stat = binding.contains("static");
-            bool inst = binding.contains("instance");
-            bool arr = binding.contains("array") || binding.contains("arr_el");
-            bool sng = binding.contains("single");
+            bool stat = binding.contains ("static");
+            bool inst = binding.contains ("instance");
+            bool arr = binding.contains ("array") || binding.contains ("arr_el");
+            bool sng = binding.contains ("single");
 
-            if (smb is Method){
+            if (smb is Method) {
                 if (inst && ((Method)smb).binding == MemberBinding.STATIC)
                     return false;
                 else if (stat && ((Method)smb).binding == MemberBinding.INSTANCE)
                     return false;
-            } else if (smb is Field){
+            } else if (smb is Field) {
                 if (inst && ((Field)smb).binding == MemberBinding.STATIC)
                     return false;
                 else if (stat && ((Field)smb).binding == MemberBinding.INSTANCE)
                     return false;
-            } else if (smb is Property){
+            } else if (smb is Property) {
                 if (inst && ((Property)smb).binding == MemberBinding.STATIC)
                     return false;
                 else if (stat && ((Property)smb).binding == MemberBinding.INSTANCE)
@@ -399,7 +385,7 @@ namespace Guanako {
                     return param;
             return null;
         }
-        
+
         /*
          * Clones a list of CallParameter's, including return dependencies
          */
@@ -412,23 +398,21 @@ namespace Guanako {
                 new_param.symbol = p.symbol;
                 new_param.name = p.name;
                 new_param.return_to_param = p.return_to_param;
-                ret.add(new_param);
+                ret.add (new_param);
             }
-            foreach (CallParameter r in ret){
-                if (r.return_to_param != null){
-                    r.return_to_param = find_param(ret, r.return_to_param.name, r.return_to_param.for_rule_id);
-                }
-            }
+            foreach (CallParameter r in ret)
+                if (r.return_to_param != null)
+                    r.return_to_param = find_param (ret, r.return_to_param.name, r.return_to_param.for_rule_id);
             return ret;
         }
 
         int rule_id_count = 0;
 
         void compare (RuleExpression[] compare_rule,
-                                      Symbol[] accessible,
-                                      string written2,
-                                      Gee.ArrayList<CallParameter> call_params,
-                                      int depth, ref Gee.TreeSet<CompletionProposal> ret) {
+                      Symbol[] accessible,
+                      string written2,
+                      Gee.ArrayList<CallParameter> call_params,
+                      int depth, ref Gee.TreeSet<CompletionProposal> ret) {
 
             /*
              * For some reason need to create a copy... otherwise assigning new
@@ -463,7 +447,7 @@ namespace Guanako {
 
             if (current_rule.expr.has_prefix ("?")) {
                 if (rule.length > 1)
-                    compare (rule[1:rule.length], accessible, written, clone_param_list(call_params), depth + 1, ref ret);
+                    compare (rule[1:rule.length], accessible, written, clone_param_list (call_params), depth + 1, ref ret);
                 rule[0].expr = rule[0].expr.substring (1);
                 compare (rule, accessible, written, call_params, depth + 1, ref ret);
                 return;
@@ -503,14 +487,14 @@ namespace Guanako {
                 var write_to_param = info.fetch_named ("write_to");
 
                 var parent_param = find_param (call_params, parent_param_name, current_rule.rule_id);
-                if (parent_param == null){
+                if (parent_param == null) {
                     stdout.printf (_("Variable '%s' not found! >%s<\n"), parent_param_name, compare_rule[0].expr);
                     return;
                 }
                 Symbol[] children = new Symbol[0];
                 if (parent_param.symbol == null)
                     children = accessible;
-                else{
+                else {
                     bool resolve_array = false;
                     if (binding != null)
                         resolve_array = binding.contains("arr_el");
@@ -520,14 +504,14 @@ namespace Guanako {
                 Regex r2 = /^(?P<word>\w*)(?P<rest>.*)$/;
                 MatchInfo info2;
                 if(!r2.match (written, 0, out info2))
-                    return;// false;
+                    return;
                 var word = info2.fetch_named ("word");
                 var rest = info2.fetch_named ("rest");
 
-                foreach (Symbol child in children){
-                    if (symbol_is_type (child, child_type)){
+                foreach (Symbol child in children) {
+                    if (symbol_is_type (child, child_type)) {
                         if (binding != null)
-                            if (!symbol_has_binding(child, binding))
+                            if (!symbol_has_binding (child, binding))
                                 continue;
                         if (word == child.name){
                             var child_param = find_param (call_params, write_to_param, current_rule.rule_id);
@@ -537,8 +521,8 @@ namespace Guanako {
                                 child_param.for_rule_id = current_rule.rule_id;
                                 call_params.add (child_param);
                             }
-                            if (binding != null && binding.contains("arr_el"))
-                                child_param.symbol = get_type_of_symbol(child, true);
+                            if (binding != null && binding.contains ("arr_el"))
+                                child_param.symbol = get_type_of_symbol (child, true);
                             else
                                 child_param.symbol = child;
                             compare (rule[1:rule.length], accessible, rest, call_params, depth + 1, ref ret);
@@ -554,7 +538,7 @@ namespace Guanako {
                 Regex r = /^\$(?P<call>\w*)(\{(?P<pass>(\w*|\@))\})?(\>\{(?P<ret>.*)\})?$/;
                 MatchInfo info;
                 if (!r.match (current_rule.expr, 0, out info)) {
-                    stdout.printf ("Malformed rule! >" + compare_rule[0].expr + "<\n");
+                    stdout.printf (_("Malformed rule! >%s<\n"), compare_rule[0].expr);
                     return;
                 }
                 var call = info.fetch_named ("call");
@@ -599,7 +583,7 @@ namespace Guanako {
                         child_ret_p.name = "ret";
                         child_ret_p.for_rule_id = rule_id_count;
                         child_ret_p.return_to_param = ret_p;
-                        call_params.add(child_ret_p);
+                        call_params.add (child_ret_p);
                     }
                 }
 
@@ -643,9 +627,9 @@ namespace Guanako {
             DataType type = null;
             if (smb is Property)
                 type = ((Property) smb).property_type;
-            if (smb is Variable)
+            else if (smb is Variable)
                 type = ((Variable) smb).variable_type;
-            if (smb is Method)
+            else if (smb is Method)
                 type = ((Method) smb).return_type;
 
             if (type == null)
@@ -813,9 +797,8 @@ namespace Guanako {
 
         void vanish_file (SourceFile file) {
             var nodes = new Vala.ArrayList<Vala.CodeNode>();
-            foreach (var node in file.get_nodes()) {
+            foreach (var node in file.get_nodes())
                 nodes.add (node);
-            }
             foreach (var node in nodes) {
                 file.remove_node (node);
                 if (node is Vala.Symbol) {
@@ -824,7 +807,7 @@ namespace Guanako {
                         /*
                          * We need to remove it from the scope.
                          */
-                        sym.owner.remove(sym.name);
+                        sym.owner.remove (sym.name);
                     if (context.entry_point == sym)
                         context.entry_point = null;
                     sym.name = "";  //TODO: Find a less stupid solution...
