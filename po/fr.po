@@ -73,7 +73,7 @@ msgstr "Choisissez un modèle de projet"
 #: /home/dominique/projects/valama/valama/src/common.vala:441
 #, c-format
 msgid "Copy from '%s' to '%s'.\n"
-msgstr "Copier de '%s' vers '%s'.\n"
+msgstr "Copie de '%s' vers '%s'.\n"
 
 #: /home/dominique/projects/valama/valama/src/common.vala:323
 #, c-format
@@ -93,7 +93,7 @@ msgstr "Impossible de créer le nouveau fichier : %s"
 #: /home/dominique/projects/valama/valama/src/main.vala:120
 #, c-format
 msgid "Could not create thread to update buffer completion: %s"
-msgstr "Le procesus pour la mise à jour de l'auto-complétion n'a pas pu démarrer : %s"
+msgstr "Impossible de démarrer le processus pour la mise à jour de l'auto-complétion : %s"
 
 #: /home/dominique/projects/valama/valama/src/project.vala:108
 #, c-format
@@ -260,7 +260,7 @@ msgstr "Répertoire"
 #: /home/dominique/projects/valama/valama/src/common.vala:457
 #, c-format
 msgid "Move from '%s' to '%s'.\n"
-msgstr "Déplacer de '%s' vers '%s'.\n"
+msgstr "Déplacement de '%s' vers '%s'.\n"
 
 #: /home/dominique/projects/valama/valama/src/common.vala:333
 #, c-format
@@ -355,17 +355,17 @@ msgstr "Paramètres"
 #: /home/dominique/projects/valama/valama/src/common.vala:409
 #, c-format
 msgid "Skip %s\n"
-msgstr "Sauter %s\n"
+msgstr "Ignorer %s\n"
 
 #: /home/dominique/projects/valama/valama/src/ui_project_dialog.vala:84
 #, c-format
 msgid "Skip already loaded project: %s\n"
-msgstr "Sauter le projet déjà chargé : %s\n"
+msgstr "Ignorer le projet déjà chargé : %s\n"
 
 #: /home/dominique/projects/valama/valama/src/common.vala:423
 #, c-format
 msgid "Skip overwrite from '%s' to '%s'.\n"
-msgstr "Sauter écrasement de '%s' vers '%s'.\n"
+msgstr "Ignorer l'écrasement de '%s' vers '%s'.\n"
 
 #: /home/dominique/projects/valama/valama/src/ui_project_browser.vala:78
 msgid "Sources"
