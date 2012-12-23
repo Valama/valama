@@ -203,7 +203,8 @@ public static int main (string[] args) {
                           DockPlacement.TOP);
     window_main.add_item ("ReportWrapper", _("Report widget"), scr_report,
                           Stock.INFO,
-                          DockItemBehavior.NORMAL,
+                          DockItemBehavior.CANT_CLOSE, //temporary solution until items can be added later
+                          //DockItemBehavior.NORMAL,
                           DockPlacement.BOTTOM);
     window_main.add_item ("ProjectBrowser", _("Project browser"), pbrw.widget,
                           Stock.FILE,
@@ -211,7 +212,8 @@ public static int main (string[] args) {
                           DockPlacement.LEFT);
     window_main.add_item ("SymbolBrowser", _("Symbol browser"), scr_symbol,
                           Stock.CONVERT,
-                          DockItemBehavior.NORMAL,
+                          DockItemBehavior.CANT_CLOSE, //temporary solution until items can be added later
+                          //DockItemBehavior.NORMAL,
                           DockPlacement.RIGHT);
     window_main.show_all();
 
