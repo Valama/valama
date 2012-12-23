@@ -38,7 +38,6 @@ public class ProjectBrowser : UiElement {
 
         var scrw = new ScrolledWindow (null, null);
         scrw.add (tree_view);
-        scrw.set_size_request (200,0);
 
         var toolbar = new Toolbar();
         toolbar.icon_size = 1;
@@ -54,7 +53,6 @@ public class ProjectBrowser : UiElement {
         toolbar.add (btn_rem);
 
         var vbox = new Box (Orientation.VERTICAL, 0);
-
         vbox.pack_start (scrw, true, true);
         vbox.pack_start (toolbar, false, true);
 

@@ -52,7 +52,7 @@ public abstract class UiElement {
       */
     protected abstract void build();
 
-    private Thread<void*> t;
+    //private Thread<void*> t;
     /**
      * Call {@link build} methods from this and all dependent
      * {@link UiElement} class instances.

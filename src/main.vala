@@ -1,6 +1,7 @@
 /*
  * src/main.vala
  * Copyright (C) 2012, Linus Seelinger <S.Linus@gmx.de>
+ *               2012, Dominique Lasserre <lasserre.d@gmail.com>
  *
  * Valama is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -18,18 +19,19 @@
  */
 
 using Gtk;
+using Gdl;
 using Vala;
 using GLib;
 using Guanako;
 using Pango; // fonts
 
-static Window window_main;
+static MainWindow window_main;
 
 static ValamaProject project;
 static SourceView view;
 
 static bool parsing = false;
-MainLoop loop_update;
+static MainLoop loop_update;
 static SourceFile current_source_file = null;
 
 public static int main (string[] args) {
@@ -57,8 +59,13 @@ public static int main (string[] args) {
         return 1;
     }
 
+    window_main = new MainWindow();
+
+    /* Ui elements. */
     var ui_elements_pool = new UiElementPool();
     var pbrw = new ProjectBrowser (project);
+    pbrw.source_file_selected.connect (on_source_file_selected);
+
     var smb_browser = new SymbolBrowser();
     pbrw.connect (smb_browser);
     ui_elements_pool.add (pbrw);
@@ -67,18 +74,27 @@ public static int main (string[] args) {
     var report_wrapper = new ReportWrapper();
     project.guanako_project.set_report_wrapper (report_wrapper);
     var wdg_report = new UiReport (report_wrapper);
+    wdg_report.error_selected.connect (on_error_selected);
     ui_elements_pool.add (wdg_report);
 
-    window_main = new Window();
 
+    /* Source view. */
     view = new SourceView();
     view.show_line_numbers = true;
+    view.insert_spaces_instead_of_tabs = true;
+    view.override_font(FontDescription.from_string ("Monospace 10"));
+    view.buffer.create_tag ("gray_bg", "background", "gray", null);
+    view.auto_indent = true;
+    view.indent_width = 4;
+
     var bfr = (SourceBuffer) view.buffer;
     bfr.set_highlight_syntax (true);
-    view.insert_spaces_instead_of_tabs = true;
+    var langman = new SourceLanguageManager();
+    var lang = langman.get_language ("vala");
+    bfr.set_language (lang);
 
-    view.override_font(FontDescription.from_string ("Monospace 10"));
 
+    /* Completion provider. */
     TestProvider tp = new TestProvider();
     tp.priority = 1;
     tp.name = _("Test Provider 1");
@@ -89,10 +105,7 @@ public static int main (string[] args) {
         stderr.printf (_("Could not load completion: %s"), e.message);
         return 1;
     }
-    view.buffer.changed.connect (on_view_buffer_changed); // Nothing to do yet.
-    view.buffer.create_tag ("gray_bg", "background", "gray", null);
-    view.auto_indent = true;
-    view.indent_width = 4;
+
     view.buffer.changed.connect (() => {
         if (!parsing) {
             try {
@@ -122,24 +135,17 @@ public static int main (string[] args) {
         }
     });
 
-    var langman = new SourceLanguageManager();
-    var lang = langman.get_language ("vala");
-    bfr.set_language (lang);
 
-    var vbox_main = new Box (Orientation.VERTICAL, 0);
-
-    var toolbar = new Toolbar();
-    vbox_main.pack_start (toolbar, false, true);
-
+    /* Buttons. */
     var btnLoadProject = new ToolButton.from_stock (Stock.OPEN);
-    toolbar.add (btnLoadProject);
+    window_main.add_button (btnLoadProject);
     btnLoadProject.set_tooltip_text (_("Open project"));
     btnLoadProject.clicked.connect (() => {
         ui_load_project (ui_elements_pool);
     });
 
     var btnNewFile = new ToolButton.from_stock (Stock.FILE);
-    toolbar.add (btnNewFile);
+    window_main.add_button (btnNewFile);
     btnNewFile.set_tooltip_text (_("Create new file"));
     btnNewFile.clicked.connect (() => {
         var source_file = ui_create_file_dialog (project);
@@ -151,66 +157,80 @@ public static int main (string[] args) {
     });
 
     var btnSave = new ToolButton.from_stock (Stock.SAVE);
-    toolbar.add (btnSave);
+    window_main.add_button (btnSave);
     btnSave.set_tooltip_text (_("Save current file"));
     btnSave.clicked.connect (() => {
         write_current_source_file(report_wrapper);
         wdg_report.update();
     });
-    toolbar.add (btnSave);
 
     var btnBuild = new Gtk.ToolButton.from_stock (Stock.EXECUTE);
+    window_main.add_button (btnBuild);
     btnBuild.set_tooltip_text (_("Save current file and build project"));
     btnBuild.clicked.connect (() => {
         on_build_button_clicked (report_wrapper);
         wdg_report.update();
     });
-    toolbar.add (btnBuild);
 
-    /*var btnAutoIndent = new Gtk.ToolButton.from_stock (Stock.REFRESH);
+    /*
+    var btnAutoIndent = new Gtk.ToolButton.from_stock (Stock.REFRESH);
+    window_main.add_button (btnAutoIndent);
     btnAutoIndent.set_tooltip_text (_("Auto Indent"));
     btnAutoIndent.clicked.connect (on_auto_indent_button_clicked);
-    toolbar.add (btnAutoIndent);*/
+    */
 
     var btnSettings = new Gtk.ToolButton.from_stock (Stock.PREFERENCES);
+    window_main.add_button (btnSettings);
     btnSettings.set_tooltip_text (_("Settings"));
     btnSettings.clicked.connect (() => {
         ui_project_dialog (project);
     });
-    toolbar.add (btnSettings);
-
-    var hbox = new Box (Orientation.HORIZONTAL, 0);
-
-    hbox.pack_start (pbrw.widget, false, true);
-
-    var scrw = new ScrolledWindow (null, null);
-    scrw.add(view);
-    hbox.pack_start (scrw, true, true);
-
-    var scrw2 = new ScrolledWindow (null, null);
-    scrw2.add (smb_browser.widget);
-    scrw2.set_size_request (300, 0);
-    hbox.pack_start (scrw2, false, true);
-
-    vbox_main.pack_start (hbox, true, true);
 
 
-    var scrw3 = new ScrolledWindow (null, null);
-    scrw3.add (wdg_report.widget);
-    scrw3.set_size_request (0, 150);
-    vbox_main.pack_start (scrw3, false, true);
+    /* Gdl elements. */
+    var scr_view = new ScrolledWindow (null, null);
+    scr_view.add (view);
 
-    pbrw.source_file_selected.connect (on_source_file_selected);
-    wdg_report.error_selected.connect (on_error_selected);
+    var scr_symbol = new ScrolledWindow (null, null);
+    scr_symbol.add (smb_browser.widget);
 
-    window_main.add (vbox_main);
-    window_main.hide_titlebar_when_maximized = true;
-    window_main.maximize();
-    window_main.destroy.connect (Gtk.main_quit);
+    var scr_report = new ScrolledWindow (null, null);
+    scr_report.add (wdg_report.widget);
+
+    window_main.add_item ("SourceView", _("Source view"), scr_view,
+                          Stock.EDIT,
+                          DockItemBehavior.LOCKED,
+                          DockPlacement.TOP);
+    window_main.add_item ("ReportWrapper", _("Report widget"), scr_report,
+                          Stock.INFO,
+                          DockItemBehavior.NORMAL,
+                          DockPlacement.BOTTOM);
+    window_main.add_item ("ProjectBrowser", _("Project browser"), pbrw.widget,
+                          Stock.FILE,
+                          DockItemBehavior.CANT_CLOSE,
+                          DockPlacement.LEFT);
+    window_main.add_item ("SymbolBrowser", _("Symbol browser"), scr_symbol,
+                          Stock.CONVERT,
+                          DockItemBehavior.NORMAL,
+                          DockPlacement.RIGHT);
     window_main.show_all();
+
+    /* Load default layout. Either local one or system wide. */
+    string local_layout_filename = Environment.get_user_cache_dir() + "/valama/layout.xml";
+    string system_layout_filename = Config.PACKAGE_DATA_DIR + "/layout.xml";
+    if (!window_main.load_layout (local_layout_filename))
+        window_main.load_layout (system_layout_filename);
 
     Gtk.main();
 
+    var f = File.new_for_path (local_layout_filename).get_parent();
+    if (!f.query_exists())
+        try {
+            f.make_directory_with_parents();
+        } catch (GLib.Error e) {
+            stderr.printf (_("Couldn't create cache directory: %s"), e.message);
+        }
+    window_main.save_layout (local_layout_filename);
     project.save();
     return 0;
 }
@@ -284,8 +304,6 @@ void write_current_source_file (ReportWrapper report_wrapper) {
     project.guanako_project.update_file (current_source_file, view.buffer.text);
 }
 
-static void on_view_buffer_changed(){
-}
 
 class TestProvider : Gtk.SourceCompletionProvider, Object {
     Gdk.Pixbuf icon;
