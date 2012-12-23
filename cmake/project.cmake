@@ -8,6 +8,7 @@ gee-1.0
 libvala-0.18
 gdk-3.0
 gtk+-3.0
+gdl-3.0
 gtksourceview-3.0
 libxml-2.0
 guanako

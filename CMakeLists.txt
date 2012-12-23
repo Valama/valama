@@ -200,6 +200,7 @@ install(TARGETS ${project_name_lower} DESTINATION "${bindir}")
 # Additional files.
 install(DIRECTORY "pixmaps/" DESTINATION "${pixdir}")
 install(FILES "data/${project_name_lower}.desktop" DESTINATION "${appdir}")
+install(FILES "data/layout.xml" DESTINATION "${datadir}")
 install(DIRECTORY "data/templates" DESTINATION "${datadir}")
 
 

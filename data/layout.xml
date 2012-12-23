@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<dock-layout>
+  <layout name="__default__">
+    <dock name="__dock_1" floating="no" width="-1" height="-1" floatx="0" floaty="0">
+      <paned orientation="vertical" locked="no" position="800">
+        <paned orientation="horizontal" locked="no" position="250">
+          <item name="ProjectBrowser" orientation="vertical" locked="no"/>
+          <paned orientation="horizontal" locked="no" position="1363">
+            <item name="SourceView" orientation="vertical" locked="yes"/>
+            <item name="SymbolBrowser" orientation="vertical" locked="no"/>
+          </paned>
+        </paned>
+        <item name="ReportWrapper" orientation="vertical" locked="no"/>
+      </paned>
+    </dock>
+  </layout>
+</dock-layout>
