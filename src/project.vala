@@ -58,6 +58,8 @@ public class ValamaProject {
                     }
                 }
             }
+            if (FileUtils.test(project_path + "/vapi/config.vapi", FileTest.EXISTS))
+                guanako_project.add_source_file_by_name(project_path + "/vapi/config.vapi");
         } catch (GLib.Error e) {
             stderr.printf(_("Could not open file: %s"), e.message);
         }

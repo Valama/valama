@@ -21,9 +21,9 @@ using Gtk;
 using Vala;
 
 public class SymbolBrowser : UiElement {
-    public SymbolBrowser (ValamaProject? vproject=null) {
-        if (vproject != null)
-            project = vproject;
+    public SymbolBrowser (ValamaProject? project=null) {
+        if (project != null)
+            this.project = project;
         element_name = "SymbolBrowser";
 
         tree_view = new TreeView();

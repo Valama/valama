@@ -22,9 +22,9 @@ using Vala;
 using GLib;
 
 public class ProjectBrowser : UiElement {
-    public ProjectBrowser (ValamaProject? vproject=null) {
-        if (vproject != null)
-            project = vproject;
+    public ProjectBrowser (ValamaProject? project = null) {
+        if (project != null)
+            this.project = project;
         element_name = "ProjectBrowser";
 
         tree_view = new TreeView();
@@ -220,8 +220,10 @@ public class ProjectBrowser : UiElement {
             if (indices.length == 2) {
                 switch (indices[0]) {
                     case 0:
-                        if (ui_ask_warning (_("Do you wan't to delete this file?")) == ResponseType.YES) {
-                            var source_file = project.guanako_project.get_source_files()[indices[1]];
+                        var source_file = project.guanako_project.get_source_files()[indices[1]];
+                        if (project.project_path + "/vapi/config.vapi" == source_file.filename) //Do not delete config.vapi
+                            break;
+                        if (ui_ask_warning (_("Do you want to delete this file?")) == ResponseType.YES) {
                             if (current_source_file == source_file)  //TODO: Switch to file opened last.
                                 on_source_file_selected (project.guanako_project.get_source_files()[0]);
                             try {
