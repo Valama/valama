@@ -27,12 +27,18 @@ namespace Guanako {
      */
     Symbol[] get_child_symbols (Symbol parent) {
         Symbol[] ret = new Symbol[0];
-        //if (include_base_classes)
-            if (parent is Class) {
-                var p = (Class) parent;
-                if (p.base_class != null)
-                    ret = get_child_symbols (p.base_class);
+        if (parent is Class) {
+            //If parent is a Class, add its base class and types (i.e. interfaces it implements etc)
+            var p = (Class) parent;
+            if (p.base_class != null)
+                ret = get_child_symbols (p.base_class);
+            foreach (DataType type in p.get_base_types()){
+                iter_symbol(type.data_type, (s, depth) => {
+                    ret += s;
+                    return iter_callback_returns.abort_branch;
+                });
             }
+        }
 
         iter_symbol(parent, (s, depth) => {
             ret += s;

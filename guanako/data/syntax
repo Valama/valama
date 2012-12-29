@@ -5,6 +5,8 @@ init_deep_space
 ?_ $UsingStatement
 
 
+#Loops
+
 ForStatement
 for ?_ ( ?_ $TypedDeclaration ?_ ; ?_ *word ?_ $ValueComparison|$TypeComparison ?_ ; ?_ *word ?_ $Assignment )
 
@@ -15,6 +17,8 @@ WhileStatement
 while ?_ ( ?_ $Comparison ?_ )
 
 
+#Declaration
+
 DeclarationStatement
 $TypedDeclaration|$VarDeclaration ?_ ;
 
@@ -24,6 +28,7 @@ var _ *word ?_ $Assignment
 TypedDeclaration
 $Type _ *word ?_ ?$Assignment
 
+#Using
 
 UsingStatement
 using _ {@}>Namespace{child} ?$NamespaceChild{child} ?_ ;
@@ -31,6 +36,15 @@ using _ {@}>Namespace{child} ?$NamespaceChild{child} ?_ ;
 NamespaceChild : parent
 . {parent}>Namespace{child} ?$NamespaceChild{child}
 
+#Assignment
+
+AssignStatement
+$Assignable ?_ $Assignment ?_ ;
+
+Assignment
+= ?_ $Value|null|$NewExpression
+
+#Others
 
 IfStatement
 if ?_ ( ?_ $Comparison ?_ )
@@ -39,16 +53,8 @@ if ?_ ( ?_ $Comparison ?_ )
 CallStatement
 $MethodCall ?_ ;
 
-
-AssignStatement
-$Assignable ?_ $Assignment ?_ ;
-
-Assignment
-= ?_ $Value|$NewExpression
-
-
 ReturnStatement
-return _ $Value|$NewExpression ?_ ;
+return _ $Value|null|$NewExpression ?_ ;
 
 
 
@@ -58,14 +64,16 @@ new _ $Type ?_ $MethodCallBrackets
 
 
 Comparison
-$Value ?_ $ValueComparison|$TypeComparison
+$Value $ValueComparison|$TypeComparison
 
 ValueComparison
-==|<|>|<=|>=|!= ?_ $Value
+?_ ==|<|>|<=|>=|!= ?_ $Value|null
 
 TypeComparison
-is ?_ $Type
+_ is _ $Type
 
+
+#A type name (e.g. a class)
 
 Type
 $TypeClassStart|$TypeNamespaceStart ?$TemplateBrackets
@@ -91,22 +99,7 @@ TemplateBracketsIter
 
 
 SignalConnect
-$SignalALL{@}
-
-SignalIter : parent
-. $SignalALL{parent}
-
-SignalALL : parent
-$SignalChildMethod{parent}|$SignalChildVariables{parent}|$SignalChildConnect{parent}
-
-SignalChildVariables : parent
-{parent}>Variable{a}|{parent}>Property{a} $SignalIter{a}
-
-SignalChildMethod : parent
-{parent}>Method{a} ?_ $MethodCallBrackets ?$SignalIter{a}
-
-SignalChildConnect : parent
-{parent}>Signal{a} .connect ?_ ( ?_ ?$MethodName ?_ ) ?_ ;
+$Value>{parent} . {parent}>Signal{a} .connect ?_ ( ?_ ?$MethodName ?_ ) ?_ ;
 
 
 
@@ -157,59 +150,59 @@ MethodChildMethodStat : parent
 
 
 MethodChildMethodInst : parent
-$MethodGeneralCall{parent}>{a} ?$MethodIterInst{a}
+$MethodInstCall{parent}>{a} ?$MethodIterInst{a}
 
 MethodChildVariablesInst : parent
 {parent}>Variable<instance>{a}|{parent}>Property<instance>{a} $MethodIterInst{a}
 
 
-MethodGeneralCall : parent
-$MethodGeneralCallSingle{parent}>{ret}|$MethodGeneralCallArrayEl{parent}>{ret}|$MethodGeneralCallArray{parent}>{ret}
+MethodInstCall : parent
+$MethodInstCallSingle{parent}>{ret}|$MethodInstCallArrayEl{parent}>{ret}|$MethodInstCallArray{parent}>{ret}
 
-MethodGeneralCallSingle : parent
+MethodInstCallSingle : parent
 {parent}>Method<instance,single>{ret} ?_ $MethodCallBrackets
 
-MethodGeneralCallArray : parent
+MethodInstCallArray : parent
 {parent}>Method<instance,array>{ret} ?_ $MethodCallBrackets
 
-MethodGeneralCallArrayEl : parent
+MethodInstCallArrayEl : parent
 {parent}>Method<instance,arr_el>{ret} ?_ $MethodCallBrackets ?_ [ ?_ $Value ?_ ]
 
 
 Value
-null|$ValueALL{@}|$ValueChildALLSt{@}
+$ValueALL{@}>{ret}|$ValueChildALLSt{@}>{ret}
 
 ValueIter : parent
 . $ValueALL{parent}
 
 ValueALL : parent
-$ValueChildMethod{parent}|$ValueChildEnum{parent}|$ValueChildConstant{parent}|$ValueChildVariables{parent}
+$ValueChildMethod{parent}>{ret}|$ValueChildEnum{parent}>{ret}|$ValueChildConstant{parent}>{ret}|$ValueChildVariables{parent}>{ret}
 
 
 ValueIterSt : parent
-. $ValueChildALLSt{parent}
+. $ValueChildALLSt{parent}>{ret}
 
 ValueChildALLSt : parent
-$ValueChildStuffSt{parent}|$ValueChildMethodSt{parent}|$ValueChildEnum{parent}|$ValueChildConstant{parent}
+$ValueChildStuffSt{parent}>{ret}|$ValueChildMethodSt{parent}>{ret}|$ValueChildEnum{parent}>{ret}|$ValueChildConstant{parent}>{ret}
 
 ValueChildStuffSt : parent
-{parent}>Namespace{a}|{parent}>Class{a} $ValueIterSt{a}
+{parent}>Namespace{a}|{parent}>Class{a} $ValueIterSt{a}>{ret}
 
 ValueChildMethodSt : parent
-{parent}>Method<static>{a} ?_ $MethodCallBrackets ?$ValueIterSt{a}
+{parent}>Method<static>{ret} ?_ $MethodCallBrackets ?$ValueIterSt{ret}>{ret}
 
 
 ValueChildVariables : parent
-{parent}>Variable<instance>{a}|{parent}>Property{a} ?$ValueIter{a}
+{parent}>Variable<instance>{ret}|{parent}>Property{ret} ?$ValueIter{ret}>{ret}
 
 ValueChildConstant : parent
-{parent}>Constant
+{parent}>Constant{ret}
 
 ValueChildEnum : parent
-{parent}>Enum{child} . {child}>Constant
+{parent}>Enum{child} . {child}>Constant{ret}
 
 ValueChildMethod : parent
-$MethodGeneralCall{parent}>{a} ?$ValueIter{a}
+$MethodInstCall{parent}>{ret} ?$ValueIter{ret}>{ret}
 
 
 
@@ -217,13 +210,15 @@ MethodCallBrackets
 ( ?_ ?$MethodCallParams ?_ )
 
 MethodCallParams
-?$RefModif $Value ?$MethodCallParamIter
+?$RefModif $Value|null ?$MethodCallParamIter
 
 MethodCallParamIter
-?_ , ?_ ?$RefModif $Value ?$MethodCallParamIter
+?_ , ?_ ?$RefModif $Value|null ?$MethodCallParamIter
 
 RefModif
 ref|out _
+
+
 
 Assignable
 $AssgInst{@}|$AssgStat{@}
