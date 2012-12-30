@@ -81,7 +81,7 @@ class UiReport : UiElement {
                                                                    1, err.message, -1);
         }
 #if DEBUG
-        stdout.printf (_("Errors: %d, Warnings: %d\n"), report.get_errors(), report.get_warnings());
+        stdout.printf (_("Errors: %i, Warnings: %i\n"), report.errors_list.size, report.warnings_list.size);
 #endif
 #if DEBUG
         stderr.printf (_("%s update finished!\n"), element_name);
@@ -121,8 +121,6 @@ public class ReportWrapper : Vala.Report {
 #endif
                                                message);
 #endif
-        warnings ++;
-
         if (source == null)
             return;
         //lock (errors_list) {
@@ -147,7 +145,6 @@ public class ReportWrapper : Vala.Report {
 #endif
                                                message);
 #endif
-         errors ++;
 
          if (source == null) {
              general_error = true;
