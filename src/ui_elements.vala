@@ -129,11 +129,14 @@ public abstract class UiElement {
      */
     private void update_deps() {
         /* First of all mark all dependencies as dirty (add it to queue). */
+
+        build();
         foreach (UiElement ui_element in ui_connections)
-            ui_element.add_deps();
+            ui_element.update();
+        //    ui_element.add_deps();
 
         /* Then run all updates. */
-        try {
+        /*try {
 #if VALA_LESS_0_18
             var tp = new ThreadPool<UiElement> ((worker) => {worker.build();},
 #else
@@ -155,7 +158,7 @@ public abstract class UiElement {
             q.clear();
         } catch (GLib.ThreadError e) {
             stderr.printf (_("Could not start new thread: %s\n"), e.message);
-        }
+        }*/
     }
 
     /* Abort all updates. */
