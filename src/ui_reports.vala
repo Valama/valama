@@ -109,10 +109,10 @@ public class ReportWrapper : Vala.Report {
         stdout.printf (_("Warning found: %s: %d(%d)-%d(%d): %s\n"),
                                                source.file.filename,
 #if VALA_LESS_0_18
-                                               source.first_line.line,
-                                               source.last_line.column,
-                                               source.last_line.line,
-                                               source.last_line.column,
+                                               source.first_line,
+                                               source.last_column,
+                                               source.last_line,
+                                               source.last_column,
 #else
                                                source.begin.line,
                                                source.end.column,
@@ -133,10 +133,10 @@ public class ReportWrapper : Vala.Report {
         stdout.printf (_("Error found: %s: %d(%d)-%d(%d): %s\n"),
                                                source.file.filename,
 #if VALA_LESS_0_18
-                                               source.first_line.line,
-                                               source.first_line.column,
-                                               source.last_line.line,
-                                               source.last_line.column,
+                                               source.first_line,
+                                               source.first_line,
+                                               source.last_line,
+                                               source.last_column,
 #else
                                                source.begin.line,
                                                source.begin.column,
