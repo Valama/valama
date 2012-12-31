@@ -117,15 +117,21 @@ namespace Guanako {
             get { return context.root; }
         }
 
-        public void add_packages (string[] package_names, bool auto_update) {
-            var deps = get_package_dependencies (packages.to_array());
+        public string[] add_packages (string[] package_names, bool auto_update) {
+            string[] missing_packages = new string[0];
+
+            var old_deps = get_package_dependencies (packages.to_array());
 
             var new_deps = package_names;
+            /* Collect all new dependencies coming with the new packages */
             foreach (string pkg in get_package_dependencies (package_names))
-                if (!(pkg in deps) && !(pkg in new_deps)) {
+                if (!(pkg in old_deps) && !(pkg in new_deps)) {
                     var vapi_path = context.get_vapi_path (pkg);
                     if (vapi_path == null) {
+#if DEBUG
                         stderr.printf(_("Warning: Vapi for package %s not found.\n"), pkg);
+#endif
+                        missing_packages += pkg;
                         continue;
                     }
 #if DEBUG
@@ -135,12 +141,14 @@ namespace Guanako {
                 }
 
             foreach (string package_name in package_names) {
-                /* Add .vapi even if not found. */
-                //FIXME: Send signal to let apps show a warning.
+                /* Add the new packages */
                 packages.add (package_name);
                 var vapi_path = context.get_vapi_path (package_name);
                 if (vapi_path == null) {
+#if DEBUG
                     stderr.printf(_("Warning: Vapi for package %s not found.\n"), package_name);
+#endif
+                    missing_packages += package_name;
                     continue;
                 }
 #if DEBUG
@@ -149,6 +157,7 @@ namespace Guanako {
                 context.add_external_package (package_name);
             }
 
+            /* Update completion info of all the new packages */
             if (auto_update)
                 foreach (string pkg in new_deps) {
                     var pkg_file = get_source_file (context.get_vapi_path (pkg));
@@ -156,6 +165,8 @@ namespace Guanako {
                         continue;
                     update_file (pkg_file);
                 }
+
+            return missing_packages;
         }
 
         SourceFile? get_source_file (string filename) {
@@ -169,9 +180,13 @@ namespace Guanako {
             packages.remove (package_name);
             var deps = get_package_dependencies (packages.to_array());
 
-            var unused = new string[]{package_name};
-            foreach (string pkg in get_package_dependencies (new string[] {package_name}))
-                if (!(pkg in deps))
+            var remove_candidates = get_package_dependencies (new string[] {package_name});
+            remove_candidates += package_name;
+
+            /* Collect all dependencies of package_name that are not required any more */
+            var unused = new string[0];
+            foreach (string pkg in remove_candidates)
+                if (!(pkg in deps) && !(pkg in packages))
                     unused += pkg;
 
             foreach (string pkg in unused) {

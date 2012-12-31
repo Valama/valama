@@ -21,6 +21,7 @@ using Vala;
 using GLib;
 using Gee;
 using Xml;
+using Gtk;
 
 public class ValamaProject {
     public ValamaProject (string project_file) throws LoadingError {
@@ -146,7 +147,10 @@ public class ValamaProject {
                         version_patch = int.parse (p->get_content());
                 }
         }
-        guanako_project.add_packages (packages, false);
+        string[] missing_packages = guanako_project.add_packages (packages, false);
+
+        if (missing_packages.length > 0)
+            ui_missing_packages_dialog(missing_packages);
 
         delete doc;
     }

@@ -200,7 +200,9 @@ public class ProjectBrowser : UiElement {
                 case 1:
                     var pkg = package_selection_dialog (project);
                     if (pkg != null) {
-                        project.guanako_project.add_packages (new string[] {pkg}, true);
+                        string[] missing_packages = project.guanako_project.add_packages (new string[] {pkg}, true);
+                        if (missing_packages.length > 0)
+                            ui_missing_packages_dialog(missing_packages);
                         update();
                     }
                     break;
