@@ -1,0 +1,10 @@
+This are the gentoo ebuids for building valama:
+valadoc-9999.ebuild
+valama-9999.ebuild
+
+Copy the content of the gentoo directory in your local portage overlay.
+Each time you issue each "emerge -v valama" the acual git repository git://github.com/Valama/valama.git
+is downloaded, compiled and istalled.
+
+The valadoc-9999.ebuild is a slightly modified version of:
+http://code.google.com/p/vala-overlay/source/browse/dev-util/valadoc/valadoc-9999.ebuild
