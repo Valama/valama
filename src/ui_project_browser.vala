@@ -153,9 +153,11 @@ public class ProjectBrowser : UiElement {
 
         /* TODO: Implement this with checkbutton. */
         var avail_packages = get_available_packages();
+        var proposed_packages = new string[0];
         foreach (string pkg in avail_packages) {
             if (pkg in project.guanako_project.packages)  //Ignore packages that are already selected
                 continue;
+            proposed_packages += pkg;
             TreeIter iter;
             listmodel.append (out iter);
             listmodel.set (iter, 0, pkg);
@@ -172,7 +174,7 @@ public class ProjectBrowser : UiElement {
             TreeModel mdl;
             var selected_rows = tree_view.get_selection().get_selected_rows (out mdl);
             foreach (TreePath path in selected_rows)
-                ret = avail_packages.nth_data (path.get_indices()[0]);
+                ret = proposed_packages[path.get_indices()[0]];
         }
         dlg.destroy();
         return ret;
