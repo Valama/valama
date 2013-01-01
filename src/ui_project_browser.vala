@@ -22,6 +22,9 @@ using Vala;
 using GLib;
 
 public class ProjectBrowser : UiElement {
+    private TreeView tree_view;
+    public Widget widget;
+
     public ProjectBrowser (ValamaProject? project = null) {
         if (project != null)
             this.project = project;
@@ -59,9 +62,6 @@ public class ProjectBrowser : UiElement {
         widget = vbox;
     }
 
-    TreeView tree_view;
-    public Widget widget;
-
     public signal void source_file_selected (SourceFile file);
 
     protected override void build() {
@@ -75,10 +75,11 @@ public class ProjectBrowser : UiElement {
         store.append (out iter_source_files, null);
         store.set (iter_source_files, 0, _("Sources"), -1);
 
+        var pfile = File.new_for_path (project.project_path);
         foreach (SourceFile sf in project.guanako_project.get_source_files()) {
             TreeIter iter_sf;
             store.append (out iter_sf, iter_source_files);
-            var name = sf.filename.substring (sf.filename.last_index_of("/") + 1);
+            var name = pfile.get_relative_path (File.new_for_path (sf.filename));
             store.set (iter_sf, 0, name, 1, "", -1);
         }
 
@@ -104,7 +105,7 @@ public class ProjectBrowser : UiElement {
 #endif
     }
 
-    /*
+    /**
      * Get Vala packages from filenames and sort them.
      */
     private static GLib.List<string>? get_available_packages() {
@@ -128,7 +129,7 @@ public class ProjectBrowser : UiElement {
         return list;
     }
 
-    /*
+    /**
      * Select Vala packages to add/remove to/from build system (with valac).
      */
     private static string? package_selection_dialog(ValamaProject project) {
@@ -224,8 +225,9 @@ public class ProjectBrowser : UiElement {
                         if (project.project_path + "/vapi/config.vapi" == source_file.filename) //Do not delete config.vapi
                             break;
                         if (ui_ask_warning (_("Do you want to delete this file?")) == ResponseType.YES) {
-                            if (current_source_file == source_file)  //TODO: Switch to file opened last.
-                                on_source_file_selected (project.guanako_project.get_source_files()[0]);
+                            var pfile = File.new_for_path (project.project_path);
+                            var fname = pfile.get_relative_path (File.new_for_path (source_file.filename));
+                            window_main.close_srcitem (fname);
                             try {
                                 File.new_for_path (source_file.filename).delete();
                                 project.guanako_project.remove_file (source_file);
