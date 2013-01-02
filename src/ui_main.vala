@@ -143,7 +143,7 @@ class MainWindow : Window {
             var box = new Box (Orientation.HORIZONTAL, 0);
             box.pack_end (this.srcdock);
 
-            var boxitem = new DockItem ("SourceArea",  "source area", DockItemBehavior.NORMAL);
+            var boxitem = new DockItem ("SourceView",  _("Source"), DockItemBehavior.NORMAL);
             boxitem.add (box);
             this.dock.add_item (boxitem, DockPlacement.TOP);
 
