@@ -123,6 +123,9 @@ set_target_properties("${project_name_lower}" PROPERTIES
     VERSION "${${project_name}_VERSION}"
     SOVERSION "${soversion}"
 )
+target_link_libraries("${project_name_lower}" ${PROJECT_LDFLAGS})
+message("ldflags: ${PROJECT_LDFLAGS}")
+add_definitions(${PROJECT_C_FLAGS})
 
 # Set common C-macros.
 add_definitions(-DPACKAGE_NAME="${project_name}")

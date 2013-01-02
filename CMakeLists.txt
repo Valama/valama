@@ -125,7 +125,10 @@ add_definitions(-DVALA_VERSION="${valashort_ver}")
 add_definitions(-DVALA_DATA_DIR="${vala_datadir}")
 
 include_directories("${PROJECT_BINARY_DIR}/guanako")
+
 add_executable("${project_name_lower}" ${VALA_C})
+target_link_libraries("${project_name_lower}" ${PROJECT_LDFLAGS})
+add_definitions(${PROJECT_C_FLAGS})
 target_link_libraries("${project_name_lower}" "guanako")
 
 
