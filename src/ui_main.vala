@@ -40,8 +40,8 @@ class MainWindow : Window {
         this.destroy.connect (Gtk.main_quit);
         this.title = _("Valama");
         this.hide_titlebar_when_maximized = true;
+        this.set_default_size (1200, 600);
         this.maximize();
-        //this.set_default_size (x,y);
 
         var vbox_main = new Box (Orientation.VERTICAL, 5);
         vbox_main.border_width = 10;
@@ -143,7 +143,14 @@ class MainWindow : Window {
             var box = new Box (Orientation.HORIZONTAL, 0);
             box.pack_end (this.srcdock);
 
-            var boxitem = new DockItem ("SourceArea",  "source area", DockItemBehavior.NORMAL);
+            /* Don't make source view dockable. */
+            var boxitem = new DockItem ("SourceView",  _("Source"),
+                                        DockItemBehavior.NO_GRIP |
+                                        DockItemBehavior.CANT_DOCK_TOP |
+                                        DockItemBehavior.CANT_DOCK_BOTTOM |
+                                        DockItemBehavior.CANT_DOCK_LEFT |
+                                        DockItemBehavior.CANT_DOCK_RIGHT |
+                                        DockItemBehavior.CANT_DOCK_CENTER);
             boxitem.add (box);
             this.dock.add_item (boxitem, DockPlacement.TOP);
 
@@ -157,7 +164,9 @@ class MainWindow : Window {
                     return;
 
                 if (!buffer_close (get_sourceview (item))) {
-                    //FIXME: Notebook tabs broken.
+                    /*
+                     * This will work properly with gdl-3.0 >= 3.6
+                     */
                     item.show_item();
                     var pa = item.parent;
                     if (pa is Switcher) {

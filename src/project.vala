@@ -281,6 +281,8 @@ public class ValamaProject {
 
     /**
      * Show dialog if {@link SourceView} wasn't saved yet.
+     *
+     * Return true to close buffer.
      */
     public bool close_buffer (SourceView view) {
         /*
