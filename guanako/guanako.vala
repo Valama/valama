@@ -31,9 +31,8 @@ namespace Guanako {
         public int replace_length;
     }
 
-
     public class project {
-        CodeContext context;
+        public CodeContext context { get; private set; }
         Vala.Parser parser;
         int glib_major = 2;  //TODO: Make this an option.
         int glib_minor = 32;

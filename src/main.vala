@@ -23,16 +23,16 @@ using Gdl;
 using Vala;
 using GLib;
 using Guanako;
-using Pango; // fonts
 
 static MainWindow window_main;
 
 static ValamaProject project;
-static SourceView view;
 
 static bool parsing = false;
 static MainLoop loop_update;
-static SourceFile current_source_file = null;
+
+static ReportWrapper report_wrapper;
+static UiReport wdg_report;
 
 public static int main (string[] args) {
     Intl.textdomain (Config.GETTEXT_PACKAGE);
@@ -54,7 +54,7 @@ public static int main (string[] args) {
     } catch (LoadingError e) {
         //FIXME: Handle this error (properly) instead of this pseudo hack
         //       (same as above).
-        stderr.printf (_("Couldn't load Valama project: %s"), e.message);
+        stderr.printf (_("Couldn't load Valama project: %s\n"), e.message);
         project = null;
         return 1;
     }
@@ -71,69 +71,11 @@ public static int main (string[] args) {
     ui_elements_pool.add (pbrw);
     //ui_elements_pool.add (smb_browser);  // dangerous (circulare deps)
 
-    var report_wrapper = new ReportWrapper();
+    report_wrapper = new ReportWrapper();
     project.guanako_project.set_report_wrapper (report_wrapper);
-    var wdg_report = new UiReport (report_wrapper);
+    wdg_report = new UiReport (report_wrapper);
     wdg_report.error_selected.connect (on_error_selected);
     ui_elements_pool.add (wdg_report);
-
-
-    /* Source view. */
-    view = new SourceView();
-    view.show_line_numbers = true;
-    view.insert_spaces_instead_of_tabs = true;
-    view.override_font(FontDescription.from_string ("Monospace 10"));
-    view.buffer.create_tag ("gray_bg", "background", "gray", null);
-    view.auto_indent = true;
-    view.indent_width = 4;
-
-    var bfr = (SourceBuffer) view.buffer;
-    bfr.set_highlight_syntax (true);
-    var langman = new SourceLanguageManager();
-    var lang = langman.get_language ("vala");
-    bfr.set_language (lang);
-
-
-    /* Completion provider. */
-    TestProvider tp = new TestProvider();
-    tp.priority = 1;
-    tp.name = _("Test Provider 1");
-
-    try {
-        view.completion.add_provider (tp);
-    } catch (GLib.Error e) {
-        stderr.printf (_("Could not load completion: %s"), e.message);
-        return 1;
-    }
-
-    view.buffer.changed.connect (() => {
-        if (!parsing) {
-            try {
-#if NOT_THREADED
-                Thread<void*> t = new Thread<void*>.try (_("Buffer update"), () => {
-#else
-                new Thread<void*>.try (_("Buffer update"), () => {
-#endif
-                    parsing = true;
-                    report_wrapper.clear();
-                    project.guanako_project.update_file (current_source_file, view.buffer.text);
-                    Idle.add (() => {
-                        wdg_report.update();
-                        parsing = false;
-                        if (loop_update.is_running())
-                            loop_update.quit();
-                        return false;
-                    });
-                    return null;
-                });
-#if NOT_THREADED
-                t.join();
-#endif
-            } catch (GLib.Error e) {
-                stderr.printf (_("Could not create thread to update buffer completion: %s"), e.message);
-            }
-        }
-    });
 
 
     /* Buttons. */
@@ -160,8 +102,7 @@ public static int main (string[] args) {
     window_main.add_button (btnSave);
     btnSave.set_tooltip_text (_("Save current file"));
     btnSave.clicked.connect (() => {
-        write_current_source_file(report_wrapper);
-        wdg_report.update();
+        write_current_source_file();
     });
 
     var btnBuild = new Gtk.ToolButton.from_stock (Stock.EXECUTE);
@@ -186,22 +127,18 @@ public static int main (string[] args) {
         ui_project_dialog (project);
     });
 
+    window_main.buffer_close.connect (project.close_buffer);
 
     /* Gdl elements. */
-    var scr_view = new ScrolledWindow (null, null);
-    scr_view.add (view);
+    var src_symbol = new ScrolledWindow (null, null);
+    src_symbol.add (smb_browser.widget);
 
-    var scr_symbol = new ScrolledWindow (null, null);
-    scr_symbol.add (smb_browser.widget);
+    var src_report = new ScrolledWindow (null, null);
+    src_report.add (wdg_report.widget);
 
-    var scr_report = new ScrolledWindow (null, null);
-    scr_report.add (wdg_report.widget);
-
-    window_main.add_item ("SourceView", _("Source view"), scr_view,
-                          Stock.EDIT,
-                          DockItemBehavior.LOCKED,
-                          DockPlacement.TOP);
-    window_main.add_item ("ReportWrapper", _("Report widget"), scr_report,
+    /* Init new empty buffer. */
+    window_main.add_srcitem (project.open_new_buffer());
+    window_main.add_item ("ReportWrapper", _("Report widget"), src_report,
                           Stock.INFO,
                           DockItemBehavior.CANT_CLOSE, //temporary solution until items can be added later
                           //DockItemBehavior.NORMAL,
@@ -210,7 +147,7 @@ public static int main (string[] args) {
                           Stock.FILE,
                           DockItemBehavior.CANT_CLOSE,
                           DockPlacement.LEFT);
-    window_main.add_item ("SymbolBrowser", _("Symbol browser"), scr_symbol,
+    window_main.add_item ("SymbolBrowser", _("Symbol browser"), src_symbol,
                           Stock.CONVERT,
                           DockItemBehavior.CANT_CLOSE, //temporary solution until items can be added later
                           //DockItemBehavior.NORMAL,
@@ -230,24 +167,24 @@ public static int main (string[] args) {
         try {
             f.make_directory_with_parents();
         } catch (GLib.Error e) {
-            stderr.printf (_("Couldn't create cache directory: %s"), e.message);
+            stderr.printf (_("Couldn't create cache directory: %s\n"), e.message);
         }
     window_main.save_layout (local_layout_filename);
     project.save();
     return 0;
 }
 
-static void on_auto_indent_button_clicked() {
-    string indented = Guanako.auto_indent_buffer (project.guanako_project, current_source_file);
-    current_source_file.content = indented;
-    view.buffer.text = indented;
-}
+// static void on_auto_indent_button_clicked() {
+//     string indented = Guanako.auto_indent_buffer (project.guanako_project, current_source_file);
+//     current_source_file.content = indented;
+//     project.get_current_buffer().text = indented;
+// }
 
 static void on_error_selected (ReportWrapper.Error err) {
     on_source_file_selected (err.source.file);
 
     TextIter start;
-    view.buffer.get_iter_at_line_offset (out start,
+    project.get_current_buffer().get_iter_at_line_offset (out start,
 #if VALA_LESS_0_18
                                          err.source.first_line - 1,
                                          err.source.first_column - 1);
@@ -256,7 +193,7 @@ static void on_error_selected (ReportWrapper.Error err) {
                                          err.source.begin.column - 1);
 #endif
     TextIter end;
-    view.buffer.get_iter_at_line_offset (out end,
+    project.get_current_buffer().get_iter_at_line_offset (out end,
 #if VALA_LESS_0_18
                                          err.source.last_line - 1,
                                          err.source.last_column - 1);
@@ -264,46 +201,69 @@ static void on_error_selected (ReportWrapper.Error err) {
                                          err.source.end.line - 1,
                                          err.source.end.column - 1);
 #endif
-    view.buffer.select_range (start, end);
+    project.get_current_buffer().select_range (start, end);
 }
 
 static void on_build_button_clicked (ReportWrapper report_wrapper) {
-    write_current_source_file (report_wrapper);
+    write_all_source_files();
     project.build();
 }
 
 static void on_source_file_selected (SourceFile file){
-    if (current_source_file == file)
+    var pfile = File.new_for_path (project.project_path);
+    var fname = pfile.get_relative_path (File.new_for_path (file.filename));
+
+    if (window_main.current_srcfocus == fname)
         return;
-    current_source_file = file;
 
     string txt = "";
     try {
         FileUtils.get_contents (file.filename, out txt);
-        view.buffer.text = txt;
+        var view = project.open_new_buffer (txt, file.filename);
+        if (view == null)
+            window_main.focus_src (fname);
+        else
+            window_main.add_srcitem (view, fname);
     } catch (GLib.FileError e) {
-        stderr.printf (_("Could not load file: %s"), e.message);
+        stderr.printf (_("Could not load file: %s\n"), e.message);
     }
 }
 
-void write_current_source_file (ReportWrapper report_wrapper) {
-    var file = File.new_for_path (current_source_file.filename);
+void write_all_source_files() {
+    foreach (string file in project.files)
+        write_current_source_file (file);
+}
+
+/**
+ * Save current selected source file (by filename).
+ * Optionally save file given as parameter.
+ */
+void write_current_source_file (string filename = "") {
+    if (window_main.current_srcfocus == null) {
+        stdout.printf (_("No file selected to save.\n"));
+        return;
+    }
+
+    File file;
+    if (filename == "")
+        file = File.new_for_path (project.project_path + "/" + window_main.current_srcfocus);
+    else
+        file = File.new_for_path (filename);
+
     /* TODO: First parameter can be used to check if file has changed.
      *       The second parameter can enable/disable backup file. */
     try {
         var fos = file.replace (null, false, FileCreateFlags.REPLACE_DESTINATION);
         var dos = new DataOutputStream (fos);
-        dos.put_string (view.buffer.text);
+        dos.put_string (project.get_current_buffer().text);
         dos.flush();
         dos.close();
+        stdout.printf (_("File saved: %s\n"),  file.get_path());
     } catch (GLib.IOError e) {
-        stderr.printf (_("Could not update source file: %s"), e.message);
+        stderr.printf (_("Could not update source file: %s\n"), e.message);
     } catch (GLib.Error e) {
-        stderr.printf (_("Could not open file to write: %s"), e.message);
+        stderr.printf (_("Could not open file to write: %s\n"), e.message);
     }
-
-    report_wrapper.clear();
-    project.guanako_project.update_file (current_source_file, view.buffer.text);
 }
 
 
@@ -330,11 +290,11 @@ class TestProvider : Gtk.SourceCompletionProvider, Object {
                                                   "constant"})
                 map_icons[type] = new Gdk.Pixbuf.from_file (Config.PIXMAP_DIR + "/element-" + type + "-16.png");
         } catch (Gdk.PixbufError e) {
-            stderr.printf (_("Could not load pixmap: %s"), e.message);
+            stderr.printf (_("Could not load pixmap: %s\n"), e.message);
         } catch (GLib.FileError e) {
-            stderr.printf (_("Could not open pximaps file: %s"), e.message);
+            stderr.printf (_("Could not open pximaps file: %s\n"), e.message);
         } catch (GLib.Error e) {
-            stderr.printf (_("Pixmap loading failed: %s"), e.message);
+            stderr.printf (_("Pixmap loading failed: %s\n"), e.message);
         }
     }
 
@@ -351,6 +311,7 @@ class TestProvider : Gtk.SourceCompletionProvider, Object {
     public bool match (Gtk.SourceCompletionContext context) {
         return true;
     }
+
     GLib.List<Gtk.SourceCompletionItem> props;
     Symbol[] props_symbols;
     Gee.HashMap<Gtk.SourceCompletionProposal, CompletionProposal> map_proposals;
@@ -359,15 +320,15 @@ class TestProvider : Gtk.SourceCompletionProvider, Object {
         props = new GLib.List<Gtk.SourceCompletionItem>();
         props_symbols = new Symbol[0];
 
-        var mark = view.buffer.get_insert();
+        var mark = project.get_current_buffer().get_insert();
         TextIter iter;
-        view.buffer.get_iter_at_mark (out iter, mark);
+        project.get_current_buffer().get_iter_at_mark (out iter, mark);
         var line = iter.get_line() + 1;
         var col = iter.get_line_offset();
 
         TextIter iter_start;
-        view.buffer.get_iter_at_line (out iter_start, line - 1);
-        var current_line = view.buffer.get_text (iter_start, iter, false);
+        project.get_current_buffer().get_iter_at_line (out iter_start, line - 1);
+        var current_line = project.get_current_buffer().get_text (iter_start, iter, false);
 
         string[] splt = current_line.split_set (" .(,");
         string last = "";
@@ -378,7 +339,13 @@ class TestProvider : Gtk.SourceCompletionProvider, Object {
             loop_update.run();
 
         map_proposals = new Gee.HashMap<Gtk.SourceCompletionProposal, CompletionProposal>();
-        var proposals = project.guanako_project.propose_symbols (current_source_file, line, col, current_line);
+        var proposals = project.guanako_project.propose_symbols (
+                                new SourceFile (project.guanako_project.context,
+                                                SourceFileType.SOURCE,
+                                                window_main.current_srcfocus),
+                                line,
+                                col,
+                                current_line);
         foreach (CompletionProposal proposal in proposals) {
             if (proposal.symbol.name != null) {
 
@@ -402,15 +369,13 @@ class TestProvider : Gtk.SourceCompletionProvider, Object {
         context.add_proposals (this, props, true);
     }
 
-    public unowned Gdk.Pixbuf? get_icon()
-    {
-        if (this.icon == null)
-        {
+    public unowned Gdk.Pixbuf? get_icon() {
+        if (this.icon == null) {
             Gtk.IconTheme theme = Gtk.IconTheme.get_default();
             try {
                 this.icon = theme.load_icon (Gtk.Stock.DIALOG_INFO, 16, 0);
             } catch (GLib.Error e) {
-                stderr.printf (_("Could not load icon theme: %s"), e.message);
+                stderr.printf (_("Could not load icon theme: %s\n"), e.message);
             }
         }
         return this.icon;
@@ -423,8 +388,8 @@ class TestProvider : Gtk.SourceCompletionProvider, Object {
         TextIter start = iter;
         start.backward_chars (prop.replace_length);
 
-        view.buffer.delete (ref start, ref iter);
-        view.buffer.insert (ref start, prop.symbol.name, prop.symbol.name.length);
+        project.get_current_buffer().delete (ref start, ref iter);
+        project.get_current_buffer().insert (ref start, prop.symbol.name, prop.symbol.name.length);
         return true;
     }
 

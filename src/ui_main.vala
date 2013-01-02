@@ -20,6 +20,7 @@
 using GLib;
 using Gtk;
 using Gdl;
+using Gee;
 
 /**
  * Main window class. Setup {@link Gdl.Dock} and {@link Gdl.DockBar} stuff.
@@ -28,6 +29,12 @@ class MainWindow : Window {
     private Dock dock;
     private DockLayout layout;
     private Toolbar toolbar;
+
+    private Dock srcdock;
+    private DockLayout srclayout;
+    private ArrayList<DockItem> srcitems;
+
+    public string current_srcfocus { get; private set; }
 
     public MainWindow() {
         this.destroy.connect (Gtk.main_quit);
@@ -42,21 +49,173 @@ class MainWindow : Window {
 
 
         /* Menubar. */
-        toolbar = new Toolbar();
+        this.toolbar = new Toolbar();
         vbox_main.pack_start (toolbar, false, true);
 
         /* Gdl dock stuff. */
-        dock = new Dock();
+        this.dock = new Dock();
 
-        this.layout = new DockLayout (dock);
+        this.layout = new DockLayout (this.dock);
 
-        var dockbar = new DockBar (dock);
+        var dockbar = new DockBar (this.dock);
         dockbar.set_style (DockBarStyle.TEXT);
 
         var box = new Box (Orientation.HORIZONTAL, 5);
         vbox_main.pack_start (box, true, true, 0);
         box.pack_start (dockbar, false, false, 0);
         box.pack_end (dock, true, true, 0);
+
+        this.srcitems = new ArrayList<DockItem>();
+    }
+
+    /**
+     * Focus source view {@link Gdl.DockItem} in {@link Gdl.Dock} and select
+     * recursively all {@link Gdl.DockNotebook} tabs.
+     */
+    public void focus_src (string filename) {
+        foreach (var srcitem in srcitems) {
+            if (srcitem.long_name == filename) {
+                /* Hack arround gdl_dock_notebook with gtk_notebook. */
+                var pa = srcitem.parent;
+                // pa.grab_focus();
+                /* If something strange happens (pa == null) break the loop. */
+                while (!(pa is Dock) && (pa != null)) {
+                    //stdout.printf("item: %s\n", pa.name);
+                    if (pa is Switcher) {
+                        var nbook = (Notebook) pa;
+                        nbook.page = nbook.page_num (srcitem);
+                    }
+                    pa = pa.parent;
+                    // pa.grab_focus();
+                }
+                return;
+            }
+        }
+    }
+
+    /**
+     * Connect to this signal to interrupt hiding (closing) of
+     * {@link Gdl.DockItem} with {@link Gtk.SourceView}.
+     *
+     * Return false to interrupt or return true proceed.
+     */
+    public signal bool buffer_close (SourceView view);
+
+    /**
+     * Hide (close) {@link Gdl.DockItem} with {@link Gtk.SourceView} by
+     * filename.
+     */
+    public void close_srcitem (string filename) {
+        foreach (var srcitem in srcitems)
+            if (srcitem.long_name == filename) {
+                srcitems.remove (srcitem);
+                srcitem.hide_item();
+            }
+    }
+
+    /**
+     * Add new source view item to main {@link Gdl.Dock}.
+     */
+    public void add_srcitem (SourceView view, string filename = "") {
+        if (filename == "")
+            filename = _("New document");
+
+        var src_view = new ScrolledWindow (null, null);
+        src_view.add (view);
+        var item = new DockItem.with_stock ("SourceView " + srcitems.size.to_string(),
+                                            filename,
+                                            Stock.EDIT,
+                                            DockItemBehavior.LOCKED);
+        item.add (src_view);
+
+        /* Set focus on tab change. */
+        item.selected.connect (() => {
+            this.current_srcfocus = filename;
+        });
+        /* Set focus on click. */
+        view.grab_focus.connect (() => {
+            this.current_srcfocus = filename;
+        });
+
+        if (srcitems.size == 0) {
+            this.srcdock = new Dock();
+            this.srclayout = new DockLayout (this.srcdock);
+            var box = new Box (Orientation.HORIZONTAL, 0);
+            box.pack_end (this.srcdock);
+
+            var boxitem = new DockItem ("SourceArea",  "source area", DockItemBehavior.NORMAL);
+            boxitem.add (box);
+            this.dock.add_item (boxitem, DockPlacement.TOP);
+
+            this.srcdock.add_item (item, DockPlacement.RIGHT);
+            this.srcdock.master.switcher_style = SwitcherStyle.TABS;
+        } else {
+            /* Handle dock item closing. */
+            item.hide.connect (() => {
+                /* Suppress dialog by removing item first forom srcitems list.  */
+                if (!(item in srcitems))
+                    return;
+
+                if (!buffer_close (get_sourceview (item))) {
+                    //FIXME: Notebook tabs broken.
+                    item.show_item();
+                    var pa = item.parent;
+                    if (pa is Switcher) {
+                        var nbook = (Notebook) pa;
+                        nbook.set_tab_pos (PositionType.TOP);
+                        foreach (var child in nbook.get_children())
+                            nbook.set_tab_reorderable (child, true);
+                    }
+                    return;
+                }
+                srcitems.remove (item);
+                if (srcitems.size == 1)
+                    srcitems[0].show_item();
+            });
+
+            item.behavior = DockItemBehavior.CANT_ICONIFY;
+
+            /*
+             * Hide default source view if it is empty.
+             * Dock new items to first dock item.
+             *
+             * NOTE: Custom unsafed views are ignored (even if empty).
+             */
+            //TODO: Test whether docking to first or last added item is more intuitive.
+            if (srcitems.size == 1) {
+                this.srcitems[0].dock (item, DockPlacement.CENTER, 0);
+
+                var view_widget = get_sourceview (srcitems[0]);
+                if (view_widget.buffer.text == "")
+                    srcitems[0].hide_item();
+            } else
+                this.srcitems[1].dock (item, DockPlacement.CENTER, 0);
+
+            var pa = item.parent;
+            if (pa is Switcher) {
+                var nbook = (Notebook) pa;
+                nbook.set_tab_pos (PositionType.TOP);
+                foreach (var child in nbook.get_children())
+                    nbook.set_tab_reorderable (child, true);
+            }
+        }
+        srcitems.add (item);
+        view.show();
+        src_view.show();
+        item.show();
+    }
+
+    /**
+     * Get {@link Gtk.SourceView} from within {@link Gdl.DockItem}.
+     *
+     */
+    /*
+     * Be careful. This have to be exactly the same objects as
+     * the objects at creation of new source views.
+     */
+    private SourceView get_sourceview (DockItem item) {
+        var scroll_widget = (ScrolledWindow) item.child;
+        return (SourceView) scroll_widget.get_children().nth_data (0);
     }
 
     /**
