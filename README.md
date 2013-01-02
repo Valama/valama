@@ -14,7 +14,7 @@ The next gen Vala IDE.
  * gee-1.0
  * libvala-0.18 (>= 0.17) or libvala-0.16 (deprecated)
  * gdk-3.0
- * gdl-3.0
+ * gdl-3.0 (>= 3.6 is recommended)
  * gtk+-3.0
  * gtksourceview-3.0
  * libxml-2.0
@@ -24,7 +24,7 @@ On Debian based system install following packages:
 
     sudo apt-get install build-essential valac-0.18 libvala-0.18-dev cmake pkg-config libgtk-3-dev libgtksourceview-3.0-dev libgee-dev libxml2-dev libgdl-3-dev
 
-If `valac-0.18` and `libvala-0.18-dev` aren't available, replace them with `valac-0.16` and `libvala-0.16-dev`.
+If `valac-0.18` and `libvala-0.18-dev` aren't available, replace them with `valac-0.16` and `libvala-0.16-dev` and edit `cmake/project.cmake` manually.
 
 ### Building ###
  1. `mkdir build && cd build`
@@ -32,7 +32,7 @@ If `valac-0.18` and `libvala-0.18-dev` aren't available, replace them with `vala
  1. `make -j2`
 
 ### Installation ###
- 1. `sudo make install` (real installation is required for syntax definitions)
+ 1. `sudo make install` (real installation is required for syntax definitions and templates)
 
 # Credits #
 
