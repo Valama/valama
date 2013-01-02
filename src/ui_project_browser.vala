@@ -37,6 +37,15 @@ public class ProjectBrowser : UiElement {
                                                  "text",
                                                  0,
                                                  null);
+        tree_view.row_activated.connect ((path) => {
+            int[] indices = path.get_indices();
+            if (indices.length > 1) {
+                if (indices[0] == 0)
+                    source_file_selected (project.guanako_project.get_source_files()[indices[1]]);
+            }
+        });
+        tree_view.show_expanders = false;
+        tree_view.level_indentation = 20;
         build();
 
         var scrw = new ScrolledWindow (null, null);
@@ -83,14 +92,6 @@ public class ProjectBrowser : UiElement {
             store.set (iter_sf, 0, name, 1, "", -1);
         }
 
-        tree_view.row_activated.connect ((path) => {
-            int[] indices = path.get_indices();
-            if (indices.length > 1) {
-                if (indices[0] == 0)
-                    source_file_selected (project.guanako_project.get_source_files()[indices[1]]);
-            }
-        });
-
         TreeIter iter_packages;
         store.append (out iter_packages, null);
         store.set (iter_packages, 0, _("Packages"), -1);
@@ -100,6 +101,7 @@ public class ProjectBrowser : UiElement {
             store.append (out iter_sf, iter_packages);
             store.set (iter_sf, 0, pkg, 1, "", -1);
         }
+        tree_view.expand_all();
 #if DEBUG
         stderr.printf (_("%s update finished!\n"), element_name);
 #endif
