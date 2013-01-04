@@ -155,8 +155,11 @@ public static int main (string[] args) {
     window_main.show_all();
 
     /* Load default layout. Either local one or system wide. */
-    string local_layout_filename = Environment.get_user_cache_dir() + "/valama/layout.xml";
-    string system_layout_filename = Config.PACKAGE_DATA_DIR + "/layout.xml";
+    string local_layout_filename = join_paths ({Environment.get_user_cache_dir(),
+                                                "valama",
+                                                "layout.xml"});
+    string system_layout_filename = join_paths ({Config.PACKAGE_DATA_DIR,
+                                                "layout.xml"});
     if (!window_main.load_layout (local_layout_filename))
         window_main.load_layout (system_layout_filename);
 
@@ -246,7 +249,8 @@ void write_current_source_file (string filename = "") {
 
     File file;
     if (filename == "")
-        file = File.new_for_path (project.project_path + "/" + window_main.current_srcfocus);
+        file = File.new_for_path (join_paths ({project.project_path,
+                                               window_main.current_srcfocus}));
     else
         file = File.new_for_path (filename);
 
@@ -288,11 +292,12 @@ class TestProvider : Gtk.SourceCompletionProvider, Object {
                                                   "struct",
                                                   "signal",
                                                   "constant"})
-                map_icons[type] = new Gdk.Pixbuf.from_file (Config.PIXMAP_DIR + "/element-" + type + "-16.png");
+                map_icons[type] = new Gdk.Pixbuf.from_file (join_paths ({Config.PIXMAP_DIR,
+                                                                         "element-" + type + "-16.png"}));
         } catch (Gdk.PixbufError e) {
             stderr.printf (_("Could not load pixmap: %s\n"), e.message);
         } catch (GLib.FileError e) {
-            stderr.printf (_("Could not open pximaps file: %s\n"), e.message);
+            stderr.printf (_("Could not open pixmaps file: %s\n"), e.message);
         } catch (GLib.Error e) {
             stderr.printf (_("Pixmap loading failed: %s\n"), e.message);
         }

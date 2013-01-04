@@ -136,10 +136,10 @@ public ValamaProject? ui_create_project_dialog() {
         //TODO: Add progress bar and at least warn on overwrite (don't skip
         //      without warning).
         new FileTransfer (template.path,
-                          target_folder + "/" + proj_name,
+                          join_paths ({target_folder, proj_name}),
                           CopyRecursiveFlags.SKIP_EXISTENT).copy();
-        new FileTransfer (target_folder + "/" + proj_name + "/template.vlp",
-                          target_folder + "/" + proj_name + "/" + proj_name +".vlp",
+        new FileTransfer (join_paths ({target_folder, proj_name, "template.vlp"}),
+                          join_paths ({target_folder, proj_name, proj_name + ".vlp"}),
                           CopyRecursiveFlags.SKIP_EXISTENT).move();
     } catch (GLib.Error e) {
         stderr.printf (_("Could not copy templates for new project: %s\n"), e.message);
@@ -148,7 +148,7 @@ public ValamaProject? ui_create_project_dialog() {
 
     ValamaProject new_proj = null;
     try {
-        new_proj = new ValamaProject (@"$target_folder/$proj_name/$proj_name.vlp");
+        new_proj = new ValamaProject (join_paths ({target_folder, proj_name, proj_name + ".vlp"}));
         new_proj.project_name = proj_name;
     } catch (LoadingError e) {
         stderr.printf (_("Couln't load new project: %s\n"), e.message);

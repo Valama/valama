@@ -28,7 +28,7 @@ public class ValamaProject {
     public Guanako.project guanako_project { get; private set; }
     public string project_path { get; private set; }
     public string project_file { get; private set; }
-    public string[] project_source_dirs { get; private set; default = {"/src"}; }
+    public string[] project_source_dirs { get; private set; default = {"src"}; }
     public string[] project_file_types { get; private set; default = {".vala", ".vapi"}; }
     public int version_major;
     public int version_minor;
@@ -61,11 +61,13 @@ public class ValamaProject {
             FileInfo file_info;
 
             foreach (string source_dir in project_source_dirs) {
-                directory = File.new_for_path (project_path + source_dir);
+                directory = File.new_for_path (join_paths ({project_path, source_dir}));
                 enumerator = directory.enumerate_children (FileAttribute.STANDARD_NAME, 0);
 
                 while ((file_info = enumerator.next_file()) != null) {
-                    string file = project_path + source_dir + "/" + file_info.get_name();
+                    string file = join_paths ({project_path,
+                                               source_dir,
+                                               file_info.get_name()});
 
                     foreach (string suffix in project_file_types) {
                         if (file.has_suffix (suffix)){
@@ -77,8 +79,8 @@ public class ValamaProject {
                     }
                 }
             }
-            if (FileUtils.test(project_path + "/vapi/config.vapi", FileTest.EXISTS))
-                guanako_project.add_source_file_by_name(project_path + "/vapi/config.vapi");
+            if (FileUtils.test (join_paths ({project_path, "vapi", "config.vapi"}), FileTest.EXISTS))
+                guanako_project.add_source_file_by_name (join_paths ({project_path, "vapi", "config.vapi"}));
         } catch (GLib.Error e) {
             stderr.printf(_("Could not open file: %s\n"), e.message);
         }
@@ -102,10 +104,11 @@ public class ValamaProject {
                 pkg_list += pkg + "\n";
             pkg_list += ")";
 
-            var file_stream = File.new_for_path (project_path +
-                                    "/cmake/project.cmake").replace(null,
-                                                                    false,
-                                                                    FileCreateFlags.REPLACE_DESTINATION);
+            var file_stream = File.new_for_path (join_paths ({project_path,
+                                                             "cmake",
+                                                             "project.cmake"})).replace(null,
+                                                                                        false,
+                                                                                        FileCreateFlags.REPLACE_DESTINATION);
             var data_stream = new DataOutputStream (file_stream);
             data_stream.put_string ("set(project_name " + project_name + ")\n");
             data_stream.put_string (@"set($(project_name)_VERSION $version_major.$version_minor.$version_patch)\n");

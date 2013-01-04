@@ -112,8 +112,8 @@ public class ProjectBrowser : UiElement {
      */
     private static GLib.List<string>? get_available_packages() {
         GLib.List<string> list = null;
-        string[] paths = new string[] {Config.VALA_DATA_DIR + "-" + Config.VALA_VERSION + "/vapi",
-                                       Config.VALA_DATA_DIR + "/vapi"};
+        string[] paths = new string[] {join_paths ({Config.VALA_DATA_DIR + "-" + Config.VALA_VERSION, "vapi"}),
+                                       join_paths ({Config.VALA_DATA_DIR + "vapi"})};
         try {
             foreach (string path in paths) {
                 var enumerator = File.new_for_path (path).enumerate_children (FileAttribute.STANDARD_NAME, 0);
@@ -228,7 +228,7 @@ public class ProjectBrowser : UiElement {
                 switch (indices[0]) {
                     case 0:
                         var source_file = project.guanako_project.get_source_files()[indices[1]];
-                        if (project.project_path + "/vapi/config.vapi" == source_file.filename) //Do not delete config.vapi
+                        if (join_paths ({project.project_path, "vapi", "config.vapi"}) == source_file.filename) //Do not delete config.vapi
                             break;
                         if (ui_ask_warning (_("Do you want to delete this file?")) == ResponseType.YES) {
                             var pfile = File.new_for_path (project.project_path);
