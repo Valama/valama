@@ -194,7 +194,7 @@ public void ui_project_dialog (ValamaProject? project) {
                 break;
             default:
                 stderr.printf (_("Unexpected enum value: %s: %d\n"), "project_dialog - dlg.response.connect", response_id);
-                stderr.printf (_("Please report a bug!"));
+                stderr.printf (_("Please report a bug!\n"));
                 dlg.destroy();
                 break;
         }

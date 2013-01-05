@@ -25,7 +25,7 @@ using Gee;
 /**
  * Main window class. Setup {@link Gdl.Dock} and {@link Gdl.DockBar} stuff.
  */
-class MainWindow : Window {
+public class MainWindow : Window {
     private Dock dock;
     private DockLayout layout;
     private Toolbar toolbar;
@@ -34,7 +34,36 @@ class MainWindow : Window {
     private DockLayout srclayout;
     private ArrayList<DockItem> srcitems;
 
-    public string current_srcfocus { get; private set; }
+    private  string _current_srcfocus;
+    public string current_srcfocus {
+        get {
+            return _current_srcfocus;
+        }
+        private set {
+#if DEBUG
+            stdout.printf (_("Change current focus: %s\n"), value);
+#endif
+            this.current_srcid = get_sourceview_id (value);
+            _current_srcfocus = value;
+        }
+    }
+    private int _current_srcid = -1;
+    private int current_srcid {
+        get {
+            return _current_srcid;
+        }
+        private set {
+            this.current_srcview = get_sourceview (this.srcitems[value]);
+            _current_srcid = value;
+        }
+    }
+    public SourceView current_srcview { get; private set; }
+    public TextBuffer current_srcbuffer {
+        get {
+            return current_srcview.buffer;
+        }
+    }
+
 
     public MainWindow() {
         this.destroy.connect (Gtk.main_quit);
@@ -140,6 +169,13 @@ class MainWindow : Window {
             this.current_srcfocus = filename;
         });
 
+        /*
+         * Set notebook tab properly if needed.
+         */
+        item.dock.connect (() => {
+            set_notebook_tabs (item);
+        });
+
         if (srcitems.size == 0) {
             this.srcdock = new Dock();
             this.srclayout = new DockLayout (this.srcdock);
@@ -149,10 +185,6 @@ class MainWindow : Window {
             /* Don't make source view dockable. */
             var boxitem = new DockItem ("SourceView",  _("Source"),
                                         DockItemBehavior.NO_GRIP |
-                                        DockItemBehavior.CANT_DOCK_TOP |
-                                        DockItemBehavior.CANT_DOCK_BOTTOM |
-                                        DockItemBehavior.CANT_DOCK_LEFT |
-                                        DockItemBehavior.CANT_DOCK_RIGHT |
                                         DockItemBehavior.CANT_DOCK_CENTER);
             boxitem.add (box);
             this.dock.add_item (boxitem, DockPlacement.TOP);
@@ -171,13 +203,7 @@ class MainWindow : Window {
                      * This will work properly with gdl-3.0 >= 3.6
                      */
                     item.show_item();
-                    var pa = item.parent;
-                    if (pa is Switcher) {
-                        var nbook = (Notebook) pa;
-                        nbook.set_tab_pos (PositionType.TOP);
-                        foreach (var child in nbook.get_children())
-                            nbook.set_tab_reorderable (child, true);
-                    }
+                    set_notebook_tabs (item);
                     return;
                 }
                 srcitems.remove (item);
@@ -189,33 +215,42 @@ class MainWindow : Window {
 
             /*
              * Hide default source view if it is empty.
-             * Dock new items to first dock item.
+             * Dock new items to focused dock item.
              *
              * NOTE: Custom unsafed views are ignored (even if empty).
              */
-            //TODO: Test whether docking to first or last added item is more intuitive.
+            var id = get_sourceview_id (this.current_srcfocus);
+            if (id != -1)
+                this.srcitems[id].dock (item, DockPlacement.CENTER, 0);
+            else {
+                stderr.printf (_("Source view id out of range.\n"));
+                stderr.printf (_("Please report a bug!\n"));
+                return;
+            }
             if (srcitems.size == 1) {
-                this.srcitems[0].dock (item, DockPlacement.CENTER, 0);
-
                 var view_widget = get_sourceview (srcitems[0]);
                 //TODO: Use dirty flag of buffer.
                 if (view_widget.buffer.text == "")
                     srcitems[0].hide_item();
-            } else
-                this.srcitems[1].dock (item, DockPlacement.CENTER, 0);
-
-            var pa = item.parent;
-            if (pa is Switcher) {
-                var nbook = (Notebook) pa;
-                nbook.set_tab_pos (PositionType.TOP);
-                foreach (var child in nbook.get_children())
-                    nbook.set_tab_reorderable (child, true);
             }
         }
         srcitems.add (item);
         view.show();
         src_view.show();
-        item.show();
+        item.show_item();
+    }
+
+    /**
+     * Set up {@link Gtk.Notebook} tab properties.
+     */
+    private void set_notebook_tabs (DockItem item) {
+        var pa = item.parent;
+        if (pa is Switcher) {
+            var nbook = (Notebook) pa;
+            nbook.set_tab_pos (PositionType.TOP);
+            foreach (var child in nbook.get_children())
+                nbook.set_tab_reorderable (child, true);
+        }
     }
 
     /**
@@ -229,6 +264,18 @@ class MainWindow : Window {
     private SourceView get_sourceview (DockItem item) {
         var scroll_widget = (ScrolledWindow) item.child;
         return (SourceView) scroll_widget.get_children().nth_data (0);
+    }
+
+    /**
+     * Get id of {@link Gtk.SourceView} by filename.
+     *
+     * If file wasn't found return -1.
+     */
+    private int get_sourceview_id (string filename) {
+        for (int i = 0; i < srcitems.size; ++i)
+            if (srcitems[i].long_name == filename)
+                return i;
+        return -1;
     }
 
     /**

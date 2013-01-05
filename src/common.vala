@@ -471,7 +471,7 @@ public class FileTransfer : Object {
                 break;
             default:
                 stderr.printf (_("Unexpected enum value: %s: %d\n"), "common - RecursiveAction", action);
-                stderr.printf (_("Please report a bug!"));
+                stderr.printf (_("Please report a bug!\n"));
                 break;
         }
     }

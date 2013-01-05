@@ -249,7 +249,7 @@ public class ProjectBrowser : UiElement {
                         break;
                     default:
                         stderr.printf (_("Unexpected enum value: %s: %d\n"), "btn_rem.clicked.connect", indices[0]);
-                        stderr.printf (_("Please report a bug!"));
+                        stderr.printf (_("Please report a bug!\n"));
                         break;
                 }
             }

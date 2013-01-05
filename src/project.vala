@@ -37,6 +37,7 @@ public class ValamaProject {
 
     public Gee.ArrayList<string> files { get; private set; }
 
+    //TODO: Do we need an __ordered__ list? Gtk has already focus handling.
     private Gee.LinkedList<ViewMap?> vieworder;
     private TestProvider comp_provider;
 
@@ -107,11 +108,12 @@ public class ValamaProject {
                 pkg_list += pkg + "\n";
             pkg_list += ")";
 
-            var file_stream = File.new_for_path (join_paths ({project_path,
-                                                             "cmake",
-                                                             "project.cmake"})).replace(null,
-                                                                                        false,
-                                                                                        FileCreateFlags.REPLACE_DESTINATION);
+            var file_stream = File.new_for_path (
+                                    join_paths ({project_path,
+                                                "cmake",
+                                                "project.cmake"})).replace(null,
+                                                                           false,
+                                                                           FileCreateFlags.REPLACE_DESTINATION);
             var data_stream = new DataOutputStream (file_stream);
             data_stream.put_string ("set(project_name " + project_name + ")\n");
             data_stream.put_string (@"set($(project_name)_VERSION $version_major.$version_minor.$version_patch)\n");
@@ -274,7 +276,7 @@ public class ValamaProject {
             }
         });
 
-        ViewMap vmap = {view, filename, ++vmap_id};
+        var vmap = new ViewMap (view, filename);
         vieworder.offer_head (vmap);
 #if DEBUG
         stdout.printf (_("Buffer loaded.\n"));
@@ -283,7 +285,7 @@ public class ValamaProject {
     }
 
     /**
-     * Show dialog if {@link SourceView} wasn't saved yet.
+     * Show dialog if {@link Gtk.SourceView} wasn't saved yet.
      *
      * Return true to close buffer.
      */
@@ -296,24 +298,21 @@ public class ValamaProject {
     }
 
     /**
-     * Get current {@link TextBuffer}.
+     * Hold filename -> view mappings for {@link vieworder}.
      */
-    //TODO: Do we need this? Gtk has already focus handling.
-    public TextBuffer? get_current_buffer() {
-        return vieworder.first().view.buffer;
-    }
+    private class ViewMap {
+        public ViewMap (SourceView view, string filename) {
+            this.view = view;
+            this.filename = filename;
+        }
 
-    /**
-     * Hold filename -> view mappings for vieworder.
-     */
-    private int vmap_id = -1;
-    private struct ViewMap {
-        SourceView view;
-        string filename;
+        public SourceView view;
+        public string filename;
         /**
          * Use unique id to support multiple views for same file.
          */
-        int id;
+        // private static int size = 0;
+        // public int id = size++;
     }
 }
 

@@ -180,14 +180,14 @@ public static int main (string[] args) {
 // static void on_auto_indent_button_clicked() {
 //     string indented = Guanako.auto_indent_buffer (project.guanako_project, current_source_file);
 //     current_source_file.content = indented;
-//     project.get_current_buffer().text = indented;
+//     window_main.current_srcbuffer.text = indented;
 // }
 
 static void on_error_selected (ReportWrapper.Error err) {
     on_source_file_selected (err.source.file);
 
     TextIter start;
-    project.get_current_buffer().get_iter_at_line_offset (out start,
+    window_main.current_srcbuffer.get_iter_at_line_offset (out start,
 #if VALA_LESS_0_18
                                          err.source.first_line - 1,
                                          err.source.first_column - 1);
@@ -196,7 +196,7 @@ static void on_error_selected (ReportWrapper.Error err) {
                                          err.source.begin.column - 1);
 #endif
     TextIter end;
-    project.get_current_buffer().get_iter_at_line_offset (out end,
+    window_main.current_srcbuffer.get_iter_at_line_offset (out end,
 #if VALA_LESS_0_18
                                          err.source.last_line - 1,
                                          err.source.last_column - 1);
@@ -204,7 +204,7 @@ static void on_error_selected (ReportWrapper.Error err) {
                                          err.source.end.line - 1,
                                          err.source.end.column - 1);
 #endif
-    project.get_current_buffer().select_range (start, end);
+    window_main.current_srcbuffer.select_range (start, end);
 }
 
 static void on_build_button_clicked (ReportWrapper report_wrapper) {
@@ -259,7 +259,7 @@ void write_current_source_file (string filename = "") {
     try {
         var fos = file.replace (null, false, FileCreateFlags.REPLACE_DESTINATION);
         var dos = new DataOutputStream (fos);
-        dos.put_string (project.get_current_buffer().text);
+        dos.put_string (window_main.current_srcbuffer.text);
         dos.flush();
         dos.close();
         stdout.printf (_("File saved: %s\n"),  file.get_path());
@@ -325,15 +325,15 @@ class TestProvider : Gtk.SourceCompletionProvider, Object {
         props = new GLib.List<Gtk.SourceCompletionItem>();
         props_symbols = new Symbol[0];
 
-        var mark = project.get_current_buffer().get_insert();
+        var mark = window_main.current_srcbuffer.get_insert();
         TextIter iter;
-        project.get_current_buffer().get_iter_at_mark (out iter, mark);
+        window_main.current_srcbuffer.get_iter_at_mark (out iter, mark);
         var line = iter.get_line() + 1;
         var col = iter.get_line_offset();
 
         TextIter iter_start;
-        project.get_current_buffer().get_iter_at_line (out iter_start, line - 1);
-        var current_line = project.get_current_buffer().get_text (iter_start, iter, false);
+        window_main.current_srcbuffer.get_iter_at_line (out iter_start, line - 1);
+        var current_line = window_main.current_srcbuffer.get_text (iter_start, iter, false);
 
         string[] splt = current_line.split_set (" .(,");
         string last = "";
@@ -393,8 +393,8 @@ class TestProvider : Gtk.SourceCompletionProvider, Object {
         TextIter start = iter;
         start.backward_chars (prop.replace_length);
 
-        project.get_current_buffer().delete (ref start, ref iter);
-        project.get_current_buffer().insert (ref start, prop.symbol.name, prop.symbol.name.length);
+        window_main.current_srcbuffer.delete (ref start, ref iter);
+        window_main.current_srcbuffer.insert (ref start, prop.symbol.name, prop.symbol.name.length);
         return true;
     }
 
