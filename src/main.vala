@@ -345,9 +345,9 @@ class TestProvider : Gtk.SourceCompletionProvider, Object {
 
         map_proposals = new Gee.HashMap<Gtk.SourceCompletionProposal, CompletionProposal>();
         var proposals = project.guanako_project.propose_symbols (
-                                new SourceFile (project.guanako_project.context,
-                                                SourceFileType.SOURCE,
-                                                window_main.current_srcfocus),
+                                project.guanako_project.get_source_file_by_name (
+                                        join_paths ({project.project_path,
+                                                     window_main.current_srcfocus})),
                                 line,
                                 col,
                                 current_line);

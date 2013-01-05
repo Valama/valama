@@ -37,7 +37,7 @@ public class ValamaProject {
 
     public Gee.ArrayList<string> files { get; private set; }
 
-    private Gee.LinkedList<Gee.HashMap<string, SourceView>> vieworder;
+    private Gee.LinkedList<ViewMap?> vieworder;
     private TestProvider comp_provider;
 
     public ValamaProject (string project_file) throws LoadingError {
@@ -79,15 +79,18 @@ public class ValamaProject {
                     }
                 }
             }
-            if (FileUtils.test (join_paths ({project_path, "vapi", "config.vapi"}), FileTest.EXISTS))
-                guanako_project.add_source_file_by_name (join_paths ({project_path, "vapi", "config.vapi"}));
+            if (FileUtils.test (join_paths ({project_path, "vapi", "config.vapi"}),
+                                            FileTest.EXISTS))
+                guanako_project.add_source_file_by_name (join_paths ({project_path,
+                                                                     "vapi",
+                                                                     "config.vapi"}));
         } catch (GLib.Error e) {
             stderr.printf(_("Could not open file: %s\n"), e.message);
         }
 
         guanako_project.update();
 
-        vieworder = new Gee.LinkedList<Gee.HashMap<string, SourceView>>();
+        vieworder = new Gee.LinkedList<ViewMap?>();
 
         /* Completion provider. */
         this.comp_provider = new TestProvider();
@@ -205,9 +208,7 @@ public class ValamaProject {
 #endif
         SourceView? view = null;
         foreach (var viewelement in vieworder) {
-            var it = viewelement.map_iterator();
-            it.first();
-            if (it.get_key() == filename) {
+            if (viewelement.filename == filename) {
                 vieworder.remove (viewelement);
                 vieworder.offer_head (viewelement);
                 return null;
@@ -273,9 +274,8 @@ public class ValamaProject {
             }
         });
 
-        var hmap = new Gee.HashMap<string, SourceView>();
-        hmap.set (filename, view);
-        vieworder.offer_head (hmap);
+        ViewMap vmap = {view, filename, ++vmap_id};
+        vieworder.offer_head (vmap);
 #if DEBUG
         stdout.printf (_("Buffer loaded.\n"));
 #endif
@@ -299,10 +299,21 @@ public class ValamaProject {
      * Get current {@link TextBuffer}.
      */
     //TODO: Do we need this? Gtk has already focus handling.
-    public TextBuffer get_current_buffer() {
-        var it = vieworder.first().map_iterator();
-        it.first();
-        return it.get_value().buffer;
+    public TextBuffer? get_current_buffer() {
+        return vieworder.first().view.buffer;
+    }
+
+    /**
+     * Hold filename -> view mappings for vieworder.
+     */
+    private int vmap_id = -1;
+    private struct ViewMap {
+        SourceView view;
+        string filename;
+        /**
+         * Use unique id to support multiple views for same file.
+         */
+        int id;
     }
 }
 

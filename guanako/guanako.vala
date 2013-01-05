@@ -57,6 +57,13 @@ namespace Guanako {
             return true;
         }
 
+        public SourceFile? get_source_file_by_name (string filename) {
+            foreach (SourceFile file in context.get_source_files())
+                if (file.filename == filename)
+                    return file;
+            return null;
+        }
+
         public SourceFile? add_source_file_by_name (string filename) {
             var source_file = new SourceFile (context,
                                               SourceFileType.SOURCE,
@@ -263,7 +270,7 @@ namespace Guanako {
 
 
             // TreeSet with custom sorting function
-            Gee.TreeSet<CompletionProposal> ret = new Gee.TreeSet<CompletionProposal>((a,b)=>{
+            Gee.TreeSet<CompletionProposal> ret = new Gee.TreeSet<CompletionProposal> ((a,b) => {
                 var name_a = ((CompletionProposal)a).symbol.name;
                 var name_b = ((CompletionProposal)b).symbol.name;
                 var name_a_case = name_a.casefold();

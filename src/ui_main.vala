@@ -122,6 +122,9 @@ class MainWindow : Window {
 
         var src_view = new ScrolledWindow (null, null);
         src_view.add (view);
+        /*
+         * NOTE: Keep this in sync with get_sourceview method.
+         */
         var item = new DockItem.with_stock ("SourceView " + srcitems.size.to_string(),
                                             filename,
                                             Stock.EDIT,
@@ -195,6 +198,7 @@ class MainWindow : Window {
                 this.srcitems[0].dock (item, DockPlacement.CENTER, 0);
 
                 var view_widget = get_sourceview (srcitems[0]);
+                //TODO: Use dirty flag of buffer.
                 if (view_widget.buffer.text == "")
                     srcitems[0].hide_item();
             } else
@@ -219,8 +223,8 @@ class MainWindow : Window {
      *
      */
     /*
-     * Be careful. This have to be exactly the same objects as
-     * the objects at creation of new source views.
+     * NOTE: Be careful. This have to be exactly the same objects as the
+     *       objects at creation of new source views.
      */
     private SourceView get_sourceview (DockItem item) {
         var scroll_widget = (ScrolledWindow) item.child;
