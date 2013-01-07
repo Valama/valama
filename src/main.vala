@@ -347,11 +347,6 @@ class TestProvider : Gtk.SourceCompletionProvider, Object {
         window_main.current_srcbuffer.get_iter_at_line (out iter_start, line - 1);
         var current_line = window_main.current_srcbuffer.get_text (iter_start, iter, false);
 
-        string[] splt = current_line.split_set (" .(,");
-        string last = "";
-        if (splt.length > 0)
-            last = splt[splt.length - 1];
-
         if (parsing)
             loop_update.run();
 
