@@ -9,7 +9,7 @@
 		<package>gobject-2.0</package>
 		<package>glib-2.0</package>
 		<package>gio-2.0</package>
-		<package>gee-0.8</package>
+		<package>gee-1.0</package>
 		<package>libvala-0.18</package>
 		<package>gdk-3.0</package>
 		<package>gtk+-3.0</package>
