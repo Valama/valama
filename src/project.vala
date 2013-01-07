@@ -283,7 +283,7 @@ public class ValamaProject {
     }
 
     /**
-     * Show dialog if {@link SourceView} wasn't saved yet.
+     * Show dialog if {@link Gtk.SourceView} wasn't saved yet.
      *
      * Return true to close buffer.
      */
@@ -296,13 +296,24 @@ public class ValamaProject {
     }
 
     /**
-     * Get current {@link TextBuffer}.
+     * Get current {@link Gtk.TextBuffer}.
      */
-    //TODO: Do we need this? Gtk has already focus handling.
-    public TextBuffer get_current_buffer() {
-        var it = vieworder.first().map_iterator();
-        it.first();
-        return it.get_value().buffer;
+    public TextBuffer? get_current_buffer() {
+        return get_buffer_by_file (window_main.current_srcfocus);
+    }
+
+    /**
+     * Get {@link Gtk.TextBuffer} by file name.
+     */
+    //FIXME: Dirty hack. Quickfix of #25.
+    public TextBuffer? get_buffer_by_file (string filename) {
+        foreach (var element in vieworder) {
+            var it = element.map_iterator();
+            it.next();
+            if (it.get_key() == filename)
+                return it.get_value().buffer;
+        }
+        return null;
     }
 }
 

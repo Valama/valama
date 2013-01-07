@@ -168,7 +168,7 @@ namespace Guanako {
             return missing_packages;
         }
 
-        SourceFile? get_source_file (string filename) {
+        public SourceFile? get_source_file (string filename) {
             foreach (SourceFile file in context.get_source_files())
                 if (file.filename == filename)
                     return file;
