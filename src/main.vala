@@ -232,34 +232,47 @@ static void on_source_file_selected (SourceFile file){
     }
 }
 
+/**
+ * Save currently opened source file.
+ */
+void write_current_source_file() {
+    if (window_main.current_srcfocus == null) {
+        stdout.printf (_("No file selected to save.\n"));
+        return;
+    }
+
+    write_source_file (join_paths ({project.project_path,
+                                    window_main.current_srcfocus}),
+                       window_main.current_srcbuffer.text);
+}
+
+/**
+ * Save all opened source files.
+ */
+//TODO: Only save modified source files.
 void write_all_source_files() {
-    foreach (string file in project.files)
-        write_current_source_file (file);
+    foreach (string filename in project.files)
+        write_source_file (filename, project.get_buffer_by_file (filename).text);
 }
 
 /**
  * Save current selected source file (by filename).
  * Optionally save file given as parameter.
  */
-void write_current_source_file (string filename = "") {
-    if (window_main.current_srcfocus == null) {
-        stdout.printf (_("No file selected to save.\n"));
+void write_source_file (string filename, string? buffertext) {
+    if (buffertext == null) {
+        stdout.printf (_("Nothing to save for '%s'.\n"), filename);
         return;
     }
 
-    File file;
-    if (filename == "")
-        file = File.new_for_path (join_paths ({project.project_path,
-                                               window_main.current_srcfocus}));
-    else
-        file = File.new_for_path (filename);
+    var file = File.new_for_path (filename);
 
     /* TODO: First parameter can be used to check if file has changed.
      *       The second parameter can enable/disable backup file. */
     try {
         var fos = file.replace (null, false, FileCreateFlags.REPLACE_DESTINATION);
         var dos = new DataOutputStream (fos);
-        dos.put_string (window_main.current_srcbuffer.text);
+        dos.put_string (buffertext);
         dos.flush();
         dos.close();
         stdout.printf (_("File saved: %s\n"),  file.get_path());

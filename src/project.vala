@@ -314,6 +314,17 @@ public class ValamaProject {
         // private static int size = 0;
         // public int id = size++;
     }
+
+    /**
+     * Get {@link Gtk.TextBuffer} by file name.
+     */
+    public TextBuffer? get_buffer_by_file (string filename) {
+        foreach (var map in vieworder) {
+            if (map.filename == filename)
+                return (TextBuffer) map.view.buffer;
+        }
+        return null;
+    }
 }
 
 errordomain LoadingError {
