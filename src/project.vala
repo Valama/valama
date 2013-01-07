@@ -325,6 +325,19 @@ public class ValamaProject {
         }
         return null;
     }
+
+    /**
+     * Provide delegate to perform action on opened views. See
+     * {@link foreach_view}.
+     */
+    public delegate void ViewCallback (string filename, string? buffertext);
+    /**
+     * Perform {@link ViewCallback} action for each opened {@link SourceView}.
+     */
+    public void foreach_view (ViewCallback action) {
+        foreach (var map in vieworder)
+            action (map.filename, map.view.buffer.text);
+    }
 }
 
 errordomain LoadingError {

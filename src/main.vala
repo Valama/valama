@@ -251,8 +251,7 @@ void write_current_source_file() {
  */
 //TODO: Only save modified source files.
 void write_all_source_files() {
-    foreach (string filename in project.files)
-        write_source_file (filename, project.get_buffer_by_file (filename).text);
+    project.foreach_view (write_source_file);
 }
 
 /**
