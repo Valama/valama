@@ -25,6 +25,8 @@ public class ProjectBrowser : UiElement {
     private TreeView tree_view;
     public Widget widget;
 
+    private Gee.ArrayList<TreePath> tree_view_expanded;
+
     public ProjectBrowser (ValamaProject? project = null) {
         if (project != null)
             this.project = project;
@@ -44,8 +46,7 @@ public class ProjectBrowser : UiElement {
                     source_file_selected (project.guanako_project.get_source_files()[indices[1]]);
             }
         });
-        tree_view.show_expanders = false;
-        tree_view.level_indentation = 20;
+        tree_view_expanded = new Gee.ArrayList<TreePath>();
         build();
 
         var scrw = new ScrolledWindow (null, null);
@@ -101,7 +102,18 @@ public class ProjectBrowser : UiElement {
             store.append (out iter_sf, iter_packages);
             store.set (iter_sf, 0, pkg, 1, "", -1);
         }
-        tree_view.expand_all();
+
+        tree_view.row_collapsed.connect ((iter, path) => {
+            if (path in tree_view_expanded)
+                tree_view_expanded.remove (path);
+        });
+        tree_view.row_expanded.connect ((iter, path) => {
+            if (!(path in tree_view_expanded))
+                tree_view_expanded.add (path);
+        });
+
+        foreach (var path in tree_view_expanded)
+            tree_view.expand_to_path (path);
 #if DEBUG
         stderr.printf (_("%s update finished!\n"), element_name);
 #endif

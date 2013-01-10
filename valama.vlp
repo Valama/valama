@@ -18,4 +18,23 @@
 		<package>libxml-2.0</package>
 		<package>guanako</package>
 	</packages>
+	<source-directories>
+		<directory>src</directory>
+	</source-directories>
+	<source-files/>
+	<file-types>
+		<type>.vapi</type>
+		<type>.vala</type>
+	</file-types>
+	<buildsystem-directories>
+		<directory>cmake</directory>
+	</buildsystem-directories>
+	<buildsystem-files>
+		<file>CMakeLists.txt</file>
+		<file>po/CMakeLists.txt</file>
+		<file>data/CMakeLists.txt</file>
+	</buildsystem-files>
+	<buildsystem-file-types>
+		<type>.cmake</type>
+	</buildsystem-file-types>
 </project>

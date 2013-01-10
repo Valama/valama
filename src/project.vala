@@ -29,7 +29,11 @@ public class ValamaProject {
     public string project_path { get; private set; }
     public string project_file { get; private set; }
     public string[] project_source_dirs { get; private set; default = {"src"}; }
+    public string[] project_source_files { get; private set; }
     public string[] project_file_types { get; private set; default = {".vala", ".vapi"}; }
+    public string[] project_buildsystem_dirs { get; private set; default = {"cmake"}; }
+    public string[] project_buildsystem_files { get; private set; default = {"CMakeLists.txt"}; }
+    public string[] project_buildsystem_file_types { get; private set; default = {".cmake"}; }
     public int version_major;
     public int version_minor;
     public int version_patch;
@@ -151,29 +155,79 @@ public class ValamaProject {
         }
 
         var packages = new string[0];
+        var source_dirs = new string[0];
+        var source_files = new string[0];
+        var file_types = new string[0];
+        var buildsystem_dirs = new string[0];
+        var buildsystem_files = new string[0];
+        var buildsystem_file_types = new string[0];
         for (Xml.Node* i = root_node->children; i != null; i = i->next) {
             if (i->type != ElementType.ELEMENT_NODE)
                 continue;
-            if (i->name == "name")
-                project_name = i->get_content();
-            if (i->name == "packages")
-                for (Xml.Node* p = i->children; p != null; p = p->next)
-                    if (p->name == "package")
-                        packages += p->get_content();
-            if (i->name == "version")
-                for (Xml.Node* p = i->children; p != null; p = p->next) {
-                    if (p->name == "major")
-                        version_major = int.parse (p->get_content());
-                    else if (p->name == "minor")
-                        version_minor = int.parse (p->get_content());
-                    else if (p->name == "patch")
-                        version_patch = int.parse (p->get_content());
-                }
+            switch (i->name) {
+                case "name":
+                    project_name = i->get_content();
+                    break;
+                case "packages":
+                    for (Xml.Node* p = i->children; p != null; p = p->next)
+                        if (p->name == "package")
+                            packages += p->get_content();
+                    break;
+                case "version":
+                    for (Xml.Node* p = i->children; p != null; p = p->next) {
+                        if (p->name == "major")
+                            version_major = int.parse (p->get_content());
+                        else if (p->name == "minor")
+                            version_minor = int.parse (p->get_content());
+                        else if (p->name == "patch")
+                            version_patch = int.parse (p->get_content());
+                    }
+                    break;
+                case "source-directories":
+                    for (Xml.Node* p = i-> children; p != null; p = p->next)
+                        if (p->name == "directory")
+                            source_dirs += p->get_content();
+                    break;
+                case "source-files":
+                    for (Xml.Node* p = i-> children; p != null; p = p->next)
+                        if (p->name == "file")
+                            source_files += p->get_content();
+                    break;
+                case "file-types":
+                    for (Xml.Node* p = i-> children; p != null; p = p->next)
+                        if (p->name == "type")
+                            file_types += p->get_content();
+                    break;
+                case "buildsystem-directories":
+                    for (Xml.Node* p = i-> children; p != null; p = p->next)
+                        if (p->name == "directory")
+                            buildsystem_dirs += p->get_content();
+                    break;
+                case "buildsystem-files":
+                    for (Xml.Node* p = i-> children; p != null; p = p->next)
+                        if (p->name == "file")
+                            buildsystem_files += p->get_content();
+                    break;
+                case "buildsystem-file-types":
+                    for (Xml.Node* p = i-> children; p != null; p = p->next)
+                        if (p->name == "type")
+                            buildsystem_file_types += p->get_content();
+                    break;
+                default:
+                    stderr.printf ("Warning: Unknown configuration file value: %s", i->name);
+                    break;
+            }
         }
         string[] missing_packages = guanako_project.add_packages (packages, false);
+        project_source_dirs = source_dirs;
+        project_source_files = source_files;
+        project_file_types = file_types;
+        project_buildsystem_dirs = buildsystem_dirs;
+        project_buildsystem_files = buildsystem_files;
+        project_buildsystem_file_types = buildsystem_file_types;
 
         if (missing_packages.length > 0)
-            ui_missing_packages_dialog(missing_packages);
+            ui_missing_packages_dialog (missing_packages);
 
         delete doc;
     }
@@ -196,6 +250,37 @@ public class ValamaProject {
         foreach (string pkg in guanako_project.packages)
             writer.write_element ("package", pkg);
         writer.end_element();
+
+        writer.start_element ("source-directories");
+        foreach (string directory in project_source_dirs)
+            writer.write_element ("directory", directory);
+        writer.end_element();
+
+        writer.start_element ("source-files");
+        foreach (string directory in project_source_files)
+            writer.write_element ("file", directory);
+        writer.end_element();
+
+        writer.start_element ("file-types");
+        foreach (string type in project_file_types)
+            writer.write_element ("type", type);
+        writer.end_element();
+
+        writer.start_element ("buildsystem-directories");
+        foreach (string directory in project_buildsystem_dirs)
+            writer.write_element ("directory", directory);
+        writer.end_element();
+
+        writer.start_element ("buildsystem-files");
+        foreach (string directory in project_buildsystem_files)
+            writer.write_element ("file", directory);
+        writer.end_element();
+
+        writer.start_element ("buildsystem-file-types");
+        foreach (string type in project_buildsystem_file_types)
+            writer.write_element ("type", type);
+        writer.end_element();
+
         writer.end_element();
     }
 
