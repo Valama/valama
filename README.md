@@ -40,7 +40,13 @@ If you want to use `gee-0.8` instead of `gee-1.0`, change `cmake/project.cmake` 
 ## Packaging files for distributions ##
 To build and install Valama for your distriution look at the [packaging](https://github.com/Valama/valama/tree/packaging) branch. If you don't find your distribution there, you are welcome to contribute your packagig files to this branch (and put you work under GPL-3+).
 
+## License ##
+Valama is distributed under the terms of the GNU General Public License version 3 or later and published by:
+ * Linus Seelinger
+ * Dominique Lasserre
 
-# Credits #
+For a full list of all contributors see [here](https://github.com/Valama/valama/graphs/contributors) and take a look at `AUTHORS` file.
+
+## Credits ##
 
 element-\* icons from Anjuta IDE (www.anjuta.org, GPL2 licensed)
