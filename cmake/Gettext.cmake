@@ -221,55 +221,55 @@ if(XGETTEXT_FOUND)
         OUTPUT
           "pot_file"
         COMMAND
-          ${XGETTEXT_EXECUTABLE} ${xgettext_options} "-o" "${potfile}" ${src_list}
+          ${XGETTEXT_EXECUTABLE} ${xgettext_options} "-o" "${CMAKE_CURRENT_BINARY_DIR}/${potfile}" ${src_list}
         DEPENDS
           ${src_list_abs}
           ${glade_list_abs}
         WORKING_DIRECTORY
-          "${CMAKE_CURRENT_BINARY_DIR}"
+          "${CMAKE_CURRENT_SOURCE_DIR}"
       )
 
       if(ARGS_SRCFILES AND ARGS_GLADEFILES)
         add_custom_target(pot_file
           COMMAND
-            "${XGETTEXT_EXECUTABLE}" ${xgettext_options} "-o" "_source.pot" ${src_list_abs}
+            "${XGETTEXT_EXECUTABLE}" ${xgettext_options} "-o" "${CMAKE_CURRENT_BINARY_DIR}/_source.pot" ${src_list}
           COMMAND
-            "${XGETTEXT_EXECUTABLE}" "--language=Glade" "--omit-header" "-o" "_glade.pot" ${glade_list}
+            "${XGETTEXT_EXECUTABLE}" "--language=Glade" "--omit-header" "-o" "${CMAKE_CURRENT_BINARY_DIR}/_glade.pot" ${glade_list}
           COMMAND
-            "${GETTEXT_MSGCAT_EXECUTABLE}" "-o" "${potfile}" "--use-first" "_source.pot" "_glade.pot"
+            "${GETTEXT_MSGCAT_EXECUTABLE}" "-o" "${potfile}" "--use-first" "${CMAKE_CURRENT_BINARY_DIR}/_source.pot" "${CMAKE_CURRENT_BINARY_DIR}/_glade.pot"
           DEPENDS
             ${src_list_abs}
             ${glade_list_abs}
           WORKING_DIRECTORY
-            "${CMAKE_CURRENT_BINARY_DIR}"
+            "${CMAKE_CURRENT_SOURCE_DIR}"
           COMMENT
             "Extract translateable messages to ${potfile}"
         )
       elseif(ARGS_SRCFILES)
         add_custom_target(pot_file
           COMMAND
-            "${XGETTEXT_EXECUTABLE}" ${xgettext_options} "-o" "_source.pot" ${src_list_abs}
+            "${XGETTEXT_EXECUTABLE}" ${xgettext_options} "-o" "${CMAKE_CURRENT_BINARY_DIR}/_source.pot" ${src_list}
           COMMAND
-            "${GETTEXT_MSGCAT_EXECUTABLE}" "-o" "${potfile}" "--use-first" "_source.pot"
+            "${GETTEXT_MSGCAT_EXECUTABLE}" "-o" "${potfile}" "--use-first" "${CMAKE_CURRENT_BINARY_DIR}/_source.pot"
           DEPENDS
             ${src_list_abs}
             ${glade_list_abs}
           WORKING_DIRECTORY
-            "${CMAKE_CURRENT_BINARY_DIR}"
+            "${CMAKE_CURRENT_SOURCE_DIR}"
           COMMENT
             "Extract translateable messages to ${potfile}"
         )
       else()
         add_custom_target(pot_file
           COMMAND
-            "${XGETTEXT_EXECUTABLE}" "--language=Glade" "--omit-header" "-o" "_glade.pot" ${glade_list}
+            "${XGETTEXT_EXECUTABLE}" "--language=Glade" "--omit-header" "-o" "${CMAKE_CURRENT_BINARY_DIR}/_glade.pot" ${glade_list}
           COMMAND
-            "${GETTEXT_MSGCAT_EXECUTABLE}" "-o" "${potfile}" "--use-first" "_glade.pot"
+            "${GETTEXT_MSGCAT_EXECUTABLE}" "-o" "${potfile}" "--use-first" "${CMAKE_CURRENT_BINARY_DIR}/_glade.pot"
           DEPENDS
             ${src_list_abs}
             ${glade_list_abs}
           WORKING_DIRECTORY
-            "${CMAKE_CURRENT_BINARY_DIR}"
+            "${CMAKE_CURRENT_SOURCE_DIR}"
           COMMENT
             "Extract translateable messages to ${potfile}"
         )
