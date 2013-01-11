@@ -1,3 +1,6 @@
+#
+# cmake/vala/UseVala.cmake
+#
 ##
 # Compile vala files to their c equivalents for further processing.
 #

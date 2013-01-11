@@ -1,3 +1,6 @@
+#
+# cmake/vala/FindVala.cmake
+#
 ##
 # Find module for the Vala compiler (valac)
 #

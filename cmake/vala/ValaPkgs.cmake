@@ -1,6 +1,6 @@
 #
-# cmake/vala/vala-pkgs.cmake
-# Copyright (C) 2012, Dominique Lasserre <lasserre.d@gmail.com>
+# cmake/vala/ValaPkgs.cmake
+# Copyright (C) 2012, 2013, Valama development team
 #
 # Valama is free software: you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the

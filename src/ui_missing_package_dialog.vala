@@ -1,7 +1,6 @@
 /*
- * src/ui_project_dialog.vala
- * Copyright (C) 2012, Linus Seelinger <S.Linus@gmx.de>
- *               2012, Dominique Lasserre <lasserre.d@gmail.com>
+ * src/ui_missing_package_dialog.vala
+ * Copyright (C) 2012, 2013, Valama development team
  *
  * Valama is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -30,7 +29,7 @@ public void ui_missing_packages_dialog(string[] missing_packages){
                                        null);
     dlg_missing_packages.resizable = false;
 
-    var box_main = new VBox(false, 0);
+    var box_main = new Box(Orientation.VERTICAL, 0);
     string dlg = _("The following vala packages are not available on your system:\n");
     foreach (string pkg in missing_packages)
         dlg += pkg + "\n";
