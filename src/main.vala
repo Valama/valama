@@ -63,8 +63,7 @@ public static int main (string[] args) {
     /* Ui elements. */
     var ui_elements_pool = new UiElementPool();
     var pbrw = new ProjectBrowser (project);
-    pbrw.source_file_selected.connect (on_source_file_selected);
-    pbrw.data_file_selected.connect (on_data_file_selected);
+    pbrw.file_selected.connect (on_file_selected);
 
     var smb_browser = new SymbolBrowser();
     pbrw.connect (smb_browser);
@@ -93,7 +92,7 @@ public static int main (string[] args) {
         var source_file = ui_create_file_dialog (project);
         if (source_file != null) {
             project.guanako_project.add_source_file (source_file);
-            on_source_file_selected (source_file);
+            on_file_selected (source_file.filename);
             pbrw.update();
         }
     });
@@ -184,7 +183,7 @@ public static int main (string[] args) {
 // }
 
 static void on_error_selected (ReportWrapper.Error err) {
-    on_source_file_selected (err.source.file);
+    on_file_selected (err.source.file.filename);
 
     TextIter start;
     window_main.current_srcbuffer.get_iter_at_line_offset (out start,
@@ -212,7 +211,7 @@ static void on_build_button_clicked (ReportWrapper report_wrapper) {
     project.build();
 }
 
-static void on_data_file_selected (string filename){
+static void on_file_selected (string filename){
     var pfile = File.new_for_path (project.project_path);
     var fname = pfile.get_relative_path (File.new_for_path (filename));
 
@@ -223,26 +222,6 @@ static void on_data_file_selected (string filename){
     try {
         FileUtils.get_contents (filename, out txt);
         var view = project.open_new_buffer (txt, filename);
-        if (view == null)
-            window_main.focus_src (fname);
-        else
-            window_main.add_srcitem (view, fname);
-    } catch (GLib.FileError e) {
-        stderr.printf (_("Could not load file: %s\n"), e.message);
-    }
-}
-
-static void on_source_file_selected (SourceFile file){
-    var pfile = File.new_for_path (project.project_path);
-    var fname = pfile.get_relative_path (File.new_for_path (file.filename));
-
-    if (window_main.current_srcfocus == fname)
-        return;
-
-    string txt = "";
-    try {
-        FileUtils.get_contents (file.filename, out txt);
-        var view = project.open_new_buffer (txt, file.filename);
         if (view == null)
             window_main.focus_src (fname);
         else

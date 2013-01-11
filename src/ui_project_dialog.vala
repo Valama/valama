@@ -77,7 +77,7 @@ public void ui_load_project(UiElementPool ui_elements_pool) {
             project = new_project;
             foreach (UiElement element in ui_elements_pool)
                 element.update (project);
-            on_source_file_selected (project.guanako_project.get_source_files()[0]);
+            on_file_selected (project.guanako_project.get_source_files()[0].filename);
             return;
         } else {
             stdout.printf (_("Skip already loaded project: %s\n"), new_filename);

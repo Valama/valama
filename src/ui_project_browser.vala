@@ -43,9 +43,9 @@ public class ProjectBrowser : UiElement {
             int[] indices = path.get_indices();
             if (indices.length > 1) {
                 if (indices[0] == 0)
-                    source_file_selected (project.guanako_project.get_source_files()[indices[1]]);
+                    file_selected (project.guanako_project.get_source_files()[indices[1]].filename);
                 else if (indices[0] == 1)
-                    data_file_selected (project.b_files[indices[1]]);
+                    file_selected (project.b_files[indices[1]]);
             }
         });
         tree_view_expanded = new Gee.ArrayList<TreePath>();
@@ -74,8 +74,7 @@ public class ProjectBrowser : UiElement {
         widget = vbox;
     }
 
-    public signal void source_file_selected (SourceFile file);
-    public signal void data_file_selected (string filename);
+    public signal void file_selected (string filename);
 
     protected override void build() {
 #if DEBUG
@@ -224,7 +223,7 @@ public class ProjectBrowser : UiElement {
                     if (source_file != null) {
                         //TODO: Check if already loaded.
                         project.guanako_project.add_source_file (source_file);
-                        on_source_file_selected (source_file);
+                        on_file_selected (source_file.filename);
                         update();
                     }
                     break;
