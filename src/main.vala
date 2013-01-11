@@ -64,6 +64,7 @@ public static int main (string[] args) {
     var ui_elements_pool = new UiElementPool();
     var pbrw = new ProjectBrowser (project);
     pbrw.source_file_selected.connect (on_source_file_selected);
+    pbrw.data_file_selected.connect (on_data_file_selected);
 
     var smb_browser = new SymbolBrowser();
     pbrw.connect (smb_browser);
@@ -209,6 +210,26 @@ static void on_error_selected (ReportWrapper.Error err) {
 static void on_build_button_clicked (ReportWrapper report_wrapper) {
     write_all_source_files();
     project.build();
+}
+
+static void on_data_file_selected (string filename){
+    var pfile = File.new_for_path (project.project_path);
+    var fname = pfile.get_relative_path (File.new_for_path (filename));
+
+    if (window_main.current_srcfocus == fname)
+        return;
+
+    string txt = "";
+    try {
+        FileUtils.get_contents (filename, out txt);
+        var view = project.open_new_buffer (txt, filename);
+        if (view == null)
+            window_main.focus_src (fname);
+        else
+            window_main.add_srcitem (view, fname);
+    } catch (GLib.FileError e) {
+        stderr.printf (_("Could not load file: %s\n"), e.message);
+    }
 }
 
 static void on_source_file_selected (SourceFile file){

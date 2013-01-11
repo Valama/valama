@@ -39,11 +39,13 @@ public class ProjectBrowser : UiElement {
                                                  "text",
                                                  0,
                                                  null);
-        tree_view.row_activated.connect ((path) => {
+        tree_view.row_activated.connect ((path, column) => {
             int[] indices = path.get_indices();
             if (indices.length > 1) {
                 if (indices[0] == 0)
                     source_file_selected (project.guanako_project.get_source_files()[indices[1]]);
+                else if (indices[0] == 1)
+                    data_file_selected (project.b_files[indices[1]]);
             }
         });
         tree_view_expanded = new Gee.ArrayList<TreePath>();
@@ -73,6 +75,7 @@ public class ProjectBrowser : UiElement {
     }
 
     public signal void source_file_selected (SourceFile file);
+    public signal void data_file_selected (string filename);
 
     protected override void build() {
 #if DEBUG
@@ -90,6 +93,17 @@ public class ProjectBrowser : UiElement {
             TreeIter iter_sf;
             store.append (out iter_sf, iter_source_files);
             var name = pfile.get_relative_path (File.new_for_path (sf.filename));
+            store.set (iter_sf, 0, name, 1, "", -1);
+        }
+
+        TreeIter iter_buildsystem_files;
+        store.append (out iter_buildsystem_files, null);
+        store.set (iter_buildsystem_files, 0, _("Buildsystem files"), -1);
+
+        foreach (string file in project.b_files) {
+            TreeIter iter_sf;
+            store.append (out iter_sf, iter_buildsystem_files);
+            var name = pfile.get_relative_path (File.new_for_path (file));
             store.set (iter_sf, 0, name, 1, "", -1);
         }
 
@@ -215,6 +229,8 @@ public class ProjectBrowser : UiElement {
                     }
                     break;
                 case 1:
+                    break;
+                case 2:
                     var pkg = package_selection_dialog (project);
                     if (pkg != null) {
                         string[] missing_packages = project.guanako_project.add_packages (new string[] {pkg}, true);
@@ -225,7 +241,7 @@ public class ProjectBrowser : UiElement {
                     break;
                 default:
                     stderr.printf (_("Unexpected enum value: %s: %d\n"), "btn_add.clicked.connect", indices[0]);
-                    stderr.printf (_("Please report a bug!"));
+                    stderr.printf (_("Please report a bug!\n"));
                     break;
             }
         }

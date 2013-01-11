@@ -22,7 +22,7 @@ using Gtk;
 using Vala;
 
 namespace Guanako {
-    public static string auto_indent_buffer (project project, SourceFile file) {
+    public static string auto_indent_buffer (Project project, SourceFile file) {
         string[] lines = file.content.split ("\n");
         for (int q = 0; q < lines.length; q++)
             lines[q] = lines[q].strip();

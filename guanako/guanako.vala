@@ -31,11 +31,14 @@ namespace Guanako {
         public int replace_length;
     }
 
-    public class project {
+    public class Project {
         public CodeContext context { get; private set; }
         Vala.Parser parser;
         int glib_major = 2;  //TODO: Make this an option.
         int glib_minor = 32;
+
+        //TODO: Use sorted list.
+        public Gee.ArrayList<string> packages;
 
         /*
          * Not a beautiful piece of code, but necessary to convert from
@@ -77,11 +80,10 @@ namespace Guanako {
             context.report = report_wrapper;
         }
 
-        public Gee.ArrayList<string> packages = new Gee.ArrayList<string>();
-
-        public project(){
+        public Project(){
             context = new CodeContext();
             parser = new Vala.Parser();
+            packages = new Gee.ArrayList<string>();
 
             context_prep();
 
@@ -162,6 +164,7 @@ namespace Guanako {
 #endif
                 context.add_external_package (package_name);
             }
+            packages.sort();
 
             /* Update completion info of all the new packages */
             if (auto_update)

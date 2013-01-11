@@ -25,7 +25,7 @@ using Gtk;
 using Pango; // fonts
 
 public class ValamaProject {
-    public Guanako.project guanako_project { get; private set; }
+    public Guanako.Project guanako_project { get; private set; }
     public string project_path { get; private set; }
     public string project_file { get; private set; }
     public string[] project_source_dirs { get; private set; default = {"src"}; }
@@ -39,7 +39,9 @@ public class ValamaProject {
     public int version_patch;
     public string project_name = _("valama_project");
 
+    //TODO: Use sorted list.
     public Gee.ArrayList<string> files { get; private set; }
+    public Gee.ArrayList<string> b_files { get; private set; }
 
     //TODO: Do we need an __ordered__ list? Gtk has already focus handling.
     private Gee.LinkedList<ViewMap?> vieworder;
@@ -50,48 +52,23 @@ public class ValamaProject {
         this.project_file = proj_file.get_path();
         project_path = proj_file.get_parent().get_path();
 
-        guanako_project = new Guanako.project();
+        guanako_project = new Guanako.Project();
         files = new Gee.ArrayList<string>();
+        b_files = new Gee.ArrayList<string>();
 
         stdout.printf (_("Load project file: %s\n"), this.project_file);
         load_project_file();  // can throw LoadingError
 
-        /*
-         * Add file type files in source directory folders to the project.
-         * Default file suffix is .vala and default source directory is src/.
-         */
-        try {
-            File directory;
-            FileEnumerator enumerator;
-            FileInfo file_info;
-
-            foreach (string source_dir in project_source_dirs) {
-                directory = File.new_for_path (join_paths ({project_path, source_dir}));
-                enumerator = directory.enumerate_children (FileAttribute.STANDARD_NAME, 0);
-
-                while ((file_info = enumerator.next_file()) != null) {
-                    string file = join_paths ({project_path,
-                                               source_dir,
-                                               file_info.get_name()});
-
-                    foreach (string suffix in project_file_types) {
-                        if (file.has_suffix (suffix)){
-                            stdout.printf (_("Found file %s\n"), file);
-                            guanako_project.add_source_file_by_name (file);
-                            this.files.add (file);
-                            break;
-                        }
-                    }
-                }
-            }
-            if (FileUtils.test (join_paths ({project_path, "vapi", "config.vapi"}),
-                                            FileTest.EXISTS))
-                guanako_project.add_source_file_by_name (join_paths ({project_path,
-                                                                     "vapi",
-                                                                     "config.vapi"}));
-        } catch (GLib.Error e) {
-            stderr.printf(_("Could not open file: %s\n"), e.message);
-        }
+        generate_file_list (project_source_dirs,
+                            project_source_files,
+                            project_file_types,
+                            add_source_file);
+        files.sort();
+        generate_file_list (project_buildsystem_dirs,
+                            project_buildsystem_files,
+                            project_buildsystem_file_types,
+                            add_buildsystem_file);
+        b_files.sort();
 
         guanako_project.update();
 
@@ -101,6 +78,68 @@ public class ValamaProject {
         this.comp_provider = new TestProvider();
         this.comp_provider.priority = 1;
         this.comp_provider.name = _("Test Provider 1");
+    }
+
+    private void add_source_file (string filename) {
+        stdout.printf (_("Found file %s\n"), filename);
+        if (!this.files.contains (filename)) {
+            guanako_project.add_source_file_by_name (filename);
+            this.files.add (filename);
+        }
+    }
+
+    private void add_buildsystem_file (string filename) {
+        stdout.printf (_("Found file %s\n"), filename);
+        if (!this.b_files.contains (filename))
+            this.b_files.add (filename);
+    }
+
+    private delegate void FileCallback (string filename);
+    /**
+     * Iterate over directories and files and fill list.
+     */
+    private void generate_file_list(string[] directories,
+                           string[] files,
+                           string[] file_types,
+                           FileCallback? action = null) {
+        try {
+            File directory;
+            FileEnumerator enumerator;
+            FileInfo file_info;
+
+            foreach (string dir in directories) {
+                directory = File.new_for_path (join_paths ({project_path, dir}));
+                enumerator = directory.enumerate_children (FileAttribute.STANDARD_NAME, 0);
+
+                while ((file_info = enumerator.next_file()) != null) {
+                    string filename = join_paths ({project_path,
+                                                  dir,
+                                                  file_info.get_name()});
+
+                    if (file_types.length > 0)
+                        foreach (string suffix in file_types) {
+                            if (filename.has_suffix (suffix)){
+                                action (filename);
+                                break;
+                            }
+                        }
+                    else
+                        action (filename);
+                }
+            }
+
+            foreach (string filename in files) {
+                var path = join_paths ({project_path, filename});
+                var file = File.new_for_path (path);
+                if (file.query_exists())
+                    action (path);
+                else
+                    stderr.printf (_("Warning: File not found: %s\n"), path);
+            }
+        } catch (GLib.Error e) {
+            stderr.printf(_("Could not open file: %s\n"), e.message);
+        }
+
     }
 
     public string build() {
@@ -140,7 +179,7 @@ public class ValamaProject {
         return ret;
     }
 
-    void load_project_file() throws LoadingError {
+    private void load_project_file() throws LoadingError {
         Xml.Doc* doc = Xml.Parser.parse_file (project_file);
 
         if (doc == null) {
@@ -318,16 +357,21 @@ public class ValamaProject {
         SourceLanguage lang;
         if (filename == "")
             lang = langman.get_language ("vala");
+        else if (Path.get_basename (filename) == "CMakeLists.txt")
+            lang = langman.get_language ("cmake");
         else
             lang = langman.guess_language (filename, null);
-        bfr.set_language (lang);
 
-        if (bfr.language.id == "vala")
-            try {
-                view.completion.add_provider (this.comp_provider);
-            } catch (GLib.Error e) {
-                stderr.printf (_("Could not load completion: %s\n"), e.message);
-            }
+        if (lang != null) {
+            bfr.set_language (lang);
+
+            if (bfr.language.id == "vala")
+                try {
+                    view.completion.add_provider (this.comp_provider);
+                } catch (GLib.Error e) {
+                    stderr.printf (_("Could not load completion: %s\n"), e.message);
+                }
+        }
 
         view.buffer.changed.connect (() => {
             if (!parsing) {
