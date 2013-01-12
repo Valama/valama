@@ -39,15 +39,6 @@ public class ProjectBrowser : UiElement {
                                                  "text",
                                                  0,
                                                  null);
-        tree_view.row_activated.connect ((path, column) => {
-            int[] indices = path.get_indices();
-            if (indices.length > 1) {
-                if (indices[0] == 0)
-                    file_selected (project.guanako_project.get_source_files()[indices[1]].filename);
-                else if (indices[0] == 1)
-                    file_selected (project.b_files[indices[1]]);
-            }
-        });
         tree_view_expanded = new Gee.ArrayList<TreePath>();
         build();
 
@@ -60,11 +51,13 @@ public class ProjectBrowser : UiElement {
         var btn_add = new ToolButton (null, null);
         btn_add.icon_name = "list-add-symbolic";
         btn_add.clicked.connect (on_add_button);
+        btn_add.sensitive = false;
         toolbar.add (btn_add);
 
         var btn_rem = new ToolButton (null, null);
         btn_rem.icon_name = "list-remove-symbolic";
         btn_rem.clicked.connect (on_remove_button);
+        btn_rem.sensitive = false;
         toolbar.add (btn_rem);
 
         var vbox = new Box (Orientation.VERTICAL, 0);
@@ -72,6 +65,24 @@ public class ProjectBrowser : UiElement {
         vbox.pack_start (toolbar, false, true);
 
         widget = vbox;
+
+        tree_view.row_activated.connect ((path, column) => {
+            int[] indices = path.get_indices();
+            if (indices.length > 1) {
+                if (indices[0] == 0)
+                    file_selected (project.guanako_project.get_source_files()[indices[1]].filename);
+                else if (indices[0] == 1)
+                    file_selected (project.b_files[indices[1]]);
+            }
+        });
+        tree_view.cursor_changed.connect(()=>{
+            TreePath pth = null;
+            tree_view.get_cursor(out pth, null);
+            var indices = pth.get_indices();
+            var sensitive = indices.length == 2 && indices[0] != 1;
+            btn_add.sensitive = sensitive;
+            btn_rem.sensitive = sensitive;
+        });
     }
 
     public signal void file_selected (string filename);
@@ -213,10 +224,6 @@ public class ProjectBrowser : UiElement {
         var paths = tree_view.get_selection().get_selected_rows (out model);
         foreach (TreePath path in paths) {
             var indices = path.get_indices();
-            /*
-             * Allow adding of items also from toplevel trees (don't check
-             * indices.length).
-             */
             switch (indices[0]) {
                 case 0:
                     var source_file = ui_create_file_dialog (project);
@@ -227,8 +234,6 @@ public class ProjectBrowser : UiElement {
                         update();
                     }
                     break;
-                case 1:
-                    break;
                 case 2:
                     var pkg = package_selection_dialog (project);
                     if (pkg != null) {
@@ -237,10 +242,6 @@ public class ProjectBrowser : UiElement {
                             ui_missing_packages_dialog(missing_packages);
                         update();
                     }
-                    break;
-                default:
-                    stderr.printf (_("Unexpected enum value: %s: %d\n"), "btn_add.clicked.connect", indices[0]);
-                    stderr.printf (_("Please report a bug!\n"));
                     break;
             }
         }
@@ -251,34 +252,28 @@ public class ProjectBrowser : UiElement {
         var paths = tree_view.get_selection().get_selected_rows (out model);
         foreach (TreePath path in paths) {
             var indices = path.get_indices();
-            if (indices.length == 2) {
-                switch (indices[0]) {
-                    case 0:
-                        var source_file = project.guanako_project.get_source_files()[indices[1]];
-                        if (join_paths ({project.project_path, "vapi", "config.vapi"}) == source_file.filename) //Do not delete config.vapi
-                            break;
-                        if (ui_ask_warning (_("Do you want to delete this file?")) == ResponseType.YES) {
-                            var pfile = File.new_for_path (project.project_path);
-                            var fname = pfile.get_relative_path (File.new_for_path (source_file.filename));
-                            window_main.close_srcitem (fname);
-                            try {
-                                File.new_for_path (source_file.filename).delete();
-                                project.guanako_project.remove_file (source_file);
-                                update();
-                            } catch (GLib.Error e) {
-                                stderr.printf (_("Unable to delete source file: %s\n"), e.message);
-                            }
+            switch (indices[0]) {
+                case 0:
+                    var source_file = project.guanako_project.get_source_files()[indices[1]];
+                    if (join_paths ({project.project_path, "vapi", "config.vapi"}) == source_file.filename) //Do not delete config.vapi
+                        break;
+                    if (ui_ask_warning (_("Do you want to delete this file?")) == ResponseType.YES) {
+                        var pfile = File.new_for_path (project.project_path);
+                        var fname = pfile.get_relative_path (File.new_for_path (source_file.filename));
+                        window_main.close_srcitem (fname);
+                        try {
+                            File.new_for_path (source_file.filename).delete();
+                            project.guanako_project.remove_file (source_file);
+                            update();
+                        } catch (GLib.Error e) {
+                            stderr.printf (_("Unable to delete source file: %s\n"), e.message);
                         }
-                        break;
-                    case 1:
-                        project.guanako_project.remove_package (project.guanako_project.packages[indices[1]]);
-                        update();
-                        break;
-                    default:
-                        stderr.printf (_("Unexpected enum value: %s: %d\n"), "btn_rem.clicked.connect", indices[0]);
-                        stderr.printf (_("Please report a bug!\n"));
-                        break;
-                }
+                    }
+                    break;
+                case 2:
+                    project.guanako_project.remove_package (project.guanako_project.packages[indices[1]]);
+                    update();
+                    break;
             }
         }
     }
