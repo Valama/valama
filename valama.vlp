@@ -23,10 +23,6 @@
 		<directory>vapi</directory>
 	</source-directories>
 	<source-files/>
-	<file-types>
-		<type>.vapi</type>
-		<type>.vala</type>
-	</file-types>
 	<buildsystem-directories>
 		<directory>cmake</directory>
 	</buildsystem-directories>
@@ -34,7 +30,4 @@
 		<file>CMakeLists.txt</file>
 		<file>po/CMakeLists.txt</file>
 	</buildsystem-files>
-	<buildsystem-file-types>
-		<type>.cmake</type>
-	</buildsystem-file-types>
 </project>
