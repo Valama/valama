@@ -107,18 +107,19 @@ public class ValamaProject {
             FileInfo file_info;
 
             foreach (string dir in directories) {
-                directory = File.new_for_path (join_paths ({project_path, dir}));
+                directory = File.new_for_path (Path.build_path (Path.DIR_SEPARATOR_S, project_path, dir));
                 enumerator = directory.enumerate_children (FileAttribute.STANDARD_NAME, 0);
 
                 while ((file_info = enumerator.next_file()) != null) {
-                    action (join_paths ({project_path,
-                                         dir,
-                                         file_info.get_name()}));
+                    action (Path.build_path (Path.DIR_SEPARATOR_S,
+                                             project_path,
+                                             dir,
+                                             file_info.get_name()));
                 }
             }
 
             foreach (string filename in files) {
-                var path = join_paths ({project_path, filename});
+                var path = Path.build_path (Path.DIR_SEPARATOR_S, project_path, filename);
                 var file = File.new_for_path (path);
                 if (file.query_exists())
                     action (path);
@@ -141,11 +142,13 @@ public class ValamaProject {
             pkg_list += ")";
 
             var file_stream = File.new_for_path (
-                                    join_paths ({project_path,
-                                                "cmake",
-                                                "project.cmake"})).replace(null,
-                                                                           false,
-                                                                           FileCreateFlags.REPLACE_DESTINATION);
+                                    Path.build_path (Path.DIR_SEPARATOR_S,
+                                                     project_path,
+                                                     "cmake",
+                                                     "project.cmake")).replace(
+                                                            null,
+                                                            false,
+                                                            FileCreateFlags.REPLACE_DESTINATION);
             var data_stream = new DataOutputStream (file_stream);
             data_stream.put_string ("set(project_name " + project_name + ")\n");
             data_stream.put_string (@"set($(project_name)_VERSION $version_major.$version_minor.$version_patch)\n");

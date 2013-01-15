@@ -154,11 +154,13 @@ public static int main (string[] args) {
     window_main.show_all();
 
     /* Load default layout. Either local one or system wide. */
-    string local_layout_filename = join_paths ({Environment.get_user_cache_dir(),
-                                                "valama",
-                                                "layout.xml"});
-    string system_layout_filename = join_paths ({Config.PACKAGE_DATA_DIR,
-                                                "layout.xml"});
+    string local_layout_filename = Path.build_path (Path.DIR_SEPARATOR_S,
+                                                    Environment.get_user_cache_dir(),
+                                                    "valama",
+                                                    "layout.xml");
+    string system_layout_filename = Path.build_path (Path.DIR_SEPARATOR_S,
+                                                     Config.PACKAGE_DATA_DIR,
+                                                     "layout.xml");
     if (!window_main.load_layout (local_layout_filename))
         window_main.load_layout (system_layout_filename);
 
@@ -240,8 +242,9 @@ void write_current_source_file() {
         return;
     }
 
-    write_source_file (join_paths ({project.project_path,
-                                    window_main.current_srcfocus}),
+    write_source_file (Path.build_path (Path.DIR_SEPARATOR_S,
+                                        project.project_path,
+                                        window_main.current_srcfocus),
                        window_main.current_srcbuffer.text);
 }
 
@@ -303,8 +306,10 @@ class TestProvider : Gtk.SourceCompletionProvider, Object {
                                                   "struct",
                                                   "signal",
                                                   "constant"})
-                map_icons[type] = new Gdk.Pixbuf.from_file (join_paths ({Config.PIXMAP_DIR,
-                                                                         "element-" + type + "-16.png"}));
+                map_icons[type] = new Gdk.Pixbuf.from_file (Path.build_path (
+                                                Path.DIR_SEPARATOR_S,
+                                                Config.PIXMAP_DIR,
+                                                "element-" + type + "-16.png"));
         } catch (Gdk.PixbufError e) {
             stderr.printf (_("Could not load pixmap: %s\n"), e.message);
         } catch (GLib.FileError e) {
@@ -352,8 +357,9 @@ class TestProvider : Gtk.SourceCompletionProvider, Object {
         map_proposals = new Gee.HashMap<Gtk.SourceCompletionProposal, CompletionProposal>();
         var proposals = project.guanako_project.propose_symbols (
                                 project.guanako_project.get_source_file_by_name (
-                                        join_paths ({project.project_path,
-                                                     window_main.current_srcfocus})),
+                                        Path.build_path (Path.DIR_SEPARATOR_S,
+                                                         project.project_path,
+                                                         window_main.current_srcfocus)),
                                 line,
                                 col,
                                 current_line);

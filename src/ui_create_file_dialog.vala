@@ -62,7 +62,7 @@ public SourceFile? ui_create_file_dialog (ValamaProject project) {
                 ent_filename.set_label_timer (_("Don't let this field empty. Name a file."), 10);
                 return;
             }
-            string filename = join_paths ({project.project_path, "src", ent_filename.text});
+            string filename = Path.build_path (Path.DIR_SEPARATOR_S, project.project_path, "src", ent_filename.text);
             if (!filename.has_suffix (".vala"))
                 filename += ".vala";
             var f = File.new_for_path (filename);

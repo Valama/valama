@@ -477,18 +477,4 @@ public class FileTransfer : Object {
     }
 }
 
-
-/**
- * Join file paths together. Default delimiter is '/'.
- */
-public string join_paths (string[] parts, string delimiter = "/") {
-    if (parts.length == 0)
-        return "";
-    string result = parts[0];
-    for (int i = 1; i < parts.length; ++i) {
-        result += delimiter + parts[i];
-    }
-    return result;
-}
-
 // vim: set ai ts=4 sts=4 et sw=4
