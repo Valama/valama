@@ -217,8 +217,9 @@ namespace Guanako {
         }
 
         void build_syntax_map() {
-            var file = File.new_for_path (Config.PACKAGE_DATA_DIR + "/syntax");
-
+            var file = File.new_for_path (Path.build_path (Path.DIR_SEPARATOR_S,
+                                                           Config.PACKAGE_DATA_DIR,
+                                                           "syntax"));
             try {
                 var dis = new DataInputStream (file.read());
                 string line;
