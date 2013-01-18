@@ -477,4 +477,39 @@ public class FileTransfer : Object {
     }
 }
 
+
+/**
+ * Generate list of filename parts splitted on {@link GLib.Path.DIR_SEPARATOR}.
+ *
+ * If basename is false, return list of full paths.
+ */
+public string[] split_path (string path, bool basename = true) {
+    string[] pathlist = {};
+    string subpath = path;
+
+    /* Strip root from path name. */
+    if (Path.skip_root (path) != null) {
+        var rootlesspart = Path.skip_root (path);
+        var rootindex = subpath.last_index_of (rootlesspart);
+        pathlist += subpath[0:rootindex];
+        subpath = rootlesspart;
+    }
+
+    /* Generate list of file parts. */
+    string[] tmppathlist = {};
+    while (subpath != "" && subpath != ".") {
+        if (basename)
+            tmppathlist += Path.get_basename (subpath);
+        else
+            tmppathlist += subpath;
+        subpath = Path.get_dirname (subpath);
+    }
+
+    /* Reverse order of file parts list and add it to final list. */
+    for (int i = tmppathlist.length - 1; i >= 0; --i)
+        pathlist += tmppathlist[i];
+
+    return pathlist;
+}
+
 // vim: set ai ts=4 sts=4 et sw=4

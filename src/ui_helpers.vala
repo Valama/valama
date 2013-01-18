@@ -20,13 +20,17 @@
 using Gtk;
 using GLib;
 
-/*
+/**
+ * Custom {@link Gtk.Entry} class.
+ *
  * Check proper user input. Project names have to consist of "normal"
  * characters only (see regex below). Otherwise cmake would break.
  *
  * Provide two signals valid_input and invalid_input to signal if text is empty
  * or not.
  *
+ */
+/*
  * TODO: Perhaps we should internally handle special characters with
  *       underscore.
  */
@@ -100,10 +104,12 @@ public class Entry : Gtk.Entry {
     }
 }
 
-/*
- * Simple warning dialog. Check ResponseType.YES or NO.
+
+/**
+ * Simple warning dialog. Check {@link Gtk.ResponseType.YES} or
+ * {@link Gtk.ResponseType.NO}.
  */
-int ui_ask_warning (string warn_msg) {
+public int ui_ask_warning (string warn_msg) {
     var dlg = new MessageDialog (window_main,
                                  DialogFlags.MODAL,
                                  MessageType.WARNING,
@@ -113,6 +119,61 @@ int ui_ask_warning (string warn_msg) {
     int ret = dlg.run();
     dlg.destroy();
     return ret;
+}
+
+
+/**
+ * Build {@link Gtk.TreeStore} with files. Each directory has its own leaves.
+ */
+public void build_file_treestore (string storename,
+                                  string[] files,
+                                  ref TreeStore store,
+                                  ref Gee.HashMap<string, TreeIter?> pathmap) {
+        TreeIter iter_base;
+        store.append (out iter_base, null);
+        store.set (iter_base, 0, storename, 1, "filetree", -1);
+
+        var pfile = File.new_for_path (project.project_path);
+        foreach (string file in files) {
+            var name = pfile.get_relative_path (File.new_for_path (file));
+            var depth = -1;
+            foreach (var pathpart in split_path (name, false)) {
+                ++depth;
+                if (pathpart in pathmap)
+                    continue;
+
+                TreeIter iter;
+                if (depth == 0)
+                    store.append (out iter, iter_base);
+                else
+                    store.append (out iter, pathmap[Path.get_dirname (pathpart)]);
+                store.set (iter, 0, Path.get_basename (pathpart), -1);
+
+                pathmap[pathpart] = iter;
+            }
+            if (depth == -1) {
+                stderr.printf (_("Couldn't add element to TreeStore '%s': %s\n"), storename, file);
+                stderr.printf (_("Please report a bug!\n"));
+            }
+        }
+}
+
+
+/**
+ * Build plain {@link Gtk.TreeStore}.
+ *
+ * To build up TreeStore with leaves, look at {@link build_file_treestore}.
+ */
+public void build_plain_treestore (string storename, string[] elements, ref TreeStore store) {
+    TreeIter iter_base;
+    store.append (out iter_base, null);
+    store.set (iter_base, 0, storename, -1);
+
+    foreach (string element in elements) {
+        TreeIter iter;
+        store.append (out iter, iter_base);
+        store.set (iter, 0, element, -1);
+    }
 }
 
 // vim: set ai ts=4 sts=4 et sw=4
