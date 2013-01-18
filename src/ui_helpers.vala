@@ -123,6 +123,16 @@ public int ui_ask_warning (string warn_msg) {
 
 
 /**
+ * Types of "root" trees in project browser (source files, build files,
+ * packages).
+ */
+public enum StoreType {
+    PLAIN,
+    FILE_TREE
+}
+
+
+/**
  * Build {@link Gtk.TreeStore} with files. Each directory has its own leaves.
  */
 public void build_file_treestore (string storename,
@@ -131,7 +141,7 @@ public void build_file_treestore (string storename,
                                   ref Gee.HashMap<string, TreeIter?> pathmap) {
         TreeIter iter_base;
         store.append (out iter_base, null);
-        store.set (iter_base, 0, storename, 1, "filetree", -1);
+        store.set (iter_base, 0, storename, 1, StoreType.FILE_TREE, -1);
 
         var pfile = File.new_for_path (project.project_path);
         foreach (string file in files) {
@@ -167,7 +177,7 @@ public void build_file_treestore (string storename,
 public void build_plain_treestore (string storename, string[] elements, ref TreeStore store) {
     TreeIter iter_base;
     store.append (out iter_base, null);
-    store.set (iter_base, 0, storename, -1);
+    store.set (iter_base, 0, storename, 1, StoreType.PLAIN, -1);
 
     foreach (string element in elements) {
         TreeIter iter;

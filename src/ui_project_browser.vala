@@ -70,47 +70,104 @@ public class ProjectBrowser : UiElement {
 
         tree_view.row_activated.connect ((path, column) => {
             int[] indices = path.get_indices();
+
             TreeIter parent;
             if (!tree_view.model.get_iter_from_string (out parent, indices[0].to_string())) {
                 stderr.printf (_("Couldn't resolve rootpath in TreeView: %s\n"), path.to_string());
                 stderr.printf (_("Please report a bug!\n"));
                 return;
             }
-            string store_type;
+
+            StoreType store_type;
             string val;
             tree_view.model.get (parent, 0, out val, 1, out store_type, -1);
 
-            if (store_type == "filetree") {
-                if (indices.length <= 1)
-                    return;
-
-                TreeIter iter;
-                string filepath = "";
-                for (int i = 1; i < indices.length; ++i) {
-                    if (!tree_view.model.iter_nth_child (out iter, parent, indices[i])) {
-                        stderr.printf (_("Couldn't resolve path in TreeView: %s"), filepath);
-                        stderr.printf (_(" (%d of %d)\n"), i, indices.length - 1);
+            switch (store_type) {
+                /* Invoke file_selected signal if file was selected. */
+                case StoreType.FILE_TREE:
+                    TreeIter iter;
+                    if (!tree_view.model.get_iter (out iter, path)) {
+                        stderr.printf (_("Couldn't get last filetree iterator: %s"), path.to_string());
                         stderr.printf (_("Please report a bug!\n"));
                         return;
                     }
-                    tree_view.model.get (iter, 0, out val, -1);
-                    filepath = Path.build_path (Path.DIR_SEPARATOR_S, filepath, val);
-                    parent = iter;
-                }
-                if (filepath != "")
-                    file_selected (Path.build_path (Path.DIR_SEPARATOR_S,
-                                                    project.project_path,
-                                                    filepath));
+
+                    /* Break on directory (or root node). */
+                    if ((indices.length <= 1) || tree_view.model.iter_has_child (iter))
+                        return;
+
+                    string filepath = "";
+                    for (int i = 1; i < indices.length; ++i) {
+                        if (!tree_view.model.iter_nth_child (out iter, parent, indices[i])) {
+                            stderr.printf (_("Couldn't resolve path in TreeView: %s"), filepath);
+                            stderr.printf (_(" (%d of %d)\n"), i, indices.length - 1);
+                            stderr.printf (_("Please report a bug!\n"));
+                            return;
+                        }
+                        tree_view.model.get (iter, 0, out val, -1);
+                        filepath = Path.build_path (Path.DIR_SEPARATOR_S, filepath, val);
+                        parent = iter;
+                    }
+                    if (filepath != "")
+                        file_selected (Path.build_path (Path.DIR_SEPARATOR_S,
+                                                        project.project_path,
+                                                        filepath));
+                    break;
+                default:
+                    break;
             }
         });
 
         tree_view.cursor_changed.connect (() => {
-            TreePath pth = null;
-            tree_view.get_cursor (out pth, null);
-            var indices = pth.get_indices();
-            var sensitive = indices.length == 2 && indices[0] != 1;
-            btn_add.sensitive = sensitive;
-            btn_rem.sensitive = sensitive;
+            TreePath path;
+            tree_view.get_cursor (out path, null);
+            if (path == null) {
+                btn_add.sensitive = false;
+                btn_rem.sensitive = false;
+                return;
+            }
+
+            TreeIter rootiter;
+            if (!tree_view.model.get_iter_from_string (out rootiter, path.get_indices()[0].to_string())) {
+                stderr.printf (_("Couldn't resolve rootpath in TreeView: %s\n"), path.to_string());
+                stderr.printf (_("Please report a bug!\n"));
+                btn_add.sensitive = false;
+                btn_rem.sensitive = false;
+                return;
+            }
+
+            StoreType store_type;
+            string val;
+            tree_view.model.get (rootiter, 0, out val, 1, out store_type, -1);
+
+            switch (store_type) {
+                case StoreType.FILE_TREE:
+                    btn_add.sensitive = true;
+                    TreeIter iter;
+                    if (!tree_view.model.get_iter (out iter, path)) {
+                        stderr.printf (_("Couldn't get last filetree iterator: %s"), path.to_string());
+                        stderr.printf (_("Please report a bug!\n"));
+                        btn_rem.sensitive = false;
+                    }
+                    if ((path.get_indices().length <= 1) || tree_view.model.iter_has_child (iter))
+                        btn_rem.sensitive = false;
+                    else
+                        btn_rem.sensitive = true;
+                    break;
+                case StoreType.PLAIN:
+                    btn_add.sensitive = true;
+                    if (path.get_depth() > 1)
+                        btn_rem.sensitive = true;
+                    else
+                        btn_rem.sensitive = false;
+                    break;
+                default:
+                    stderr.printf (_("Unexpected enum value: %s: %d\n"), "ui_project_browser - StoreType", store_type);
+                    stderr.printf (_("Please report a bug!\n"));
+                    btn_add.sensitive = false;
+                    btn_rem.sensitive = false;
+                    break;
+            }
         });
     }
 
@@ -130,7 +187,7 @@ public class ProjectBrowser : UiElement {
 #if DEBUG
         stderr.printf (_("Run %s update!\n"), element_name);
 #endif
-        var store = new TreeStore (2, typeof (string), typeof (string));
+        var store = new TreeStore (2, typeof (string), typeof (int));
         tree_view.set_model (store);
         build_file_treestore (_("Sources"), project.files.to_array(), ref store, ref pathmap);
         build_file_treestore (_("Buildsystem files"), project.b_files.to_array(), ref store, ref b_pathmap);
