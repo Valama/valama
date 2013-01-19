@@ -349,7 +349,7 @@ class TestProvider : Gtk.SourceCompletionProvider, Object {
         if (parsing)
             loop_update.run();
 
-        map_proposals = new Gee.HashMap<Gtk.SourceCompletionProposal, CompletionProposal>();
+        var map_proposals_new = new Gee.HashMap<Gtk.SourceCompletionProposal, CompletionProposal>();
         var proposals = project.guanako_project.propose_symbols (
                                 project.guanako_project.get_source_file_by_name (
                                         join_paths ({project.project_path,
@@ -373,10 +373,10 @@ class TestProvider : Gtk.SourceCompletionProvider, Object {
 
                 var item = new Gtk.SourceCompletionItem (proposal.symbol.name, proposal.symbol.name, pixbuf, null);
                 props.append (item);
-                map_proposals[item] = proposal;
+                map_proposals_new[item] = proposal;
             }
         }
-
+        map_proposals = map_proposals_new;
         context.add_proposals (this, props, true);
     }
 
@@ -394,6 +394,10 @@ class TestProvider : Gtk.SourceCompletionProvider, Object {
 
     public bool activate_proposal (Gtk.SourceCompletionProposal proposal,
                                    Gtk.TextIter iter) {
+        if (!map_proposals.has_key(proposal)){
+            stdout.printf("Damn it! Proposal list out of sync -.-\n");
+            return true;
+        }
         var prop = map_proposals[proposal];
 
         TextIter start = iter;

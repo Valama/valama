@@ -375,18 +375,16 @@ public class ValamaProject {
 
         view.buffer.changed.connect (() => {
             if (!parsing) {
+                parsing = true;
                 try {
-#if NOT_THREADED
-                    Thread<void*> t = new Thread<void*>.try (_("Buffer update"), () => {
-#else
+                    /* Get a copy of the buffer that is safe to work on
+                     * Otherwise, the thread might crash accessing it
+                     */
+                    string buffer_content =  view.buffer.text;
                     new Thread<void*>.try (_("Buffer update"), () => {
-#endif
-                        parsing = true;
                         report_wrapper.clear();
-                        var source_file = new SourceFile (project.guanako_project.context,
-                                                          SourceFileType.SOURCE,
-                                                          window_main.current_srcfocus);
-                        project.guanako_project.update_file (source_file, view.buffer.text);
+                        var source_file = project.guanako_project.get_source_file_by_name(window_main.current_srcfocus);
+                        project.guanako_project.update_file (source_file, buffer_content);
                         Idle.add (() => {
                             wdg_report.update();
                             parsing = false;
@@ -396,9 +394,6 @@ public class ValamaProject {
                         });
                         return null;
                     });
-#if NOT_THREADED
-                    t.join();
-#endif
                 } catch (GLib.Error e) {
                     stderr.printf (_("Could not create thread to update buffer completion: %s\n"), e.message);
                 }
