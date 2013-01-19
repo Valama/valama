@@ -40,6 +40,8 @@ public class ProjectBrowser : UiElement {
                                                  0,
                                                  null);
         tree_view_expanded = new Gee.ArrayList<TreePath>();
+        pathmap = new Gee.HashMap<string, TreeIter?>();
+        b_pathmap = new Gee.HashMap<string, TreeIter?>();
         build();
 
         var scrw = new ScrolledWindow (null, null);
@@ -68,64 +70,128 @@ public class ProjectBrowser : UiElement {
 
         tree_view.row_activated.connect ((path, column) => {
             int[] indices = path.get_indices();
-            if (indices.length > 1) {
-                if (indices[0] == 0)
-                    file_selected (project.guanako_project.get_source_files()[indices[1]].filename);
-                else if (indices[0] == 1)
-                    file_selected (project.b_files[indices[1]]);
+
+            TreeIter parent;
+            if (!tree_view.model.get_iter_from_string (out parent, indices[0].to_string())) {
+                stderr.printf (_("Couldn't resolve rootpath in TreeView: %s\n"), path.to_string());
+                stderr.printf (_("Please report a bug!\n"));
+                return;
+            }
+
+            StoreType store_type;
+            string val;
+            tree_view.model.get (parent, 0, out val, 1, out store_type, -1);
+
+            switch (store_type) {
+                /* Invoke file_selected signal if file was selected. */
+                case StoreType.FILE_TREE:
+                    TreeIter iter;
+                    if (!tree_view.model.get_iter (out iter, path)) {
+                        stderr.printf (_("Couldn't get last filetree iterator: %s"), path.to_string());
+                        stderr.printf (_("Please report a bug!\n"));
+                        return;
+                    }
+
+                    /* Break on directory (or root node). */
+                    if ((indices.length <= 1) || tree_view.model.iter_has_child (iter))
+                        return;
+
+                    string filepath = "";
+                    for (int i = 1; i < indices.length; ++i) {
+                        if (!tree_view.model.iter_nth_child (out iter, parent, indices[i])) {
+                            stderr.printf (_("Couldn't resolve path in TreeView: %s"), filepath);
+                            stderr.printf (_(" (%d of %d)\n"), i, indices.length - 1);
+                            stderr.printf (_("Please report a bug!\n"));
+                            return;
+                        }
+                        tree_view.model.get (iter, 0, out val, -1);
+                        filepath = Path.build_path (Path.DIR_SEPARATOR_S, filepath, val);
+                        parent = iter;
+                    }
+                    if (filepath != "")
+                        file_selected (Path.build_path (Path.DIR_SEPARATOR_S,
+                                                        project.project_path,
+                                                        filepath));
+                    break;
+                default:
+                    break;
             }
         });
-        tree_view.cursor_changed.connect(()=>{
-            TreePath pth = null;
-            tree_view.get_cursor(out pth, null);
-            var indices = pth.get_indices();
-            var sensitive = indices.length == 2 && indices[0] != 1;
-            btn_add.sensitive = sensitive;
-            btn_rem.sensitive = sensitive;
+
+        tree_view.cursor_changed.connect (() => {
+            TreePath path;
+            tree_view.get_cursor (out path, null);
+            if (path == null) {
+                btn_add.sensitive = false;
+                btn_rem.sensitive = false;
+                return;
+            }
+
+            TreeIter rootiter;
+            if (!tree_view.model.get_iter_from_string (out rootiter, path.get_indices()[0].to_string())) {
+                stderr.printf (_("Couldn't resolve rootpath in TreeView: %s\n"), path.to_string());
+                stderr.printf (_("Please report a bug!\n"));
+                btn_add.sensitive = false;
+                btn_rem.sensitive = false;
+                return;
+            }
+
+            StoreType store_type;
+            string val;
+            tree_view.model.get (rootiter, 0, out val, 1, out store_type, -1);
+
+            switch (store_type) {
+                case StoreType.FILE_TREE:
+                    btn_add.sensitive = true;
+                    TreeIter iter;
+                    if (!tree_view.model.get_iter (out iter, path)) {
+                        stderr.printf (_("Couldn't get last filetree iterator: %s"), path.to_string());
+                        stderr.printf (_("Please report a bug!\n"));
+                        btn_rem.sensitive = false;
+                    }
+                    if ((path.get_indices().length <= 1) || tree_view.model.iter_has_child (iter))
+                        btn_rem.sensitive = false;
+                    else
+                        btn_rem.sensitive = true;
+                    break;
+                case StoreType.PLAIN:
+                    btn_add.sensitive = true;
+                    if (path.get_depth() > 1)
+                        btn_rem.sensitive = true;
+                    else
+                        btn_rem.sensitive = false;
+                    break;
+                default:
+                    stderr.printf (_("Unexpected enum value: %s: %d\n"), "ui_project_browser - StoreType", store_type);
+                    stderr.printf (_("Please report a bug!\n"));
+                    btn_add.sensitive = false;
+                    btn_rem.sensitive = false;
+                    break;
+            }
         });
     }
 
     public signal void file_selected (string filename);
 
+    /**
+     * Map path name to {@link Gtk.TreeIter} to build up correctly folded
+     * {@link Gtk.TreeView}.
+     */
+    private Gee.HashMap<string, TreeIter?> pathmap;
+    /**
+     * Same as {@link pathmap} for build system files.
+     */
+    private Gee.HashMap<string, TreeIter?> b_pathmap;
+
     protected override void build() {
 #if DEBUG
         stderr.printf (_("Run %s update!\n"), element_name);
 #endif
-        var store = new TreeStore (2, typeof (string), typeof (string));
+        var store = new TreeStore (2, typeof (string), typeof (int));
         tree_view.set_model (store);
-
-        TreeIter iter_source_files;
-        store.append (out iter_source_files, null);
-        store.set (iter_source_files, 0, _("Sources"), -1);
-
-        var pfile = File.new_for_path (project.project_path);
-        foreach (SourceFile sf in project.guanako_project.get_source_files()) {
-            TreeIter iter_sf;
-            store.append (out iter_sf, iter_source_files);
-            var name = pfile.get_relative_path (File.new_for_path (sf.filename));
-            store.set (iter_sf, 0, name, 1, "", -1);
-        }
-
-        TreeIter iter_buildsystem_files;
-        store.append (out iter_buildsystem_files, null);
-        store.set (iter_buildsystem_files, 0, _("Buildsystem files"), -1);
-
-        foreach (string file in project.b_files) {
-            TreeIter iter_sf;
-            store.append (out iter_sf, iter_buildsystem_files);
-            var name = pfile.get_relative_path (File.new_for_path (file));
-            store.set (iter_sf, 0, name, 1, "", -1);
-        }
-
-        TreeIter iter_packages;
-        store.append (out iter_packages, null);
-        store.set (iter_packages, 0, _("Packages"), -1);
-
-        foreach (string pkg in project.guanako_project.packages) {
-            TreeIter iter_sf;
-            store.append (out iter_sf, iter_packages);
-            store.set (iter_sf, 0, pkg, 1, "", -1);
-        }
+        build_file_treestore (_("Sources"), project.files.to_array(), ref store, ref pathmap);
+        build_file_treestore (_("Buildsystem files"), project.b_files.to_array(), ref store, ref b_pathmap);
+        build_plain_treestore (_("Packages"), project.guanako_project.packages.to_array(), ref store);
 
         tree_view.row_collapsed.connect ((iter, path) => {
             if (path in tree_view_expanded)
@@ -148,8 +214,8 @@ public class ProjectBrowser : UiElement {
      */
     private static GLib.List<string>? get_available_packages() {
         GLib.List<string> list = null;
-        string[] paths = new string[] {join_paths ({Config.VALA_DATA_DIR + "-" + Config.VALA_VERSION, "vapi"}),
-                                       join_paths ({Config.VALA_DATA_DIR, "vapi"})};
+        string[] paths = new string[] {Path.build_path (Path.DIR_SEPARATOR_S, Config.VALA_DATA_DIR + "-" + Config.VALA_VERSION, "vapi"),
+                                       Path.build_path (Path.DIR_SEPARATOR_S, Config.VALA_DATA_DIR, "vapi")};
         try {
             foreach (string path in paths) {
                 var enumerator = File.new_for_path (path).enumerate_children (FileAttribute.STANDARD_NAME, 0);
@@ -255,7 +321,7 @@ public class ProjectBrowser : UiElement {
             switch (indices[0]) {
                 case 0:
                     var source_file = project.guanako_project.get_source_files()[indices[1]];
-                    if (join_paths ({project.project_path, "vapi", "config.vapi"}) == source_file.filename) //Do not delete config.vapi
+                    if (Path.build_path (Path.DIR_SEPARATOR_S, project.project_path, "vapi", "config.vapi") == source_file.filename) //Do not delete config.vapi
                         break;
                     if (ui_ask_warning (_("Do you want to delete this file?")) == ResponseType.YES) {
                         var pfile = File.new_for_path (project.project_path);

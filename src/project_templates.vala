@@ -34,8 +34,9 @@ public ProjectTemplate[] load_templates(string language){
     FileInfo file_info;
     ProjectTemplate[] ret = new ProjectTemplate[0];
 
-    var directory = File.new_for_path (join_paths ({Config.PACKAGE_DATA_DIR,
-                                                    "templates"}));
+    var directory = File.new_for_path (Path.build_path (Path.DIR_SEPARATOR_S,
+                                                        Config.PACKAGE_DATA_DIR,
+                                                        "templates"));
     try {
         var enumerator = directory.enumerate_children (FileAttribute.STANDARD_NAME, 0);
 
@@ -46,20 +47,26 @@ public ProjectTemplate[] load_templates(string language){
 
             var new_template = new ProjectTemplate();
             new_template.name = filename.substring(0, filename.length - 5);
-            new_template.path = join_paths ({Config.PACKAGE_DATA_DIR,
-                                             "templates",
-                                             new_template.name});
-            string icon_path = join_paths ({Config.PACKAGE_DATA_DIR,
-                                            "templates",
-                                            new_template.name + ".png"});
+            new_template.path = Path.build_path (Path.DIR_SEPARATOR_S,
+                                                 Config.PACKAGE_DATA_DIR,
+                                                 "templates",
+                                                 new_template.name);
+            string icon_path = Path.build_path (Path.DIR_SEPARATOR_S,
+                                                Config.PACKAGE_DATA_DIR,
+                                                "templates",
+                                                new_template.name + ".png");
             if (FileUtils.test(icon_path, FileTest.EXISTS))
-                new_template.icon = new Gdk.Pixbuf.from_file (join_paths ({Config.PACKAGE_DATA_DIR,
-                                                                           "templates",
-                                                                           new_template.name + ".png"}));
+                new_template.icon = new Gdk.Pixbuf.from_file (Path.build_path (
+                                                    Path.DIR_SEPARATOR_S,
+                                                    Config.PACKAGE_DATA_DIR,
+                                                    "templates",
+                                                    new_template.name + ".png"));
 
-            Xml.Doc* doc = Xml.Parser.parse_file (join_paths ({Config.PACKAGE_DATA_DIR,
-                                                               "templates",
-                                                               filename}));
+            Xml.Doc* doc = Xml.Parser.parse_file (Path.build_path (
+                                                    Path.DIR_SEPARATOR_S,
+                                                    Config.PACKAGE_DATA_DIR,
+                                                    "templates",
+                                                    filename));
 
             if (doc == null) {
                 delete doc;

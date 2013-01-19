@@ -62,10 +62,10 @@ public class SymbolBrowser : UiElement {
             if (smb.name != null) {
                 string tpe = "";
                 if (smb is Class)    tpe = "Class";
-                if (smb is Method)   tpe = "Method";
-                if (smb is Field)    tpe = "Field";
-                if (smb is Constant) tpe = "Constant";
-                if (smb is Property) tpe = "Property";
+                else if (smb is Method)   tpe = "Method";
+                else if (smb is Field)    tpe = "Field";
+                else if (smb is Constant) tpe = "Constant";
+                else if (smb is Property) tpe = "Property";
 
                 TreeIter next;
                 if (depth == 1)
