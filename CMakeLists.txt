@@ -18,7 +18,7 @@
 
 include("${CMAKE_SOURCE_DIR}/cmake/project.cmake")
 
-cmake_minimum_required(VERSION "2.8")
+cmake_minimum_required(VERSION "2.8.4")
 project("${project_name}" C)
 string(TOLOWER "${project_name}" project_name_lower)
 
