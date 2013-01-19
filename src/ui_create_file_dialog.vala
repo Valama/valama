@@ -23,8 +23,10 @@ using Vala;
 
 /*
  * Create new file and add it to project. If file already exists, open it.
+ *
+ * Pass second parameter to create and or open file at path + filename.
  */
-public SourceFile? ui_create_file_dialog (ValamaProject project) {
+public SourceFile? ui_create_file_dialog (ValamaProject project, string path = "") {
     var dlg = new Dialog.with_buttons (_("Choose filename"),
                                        window_main,
                                        DialogFlags.MODAL,
@@ -47,7 +49,7 @@ public SourceFile? ui_create_file_dialog (ValamaProject project) {
 
     Regex valid_chars = /^[a-z0-9.:_-]+$/i;  // keep "-" at the end!
     var ent_filename = new Entry.with_inputcheck (ent_filename_err, valid_chars);
-    ent_filename.set_placeholder_text(_("filename"));  // this is i.g. not visible
+    ent_filename.set_placeholder_text (_("filename"));  // this is i.g. not visible
 
     box_filename.pack_start (ent_filename, false, false);
     box_filename.pack_start (ent_filename_err, false, false);
@@ -62,7 +64,10 @@ public SourceFile? ui_create_file_dialog (ValamaProject project) {
                 ent_filename.set_label_timer (_("Don't let this field empty. Name a file."), 10);
                 return;
             }
-            string filename = Path.build_path (Path.DIR_SEPARATOR_S, project.project_path, "src", ent_filename.text);
+            string filename = Path.build_path (Path.DIR_SEPARATOR_S,
+                                               project.project_path,
+                                               path,
+                                               ent_filename.text);
             if (!filename.has_suffix (".vala"))
                 filename += ".vala";
             var f = File.new_for_path (filename);
