@@ -351,7 +351,9 @@ public class ValamaProject {
                     string buffer_content =  view.buffer.text;
                     new Thread<void*>.try (_("Buffer update"), () => {
                         report_wrapper.clear();
-                        var source_file = project.guanako_project.get_source_file_by_name(window_main.current_srcfocus);
+                        var source_file = project.guanako_project.get_source_file_by_name(Path.build_path (
+                                                        Path.DIR_SEPARATOR_S, project.project_path,
+                                                        window_main.current_srcfocus));
                         project.guanako_project.update_file (source_file, buffer_content);
                         Idle.add (() => {
                             wdg_report.update();
