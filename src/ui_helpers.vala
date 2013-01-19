@@ -127,7 +127,10 @@ public int ui_ask_warning (string warn_msg) {
  * packages).
  */
 public enum StoreType {
-    PLAIN,
+    PACKAGE,
+    PACKAGE_TREE,
+    FILE,
+    DIRECTORY,
     FILE_TREE
 }
 
@@ -146,24 +149,31 @@ public void build_file_treestore (string storename,
         var pfile = File.new_for_path (project.project_path);
         foreach (string file in files) {
             var name = pfile.get_relative_path (File.new_for_path (file));
-            var depth = -1;
-            foreach (var pathpart in split_path (name, false)) {
-                ++depth;
-                if (pathpart in pathmap)
+            var pathparts = split_path (name, false);
+
+            if (pathparts.length == 0) {
+                stderr.printf (_("Couldn't add element to TreeStore '%s': %s\n"), storename, file);
+                stderr.printf (_("Please report a bug!\n"));
+                return;
+            }
+            for (int depth = 0; depth < pathparts.length; ++depth) {
+                if (pathparts[depth] in pathmap)
                     continue;
 
                 TreeIter iter;
                 if (depth == 0)
                     store.append (out iter, iter_base);
                 else
-                    store.append (out iter, pathmap[Path.get_dirname (pathpart)]);
-                store.set (iter, 0, Path.get_basename (pathpart), -1);
+                    store.append (out iter, pathmap[Path.get_dirname (pathparts[depth])]);
 
-                pathmap[pathpart] = iter;
-            }
-            if (depth == -1) {
-                stderr.printf (_("Couldn't add element to TreeStore '%s': %s\n"), storename, file);
-                stderr.printf (_("Please report a bug!\n"));
+                StoreType store_type;
+                if (depth < pathparts.length - 1)
+                    store_type = StoreType.DIRECTORY;
+                else
+                    store_type = StoreType.FILE;
+                store.set (iter, 0, Path.get_basename (pathparts[depth]), 1, store_type, -1);
+
+                pathmap[pathparts[depth]] = iter;
             }
         }
 }
@@ -177,12 +187,12 @@ public void build_file_treestore (string storename,
 public void build_plain_treestore (string storename, string[] elements, ref TreeStore store) {
     TreeIter iter_base;
     store.append (out iter_base, null);
-    store.set (iter_base, 0, storename, 1, StoreType.PLAIN, -1);
+    store.set (iter_base, 0, storename, 1, StoreType.PACKAGE_TREE, -1);
 
     foreach (string element in elements) {
         TreeIter iter;
         store.append (out iter, iter_base);
-        store.set (iter, 0, element, -1);
+        store.set (iter, 0, element, 1, StoreType.PACKAGE, -1);
     }
 }
 
