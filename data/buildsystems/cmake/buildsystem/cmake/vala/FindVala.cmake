@@ -1,3 +1,6 @@
+#
+# cmake/vala/FindVala.cmake
+#
 ##
 # Find module for the Vala compiler (valac)
 #
@@ -45,16 +48,17 @@
 ##
 
 # Search for the valac executable in the usual system paths.
-find_program(VALA_EXECUTABLE valac)
+find_program(VALA_EXECUTABLE "valac")
 mark_as_advanced(VALA_EXECUTABLE)
 
 # Determine the valac version
 if(VALA_EXECUTABLE)
-    execute_process(COMMAND ${VALA_EXECUTABLE} "--version"
-                    OUTPUT_VARIABLE VALA_VERSION
-                    OUTPUT_STRIP_TRAILING_WHITESPACE)
-    string(REPLACE "Vala " "" VALA_VERSION "${VALA_VERSION}")
-endif(VALA_EXECUTABLE)
+  execute_process(COMMAND ${VALA_EXECUTABLE} "--version"
+                  OUTPUT_VARIABLE VALA_VERSION
+                  OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
+  string(REPLACE "Vala " "" VALA_VERSION "${VALA_VERSION}")
+endif()
 
 # Handle the QUIETLY and REQUIRED arguments, which may be given to the find call.
 # Furthermore set VALA_FOUND to TRUE if Vala has been found (aka.
@@ -62,8 +66,11 @@ endif(VALA_EXECUTABLE)
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(Vala
-    REQUIRED_VARS VALA_EXECUTABLE
-    VERSION_VAR VALA_VERSION)
+  REQUIRED_VARS
+    VALA_EXECUTABLE
+  VERSION_VAR
+    VALA_VERSION
+)
 
 set(VALA_USE_FILE "${CMAKE_CURRENT_LIST_DIR}/UseVala.cmake")
 # vim: set ai ts=2 sts=2 et sw=2

@@ -27,46 +27,43 @@ public class ProjectTemplate {
     public Gdk.Pixbuf icon = null;
 }
 
-/*
- * Template info parser
+/**
+ * Load all available {@link ProjectTemplate} information.
  */
-public ProjectTemplate[] load_templates(string language){
+public ProjectTemplate[] load_templates (string language){
     FileInfo file_info;
     ProjectTemplate[] ret = new ProjectTemplate[0];
 
-    var directory = File.new_for_path (Path.build_path (Path.DIR_SEPARATOR_S,
-                                                        Config.PACKAGE_DATA_DIR,
-                                                        "templates"));
+    var dirpath = Path.build_path (Path.DIR_SEPARATOR_S,
+                                   Config.PACKAGE_DATA_DIR,
+                                   "templates");
+    var directory = File.new_for_path (dirpath);
     try {
         var enumerator = directory.enumerate_children (FileAttribute.STANDARD_NAME, 0);
 
         while ((file_info = enumerator.next_file()) != null) {
-            string filename = file_info.get_name();
-            if (!filename.has_suffix(".info"))
+            var infof = File.new_for_path (Path.build_path (Path.DIR_SEPARATOR_S,
+                                                            dirpath,
+                                                            file_info.get_name(),
+                                                            file_info.get_name() + ".info"));
+            if (!infof.query_exists())
                 continue;
+            string filename = infof.get_path();
 
             var new_template = new ProjectTemplate();
-            new_template.name = filename.substring(0, filename.length - 5);
+            new_template.name = file_info.get_name();
             new_template.path = Path.build_path (Path.DIR_SEPARATOR_S,
-                                                 Config.PACKAGE_DATA_DIR,
-                                                 "templates",
-                                                 new_template.name);
+                                                 dirpath,
+                                                 new_template.name,
+                                                 "template");
             string icon_path = Path.build_path (Path.DIR_SEPARATOR_S,
-                                                Config.PACKAGE_DATA_DIR,
-                                                "templates",
+                                                dirpath,
+                                                new_template.name,
                                                 new_template.name + ".png");
-            if (FileUtils.test(icon_path, FileTest.EXISTS))
-                new_template.icon = new Gdk.Pixbuf.from_file (Path.build_path (
-                                                    Path.DIR_SEPARATOR_S,
-                                                    Config.PACKAGE_DATA_DIR,
-                                                    "templates",
-                                                    new_template.name + ".png"));
+            if (FileUtils.test (icon_path, FileTest.EXISTS))
+                new_template.icon = new Gdk.Pixbuf.from_file (icon_path);
 
-            Xml.Doc* doc = Xml.Parser.parse_file (Path.build_path (
-                                                    Path.DIR_SEPARATOR_S,
-                                                    Config.PACKAGE_DATA_DIR,
-                                                    "templates",
-                                                    filename));
+            Xml.Doc* doc = Xml.Parser.parse_file (filename);
 
             if (doc == null) {
                 delete doc;
@@ -82,24 +79,24 @@ public ProjectTemplate[] load_templates(string language){
             for (Xml.Node* i = root_node->children; i != null; i = i->next) {
                 if (i->type != ElementType.ELEMENT_NODE)
                     continue;
-                if (i->name == "name"){
+                //TODO: Author/mail handling
+                if (i->name == "name") {
                     string name_en = "", name_local = "";
                     for (Xml.Node* p = i->children; p != null; p = p->next) {
                         if (p->name == "en")
                             name_en = p->get_content();
-                        if (p->name == "language")
+                        else if (p->name == "language")
                             name_local = p->get_content();
                     }
                     if (name_local == "")
                         name_local = name_en;
                     new_template.name = name_local;
-                }
-                if (i->name == "description"){
+                } else if (i->name == "description") {
                     string desc_en = "", desc_local = "";
                     for (Xml.Node* p = i->children; p != null; p = p->next) {
                         if (p->name == "en")
                             desc_en = p->get_content();
-                        if (p->name == "language")
+                        else if (p->name == "language")
                             desc_local = p->get_content();
                     }
                     if (desc_local == "")
@@ -111,7 +108,7 @@ public ProjectTemplate[] load_templates(string language){
             ret += new_template;
         }
     } catch (GLib.Error e) {
-        stderr.printf (_("Couln't get template information: %s"), e.message);
+        stderr.printf (_("Couln't get template information: %s\n"), e.message);
     }
 
     return ret;

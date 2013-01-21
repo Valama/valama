@@ -28,14 +28,14 @@ public class ValamaProject {
     public Guanako.Project guanako_project { get; private set; }
     public string project_path { get; private set; }
     public string project_file { get; private set; }
-    public string[] project_source_dirs { get; private set; default = {"src"}; }
+    public string[] project_source_dirs { get; private set; }
     public string[] project_source_files { get; private set; }
-    public string[] project_buildsystem_dirs { get; private set; default = {"cmake"}; }
-    public string[] project_buildsystem_files { get; private set; default = {"CMakeLists.txt"}; }
-    public int version_major;
-    public int version_minor;
-    public int version_patch;
-    public string project_name = _("valama_project");
+    public string[] project_buildsystem_dirs { get; private set; }
+    public string[] project_buildsystem_files { get; private set; }
+    public int version_major { get; set; default = 0; }
+    public int version_minor { get; set; default = 0; }
+    public int version_patch { get; set; default = 0; }
+    public string project_name { get; set; default = _("valama_project"); }
 
     //TODO: Use sorted list.
     public Gee.ArrayList<string> files { get; private set; }
@@ -48,7 +48,7 @@ public class ValamaProject {
     public ValamaProject (string project_file) throws LoadingError {
         var proj_file = File.new_for_path (project_file);
         this.project_file = proj_file.get_path();
-        project_path = proj_file.get_parent().get_path();
+        project_path = proj_file.get_parent().get_path(); //TODO: Check valid path?
 
         guanako_project = new Guanako.Project();
         files = new Gee.ArrayList<string>();

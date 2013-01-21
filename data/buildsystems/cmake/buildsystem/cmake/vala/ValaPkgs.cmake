@@ -1,6 +1,6 @@
 #
-# cmake/vala/vala-pkgs.cmake
-# Copyright (C) 2012, Dominique Lasserre <lasserre.d@gmail.com>
+# cmake/vala/ValaPkgs.cmake
+# Copyright (C) 2012, 2013, Valama development team
 #
 # Valama is free software: you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the
@@ -54,6 +54,8 @@
 #       src/file3.vala
 #   )
 #   add_executable(myexecutable ${VALA_C})
+#   target_link_libraries(myexecutable ${PROJECT_LDFLAGS})
+#   add_definitions(${PROJECT_C_FLAGS})
 #
 include(CMakeParseArguments)
 function(vala_pkgs output)
@@ -68,9 +70,9 @@ function(vala_pkgs output)
     include(UseVala)
 
     # Package list without versions to pass to vala_precompile.
-    set(pkglist "")
+    set(pkglist)
 
-    set(required_pkgs "")
+    set(required_pkgs)
     if(ARGS_PACKAGES)
       foreach(pkg ${ARGS_PACKAGES})
         string(TOUPPER ${pkg} pkgdesctmp)
@@ -84,7 +86,7 @@ function(vala_pkgs output)
       endforeach()
     endif()
 
-    set(optional_pkgs "")
+    set(optional_pkgs)
     if(ARGS_OPTIONAL)
       foreach(pkg ${ARGS_OPTIONAL})
         string(TOUPPER ${pkg} pkgdesctmp)
@@ -98,35 +100,34 @@ function(vala_pkgs output)
       endforeach()
     endif()
 
-    set(definitions "")
-    set(libraries "")
-    foreach(pkg ${required_pkgs} ${optional_pkgs})
+    set(definitions)
+    set(libraries)
+    pkg_check_modules(GTHREAD REQUIRED "gthread-2.0")
+    foreach(pkg ${required_pkgs} "GTHREAD" ${optional_pkgs})
       list(APPEND definitions ${${pkg}_CFLAGS})
-      list(APPEND libraries ${${pkg}_LIBRARIES})
+      list(APPEND libraries ${${pkg}_LDFLAGS})
     endforeach()
     foreach(pkg ${optional_pkgs})
       list(APPEND definitions ${${pkg}_CFLAGS})
-      list(APPEND libraries ${${pkg}_LIBRARIES})
+      list(APPEND libraries ${${pkg}_LDFLAGS})
     endforeach()
-    add_definitions(${definitions})
-    link_libraries(${libraries})
 
-    set(srcfiles "")
+    set(srcfiles)
     foreach(globexpr ${ARGS_SRCFILES})
       file(GLOB tmpsrcfiles ${globexpr})
       foreach(tmpsrcfile ${tmpsrcfiles})
-        file(RELATIVE_PATH srcfile ${CMAKE_CURRENT_SOURCE_DIR} ${tmpsrcfile})
-        list(APPEND srcfiles ${srcfile})
+        file(RELATIVE_PATH srcfile "${CMAKE_CURRENT_SOURCE_DIR}" "${tmpsrcfile}")
+        list(APPEND srcfiles "${srcfile}")
       endforeach()
     endforeach()
 
-    set(vapifiles "")
+    set(vapifiles)
     if(ARGS_VAPIS)
       foreach(globexpr ${ARGS_VAPIS})
         file(GLOB tmpvapifiles ${globexpr})
         foreach(tmpvapifile ${tmpvapifiles})
-          file(RELATIVE_PATH vapifile ${CMAKE_CURRENT_SOURCE_DIR} ${tmpvapifile})
-          list(APPEND vapifiles ${vapifile})
+          file(RELATIVE_PATH vapifile "${CMAKE_CURRENT_SOURCE_DIR}" "${tmpvapifile}")
+          list(APPEND vapifiles "${vapifile}")
         endforeach()
       endforeach()
     endif()
@@ -142,6 +143,8 @@ function(vala_pkgs output)
     )
 
     set(${output} ${VALA_C} PARENT_SCOPE)
+    set(PROJECT_C_FLAGS ${definitions} PARENT_SCOPE)
+    set(PROJECT_LDFLAGS ${libraries} PARENT_SCOPE)
   endif()
 endfunction()
 

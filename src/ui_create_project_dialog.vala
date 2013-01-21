@@ -41,7 +41,7 @@ public class uiTemplateSelector {
                                                  "markup",
                                                  0);
 
-        available_templates = load_templates("en");
+        available_templates = load_templates ("en");
 
         foreach (ProjectTemplate template in available_templates) {
             TreeIter iter;
@@ -125,22 +125,38 @@ public ValamaProject? ui_create_project_dialog() {
     var res = dlg.run();
 
     var template = selector.get_selected_template();
-    string target_folder = chooser_target.get_current_folder();
     string proj_name = ent_proj_name.text;
+    string target_folder = Path.build_path (Path.DIR_SEPARATOR_S,
+                                            chooser_target.get_current_folder(),
+                                            proj_name);
 
     dlg.destroy();
     if (res == ResponseType.CANCEL || res == ResponseType.DELETE_EVENT || template == null)
         return null;
 
-    try {
+    try { //TODO: Separate different error catchings to provide differentiate error messages.
         //TODO: Add progress bar and at least warn on overwrite (don't skip
         //      without warning).
         new FileTransfer (template.path,
-                          Path.build_path (Path.DIR_SEPARATOR_S, target_folder, proj_name),
+                          target_folder,
                           CopyRecursiveFlags.SKIP_EXISTENT).copy();
-        new FileTransfer (Path.build_path (Path.DIR_SEPARATOR_S, target_folder, proj_name, "template.vlp"),
-                          Path.build_path (Path.DIR_SEPARATOR_S, target_folder, proj_name, proj_name + ".vlp"),
+        new FileTransfer (Path.build_path (Path.DIR_SEPARATOR_S,
+                                           target_folder,
+                                           "template.vlp"),
+                          Path.build_path (Path.DIR_SEPARATOR_S,
+                                           target_folder,
+                                           proj_name + ".vlp"),
                           CopyRecursiveFlags.SKIP_EXISTENT).move();
+
+        //TODO: Do this with cmake buildsystem plugin.
+        string buildsystem_path = Path.build_path (Path.DIR_SEPARATOR_S,
+                                                   Config.PACKAGE_DATA_DIR,
+                                                   "buildsystems",
+                                                   "cmake",
+                                                   "buildsystem");
+        new FileTransfer (buildsystem_path,
+                          target_folder,
+                          CopyRecursiveFlags.SKIP_EXISTENT).copy();
     } catch (GLib.Error e) {
         stderr.printf (_("Could not copy templates for new project: %s\n"), e.message);
     }
@@ -148,7 +164,9 @@ public ValamaProject? ui_create_project_dialog() {
 
     ValamaProject new_proj = null;
     try {
-        new_proj = new ValamaProject (Path.build_path (Path.DIR_SEPARATOR_S, target_folder, proj_name, proj_name + ".vlp"));
+        new_proj = new ValamaProject (Path.build_path (Path.DIR_SEPARATOR_S,
+                                                       target_folder,
+                                                       proj_name + ".vlp"));
         new_proj.project_name = proj_name;
     } catch (LoadingError e) {
         stderr.printf (_("Couln't load new project: %s\n"), e.message);

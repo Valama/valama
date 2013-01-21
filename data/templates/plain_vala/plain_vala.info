@@ -1,5 +1,8 @@
 <template>
-    <author>Linus Seelinger S.Linus@quantentunnel.de</author>
+    <author>
+        <name>Linus Seelinger</name>
+        <mail>S.Linus@quantentunnel.de</mail>
+    </author>
     <name>
         <en>Plain vala</en>
     </name>

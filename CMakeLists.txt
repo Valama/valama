@@ -90,6 +90,8 @@ if(TRANSLATION)
   add_subdirectory("po")
 endif()
 
+set(srcfiles "${CMAKE_CURRENT_SOURCE_DIR}/src/*.vala")
+set(vapifiles "${CMAKE_CURRENT_SOURCE_DIR}/vapi/*.vapi")
 set(default_vala_flags
   "--thread"
   "--target-glib" "2.32"  # enable this to use new(tm) thread syntax
@@ -104,9 +106,9 @@ vala_pkgs(VALA_C
   PACKAGES
     ${required_pkgs}
   SRCFILES
-    "${PROJECT_SOURCE_DIR}/src/*.vala"
+    ${srcfiles}
   VAPIS
-    "${CMAKE_CURRENT_SOURCE_DIR}/vapi/config.vapi"
+    ${vapifiles}
   OPTIONS
     ${default_vala_flags}
 )
@@ -205,6 +207,7 @@ install(DIRECTORY "pixmaps/" DESTINATION "${pixdir}")
 install(FILES "data/${project_name_lower}.desktop" DESTINATION "${appdir}")
 install(FILES "data/layout.xml" DESTINATION "${datadir}")
 install(DIRECTORY "data/templates" DESTINATION "${datadir}")
+install(DIRECTORY "data/buildsystems" DESTINATION "${datadir}")
 
 
 # Print some information about build.
