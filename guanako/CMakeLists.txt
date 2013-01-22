@@ -93,7 +93,6 @@ base_list_to_delimited_string(deps_requirements
 )
 configure_file("${project_name_lower}.deps.in" "${project_name_lower}.deps")
 
-set(srcfiles "${CMAKE_CURRENT_SOURCE_DIR}/*.vala")
 set(default_vala_flags
   "--thread"
   "-H" "${project_name_lower}.h"
@@ -113,7 +112,7 @@ vala_pkgs(VALA_C
   SRCFILES
     ${srcfiles}
   VAPIS
-    "${CMAKE_CURRENT_SOURCE_DIR}/config.vapi"
+    ${vapifiles}
   OPTIONS
     ${default_vala_flags}
 )

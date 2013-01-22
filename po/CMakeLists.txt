@@ -18,11 +18,12 @@
 
 include(Gettext)
 if(XGETTEXT_FOUND)
-  set(potfile "${PROJECT_SOURCE_DIR}/po/valama.pot")
+  set(potfile "${CMAKE_CURRENT_SOURCE_DIR}/${project_name_lower}.pot")
   gettext_create_pot("${potfile}"
     SRCFILES
-      "${PROJECT_SOURCE_DIR}/src/*.vala"
-      "${PROJECT_SOURCE_DIR}/guanako/*.vala"
+      ${srcfiles}
+    WORKING_DIRECTORY
+      "../"
   )
 
   gettext_create_translations("${potfile}"

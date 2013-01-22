@@ -90,8 +90,6 @@ if(TRANSLATION)
   add_subdirectory("po")
 endif()
 
-set(srcfiles "${CMAKE_CURRENT_SOURCE_DIR}/src/*.vala")
-set(vapifiles "${CMAKE_CURRENT_SOURCE_DIR}/vapi/*.vapi")
 set(default_vala_flags
   "--thread"
   "--target-glib" "2.32"  # enable this to use new(tm) thread syntax
@@ -158,15 +156,14 @@ if(VALADOC_FOUND)
   else()
     set(make_all)
   endif()
+  list(REMOVE_ITEM vapifiles "guanako/config.vapi")
   valadoc_gen("${project_name}"
     ${make_all}
     PACKAGES
       ${required_pkgs}
     SRCFILES
-      "${CMAKE_CURRENT_SOURCE_DIR}/src/*.vala"
-      "${CMAKE_CURRENT_SOURCE_DIR}/vapi/*.vapi"
-      "${CMAKE_CURRENT_SOURCE_DIR}/guanako/*.vala"
-      #"${CMAKE_CURRENT_SOURCE_DIR}/guanako/*.vapi"
+      ${srcfiles}
+      ${vapifiles}
     OPTIONS
       "--vapidir" "${vapidir}"
       "--target-glib" "2.32"

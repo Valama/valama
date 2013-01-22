@@ -20,6 +20,7 @@
 	</packages>
 	<source-directories>
 		<directory>src</directory>
+		<directory>guanako</directory>
 		<directory>vapi</directory>
 	</source-directories>
 	<source-files/>
