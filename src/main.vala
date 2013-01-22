@@ -224,10 +224,9 @@ static void on_file_selected (string filename){
     try {
         FileUtils.get_contents (filename, out txt);
         var view = project.open_new_buffer (txt, filename);
-        if (view == null)
-            window_main.focus_src (fname);
-        else
+        if (view != null)
             window_main.add_srcitem (view, fname);
+        window_main.focus_src (fname);
     } catch (GLib.FileError e) {
         stderr.printf (_("Could not load file: %s\n"), e.message);
     }
