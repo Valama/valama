@@ -173,8 +173,6 @@ public void ui_project_dialog (ValamaProject? project) {
                 dlg.destroy();
                 break;
             case ResponseType.CANCEL:
-                dlg.destroy();
-                break;
             case ResponseType.DELETE_EVENT:  // window manager close
                 dlg.destroy();
                 break;

@@ -143,8 +143,14 @@ public static int main (string[] args) {
 
     /* Help */
     var item_help = new Gtk.MenuItem.with_mnemonic ("_" + _("Help"));
-    item_help.set_sensitive (false);
     window_main.add_menu (item_help);
+
+    var menu_help = new Gtk.Menu();
+    item_help.set_submenu (menu_help);
+
+    var item_about = new ImageMenuItem.from_stock (Stock.ABOUT, null);
+    menu_help.append (item_about);
+    item_about.activate.connect (ui_about_dialog);
 
 
     /* Buttons. */
