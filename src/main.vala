@@ -30,6 +30,8 @@ static ValamaProject project;
 static bool parsing = false;
 static MainLoop loop_update;
 
+//FIXME: Avoid those globals with signals.
+static ProjectBrowser pbrw;
 static ReportWrapper report_wrapper;
 static UiReport wdg_report;
 
@@ -62,7 +64,7 @@ public static int main (string[] args) {
 
     /* Ui elements. */
     var ui_elements_pool = new UiElementPool();
-    var pbrw = new ProjectBrowser (project);
+    pbrw = new ProjectBrowser (project);
     pbrw.file_selected.connect (on_file_selected);
 
     var smb_browser = new SymbolBrowser();
@@ -77,7 +79,80 @@ public static int main (string[] args) {
     ui_elements_pool.add (wdg_report);
 
 
+    /* Menu */
+    /* File */
+    var item_file = new Gtk.MenuItem.with_mnemonic ("_" + _("File"));
+    window_main.add_menu (item_file);
+
+    var menu_file = new Gtk.Menu();
+    item_file.set_submenu (menu_file);
+
+    var item_new = new ImageMenuItem.from_stock (Stock.NEW, null);
+    menu_file.append (item_new);
+    item_new.activate.connect (create_new_file);
+    window_main.add_accel_activate (item_new, "n");
+
+    var item_open = new ImageMenuItem.from_stock (Stock.OPEN, null);
+    menu_file.append (item_open);
+    item_open.activate.connect (() => {
+        ui_load_project (ui_elements_pool);
+    });
+    window_main.add_accel_activate (item_open, "o");
+
+    var item_save = new ImageMenuItem.from_stock (Stock.SAVE, null);
+    menu_file.append (item_save);
+    item_save.activate.connect (write_all_source_files);
+    window_main.add_accel_activate (item_save, "s");
+
+    menu_file.append (new SeparatorMenuItem());
+
+    var item_quit = new ImageMenuItem.from_stock (Stock.QUIT, null);
+    menu_file.append (item_quit);
+    item_quit.activate.connect (main_quit);
+    window_main.add_accel_activate (item_quit, "q");
+
+    /* Edit */
+    var item_edit = new Gtk.MenuItem.with_mnemonic ("_" + _("Edit"));
+    window_main.add_menu (item_edit);
+    var menu_edit = new Gtk.Menu();
+    item_edit.set_submenu (menu_edit);
+
+    var item_undo = new ImageMenuItem.from_stock (Stock.UNDO, null);
+    item_undo.set_sensitive (false);
+    menu_edit.append (item_undo);
+    item_undo.activate.connect (undo_change);
+    project.undo_changed.connect (item_undo.set_sensitive);
+    window_main.add_accel_activate (item_undo, "u");
+
+    var item_redo = new ImageMenuItem.from_stock (Stock.REDO, null);
+    item_redo.set_sensitive (false);
+    menu_edit.append (item_redo);
+    item_redo.activate.connect (redo_change);
+    project.redo_changed.connect (item_redo.set_sensitive);
+    window_main.add_accel_activate (item_redo, "r");
+
+    /* View */
+    var item_view = new Gtk.MenuItem.with_mnemonic ("_" + _("View"));
+    item_view.set_sensitive (false);
+    window_main.add_menu (item_view);
+
+    /* Project */
+    var item_project = new Gtk.MenuItem.with_mnemonic ("_" + _("Project"));
+    item_project.set_sensitive (false);
+    window_main.add_menu (item_project);
+
+    /* Help */
+    var item_help = new Gtk.MenuItem.with_mnemonic ("_" + _("Help"));
+    item_help.set_sensitive (false);
+    window_main.add_menu (item_help);
+
+
     /* Buttons. */
+    var btnNewFile = new ToolButton.from_stock (Stock.NEW);
+    window_main.add_button (btnNewFile);
+    btnNewFile.set_tooltip_text (_("Create new file"));
+    btnNewFile.clicked.connect (create_new_file);
+
     var btnLoadProject = new ToolButton.from_stock (Stock.OPEN);
     window_main.add_button (btnLoadProject);
     btnLoadProject.set_tooltip_text (_("Open project"));
@@ -85,24 +160,28 @@ public static int main (string[] args) {
         ui_load_project (ui_elements_pool);
     });
 
-    var btnNewFile = new ToolButton.from_stock (Stock.FILE);
-    window_main.add_button (btnNewFile);
-    btnNewFile.set_tooltip_text (_("Create new file"));
-    btnNewFile.clicked.connect (() => {
-        var source_file = ui_create_file_dialog (project);
-        if (source_file != null) {
-            project.guanako_project.add_source_file (source_file);
-            on_file_selected (source_file.filename);
-            pbrw.update();
-        }
-    });
-
     var btnSave = new ToolButton.from_stock (Stock.SAVE);
     window_main.add_button (btnSave);
     btnSave.set_tooltip_text (_("Save current file"));
-    btnSave.clicked.connect (() => {
-        write_current_source_file();
-    });
+    btnSave.clicked.connect (write_current_source_file);
+
+    window_main.add_button (new SeparatorToolItem());
+
+    var btnUndo = new ToolButton.from_stock (Stock.UNDO);
+    btnUndo.set_sensitive (false);
+    window_main.add_button (btnUndo);
+    btnUndo.set_tooltip_text (_("Undo last change"));
+    btnUndo.clicked.connect (undo_change);
+    project.undo_changed.connect (btnUndo.set_sensitive);
+
+    var btnRedo = new ToolButton.from_stock (Stock.REDO);
+    btnRedo.set_sensitive (false);
+    window_main.add_button (btnRedo);
+    btnRedo.set_tooltip_text (_("Redo last change"));
+    btnRedo.clicked.connect (redo_change);
+    project.redo_changed.connect (btnRedo.set_sensitive);
+
+    window_main.add_button (new SeparatorToolItem());
 
     var btnBuild = new Gtk.ToolButton.from_stock (Stock.EXECUTE);
     window_main.add_button (btnBuild);
@@ -111,6 +190,8 @@ public static int main (string[] args) {
         on_build_button_clicked (report_wrapper);
         wdg_report.update();
     });
+
+    window_main.add_button (new SeparatorToolItem());
 
     /*
     var btnAutoIndent = new Gtk.ToolButton.from_stock (Stock.REFRESH);
@@ -126,7 +207,16 @@ public static int main (string[] args) {
         ui_project_dialog (project);
     });
 
+
+    /* Application signals. */
     window_main.buffer_close.connect (project.close_buffer);
+
+    window_main.srcfocus_changed.connect (() => {
+        var srcbuf = (SourceBuffer) window_main.current_srcbuffer;
+        project.undo_changed (srcbuf.can_undo);
+        project.redo_changed (srcbuf.can_redo);
+    });
+
 
     /* Gdl elements. */
     var src_symbol = new ScrolledWindow (null, null);
@@ -176,6 +266,27 @@ public static int main (string[] args) {
     window_main.save_layout (local_layout_filename);
     project.save();
     return 0;
+}
+
+static void create_new_file() {
+    var source_file = ui_create_file_dialog (project);
+    if (source_file != null) {
+        project.guanako_project.add_source_file (source_file);
+        on_file_selected (source_file.filename);
+        pbrw.update();
+    }
+}
+
+static void undo_change() {
+    var srcbuf = (SourceBuffer) window_main.current_srcbuffer;
+    var manager = srcbuf.get_undo_manager();
+    manager.undo();
+}
+
+static void redo_change() {
+    var srcbuf = (SourceBuffer) window_main.current_srcbuffer;
+    var manager = srcbuf.get_undo_manager();
+    manager.redo();
 }
 
 // static void on_auto_indent_button_clicked() {

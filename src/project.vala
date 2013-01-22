@@ -291,6 +291,15 @@ public class ValamaProject {
         writer.end_element();
     }
 
+    /**
+     * Emit when current {@link Gtk.SourceBuffer} has changed.
+     */
+    public signal void undo_changed (bool undo_possibility);
+    /**
+     * Emit when current {@link Gtk.SourceBuffer} has changed.
+     */
+    public signal void redo_changed (bool redo_possibility);
+
     public SourceView? open_new_buffer (string txt = "", string filename = "") {
 #if DEBUG
         string dbgstr;
@@ -313,13 +322,27 @@ public class ValamaProject {
         view.show_line_numbers = true;
         view.insert_spaces_instead_of_tabs = true;
         view.override_font (FontDescription.from_string ("Monospace 10"));
-        view.buffer.create_tag ("gray_bg", "background", "gray", null);
         view.auto_indent = true;
         view.indent_width = 4;
 
-        view.buffer.text = txt;
-
         var bfr = (SourceBuffer) view.buffer;
+        bfr.begin_not_undoable_action();
+        bfr.text = txt;
+        bfr.end_not_undoable_action();
+
+        bfr.create_tag ("gray_bg", "background", "gray", null);
+        bfr.highlight_matching_brackets = true;
+
+        /* Undo manager. */
+        var undoman = bfr.get_undo_manager();
+        undoman.can_undo_changed.connect (() => {
+            undo_changed (undoman.can_undo());
+        });
+        undoman.can_redo_changed.connect (() => {
+            redo_changed (undoman.can_redo());
+        });
+
+        /* Syntax highlighting. */
         bfr.set_highlight_syntax (true);
         var langman = new SourceLanguageManager();
         SourceLanguage lang;

@@ -17,10 +17,6 @@
  *
  */
 
-/**
- * Valadoc test comment.
- */
-
 using GLib;
 using Gee;
 

@@ -28,11 +28,14 @@ using Gee;
 public class MainWindow : Window {
     private Dock dock;
     private DockLayout layout;
+    private MenuBar menubar;
     private Toolbar toolbar;
 
     private Dock srcdock;
     private DockLayout srclayout;
     private ArrayList<DockItem> srcitems;
+
+    private AccelGroup accel_group;
 
     private  string _current_srcfocus;
     public string current_srcfocus {
@@ -45,6 +48,7 @@ public class MainWindow : Window {
 #endif
             this.current_srcid = get_sourceview_id (value);
             _current_srcfocus = value;
+            srcfocus_changed();
         }
     }
     private int _current_srcid = -1;
@@ -64,22 +68,34 @@ public class MainWindow : Window {
         }
     }
 
+    /**
+     * Emit signal to indicate that source item focus has probably changed.
+     */
+    public signal void srcfocus_changed();
+
 
     public MainWindow() {
-        this.destroy.connect (Gtk.main_quit);
+        this.destroy.connect (main_quit);
         this.title = _("Valama");
         this.hide_titlebar_when_maximized = true;
         this.set_default_size (1200, 600);
         this.maximize();
 
-        var vbox_main = new Box (Orientation.VERTICAL, 5);
-        vbox_main.border_width = 10;
-        add (vbox_main);
+        accel_group = new AccelGroup();
+        this.add_accel_group (accel_group);
 
+        var vbox_main = new Box (Orientation.VERTICAL, 0);
+        this.add (vbox_main);
 
         /* Menubar. */
+        this.menubar = new MenuBar();
+        vbox_main.pack_start (menubar, false, true);
+
+        /* Toolbar. */
         this.toolbar = new Toolbar();
         vbox_main.pack_start (toolbar, false, true);
+        var toolbar_scon = toolbar.get_style_context();
+        toolbar_scon.add_class (STYLE_CLASS_PRIMARY_TOOLBAR);
 
         /* Gdl dock stuff. */
         this.dock = new Dock();
@@ -297,10 +313,17 @@ public class MainWindow : Window {
     }
 
     /**
+     * Add menu to main {@link Gtk.MenuBar}.
+     */
+    public void add_menu (Gtk.MenuItem item) {
+        this.menubar.add (item);
+    }
+
+    /**
      * Add new button to main {@link Gdl.DockBar}.
      */
-    public void add_button (ToolButton button){
-        toolbar.add (button);
+    public void add_button (ToolItem item) {
+        this.toolbar.add (item);
     }
 
     /**
@@ -343,6 +366,19 @@ public class MainWindow : Window {
             stdout.printf (_("Layout loaded: %s\n"), section);
 #endif
         return ret;
+    }
+
+    /**
+     * Add accelerator for 'activate' signal.
+     */
+    public void add_accel_activate (Widget item,
+                                    string keyname,
+                                    Gdk.ModifierType modtype = Gdk.ModifierType.CONTROL_MASK) {
+        item.add_accelerator ("activate",
+                              this.accel_group,
+                              Gdk.keyval_from_name (keyname),
+                              modtype,
+                              AccelFlags.VISIBLE);
     }
 }
 
