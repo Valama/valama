@@ -132,8 +132,14 @@ public class ValamaProject {
 
     }
 
-    public string build() {
-        string ret;
+    /**
+     * Build project.
+     *
+     * @return Return true on success else false.
+     */
+    public bool build() {
+        if (!buffer_save_all())
+            return false;
 
         try {
             string pkg_list = "set(required_pkgs\n";
@@ -176,20 +182,32 @@ public class ValamaProject {
 
             data_stream.close();
         } catch (GLib.IOError e) {
-            stderr.printf(_("Could not read file: %s\n"), e.message);
+            stderr.printf (_("Could not read file: %s\n"), e.message);
         } catch (GLib.Error e) {
-            stderr.printf(_("Could not open file: %s\n"), e.message);
+            stderr.printf (_("Could not open file: %s\n"), e.message);
         }
 
+        int exitstatus = 0;
         try {
-            GLib.Process.spawn_command_line_sync("sh -c 'cd " + project_path +
-                                                    " && mkdir -p build && cd build && cmake .. && make'",
-                                                 null,
-                                                 out ret);
+            string curdir = Environment.get_current_dir();
+            var buildpath = Path.build_path (Path.DIR_SEPARATOR_S,
+                                             project_path,
+                                             "build");
+            DirUtils.create (buildpath, 755);  //TODO: Support umask
+            Environment.set_current_dir (buildpath);
+            //TODO; Use GLib.Process.spawn_async_with_pipes.
+            Process.spawn_command_line_sync ("cmake ..", null, null, out exitstatus);
+            if (exitstatus == 0)
+                Process.spawn_command_line_sync ("make", null, null, out exitstatus);
         } catch (GLib.SpawnError e) {
             stderr.printf(_("Could not execute build process: %s\n"), e.message);
+            return false;
+        } finally {
+            Environment.set_current_dir (curdir);
         }
-        return ret;
+        if (exitstatus == 0)
+            return true;
+        return false;
     }
 
     private void load_project_file() throws LoadingError {
@@ -313,15 +331,20 @@ public class ValamaProject {
     }
 
     /**
-     * Emit when current {@link Gtk.SourceBuffer} has changed.
+     * Emit when undo flag of current {@link Gtk.SourceBuffer} has changed.
      */
     public signal void undo_changed (bool undo_possibility);
     /**
-     * Emit when current {@link Gtk.SourceBuffer} has changed.
+     * Emit when redo flag of current {@link Gtk.SourceBuffer} has changed.
      */
     public signal void redo_changed (bool redo_possibility);
 
-    public SourceView? open_new_buffer (string txt = "", string filename = "") {
+    /**
+     * Emit signal when current {@link Gtk.SourceBuffer} has changed.
+     */
+    public signal void buffer_changed (bool has_changes);
+
+    public SourceView? open_new_buffer (string txt = "", string filename = "", bool dirty = false) {
 #if DEBUG
         string dbgstr;
         if (filename == "")
@@ -351,7 +374,6 @@ public class ValamaProject {
         bfr.text = txt;
         bfr.end_not_undoable_action();
 
-        bfr.create_tag ("gray_bg", "background", "gray", null);
         bfr.highlight_matching_brackets = true;
 
         /* Undo manager. */
@@ -385,7 +407,14 @@ public class ValamaProject {
                 }
         }
 
-        view.buffer.changed.connect (() => {
+        var vmap = new ViewMap (view, filename, dirty);
+        this.buffer_changed (dirty);
+        vmap.notify["dirty"].connect ((sender, property) => {
+            this.buffer_changed (vmap.dirty);
+        });
+
+        bfr.changed.connect (() => {
+            vmap.dirty = true;
             if (!parsing) {
                 parsing = true;
                 try {
@@ -395,10 +424,11 @@ public class ValamaProject {
                     string buffer_content =  view.buffer.text;
                     new Thread<void*>.try (_("Buffer update"), () => {
                         report_wrapper.clear();
-                        var source_file = project.guanako_project.get_source_file_by_name(Path.build_path (
-                                                        Path.DIR_SEPARATOR_S, project.project_path,
+                        var source_file = this.guanako_project.get_source_file_by_name(Path.build_path (
+                                                        Path.DIR_SEPARATOR_S,
+                                                        this.project_path,
                                                         window_main.current_srcfocus));
-                        project.guanako_project.update_file (source_file, buffer_content);
+                        this.guanako_project.update_file (source_file, buffer_content);
                         Idle.add (() => {
                             wdg_report.update();
                             parsing = false;
@@ -414,7 +444,6 @@ public class ValamaProject {
             }
         });
 
-        var vmap = new ViewMap (view, filename);
         vieworder.offer_head (vmap);
 #if DEBUG
         stdout.printf (_("Buffer loaded.\n"));
@@ -423,9 +452,76 @@ public class ValamaProject {
     }
 
     /**
+     * Save all opened project files.
+     *
+     * @return Return true on success else false.
+     */
+    public bool buffer_save_all() {
+        bool ret = true;
+        foreach (var map in vieworder) {
+            if (map.filename == "")
+                continue;
+            map.dirty = !save_file (map.filename, map.view.buffer.text);
+            if (ret && map.dirty)
+                ret = false;
+        }
+        return  ret;
+    }
+
+    /**
+     * Save specific project file and update dirty flag.
+     *
+     * @param filename Filename of buffer to save. If empty current buffer is
+     *                 choosed. If filename is relative project path is
+     *                 prepended.
+     * @return Return true on success else false.
+     */
+    public bool buffer_save (string filename = "") {
+        /* Use temporary variable to work arround onowned var issue with
+         * GLib.Path.build_path. */
+        string filepath = filename;
+        if (filepath == "") {
+            if (window_main.current_srcfocus == null) {
+                stdout.printf (_("Warning: No file selected.\n"));
+                return false;
+            }
+            filepath = Path.build_path (Path.DIR_SEPARATOR_S,
+                                        this.project_path,
+                                        window_main.current_srcfocus);
+        } else if (!Path.is_absolute (filepath))
+            filepath = Path.build_path (Path.DIR_SEPARATOR_S,
+                                        this.project_path,
+                                        filepath);
+        foreach (var map in vieworder)
+            if (map.filename == filepath) {
+                map.dirty = !save_file (map.filename, map.view.buffer.text);
+                return !map.dirty;
+            }
+        stderr.printf (_("Warning: Couldn't save project file: %s\n"), filename);
+        return false;
+    }
+
+    /**
+     * Check if buffer is empty.
+     *
+     * @param filename Buffer by filename to check.
+     * @return Return dirty flag of buffer or false if buffer doesn't exist in
+     *         project file context.
+     */
+    public bool buffer_is_dirty (string filename) {
+        foreach (var map in vieworder)
+            if (map.filename == filename)
+                return map.dirty;
+#if DEBUG
+        stderr.printf (_("Warning: File not registered in project to check if buffer is dirty: %s\n"), filename);
+#endif
+        return false;
+    }
+
+    /**
      * Show dialog if {@link Gtk.SourceView} wasn't saved yet.
      *
-     * Return true to close buffer.
+     * @return Return true to indicate buffer can now closed safely.
      */
     public bool close_buffer (SourceView view) {
         /*
@@ -436,16 +532,18 @@ public class ValamaProject {
     }
 
     /**
-     * Hold filename -> view mappings for {@link vieworder}.
+     * Hold filename -> view/dirty mappings for {@link vieworder}.
      */
-    private class ViewMap {
-        public ViewMap (SourceView view, string filename) {
+    private class ViewMap : Object {
+        public ViewMap (SourceView view, string filename, bool dirty) {
             this.view = view;
             this.filename = filename;
+            this.dirty = dirty;
         }
 
         public SourceView view;
         public string filename;
+        public bool dirty { get; set; }
         /**
          * Use unique id to support multiple views for same file.
          */
@@ -457,22 +555,21 @@ public class ValamaProject {
      * Get {@link Gtk.TextBuffer} by file name.
      */
     public TextBuffer? get_buffer_by_file (string filename) {
-        foreach (var map in vieworder) {
+        foreach (var map in vieworder)
             if (map.filename == filename)
                 return (TextBuffer) map.view.buffer;
-        }
         return null;
     }
 
     /**
      * Provide delegate to perform action on opened views. See
-     * {@link foreach_view}.
+     * {@link foreach_buffer}.
      */
     public delegate void ViewCallback (string filename, string? buffertext);
     /**
      * Perform {@link ViewCallback} action for each opened {@link SourceView}.
      */
-    public void foreach_view (ViewCallback action) {
+    public void foreach_buffer (ViewCallback action) {
         foreach (var map in vieworder)
             action (map.filename, map.view.buffer.text);
     }

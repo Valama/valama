@@ -15,11 +15,6 @@ set(required_pkgs
 "libxml-2.0"
 )
 set(srcfiles
-"guanako/guanako.vala"
-"guanako/guanako_auto_indent.vala"
-"guanako/guanako_helpers.vala"
-"guanako/guanako_iterators.vala"
-"guanako/guanako_vapi_discoverer.vala"
 "src/common.vala"
 "src/main.vala"
 "src/project.vala"
@@ -37,6 +32,5 @@ set(srcfiles
 "src/ui_symbol_browser.vala"
 )
 set(vapifiles
-"guanako/config.vapi"
 "vapi/config.vapi"
 )

@@ -512,4 +512,34 @@ public string[] split_path (string path, bool basename = true) {
     return pathlist;
 }
 
+
+/**
+ * Save content to file.
+ *
+ * @param filename Filename where to save buffer.
+ * @param text Content to save.
+ * @return On success return true else false.
+ */
+public bool save_file (string filename, string text) {
+    var file = File.new_for_path (filename);
+
+    /* TODO: First parameter can be used to check if file has changed.
+     *       The second parameter can enable/disable backup file. */
+    try {
+        var fos = file.replace (null, false, FileCreateFlags.REPLACE_DESTINATION);
+        var dos = new DataOutputStream (fos);
+        dos.put_string (text);
+        dos.flush();
+        dos.close();
+        stdout.printf (_("File saved: %s\n"),  file.get_path());
+        return true;
+    } catch (GLib.IOError e) {
+        stderr.printf (_("Could not update file: %s\n"), e.message);
+    } catch (GLib.Error e) {
+        stderr.printf (_("Could not open file to write: %s\n"), e.message);
+    }
+    return false;
+}
+
+
 // vim: set ai ts=4 sts=4 et sw=4

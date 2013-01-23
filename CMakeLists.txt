@@ -156,7 +156,6 @@ if(VALADOC_FOUND)
   else()
     set(make_all)
   endif()
-  list(REMOVE_ITEM vapifiles "guanako/config.vapi")
   valadoc_gen("${project_name}"
     ${make_all}
     PACKAGES
@@ -164,6 +163,7 @@ if(VALADOC_FOUND)
     SRCFILES
       ${srcfiles}
       ${vapifiles}
+      "guanako/*.vala"
     OPTIONS
       "--vapidir" "${vapidir}"
       "--target-glib" "2.32"

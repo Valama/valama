@@ -101,7 +101,10 @@ public static int main (string[] args) {
 
     var item_save = new ImageMenuItem.from_stock (Stock.SAVE, null);
     menu_file.append (item_save);
-    item_save.activate.connect (write_all_source_files);
+    item_save.activate.connect (() => {
+        project.buffer_save();
+    });
+    project.buffer_changed.connect (item_save.set_sensitive);
     window_main.add_accel_activate (item_save, "s");
 
     menu_file.append (new SeparatorMenuItem());
@@ -169,7 +172,10 @@ public static int main (string[] args) {
     var btnSave = new ToolButton.from_stock (Stock.SAVE);
     window_main.add_button (btnSave);
     btnSave.set_tooltip_text (_("Save current file"));
-    btnSave.clicked.connect (write_current_source_file);
+    btnSave.clicked.connect (() => {
+        project.buffer_save();
+    });
+    project.buffer_changed.connect (btnSave.set_sensitive);
 
     window_main.add_button (new SeparatorToolItem());
 
@@ -193,7 +199,7 @@ public static int main (string[] args) {
     window_main.add_button (btnBuild);
     btnBuild.set_tooltip_text (_("Save current file and build project"));
     btnBuild.clicked.connect (() => {
-        on_build_button_clicked (report_wrapper);
+        project.build();
         wdg_report.update();
     });
 
@@ -221,6 +227,9 @@ public static int main (string[] args) {
         var srcbuf = (SourceBuffer) window_main.current_srcbuffer;
         project.undo_changed (srcbuf.can_undo);
         project.redo_changed (srcbuf.can_redo);
+        project.buffer_changed (project.buffer_is_dirty (Path.build_path (Path.DIR_SEPARATOR_S,
+                                                                          project.project_path,
+                                                                          window_main.current_srcfocus)));
     });
 
 
@@ -232,7 +241,7 @@ public static int main (string[] args) {
     src_report.add (wdg_report.widget);
 
     /* Init new empty buffer. */
-    window_main.add_srcitem (project.open_new_buffer());
+    window_main.add_srcitem (project.open_new_buffer("", "", true));
     window_main.add_item ("ReportWrapper", _("Report widget"), src_report,
                           Stock.INFO,
                           DockItemBehavior.CANT_CLOSE, //temporary solution until items can be added later
@@ -325,10 +334,6 @@ static void on_error_selected (ReportWrapper.Error err) {
     window_main.current_srcbuffer.select_range (start, end);
 }
 
-static void on_build_button_clicked (ReportWrapper report_wrapper) {
-    write_all_source_files();
-    project.build();
-}
 
 static void on_file_selected (string filename){
     var pfile = File.new_for_path (project.project_path);
@@ -346,57 +351,6 @@ static void on_file_selected (string filename){
         window_main.focus_src (fname);
     } catch (GLib.FileError e) {
         stderr.printf (_("Could not load file: %s\n"), e.message);
-    }
-}
-
-/**
- * Save currently opened source file.
- */
-void write_current_source_file() {
-    if (window_main.current_srcfocus == null) {
-        stdout.printf (_("No file selected to save.\n"));
-        return;
-    }
-
-    write_source_file (Path.build_path (Path.DIR_SEPARATOR_S,
-                                        project.project_path,
-                                        window_main.current_srcfocus),
-                       window_main.current_srcbuffer.text);
-}
-
-/**
- * Save all opened source files.
- */
-//TODO: Only save modified source files.
-void write_all_source_files() {
-    project.foreach_view (write_source_file);
-}
-
-/**
- * Save current selected source file (by filename).
- * Optionally save file given as parameter.
- */
-void write_source_file (string filename, string? buffertext) {
-    if (buffertext == null) {
-        stdout.printf (_("Nothing to save for '%s'.\n"), filename);
-        return;
-    }
-
-    var file = File.new_for_path (filename);
-
-    /* TODO: First parameter can be used to check if file has changed.
-     *       The second parameter can enable/disable backup file. */
-    try {
-        var fos = file.replace (null, false, FileCreateFlags.REPLACE_DESTINATION);
-        var dos = new DataOutputStream (fos);
-        dos.put_string (buffertext);
-        dos.flush();
-        dos.close();
-        stdout.printf (_("File saved: %s\n"),  file.get_path());
-    } catch (GLib.IOError e) {
-        stderr.printf (_("Could not update source file: %s\n"), e.message);
-    } catch (GLib.Error e) {
-        stderr.printf (_("Could not open file to write: %s\n"), e.message);
     }
 }
 
