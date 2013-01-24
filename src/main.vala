@@ -227,9 +227,13 @@ public static int main (string[] args) {
         var srcbuf = window_main.current_srcbuffer;
         project.undo_changed (srcbuf.can_undo);
         project.redo_changed (srcbuf.can_redo);
-        project.buffer_changed (project.buffer_is_dirty (Path.build_path (Path.DIR_SEPARATOR_S,
-                                                                          project.project_path,
-                                                                          window_main.current_srcfocus)));
+        if (window_main.current_srcfocus != _("New document"))
+            project.buffer_changed (project.buffer_is_dirty (
+                        Path.build_path (Path.DIR_SEPARATOR_S,
+                                         project.project_path,
+                                         window_main.current_srcfocus)));
+        else
+            project.buffer_changed (true);
     });
 
 

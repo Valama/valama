@@ -46,21 +46,13 @@ public class MainWindow : Window {
 #if DEBUG
             stdout.printf (_("Change current focus: %s\n"), value);
 #endif
-            this.current_srcid = get_sourceview_id (value);
             _current_srcfocus = value;
+            this.current_srcid = get_sourceview_id (_current_srcfocus);
+            this.current_srcview = get_sourceview (this.srcitems[this.current_srcid]);
             srcfocus_changed();
         }
     }
-    private int _current_srcid = -1;
-    private int current_srcid {
-        get {
-            return _current_srcid;
-        }
-        private set {
-            this.current_srcview = get_sourceview (this.srcitems[value]);
-            _current_srcid = value;
-        }
-    }
+    private int current_srcid { get; private set; default = -1; }
     public SourceView current_srcview { get; private set; }
     public SourceBuffer current_srcbuffer {
         get {

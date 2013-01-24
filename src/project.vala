@@ -520,7 +520,7 @@ public class ValamaProject {
 #if DEBUG
         stderr.printf (_("Warning: File not registered in project to check if buffer is dirty: %s\n"), filename);
 #endif
-        return false;
+        return true;
     }
 
     /**
