@@ -188,8 +188,8 @@ public class ValamaProject {
         }
 
         int exitstatus = 0;
+        string curdir = Environment.get_current_dir();
         try {
-            string curdir = Environment.get_current_dir();
             var buildpath = Path.build_path (Path.DIR_SEPARATOR_S,
                                              project_path,
                                              "build");
