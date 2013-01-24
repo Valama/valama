@@ -331,16 +331,16 @@ public class ValamaProject {
     }
 
     /**
-     * Emit when undo flag of current {@link Gtk.SourceBuffer} has changed.
+     * Emit when undo flag of current {@link SourceBuffer} has changed.
      */
     public signal void undo_changed (bool undo_possibility);
     /**
-     * Emit when redo flag of current {@link Gtk.SourceBuffer} has changed.
+     * Emit when redo flag of current {@link SourceBuffer} has changed.
      */
     public signal void redo_changed (bool redo_possibility);
 
     /**
-     * Emit signal when current {@link Gtk.SourceBuffer} has changed.
+     * Emit signal when current {@link SourceBuffer} has changed.
      */
     public signal void buffer_changed (bool has_changes);
 
@@ -362,14 +362,14 @@ public class ValamaProject {
             }
         }
 
-        view = new SourceView();
+        var bfr = new SourceBuffer();
+        view = new SourceView.with_buffer(bfr);
         view.show_line_numbers = true;
         view.insert_spaces_instead_of_tabs = true;
         view.override_font (FontDescription.from_string ("Monospace 10"));
         view.auto_indent = true;
         view.indent_width = 4;
 
-        var bfr = (SourceBuffer) view.buffer;
         bfr.begin_not_undoable_action();
         bfr.text = txt;
         bfr.end_not_undoable_action();
@@ -407,14 +407,14 @@ public class ValamaProject {
                 }
         }
 
-        var vmap = new ViewMap (view, filename, dirty);
-        this.buffer_changed (dirty);
-        vmap.notify["dirty"].connect ((sender, property) => {
-            this.buffer_changed (vmap.dirty);
+        /* Modified flag. */
+        bfr.notify["dirty"].connect ((sender, property) => {
+            this.buffer_changed (bfr.dirty);
         });
+        bfr.dirty = dirty;
 
         bfr.changed.connect (() => {
-            vmap.dirty = true;
+            bfr.dirty = true;
             if (!parsing) {
                 parsing = true;
                 try {
@@ -444,6 +444,7 @@ public class ValamaProject {
             }
         });
 
+        var vmap = new ViewMap (view, filename);
         vieworder.offer_head (vmap);
 #if DEBUG
         stdout.printf (_("Buffer loaded.\n"));
@@ -461,8 +462,9 @@ public class ValamaProject {
         foreach (var map in vieworder) {
             if (map.filename == "")
                 continue;
-            map.dirty = !save_file (map.filename, map.view.buffer.text);
-            if (ret && map.dirty)
+            var srcbuf = (SourceBuffer) map.view.buffer;
+            srcbuf.dirty = !save_file (map.filename, srcbuf.text);
+            if (ret && srcbuf.dirty)
                 ret = false;
         }
         return  ret;
@@ -494,8 +496,9 @@ public class ValamaProject {
                                         filepath);
         foreach (var map in vieworder)
             if (map.filename == filepath) {
-                map.dirty = !save_file (map.filename, map.view.buffer.text);
-                return !map.dirty;
+                var srcbuf = (SourceBuffer) map.view.buffer;
+                srcbuf.dirty = !save_file (map.filename, srcbuf.text);
+                return !srcbuf.dirty;
             }
         stderr.printf (_("Warning: Couldn't save project file: %s\n"), filename);
         return false;
@@ -510,8 +513,10 @@ public class ValamaProject {
      */
     public bool buffer_is_dirty (string filename) {
         foreach (var map in vieworder)
-            if (map.filename == filename)
-                return map.dirty;
+            if (map.filename == filename) {
+                var srcbuf = (SourceBuffer) map.view.buffer;
+                return srcbuf.dirty;
+            }
 #if DEBUG
         stderr.printf (_("Warning: File not registered in project to check if buffer is dirty: %s\n"), filename);
 #endif
@@ -535,15 +540,13 @@ public class ValamaProject {
      * Hold filename -> view/dirty mappings for {@link vieworder}.
      */
     private class ViewMap : Object {
-        public ViewMap (SourceView view, string filename, bool dirty) {
+        public ViewMap (SourceView view, string filename) {
             this.view = view;
             this.filename = filename;
-            this.dirty = dirty;
         }
 
         public SourceView view;
         public string filename;
-        public bool dirty { get; set; }
         /**
          * Use unique id to support multiple views for same file.
          */
@@ -552,12 +555,12 @@ public class ValamaProject {
     }
 
     /**
-     * Get {@link Gtk.TextBuffer} by file name.
+     * Get {@link SourceBuffer} by file name.
      */
-    public TextBuffer? get_buffer_by_file (string filename) {
+    public SourceBuffer? get_buffer_by_file (string filename) {
         foreach (var map in vieworder)
             if (map.filename == filename)
-                return (TextBuffer) map.view.buffer;
+                return (SourceBuffer) map.view.buffer;
         return null;
     }
 
@@ -573,6 +576,10 @@ public class ValamaProject {
         foreach (var map in vieworder)
             action (map.filename, map.view.buffer.text);
     }
+}
+
+public class SourceBuffer : Gtk.SourceBuffer {
+    public bool dirty { get; set; }
 }
 
 errordomain LoadingError {

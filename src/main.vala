@@ -224,7 +224,7 @@ public static int main (string[] args) {
     window_main.buffer_close.connect (project.close_buffer);
 
     window_main.srcfocus_changed.connect (() => {
-        var srcbuf = (SourceBuffer) window_main.current_srcbuffer;
+        var srcbuf = window_main.current_srcbuffer;
         project.undo_changed (srcbuf.can_undo);
         project.redo_changed (srcbuf.can_redo);
         project.buffer_changed (project.buffer_is_dirty (Path.build_path (Path.DIR_SEPARATOR_S,
@@ -293,13 +293,13 @@ static void create_new_file() {
 }
 
 static void undo_change() {
-    var srcbuf = (SourceBuffer) window_main.current_srcbuffer;
+    var srcbuf = window_main.current_srcbuffer;
     var manager = srcbuf.get_undo_manager();
     manager.undo();
 }
 
 static void redo_change() {
-    var srcbuf = (SourceBuffer) window_main.current_srcbuffer;
+    var srcbuf = window_main.current_srcbuffer;
     var manager = srcbuf.get_undo_manager();
     manager.redo();
 }

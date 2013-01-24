@@ -62,9 +62,9 @@ public class MainWindow : Window {
         }
     }
     public SourceView current_srcview { get; private set; }
-    public TextBuffer current_srcbuffer {
+    public SourceBuffer current_srcbuffer {
         get {
-            return current_srcview.buffer;
+            return (SourceBuffer) current_srcview.buffer;
         }
     }
 
@@ -172,8 +172,14 @@ public class MainWindow : Window {
          */
         var item = new DockItem.with_stock ("SourceView " + srcitems.size.to_string(),
                                             filename,
-                                            Stock.EDIT,
+                                            Stock.NEW,
                                             DockItemBehavior.LOCKED);
+        project.buffer_changed.connect ((has_changes) => {
+            if (has_changes)
+                item.stock_id = Stock.NEW;
+            else
+                item.stock_id = Stock.EDIT;
+        });
         item.add (src_view);
 
         /* Set focus on tab change. */
