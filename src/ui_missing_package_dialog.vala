@@ -20,25 +20,30 @@
 using Gtk;
 using GLib;
 
-public void ui_missing_packages_dialog(string[] missing_packages){
+/**
+ * Show dialog with missing packages.
+ */
+public void ui_missing_packages_dialog (string[] missing_packages) {
     var dlg_missing_packages = new Dialog.with_buttons (_("Missing packages"),
-                                       window_main,
-                                       DialogFlags.MODAL,
-                                       Stock.OK,
-                                       ResponseType.OK,
-                                       null);
+                                                        window_main,
+                                                        DialogFlags.MODAL,
+                                                        Stock.OK,
+                                                        ResponseType.OK,
+                                                        null);
     dlg_missing_packages.resizable = false;
 
-    var box_main = new Box(Orientation.VERTICAL, 0);
+    var box_main = new Box (Orientation.VERTICAL, 0);
     string dlg = _("The following vala packages are not available on your system:\n");
     foreach (string pkg in missing_packages)
         dlg += pkg + "\n";
     dlg += _("Compiling and autocompletion might fail!");
-    var lbl_packages = new Label(dlg);
-    box_main.pack_start(lbl_packages, true, true);
+    var lbl_packages = new Label (dlg);
+    box_main.pack_start (lbl_packages, true, true);
     box_main.show_all();
 
-    dlg_missing_packages.get_content_area().pack_start(box_main);
+    dlg_missing_packages.get_content_area().pack_start (box_main);
     dlg_missing_packages.run();
     dlg_missing_packages.destroy();
 }
+
+// vim: set ai ts=4 sts=4 et sw=4

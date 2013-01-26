@@ -721,7 +721,13 @@ public class CodeView : Object {
  * Throw on project file loading errors.
  */
 errordomain LoadingError {
+    /**
+     * File does not contain enough information.
+     */
     FILE_IS_EMPTY,
+    /**
+     * Unable to load file.
+     */
     FILE_IS_GARBAGE
 }
 

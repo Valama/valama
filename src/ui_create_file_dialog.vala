@@ -21,10 +21,13 @@ using Gtk;
 using GLib;
 using Vala;
 
-/*
+/**
  * Create new file and add it to project. If file already exists, open it.
  *
  * Pass second parameter to create and or open file at path + filename.
+ *
+ * @param project {@link ValamaProject} to register file to.
+ * @param path Rootpath of new file.
  */
 public SourceFile? ui_create_file_dialog (ValamaProject project, string path = "") {
     var dlg = new Dialog.with_buttons (_("Choose filename"),

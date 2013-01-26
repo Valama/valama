@@ -35,12 +35,30 @@ using GLib;
  *       underscore.
  */
 public class Entry : Gtk.Entry {
-    uint timer_id = 0;
-    Label err_label;
-    Regex valid_chars;
-    uint delay_sec;
-    bool label_resettable;  // label can be resetted when valid input is provided
+    /**
+     * Id of timer.
+     */
+    private uint timer_id = 0;
+    /**
+     * Label to show error message.
+     */
+    private Label err_label;
+    /**
+     * Regex of valid characters.
+     */
+    private Regex valid_chars;
+    /**
+     * Delay in seconds.
+     */
+    private uint delay_sec;
+    /**
+     * Label can be resetted when valid input is provided.
+     */
+    private bool label_resettable;
 
+    /**
+     * Create Entry and connect signals to input.
+     */
     public Entry.with_inputcheck (Label err_label,
                                   Regex valid_chars,
                                   uint delay_sec = 5) {
@@ -60,10 +78,19 @@ public class Entry : Gtk.Entry {
         });
     }
 
+    /**
+     * Destroy object and disable timer.
+     */
     ~Entry() {
         this.disable_timer();
     }
 
+    /**
+     * Check text for valid input and (re)set {@link err_label} with timer
+     * accordingly.
+     *
+     * @param input_text Text to check.
+     */
     public void ui_check_input (string input_text) {
         MatchInfo match_info = null;  // init to null to make valac happy
         if (!this.valid_chars.match (input_text, 0, out match_info)) {
@@ -82,11 +109,21 @@ public class Entry : Gtk.Entry {
         }
     }
 
+    /**
+     * Emit when input was valid.
+     */
     public signal void valid_input();
+    /**
+     * Emit when input was invalid.
+     */
     public signal void invalid_input();
 
-    /*
+    /**
      * If resettable is true. Label will be resettet with next user input.
+     *
+     * @param error_msg Error message to show in {@link err_label}.
+     * @param delay Delay in seconds to show error in {@link err_label}.
+     * @param resettable {@link err_label} will be resetted with valid input.
      */
     public void set_label_timer (string error_msg, uint delay, bool resettable = true) {
         this.err_label.set_label (error_msg);
@@ -98,6 +135,9 @@ public class Entry : Gtk.Entry {
         }));
     }
 
+    /**
+     * Disable timer.
+     */
     public void disable_timer() {
         if (this.timer_id != 0)
             Source.remove (this.timer_id);
@@ -108,6 +148,9 @@ public class Entry : Gtk.Entry {
 /**
  * Simple warning dialog. Check {@link Gtk.ResponseType.YES} or
  * {@link Gtk.ResponseType.NO}.
+ *
+ * @param warn_msg Text of warning.
+ * @return Return {@link Gtk.ResponseType}.
  */
 public int ui_ask_warning (string warn_msg) {
     var dlg = new MessageDialog (window_main,
@@ -137,6 +180,12 @@ public enum StoreType {
 
 /**
  * Build {@link Gtk.TreeStore} with files. Each directory has its own leaves.
+ *
+ * @param storename Name of store.
+ * @param files List of files to add to store.
+ * @param store {@link Gtk.TreeStore} to initialize.
+ * @param pathmap Map from filepaths to {@link Gtk.TreeIter} to build up tree
+ *                correctly.
  */
 public void build_file_treestore (string storename,
                                   string[] files,
@@ -183,6 +232,10 @@ public void build_file_treestore (string storename,
  * Build plain {@link Gtk.TreeStore}.
  *
  * To build up TreeStore with leaves, look at {@link build_file_treestore}.
+ *
+ * @param storename Name of store.
+ * @param elements List of elements to add to store.
+ * @param store {@link Gtk.TreeStore} to initialize.
  */
 public void build_plain_treestore (string storename, string[] elements, ref TreeStore store) {
     TreeIter iter_base;

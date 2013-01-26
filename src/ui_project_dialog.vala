@@ -20,8 +20,12 @@
 using Gtk;
 using GLib;
 
-/* Load new projects (with dialog). */
-public void ui_load_project(UiElementPool ui_elements_pool) {
+/**
+ * Load new projects (with dialog).
+ *
+ * @param ui_elements_pool Pool to update all connected {@link UiElement} components.
+ */
+public void ui_load_project (UiElementPool ui_elements_pool) {
     var dlg = new FileChooserDialog (_("Open project"),
                                      window_main,
                                      FileChooserAction.OPEN,
@@ -86,7 +90,12 @@ public void ui_load_project(UiElementPool ui_elements_pool) {
     dlg.close();
 }
 
-/* Settings window. */
+
+/**
+ * Show project wettings window.
+ *
+ * @param project {@link ValamaProject} to edit settings.
+ */
 public void ui_project_dialog (ValamaProject? project) {
     var dlg = new Dialog.with_buttons (_("Project settings"),
                                        window_main,

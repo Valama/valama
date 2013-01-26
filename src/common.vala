@@ -24,7 +24,7 @@ using GLib;
  */
 public enum CopyRecursiveFlags {
     /**
-     * Don't count and don't skip or warn on existing files.
+     * Do not count and do not skip or warn on existing files.
      */
     NONE,
     /**
@@ -198,6 +198,18 @@ public class FileTransfer : Object {
         COUNT
     }
 
+    /**
+     * Setup all flags.
+     *
+     * @param from Path to do action from (e.g. filename to copy).
+     * @param to Path to do action to (e.g. where to copy file).
+     * @param rec_flag Flag to control action to do.
+     * @param copy_flag Copy and move behavior (e.g. to overwrite file or make a backup).
+     * @param query_flag Follow symlinks or not.
+     * @param cancellable Is cancellable.
+     * @throws GLib.Error Throw on file query errors.
+     * @throws GLib.IOError Throw on failed io operations.
+     */
     public FileTransfer (string from, string to,
                               CopyRecursiveFlags rec_flag = CopyRecursiveFlags.NONE,
                               FileCopyFlags copy_flag = FileCopyFlags.NONE,
@@ -249,27 +261,36 @@ public class FileTransfer : Object {
     }
 
     /**
-     * Percentage of file transfer.
+     * Emit percentage of file transfer.
+     *
+     * @param percent_done Percentage of file transfer.
      */
     public signal void byte_count_changed (double percent_done);
 
     /**
-     * Number of current transferred files (and total amount).
+     * Emit on change number of current transferred files (and total amount).
      *
-     * Emit on change.
+     * @param cur Current transferred files.
+     * @param tot Total of files to transfer.
      */
     public signal void num_count_changed (int cur, int tot);
 
-    /*
+    /**
      * Signal with both file names to indicate if file should be overwritten.
      * Return true to overwrite file. To skip return false.
      *
      * Emit on change.
+     *
+     * @param from_name Path of file where action comes from.
+     * @param to_name Path of file where action should go to.
      */
     public signal bool warn_overwrite (string from_name, string to_name);
 
     /**
      * Calculate total size of transfers.
+     *
+     * @throws GLib.Error Throw on file query errors.
+     * @throws GLib.IOError Throw on failed io operations.
      */
     //TODO: Provide public interface to provide information without doing
     //      anything?
@@ -296,6 +317,11 @@ public class FileTransfer : Object {
     /**
      * Call the transfer methods properly, calulcate before transfer and create
      * destination directory if needed.
+     *
+     * @param action Flag to control action to do.
+     *
+     * @throws GLib.Error Throw on file query errors.
+     * @throws GLib.IOError Throw on failed io operations.
      */
     private void transfer (RecursiveAction action) throws GLib.Error, GLib.IOError {
         calc_size();
@@ -316,6 +342,9 @@ public class FileTransfer : Object {
 
     /**
      * Wrapper to call recursive copy method (and avoid file names here).
+     *
+     * @throws GLib.Error Throw on file query errors.
+     * @throws GLib.IOError Throw on failed io operations.
      */
     public void copy() throws GLib.Error, GLib.IOError {
         transfer (RecursiveAction.COPY);
@@ -326,6 +355,9 @@ public class FileTransfer : Object {
 
     /**
      * Wrapper to call recursive move method (and avoid file names here).
+     *
+     * @throws GLib.Error Throw on file query errors.
+     * @throws GLib.IOError Throw on failed io operations.
      */
     public void move() throws GLib.Error, GLib.IOError {
         transfer (RecursiveAction.MOVE);
@@ -336,6 +368,11 @@ public class FileTransfer : Object {
 
     /**
      * Do all the recursive work and take care of all different flag types.
+     *
+     * @param from {@link GLib.File} to do action from.
+     * @param dest {@link GLib.File} to do action to.
+     * @throws GLib.Error Throw on file query errors.
+     * @throws GLib.IOError Throw on failed io operations.
      */
     private void do_recursively (File from, File dest) throws Error, IOError {
         FileEnumerator enumerator = from.enumerate_children ("standard::*",
@@ -394,6 +431,11 @@ public class FileTransfer : Object {
 
     /**
      * Do the file transfer of a single file.
+     *
+     * @param from {@link GLib.File} to do action from.
+     * @param dest {@link GLib.File} to do action to.
+     * @param size Total size of files.
+     * @throws GLib.Error Throw on file query errors.
      */
     private void transfer_file (File from, File dest, double size = 0) throws GLib.Error {
         /*
@@ -481,7 +523,10 @@ public class FileTransfer : Object {
 /**
  * Generate list of filename parts splitted on {@link GLib.Path.DIR_SEPARATOR}.
  *
- * If basename is false, return list of full paths.
+ * @param path Pathname to split.
+ * @param basename Control return of absolute or relative parts of path.
+ * @return If basename is false, return list of full paths. Else return
+ *         absolute paths.
  */
 public string[] split_path (string path, bool basename = true) {
     string[] pathlist = {};

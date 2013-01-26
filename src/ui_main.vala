@@ -26,18 +26,45 @@ using Gee;
  * Main window class. Setup {@link Gdl.Dock} and {@link Gdl.DockBar} stuff.
  */
 public class MainWindow : Window {
+    /**
+     * Master dock for all items except tool and menubar.
+     */
     private Dock dock;
+    /**
+     * Layout of master dock {@link dock}.
+     */
     private DockLayout layout;
+    /**
+     * Menubar. Fill with {@link add_menu}.
+     */
     private MenuBar menubar;
+    /**
+     * Toolbar. Fill with {@link add_button}.
+     */
     private Toolbar toolbar;
 
+    /**
+     * Source code dock.
+     */
     private Dock srcdock;
+    /**
+     * Layout of source code dock {@link srcdock}.
+     */
     private DockLayout srclayout;
+    /**
+     * List of all {@link DockItem} objects in source dock {@link srcdock}.
+     */
     private ArrayList<DockItem> srcitems;
 
+    /**
+     * Global shortcut object.
+     */
     private AccelGroup accel_group;
 
     private string? _current_srcfocus = null;
+    /**
+     * Relative path to current selected {@link Gtk.SourceBuffer}.
+     */
     public string current_srcfocus {
         get {
             return _current_srcfocus;
@@ -52,11 +79,24 @@ public class MainWindow : Window {
             this.current_srcbuffer = (SourceBuffer) this.current_srcview.buffer;
         }
     }
+    /**
+     * Id of current {@link Gtk.SourceView} in {@link srcitems}.
+     */
     private int current_srcid { get; private set; default = -1; }
+    /**
+     * Currently selected {@link Gtk.SourceView}.
+     */
     public SourceView? current_srcview { get; private set; default = null; }
+    /**
+     * Currently selected {@link Gtk.SourceBuffer}.
+     */
     public SourceBuffer? current_srcbuffer { get; private set; default = null; }
 
 
+    /**
+     * Create MainWindow. Initialize menubar, toolbar, master dock and source
+     * dock.
+     */
     public MainWindow() {
         this.destroy.connect (main_quit);
         this.title = _("Valama");
@@ -99,6 +139,8 @@ public class MainWindow : Window {
     /**
      * Focus source view {@link Gdl.DockItem} in {@link Gdl.Dock} and select
      * recursively all {@link Gdl.DockNotebook} tabs.
+     *
+     * @param filename Name of file to focus.
      */
     public void focus_src (string filename) {
         foreach (var srcitem in srcitems) {
@@ -125,13 +167,16 @@ public class MainWindow : Window {
      * Connect to this signal to interrupt hiding (closing) of
      * {@link Gdl.DockItem} with {@link Gtk.SourceView}.
      *
-     * Return false to interrupt or return true proceed.
+     * @param view {@link Gtk.SourceView} to close.
+     * @return Return false to interrupt or return true proceed.
      */
     public signal bool buffer_close (SourceView view);
 
     /**
      * Hide (close) {@link Gdl.DockItem} with {@link Gtk.SourceView} by
      * filename.
+     *
+     * @param filename Name of source file to close.
      */
     public void close_srcitem (string filename) {
         foreach (var srcitem in srcitems)
@@ -142,7 +187,10 @@ public class MainWindow : Window {
     }
 
     /**
-     * Add new source view item to main {@link Gdl.Dock}.
+     * Add new source view item to source dock {@link srcdock}.
+     *
+     * @param cview {@link CodeView} object to add.
+     * @param filename Name of file (used to identify item).
      */
     public void add_srcitem (CodeView cview, string filename = "") {
         if (filename == "")
@@ -247,6 +295,8 @@ public class MainWindow : Window {
 
     /**
      * Set up {@link Gtk.Notebook} tab properties.
+     *
+     * @param item {@link Gdl.DockItem} to setup.
      */
     private void set_notebook_tabs (DockItem item) {
         var pa = item.parent;
@@ -261,6 +311,8 @@ public class MainWindow : Window {
     /**
      * Get {@link Gtk.SourceView} from within {@link Gdl.DockItem}.
      *
+     * @param item {@link Gdl.DockItem} to get {@link Gtk.SourceView} from.
+     * @return Return associated {@link Gtk.SourceView}.
      */
     /*
      * NOTE: Be careful. This have to be exactly the same objects as the
@@ -274,7 +326,9 @@ public class MainWindow : Window {
     /**
      * Get id of {@link Gtk.SourceView} by filename.
      *
-     * If file wasn't found return -1.
+     * @param filename Name of source file to search for in {@link srcitems}.
+     * @return If file was found return id of {@link Gtk.SourceView} in
+     *         {@link srcitems}. Else -1.
      */
     private int get_sourceview_id (string filename) {
         for (int i = 0; i < srcitems.size; ++i)
@@ -284,7 +338,14 @@ public class MainWindow : Window {
     }
 
     /**
-     * Add new item to main {@link Gdl.Dock}.
+     * Add new item to master dock {@link dock}.
+     *
+     * @param item_name Unique name of new {@link Gdl.DockItem}.
+     * @param item_long_name Display name of new {@link Gdl.DockItem}.
+     * @param widget {@link Gtk.Widget} to add to new {@link Gdl.DockItem}.
+     * @param stock {@link Gtk.Stock} name to add icon to {@link Gdl.DockItem}.
+     * @param behavior {@link Gdl.DockItemBehavior} of new {@link Gdl.DockItem}.
+     * @param placement {@link Gdl.DockPlacement} of new {@link Gdl.DockItem}.
      */
     public void add_item (string item_name, string item_long_name,
                           Widget widget,
@@ -303,6 +364,8 @@ public class MainWindow : Window {
 
     /**
      * Add menu to main {@link Gtk.MenuBar}.
+     *
+     * @param item {@link Gtk.MenuItem} to add.
      */
     public void add_menu (Gtk.MenuItem item) {
         this.menubar.add (item);
@@ -310,6 +373,8 @@ public class MainWindow : Window {
 
     /**
      * Add new button to main {@link Gdl.DockBar}.
+     *
+     * @param item {@link Gtk.ToolItem} to add.
      */
     public void add_button (ToolItem item) {
         this.toolbar.add (item);
@@ -317,6 +382,9 @@ public class MainWindow : Window {
 
     /**
      * Save current {@link Gdl.DockLayout} to file.
+     *
+     * @param  filename Name of file to save layout to.
+     * @return Return true on success else false.
      */
     public bool save_layout (string filename) {
         bool ret = this.layout.save_to_file (filename);
@@ -331,6 +399,10 @@ public class MainWindow : Window {
 
     /**
      * Load {@link Gdl.DockLayout} from filename.
+     *
+     * @param filename Name of file to load layout from.
+     * @param section Name of default section to load settings from.
+     * @return Return true on success else false.
      */
     public bool load_layout (string filename, string section = "__default__") {
         bool ret = this.layout.load_from_file (filename);
@@ -345,6 +417,9 @@ public class MainWindow : Window {
 
     /**
      * Reload current {@link Gdl.DockLayout}. May be helpful on window resize.
+     *
+     * @param section Name of default section to load settings from.
+     * @return Return true on success else false.
      */
     public bool layout_reload (string section = "__default__") {
         bool ret = this.layout.load_layout (section);
@@ -358,7 +433,12 @@ public class MainWindow : Window {
     }
 
     /**
-     * Add accelerator for 'activate' signal.
+     * Add accelerator for "activate" signal.
+     *
+     * @param item {@link Gtk.Widget} to connect.
+     * @param keyname Name of key to connect to signal (with modtype).
+     * @param modtype {@link Gdk.ModifierType} to connect to signal together
+     *                with keyname. Default modifier key is "ctrl".
      */
     public void add_accel_activate (Widget item,
                                     string keyname,

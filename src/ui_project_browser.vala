@@ -21,6 +21,9 @@ using Gtk;
 using Vala;
 using GLib;
 
+/**
+ * Browse source code.
+ */
 public class ProjectBrowser : UiElement {
     private TreeView tree_view;
     public Widget widget;

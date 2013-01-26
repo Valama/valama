@@ -20,6 +20,9 @@
 using GLib;
 using Gtk;
 
+/**
+ * Report build status and code warnings/errors.
+ */
 class UiReport : UiElement {
     ReportWrapper report;
     TreeView tree_view;

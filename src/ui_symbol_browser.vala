@@ -20,6 +20,9 @@
 using Gtk;
 using Vala;
 
+/**
+ * Browser symbols.
+ */
 public class SymbolBrowser : UiElement {
     public SymbolBrowser (ValamaProject? vproject=null) {
         if (vproject != null)
