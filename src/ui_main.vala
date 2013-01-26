@@ -37,7 +37,7 @@ public class MainWindow : Window {
 
     private AccelGroup accel_group;
 
-    private  string _current_srcfocus;
+    private string? _current_srcfocus = null;
     public string current_srcfocus {
         get {
             return _current_srcfocus;
@@ -49,21 +49,12 @@ public class MainWindow : Window {
             _current_srcfocus = value;
             this.current_srcid = get_sourceview_id (_current_srcfocus);
             this.current_srcview = get_sourceview (this.srcitems[this.current_srcid]);
-            srcfocus_changed();
+            this.current_srcbuffer = (SourceBuffer) this.current_srcview.buffer;
         }
     }
     private int current_srcid { get; private set; default = -1; }
-    public SourceView current_srcview { get; private set; }
-    public SourceBuffer current_srcbuffer {
-        get {
-            return (SourceBuffer) current_srcview.buffer;
-        }
-    }
-
-    /**
-     * Emit signal to indicate that source item focus has probably changed.
-     */
-    public signal void srcfocus_changed();
+    public SourceView? current_srcview { get; private set; default = null; }
+    public SourceBuffer? current_srcbuffer { get; private set; default = null; }
 
 
     public MainWindow() {
@@ -153,24 +144,22 @@ public class MainWindow : Window {
     /**
      * Add new source view item to main {@link Gdl.Dock}.
      */
-    public void add_srcitem (SourceView view, string filename = "") {
+    public void add_srcitem (CodeView cview, string filename = "") {
         if (filename == "")
             filename = _("New document");
 
         var src_view = new ScrolledWindow (null, null);
-        src_view.add (view);
+        src_view.add (cview.view);
+
         /*
          * NOTE: Keep this in sync with get_sourceview method.
          */
         var item = new DockItem.with_stock ("SourceView " + srcitems.size.to_string(),
                                             filename,
-                                            Stock.NEW,
+                                            (cview.dirty) ? Stock.NEW : Stock.EDIT,
                                             DockItemBehavior.LOCKED);
-        project.buffer_changed.connect ((has_changes) => {
-            if (has_changes)
-                item.stock_id = Stock.NEW;
-            else
-                item.stock_id = Stock.EDIT;
+        cview.notify["dirty"].connect (() => {
+            item.stock_id = (cview.dirty) ? Stock.NEW : Stock.EDIT;
         });
         item.add (src_view);
 
@@ -179,7 +168,7 @@ public class MainWindow : Window {
             this.current_srcfocus = filename;
         });
         /* Set focus on click. */
-        view.grab_focus.connect (() => {
+        cview.view.grab_focus.connect (() => {
             this.current_srcfocus = filename;
         });
 
@@ -233,7 +222,9 @@ public class MainWindow : Window {
              *
              * NOTE: Custom unsafed views are ignored (even if empty).
              */
-            var id = get_sourceview_id (this.current_srcfocus);
+            int id = 0;
+            if (this.current_srcfocus != null)
+                id = get_sourceview_id (this.current_srcfocus);
             if (id != -1)
                 this.srcitems[id].dock (item, DockPlacement.CENTER, 0);
             else {
@@ -249,7 +240,7 @@ public class MainWindow : Window {
             }
         }
         srcitems.add (item);
-        view.show();
+        cview.view.show();
         src_view.show();
         item.show_item();
     }

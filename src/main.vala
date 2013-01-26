@@ -223,17 +223,18 @@ public static int main (string[] args) {
     /* Application signals. */
     window_main.buffer_close.connect (project.close_buffer);
 
-    window_main.srcfocus_changed.connect (() => {
+    window_main.notify["current-srcbuffer"].connect (() => {
         var srcbuf = window_main.current_srcbuffer;
         project.undo_changed (srcbuf.can_undo);
         project.redo_changed (srcbuf.can_redo);
-        if (window_main.current_srcfocus != _("New document"))
+
+        if (window_main.current_srcfocus == _("New document"))
+            project.buffer_changed (true);
+        else
             project.buffer_changed (project.buffer_is_dirty (
                         Path.build_path (Path.DIR_SEPARATOR_S,
                                          project.project_path,
                                          window_main.current_srcfocus)));
-        else
-            project.buffer_changed (true);
     });
 
 
@@ -245,7 +246,7 @@ public static int main (string[] args) {
     src_report.add (wdg_report.widget);
 
     /* Init new empty buffer. */
-    window_main.add_srcitem (project.open_new_buffer("", "", true));
+    window_main.add_srcitem (project.open_new_buffer ("", "", true));
     window_main.add_item ("ReportWrapper", _("Report widget"), src_report,
                           Stock.INFO,
                           DockItemBehavior.CANT_CLOSE, //temporary solution until items can be added later
@@ -349,9 +350,9 @@ static void on_file_selected (string filename){
     string txt = "";
     try {
         FileUtils.get_contents (filename, out txt);
-        var view = project.open_new_buffer (txt, filename);
-        if (view != null)
-            window_main.add_srcitem (view, fname);
+        var cview = project.open_new_buffer (txt, filename);
+        if (cview != null)
+            window_main.add_srcitem (cview, fname);
         window_main.focus_src (fname);
     } catch (GLib.FileError e) {
         stderr.printf (_("Could not load file: %s\n"), e.message);
