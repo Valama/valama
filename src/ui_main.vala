@@ -159,18 +159,17 @@ public class MainWindow : Window {
 
         var src_view = new ScrolledWindow (null, null);
         src_view.add (view);
+
+        var srcbuf = (SourceBuffer) view.buffer;
         /*
          * NOTE: Keep this in sync with get_sourceview method.
          */
         var item = new DockItem.with_stock ("SourceView " + srcitems.size.to_string(),
                                             filename,
-                                            Stock.NEW,
+                                            (srcbuf.dirty) ? Stock.NEW : Stock.EDIT,
                                             DockItemBehavior.LOCKED);
-        project.buffer_changed.connect ((has_changes) => {
-            if (has_changes)
-                item.stock_id = Stock.NEW;
-            else
-                item.stock_id = Stock.EDIT;
+        srcbuf.notify["dirty"].connect ((sender, property) => {
+            item.stock_id = (srcbuf.dirty) ? Stock.NEW : Stock.EDIT;
         });
         item.add (src_view);
 
