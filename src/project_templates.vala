@@ -29,6 +29,9 @@ public class ProjectTemplate {
 
 /**
  * Load all available {@link ProjectTemplate} information.
+ *
+ * @param language Current locale.
+ * @return Return list of all found templates.
  */
 public ProjectTemplate[] load_templates (string language){
     FileInfo file_info;

@@ -223,7 +223,7 @@ public static int main (string[] args) {
     /* Application signals. */
     window_main.buffer_close.connect (project.close_buffer);
 
-    window_main.notify["current-srcfocus"].connect (() => {
+    window_main.notify["current-srcbuffer"].connect (() => {
         var srcbuf = window_main.current_srcbuffer;
         project.undo_changed (srcbuf.can_undo);
         project.redo_changed (srcbuf.can_redo);
@@ -245,7 +245,7 @@ public static int main (string[] args) {
     src_report.add (wdg_report.widget);
 
     /* Init new empty buffer. */
-    window_main.add_srcitem (project.open_new_buffer("", "", true));
+    window_main.add_srcitem (project.open_new_buffer ("", "", true));
     window_main.add_item ("ReportWrapper", _("Report widget"), src_report,
                           Stock.INFO,
                           DockItemBehavior.CANT_CLOSE, //temporary solution until items can be added later

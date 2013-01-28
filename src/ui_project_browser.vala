@@ -21,15 +21,18 @@ using Gtk;
 using Vala;
 using GLib;
 
+/**
+ * Browse source code.
+ */
 public class ProjectBrowser : UiElement {
     private TreeView tree_view;
     public Widget widget;
 
     private Gee.ArrayList<TreePath> tree_view_expanded;
 
-    public ProjectBrowser (ValamaProject? project = null) {
-        if (project != null)
-            this.project = project;
+    public ProjectBrowser (ValamaProject? vproject = null) {
+        if (vproject != null)
+            project = vproject;
         element_name = "ProjectBrowser";
 
         tree_view = new TreeView();

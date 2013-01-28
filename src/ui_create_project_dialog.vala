@@ -20,7 +20,7 @@
 using GLib;
 using Gtk;
 
-/*
+/**
  * Template selection widget; Can return selected item
  */
 public class uiTemplateSelector {
@@ -67,10 +67,12 @@ public class uiTemplateSelector {
     }
 }
 
-/*
- * Project creation dialog; returns a ValamaProject of the created template-based project
- */
 
+/**
+ * Project creation dialog.
+ *
+ * @return Return a {@link ValamaProject} of the created template-based project.
+ */
 public ValamaProject? ui_create_project_dialog() {
     var dlg = new Dialog.with_buttons (_("Choose project template"),
                                        window_main,

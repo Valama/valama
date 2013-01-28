@@ -20,6 +20,9 @@
 using Gtk;
 using GLib;
 
+/**
+ * Show about dialog.
+ */
 public void ui_about_dialog() {
     var dlg = new AboutDialog();
     dlg.resizable = false;
