@@ -223,7 +223,7 @@ public static int main (string[] args) {
     /* Application signals. */
     window_main.buffer_close.connect (project.close_buffer);
 
-    window_main.srcfocus_changed.connect (() => {
+    window_main.notify["current-srcfocus"].connect (() => {
         var srcbuf = window_main.current_srcbuffer;
         project.undo_changed (srcbuf.can_undo);
         project.redo_changed (srcbuf.can_redo);

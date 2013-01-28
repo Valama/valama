@@ -37,7 +37,7 @@ public class MainWindow : Window {
 
     private AccelGroup accel_group;
 
-    private  string _current_srcfocus;
+    private  string _current_srcfocus = null;
     public string current_srcfocus {
         get {
             return _current_srcfocus;
@@ -49,22 +49,12 @@ public class MainWindow : Window {
             _current_srcfocus = value;
             this.current_srcid = get_sourceview_id (_current_srcfocus);
             this.current_srcview = get_sourceview (this.srcitems[this.current_srcid]);
-            srcfocus_changed();
+            this.current_srcbuffer = (SourceBuffer) this.current_srcview.buffer;
         }
     }
     private int current_srcid { get; private set; default = -1; }
-    public SourceView current_srcview { get; private set; }
-    public SourceBuffer current_srcbuffer {
-        get {
-            return (SourceBuffer) current_srcview.buffer;
-        }
-    }
-
-    /**
-     * Emit signal to indicate that source item focus has probably changed.
-     */
-    public signal void srcfocus_changed();
-
+    public SourceView current_srcview { get; private set; default = null; }
+    public SourceBuffer current_srcbuffer { get; private set; default = null; }
 
     public MainWindow() {
         this.destroy.connect (main_quit);
@@ -232,7 +222,9 @@ public class MainWindow : Window {
              *
              * NOTE: Custom unsafed views are ignored (even if empty).
              */
-            var id = get_sourceview_id (this.current_srcfocus);
+            int id = 0;
+            if (this.current_srcfocus != null)
+                id = get_sourceview_id (this.current_srcfocus);
             if (id != -1)
                 this.srcitems[id].dock (item, DockPlacement.CENTER, 0);
             else {
