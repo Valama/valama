@@ -142,6 +142,11 @@ if(VALADOC_FOUND)
       "--private"
       "--internal"
     )
+    if(DEBUG)
+      foreach(pkg ${required_pkgs})
+        list(APPEND extra_valadoc_opts "--deps=${pkg}")
+      endforeach()
+    endif()
   else()
     set(extra_valadoc_opts)
   endif()

@@ -22,6 +22,7 @@ if(XGETTEXT_FOUND)
   gettext_create_pot("${potfile}"
     SRCFILES
       ${srcfiles}
+      "guanako/*.vala"
     WORKING_DIRECTORY
       "../"
   )

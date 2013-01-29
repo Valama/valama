@@ -7,17 +7,17 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Valama 0.1.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-01-11 01:18+0100\n"
+"POT-Creation-Date: 2013-01-29 15:29+0100\n"
 "PO-Revision-Date: 2012-12-19 03:00+0100\n"
 "Last-Translator: Martin Lorang <martin@lorang.net>\n"
 "Language-Team: French\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=utf-8\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: ../src/main.vala:448
+#: ../src/main.vala:531
 msgid ""
 "\n"
 "\n"
@@ -27,455 +27,509 @@ msgstr ""
 "\n"
 "Retours chariots:\n"
 
-#: ../src/ui_symbol_browser.vala:84 ../src/ui_project_browser.vala:118
-#: ../src/ui_reports.vala:87
+#: ../src/ui_project_browser.vala:194 ../src/ui_reports.vala:89
+#: ../src/ui_symbol_browser.vala:87
 #, c-format
 msgid "%s update finished!\n"
 msgstr "Mise à jour de %s terminée !\n"
 
-#: ../src/ui_helpers.vala:67
+#: ../src/ui_helpers.vala:98
 msgid "' Please choose one from: "
 msgstr "Sélectionner un de : "
 
-#: ../src/project.vala:291
+#: ../src/project.vala:440
 #, fuzzy
 msgid "(new file)"
 msgstr "Créer un nouveau fichier"
 
-#: ../src/ui_create_file_dialog.vala:41
+#: ../src/ui_create_file_dialog.vala:46
 msgid "Add new file to project"
 msgstr "Ajouter un nouveau fichier au projet"
 
-#: ../guanako/guanako.vala:247
+#: ../guanako/guanako.vala:251
 #, c-format
 msgid "An error occured: %s"
 msgstr "Une erreur est survenue : %s"
 
-#: ../src/project.vala:367
+#: ../src/project.vala:539
 #, fuzzy, c-format
 msgid "Buffer loaded.\n"
 msgstr "Mise à jour du buffer"
 
-#: ../src/project.vala:336 ../src/project.vala:338
+#: ../src/project.vala:514
 msgid "Buffer update"
 msgstr "Mise à jour du buffer"
 
-#: ../guanako/guanako.vala:570
+#: ../src/ui_project_browser.vala:179
+msgid "Buildsystem files"
+msgstr ""
+
+#: ../guanako/guanako.vala:574
 #, c-format
 msgid "Call '%s' not found in >%s<\n"
 msgstr "Appel '%s' non trouvé dans >%s<\n"
 
-#: ../src/project_templates.vala:66 ../src/project.vala:148
+#: ../src/project.vala:299 ../src/project_templates.vala:73
 msgid "Cannot parse file."
 msgstr "Impossible de parser le fichier."
 
-#: ../src/ui_main.vala:44
+#: ../src/ui_main.vala:74
 #, c-format
 msgid "Change current focus: %s\n"
 msgstr ""
 
-#: ../src/ui_create_file_dialog.vala:28
+#: ../src/ui_create_file_dialog.vala:33
 msgid "Choose filename"
 msgstr "Choisissez un fichier"
 
-#: ../src/ui_create_project_dialog.vala:75
+#: ../src/ui_create_project_dialog.vala:77
 msgid "Choose project template"
 msgstr "Choisissez un modèle de projet"
 
-#: ../src/ui_missing_package_dialog.vala:37
+#: ../src/ui_missing_package_dialog.vala:39
 msgid "Compiling and autocompletion might fail!"
 msgstr ""
 
-#: ../src/common.vala:441
+#: ../src/common.vala:483
 #, c-format
 msgid "Copy from '%s' to '%s'.\n"
 msgstr "Copie de '%s' vers '%s'.\n"
 
-#: ../src/common.vala:323
+#: ../src/common.vala:352
 #, c-format
 msgid "Copying finished.\n"
 msgstr "Copie terminée.\n"
 
-#: ../src/ui_create_project_dialog.vala:145
+#: ../src/ui_about_dialog.vala:41
+msgid "Copyright © 2012, 2013 Valama development team"
+msgstr ""
+
+#: ../src/ui_create_project_dialog.vala:163
 #, c-format
 msgid "Could not copy templates for new project: %s\n"
 msgstr "Impossible de copier le modèle pour le nouveau projet : %s\n"
 
-#: ../src/ui_create_file_dialog.vala:75
+#: ../src/ui_create_file_dialog.vala:83
 #, c-format
 msgid "Could not create new file: %s"
 msgstr "Impossible de créer le nouveau fichier : %s"
 
-#: ../src/project.vala:359
+#: ../src/project.vala:531
 #, fuzzy, c-format
 msgid "Could not create thread to update buffer completion: %s\n"
 msgstr ""
 "Impossible de démarrer le processus pour la mise à jour de l'auto-"
 "complétion : %s"
 
-#: ../src/project.vala:138
+#: ../src/project.vala:277
 #, fuzzy, c-format
 msgid "Could not execute build process: %s\n"
 msgstr "Impossible de démarrer le processus de construction : %s"
 
-#: ../src/project.vala:329
+#: ../src/project.vala:495
 #, fuzzy, c-format
 msgid "Could not load completion: %s\n"
 msgstr "Impossible de charger l'auto-complétion : %s"
 
-#: ../src/main.vala:231
+#: ../src/main.vala:357
 #, fuzzy, c-format
 msgid "Could not load file: %s\n"
 msgstr "Impossible de charger le fichier : %s"
 
-#: ../src/main.vala:390
+#: ../src/main.vala:469
 #, fuzzy, c-format
 msgid "Could not load icon theme: %s\n"
 msgstr "Impossible de charger le thème d'icones : %s"
 
-#: ../src/main.vala:310
+#: ../src/main.vala:388
 #, fuzzy, c-format
 msgid "Could not load pixmap: %s\n"
 msgstr "Impossible de charger l'image : %s"
 
-#: ../src/main.vala:281
+#: ../src/common.vala:584
 #, fuzzy, c-format
 msgid "Could not open file to write: %s\n"
 msgstr "Impossible d'ouvrir le fichier en écriture : %s"
 
-#: ../src/project.vala:93 ../src/project.vala:129
+#: ../src/project.vala:204 ../src/project.vala:261
 #, fuzzy, c-format
 msgid "Could not open file: %s\n"
 msgstr "Impossible d'ouvrir le fichier : %s"
 
-#: ../src/main.vala:312
+#: ../src/main.vala:390
 #, fuzzy, c-format
 msgid "Could not open pixmaps file: %s\n"
 msgstr "Impossible d'ouvrir le fichier image : %s"
 
-#: ../guanako/guanako_vapi_discoverer.vala:51
+#: ../guanako/guanako_vapi_discoverer.vala:55
 #, c-format
 msgid "Could not operate on directory: %s"
 msgstr "Impossible d'ouvrir le fichier : %s"
 
-#: ../guanako/guanako_vapi_discoverer.vala:49 ../guanako/guanako.vala:807
+#: ../guanako/guanako.vala:811 ../guanako/guanako_vapi_discoverer.vala:53
 #, c-format
 msgid "Could not read file: %s"
 msgstr "Impossible de lire le fichier : %s"
 
-#: ../src/project.vala:127
+#: ../src/project.vala:259
 #, fuzzy, c-format
 msgid "Could not read file: %s\n"
 msgstr "Impossible de lire le fichier : %s"
 
-#: ../guanako/guanako.vala:805
+#: ../guanako/guanako.vala:809
 #, c-format
 msgid "Could not read line: %s"
 msgstr "Impossible de lire le fichier : %s"
 
-#: ../guanako/guanako.vala:243
+#: ../guanako/guanako.vala:247
 #, c-format
 msgid "Could not read syntax file: %s"
 msgstr "Impossible de lire le fichier : %s"
 
-#: ../src/main.vala:279
+#: ../src/common.vala:582
 #, fuzzy, c-format
-msgid "Could not update source file: %s\n"
-msgstr "Impossible de mettre à jour le fichier source : %s"
+msgid "Could not update file: %s\n"
+msgstr "Impossible de mettre à jour le fichier vapi : %s\n"
 
-#: ../src/ui_project_browser.vala:140
+#: ../src/ui_project_browser.vala:216
 #, c-format
 msgid "Could not update vapi files: %s\n"
 msgstr "Impossible de mettre à jour le fichier vapi : %s\n"
 
-#: ../src/ui_create_file_dialog.vala:73
+#: ../src/ui_create_file_dialog.vala:81
 #, c-format
 msgid "Could not write to new file: %s"
 msgstr "Impossible d'écrire le nouveau fichier : %s"
 
-#: ../src/main.vala:173
+#: ../src/ui_helpers.vala:204
+#, fuzzy, c-format
+msgid "Couldn't add element to TreeStore '%s': %s\n"
+msgstr "Impossible de charger le fichier : %s"
+
+#: ../src/main.vala:283
 #, fuzzy, c-format
 msgid "Couldn't create cache directory: %s\n"
 msgstr "Impossible d'ouvrir le fichier : %s"
 
-#: ../src/main.vala:57
+#: ../src/ui_project_browser.vala:278 ../src/ui_project_browser.vala:351
+#, fuzzy, c-format
+msgid "Couldn't get current tree path: %s\n"
+msgstr "Impossible d'ouvrir le fichier : %s"
+
+#: ../src/ui_project_browser.vala:75 ../src/ui_project_browser.vala:88
+#: ../src/ui_project_browser.vala:126 ../src/ui_project_browser.vala:285
+#: ../src/ui_project_browser.vala:310 ../src/ui_project_browser.vala:358
+#: ../src/ui_project_browser.vala:377
+#, fuzzy, c-format
+msgid "Couldn't get iterator in TreeView: %s\n"
+msgstr "Impossible de lire les informations du modèle : %s"
+
+#: ../src/main.vala:58
 #, fuzzy, c-format
 msgid "Couldn't load Valama project: %s\n"
 msgstr "Impossible de charger le projet Valama : %s"
 
-#: ../src/ui_main.vala:326
+#: ../src/ui_main.vala:411
 #, fuzzy, c-format
 msgid "Couldn't load layout file: %s\n"
 msgstr "Impossible de charger le fichier : %s"
 
-#: ../src/ui_main.vala:340
+#: ../src/ui_main.vala:428
 #, fuzzy, c-format
 msgid "Couldn't load layout: %s\n"
 msgstr "Impossible de charger le projet Valama : %s"
 
-#: ../src/ui_project_dialog.vala:73
+#: ../src/ui_project_dialog.vala:76
 #, c-format
 msgid "Couldn't load new project: %s\n"
 msgstr "Impossible de charger le nouveau projet : %s\n"
 
-#: ../src/ui_main.vala:312
+#: ../src/ui_main.vala:393
 #, fuzzy, c-format
 msgid "Couldn't save layout to file: %s\n"
 msgstr "Impossible de charger le fichier : %s"
 
-#: ../src/ui_project_dialog.vala:64
+#: ../src/ui_project_dialog.vala:67
 #, c-format
 msgid "Couln't compare project files inodes: %s\n"
 msgstr "Impossible de comparer les inodes des fichiers du projet : %s\n"
 
-#: ../src/project_templates.vala:107
-#, c-format
-msgid "Couln't get template information: %s"
+#: ../src/project_templates.vala:114
+#, fuzzy, c-format
+msgid "Couln't get template information: %s\n"
 msgstr "Impossible de lire les informations du modèle : %s"
 
-#: ../src/ui_create_project_dialog.vala:154
+#: ../src/ui_create_project_dialog.vala:174
 #, c-format
 msgid "Couln't load new project: %s\n"
 msgstr "Impossible de charger le nouveau projet : %s\n"
 
-#: ../src/main.vala:91
+#: ../src/main.vala:162
 msgid "Create new file"
 msgstr "Créer un nouveau fichier"
 
-#: ../src/ui_project_browser.vala:245
+#: ../src/ui_project_browser.vala:388
 #, fuzzy
 msgid "Do you want to delete this file?"
 msgstr "Voulez-vous supprimer ce fichier ?"
 
-#: ../src/ui_create_file_dialog.vala:62
+#: ../src/ui_create_file_dialog.vala:67
 msgid "Don't let this field empty. Name a file."
 msgstr "Ne laissez pas ce champ vide. Donnez un nom de fichier."
 
-#: ../src/ui_reports.vala:36
+#: ../src/main.vala:118
+msgid "Edit"
+msgstr ""
+
+#: ../src/ui_reports.vala:38
 msgid "Error"
 msgstr "Erreur"
 
-#: ../src/ui_reports.vala:133
+#: ../src/ui_reports.vala:135
 #, c-format
 msgid "Error found: %s: %d(%d)-%d(%d): %s\n"
 msgstr "Erreur trouvée : %s: %d(%d)-%d(%d): %s\n"
 
-#: ../src/ui_reports.vala:84
+#: ../src/ui_reports.vala:86
 #, fuzzy, c-format
 msgid "Errors: %i, Warnings: %i\n"
 msgstr "Erreurs: %s, Avertissements : %d\n"
 
-#: ../src/common.vala:392
+#: ../src/main.vala:84
+msgid "File"
+msgstr ""
+
+#: ../src/common.vala:429
 msgid "File copying cancelled."
 msgstr "Copie de fichier annulée."
 
-#: ../src/project_templates.vala:72 ../src/project.vala:154
+#: ../src/project.vala:305 ../src/project_templates.vala:79
 msgid "File does not contain enough information"
 msgstr "Le fichier ne contient pas assez d'informations"
 
-#: ../src/main.vala:277
+#: ../src/common.vala:579
 #, c-format
 msgid "File saved: %s\n"
 msgstr ""
 
-#: ../src/project.vala:79
+#: ../src/project.vala:141 ../src/project.vala:156
 #, c-format
 msgid "Found file %s\n"
 msgstr "Fichier %s trouvé\n"
 
-#: ../src/ui_helpers.vala:66
+#: ../src/ui_about_dialog.vala:36
+#, c-format
+msgid "French"
+msgstr ""
+
+#: ../src/ui_about_dialog.vala:37
+#, c-format
+msgid "German"
+msgstr ""
+
+#: ../src/ui_about_dialog.vala:48
+#, fuzzy
+msgid "Github project page"
+msgstr "Choisissez un modèle de projet"
+
+#: ../src/main.vala:148
+msgid "Help"
+msgstr ""
+
+#: ../src/ui_helpers.vala:97
 msgid "Invalid character: '"
 msgstr "Caractère non valide : '"
 
-#: ../src/ui_main.vala:329
+#: ../src/ui_main.vala:414
 #, fuzzy, c-format
 msgid "Layout loaded from file: %s\n"
 msgstr "Chargement du fichier projet : %s\n"
 
-#: ../src/ui_main.vala:343
+#: ../src/ui_main.vala:431
 #, fuzzy, c-format
 msgid "Layout loaded: %s\n"
 msgstr "Impossible de charger le fichier : %s"
 
-#: ../src/ui_main.vala:315
+#: ../src/ui_main.vala:396
 #, fuzzy, c-format
 msgid "Layout saved to file: %s\n"
 msgstr "Chargement du fichier projet : %s\n"
 
-#: ../src/project.vala:294
+#: ../src/project.vala:443
 #, fuzzy, c-format
 msgid "Load new buffer: %s\n"
 msgstr "Chargement du fichier projet : %s\n"
 
-#: ../src/project.vala:56
+#: ../src/project.vala:111
 #, c-format
 msgid "Load project file: %s\n"
 msgstr "Chargement du fichier projet : %s\n"
 
-#: ../src/ui_reports.vala:35 ../src/ui_create_project_dialog.vala:114
+#: ../src/ui_create_project_dialog.vala:116 ../src/ui_reports.vala:37
 msgid "Location"
 msgstr "Répertoire"
 
-#: ../guanako/guanako.vala:501 ../guanako/guanako.vala:562
+#: ../guanako/guanako.vala:505 ../guanako/guanako.vala:566
 #, c-format
 msgid "Malformed rule! >%s<\n"
 msgstr ""
 
-#: ../src/ui_missing_package_dialog.vala:25
+#: ../src/ui_missing_package_dialog.vala:27
 msgid "Missing packages"
 msgstr ""
 
-#: ../src/common.vala:457
+#: ../src/common.vala:499
 #, c-format
 msgid "Move from '%s' to '%s'.\n"
 msgstr "Déplacement de '%s' vers '%s'.\n"
 
-#: ../src/common.vala:333
+#: ../src/common.vala:365
 #, c-format
 msgid "Moving finished.\n"
 msgstr "Déplacement terminé.\n"
 
-#: ../src/ui_main.vala:150
+#: ../src/main.vala:230 ../src/ui_main.vala:197
 msgid "New document"
 msgstr ""
 
-#: ../src/ui_create_project_dialog.vala:118
+#: ../src/ui_create_project_dialog.vala:120
 msgid "New project location"
 msgstr "Nouveau lieu du projet"
 
-#: ../src/main.vala:240
-#, c-format
-msgid "No file selected to save.\n"
+#: ../src/ui_about_dialog.vala:40
+msgid "Next generation Vala IDE"
 msgstr ""
 
-#: ../src/common.vala:214
+#: ../src/common.vala:226
 msgid "No such file."
 msgstr "Fichier inexistant."
 
-#: ../src/common.vala:292
+#: ../src/common.vala:313
 msgid "Not enough space available."
 msgstr "Pas assez d'espace libre."
 
-#: ../src/main.vala:263
-#, c-format
-msgid "Nothing to save for '%s'.\n"
-msgstr ""
-
-#: ../src/main.vala:84 ../src/ui_project_dialog.vala:26
+#: ../src/main.vala:167 ../src/ui_project_dialog.vala:29
 msgid "Open project"
 msgstr "Ouvrir projet"
 
-#: ../src/ui_project_browser.vala:98 ../src/ui_project_browser.vala:164
+#: ../src/ui_project_browser.vala:180 ../src/ui_project_browser.vala:240
 msgid "Packages"
 msgstr "Paquets"
 
-#: ../guanako/guanako.vala:589
+#: ../guanako/guanako.vala:593
 #, c-format
 msgid "Parameter '%s' not found in >%s<\n"
 msgstr "Paramètre '%s' non trouvé dans >%s<\n"
 
-#: ../src/main.vala:447
+#: ../src/main.vala:530
 msgid "Parameters:\n"
 msgstr "Paramètres :\n"
 
-#: ../src/main.vala:314
+#: ../src/main.vala:392
 #, fuzzy, c-format
 msgid "Pixmap loading failed: %s\n"
 msgstr "Erreur lors du chargement de l'image : %s"
 
-#: ../src/ui_project_browser.vala:228
-#, c-format
-msgid "Please report a bug!"
-msgstr "Signaler ce bogue SVP !"
-
-#: ../src/ui_project_browser.vala:264 ../src/common.vala:474
-#: ../src/ui_project_dialog.vala:197 ../src/ui_main.vala:227
+#: ../src/common.vala:516 ../src/ui_about_dialog.vala:58
+#: ../src/ui_helpers.vala:205 ../src/ui_main.vala:281
+#: ../src/ui_project_browser.vala:76 ../src/ui_project_browser.vala:89
+#: ../src/ui_project_browser.vala:110 ../src/ui_project_browser.vala:127
+#: ../src/ui_project_browser.vala:149 ../src/ui_project_browser.vala:279
+#: ../src/ui_project_browser.vala:286 ../src/ui_project_browser.vala:311
+#: ../src/ui_project_browser.vala:342 ../src/ui_project_browser.vala:352
+#: ../src/ui_project_browser.vala:359 ../src/ui_project_browser.vala:378
+#: ../src/ui_project_browser.vala:415 ../src/ui_project_dialog.vala:203
 #, fuzzy, c-format
 msgid "Please report a bug!\n"
 msgstr "Signaler ce bogue SVP !"
 
-#: ../src/ui_project_browser.vala:37 ../src/ui_project_dialog.vala:107
+#: ../src/main.vala:143 ../src/ui_project_browser.vala:40
+#: ../src/ui_project_dialog.vala:115
 msgid "Project"
 msgstr "Projet"
 
-#: ../src/main.vala:146
+#: ../src/main.vala:254
 #, fuzzy
 msgid "Project browser"
 msgstr "Nom du projet"
 
-#: ../src/ui_create_project_dialog.vala:93
-#: ../src/ui_create_project_dialog.vala:102
+#: ../src/ui_create_project_dialog.vala:95
+#: ../src/ui_create_project_dialog.vala:104
 msgid "Project name"
 msgstr "Nom du projet"
 
-#: ../src/ui_project_dialog.vala:114
+#: ../src/ui_project_dialog.vala:122
 msgid "Project name:"
 msgstr "Nom du projet :"
 
-#: ../src/ui_project_dialog.vala:92
+#: ../src/ui_project_dialog.vala:100
 msgid "Project settings"
 msgstr "Paramètres du projet"
 
-#: ../src/main.vala:141
+#: ../src/main.vala:192
+msgid "Redo last change"
+msgstr ""
+
+#: ../src/main.vala:249
 msgid "Report widget"
 msgstr ""
 
-#: ../src/ui_symbol_browser.vala:54 ../src/ui_project_browser.vala:79
-#: ../src/ui_reports.vala:56
+#: ../src/ui_project_browser.vala:171 ../src/ui_reports.vala:58
+#: ../src/ui_symbol_browser.vala:57
 #, c-format
 msgid "Run %s update!\n"
 msgstr "Mise à jour de %s démarrée !\n"
 
-#: ../src/main.vala:103
+#: ../src/main.vala:174
 msgid "Save current file"
 msgstr "Sauvegarde du fichier en cours"
 
-#: ../src/main.vala:110
+#: ../src/main.vala:200
 msgid "Save current file and build project"
 msgstr "Sauvegarder le fichier en cours et construire le projet"
 
-#: ../src/ui_project_browser.vala:151
+#: ../src/ui_project_browser.vala:227
 msgid "Select new packages"
 msgstr "Sélectionner de nouveau paquets"
 
-#: ../src/main.vala:125
+#: ../src/main.vala:217
 msgid "Settings"
 msgstr "Paramètres"
 
-#: ../src/common.vala:409
+#: ../src/common.vala:451
 #, c-format
 msgid "Skip %s\n"
 msgstr "Ignorer %s\n"
 
-#: ../src/ui_project_dialog.vala:84
+#: ../src/ui_project_dialog.vala:87
 #, c-format
 msgid "Skip already loaded project: %s\n"
 msgstr "Ignorer le projet déjà chargé : %s\n"
 
-#: ../src/common.vala:423
+#: ../src/common.vala:465
 #, c-format
 msgid "Skip overwrite from '%s' to '%s'.\n"
 msgstr "Ignorer l'écrasement de '%s' vers '%s'.\n"
 
-#: ../src/ui_main.vala:186
+#: ../src/ui_main.vala:238
 #, fuzzy
 msgid "Source"
 msgstr "Sources"
 
-#: ../src/ui_main.vala:226
+#: ../src/ui_main.vala:280
 #, c-format
 msgid "Source view id out of range.\n"
 msgstr ""
 
-#: ../src/ui_project_browser.vala:86
+#: ../src/ui_project_browser.vala:178
 msgid "Sources"
 msgstr "Sources"
 
-#: ../src/ui_symbol_browser.vala:31
+#: ../src/ui_symbol_browser.vala:34
 msgid "Symbol"
 msgstr "Symbole"
 
-#: ../src/main.vala:150
+#: ../src/main.vala:258
 #, fuzzy
 msgid "Symbol browser"
 msgstr "Symbole"
@@ -484,80 +538,123 @@ msgstr "Symbole"
 msgid "Templates"
 msgstr "Modèles"
 
-#: ../src/project.vala:103
+#: ../src/project.vala:130
 msgid "Test Provider 1"
 msgstr "Auto-complétion"
 
-#: ../src/ui_missing_package_dialog.vala:34
+#: ../src/ui_missing_package_dialog.vala:36
 msgid "The following vala packages are not available on your system:\n"
 msgstr ""
 
-#: ../src/ui_symbol_browser.vala:38
+#: ../src/project.vala:248
+#, c-format
+msgid "This file was auto generated by Valama %s. Do not modify it.\n"
+msgstr ""
+
+#: ../src/ui_symbol_browser.vala:41
 msgid "Type"
 msgstr "Type"
 
-#: ../src/ui_project_browser.vala:254
-#, c-format
-msgid "Unable to delete source file: %s\n"
+#: ../src/ui_project_browser.vala:405
+#, fuzzy, c-format
+msgid "Unable to delete source file '%s': %s\n"
 msgstr "Impossible de supprimer le fichier source : %s\n"
 
-#: ../src/ui_project_browser.vala:227 ../src/ui_project_browser.vala:263
-#: ../src/common.vala:473 ../src/ui_project_dialog.vala:196
+#: ../src/main.vala:185
+msgid "Undo last change"
+msgstr ""
+
+#: ../src/common.vala:515 ../src/ui_about_dialog.vala:57
+#: ../src/ui_project_browser.vala:109 ../src/ui_project_browser.vala:148
+#: ../src/ui_project_browser.vala:341 ../src/ui_project_browser.vala:414
+#: ../src/ui_project_dialog.vala:202
 #, c-format
 msgid "Unexpected enum value: %s: %d\n"
 msgstr "Valeur enum innatendu : %s: %d\n"
 
-#: ../src/ui_main.vala:70
+#: ../src/ui_main.vala:102
 msgid "Valama"
 msgstr ""
 
-#: ../src/ui_project_dialog.vala:41
+#: ../src/ui_project_dialog.vala:44
 msgid "Valama project files (*.vlp)"
 msgstr "Fichiers projet Valama (*.vlp)"
 
-#: ../guanako/guanako.vala:144 ../guanako/guanako.vala:161
+#: ../guanako/guanako.vala:146 ../guanako/guanako.vala:163
 #, c-format
 msgid "Vapi found: %s\n"
 msgstr "Vapi trouvé : %s\n"
 
-#: ../guanako/guanako.vala:512
-#, c-format
+#: ../guanako/guanako.vala:516
+#, fuzzy, c-format
 msgid "Variable '%s' not found! >%s<\n"
-msgstr "Variable '%s' non trouvée >%s<\n"
+msgstr "Paramètre '%s' non trouvé dans >%s<\n"
 
-#: ../src/ui_project_dialog.vala:142
+#: ../src/ui_project_dialog.vala:150
 msgid "Version:"
 msgstr "Version :"
 
-#: ../src/ui_project_dialog.vala:37
+#: ../src/main.vala:138
+msgid "View"
+msgstr ""
+
+#: ../src/ui_project_dialog.vala:40
 msgid "View all files (*)"
 msgstr "Tous les fichiers (*)"
 
-#: ../src/ui_reports.vala:109
+#: ../src/ui_reports.vala:111
 #, c-format
 msgid "Warning found: %s: %d(%d)-%d(%d): %s\n"
 msgstr "Avertissement trouvé : %s: %d(%d)-%d(%d): %s\n"
 
-#: ../guanako/guanako.vala:138 ../guanako/guanako.vala:155
+#: ../src/project.vala:599
+#, fuzzy, c-format
+msgid "Warning: Couldn't save project file: %s\n"
+msgstr "Impossible de charger le fichier : %s"
+
+#: ../src/project.vala:201
+#, fuzzy, c-format
+msgid "Warning: File not found: %s\n"
+msgstr "Variable '%s' non trouvée >%s<\n"
+
+#: ../src/project.vala:617
+#, c-format
+msgid ""
+"Warning: File not registered in project to check if buffer is dirty: %s\n"
+msgstr ""
+
+#: ../src/project.vala:583
+#, c-format
+msgid "Warning: No file selected.\n"
+msgstr ""
+
+#: ../guanako/guanako.vala:140 ../guanako/guanako.vala:157
 #, c-format
 msgid "Warning: Vapi for package %s not found.\n"
 msgstr "Avertissement : Vapi pour le paquet %s non trouvé.\n"
 
-#: ../src/ui_create_file_dialog.vala:50
+#: ../src/ui_create_file_dialog.vala:55
 msgid "filename"
 msgstr "Nom de fichier"
 
-#: ../src/ui_helpers.vala:74
+#: ../src/ui_helpers.vala:105
 msgid "insert_text"
 msgstr "Insérer texte"
 
-#: ../src/main.vala:446
+#: ../src/main.vala:529
 msgid "none"
 msgstr "rien"
 
-#: ../src/project.vala:40
+#: ../src/project.vala:74
 msgid "valama_project"
 msgstr "Projet Valama"
 
 #~ msgid "Could not start new thread: %s\n"
 #~ msgstr "Impossible de démarrer un nouveau processus : %s\n"
+
+#, fuzzy
+#~ msgid "Could not update source file: %s\n"
+#~ msgstr "Impossible de mettre à jour le fichier source : %s"
+
+#~ msgid "Please report a bug!"
+#~ msgstr "Signaler ce bogue SVP !"
