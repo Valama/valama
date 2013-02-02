@@ -504,8 +504,17 @@ public class ValamaProject {
 
         bfr.changed.connect (() => {
             bfr.dirty = true;
+
             if (!parsing) {
+                var mark = window_main.current_srcbuffer.get_insert();
+                TextIter iter;
+                window_main.current_srcbuffer.get_iter_at_mark (out iter, mark);
+                var line = iter.get_line() + 1;
+                if (bfr.last_active_line == line)
+                    return;
+                bfr.last_active_line = line;
                 parsing = true;
+
                 try {
                     /* Get a copy of the buffer that is safe to work on
                      * Otherwise, the thread might crash accessing it
@@ -692,6 +701,7 @@ public class SourceBuffer : Gtk.SourceBuffer {
      * Manually indicate if buffer has unsaved changes.
      */
     public bool dirty { get; set; default = false; }
+    public int last_active_line = -1;
 }
 
 
