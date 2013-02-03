@@ -407,14 +407,9 @@ class TestProvider : Gtk.SourceCompletionProvider, Object {
         return true;
     }
 
-    GLib.List<Gtk.SourceCompletionItem> props;
-    Symbol[] props_symbols;
-    Gee.HashMap<Gtk.SourceCompletionProposal, CompletionProposal> map_proposals;
-
     public void populate (Gtk.SourceCompletionContext context) {
-        props = new GLib.List<Gtk.SourceCompletionItem>();
-        props_symbols = new Symbol[0];
 
+        /* Get current line */
         var mark = window_main.current_srcbuffer.get_insert();
         TextIter iter;
         window_main.current_srcbuffer.get_iter_at_mark (out iter, mark);
@@ -428,8 +423,8 @@ class TestProvider : Gtk.SourceCompletionProvider, Object {
         if (parsing)
             loop_update.run();
 
-        var map_proposals_new = new Gee.HashMap<Gtk.SourceCompletionProposal, CompletionProposal>();
-        var proposals = project.guanako_project.propose_symbols (
+        /* Get completion proposals from Guanako */
+        var guanako_proposals = project.guanako_project.propose_symbols (
                                 project.guanako_project.get_source_file_by_name (
                                         Path.build_path (Path.DIR_SEPARATOR_S,
                                                          project.project_path,
@@ -437,26 +432,27 @@ class TestProvider : Gtk.SourceCompletionProvider, Object {
                                 line,
                                 col,
                                 current_line);
-        foreach (CompletionProposal proposal in proposals) {
-            if (proposal.symbol.name != null) {
+
+        /* Assign icons and pass the proposals on to Gtk.SourceView */
+        var props = new GLib.List<Gtk.SourceCompletionItem>();
+        foreach (CompletionProposal guanako_proposal in guanako_proposals) {
+            if (guanako_proposal.symbol.name != null) {
 
                 Gdk.Pixbuf pixbuf = null;
-                if (proposal.symbol is Namespace)   pixbuf = map_icons["namespace"];
-                if (proposal.symbol is Property)    pixbuf = map_icons["property"];
-                if (proposal.symbol is Struct)      pixbuf = map_icons["struct"];
-                if (proposal.symbol is Method)      pixbuf = map_icons["method"];
-                if (proposal.symbol is Variable)    pixbuf = map_icons["field"];
-                if (proposal.symbol is Enum)        pixbuf = map_icons["enum"];
-                if (proposal.symbol is Class)       pixbuf = map_icons["class"];
-                if (proposal.symbol is Constant)    pixbuf = map_icons["constant"];
-                if (proposal.symbol is Vala.Signal) pixbuf = map_icons["signal"];
+                if (guanako_proposal.symbol is Namespace)   pixbuf = map_icons["namespace"];
+                if (guanako_proposal.symbol is Property)    pixbuf = map_icons["property"];
+                if (guanako_proposal.symbol is Struct)      pixbuf = map_icons["struct"];
+                if (guanako_proposal.symbol is Method)      pixbuf = map_icons["method"];
+                if (guanako_proposal.symbol is Variable)    pixbuf = map_icons["field"];
+                if (guanako_proposal.symbol is Enum)        pixbuf = map_icons["enum"];
+                if (guanako_proposal.symbol is Class)       pixbuf = map_icons["class"];
+                if (guanako_proposal.symbol is Constant)    pixbuf = map_icons["constant"];
+                if (guanako_proposal.symbol is Vala.Signal) pixbuf = map_icons["signal"];
 
-                var item = new Gtk.SourceCompletionItem (proposal.symbol.name, proposal.symbol.name, pixbuf, null);
+                var item = new ComplItem (guanako_proposal.symbol.name, guanako_proposal.symbol.name, pixbuf, null, guanako_proposal);
                 props.append (item);
-                map_proposals_new[item] = proposal;
             }
         }
-        map_proposals = map_proposals_new;
         context.add_proposals (this, props, true);
     }
 
@@ -474,11 +470,7 @@ class TestProvider : Gtk.SourceCompletionProvider, Object {
 
     public bool activate_proposal (Gtk.SourceCompletionProposal proposal,
                                    Gtk.TextIter iter) {
-        if (!map_proposals.has_key(proposal)){
-            stdout.printf("Damn it! Proposal list out of sync -.-\n");
-            return true;
-        }
-        var prop = map_proposals[proposal];
+        var prop = ((ComplItem)proposal).guanako_proposal;
 
         TextIter start = iter;
         start.backward_chars (prop.replace_length);
@@ -506,7 +498,14 @@ class TestProvider : Gtk.SourceCompletionProvider, Object {
     public bool get_start_iter (Gtk.SourceCompletionContext context,
                                 Gtk.SourceCompletionProposal proposal,
                                 Gtk.TextIter iter) {
-        return false;
+        var mark = window_main.current_srcbuffer.get_insert();
+        TextIter cursor_iter;
+        window_main.current_srcbuffer.get_iter_at_mark (out cursor_iter, mark);
+
+        var prop = ((ComplItem)proposal).guanako_proposal;
+        cursor_iter.backward_chars (prop.replace_length);
+        iter = cursor_iter;
+        return true;
     }
 
     public void update_info (Gtk.SourceCompletionProposal proposal,
@@ -516,7 +515,7 @@ class TestProvider : Gtk.SourceCompletionProvider, Object {
             info_inner_widget = null;
         }
 
-        var prop = map_proposals[proposal];
+        var prop = ((ComplItem)proposal).guanako_proposal;
         if (prop is Method) {
             var mth = prop.symbol as Method;
             var vbox = new Box(Orientation.VERTICAL, 0);
@@ -539,4 +538,14 @@ class TestProvider : Gtk.SourceCompletionProvider, Object {
     }
 }
 
+/* 
+ * Gtk.SourceCompletionItem enhanced to carry a reference to the corresponding guanako proposal
+ */
+class ComplItem : SourceCompletionItem {
+    public ComplItem(string label, string text, Gdk.Pixbuf? icon, string? info, CompletionProposal guanako_proposal){
+        Object(label: label, text: text, icon: icon, info: info);
+        this.guanako_proposal = guanako_proposal;
+    }
+    public CompletionProposal guanako_proposal;
+}
 // vim: set ai ts=4 sts=4 et sw=4
