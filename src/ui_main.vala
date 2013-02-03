@@ -73,10 +73,14 @@ public class MainWindow : Window {
 #if DEBUG
             stdout.printf (_("Change current focus: %s\n"), value);
 #endif
-            _current_srcfocus = value;
-            this.current_srcid = get_sourceview_id (_current_srcfocus);
-            this.current_srcview = get_sourceview (this.srcitems[this.current_srcid]);
-            this.current_srcbuffer = (SourceBuffer) this.current_srcview.buffer;
+            this._current_srcfocus = value;
+            this.current_srcid = get_sourceview_id (this._current_srcfocus);
+            if (0 <= this.current_srcid < this.srcitems.size) {
+                this.current_srcview = get_sourceview (this.srcitems[this.current_srcid]);
+                this.current_srcbuffer = (SourceBuffer) this.current_srcview.buffer;
+            } else
+                stderr.printf (_("Warning: Could not select current source view: %s\n" +
+                                 "Expected behavior may change.\n"), this._current_srcfocus);
         }
     }
     /**
@@ -335,6 +339,9 @@ public class MainWindow : Window {
         for (int i = 0; i < srcitems.size; ++i)
             if (srcitems[i].long_name == filename)
                 return i;
+#if DEBUG
+        stderr.printf ("Warning: No such file found in opened buffers: %s\n", filename);
+#endif
         return -1;
     }
 

@@ -16,22 +16,47 @@
 # with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-set(sizeslist 24 32 48 64 72 96 128 256)
+# Generate usable application icons.
+set(sizeslist "24" "32" "48" "64" "72" "96" "128" "256")
 convert_svg_to_png(png_list
   ICON
     "${CMAKE_CURRENT_SOURCE_DIR}/V4_logo.svg"
   SIZES
-    "${sizeslist}"
+    ${sizeslist}
   PNG_NAME
     "valama"
 )
-add_custom_target(icons ALL DEPENDS ${png_list})
+add_custom_target(icons
+  ALL
+  DEPENDS
+    ${png_list}
+  COMMENT
+    "Generate application icons." VERBATIM
+)
+
+# Generate logo with text.
+set(sizeslist "128")
+convert_svg_to_png(textlogo
+  ICON
+    "${CMAKE_CURRENT_SOURCE_DIR}/V4.svg"
+  SIZES
+    ${sizeslist}
+  PNG_NAME
+    "valama-text.png"
+)
+add_custom_target(icons_text
+  ALL
+  DEPENDS
+    ${textlogo}
+  COMMENT
+    "Generate text logo." VERBATIM
+)
+
 
 # Install application icon.
 install(
   FILES
-    "${CMAKE_CURRENT_BINARY_DIR}/icons/hicolor/24x24/apps/valama.png"
+    "${CMAKE_CURRENT_BINARY_DIR}/icons/hicolor/32x32/apps/valama.png"
   DESTINATION
-    "share/pixmaps"
-
+    "${pixrootdir}"
 )
