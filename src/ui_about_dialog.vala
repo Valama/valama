@@ -18,6 +18,7 @@
  */
 
 using Gtk;
+using Gdk;
 using GLib;
 
 /**
@@ -26,6 +27,14 @@ using GLib;
 public void ui_about_dialog() {
     var dlg = new AboutDialog();
     dlg.resizable = false;
+
+    try {
+        dlg.logo = new Pixbuf.from_file (Path.build_path (Path.DIR_SEPARATOR_S,
+                                                      Config.PACKAGE_DATA_DIR,
+                                                      "valama-text.png"));
+    } catch (GLib.Error e) {
+        stderr.printf ("Could not load pixmap: %s\n", e.message);
+    }
 
     //TODO: Generate this automatically from AUTHORS file.
     dlg.artists = null;

@@ -25,10 +25,5 @@ if(XGETTEXT_FOUND)
     WORKING_DIRECTORY
       "../"
   )
-
-  gettext_create_translations("${potfile}"
-    ALL
-    COMMENT
-      "Build translations."
-  )
+  gettext_create_translations("${potfile}" ALL)
 endif()

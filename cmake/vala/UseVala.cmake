@@ -165,16 +165,17 @@ function(vala_precompile output)
   add_custom_command(OUTPUT ${out_files}
     COMMAND
       ${VALA_EXECUTABLE}
-    ARGS
-      "-C"
-      ${header_arguments}
-      ${vapi_arguments}
-      "-b" ${CMAKE_CURRENT_SOURCE_DIR}
-      "-d" ${DIRECTORY}
-      ${vala_pkg_opts}
-      ${ARGS_OPTIONS}
-      ${in_files}
-      ${custom_vapi_arguments}
+        "-C"
+        ${header_arguments}
+        ${vapi_arguments}
+        "-b" "${CMAKE_CURRENT_SOURCE_DIR}"
+        "-d" "${DIRECTORY}"
+        ${vala_pkg_opts}
+        ${ARGS_OPTIONS}
+        ${in_files}
+        ${custom_vapi_arguments}
+    COMMAND
+      ${CMAKE_COMMAND} -E touch ${out_files}
     DEPENDS
       ${in_files}
       ${ARGS_CUSTOM_VAPIS}

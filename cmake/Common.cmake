@@ -122,7 +122,7 @@ function(convert_svg_to_png output)
           COMMAND
             ${CONVERT}
           ARGS
-            -background none -resize "${size}x${size}" "${ARGS_ICON}" "${iconpath}"
+            "-background" "none" "-resize" "${size}x${size}" "${ARGS_ICON}" "${iconpath}"
         )
         list(APPEND png_list "${iconpath}")
         install(FILES "${iconpath}" DESTINATION "share/${tmppath}")

@@ -7,6 +7,7 @@ set(required_pkgs
 "gee-1.0"
 "libvala-0.16"
 "libvala-0.18"
+"libvala-0.20"
 "gtk+-3.0"
 )
 set(srcfiles

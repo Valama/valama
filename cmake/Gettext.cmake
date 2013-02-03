@@ -385,6 +385,8 @@ if(XGETTEXT_FOUND)
         "${make_all}"
         DEPENDS
           ${_gmoFiles}
+        COMMENT
+          "Build translations." VERBATIM
       )
     endif()
   endfunction()
