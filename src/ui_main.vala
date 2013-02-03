@@ -251,18 +251,22 @@ public class MainWindow : Window {
             boxitem.add (box);
             this.dock.add_item (boxitem, DockPlacement.TOP);
 
+            /*
+             * FIXME: DockItem does not dock into source view dock with
+             *        gdl-3.0 < 3.5.5. Issue #28
+             */
             this.srcdock.add_item (item, DockPlacement.RIGHT);
             this.srcdock.master.switcher_style = SwitcherStyle.TABS;
         } else {
             /* Handle dock item closing. */
             item.hide.connect (() => {
-                /* Suppress dialog by removing item first forom srcitems list.  */
+                /* Suppress dialog by removing item at first from srcitems list. */
                 if (!(item in srcitems))
                     return;
 
                 if (!buffer_close (get_sourceview (item))) {
                     /*
-                     * This will work properly with gdl-3.0 >= 3.6
+                     * This will work properly with gdl-3.0 >= 3.5.5
                      */
                     item.show_item();
                     set_notebook_tabs (item);
