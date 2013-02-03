@@ -30,7 +30,8 @@ set(includedir "include")
 set(datadir "${datarootdir}/${project_name_lower}")
 set(localedir "${datarootdir}/locale")
 set(appdir "${datarootdir}/applications")
-set(pixdir "${datarootdir}/pixmaps/${project_name_lower}")
+set(pixrootdir "${datarootdir}/pixmaps")
+set(pixdir "${pixrootdir}/${project_name_lower}")
 set(docdir "${datadir}/doc")
 set(mandir "${datarootdir}/man")
 
@@ -40,21 +41,26 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 find_package(Vala "0.16" REQUIRED)
 
-if(VALA_VERSION STRGREATER "0.17.0")
+if(VALA_VERSION STRGREATER "0.19.0")
+  list(REMOVE_ITEM required_pkgs "libvala-0.18" )
+  list(REMOVE_ITEM required_pkgs "libvala-0.16" )
+  list(APPEND required_pkgs "libvala-0.20")
+  set(valashort_ver "0.20")
+  set(valac_cond)
+elseif(VALA_VERSION STRGREATER "0.17.0")
   list(REMOVE_ITEM required_pkgs "libvala-0.16" )
   set(valashort_ver "0.18")
-  set(valac_cond "")
+  set(valac_cond)
 else()
   list(REMOVE_ITEM required_pkgs "libvala-0.18" )
   set(valashort_ver "0.16")
   set(valac_cond "-D;VALA_LESS_0_18")
 endif()
-set(vapishort_dir "vala-${valashort_ver}/vapi")
-set(vapidir "/usr/share/${vapishort_dir}")
+set(vala_datadir "/usr/share/vala")
+set(vapidir "${vala_datadir}-${valashort_ver}/vapi")
 
 
-set(srcfiles "${CMAKE_CURRENT_SOURCE_DIR}/src/*.vala")
-set(vapifiles "${CMAKE_CURRENT_SOURCE_DIR}/vapi/*.vapi")
+
 set(default_vala_flags
   "--thread"
   "--target-glib" "2.32"

@@ -110,6 +110,8 @@ include(ValaPkgs)
 vala_pkgs(VALA_C
   PACKAGES
     ${required_pkgs}
+  OPTIONAL
+    ${optional_pkgs}
   SRCFILES
     ${srcfiles}
   VAPIS

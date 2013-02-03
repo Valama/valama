@@ -1,3 +1,4 @@
+[CCode (cprefix = "", lower_case_cprefix = "")]
 namespace Config {
-    public const string vala_version = "@valashort_ver@";
+    public const string VALA_VERSION;
 }
