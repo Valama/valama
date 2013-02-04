@@ -42,7 +42,9 @@ convert_svg_to_png(textlogo
   SIZES
     ${sizeslist}
   PNG_NAME
-    "valama-text.png"
+    "valama-text"
+  DESTINATION
+    "${datadir}"
 )
 add_custom_target(icons_text
   ALL

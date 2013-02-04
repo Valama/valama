@@ -696,7 +696,7 @@ public class ValamaProject {
      * @param filename Filename of currently processed buffer.
      * @param buffertext Content of currently processed buffer.
      */
-    public delegate void ViewCallback (string filename, string buffertext);
+    public delegate void ViewCallback (string filename, SourceBuffer buffer);
     /**
      * Perform {@link ViewCallback} action for each opened
      * {@link Gtk.SourceView}.
@@ -705,7 +705,7 @@ public class ValamaProject {
      */
     public void foreach_buffer (ViewCallback action) {
         foreach (var map in vieworder)
-            action (map.filename, map.view.buffer.text);
+            action (map.filename, (SourceBuffer) map.view.buffer);
     }
 }
 

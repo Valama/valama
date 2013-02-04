@@ -555,8 +555,9 @@ class TestProvider : Gtk.SourceCompletionProvider, Object {
     }
 }
 
-/* 
- * Gtk.SourceCompletionItem enhanced to carry a reference to the corresponding guanako proposal
+/**
+ * {@link Gtk.SourceCompletionItem} enhanced to carry a reference to the
+ * corresponding Guanako proposal.
  */
 class ComplItem : SourceCompletionItem {
     public ComplItem(string label, string text, Gdk.Pixbuf? icon, string? info, CompletionProposal guanako_proposal){

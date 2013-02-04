@@ -82,6 +82,9 @@ endfunction()
 # PNG_NAME
 #   Name of png file (without suffix) which is the target file name.
 #
+# DESTINATION
+#   Directory where to install all generated files to (plain).
+#
 #
 # Simple example:
 #
@@ -103,12 +106,15 @@ endfunction()
 #
 function(convert_svg_to_png output)
   include(CMakeParseArguments)
-  cmake_parse_arguments(ARGS "" "" "ICON;SIZES;PNG_NAME" ${ARGN})
+  cmake_parse_arguments(ARGS "" "DESTINATION" "ICON;SIZES;PNG_NAME" ${ARGN})
 
   set(png_list)
   if(ARGS_ICON)
     if(ARGS_PNG_NAME)
       find_program(CONVERT convert)
+      if(NOT datarootdir)
+        set(datarootdir "share")
+      endif()
 
       foreach(size ${ARGS_SIZES})
         set(tmppath "icons/hicolor/${size}x${size}/apps")
@@ -125,7 +131,11 @@ function(convert_svg_to_png output)
             "-background" "none" "-resize" "${size}x${size}" "${ARGS_ICON}" "${iconpath}"
         )
         list(APPEND png_list "${iconpath}")
-        install(FILES "${iconpath}" DESTINATION "share/${tmppath}")
+        if(ARGS_DESTINATION)
+          install(FILES "${iconpath}" DESTINATION "${ARGS_DESTINATION}")
+        else()
+          install(FILES "${iconpath}" DESTINATION "${datarootdir}/${tmppath}")
+        endif()
       endforeach()
     endif()
   endif()
