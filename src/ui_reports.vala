@@ -82,6 +82,41 @@ class UiReport : UiElement {
 #endif
                                                                    1, err.message, -1);
         }
+        var bfr = window_main.current_srcbuffer;
+        TextIter first_iter;
+        TextIter end_iter;
+        bfr.get_start_iter (out first_iter);
+        bfr.get_end_iter (out end_iter);
+        bfr.remove_tag_by_name ("error_bg", first_iter, end_iter);
+        bfr.remove_tag_by_name ("warning_bg", first_iter, end_iter);
+
+        foreach (ReportWrapper.Error err in report.errors_list){
+            //if (err.source.file.filename != window_main.current_srcfocus)
+            //    continue;
+            TextIter iter_start;
+            TextIter iter_end;
+            bfr.get_iter_at_line (out iter_start, err.source.begin.line - 1);
+            bfr.get_iter_at_line (out iter_end, err.source.end.line - 1);
+            iter_start.forward_chars (err.source.begin.column - 1);
+            iter_end.forward_chars (err.source.end.column);
+            bfr.apply_tag_by_name ("error_bg", iter_start, iter_end);
+        }
+        foreach (ReportWrapper.Error warn in report.warnings_list){
+            //if (warn.source.file.filename != window_main.current_srcfocus)
+            //    continue;
+            TextIter iter_start;
+            TextIter iter_end;
+            bfr.get_iter_at_line (out iter_start, warn.source.begin.line - 1);
+            bfr.get_iter_at_line (out iter_end, warn.source.end.line - 1);
+            iter_start.forward_chars (warn.source.begin.column - 1);
+            iter_end.forward_chars (warn.source.end.column);
+            bfr.apply_tag_by_name ("warning_bg", iter_start, iter_end);
+        }
+
+        /*while (first_iter.forward_search ("guanako", TextSearchFlags.TEXT_ONLY | TextSearchFlags.VISIBLE_ONLY, out start_match, out end_match, null)){
+            bfr.apply_tag_by_name (
+        }*/
+        
 #if DEBUG
         stdout.printf (_("Errors: %i, Warnings: %i\n"), report.errors_list.size, report.warnings_list.size);
 #endif

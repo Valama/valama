@@ -210,6 +210,8 @@ public class MainWindow : Window {
         src_view.add (view);
 
         var srcbuf = (SourceBuffer) view.buffer;
+        srcbuf.create_tag ("error_bg", "underline", Pango.Underline.ERROR, null);
+        srcbuf.create_tag ("warning_bg", "background", "yellow", null);
         /*
          * NOTE: Keep this in sync with get_sourceview method.
          */

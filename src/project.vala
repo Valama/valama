@@ -504,6 +504,15 @@ public class ValamaProject {
 
         bfr.changed.connect (() => {
             bfr.dirty = true;
+            bfr.needs_guanako_update = true;
+            Timeout.add(2000, ()=>{
+                if (bfr.needs_guanako_update){
+                    if (parsing) //If we are already parsing, try again next time
+                        return true;
+                    update_guanako(bfr);
+                }
+                return false;
+            });
 
             if (!parsing) {
                 var mark = window_main.current_srcbuffer.get_insert();
@@ -513,32 +522,8 @@ public class ValamaProject {
                 if (bfr.last_active_line == line)
                     return;
                 bfr.last_active_line = line;
-                parsing = true;
-
-                try {
-                    /* Get a copy of the buffer that is safe to work on
-                     * Otherwise, the thread might crash accessing it
-                     */
-                    string buffer_content =  view.buffer.text;
-                    new Thread<void*>.try (_("Buffer update"), () => {
-                        report_wrapper.clear();
-                        var source_file = this.guanako_project.get_source_file_by_name(Path.build_path (
-                                                        Path.DIR_SEPARATOR_S,
-                                                        this.project_path,
-                                                        window_main.current_srcfocus));
-                        this.guanako_project.update_file (source_file, buffer_content);
-                        Idle.add (() => {
-                            wdg_report.update();
-                            parsing = false;
-                            if (loop_update.is_running())
-                                loop_update.quit();
-                            return false;
-                        });
-                        return null;
-                    });
-                } catch (GLib.Error e) {
-                    stderr.printf (_("Could not create thread to update buffer completion: %s\n"), e.message);
-                }
+                bfr.needs_guanako_update = false;
+                update_guanako(bfr);
             }
         });
 
@@ -548,6 +533,34 @@ public class ValamaProject {
         stdout.printf (_("Buffer loaded.\n"));
 #endif
         return view;
+    }
+
+    void update_guanako (SourceBuffer buffer){
+        parsing = true;
+        try {
+            /* Get a copy of the buffer that is safe to work on
+             * Otherwise, the thread might crash accessing it
+             */
+            string buffer_content =  buffer.text;
+            new Thread<void*>.try (_("Buffer update"), () => {
+                report_wrapper.clear();
+                var source_file = this.guanako_project.get_source_file_by_name(Path.build_path (
+                                                Path.DIR_SEPARATOR_S,
+                                                this.project_path,
+                                                window_main.current_srcfocus));
+                this.guanako_project.update_file (source_file, buffer_content);
+                Idle.add (() => {
+                    wdg_report.update();
+                    parsing = false;
+                    if (loop_update.is_running())
+                        loop_update.quit();
+                    return false;
+                });
+                return null;
+            });
+        } catch (GLib.Error e) {
+            stderr.printf (_("Could not create thread to update buffer completion: %s\n"), e.message);
+        }
     }
 
     /**
@@ -702,6 +715,7 @@ public class SourceBuffer : Gtk.SourceBuffer {
      */
     public bool dirty { get; set; default = false; }
     public int last_active_line = -1;
+    public bool needs_guanako_update = false;
 }
 
 
