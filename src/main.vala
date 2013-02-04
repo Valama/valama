@@ -39,13 +39,30 @@ public static int main (string[] args) {
     Intl.textdomain (Config.GETTEXT_PACKAGE);
     Intl.bindtextdomain (Config.GETTEXT_PACKAGE, Config.LOCALE_DIR);
 
-    //TODO: Command line parsing.
-    Gtk.init (ref args);
+    // /* Command line parsing. */
+    // /* Copied from Yorba application. */
+    unowned string[] a = args;
+    Gtk.init(ref a);
+    // Sanitize the args.  Gtk's init function will leave null elements
+    // in the array, which then causes OptionContext to crash.
+    // See ticket: https://bugzilla.gnome.org/show_bug.cgi?id=674837
+    string[] fixed_args = new string[0];
+    for (int i = 0; i < args.length; ++i)
+        if (args[i] != null)
+            fixed_args += args[i];
+    args = fixed_args;
+
+    int ret = Args.parse (a);
+    if (ret > 0)
+        return ret;
+    else if (ret < 0)
+        return 0;
+
 
     loop_update  = new MainLoop();
 
     try {
-        if (args.length > 1)
+        if (Args.projectfiles.length > 0)
             project = new ValamaProject(args[1]);
         else {
             project = ui_create_project_dialog();
