@@ -83,6 +83,8 @@ class UiReport : UiElement {
                                                                    1, err.message, -1);
         }
         var bfr = window_main.current_srcbuffer;
+        if (bfr == null)
+            return;
         TextIter first_iter;
         TextIter end_iter;
         bfr.get_start_iter (out first_iter);
@@ -116,7 +118,7 @@ class UiReport : UiElement {
         /*while (first_iter.forward_search ("guanako", TextSearchFlags.TEXT_ONLY | TextSearchFlags.VISIBLE_ONLY, out start_match, out end_match, null)){
             bfr.apply_tag_by_name (
         }*/
-        
+
 #if DEBUG
         stdout.printf (_("Errors: %i, Warnings: %i\n"), report.errors_list.size, report.warnings_list.size);
 #endif
