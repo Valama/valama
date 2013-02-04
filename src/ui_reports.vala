@@ -82,19 +82,20 @@ class UiReport : UiElement {
 #endif
                                                                    1, err.message, -1);
         }
-        var bfr = window_main.current_srcbuffer;
-        if (bfr == null)
-            return;
-        TextIter first_iter;
-        TextIter end_iter;
-        bfr.get_start_iter (out first_iter);
-        bfr.get_end_iter (out end_iter);
-        bfr.remove_tag_by_name ("error_bg", first_iter, end_iter);
-        bfr.remove_tag_by_name ("warning_bg", first_iter, end_iter);
 
+        project.foreach_buffer((s, bfr)=>{
+            TextIter first_iter;
+            TextIter end_iter;
+            bfr.get_start_iter (out first_iter);
+            bfr.get_end_iter (out end_iter);
+            bfr.remove_tag_by_name ("error_bg", first_iter, end_iter);
+            bfr.remove_tag_by_name ("warning_bg", first_iter, end_iter);
+        });
         foreach (ReportWrapper.Error err in report.errors_list){
-            //if (err.source.file.filename != window_main.current_srcfocus)
-            //    continue;
+            var bfr = project.get_buffer_by_file(Path.build_path(project.project_path, err.source.file.filename));
+            if (bfr == null)
+                continue;
+
             TextIter iter_start;
             TextIter iter_end;
 #if VALA_LESS_0_18
@@ -111,8 +112,10 @@ class UiReport : UiElement {
             bfr.apply_tag_by_name ("error_bg", iter_start, iter_end);
         }
         foreach (ReportWrapper.Error warn in report.warnings_list){
-            //if (warn.source.file.filename != window_main.current_srcfocus)
-            //    continue;
+            var bfr = project.get_buffer_by_file(Path.build_path(project.project_path, warn.source.file.filename));
+            if (bfr == null)
+                continue;
+
             TextIter iter_start;
             TextIter iter_end;
 #if VALA_LESS_0_18

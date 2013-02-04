@@ -334,8 +334,12 @@ static void redo_change() {
 static void on_error_selected (ReportWrapper.Error err) {
     on_file_selected (err.source.file.filename);
 
+    var bfr = project.get_buffer_by_file(Path.build_path(project.project_path, err.source.file.filename));
+    if (bfr == null)
+        return;
+
     TextIter start;
-    window_main.current_srcbuffer.get_iter_at_line_offset (out start,
+    bfr.get_iter_at_line_offset (out start,
 #if VALA_LESS_0_18
                                          err.source.first_line - 1,
                                          err.source.first_column - 1);
@@ -344,7 +348,7 @@ static void on_error_selected (ReportWrapper.Error err) {
                                          err.source.begin.column - 1);
 #endif
     TextIter end;
-    window_main.current_srcbuffer.get_iter_at_line_offset (out end,
+    bfr.get_iter_at_line_offset (out end,
 #if VALA_LESS_0_18
                                          err.source.last_line - 1,
                                          err.source.last_column - 1);
@@ -352,7 +356,7 @@ static void on_error_selected (ReportWrapper.Error err) {
                                          err.source.end.line - 1,
                                          err.source.end.column - 1);
 #endif
-    window_main.current_srcbuffer.select_range (start, end);
+    bfr.select_range (start, end);
 }
 
 
