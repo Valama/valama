@@ -505,6 +505,8 @@ public class ValamaProject {
         bfr.changed.connect (() => {
             bfr.dirty = true;
             bfr.needs_guanako_update = true;
+
+            /* Update after timeout */
             Timeout.add(2000, ()=>{
                 if (bfr.needs_guanako_update){
                     if (parsing) //If we are already parsing, try again next time
@@ -514,6 +516,7 @@ public class ValamaProject {
                 return false;
             });
 
+            /* Immediate update after switching to a new line */
             if (!parsing) {
                 var mark = window_main.current_srcbuffer.get_insert();
                 TextIter iter;
@@ -522,7 +525,6 @@ public class ValamaProject {
                 if (bfr.last_active_line == line)
                     return;
                 bfr.last_active_line = line;
-                bfr.needs_guanako_update = false;
                 update_guanako(bfr);
             }
         });
@@ -537,6 +539,7 @@ public class ValamaProject {
 
     void update_guanako (SourceBuffer buffer){
         parsing = true;
+        buffer.needs_guanako_update = false;
         try {
             /* Get a copy of the buffer that is safe to work on
              * Otherwise, the thread might crash accessing it
