@@ -15,6 +15,7 @@ set(required_pkgs
 "libxml-2.0"
 )
 set(srcfiles
+"src/args.vala"
 "src/common.vala"
 "src/main.vala"
 "src/project.vala"
