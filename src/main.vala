@@ -334,7 +334,9 @@ static void redo_change() {
 static void on_error_selected (ReportWrapper.Error err) {
     on_file_selected (err.source.file.filename);
 
-    var bfr = project.get_buffer_by_file(Path.build_path(project.project_path, err.source.file.filename));
+    var bfr = project.get_buffer_by_file (Path.build_path (Path.DIR_SEPARATOR_S,
+                                                           project.project_path,
+                                                           err.source.file.filename));
     if (bfr == null)
         return;
 
