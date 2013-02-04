@@ -97,10 +97,17 @@ class UiReport : UiElement {
             //    continue;
             TextIter iter_start;
             TextIter iter_end;
+#if VALA_LESS_0_18
+            bfr.get_iter_at_line (out iter_start, err.source.first_line - 1);
+            bfr.get_iter_at_line (out iter_end, err.source.last_line - 1);
+            iter_start.forward_chars (err.source.last_column - 1);
+            iter_end.forward_chars (err.source.last_column);
+#else
             bfr.get_iter_at_line (out iter_start, err.source.begin.line - 1);
             bfr.get_iter_at_line (out iter_end, err.source.end.line - 1);
             iter_start.forward_chars (err.source.begin.column - 1);
             iter_end.forward_chars (err.source.end.column);
+#endif
             bfr.apply_tag_by_name ("error_bg", iter_start, iter_end);
         }
         foreach (ReportWrapper.Error warn in report.warnings_list){
@@ -108,10 +115,17 @@ class UiReport : UiElement {
             //    continue;
             TextIter iter_start;
             TextIter iter_end;
+#if VALA_LESS_0_18
+            bfr.get_iter_at_line (out iter_start, warn.source.first_line - 1);
+            bfr.get_iter_at_line (out iter_end, warn.source.last_line - 1);
+            iter_start.forward_chars (warn.source.first_column - 1);
+            iter_end.forward_chars (warn.source.last_column);
+#else
             bfr.get_iter_at_line (out iter_start, warn.source.begin.line - 1);
             bfr.get_iter_at_line (out iter_end, warn.source.end.line - 1);
             iter_start.forward_chars (warn.source.begin.column - 1);
             iter_end.forward_chars (warn.source.end.column);
+#endif
             bfr.apply_tag_by_name ("warning_bg", iter_start, iter_end);
         }
 
