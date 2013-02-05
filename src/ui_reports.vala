@@ -92,10 +92,7 @@ class UiReport : UiElement {
             bfr.remove_tag_by_name ("warning_bg", first_iter, end_iter);
         });
         foreach (ReportWrapper.Error err in report.errors_list) {
-            var bfr = project.get_buffer_by_file (Path.build_path (
-                                            Path.DIR_SEPARATOR_S,
-                                            project.project_path,
-                                            err.source.file.filename));
+            var bfr = project.get_buffer_by_file (err.source.file.filename);
             if (bfr == null)
                 continue;
 
@@ -115,10 +112,7 @@ class UiReport : UiElement {
             bfr.apply_tag_by_name ("error_bg", iter_start, iter_end);
         }
         foreach (ReportWrapper.Error warn in report.warnings_list) {
-            var bfr = project.get_buffer_by_file (Path.build_path (
-                                            Path.DIR_SEPARATOR_S,
-                                            project.project_path,
-                                            warn.source.file.filename));
+            var bfr = project.get_buffer_by_file (warn.source.file.filename);
             if (bfr == null)
                 continue;
 

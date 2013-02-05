@@ -507,12 +507,15 @@ public class ValamaProject {
             bfr.needs_guanako_update = true;
 
             /* Update after timeout */
-            Timeout.add(2000, ()=>{
+            if (bfr.timeout_id != -1)
+                Source.remove (bfr.timeout_id);
+            bfr.timeout_id = Timeout.add(1000, ()=>{
                 if (bfr.needs_guanako_update){
                     if (parsing) //If we are already parsing, try again next time
                         return true;
                     update_guanako(bfr);
                 }
+                bfr.timeout_id = -1;
                 return false;
             });
 
@@ -719,6 +722,7 @@ public class SourceBuffer : Gtk.SourceBuffer {
     public bool dirty { get; set; default = false; }
     public int last_active_line = -1;
     public bool needs_guanako_update = false;
+    public uint timeout_id = -1;
 }
 
 
