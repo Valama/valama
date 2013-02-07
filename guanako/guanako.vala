@@ -371,7 +371,7 @@ namespace Guanako {
             return true;
         }
 
-        class CallParameter {
+        internal class CallParameter {
             public int for_rule_id;
             public string name;
 
@@ -389,7 +389,7 @@ namespace Guanako {
         }
         CallParameter universal_parameter;
 
-        class RuleExpression {
+        internal class RuleExpression {
             public string expr;
             public int rule_id;
             public RuleExpression clone() {
@@ -431,7 +431,7 @@ namespace Guanako {
             return ret;
         }
 
-        RuleExpression[] clone_rules(RuleExpression[] rules){
+        internal RuleExpression[] clone_rules(RuleExpression[] rules){
             RuleExpression[] rule = new RuleExpression[rules.length];
             for (int q = 0; q < rule.length; q++)
                 rule[q] = rules[q].clone();
@@ -440,7 +440,7 @@ namespace Guanako {
 
         int rule_id_count = 0;
 
-        void compare (RuleExpression[] compare_rule,
+        internal void compare (RuleExpression[] compare_rule,
                       Symbol[] accessible,
                       string written2,
                       Gee.ArrayList<CallParameter> call_params,
@@ -467,40 +467,20 @@ namespace Guanako {
             if (current_rule.expr.contains ("|")) {
                 var branch_rets = new Gee.TreeSet<CompletionProposal>[0];
                 var splt = current_rule.expr.split ("|");
-                var thdlist = new Thread<void*>[0];
+                var thdlist = new Thread<Gee.TreeSet<CompletionProposal>>[0];
 
                 foreach (string s in splt) {
                     /*
                      * Need create a separate set of parameters here, as each branch might
                      * assign different values (resulting in scrambled eggs)
                      */
-                    var waitloop = new MainLoop();
-                    bool done_it = false;
+                    var r = clone_rules (rule);
+                    r[0].expr = s;
 
-                    thdlist += new Thread<void*> (_("Guanako Option"), () => {
-                        var r = clone_rules(rule);
-                        r[0].expr = s;
-                        var local_ret = new Gee.TreeSet<CompletionProposal>();
-                        branch_rets += local_ret;
-                        var clist = clone_param_list (call_params);
-
-                        waitloop.quit();
-                        done_it = true;
-                        compare (r, accessible, written, clist, depth + 1, ref local_ret);
-                        waitloop.quit();
-                        return null;
-                    });
-		            Timeout.add (2000, ()=>{
-			            waitloop.quit();
-			            return false;
-		            });
-                    if (!done_it)
-                        waitloop.run();
+                    thdlist += compare_threaded (this, r, accessible, written, clone_param_list (call_params), depth);
                 }
-                for (int q = 0; q < thdlist.length; q++){
-                    thdlist[q].join();
-                    ret.add_all(branch_rets[q]);
-                }
+                foreach (Thread<Gee.TreeSet<CompletionProposal>> thd in thdlist)
+                    ret.add_all(thd.join());
                 return;
             }
 
@@ -664,6 +644,42 @@ namespace Guanako {
                 ret.add (new CompletionProposal (new Struct (current_rule.expr, null, null), written.length));
             }
             return;
+        }
+
+        Thread<Gee.TreeSet<CompletionProposal>> compare_threaded(Project parent_project, RuleExpression[] compare_rule,
+                      Symbol[] accessible,
+                      string written,
+                      Gee.ArrayList<CallParameter> call_params,
+                      int depth){
+            var compare_thd = new compare_thread(parent_project, compare_rule, accessible, written, call_params, depth);
+            return new Thread<Gee.TreeSet<CompletionProposal>> (_("Guanako Completion"), compare_thd.run);
+        }
+
+        class compare_thread {
+            public compare_thread(Project parent_project,
+                      RuleExpression[] compare_rule,
+                      Symbol[] accessible,
+                      string written,
+                      Gee.ArrayList<CallParameter> call_params,
+                      int depth){
+                this.parent_project = parent_project;
+                this.compare_rule = compare_rule;
+                this.call_params = call_params;
+                this.depth = depth;
+                this.accessible = accessible;
+                this.written = written;
+            }
+            Project parent_project;
+            RuleExpression[] compare_rule;
+            Gee.ArrayList<CallParameter> call_params;
+            int depth;
+            string written;
+            Symbol[] accessible;
+            public Gee.TreeSet<CompletionProposal> run(){
+                var local_ret = new Gee.TreeSet<CompletionProposal>();
+                parent_project.compare (compare_rule, accessible, written, call_params, depth + 1, ref local_ret);
+                return local_ret;
+            }
         }
 
         enum matchres {
