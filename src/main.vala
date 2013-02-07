@@ -446,39 +446,46 @@ class TestProvider : Gtk.SourceCompletionProvider, Object {
         if (parsing)
             loop_update.run();
 
-        /* Get completion proposals from Guanako */
-	Timer tmr = new Timer();
-	tmr.start();
-        var guanako_proposals = project.guanako_project.propose_symbols (
-                                project.guanako_project.get_source_file_by_name (
-                                        Path.build_path (Path.DIR_SEPARATOR_S,
-                                                         project.project_path,
-                                                         window_main.current_srcfocus)),
-                                line,
-                                col,
-                                current_line);
-	window_main.title = tmr.elapsed().to_string();
-        /* Assign icons and pass the proposals on to Gtk.SourceView */
-        var props = new GLib.List<Gtk.SourceCompletionItem>();
-        foreach (CompletionProposal guanako_proposal in guanako_proposals) {
-            if (guanako_proposal.symbol.name != null) {
+        new Thread<void*>.try (_("Completion"), () => {
+            /* Get completion proposals from Guanako */
+	    Timer tmr = new Timer();
+	    tmr.start();
+            var guanako_proposals = project.guanako_project.propose_symbols (
+                                    project.guanako_project.get_source_file_by_name (
+                                            Path.build_path (Path.DIR_SEPARATOR_S,
+                                                             project.project_path,
+                                                             window_main.current_srcfocus)),
+                                    line,
+                                    col,
+                                    current_line);
+	    window_main.title = tmr.elapsed().to_string();
+            /* Assign icons and pass the proposals on to Gtk.SourceView */
+            var props = new GLib.List<Gtk.SourceCompletionItem>();
+            foreach (CompletionProposal guanako_proposal in guanako_proposals) {
+                if (guanako_proposal.symbol.name != null) {
 
-                Gdk.Pixbuf pixbuf = null;
-                if (guanako_proposal.symbol is Namespace)   pixbuf = map_icons["namespace"];
-                if (guanako_proposal.symbol is Property)    pixbuf = map_icons["property"];
-                if (guanako_proposal.symbol is Struct)      pixbuf = map_icons["struct"];
-                if (guanako_proposal.symbol is Method)      pixbuf = map_icons["method"];
-                if (guanako_proposal.symbol is Variable)    pixbuf = map_icons["field"];
-                if (guanako_proposal.symbol is Enum)        pixbuf = map_icons["enum"];
-                if (guanako_proposal.symbol is Class)       pixbuf = map_icons["class"];
-                if (guanako_proposal.symbol is Constant)    pixbuf = map_icons["constant"];
-                if (guanako_proposal.symbol is Vala.Signal) pixbuf = map_icons["signal"];
+                    Gdk.Pixbuf pixbuf = null;
+                    if (guanako_proposal.symbol is Namespace)   pixbuf = map_icons["namespace"];
+                    if (guanako_proposal.symbol is Property)    pixbuf = map_icons["property"];
+                    if (guanako_proposal.symbol is Struct)      pixbuf = map_icons["struct"];
+                    if (guanako_proposal.symbol is Method)      pixbuf = map_icons["method"];
+                    if (guanako_proposal.symbol is Variable)    pixbuf = map_icons["field"];
+                    if (guanako_proposal.symbol is Enum)        pixbuf = map_icons["enum"];
+                    if (guanako_proposal.symbol is Class)       pixbuf = map_icons["class"];
+                    if (guanako_proposal.symbol is Constant)    pixbuf = map_icons["constant"];
+                    if (guanako_proposal.symbol is Vala.Signal) pixbuf = map_icons["signal"];
 
-                var item = new ComplItem (guanako_proposal.symbol.name, guanako_proposal.symbol.name, pixbuf, null, guanako_proposal);
-                props.append (item);
+                    var item = new ComplItem (guanako_proposal.symbol.name, guanako_proposal.symbol.name, pixbuf, null, guanako_proposal);
+                    props.append (item);
+                }
             }
-        }
-        context.add_proposals (this, props, true);
+            GLib.Idle.add (()=>{
+                if (context is SourceCompletionContext)
+                    context.add_proposals (this, props, true);
+                return false;
+            });
+            return null;
+        });
     }
 
     public unowned Gdk.Pixbuf? get_icon() {
