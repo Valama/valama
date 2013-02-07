@@ -59,7 +59,7 @@ option(THREADED "Run multi-threaded." OFF)
 option(TRANSLATION "Build translation." ON)
 option(ICONS "Generate icons." ON)
 option(GUANAKO "Build guanako library." ON)
-option(DOCS "Build documentation." OFF)
+option(DOCS "Build documentation." ON)
 option(DEVELOPERS "Enable some features interesting for developers" OFF)
 
 if(DEBUG)
@@ -178,6 +178,8 @@ if(VALADOC_FOUND)
       ${extra_valadoc_opts}
       ${valadoc_debug}
   )
+else()
+  set(DOCS OFF)
 endif()
 
 
@@ -231,7 +233,6 @@ else()
 endif()
 message("")
 message("Installation prefix:    ${CMAKE_INSTALL_PREFIX}")
-message("Gettext package:        ${project_name_lower}")
 base_list_to_delimited_string(vala_flags
   DELIM " "
   BASE_LIST "${default_vala_flags}")
@@ -261,7 +262,7 @@ endif()
 if(DOCS)
   message("Build documentation:    enabled")
 else()
-  message("Build documentation:    enabled")
+  message("Build documentation:    disabled")
 endif()
 if(TRANSLATION_BUILD)
   message("Build translations:     enabled")
