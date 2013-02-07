@@ -447,6 +447,8 @@ class TestProvider : Gtk.SourceCompletionProvider, Object {
             loop_update.run();
 
         /* Get completion proposals from Guanako */
+	Timer tmr = new Timer();
+	tmr.start();
         var guanako_proposals = project.guanako_project.propose_symbols (
                                 project.guanako_project.get_source_file_by_name (
                                         Path.build_path (Path.DIR_SEPARATOR_S,
@@ -455,7 +457,7 @@ class TestProvider : Gtk.SourceCompletionProvider, Object {
                                 line,
                                 col,
                                 current_line);
-
+	window_main.title = tmr.elapsed().to_string();
         /* Assign icons and pass the proposals on to Gtk.SourceView */
         var props = new GLib.List<Gtk.SourceCompletionItem>();
         foreach (CompletionProposal guanako_proposal in guanako_proposals) {

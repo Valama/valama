@@ -431,6 +431,13 @@ namespace Guanako {
             return ret;
         }
 
+        RuleExpression[] clone_rules(RuleExpression[] rules){
+            RuleExpression[] rule = new RuleExpression[rules.length];
+            for (int q = 0; q < rule.length; q++)
+                rule[q] = rules[q].clone();
+            return rule;
+        }
+
         int rule_id_count = 0;
 
         void compare (RuleExpression[] compare_rule,
@@ -454,18 +461,45 @@ namespace Guanako {
             /*string depth_string = "";
             for (int q = 0; q < depth; q++)
                 depth_string += " ";
-            stdout.printf ("\n" + depth_string + "Current rule: " + current_rule.expr + "\n");
-            stdout.printf (depth_string + "Written: " + written + "\n");*/
+            stdout.printf ("\n" + depth_string + "Current rule: " + current_rule.expr + "\n" +
+                        depth_string + "Written: " + written + "\n");*/
 
             if (current_rule.expr.contains ("|")) {
+                var branch_rets = new Gee.TreeSet<CompletionProposal>[0];
                 var splt = current_rule.expr.split ("|");
+                var thdlist = new Thread<void*>[0];
+
                 foreach (string s in splt) {
-                    rule[0].expr = s;
                     /*
                      * Need create a separate set of parameters here, as each branch might
                      * assign different values (resulting in scrambled eggs)
                      */
-                    compare (rule, accessible, written, clone_param_list(call_params), depth + 1, ref ret);
+                    var waitloop = new MainLoop();
+                    bool done_it = false;
+
+                    thdlist += new Thread<void*> (_("Guanako Option"), () => {
+                        var r = clone_rules(rule);
+                        r[0].expr = s;
+                        var local_ret = new Gee.TreeSet<CompletionProposal>();
+                        branch_rets += local_ret;
+                        var clist = clone_param_list (call_params);
+
+                        waitloop.quit();
+                        done_it = true;
+                        compare (r, accessible, written, clist, depth + 1, ref local_ret);
+                        waitloop.quit();
+                        return null;
+                    });
+		            Timeout.add (2000, ()=>{
+			            waitloop.quit();
+			            return false;
+		            });
+                    if (!done_it)
+                        waitloop.run();
+                }
+                for (int q = 0; q < thdlist.length; q++){
+                    thdlist[q].join();
+                    ret.add_all(branch_rets[q]);
                 }
                 return;
             }
@@ -576,41 +610,43 @@ namespace Guanako {
                 }
 
                 RuleExpression[] composit_rule = map_syntax[call].rule;
-                rule_id_count ++;
-                foreach (RuleExpression subexp in composit_rule)
-                    subexp.rule_id = rule_id_count;
+        		lock (rule_id_count) {
+                    rule_id_count ++;
+                    foreach (RuleExpression subexp in composit_rule)
+                        subexp.rule_id = rule_id_count;
 
-                foreach (RuleExpression exp in rule[1:rule.length])
-                    composit_rule += exp;
+                    foreach (RuleExpression exp in rule[1:rule.length])
+                        composit_rule += exp;
 
-                if (pass_param != null && pass_param != "") {
+                    if (pass_param != null && pass_param != "") {
 
-                    var child_param = new CallParameter();
-                    child_param.name = map_syntax[call].parameters[0];
-                    child_param.for_rule_id = rule_id_count;
-                    var param = find_param (call_params, pass_param, current_rule.rule_id);
-                    if (param == null) {
-                        stdout.printf (_("Parameter '%s' not found in >%s<\n"), pass_param, compare_rule[0].expr);
-                        return;
+                        var child_param = new CallParameter();
+                        child_param.name = map_syntax[call].parameters[0];
+                        child_param.for_rule_id = rule_id_count;
+                        var param = find_param (call_params, pass_param, current_rule.rule_id);
+                        if (param == null) {
+                            stdout.printf (_("Parameter '%s' not found in >%s<\n"), pass_param, compare_rule[0].expr);
+                            return;
+                        }
+                        child_param.symbol = param.symbol;
+                        call_params.add (child_param);
+
                     }
-                    child_param.symbol = param.symbol;
-                    call_params.add (child_param);
-
-                }
-                if (ret_param != null){
-                    var ret_p = find_param (call_params, ret_param, current_rule.rule_id);
-                    if (ret_p == null){
-                        ret_p = new CallParameter();
-                        ret_p.name = ret_param;
-                        ret_p.for_rule_id = current_rule.rule_id;
-                        call_params.add (ret_p);
+                    if (ret_param != null){
+                        var ret_p = find_param (call_params, ret_param, current_rule.rule_id);
+                        if (ret_p == null){
+                            ret_p = new CallParameter();
+                            ret_p.name = ret_param;
+                            ret_p.for_rule_id = current_rule.rule_id;
+                            call_params.add (ret_p);
+                        }
+                        var child_ret_p = new CallParameter();
+                        child_ret_p.name = "ret";
+                        child_ret_p.for_rule_id = rule_id_count;
+                        child_ret_p.return_to_param = ret_p;
+                        call_params.add (child_ret_p);
                     }
-                    var child_ret_p = new CallParameter();
-                    child_ret_p.name = "ret";
-                    child_ret_p.for_rule_id = rule_id_count;
-                    child_ret_p.return_to_param = ret_p;
-                    call_params.add (child_ret_p);
-                }
+        		}
 
                 compare (composit_rule, accessible, written, call_params, depth + 1, ref ret);
                 return;
