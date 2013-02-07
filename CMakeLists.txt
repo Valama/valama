@@ -55,7 +55,7 @@ set(vapidir "${vala_datadir}-${valashort_ver}/vapi")
 
 
 option(DEBUG "Debug output on console." ON)
-option(THREADED "Run multi-threaded." OFF)
+option(THREADED "Run multi-threaded." ON)
 option(TRANSLATION "Build translation." ON)
 option(ICONS "Generate icons." ON)
 option(GUANAKO "Build guanako library." ON)
