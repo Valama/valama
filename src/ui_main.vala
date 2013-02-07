@@ -156,14 +156,8 @@ public class MainWindow : Window {
                 /* If something strange happens (pa == null) break the loop. */
                 while (!(pa is Dock) && (pa != null)) {
                     //stdout.printf("item: %s\n", pa.name);
-#if VALA_LESS_0_18
-                    /* Invalid cast but works. */
-                    var nbook = (Notebook) pa;
-                    if (nbook != null) {
-#else
                     if (pa is Switcher) {
                         var nbook = (Notebook) pa;
-#endif
                         nbook.page = nbook.page_num (srcitem);
                     }
                     pa = pa.parent;
@@ -314,14 +308,8 @@ public class MainWindow : Window {
      */
     private void set_notebook_tabs (DockItem item) {
         var pa = item.parent;
-#if VALA_LESS_0_18
-        /* Invalid cast but works. */
-        var nbook = (Notebook) pa;
-        if (nbook != null) {
-#else
         if (pa is Switcher) {
             var nbook = (Notebook) pa;
-#endif
             nbook.set_tab_pos (PositionType.TOP);
             foreach (var child in nbook.get_children())
                 nbook.set_tab_reorderable (child, true);

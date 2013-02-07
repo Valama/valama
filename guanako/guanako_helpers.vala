@@ -32,17 +32,9 @@ namespace Guanako {
 
         if (reference.file != source_file)
             return false;
-#if VALA_LESS_0_18
-        if (reference.first_line > source_line)
-#else
         if (reference.begin.line > source_line)
-#endif
             return true;
-#if VALA_LESS_0_18
-        if (reference.first_line == source_line && reference.first_column > source_col)
-#else
         if (reference.begin.line == source_line && reference.begin.column > source_col)
-#endif
             return true;
         return false;
     }
@@ -56,17 +48,9 @@ namespace Guanako {
 
         if (reference.file != source_file)
             return false;
-#if VALA_LESS_0_18
-        if (reference.last_line < source_line)
-#else
         if (reference.end.line < source_line)
-#endif
             return true;
-#if VALA_LESS_0_18
-        if (reference.last_line == source_line && reference.last_column < source_col)
-#else
         if (reference.end.line == source_line && reference.end.column < source_col)
-#endif
             return true;
         return false;
     }
@@ -80,23 +64,11 @@ namespace Guanako {
 
         if (reference.file != source_file)
             return false;
-#if VALA_LESS_0_18
-        if (reference.first_line > source_line || reference.first_line < source_line)
-#else
         if (reference.begin.line > source_line || reference.end.line < source_line)
-#endif
             return false;
-#if VALA_LESS_0_18
-        if (reference.first_line == source_line && reference.first_column > source_col)
-#else
         if (reference.begin.line == source_line && reference.begin.column > source_col)
-#endif
             return false;
-#if VALA_LESS_0_18
-        if (reference.last_line == source_line && reference.last_column < source_col)
-#else
         if (reference.end.line == source_line && reference.end.column < source_col)
-#endif
             return false;
         return true;
     }

@@ -6,13 +6,13 @@ The next gen Vala IDE.
 
 ### Requirements
  * cmake (>= 2.8)
- * valac (>= 0.16) (0.18 is recommended)
+ * valac (>= 0.17)
  * pkg-config
  * gobject-2.0
  * glib-2.0
  * gio-2.0
  * gee-1.0 or gee-0.8
- * libvala-0.18 (>= 0.17) or newer libvala or libvala-0.16 (deprecated)
+ * libvala-0.18 (>= 0.17) or newer libvala
  * gdk-3.0
  * gdl-3.0 (>= 3.5.5 is recommended)
  * gtk+-3.0
@@ -24,11 +24,9 @@ On Debian based system install following packages:
 
     sudo apt-get install build-essential valac-0.18 libvala-0.18-dev cmake pkg-config libgtk-3-dev libgtksourceview-3.0-dev libgee-dev libxml2-dev libgdl-3-dev
 
-If `valac-0.18` and `libvala-0.18-dev` aren't available, replace them with `valac-0.16` and `libvala-0.16-dev` and change `cmake/project.cmake`.
-
 If you want to use `gee-0.8` instead of `gee-1.0`, change `cmake/project.cmake` and `cmake/guanako.cmake` accordingly.
 
-If you want to use a newer version of `libvala`, change  `cmake/project.cmake` and `cmake/guanako.cmake` accordingly.
+If you want to use a newer version of `libvala`, change  `cmake/project.cmake` and `cmake/guanako.cmake` (and if you want to use Valama `valama.vlp`) accordingly.
 
 ### Building ###
  1. `mkdir build && cd build`
@@ -44,7 +42,7 @@ To build and install Valama for your distriution look at the [packaging](https:/
 
 ## FAQ ##
 ### Valama build error: ‘GdlDockItem’ has no member named ‘child’ ###
-With `gdl` >= 3.5.5 you have to update your gdl-vapi. If your Vala version is 0.18 update the file `/usr/share/vala-0.18/vapi/gdl-3.0.vapi` with following patch:
+With `gdl` >= 3.5.5 you have to update your gdl-vapi (see [#693127](https://bugzilla.gnome.org/show_bug.cgi?id=693127)). If your Vala version is 0.18 update the file `/usr/share/vala-0.18/vapi/gdl-3.0.vapi` with following patch:
 
 ```diff
 --- a/gdl-3.0.vapi

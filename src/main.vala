@@ -342,22 +342,12 @@ static void on_error_selected (ReportWrapper.Error err) {
 
     TextIter start;
     bfr.get_iter_at_line_offset (out start,
-#if VALA_LESS_0_18
-                                         err.source.first_line - 1,
-                                         err.source.first_column - 1);
-#else
-                                         err.source.begin.line - 1,
-                                         err.source.begin.column - 1);
-#endif
+                                 err.source.begin.line - 1,
+                                 err.source.begin.column - 1);
     TextIter end;
     bfr.get_iter_at_line_offset (out end,
-#if VALA_LESS_0_18
-                                         err.source.last_line - 1,
-                                         err.source.last_column - 1);
-#else
-                                         err.source.end.line - 1,
-                                         err.source.end.column - 1);
-#endif
+                                 err.source.end.line - 1,
+                                 err.source.end.column - 1);
     bfr.select_range (start, end);
 }
 

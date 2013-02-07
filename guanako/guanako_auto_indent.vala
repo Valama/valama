@@ -34,11 +34,7 @@ namespace Guanako {
                     if (smb is Subroutine) {
                         var sr = smb as Subroutine;
                         iter_subroutine (sr, (s, depth2) => {
-#if VALA_LESS_0_18
-                            for (int q = s.source_reference.first_line - 1; q <= s.source_reference.last_line - 1; q++)
-#else
                             for (int q = s.source_reference.begin.line - 1; q <= s.source_reference.end.line - 1; q++)
-#endif
                                 for (int i = 0; i < 1 + depth2; i++)
                                     lines[q] = "    " + lines[q];
                             return iter_callback_returns.continue;
