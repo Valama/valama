@@ -10,7 +10,10 @@
             <item name="SymbolBrowser" orientation="vertical" locked="no"/>
           </paned>
         </paned>
-        <item name="ReportWrapper" orientation="vertical" locked="no"/>
+        <notebook orientation="horizontal" locked="no" iconified="no" closed="no" page="1">
+          <item name="ReportWrapper" orientation="vertical" locked="no"/>
+          <item name="BuildOutput" orientation="vertical" locked="no"/>
+        </notebook>
       </paned>
     </dock>
   </layout>

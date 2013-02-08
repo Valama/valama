@@ -34,6 +34,7 @@ static MainLoop loop_update;
 static ProjectBrowser pbrw;
 static ReportWrapper report_wrapper;
 static UiReport wdg_report;
+static ProjectBuilder project_builder;
 
 public static int main (string[] args) {
     Intl.textdomain (Config.GETTEXT_PACKAGE);
@@ -78,6 +79,8 @@ public static int main (string[] args) {
     }
 
     window_main = new MainWindow();
+    project_builder = new ProjectBuilder ();
+    var build_output = new BuildOutput ();
 
     /* Ui elements. */
     var ui_elements_pool = new UiElementPool();
@@ -216,8 +219,8 @@ public static int main (string[] args) {
     window_main.add_button (btnBuild);
     btnBuild.set_tooltip_text (_("Save current file and build project"));
     btnBuild.clicked.connect (() => {
-        project.build();
-        wdg_report.update();
+        build_output.clear();
+        project_builder.build_project (project);
     });
 
     window_main.add_button (new SeparatorToolItem());
@@ -269,6 +272,10 @@ public static int main (string[] args) {
                           //DockItemBehavior.NORMAL,
                           DockPlacement.BOTTOM);
     window_main.add_item ("ProjectBrowser", _("Project browser"), pbrw.widget,
+                          Stock.FILE,
+                          DockItemBehavior.CANT_CLOSE,
+                          DockPlacement.LEFT);
+    window_main.add_item ("BuildOutput", _("Build output"), build_output.widget,
                           Stock.FILE,
                           DockItemBehavior.CANT_CLOSE,
                           DockPlacement.LEFT);
