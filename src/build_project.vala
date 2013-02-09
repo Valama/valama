@@ -1,5 +1,5 @@
 /*
- * src/project.vala
+ * src/build_project.vala
  * Copyright (C) 2013, Valama development team
  *
  * Valama is free software: you can redistribute it and/or modify it
@@ -122,7 +122,7 @@ public class ProjectBuilder {
                 Process.close_pid (pid);
             });
         });
-        
+
         /*var chn2 = new IOChannel.unix_new (cmake_error);
         chn2.add_watch (IOCondition.IN | IOCondition.HUP, ()=>{
             string output;
@@ -157,3 +157,5 @@ public class ProjectBuilder {
     }
 
 }
+
+// vim: set ai ts=4 sts=4 et sw=4
