@@ -86,7 +86,15 @@ public class ProjectBuilder {
         Pid cmake_pid;
         int cmake_stdout;
         int cmake_error;
-        Process.spawn_async_with_pipes (buildpath, new string[]{ "cmake", ".." }, null, SpawnFlags.SEARCH_PATH | SpawnFlags.DO_NOT_REAP_CHILD, null, out cmake_pid, null, out cmake_stdout, out cmake_error);
+        Process.spawn_async_with_pipes (buildpath,
+                                        new string[]{ "cmake", ".." },
+                                        null,
+                                        SpawnFlags.SEARCH_PATH | SpawnFlags.DO_NOT_REAP_CHILD,
+                                        null,
+                                        out cmake_pid,
+                                        null,
+                                        out cmake_stdout,
+                                        out cmake_error);
         var chn = new IOChannel.unix_new (cmake_stdout);
         chn.add_watch (IOCondition.IN | IOCondition.HUP, (source)=>{
             string output;
@@ -102,7 +110,15 @@ public class ProjectBuilder {
             Pid make_pid;
             int make_stdout;
             int make_error;
-            Process.spawn_async_with_pipes (buildpath, new string[]{ "make", "-j4" }, null, SpawnFlags.SEARCH_PATH | SpawnFlags.DO_NOT_REAP_CHILD, null, out make_pid, null, out make_stdout, out make_error);
+            Process.spawn_async_with_pipes (buildpath,
+                                            new string[]{ "make", "-j4" },
+                                            null,
+                                            SpawnFlags.SEARCH_PATH | SpawnFlags.DO_NOT_REAP_CHILD,
+                                            null,
+                                            out make_pid,
+                                            null,
+                                            out make_stdout,
+                                            out make_error);
             var chn_make = new IOChannel.unix_new (make_stdout);
             chn_make.add_watch (IOCondition.IN | IOCondition.HUP, (source, condition)=>{
                 if (condition == IOCondition.HUP)

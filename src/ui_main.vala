@@ -327,7 +327,14 @@ public class MainWindow : Window {
      *       objects at creation of new source views.
      */
     private SourceView get_sourceview (DockItem item) {
+#if VALAC_LESS_0_20
+        /*
+         * NOTE: You have to manually fix your vapi. See the Valama FAQs.
+         */
         var scroll_widget = (ScrolledWindow) item.child;
+#else
+        var scroll_widget = (ScrolledWindow) item.get_child();
+#endif
         return (SourceView) scroll_widget.get_children().nth_data (0);
     }
 
