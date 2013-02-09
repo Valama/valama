@@ -19,15 +19,24 @@
 
 public class ProjectBuilder {
 
+    public ProjectBuilder (ValamaProject project){
+        this.project = project;
+    }
+
+    ValamaProject project;
+
     public signal void buildsys_output (string output);
     public signal void buildsys_progress (int percent);
+    public signal void app_state_changed (bool app_running);
+    public bool app_running { get { return _app_running; } }
+    bool _app_running = false;
 
     /**
      * Build project.
      *
      * @return Return true on success else false.
      */
-    public bool build_project(ValamaProject project) {
+    public bool build_project() {
         //if (!buffer_save_all())
         //    return false;
 
@@ -170,6 +179,53 @@ public class ProjectBuilder {
         if (exitstatus == 0)
             return true;
         return false;
+    }
+
+    /**
+     * Launch application.
+     */
+    Pid app_pid;
+    public void launch (){
+        if (_app_running)
+            return;
+        var buildpath = Path.build_path (Path.DIR_SEPARATOR_S,
+                                         project.project_path,
+                                         "build");
+        int app_stdout;
+        int app_error;
+
+        Process.spawn_async_with_pipes (buildpath,
+                                        new string[]{ project.project_name.casefold() },
+                                        null,
+                                        SpawnFlags.SEARCH_PATH, // | SpawnFlags.DO_NOT_REAP_CHILD
+                                        null,
+                                        out app_pid,
+                                        null,
+                                        out app_stdout,
+                                        out app_error);
+        _app_running = true;
+        app_state_changed (true);
+        var chn = new IOChannel.unix_new (app_stdout);
+        chn.add_watch (IOCondition.IN | IOCondition.HUP, (source)=>{
+            string output;
+            size_t len;
+            source.read_to_end (out output, out len);
+            buildsys_output (output);
+            return false;
+        });
+        ChildWatch.add (app_pid, (pid, status) => {
+            Process.close_pid (pid);
+            _app_running = false;
+            app_state_changed (false);
+        });
+    }
+    public void quit (){
+        if (!_app_running)
+            return;
+        Process.term_sig (app_pid);
+        Process.close_pid (app_pid);
+        _app_running = false;
+        app_state_changed (false);
     }
 
 }

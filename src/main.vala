@@ -79,7 +79,7 @@ public static int main (string[] args) {
     }
 
     window_main = new MainWindow();
-    project_builder = new ProjectBuilder ();
+    project_builder = new ProjectBuilder (project);
     var build_output = new BuildOutput ();
 
     /* Ui elements. */
@@ -220,7 +220,23 @@ public static int main (string[] args) {
     btnBuild.set_tooltip_text (_("Save current file and build project"));
     btnBuild.clicked.connect (() => {
         build_output.clear();
-        project_builder.build_project (project);
+        project_builder.build_project ();
+    });
+
+    var btnRun = new Gtk.ToolButton.from_stock (Stock.MEDIA_PLAY);
+    window_main.add_button (btnRun);
+    btnRun.set_tooltip_text(_("Run application"));
+    btnRun.clicked.connect (()=>{
+        if (project_builder.app_running)
+            project_builder.quit();
+        else
+            project_builder.launch();
+    });
+    project_builder.app_state_changed.connect ((running) => {
+        if (running)
+            btnRun.stock_id = Stock.MEDIA_STOP;
+        else
+            btnRun.stock_id = Stock.MEDIA_PLAY;
     });
 
     window_main.add_button (new SeparatorToolItem());
