@@ -197,7 +197,7 @@ public class ProjectBuilder {
         Process.spawn_async_with_pipes (buildpath,
                                         new string[]{ project.project_name.casefold() },
                                         null,
-                                        SpawnFlags.SEARCH_PATH, // | SpawnFlags.DO_NOT_REAP_CHILD
+                                        SpawnFlags.SEARCH_PATH | SpawnFlags.DO_NOT_REAP_CHILD,
                                         null,
                                         out app_pid,
                                         null,
@@ -222,7 +222,7 @@ public class ProjectBuilder {
     public void quit (){
         if (!_app_running)
             return;
-        Process.term_sig (app_pid);
+        Process.spawn_command_line_sync ("kill " + app_pid.to_string());
         Process.close_pid (app_pid);
         _app_running = false;
         app_state_changed (false);
