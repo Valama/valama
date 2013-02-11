@@ -28,8 +28,7 @@ public class ProjectBuilder {
     public signal void buildsys_output (string output);
     public signal void buildsys_progress (int percent);
     public signal void app_state_changed (bool app_running);
-    public bool app_running { get { return _app_running; } }
-    bool _app_running = false;
+    public bool app_running { public get; private set; }
 
     /**
      * Build project.
@@ -39,7 +38,56 @@ public class ProjectBuilder {
     public bool build_project() {
         //if (!buffer_save_all())
         //    return false;
+        if (project.buildsystem == "valama"){
+            var buildpath = Path.build_path (Path.DIR_SEPARATOR_S,
+                                             project.project_path,
+                                             "build");
+            string[] valacargs = new string[] {"valac"};
+            valacargs += "--thread";
+            valacargs += "--output=" + project.project_name.casefold();
+            foreach (string pkg in project.guanako_project.packages)
+                valacargs += "--pkg=" + pkg;
+            foreach (Vala.SourceFile file in project.guanako_project.get_source_files())
+                valacargs += file.filename;
+            Pid valac_pid;
+            int valac_stdout;
+            int valac_error;
+            Process.spawn_async_with_pipes (buildpath,
+                                            valacargs,
+                                            null,
+                                            SpawnFlags.SEARCH_PATH | SpawnFlags.DO_NOT_REAP_CHILD,
+                                            null,
+                                            out valac_pid,
+                                            null,
+                                            out valac_stdout,
+                                            out valac_error);
+            var chn = new IOChannel.unix_new (valac_stdout);
+            chn.add_watch (IOCondition.IN | IOCondition.HUP, (source)=>{
+                string output;
+                size_t len;
+                source.read_to_end (out output, out len);
+                buildsys_output (output);
+                return false;
+            });
+            var chnerr = new IOChannel.unix_new (valac_error);
+            chnerr.add_watch (IOCondition.IN | IOCondition.HUP, (source)=>{
+                string output;
+                size_t len;
+                source.read_to_end (out output, out len);
+                buildsys_output (output);
+                return false;
+            });
+            buildsys_output ("Adding cmake watch\n");
+            ChildWatch.add (valac_pid, (pid, status) => {
+                Process.close_pid (pid);
+            });
+            return true;
+        }
 
+        var buildpath = Path.build_path (Path.DIR_SEPARATOR_S,
+                                         project.project_path,
+                                         "build");
+        DirUtils.create (buildpath, 755);  //TODO: Support umask
         /* Write project.cmake */
         try {
             string pkg_list = "set(required_pkgs\n";
@@ -88,9 +136,6 @@ public class ProjectBuilder {
         }
 
         int exitstatus = 0;
-        var buildpath = Path.build_path (Path.DIR_SEPARATOR_S,
-                                         project.project_path,
-                                         "build");
         buildsys_output ("Launching cmake...\n");
         Pid cmake_pid;
         int cmake_stdout;
@@ -186,7 +231,7 @@ public class ProjectBuilder {
      */
     Pid app_pid;
     public void launch (){
-        if (_app_running)
+        if (app_running)
             return;
         var buildpath = Path.build_path (Path.DIR_SEPARATOR_S,
                                          project.project_path,
@@ -215,7 +260,7 @@ public class ProjectBuilder {
         });
         ChildWatch.add (app_pid, (pid, status) => {
             Process.close_pid (pid);
-            _app_running = false;
+            app_running = false;
             app_state_changed (false);
         });
     }
@@ -224,7 +269,7 @@ public class ProjectBuilder {
             return;
         Process.spawn_command_line_sync ("kill " + app_pid.to_string());
         Process.close_pid (app_pid);
-        _app_running = false;
+        app_running = false;
         app_state_changed (false);
     }
 

@@ -94,6 +94,12 @@ public class ValamaProject {
     private TestProvider comp_provider;
 
     /**
+     * The project's buildsystem (valama/cmake/...)
+     */
+    public string buildsystem = "cmake";
+
+
+    /**
      * Create {@link ValamaProject} and load it from project file.
      *
      * @param project_file Load project from this file.
@@ -239,6 +245,9 @@ public class ValamaProject {
                 case "name":
                     project_name = i->get_content();
                     break;
+                case "buildsystem":
+                    buildsystem = i->get_content();
+                    break;
                 case "packages":
                     for (Xml.Node* p = i->children; p != null; p = p->next)
                         if (p->name == "package")
@@ -301,6 +310,7 @@ public class ValamaProject {
 
         writer.start_element ("project");
         writer.write_element ("name", project_name);
+        writer.write_element ("buildsystem", buildsystem);
 
         writer.start_element ("version");
         writer.write_element ("major", version_major.to_string());
