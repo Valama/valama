@@ -15,6 +15,7 @@ set(srcfiles
 "guanako_iterators.vala"
 "guanako.vala"
 "guanako_vapi_discoverer.vala"
+"guanako_frankenstein.vala"
 )
 set(vapifiles
 "config.vapi"

@@ -223,6 +223,24 @@ public static int main (string[] args) {
         project_builder.build_project ();
     });
 
+    // Frankentesting
+    var btnFrankentest = new Gtk.ToolButton.from_stock (Stock.DIALOG_WARNING);
+    window_main.add_button (btnFrankentest);
+    var stein = new Guanako.FrankenStein();
+    btnFrankentest.clicked.connect(()=>{
+        //var sourcefiles = project.guanako_project.get_source_files();
+        var myfile = project.guanako_project.get_source_file_by_name ("/home/linus/source/valama/src/main.vala");
+        var timer1 = FrankenStein.FrankenTimer() { file = myfile,
+                                                        start_line = 42, end_line = 327};
+        stein.frankentimers.add (timer1);
+        //stdout.printf ("\n\n\n=======================\n\n\n");
+        //stdout.printf (stein.frankensteinify_sourcefile (myfile));
+        //stdout.printf ("\n\n\n=======================\n\n\n");
+    });
+    stein.timer_finished.connect ((timer, time) => {
+        stdout.printf ("================ Time: " + time.to_string() + "\n");
+    });
+
     var btnRun = new Gtk.ToolButton.from_stock (Stock.MEDIA_PLAY);
     window_main.add_button (btnRun);
     btnRun.set_tooltip_text(_("Run application"));
