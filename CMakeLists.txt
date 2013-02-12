@@ -59,7 +59,7 @@ option(THREADED "Run multi-threaded." ON)
 option(TRANSLATION "Build translation." ON)
 option(ICONS "Generate icons." ON)
 option(GUANAKO "Build guanako library." ON)
-option(DOCS "Build documentation." ON)
+option(DOCS "Build documentation." OFF)
 option(DEVELOPERS "Enable some features interesting for developers" OFF)
 
 if(DEBUG)
