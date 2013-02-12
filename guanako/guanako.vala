@@ -425,8 +425,8 @@ namespace Guanako {
         public class ProposalSet {
             public ProposalSet() {
                 // TreeSet with custom sorting function
-                comp_sets = new Gee.TreeSet<CompletionProposal>[59];
-                for (int q = 0; q < 59; q++)
+                comp_sets = new Gee.TreeSet<CompletionProposal>[27];
+                for (int q = 0; q < 27; q++)
                     comp_sets[q] = new Gee.TreeSet<CompletionProposal> ((a,b)=>{
                         var name_a = ((CompletionProposal)a).symbol.name;
                         var name_b = ((CompletionProposal)b).symbol.name;
@@ -473,10 +473,12 @@ namespace Guanako {
                         queue.remove_at(0);
                     }
                     if (prop != null){
-                        if (65 <= prop.symbol.name.data[0] <= 122)
+                        if (65 <= prop.symbol.name.data[0] <= 90)
                             comp_sets[prop.symbol.name.data[0] - 65].add(prop);
+                        else if (97 <= prop.symbol.name.data[0] <= 122)
+                            comp_sets[prop.symbol.name.data[0] - 97].add(prop);
                         else
-                            comp_sets[58].add(prop);
+                            comp_sets[26].add(prop);
                     }
                 }
                 return null;
