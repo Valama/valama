@@ -265,33 +265,14 @@ namespace Guanako {
         }
         Gee.HashMap<string, SyntaxRule> map_syntax = new Gee.HashMap<string, SyntaxRule>();
 
-        public Gee.TreeSet<CompletionProposal>? propose_symbols (SourceFile file,
+        public Gee.TreeSet<CompletionProposal>[] propose_symbols (SourceFile file,
                                                                  int line,
                                                                  int col,
                                                                  string written) {
             var accessible = get_accessible_symbols (file, line, col);
             var inside_symbol = get_symbol_at_pos (file, line, col);
 
-
-            // TreeSet with custom sorting function
-            Gee.TreeSet<CompletionProposal> ret = new Gee.TreeSet<CompletionProposal> ((a,b) => {
-                var name_a = ((CompletionProposal)a).symbol.name;
-                var name_b = ((CompletionProposal)b).symbol.name;
-                var name_a_case = name_a.casefold();
-                var name_b_case = name_b.casefold();
-                if (name_a_case < name_b_case)
-                    return -1;
-                if (name_a_case > name_b_case)
-                    return 1;
-                if (name_a < name_b)
-                    return -1;
-                if (name_a > name_b)
-                    return 1;
-
-                return 0;
-            });
-
-
+            var ret = new ProposalSet();
             rule_id_count = 0;
             if (inside_symbol == null)
                 compare (map_syntax["init_deep_space"].rule,
@@ -303,7 +284,8 @@ namespace Guanako {
                                 accessible,
                                 written, new Gee.ArrayList<CallParameter>(),
                                 0, ref ret);
-            return ret;
+            ret.wait_for_finish();
+            return ret.comp_sets;
         }
 
         bool symbol_is_type (Symbol smb, string type) {
@@ -440,11 +422,96 @@ namespace Guanako {
 
         int rule_id_count = 0;
 
+        public class ProposalSet {
+            public ProposalSet() {
+                // TreeSet with custom sorting function
+                comp_sets = new Gee.TreeSet<CompletionProposal>[59];
+                for (int q = 0; q < 59; q++)
+                    comp_sets[q] = new Gee.TreeSet<CompletionProposal> ((a,b)=>{
+                        var name_a = ((CompletionProposal)a).symbol.name;
+                        var name_b = ((CompletionProposal)b).symbol.name;
+                        var name_a_case = name_a.casefold();
+                        var name_b_case = name_b.casefold();
+                        if (name_a_case < name_b_case)
+                            return -1;
+                        if (name_a_case > name_b_case)
+                            return 1;
+                        if (name_a < name_b)
+                            return -1;
+                        if (name_a > name_b)
+                            return 1;
+
+                        return 0;
+                    });
+                thread_add_items = new Thread<void*> (_("Proposal collector"), run_thread_add_items);
+            }
+            int compare (CompletionProposal a, CompletionProposal b) {
+                var name_a = ((CompletionProposal)a).symbol.name;
+                var name_b = ((CompletionProposal)b).symbol.name;
+                var name_a_case = name_a.casefold();
+                var name_b_case = name_b.casefold();
+                if (name_a_case < name_b_case)
+                    return -1;
+                if (name_a_case > name_b_case)
+                    return 1;
+                if (name_a < name_b)
+                    return -1;
+                if (name_a > name_b)
+                    return 1;
+
+                return 0;
+            }
+            void* run_thread_add_items (){
+                while (true) {
+                    if (queue.size == 0)
+                        loop_thread.run();
+                    CompletionProposal prop = null;
+                    lock (queue) {
+                        if (queue.size == 0)
+                            continue;
+                        prop = queue[0];
+                        queue.remove_at(0);
+                    }
+                    if (prop != null){
+                        if (65 <= prop.symbol.name.data[0] <= 122)
+                            comp_sets[prop.symbol.name.data[0] - 65].add(prop);
+                        else
+                            comp_sets[58].add(prop);
+                    }
+                }
+                return null;
+            }
+            public void wait_for_finish() {
+                var tmr = new Timer();
+                tmr.start();
+                while (queue.size > 0) //TODO: Cleaner solution
+                    Thread.usleep (1000);
+            }
+            MainLoop loop_thread = new MainLoop();
+            Gee.ArrayList<CompletionProposal> queue = new Gee.ArrayList<CompletionProposal>();
+            Thread<void*> thread_add_items;
+
+            public void add (CompletionProposal prop){
+                lock (queue) {
+                    queue.add(prop);
+                }
+                loop_thread.quit();
+            }
+            public void add_all (ProposalSet add_set){
+                lock (queue) {
+                    foreach (var s in add_set.comp_sets)
+                        queue.add_all(s);
+                }
+                loop_thread.quit();
+            }
+            public Gee.TreeSet<CompletionProposal>[] comp_sets;
+        }
+
         internal void compare (RuleExpression[] compare_rule,
                       Symbol[] accessible,
                       string written2,
                       Gee.ArrayList<CallParameter> call_params,
-                      int depth, ref Gee.TreeSet<CompletionProposal> ret) {
+                      int depth, ref ProposalSet ret) {
 
             /*
              * For some reason need to create a copy... otherwise assigning new
@@ -467,7 +534,7 @@ namespace Guanako {
             if (current_rule.expr.contains ("|")) {
                 var branch_rets = new Gee.TreeSet<CompletionProposal>[0];
                 var splt = current_rule.expr.split ("|");
-                var thdlist = new Thread<Gee.TreeSet<CompletionProposal>>[0];
+                var thdlist = new Thread<void*>[0];
 
                 foreach (string s in splt) {
                     /*
@@ -477,10 +544,10 @@ namespace Guanako {
                     var r = clone_rules (rule);
                     r[0].expr = s;
 
-                    thdlist += compare_threaded (this, r, accessible, written, clone_param_list (call_params), depth);
+                    thdlist += compare_threaded (this, r, accessible, written, clone_param_list (call_params), depth, ref ret);
                 }
-                foreach (Thread<Gee.TreeSet<CompletionProposal>> thd in thdlist)
-                    ret.add_all(thd.join());
+                foreach (Thread<void*> thd in thdlist)
+                    thd.join();
                 return;
             }
 
@@ -648,13 +715,13 @@ namespace Guanako {
             return;
         }
 
-        Thread<Gee.TreeSet<CompletionProposal>> compare_threaded(Project parent_project, RuleExpression[] compare_rule,
+        Thread<void*> compare_threaded(Project parent_project, RuleExpression[] compare_rule,
                       Symbol[] accessible,
                       string written,
                       Gee.ArrayList<CallParameter> call_params,
-                      int depth){
-            var compare_thd = new compare_thread(parent_project, compare_rule, accessible, written, call_params, depth);
-            return new Thread<Gee.TreeSet<CompletionProposal>> (_("Guanako Completion"), compare_thd.run);
+                      int depth, ref ProposalSet ret){
+            var compare_thd = new compare_thread(parent_project, compare_rule, accessible, written, call_params, depth, ref ret);
+            return new Thread<void*> (_("Guanako Completion"), compare_thd.run);
         }
 
         class compare_thread {
@@ -663,24 +730,25 @@ namespace Guanako {
                       Symbol[] accessible,
                       string written,
                       Gee.ArrayList<CallParameter> call_params,
-                      int depth){
+                      int depth, ref ProposalSet ret){
                 this.parent_project = parent_project;
                 this.compare_rule = compare_rule;
                 this.call_params = call_params;
                 this.depth = depth;
                 this.accessible = accessible;
                 this.written = written;
+                this.ret = ret;
             }
             Project parent_project;
             RuleExpression[] compare_rule;
             Gee.ArrayList<CallParameter> call_params;
+            ProposalSet ret;
             int depth;
             string written;
             Symbol[] accessible;
-            public Gee.TreeSet<CompletionProposal> run(){
-                var local_ret = new Gee.TreeSet<CompletionProposal>();
-                parent_project.compare (compare_rule, accessible, written, call_params, depth + 1, ref local_ret);
-                return local_ret;
+            public void* run(){
+                parent_project.compare (compare_rule, accessible, written, call_params, depth + 1, ref ret);
+                return null;
             }
         }
 
