@@ -32,7 +32,7 @@ public enum IDEmodes {
  */
 public class MainWindow : Window {
 
-    public IDEmodes IDEmode { 
+    public IDEmodes IDEmode {
         get { return _IDEmode; }
         set { _IDEmode = value; IDEmode_changed(); }
     }
@@ -226,7 +226,7 @@ public class MainWindow : Window {
         srcbuf.create_tag ("error_bg", "underline", Pango.Underline.ERROR, null);
         srcbuf.create_tag ("warning_bg", "background", "yellow", null);
 
-        //"left-margin", "1", "left-margin-set", "true", 
+        //"left-margin", "1", "left-margin-set", "true",
         /*
          * NOTE: Keep this in sync with get_sourceview method.
          */
@@ -348,9 +348,15 @@ public class MainWindow : Window {
     private SourceView get_sourceview (DockItem item) {
 #if VALAC_LESS_0_20
         /*
-         * NOTE: You have to manually fix your vapi. See the Valama FAQs.
+         * Work arround GNOME #693127.
          */
-        var scroll_widget = (ScrolledWindow) item.child;
+        ScrolledWindow scroll_widget = null;
+        item.forall ((child) => {
+            if (child is ScrolledWindow)
+                scroll_widget = (ScrolledWindow) child;
+        });
+        if (scroll_widget == null)
+            bug_msg (("Could not find ScrolledWindow widget: %s\n"), item.name);
 #else
         var scroll_widget = (ScrolledWindow) item.get_child();
 #endif

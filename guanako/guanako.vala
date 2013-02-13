@@ -22,6 +22,11 @@ using Vala;
 using Gee;
 
 namespace Guanako {
+    /**
+     * Enable debug information.
+     */
+    public bool debug = false;
+
     public class CompletionProposal {
         public CompletionProposal (Symbol smb, int rep_length) {
             this.symbol = smb;
@@ -76,11 +81,11 @@ namespace Guanako {
             return source_file;
         }
 
-        public void set_report_wrapper(Report report_wrapper){
+        public void set_report_wrapper (Report report_wrapper) {
             context.report = report_wrapper;
         }
 
-        public Project(){
+        public Project() {
             context = new CodeContext();
             parser = new Vala.Parser();
             packages = new Gee.ArrayList<string>();
@@ -136,15 +141,11 @@ namespace Guanako {
                 if (!(pkg in old_deps) && !(pkg in new_deps)) {
                     var vapi_path = context.get_vapi_path (pkg);
                     if (vapi_path == null) {
-#if DEBUG
-                        stderr.printf(_("Warning: Vapi for package %s not found.\n"), pkg);
-#endif
+                        stderr.printf (_("Warning: Vapi for package %s not found.\n"), pkg);
                         missing_packages += pkg;
                         continue;
                     }
-#if DEBUG
-                    stdout.printf(_("Vapi found: %s\n"), vapi_path);
-#endif
+                        debug_msg (_("Vapi found: %s\n"), vapi_path);
                     new_deps += pkg;
                 }
 
@@ -153,15 +154,11 @@ namespace Guanako {
                 packages.add (package_name);
                 var vapi_path = context.get_vapi_path (package_name);
                 if (vapi_path == null) {
-#if DEBUG
-                    stderr.printf(_("Warning: Vapi for package %s not found.\n"), package_name);
-#endif
+                    stderr.printf (_("Warning: Vapi for package %s not found.\n"), package_name);
                     missing_packages += package_name;
                     continue;
                 }
-#if DEBUG
-                stdout.printf(_("Vapi found: %s\n"), vapi_path);
-#endif
+                debug_msg (_("Vapi found: %s\n"), vapi_path);
                 context.add_external_package (package_name);
             }
             packages.sort();
@@ -229,7 +226,7 @@ namespace Guanako {
 
                     string[] rule_line_split = dis.read_line (null).split (" ");
                     RuleExpression[] rule_exprs = new RuleExpression[rule_line_split.length];
-                    for(int q = 0; q < rule_line_split.length; q++) {
+                    for (int q = 0; q < rule_line_split.length; q++) {
                         rule_exprs[q] = new RuleExpression();
                         rule_exprs[q].expr = rule_line_split[q];
                     }
@@ -312,7 +309,7 @@ namespace Guanako {
             return false;
         }
 
-        bool symbol_has_binding(Symbol smb, string? binding){
+        bool symbol_has_binding (Symbol smb, string? binding) {
             if (binding == null)
                 return true;
 
@@ -340,11 +337,11 @@ namespace Guanako {
             DataType type = null;
             if (smb is Property)
                 type = ((Property) smb).property_type;
-            if (smb is Variable)
+            else if (smb is Variable)
                 type = ((Variable) smb).variable_type;
-            if (smb is Method)
+            else if (smb is Method)
                 type = ((Method) smb).return_type;
-            if (type != null){
+            else if (type != null) {
                 if (!type.is_array() && arr)
                     return false;
                 if (type.is_array() && sng)
@@ -396,10 +393,9 @@ namespace Guanako {
         /*
          * Clones a list of CallParameter's, including return dependencies
          */
-        Gee.ArrayList<CallParameter> clone_param_list (Gee.ArrayList<CallParameter> param){
-
+        Gee.ArrayList<CallParameter> clone_param_list (Gee.ArrayList<CallParameter> param) {
             var ret = new Gee.ArrayList<CallParameter>();
-            foreach (CallParameter p in param){
+            foreach (CallParameter p in param) {
                 var new_param = new CallParameter();
                 new_param.for_rule_id = p.for_rule_id;
                 new_param.symbol = p.symbol;
@@ -413,7 +409,7 @@ namespace Guanako {
             return ret;
         }
 
-        internal RuleExpression[] clone_rules(RuleExpression[] rules){
+        internal RuleExpression[] clone_rules (RuleExpression[] rules) {
             RuleExpression[] rule = new RuleExpression[rules.length];
             for (int q = 0; q < rule.length; q++)
                 rule[q] = rules[q].clone();
@@ -427,7 +423,7 @@ namespace Guanako {
                 // TreeSet with custom sorting function
                 comp_sets = new Gee.TreeSet<CompletionProposal>[27];
                 for (int q = 0; q < 27; q++)
-                    comp_sets[q] = new Gee.TreeSet<CompletionProposal> ((a,b)=>{
+                    comp_sets[q] = new Gee.TreeSet<CompletionProposal> ((a,b) => {
                         var name_a = ((CompletionProposal)a).symbol.name;
                         var name_b = ((CompletionProposal)b).symbol.name;
                         var name_a_case = name_a.casefold();
@@ -449,22 +445,7 @@ namespace Guanako {
                 active = false;
                 loop_thread.quit();
             }
-            int compare (CompletionProposal a, CompletionProposal b) {
-                var name_a = ((CompletionProposal)a).symbol.name;
-                var name_b = ((CompletionProposal)b).symbol.name;
-                var name_a_case = name_a.casefold();
-                var name_b_case = name_b.casefold();
-                if (name_a_case < name_b_case)
-                    return -1;
-                if (name_a_case > name_b_case)
-                    return 1;
-                if (name_a < name_b)
-                    return -1;
-                if (name_a > name_b)
-                    return 1;
 
-                return 0;
-            }
             bool active = true;
             void* run_thread_add_items (){
                 while (active) {
@@ -475,39 +456,41 @@ namespace Guanako {
                         if (queue.size == 0)
                             continue;
                         prop = queue[0];
-                        queue.remove_at(0);
+                        queue.remove_at (0);
                     }
-                    if (prop != null){
+                    if (prop != null) {
                         if (65 <= prop.symbol.name.data[0] <= 90)
-                            comp_sets[prop.symbol.name.data[0] - 65].add(prop);
+                            comp_sets[prop.symbol.name.data[0] - 65].add (prop);
                         else if (97 <= prop.symbol.name.data[0] <= 122)
-                            comp_sets[prop.symbol.name.data[0] - 97].add(prop);
+                            comp_sets[prop.symbol.name.data[0] - 97].add (prop);
                         else
-                            comp_sets[26].add(prop);
+                            comp_sets[26].add (prop);
                     }
                 }
                 return null;
             }
+
             public void wait_for_finish() {
                 var tmr = new Timer();
                 tmr.start();
                 while (queue.size > 0) //TODO: Cleaner solution
                     Thread.usleep (1000);
             }
+
             MainLoop loop_thread = new MainLoop();
             Gee.ArrayList<CompletionProposal> queue = new Gee.ArrayList<CompletionProposal>();
             Thread<void*> thread_add_items;
 
-            public void add (CompletionProposal prop){
+            public void add (CompletionProposal prop) {
                 lock (queue) {
-                    queue.add(prop);
+                    queue.add (prop);
                 }
                 loop_thread.quit();
             }
-            public void add_all (ProposalSet add_set){
+            public void add_all (ProposalSet add_set) {
                 lock (queue) {
                     foreach (var s in add_set.comp_sets)
-                        queue.add_all(s);
+                        queue.add_all (s);
                 }
                 loop_thread.quit();
             }
@@ -515,10 +498,10 @@ namespace Guanako {
         }
 
         internal void compare (RuleExpression[] compare_rule,
-                      Symbol[] accessible,
-                      string written2,
-                      Gee.ArrayList<CallParameter> call_params,
-                      int depth, ref ProposalSet ret) {
+                               Symbol[] accessible,
+                               string written2,
+                               Gee.ArrayList<CallParameter> call_params,
+                               int depth, ref ProposalSet ret) {
 
             /*
              * For some reason need to create a copy... otherwise assigning new
@@ -539,7 +522,6 @@ namespace Guanako {
                         depth_string + "Written: " + written + "\n");*/
 
             if (current_rule.expr.contains ("|")) {
-                var branch_rets = new Gee.TreeSet<CompletionProposal>[0];
                 var splt = current_rule.expr.split ("|");
                 var thdlist = new Thread<void*>[0];
 
@@ -610,13 +592,13 @@ namespace Guanako {
                 else {
                     bool resolve_array = false;
                     if (binding != null)
-                        resolve_array = binding.contains("arr_el");
+                        resolve_array = binding.contains ("arr_el");
                     children = get_child_symbols (get_type_of_symbol (parent_param.symbol, resolve_array));
                 }
 
                 Regex r2 = /^(?P<word>\w*)(?P<rest>.*)$/;
                 MatchInfo info2;
-                if(!r2.match (written, 0, out info2))
+                if (!r2.match (written, 0, out info2))
                     return;
                 var word = info2.fetch_named ("word");
                 var rest = info2.fetch_named ("rest");
@@ -626,9 +608,9 @@ namespace Guanako {
                         if (binding != null)
                             if (!symbol_has_binding (child, binding))
                                 continue;
-                        if (word == child.name){
+                        if (word == child.name) {
                             var child_param = find_param (call_params, write_to_param, current_rule.rule_id);
-                            if (child_param == null){
+                            if (child_param == null) {
                                 child_param = new CallParameter();
                                 child_param.name = write_to_param;
                                 child_param.for_rule_id = current_rule.rule_id;
@@ -640,7 +622,7 @@ namespace Guanako {
                                 child_param.symbol = child;
                             compare (rule[1:rule.length], accessible, rest, call_params, depth + 1, ref ret);
                         }
-                        if (rest == "" && child.name.has_prefix (word) && child.name.length > word.length){
+                        if (rest == "" && child.name.has_prefix (word) && child.name.length > word.length) {
                             ret.add (new CompletionProposal (child, word.length));
                         }
                     }
@@ -665,10 +647,10 @@ namespace Guanako {
 
                 RuleExpression[] composit_rule = map_syntax[call].rule;
                 int local_rule_id_count;
-        		lock (rule_id_count) {
+                lock (rule_id_count) {
                     rule_id_count ++;
                     local_rule_id_count = rule_id_count;
-        		}
+                }
                 foreach (RuleExpression subexp in composit_rule)
                     subexp.rule_id = local_rule_id_count;
 
@@ -689,9 +671,9 @@ namespace Guanako {
                     call_params.add (child_param);
 
                 }
-                if (ret_param != null){
+                if (ret_param != null) {
                     var ret_p = find_param (call_params, ret_param, current_rule.rule_id);
-                    if (ret_p == null){
+                    if (ret_p == null) {
                         ret_p = new CallParameter();
                         ret_p.name = ret_param;
                         ret_p.for_rule_id = current_rule.rule_id;
@@ -710,34 +692,37 @@ namespace Guanako {
 
             var mres = match (written, current_rule.expr);
 
-            if (mres == matchres.COMPLETE) {
+            if (mres == MatchRes.COMPLETE) {
                 written = written.substring (current_rule.expr.length);
                 if (rule.length == 1)
                     return;
                 compare (rule[1:rule.length], accessible, written, call_params, depth + 1, ref ret);
             }
-            else if (mres == matchres.STARTED) {
+            else if (mres == MatchRes.STARTED) {
                 ret.add (new CompletionProposal (new Struct (current_rule.expr, null, null), written.length));
             }
             return;
         }
 
-        Thread<void*> compare_threaded(Project parent_project, RuleExpression[] compare_rule,
-                      Symbol[] accessible,
-                      string written,
-                      Gee.ArrayList<CallParameter> call_params,
-                      int depth, ref ProposalSet ret){
-            var compare_thd = new compare_thread(parent_project, compare_rule, accessible, written, call_params, depth, ref ret);
+        Thread<void*> compare_threaded (Project parent_project,
+                                        RuleExpression[] compare_rule,
+                                        Symbol[] accessible,
+                                        string written,
+                                        Gee.ArrayList<CallParameter> call_params,
+                                        int depth,
+                                        ref ProposalSet ret) {
+            var compare_thd = new CompareThread (parent_project, compare_rule, accessible, written, call_params, depth, ref ret);
             return new Thread<void*> (_("Guanako Completion"), compare_thd.run);
         }
 
-        class compare_thread {
-            public compare_thread(Project parent_project,
-                      RuleExpression[] compare_rule,
-                      Symbol[] accessible,
-                      string written,
-                      Gee.ArrayList<CallParameter> call_params,
-                      int depth, ref ProposalSet ret){
+        class CompareThread {
+            public CompareThread (Project parent_project,
+                                   RuleExpression[] compare_rule,
+                                   Symbol[] accessible,
+                                   string written,
+                                   Gee.ArrayList<CallParameter> call_params,
+                                   int depth,
+                                   ref ProposalSet ret) {
                 this.parent_project = parent_project;
                 this.compare_rule = compare_rule;
                 this.call_params = call_params;
@@ -753,28 +738,28 @@ namespace Guanako {
             int depth;
             string written;
             Symbol[] accessible;
-            public void* run(){
+            public void* run() {
                 parent_project.compare (compare_rule, accessible, written, call_params, depth + 1, ref ret);
                 return null;
             }
         }
 
-        enum matchres {
+        enum MatchRes {
             UNEQUAL,
             STARTED,
             COMPLETE
         }
 
-        matchres match (string written, string target) {
+        MatchRes match (string written, string target) {
             if (written.length >= target.length)
                 if (written.has_prefix (target))
-                    return matchres.COMPLETE;
+                    return MatchRes.COMPLETE;
             if (target.length > written.length && target.has_prefix (written))
-                return matchres.STARTED;
-            return matchres.UNEQUAL;
+                return MatchRes.STARTED;
+            return MatchRes.UNEQUAL;
         }
 
-        Symbol? get_type_of_symbol (Symbol smb, bool resolve_array){
+        Symbol? get_type_of_symbol (Symbol smb, bool resolve_array) {
             if (smb is Class || smb is Namespace || smb is Struct || smb is Enum)
                 return smb;
 
@@ -788,11 +773,11 @@ namespace Guanako {
 
             if (type == null)
                 return null;
-            if (type is ArrayType){
+            if (type is ArrayType) {
                 if (resolve_array)
                     return ((ArrayType)type).element_type.data_type;
                 else
-                    return new Class("Array");
+                    return new Class ("Array");
             }
             return type.data_type;
         }
@@ -801,9 +786,8 @@ namespace Guanako {
             Symbol [] ret = new Symbol[0];
             var current_symbol = get_symbol_at_pos (file, line, col);
 
-            if (current_symbol == null) {
+            if (current_symbol == null)
                 return ret;
-            }
 
             foreach (UsingDirective directive in file.current_using_directives) {
                 var children = get_child_symbols (directive.namespace_symbol);
@@ -828,7 +812,7 @@ namespace Guanako {
                 int last_depth = -1;
                 /* Add all statements before selected one to candidates. */
 
-                iter_subroutine(sr, (statement, depth) => {
+                iter_subroutine (sr, (statement, depth) => {
                     if (inside_source_ref (file, line, col, statement.source_reference)) {
                         if (depth > last_depth)
                             last_depth = depth;
@@ -854,7 +838,7 @@ namespace Guanako {
                         /*if (candidates[q] is ForStatement) {
                             var expressions = ((ForStatement) candidates[q]).get_initializer();
                             foreach (Expression expr in expressions) {
-                                stdout.printf(expr.symbol_reference.name + "!!\n");
+                                stdout.printf (expr.symbol_reference.name + "!!\n");
                             }
                             //if (fst.type_reference != null)
                             //    ret += new Variable (fst.type_reference, fst.variable_name);
@@ -881,38 +865,40 @@ namespace Guanako {
         public Symbol? get_symbol_at_pos (SourceFile source_file, int line, int col) {
             Symbol ret = null;
             int last_depth = -1;
-            iter_symbol (context.root, (smb, depth) => {
-                if (smb.name != null) {
-                    SourceReference sref = smb.source_reference;
-                    if (sref == null)
-                        return iter_callback_returns.continue;
+            iter_symbol (context.root,
+                         (smb, depth) => {
+                            if (smb.name != null) {
+                                SourceReference sref = smb.source_reference;
+                                if (sref == null)
+                                    return iter_callback_returns.continue;
 
-                    /*
-                     * Check symbol's own source reference.
-                     */
-                    if (inside_source_ref(source_file, line, col, sref)){
-                        if (depth > last_depth){  //Get symbol deepest in the tree
-                            ret = smb;
-                            last_depth = depth;
-                        }
-                    }
-
-                    /*
-                     * If the symbol is a subroutine, check its body's source
-                     * reference.
-                     */
-                    if (smb is Subroutine) {
-                        var sr = (Subroutine) smb;
-                        if (sr.body != null)
-                            if (inside_source_ref (source_file, line, col, sr.body.source_reference))
-                                if (depth > last_depth) {  //Get symbol deepest in the tree
-                                    ret = smb;
-                                    last_depth = depth;
+                                /*
+                                 * Check symbol's own source reference.
+                                 */
+                                if (inside_source_ref (source_file, line, col, sref)) {
+                                    if (depth > last_depth) {  //Get symbol deepest in the tree
+                                        ret = smb;
+                                        last_depth = depth;
+                                    }
                                 }
-                    }
-                }
-                return iter_callback_returns.continue;
-            }, 0);
+
+                                /*
+                                 * If the symbol is a subroutine, check its body's source
+                                 * reference.
+                                 */
+                                if (smb is Subroutine) {
+                                    var sr = (Subroutine) smb;
+                                    if (sr.body != null)
+                                        if (inside_source_ref (source_file, line, col, sr.body.source_reference))
+                                            if (depth > last_depth) {  //Get symbol deepest in the tree
+                                                ret = smb;
+                                                last_depth = depth;
+                                            }
+                                }
+                            }
+                            return iter_callback_returns.continue;
+                         },
+                         0);
             return ret;
         }
 
@@ -977,9 +963,7 @@ namespace Guanako {
                  * Removing nodes in the same loop causes problems (probably
                  * due to ReadOnlyList).
                  */
-#if DEBUG
-                stdout.printf ("Update source file: %s\n", file.filename);
-#endif
+                debug_msg ("Update source file: %s\n", file.filename);
 
                 Vala.CodeContext.push (context);
 
@@ -1000,6 +984,17 @@ namespace Guanako {
             }
         }
 
+        /**
+         * Print debug information if {@link debug} is true.
+         *
+         * @param format Format string.
+         * @param ... Arguments for format string.
+         */
+        private void debug_msg (string format, ...) {
+            if (debug)
+                stdout.printf (format.vprintf (va_list()));
+
+        }
      }
 }
 

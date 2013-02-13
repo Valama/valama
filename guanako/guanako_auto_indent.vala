@@ -30,7 +30,7 @@ namespace Guanako {
         foreach (var node in file.get_nodes()) {
             if (node is Symbol) {
                 var cls = node as Symbol;
-                iter_symbol(cls, (smb, depth) => {
+                iter_symbol (cls, (smb, depth) => {
                     if (smb is Subroutine) {
                         var sr = smb as Subroutine;
                         iter_subroutine (sr, (s, depth2) => {

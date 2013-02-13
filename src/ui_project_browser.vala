@@ -215,13 +215,13 @@ public class ProjectBrowser : UiElement {
      */
     private static string? package_selection_dialog (ValamaProject project) {
 
-        Dialog dlg = new Dialog.with_buttons(_("Select new packages"),
-                                            window_main,
-                                            DialogFlags.MODAL,
-                                            Stock.CANCEL,
-                                            ResponseType.REJECT,
-                                            Stock.OK,
-                                            ResponseType.ACCEPT);
+        Dialog dlg = new Dialog.with_buttons (_("Select new packages"),
+                                              window_main,
+                                              DialogFlags.MODAL,
+                                              Stock.CANCEL,
+                                              ResponseType.REJECT,
+                                              Stock.OK,
+                                              ResponseType.ACCEPT);
 
         var tree_view = new TreeView();
         var listmodel = new ListStore (1, typeof (string));
@@ -321,7 +321,7 @@ public class ProjectBrowser : UiElement {
                 if (pkg != null) {
                     string[] missing_packages = project.guanako_project.add_packages (new string[] {pkg}, true);
                     if (missing_packages.length > 0)
-                        ui_missing_packages_dialog(missing_packages);
+                        ui_missing_packages_dialog (missing_packages);
                     update();
                 }
                 break;
