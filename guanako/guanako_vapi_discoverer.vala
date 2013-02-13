@@ -36,9 +36,9 @@ namespace Guanako {
                 var enumerator = directory.enumerate_children (FileAttribute.STANDARD_NAME, 0);
 
                 FileInfo file_info;
-                while ((file_info = enumerator.next_file ()) != null) {
+                while ((file_info = enumerator.next_file()) != null) {
                     if (file_info.get_name().has_suffix (".vapi")) {
-                        var file = File.new_for_path (vapipath + file_info.get_name ());
+                        var file = File.new_for_path (vapipath + file_info.get_name());
                         var dis = new DataInputStream (file.read());
                         string line;
                         /*
@@ -50,9 +50,9 @@ namespace Guanako {
                     }
                 }
             } catch (GLib.IOError e) {
-                stderr.printf(_("Could not read file: %s"), e.message);
+                stderr.printf (_("Could not read file: %s"), e.message);
             } catch (GLib.Error e) {
-                stderr.printf(_("Could not operate on directory: %s"), e.message);
+                stderr.printf (_("Could not operate on directory: %s"), e.message);
             }
         }
         return null;

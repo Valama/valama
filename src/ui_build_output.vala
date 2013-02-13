@@ -29,7 +29,7 @@ public class BuildOutput : UiElement {
     private TextView textview;
     private ProgressBar progressbar;
 
-    public BuildOutput () {
+    public BuildOutput() {
         var vbox = new Box (Orientation.VERTICAL, 0);
 
         textview = new TextView();

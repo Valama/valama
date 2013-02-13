@@ -47,7 +47,7 @@ class UiBreakpoints : UiElement {
         build();
 
         /*tree_view.cursor_changed.connect (() => {
-            
+
         });*/
         tree_view.row_activated.connect ((path) => {
             /*int index = path.get_indices()[0];
@@ -105,7 +105,7 @@ class UiBreakpoints : UiElement {
         TextIter iter_end;
         var focus_file = project.guanako_project.get_source_file_by_name (Path.build_path (Path.DIR_SEPARATOR_S, project.project_path, window_main.current_srcfocus));
         if (!window_main.current_srcbuffer.get_selection_bounds (out iter_start, out iter_end)) {
-            var mark_insert = window_main.current_srcbuffer.get_insert ();
+            var mark_insert = window_main.current_srcbuffer.get_insert();
             TextIter iter;
             window_main.current_srcbuffer.get_iter_at_mark (out iter, mark_insert);
             var new_stop = FrankenStein.FrankenStop() { file = focus_file, line = iter.get_line() + 1 };
@@ -126,15 +126,13 @@ class UiBreakpoints : UiElement {
             frankenstein.frankentimers.remove_at (index);
         else
             frankenstein.frankenstops.remove_at (index - frankenstein.frankentimers.size);
-        
+
         build();
     }
 
     ListStore store = null;
     public override void build() {
-#if DEBUG
-        stderr.printf (_("Run %s update!\n"), element_name);
-#endif
+        debug_msg (_("Run %s update!\n"), element_name);
         store = new ListStore (3, typeof (string), typeof (string), typeof (string));
         tree_view.set_model (store);
 
@@ -171,9 +169,7 @@ class UiBreakpoints : UiElement {
             bfr.create_source_mark (null, "stop", iter);
         }
 
-#if DEBUG
-        stderr.printf (_("%s update finished!\n"), element_name);
-#endif
+        debug_msg (_("%s update finished!\n"), element_name);
     }
 }
 

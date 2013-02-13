@@ -32,7 +32,7 @@ public enum IDEmodes {
  */
 public class MainWindow : Window {
 
-    public IDEmodes IDEmode { 
+    public IDEmodes IDEmode {
         get { return _IDEmode; }
         set { _IDEmode = value; IDEmode_changed(); }
     }
@@ -226,7 +226,7 @@ public class MainWindow : Window {
         srcbuf.create_tag ("error_bg", "underline", Pango.Underline.ERROR, null);
         srcbuf.create_tag ("warning_bg", "background", "yellow", null);
 
-        //"left-margin", "1", "left-margin-set", "true", 
+        //"left-margin", "1", "left-margin-set", "true",
         /*
          * NOTE: Keep this in sync with get_sourceview method.
          */

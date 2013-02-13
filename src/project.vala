@@ -187,9 +187,9 @@ public class ValamaProject {
      * @param action Method to perform on each found file in directory or
      *               file list.
      */
-    private void generate_file_list(string[] directories,
-                                    string[] files,
-                                    FileCallback? action = null) {
+    private void generate_file_list (string[] directories,
+                                     string[] files,
+                                     FileCallback? action = null) {
         try {
             File directory;
             FileEnumerator enumerator;
@@ -454,11 +454,11 @@ public class ValamaProject {
             /* Update after timeout */
             if (bfr.timeout_id != -1)
                 Source.remove (bfr.timeout_id);
-            bfr.timeout_id = Timeout.add(1000, ()=>{
-                if (bfr.needs_guanako_update){
+            bfr.timeout_id = Timeout.add (1000, () => {
+                if (bfr.needs_guanako_update) {
                     if (parsing) //If we are already parsing, try again next time
                         return true;
-                    update_guanako(bfr);
+                    update_guanako (bfr);
                 }
                 bfr.timeout_id = -1;
                 return false;
@@ -473,7 +473,7 @@ public class ValamaProject {
                 if (bfr.last_active_line == line)
                     return;
                 bfr.last_active_line = line;
-                update_guanako(bfr);
+                update_guanako (bfr);
             }
         });
 
@@ -483,7 +483,7 @@ public class ValamaProject {
         return view;
     }
 
-    void update_guanako (SourceBuffer buffer){
+    void update_guanako (SourceBuffer buffer) {
         parsing = true;
         buffer.needs_guanako_update = false;
         try {
@@ -493,7 +493,7 @@ public class ValamaProject {
             string buffer_content =  buffer.text;
             new Thread<void*>.try (_("Buffer update"), () => {
                 report_wrapper.clear();
-                var source_file = this.guanako_project.get_source_file_by_name(Path.build_path (
+                var source_file = this.guanako_project.get_source_file_by_name (Path.build_path (
                                                 Path.DIR_SEPARATOR_S,
                                                 this.project_path,
                                                 window_main.current_srcfocus));

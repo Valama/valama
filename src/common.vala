@@ -475,7 +475,7 @@ public class FileTransfer : Object {
                                                            dest.get_path());
                 if (counter_on) {
                     from.copy (dest, copy_flag, cancellable, (cur, tot) => {
-                        byte_count_changed((current_size + (double) cur)/ total_size);
+                        byte_count_changed ((current_size + (double) cur)/ total_size);
                     });
                     current_size += size;
                     ++count_current;
@@ -489,7 +489,7 @@ public class FileTransfer : Object {
                                                            dest.get_path());
                 if (counter_on) {
                     from.move (dest, copy_flag, cancellable, (cur, tot) => {
-                        byte_count_changed((current_size + (double) cur)/ total_size);
+                        byte_count_changed ((current_size + (double) cur)/ total_size);
                     });
                     current_size += size;
                     ++count_current;

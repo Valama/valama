@@ -3,7 +3,7 @@ using Gtk;
 
 static Label lbl_hello;
 
-static void main (string[] args){
+static void main (string[] args) {
     Gtk.init (ref args);
 
     var window_main = new Window();
@@ -16,7 +16,7 @@ static void main (string[] args){
     lbl_hello = new Label ("Hello!");
     var btn_bye = new Button.with_label ("Magic!");
 
-    btn_bye.clicked.connect(on_btn_bye_clicked);
+    btn_bye.clicked.connect (on_btn_bye_clicked);
 
     vbox_main.pack_start (lbl_hello, true, true);
     vbox_main.pack_start (btn_bye, false, true);
@@ -28,6 +28,6 @@ static void main (string[] args){
     Gtk.main();
 }
 
-static void on_btn_bye_clicked(){
+static void on_btn_bye_clicked() {
     lbl_hello.label = "Bye!";
 }

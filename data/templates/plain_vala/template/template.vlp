@@ -1,5 +1,6 @@
 <project version="0.1">
 	<name></name>
+	<buildsystem>cmake</buildsystem>
 	<version>
 		<major>0</major>
 		<minor>0</minor>
@@ -20,6 +21,5 @@
 	</buildsystem-directories>
 	<buildsystem-files>
 		<file>CMakeLists.txt</file>
-		<file>po/CMakeLists.txt</file>
 	</buildsystem-files>
 </project>
