@@ -26,6 +26,7 @@ using Guanako;
 static MainWindow window_main;
 
 static ValamaProject project;
+static Guanako.FrankenStein frankenstein;
 
 static bool parsing = false;
 static MainLoop loop_update;
@@ -80,6 +81,7 @@ public static int main (string[] args) {
 
     window_main = new MainWindow();
     project_builder = new ProjectBuilder (project);
+    frankenstein = new Guanako.FrankenStein();
     var build_output = new BuildOutput ();
 
     /* Ui elements. */
@@ -95,6 +97,7 @@ public static int main (string[] args) {
     report_wrapper = new ReportWrapper();
     project.guanako_project.set_report_wrapper (report_wrapper);
     wdg_report = new UiReport (report_wrapper);
+    var wdg_breakpoints = new UiBreakpoints (frankenstein);
     wdg_report.error_selected.connect (on_error_selected);
     ui_elements_pool.add (wdg_report);
 
@@ -226,19 +229,9 @@ public static int main (string[] args) {
     // Frankentesting
     var btnFrankentest = new Gtk.ToolButton.from_stock (Stock.DIALOG_WARNING);
     window_main.add_button (btnFrankentest);
-    var stein = new Guanako.FrankenStein();
     btnFrankentest.clicked.connect(()=>{
-        //var sourcefiles = project.guanako_project.get_source_files();
-        var myfile = project.guanako_project.get_source_file_by_name ("/home/linus/source/valama/src/main.vala");
-        var timer1 = FrankenStein.FrankenTimer() { file = myfile,
-                                                        start_line = 42, end_line = 327};
-        stein.frankentimers.add (timer1);
-        //stdout.printf ("\n\n\n=======================\n\n\n");
-        //stdout.printf (stein.frankensteinify_sourcefile (myfile));
-        //stdout.printf ("\n\n\n=======================\n\n\n");
-    });
-    stein.timer_finished.connect ((timer, time) => {
-        stdout.printf ("================ Time: " + time.to_string() + "\n");
+        build_output.clear();
+        project_builder.build_project (frankenstein);
     });
 
     var btnRun = new Gtk.ToolButton.from_stock (Stock.MEDIA_PLAY);
@@ -310,6 +303,10 @@ public static int main (string[] args) {
                           DockItemBehavior.CANT_CLOSE,
                           DockPlacement.LEFT);
     window_main.add_item ("BuildOutput", _("Build output"), build_output.widget,
+                          Stock.FILE,
+                          DockItemBehavior.CANT_CLOSE,
+                          DockPlacement.LEFT);
+    window_main.add_item ("Breakpoints", _("Breakpoints / Timers"), wdg_breakpoints.widget,
                           Stock.FILE,
                           DockItemBehavior.CANT_CLOSE,
                           DockPlacement.LEFT);

@@ -13,6 +13,7 @@
         <notebook orientation="horizontal" locked="no" iconified="no" closed="no" page="1">
           <item name="ReportWrapper" orientation="vertical" locked="no"/>
           <item name="BuildOutput" orientation="vertical" locked="no"/>
+          <item name="Breakpoints" orientation="vertical" locked="no"/>
         </notebook>
       </paned>
     </dock>

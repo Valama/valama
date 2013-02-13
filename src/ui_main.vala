@@ -205,8 +205,17 @@ public class MainWindow : Window {
         src_view.add (view);
 
         var srcbuf = (SourceBuffer) view.buffer;
+        var attr = new SourceMarkAttributes();
+        attr.stock_id = Stock.MEDIA_FORWARD;
+        view.set_mark_attributes ("timer", attr, 0);
+        var attr2 = new SourceMarkAttributes();
+        attr2.stock_id = Stock.STOP;
+        view.set_mark_attributes ("stop", attr2, 0);
+        view.show_line_marks = true;
         srcbuf.create_tag ("error_bg", "underline", Pango.Underline.ERROR, null);
         srcbuf.create_tag ("warning_bg", "background", "yellow", null);
+
+        //"left-margin", "1", "left-margin-set", "true", 
         /*
          * NOTE: Keep this in sync with get_sourceview method.
          */

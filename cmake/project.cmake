@@ -22,6 +22,7 @@ set(srcfiles
 "src/project.vala"
 "src/project_templates.vala"
 "src/ui_about_dialog.vala"
+"src/ui_breakpoints.vala"
 "src/ui_build_output.vala"
 "src/ui_create_file_dialog.vala"
 "src/ui_create_project_dialog.vala"
