@@ -14,6 +14,7 @@
           <item name="ReportWrapper" orientation="vertical" locked="no"/>
           <item name="BuildOutput" orientation="vertical" locked="no"/>
           <item name="Breakpoints" orientation="vertical" locked="no"/>
+          <item name="CurrentFileStructure" orientation="vertical" locked="no"/>
         </notebook>
       </paned>
     </dock>

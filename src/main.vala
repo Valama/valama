@@ -99,8 +99,8 @@ public static int main (string[] args) {
     wdg_report = new UiReport (report_wrapper);
     var wdg_breakpoints = new UiBreakpoints (frankenstein);
     wdg_report.error_selected.connect (on_error_selected);
-    ui_elements_pool.add (wdg_report);
 
+    ui_elements_pool.add (wdg_report);
 
     /* Menu */
     /* File */
@@ -219,6 +219,7 @@ public static int main (string[] args) {
     window_main.add_button (new SeparatorToolItem());
 
     var target_selector = new ComboBoxText();
+    target_selector.set_tooltip_text (_("IDE mode"));
     var ti = new ToolItem();
     ti.add (target_selector);
     target_selector.append_text (_("Debug"));
@@ -297,6 +298,8 @@ public static int main (string[] args) {
     var src_report = new ScrolledWindow (null, null);
     src_report.add (wdg_report.widget);
 
+    var wdg_current_file_structure = new UiCurrentFileStructure();
+
     /* Init new empty buffer. */
     window_main.add_srcitem (project.open_new_buffer ("", "", true));
     window_main.add_item ("ReportWrapper", _("Report widget"), src_report,
@@ -313,6 +316,10 @@ public static int main (string[] args) {
                           DockItemBehavior.CANT_CLOSE,
                           DockPlacement.LEFT);
     window_main.add_item ("Breakpoints", _("Breakpoints / Timers"), wdg_breakpoints.widget,
+                          Stock.FILE,
+                          DockItemBehavior.CANT_CLOSE,
+                          DockPlacement.LEFT);
+    window_main.add_item ("CurrentFileStructure", _("Current file"), wdg_current_file_structure.widget,
                           Stock.FILE,
                           DockItemBehavior.CANT_CLOSE,
                           DockPlacement.LEFT);

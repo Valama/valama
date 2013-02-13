@@ -445,6 +445,10 @@ namespace Guanako {
                     });
                 thread_add_items = new Thread<void*> (_("Proposal collector"), run_thread_add_items);
             }
+            ~ProposalSet() {
+                active = false;
+                loop_thread.quit();
+            }
             int compare (CompletionProposal a, CompletionProposal b) {
                 var name_a = ((CompletionProposal)a).symbol.name;
                 var name_b = ((CompletionProposal)b).symbol.name;
@@ -461,8 +465,9 @@ namespace Guanako {
 
                 return 0;
             }
+            bool active = true;
             void* run_thread_add_items (){
-                while (true) {
+                while (active) {
                     if (queue.size == 0)
                         loop_thread.run();
                     CompletionProposal prop = null;
