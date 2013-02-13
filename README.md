@@ -40,27 +40,6 @@ If you want to use a newer version of `libvala`, change  `cmake/project.cmake` a
 ## Packaging files for distributions ##
 To build and install Valama for your distriution look at the [packaging](https://github.com/Valama/valama/tree/packaging) branch. If you don't find your distribution there, you are welcome to contribute your packagig files to this branch (and put you work under GPL-3+).
 
-## FAQ ##
-### Valama build error: ‘GdlDockItem’ has no member named ‘child’ ###
-With `gdl` >= 3.5.5 you have to update your gdl-vapi (see [#693127](https://bugzilla.gnome.org/show_bug.cgi?id=693127)). If your Vala version is 0.18 update the file `/usr/share/vala-0.18/vapi/gdl-3.0.vapi` with following patch:
-
-```diff
---- a/gdl-3.0.vapi
-+++ b/gdl-3.0.vapi
-@@ -41,7 +41,7 @@
-        }
-        [CCode (cheader_filename = "gdl/gdl.h", type_id = "gdl_dock_item_get_type ()")]
-        public class DockItem : Gdl.DockObject, Atk.Implementor, Gtk.Buildable {
--               public weak Gtk.Widget child;
-+               public weak Gtk.Widget child { get; set; }
-                public int dragoff_x;
-                public int dragoff_y;
-                [CCode (has_construct_function = false, type = "GtkWidget*")]
-```
-
-This will make DockItem.child a property and fix this C-compiler error.
-
-
 ## License ##
 Valama is distributed under the terms of the GNU General Public License version 3 or later and published by:
  * Linus Seelinger
@@ -69,5 +48,4 @@ Valama is distributed under the terms of the GNU General Public License version 
 For a full list of all contributors see [here](https://github.com/Valama/valama/graphs/contributors) and take a look at `AUTHORS` file.
 
 ## Credits ##
-
 element-\* icons from Anjuta IDE (www.anjuta.org, GPL2 licensed)
