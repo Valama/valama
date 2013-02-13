@@ -37,7 +37,7 @@ class UiBreakpoints : UiElement {
 
         element_name = "UiBreakpoints";
 
-        var box_main = new VBox (false, 0);
+        var box_main = new Box (Orientation.VERTICAL, 0);
 
         tree_view = new TreeView();
         tree_view.insert_column_with_attributes (-1, _("Line"), new CellRendererText(), "text", 0, null);

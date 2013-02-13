@@ -66,16 +66,26 @@ public class ProjectBuilder {
                     if (src_file_path.has_suffix (".vapi"))
                         continue;
                     string content;
-                    FileUtils.get_contents(src_file_path, out content);
+                    try {
+                        FileUtils.get_contents (src_file_path, out content);
+                    } catch (GLib.FileError e) {
+                        errmsg (_("Could read file content of '%s': %s\n"), src_file_path, e.message);
+                    }
                     var srcfile = project.guanako_project.get_source_file_by_name(src_file_path);
                     srcfile.content = content; //TODO: Find out why SourceFile.content is empty at the beginning (??)
                     var tmppath = Path.build_path (Path.DIR_SEPARATOR_S, buildpath, cnt.to_string() + ".vala");
                     var tmpfile = File.new_for_path (tmppath);
 
-                    var dos = new DataOutputStream (tmpfile.replace (null, false, FileCreateFlags.REPLACE_DESTINATION));
-                    dos.put_string (stein.frankensteinify_sourcefile(srcfile));
-                    if (cnt == 0)
-                        dos.put_string (stein.get_frankenstein_mainblock());
+                    try {
+                        var dos = new DataOutputStream (tmpfile.replace (null, false, FileCreateFlags.REPLACE_DESTINATION));
+                        dos.put_string (stein.frankensteinify_sourcefile(srcfile));
+                        if (cnt == 0)
+                            dos.put_string (stein.get_frankenstein_mainblock());
+                    } catch (GLib.IOError e) {
+                        errmsg (_("Could not update file: %s\n"), e.message);
+                    } catch (GLib.Error e) {
+                        errmsg (_("Could not open file to write: %s\n"), e.message);
+                    }
                     valacargs += tmppath;
                     cnt++;
                 }
