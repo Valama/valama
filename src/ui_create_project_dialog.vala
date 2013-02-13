@@ -159,6 +159,7 @@ public ValamaProject? ui_create_project_dialog() {
         new FileTransfer (buildsystem_path,
                           target_folder,
                           CopyRecursiveFlags.SKIP_EXISTENT).copy();
+        project.save();
     } catch (GLib.Error e) {
         stderr.printf (_("Could not copy templates for new project: %s\n"), e.message);
     }

@@ -179,6 +179,7 @@ public void ui_project_dialog (ValamaProject? project) {
                 project.version_minor = (int) ent_minor.value;
                 project.version_patch = (int) ent_patch.value;
                 //project.version_special = ent_version_special;
+                project.save();
                 dlg.destroy();
                 break;
             case ResponseType.CANCEL:
