@@ -78,6 +78,11 @@ class UiBreakpoints : UiElement {
         btn_resume.sensitive = false;
         box_main.pack_start (toolbar, false, true);
 
+        window_main.IDEmode_changed.connect(()=>{
+            var active = window_main.IDEmode == IDEmodes.DEBUG;
+            box_main.sensitive = active;
+        });
+
         widget = box_main;
     }
     MainLoop resume_wait_loop = new MainLoop();

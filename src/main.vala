@@ -218,20 +218,26 @@ public static int main (string[] args) {
 
     window_main.add_button (new SeparatorToolItem());
 
+    var target_selector = new ComboBoxText();
+    var ti = new ToolItem();
+    ti.add (target_selector);
+    target_selector.append_text (_("Debug"));
+    target_selector.append_text (_("Release"));
+    target_selector.active = 0;
+    target_selector.changed.connect (()=>{
+        window_main.IDEmode = (IDEmodes)target_selector.active;
+    });
+    window_main.add_button (ti);
+
     var btnBuild = new Gtk.ToolButton.from_stock (Stock.EXECUTE);
     window_main.add_button (btnBuild);
     btnBuild.set_tooltip_text (_("Save current file and build project"));
     btnBuild.clicked.connect (() => {
         build_output.clear();
-        project_builder.build_project ();
-    });
-
-    // Frankentesting
-    var btnFrankentest = new Gtk.ToolButton.from_stock (Stock.DIALOG_WARNING);
-    window_main.add_button (btnFrankentest);
-    btnFrankentest.clicked.connect(()=>{
-        build_output.clear();
-        project_builder.build_project (frankenstein);
+        if (window_main.IDEmode == IDEmodes.RELEASE)
+            project_builder.build_project ();
+        else if (window_main.IDEmode == IDEmodes.DEBUG)
+            project_builder.build_project (frankenstein);
     });
 
     var btnRun = new Gtk.ToolButton.from_stock (Stock.MEDIA_PLAY);

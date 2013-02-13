@@ -22,10 +22,23 @@ using Gtk;
 using Gdl;
 using Gee;
 
+public enum IDEmodes {
+    DEBUG = 0,
+    RELEASE = 1
+}
+
 /**
  * Main window class. Setup {@link Gdl.Dock} and {@link Gdl.DockBar} stuff.
  */
 public class MainWindow : Window {
+
+    public IDEmodes IDEmode { 
+        get { return _IDEmode; }
+        set { _IDEmode = value; IDEmode_changed(); }
+    }
+    public signal void IDEmode_changed();
+    IDEmodes _IDEmode = IDEmodes.DEBUG;
+
     /**
      * Master dock for all items except tool and menubar.
      */
