@@ -201,8 +201,7 @@ public void build_file_treestore (string storename,
             var pathparts = split_path (name, false);
 
             if (pathparts.length == 0) {
-                stderr.printf (_("Couldn't add element to TreeStore '%s': %s\n"), storename, file);
-                stderr.printf (_("Please report a bug!\n"));
+                bug_msg (_("Couldn't add element to TreeStore '%s': %s\n"), storename, file);
                 return;
             }
             for (int depth = 0; depth < pathparts.length; ++depth) {

@@ -53,9 +53,7 @@ public class SymbolBrowser : UiElement {
     public Widget widget;
 
     public override void build() {
-#if DEBUG
-        stderr.printf (_("Run %s update!\n"), element_name);
-#endif
+        debug_msg (_("Run %s update!\n"), element_name);
         var store = new TreeStore (2, typeof (string), typeof (string));
         tree_view.set_model (store);
 
@@ -83,9 +81,7 @@ public class SymbolBrowser : UiElement {
             }
             return Guanako.iter_callback_returns.continue;
         });
-#if DEBUG
-        stderr.printf (_("%s update finished!\n"), element_name);
-#endif
+        debug_msg (_("%s update finished!\n"), element_name);
     }
 }
 

@@ -161,7 +161,7 @@ public ValamaProject? ui_create_project_dialog() {
                           CopyRecursiveFlags.SKIP_EXISTENT).copy();
         project.save();
     } catch (GLib.Error e) {
-        stderr.printf (_("Could not copy templates for new project: %s\n"), e.message);
+        errmsg (_("Could not copy templates for new project: %s\n"), e.message);
     }
 
 
@@ -172,7 +172,7 @@ public ValamaProject? ui_create_project_dialog() {
                                                        proj_name + ".vlp"));
         new_proj.project_name = proj_name;
     } catch (LoadingError e) {
-        stderr.printf (_("Couln't load new project: %s\n"), e.message);
+        errmsg (_("Couln't load new project: %s\n"), e.message);
     }
     return new_proj;
 }

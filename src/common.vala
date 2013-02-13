@@ -348,9 +348,7 @@ public class FileTransfer : Object {
      */
     public void copy() throws GLib.Error, GLib.IOError {
         transfer (RecursiveAction.COPY);
-#if DEBUG
-        stdout.printf (_("Copying finished.\n"));
-#endif
+        debug_msg (_("Copying finished.\n"));
     }
 
     /**
@@ -361,9 +359,7 @@ public class FileTransfer : Object {
      */
     public void move() throws GLib.Error, GLib.IOError {
         transfer (RecursiveAction.MOVE);
-#if DEBUG
-        stdout.printf (_("Moving finished.\n"));
-#endif
+        debug_msg (_("Moving finished.\n"));
     }
 
     /**
@@ -446,10 +442,8 @@ public class FileTransfer : Object {
             /* SKIP_EXISTENT */
             if (rec_flag == CopyRecursiveFlags.SKIP_EXISTENT ||
                     rec_flag == CopyRecursiveFlags.NO_COUNT_SKIP_EXISTENT) {
-#if DEBUG
                 if (action != RecursiveAction.COUNT)
-                    stdout.printf (_("Skip %s\n"), dest.get_path());
-#endif
+                    debug_msg (_("Skip %s\n"), dest.get_path());
                 if (counter_on) {
                     current_size += size;
                     byte_count_changed (current_size / total_size);
@@ -461,10 +455,8 @@ public class FileTransfer : Object {
             } else if ((rec_flag == CopyRecursiveFlags.WARN_OVERWRITE ||
                     rec_flag == CopyRecursiveFlags.NO_COUNT_WARN_OVERWRITE) &&
                     !warn_overwrite (from.get_path(), dest.get_path())) {
-#if DEBUG
-                stdout.printf (_("Skip overwrite from '%s' to '%s'.\n"), from.get_path(),
-                                                                      dest.get_path());
-#endif
+                debug_msg (_("Skip overwrite from '%s' to '%s'.\n"), from.get_path(),
+                                                                     dest.get_path());
                 if (counter_on) {
                     current_size += size;
                     byte_count_changed (current_size / total_size);
@@ -479,10 +471,8 @@ public class FileTransfer : Object {
         /* Do the actual file transfer action. */
         switch (action) {
             case RecursiveAction.COPY:
-#if DEBUG
-                stdout.printf (_("Copy from '%s' to '%s'.\n"), from.get_path(),
-                                                            dest.get_path());
-#endif
+                debug_msg (_("Copy from '%s' to '%s'.\n"), from.get_path(),
+                                                           dest.get_path());
                 if (counter_on) {
                     from.copy (dest, copy_flag, cancellable, (cur, tot) => {
                         byte_count_changed((current_size + (double) cur)/ total_size);
@@ -495,10 +485,8 @@ public class FileTransfer : Object {
                 break;
             //TODO: Exactly same as copying. Do this the more elegant way.
             case RecursiveAction.MOVE:
-#if DEBUG
-                stdout.printf (_("Move from '%s' to '%s'.\n"), from.get_path(),
-                                                            dest.get_path());
-#endif
+                debug_msg (_("Move from '%s' to '%s'.\n"), from.get_path(),
+                                                           dest.get_path());
                 if (counter_on) {
                     from.move (dest, copy_flag, cancellable, (cur, tot) => {
                         byte_count_changed((current_size + (double) cur)/ total_size);
@@ -512,8 +500,7 @@ public class FileTransfer : Object {
             case RecursiveAction.COUNT:
                 break;
             default:
-                stderr.printf (_("Unexpected enum value: %s: %d\n"), "common - RecursiveAction", action);
-                stderr.printf (_("Please report a bug!\n"));
+                bug_msg (_("Unexpected enum value: %s: %d\n"), "common - RecursiveAction", action);
                 break;
         }
     }
@@ -576,12 +563,12 @@ public bool save_file (string filename, string text) {
         dos.put_string (text);
         dos.flush();
         dos.close();
-        stdout.printf (_("File saved: %s\n"),  file.get_path());
+        msg (_("File saved: %s\n"),  file.get_path());
         return true;
     } catch (GLib.IOError e) {
-        stderr.printf (_("Could not update file: %s\n"), e.message);
+        errmsg (_("Could not update file: %s\n"), e.message);
     } catch (GLib.Error e) {
-        stderr.printf (_("Could not open file to write: %s\n"), e.message);
+        errmsg (_("Could not open file to write: %s\n"), e.message);
     }
     return false;
 }
@@ -607,14 +594,45 @@ public int comp_proj_version (string ver_a, string ver_b) {
 
     for (int i = 0; i < max; ++i) {
         var ret = strcmp (a_parts[i], b_parts[i]);
-        stdout.printf ("a: %s\n", a_parts[i]);
-        stdout.printf ("b: %s\n", b_parts[i]);
         if (ret > 0)
             return 1;
         else if (ret < 0)
             return -1;
     }
     return 0;
+}
+
+
+/* Message methods. */
+/**
+ * Print debug message only if debulevel is high enough.
+ *
+ * @param format Printf string.
+ * @param ... Printf variables.
+ */
+public void debug_msg (string format, ...) {
+    if (Args.debug)
+        stdout.printf (format.vprintf (va_list()));
+}
+
+public void warning_msg (string format, ...) {
+    stdout.printf (_("Warning: ") + format.vprintf (va_list()));
+}
+
+public void error_msg (string format, ...) {
+    stderr.printf (_("Error: ") + format.vprintf (va_list()));
+}
+
+public void bug_msg (string format, ...) {
+    stderr.printf (format.vprintf (va_list()) + _("Please report a bug!\n"));
+}
+
+public void msg (string format, ...) {
+    stdout.printf (format.vprintf (va_list()));
+}
+
+public void errmsg (string format, ...) {
+    stderr.printf (format.vprintf (va_list()));
 }
 
 // vim: set ai ts=4 sts=4 et sw=4

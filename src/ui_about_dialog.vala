@@ -33,7 +33,7 @@ public void ui_about_dialog() {
                                                       Config.PACKAGE_DATA_DIR,
                                                       "valama-text.png"));
     } catch (GLib.Error e) {
-        stderr.printf ("Could not load pixmap: %s\n", e.message);
+        errmsg ("Could not load pixmap: %s\n", e.message);
     }
 
     //TODO: Generate this automatically from AUTHORS file.
@@ -63,8 +63,7 @@ public void ui_about_dialog() {
                 dlg.destroy();
                 break;
             default:
-                stderr.printf (_("Unexpected enum value: %s: %d\n"), "about_dialog - dlg.response.connect", response_id);
-                stderr.printf (_("Please report a bug!\n"));
+                bug_msg (_("Unexpected enum value: %s: %d\n"), "about_dialog - dlg.response.connect", response_id);
                 break;
         }
     });

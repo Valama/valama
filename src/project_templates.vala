@@ -111,7 +111,7 @@ public ProjectTemplate[] load_templates (string language){
             ret += new_template;
         }
     } catch (GLib.Error e) {
-        stderr.printf (_("Couln't get template information: %s\n"), e.message);
+        errmsg (_("Couln't get template information: %s\n"), e.message);
     }
 
     return ret;

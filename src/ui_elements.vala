@@ -145,7 +145,7 @@ public abstract class UiElement {
                 tp.add (queue_element);
             q.clear();
         } catch (GLib.ThreadError e) {
-            stderr.printf (_("Could not start new thread: %s\n"), e.message);
+            errmsg (_("Could not start new thread: %s\n"), e.message);
         }*/
     }
 

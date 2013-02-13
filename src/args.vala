@@ -21,11 +21,13 @@ using GLib;
 
 namespace Args {
     public bool version = false;
+    public bool debug = false;
     [CCode (array_length = false, array_null_terminated = true)]
     public string[]? projectfiles = null;
 
     private const OptionEntry[] options = {
         {"version", 'v', 0, OptionArg.NONE, ref version, N_("Display version number."), null},
+        {"debug", 'd', 0, OptionArg.NONE, ref debug, N_("Output debug information."), null},
         {"", 0, 0, OptionArg.FILENAME_ARRAY, ref projectfiles, N_("Load project from file."), N_("[FILE...]")},
         {null}
     };
@@ -39,13 +41,13 @@ namespace Args {
         try {
             opt_context.parse (ref args);
         } catch (OptionError e) {
-            stderr.printf (_("Error: %s\n"), e.message);
-            stderr.printf (_("Run '%s --help' to see a full list of available command line options.\n"), args[0]);
+            errmsg (_("Error: %s\n"), e.message);
+            errmsg (_("Run '%s --help' to see a full list of available command line options.\n"), args[0]);
             return 1;
         }
 
         if (version) {
-            stdout.printf ("%s: %s\n", Config.PACKAGE_NAME, Config.PACKAGE_VERSION);
+            msg ("%s: %s\n", Config.PACKAGE_NAME, Config.PACKAGE_VERSION);
             ret = -1;
         }
 

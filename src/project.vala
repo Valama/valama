@@ -123,7 +123,7 @@ public class ValamaProject {
         files = new Gee.ArrayList<string>();
         b_files = new Gee.ArrayList<string>();
 
-        stdout.printf (_("Load project file: %s\n"), this.project_file);
+        msg (_("Load project file: %s\n"), this.project_file);
         load_project_file();  // can throw LoadingError
 
         generate_file_list (project_source_dirs,
@@ -153,7 +153,7 @@ public class ValamaProject {
     private void add_source_file (string filename) {
         if (!(filename.has_suffix (".vala") || filename.has_suffix (".vapi")))
             return;
-        stdout.printf (_("Found file %s\n"), filename);
+        msg (_("Found file %s\n"), filename);
         if (!this.files.contains (filename)) {
             guanako_project.add_source_file_by_name (filename);
             this.files.add (filename);
@@ -168,7 +168,7 @@ public class ValamaProject {
     private void add_buildsystem_file (string filename) {
         if (!(filename.has_suffix (".cmake") || Path.get_basename (filename) == ("CMakeLists.txt")))
             return;
-        stdout.printf (_("Found file %s\n"), filename);
+        msg (_("Found file %s\n"), filename);
         if (!this.b_files.contains (filename))
             this.b_files.add (filename);
     }
@@ -213,10 +213,10 @@ public class ValamaProject {
                 if (file.query_exists())
                     action (path);
                 else
-                    stderr.printf (_("Warning: File not found: %s\n"), path);
+                    warning_msg (_("File not found: %s\n"), path);
             }
         } catch (GLib.Error e) {
-            stderr.printf(_("Could not open file: %s\n"), e.message);
+            errmsg (_("Could not open file: %s\n"), e.message);
         }
 
     }
@@ -302,7 +302,7 @@ public class ValamaProject {
                             buildsystem_files += p->get_content();
                     break;
                 default:
-                    stderr.printf ("Warning: Unknown configuration file value: %s", i->name);
+                    errmsg ("Warning: Unknown configuration file value: %s", i->name);
                     break;
             }
         }
@@ -385,14 +385,8 @@ public class ValamaProject {
      * @return Return {@link Gtk.SourceView} if new buffer was created else null.
      */
     public SourceView? open_new_buffer (string txt = "", string filename = "", bool dirty = false) {
-#if DEBUG
-        string dbgstr;
-        if (filename == "")
-            dbgstr = _("(new file)");
-        else
-            dbgstr = filename;
-        stdout.printf (_("Load new buffer: %s\n"), dbgstr);
-#endif
+        debug_msg (_("Load new buffer: %s\n"), (filename == "") ? _("(new file)") : filename);
+
         foreach (var viewelement in vieworder) {
             if (viewelement.filename == filename) {
                 vieworder.remove (viewelement);
@@ -443,7 +437,7 @@ public class ValamaProject {
                 try {
                     view.completion.add_provider (this.comp_provider);
                 } catch (GLib.Error e) {
-                    stderr.printf (_("Could not load completion: %s\n"), e.message);
+                    errmsg (_("Could not load completion: %s\n"), e.message);
                 }
         }
 
@@ -485,9 +479,7 @@ public class ValamaProject {
 
         var vmap = new ViewMap (view, filename);
         vieworder.offer_head (vmap);
-#if DEBUG
-        stdout.printf (_("Buffer loaded.\n"));
-#endif
+        debug_msg (_("Buffer loaded.\n"));
         return view;
     }
 
@@ -516,7 +508,7 @@ public class ValamaProject {
                 return null;
             });
         } catch (GLib.Error e) {
-            stderr.printf (_("Could not create thread to update buffer completion: %s\n"), e.message);
+            errmsg (_("Could not create thread to update buffer completion: %s\n"), e.message);
         }
     }
 
@@ -559,7 +551,7 @@ public class ValamaProject {
         string filepath = filename;
         if (filepath == "") {
             if (window_main.current_srcfocus == null) {
-                stdout.printf (_("Warning: No file selected.\n"));
+                warning_msg (_("No file selected.\n"));
                 return false;
             }
             filepath = Path.build_path (Path.DIR_SEPARATOR_S,
@@ -575,7 +567,7 @@ public class ValamaProject {
                 srcbuf.dirty = !save_file (map.filename, srcbuf.text);
                 return !srcbuf.dirty;
             }
-        stderr.printf (_("Warning: Couldn't save project file: %s\n"), filename);
+        warning_msg (_("Couldn't save project file: %s\n"), filename);
         return false;
     }
 
@@ -592,9 +584,7 @@ public class ValamaProject {
                 var srcbuf = (SourceBuffer) map.view.buffer;
                 return srcbuf.dirty;
             }
-#if DEBUG
-        stderr.printf (_("Warning: File not registered in project to check if buffer is dirty: %s\n"), filename);
-#endif
+        debug_msg (_("Warning: File not registered in project to check if buffer is dirty: %s\n"), filename);
         return false;
     }
 

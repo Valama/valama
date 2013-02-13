@@ -70,16 +70,14 @@ public class MainWindow : Window {
             return _current_srcfocus;
         }
         private set {
-#if DEBUG
-            stdout.printf (_("Change current focus: %s\n"), value);
-#endif
+            debug_msg (_("Change current focus: %s\n"), value);
             this._current_srcfocus = value;
             this.current_srcid = get_sourceview_id (this._current_srcfocus);
             if (0 <= this.current_srcid < this.srcitems.size) {
                 this.current_srcview = get_sourceview (this.srcitems[this.current_srcid]);
                 this.current_srcbuffer = (SourceBuffer) this.current_srcview.buffer;
             } else
-                stderr.printf (_("Warning: Could not select current source view: %s\n" +
+                errmsg (_("Warning: Could not select current source view: %s\n" +
                                  "Expected behavior may change.\n"), this._current_srcfocus);
         }
     }
@@ -155,7 +153,7 @@ public class MainWindow : Window {
                 // pa.grab_focus();
                 /* If something strange happens (pa == null) break the loop. */
                 while (!(pa is Dock) && (pa != null)) {
-                    //stdout.printf("item: %s\n", pa.name);
+                    //msg ("item: %s\n", pa.name);
                     if (pa is Switcher) {
                         var nbook = (Notebook) pa;
                         nbook.page = nbook.page_num (srcitem);
@@ -287,8 +285,7 @@ public class MainWindow : Window {
             if (id != -1)
                 this.srcitems[id].dock (item, DockPlacement.CENTER, 0);
             else {
-                stderr.printf (_("Source view id out of range.\n"));
-                stderr.printf (_("Please report a bug!\n"));
+                bug_msg (_("Source view id out of range.\n"));
                 return;
             }
             if (srcitems.size == 1) {
@@ -358,9 +355,7 @@ public class MainWindow : Window {
         for (int i = 0; i < srcitems.size; ++i)
             if (srcitems[i].long_name == filename)
                 return i;
-#if DEBUG
-        stderr.printf ("Warning: No such file found in opened buffers: %s\n", filename);
-#endif
+        debug_msg ("No such file found in opened buffers: %s\n", filename);
         return -1;
     }
 
@@ -416,11 +411,9 @@ public class MainWindow : Window {
     public bool save_layout (string filename) {
         bool ret = this.layout.save_to_file (filename);
         if (!ret)
-            stderr.printf (_("Couldn't save layout to file: %s\n"), filename);
-#if DEBUG
+            errmsg (_("Couldn't save layout to file: %s\n"), filename);
         else
-            stdout.printf (_("Layout saved to file: %s\n"), filename);
-#endif
+            debug_msg (_("Layout saved to file: %s\n"), filename);
         return ret;
     }
 
@@ -434,11 +427,9 @@ public class MainWindow : Window {
     public bool load_layout (string filename, string section = "__default__") {
         bool ret = this.layout.load_from_file (filename);
         if (!ret)
-            stderr.printf (_("Couldn't load layout file: %s\n"), filename);
-#if DEBUG
+            errmsg (_("Couldn't load layout file: %s\n"), filename);
         else
-            stdout.printf (_("Layout loaded from file: %s\n"), filename);
-#endif
+            debug_msg (_("Layout loaded from file: %s\n"), filename);
         return (ret && this.layout_reload (section));
     }
 
@@ -451,11 +442,9 @@ public class MainWindow : Window {
     public bool layout_reload (string section = "__default__") {
         bool ret = this.layout.load_layout (section);
         if (!ret)
-            stderr.printf (_("Couldn't load layout: %s\n"), section);
-#if DEBUG
+            errmsg (_("Couldn't load layout: %s\n"), section);
         else
-            stdout.printf (_("Layout loaded: %s\n"), section);
-#endif
+            debug_msg (_("Layout loaded: %s\n"), section);
         return ret;
     }
 

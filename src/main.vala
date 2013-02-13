@@ -74,7 +74,7 @@ public static int main (string[] args) {
     } catch (LoadingError e) {
         //FIXME: Handle this error (properly) instead of this pseudo hack
         //       (same as above).
-        stderr.printf (_("Couldn't load Valama project: %s\n"), e.message);
+        errmsg (_("Couldn't load Valama project: %s\n"), e.message);
         project = null;
         return 1;
     }
@@ -335,7 +335,7 @@ public static int main (string[] args) {
         try {
             f.make_directory_with_parents();
         } catch (GLib.Error e) {
-            stderr.printf (_("Couldn't create cache directory: %s\n"), e.message);
+            errmsg (_("Couldn't create cache directory: %s\n"), e.message);
         }
     window_main.save_layout (local_layout_filename);
     project.save();
@@ -405,7 +405,7 @@ static void on_file_selected (string filename){
             window_main.add_srcitem (view, fname);
         window_main.focus_src (fname);
     } catch (GLib.FileError e) {
-        stderr.printf (_("Could not load file: %s\n"), e.message);
+        errmsg (_("Could not load file: %s\n"), e.message);
     }
 }
 
@@ -436,11 +436,11 @@ class TestProvider : Gtk.SourceCompletionProvider, Object {
                                                 Config.PIXMAP_DIR,
                                                 "element-" + type + "-16.png"));
         } catch (Gdk.PixbufError e) {
-            stderr.printf (_("Could not load pixmap: %s\n"), e.message);
+            errmsg (_("Could not load pixmap: %s\n"), e.message);
         } catch (GLib.FileError e) {
-            stderr.printf (_("Could not open pixmaps file: %s\n"), e.message);
+            errmsg (_("Could not open pixmaps file: %s\n"), e.message);
         } catch (GLib.Error e) {
-            stderr.printf (_("Pixmap loading failed: %s\n"), e.message);
+            errmsg (_("Pixmap loading failed: %s\n"), e.message);
         }
     }
 
@@ -523,7 +523,7 @@ class TestProvider : Gtk.SourceCompletionProvider, Object {
             try {
                 this.icon = theme.load_icon (Gtk.Stock.DIALOG_INFO, 16, 0);
             } catch (GLib.Error e) {
-                stderr.printf (_("Could not load icon theme: %s\n"), e.message);
+                errmsg (_("Could not load icon theme: %s\n"), e.message);
             }
         }
         return this.icon;

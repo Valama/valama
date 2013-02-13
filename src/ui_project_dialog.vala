@@ -64,7 +64,7 @@ public void ui_load_project (UiElementPool ui_elements_pool) {
                     File.new_for_path (project.project_file).query_info (FileAttribute.UNIX_INODE,
                     FileQueryInfoFlags.NONE).get_attribute_as_string (FileAttribute.UNIX_INODE));
         } catch (GLib.Error e) {
-            stderr.printf (_("Couln't compare project files inodes: %s\n"), e.message);
+            errmsg (_("Couln't compare project files inodes: %s\n"), e.message);
             comp = false;
         }
         if (comp) {
@@ -73,7 +73,7 @@ public void ui_load_project (UiElementPool ui_elements_pool) {
             try {
                 new_project = new ValamaProject (new_filename);
             } catch (LoadingError e) {
-                stderr.printf (_("Couldn't load new project: %s\n"), e.message);
+                errmsg (_("Couldn't load new project: %s\n"), e.message);
                 dlg.close();
                 return;
             }
@@ -84,7 +84,7 @@ public void ui_load_project (UiElementPool ui_elements_pool) {
             on_file_selected (project.guanako_project.get_source_files()[0].filename);
             return;
         } else {
-            stdout.printf (_("Skip already loaded project: %s\n"), new_filename);
+            msg (_("Skip already loaded project: %s\n"), new_filename);
         }
     }
     dlg.close();
@@ -200,8 +200,7 @@ public void ui_project_dialog (ValamaProject? project) {
                 //ent_version_special.text = project.version_special;
                 break;
             default:
-                stderr.printf (_("Unexpected enum value: %s: %d\n"), "project_dialog - dlg.response.connect", response_id);
-                stderr.printf (_("Please report a bug!\n"));
+                bug_msg (_("Unexpected enum value: %s: %d\n"), "project_dialog - dlg.response.connect", response_id);
                 dlg.destroy();
                 break;
         }

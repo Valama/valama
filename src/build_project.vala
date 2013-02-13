@@ -62,7 +62,7 @@ public class ProjectBuilder {
                     srcfile.content = content; //TODO: Find out why SourceFile.content is empty at the beginning (??)
                     var tmppath = Path.build_path (Path.DIR_SEPARATOR_S, buildpath, cnt.to_string() + ".vala");
                     var tmpfile = File.new_for_path (tmppath);
-                    
+
                     var dos = new DataOutputStream (tmpfile.replace (null, false, FileCreateFlags.REPLACE_DESTINATION));
                     dos.put_string (stein.frankensteinify_sourcefile(srcfile));
                     if (cnt == 0)
@@ -152,9 +152,9 @@ public class ProjectBuilder {
 
             data_stream.close();
         } catch (GLib.IOError e) {
-            stderr.printf (_("Could not read file: %s\n"), e.message);
+            errmsg (_("Could not read file: %s\n"), e.message);
         } catch (GLib.Error e) {
-            stderr.printf (_("Could not open file: %s\n"), e.message);
+            errmsg (_("Could not open file: %s\n"), e.message);
         }
 
         int exitstatus = 0;
@@ -221,7 +221,7 @@ public class ProjectBuilder {
             size_t len;
             chn2.read_to_end (out output, out len);
             buildsys_output (output);
-            stdout.printf ("==================" + output + "\n");
+            msg ("==================" + output + "\n");
             return true;
         });*/
 
@@ -238,7 +238,7 @@ public class ProjectBuilder {
             if (exitstatus == 0)
                 Process.spawn_command_line_sync ("make", null, null, out exitstatus);
         } catch (GLib.SpawnError e) {
-            stderr.printf(_("Could not execute build process: %s\n"), e.message);
+            errmsg (_("Could not execute build process: %s\n"), e.message);
             return false;
         } finally {
             Environment.set_current_dir (curdir);

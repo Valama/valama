@@ -72,8 +72,7 @@ public class ProjectBrowser : UiElement {
         tree_view.row_activated.connect ((path, column) => {
             TreeIter iter;
             if (!tree_view.model.get_iter (out iter, path)) {
-                stderr.printf (_("Couldn't get iterator in TreeView: %s\n"), path.to_string());
-                stderr.printf (_("Please report a bug!\n"));
+                bug_msg (_("Couldn't get iterator in TreeView: %s\n"), path.to_string());
                 return;
             }
 
@@ -85,8 +84,7 @@ public class ProjectBrowser : UiElement {
                     string filepath = val;
                     while (path.up()) {
                         if (!tree_view.model.get_iter (out iter, path)) {
-                            stderr.printf (_("Couldn't get iterator in TreeView: %s\n"), path.to_string());
-                            stderr.printf (_("Please report a bug!\n"));
+                            bug_msg (_("Couldn't get iterator in TreeView: %s\n"), path.to_string());
                             return;
                         }
                         tree_view.model.get (iter, 0, out val, 1, out store_type, -1);
@@ -106,8 +104,7 @@ public class ProjectBrowser : UiElement {
                 case StoreType.PACKAGE:
                     break;
                 default:
-                    stderr.printf (_("Unexpected enum value: %s: %d\n"), "ui_project_browser - row_activated", store_type);
-                    stderr.printf (_("Please report a bug!\n"));
+                    bug_msg (_("Unexpected enum value: %s: %d\n"), "ui_project_browser - row_activated", store_type);
                     break;
             }
         });
@@ -123,8 +120,7 @@ public class ProjectBrowser : UiElement {
 
             TreeIter iter;
             if (!tree_view.model.get_iter (out iter, path)) {
-                stderr.printf (_("Couldn't get iterator in TreeView: %s\n"), path.to_string());
-                stderr.printf (_("Please report a bug!\n"));
+                bug_msg (_("Couldn't get iterator in TreeView: %s\n"), path.to_string());
                 return;
             }
 
@@ -145,8 +141,7 @@ public class ProjectBrowser : UiElement {
                     btn_rem.sensitive = true;
                     break;
                 default:
-                    stderr.printf (_("Unexpected enum value: %s: %d\n"), "ui_project_browser - cursor_changed", store_type);
-                    stderr.printf (_("Please report a bug!\n"));
+                    bug_msg (_("Unexpected enum value: %s: %d\n"), "ui_project_browser - cursor_changed", store_type);
                     btn_add.sensitive = false;
                     btn_rem.sensitive = false;
                     break;
@@ -167,9 +162,7 @@ public class ProjectBrowser : UiElement {
     private Gee.HashMap<string, TreeIter?> b_pathmap;
 
     protected override void build() {
-#if DEBUG
-        stderr.printf (_("Run %s update!\n"), element_name);
-#endif
+        debug_msg (_("Run %s update!\n"), element_name);
         var store = new TreeStore (2, typeof (string), typeof (int));
         tree_view.set_model (store);
 
@@ -190,9 +183,7 @@ public class ProjectBrowser : UiElement {
 
         foreach (var path in tree_view_expanded)
             tree_view.expand_to_path (path);
-#if DEBUG
-        stderr.printf (_("%s update finished!\n"), element_name);
-#endif
+        debug_msg (_("%s update finished!\n"), element_name);
     }
 
     /**
@@ -213,7 +204,7 @@ public class ProjectBrowser : UiElement {
                 }
             }
         } catch (GLib.Error e) {
-            stderr.printf (_("Could not update vapi files: %s\n"), e.message);
+            errmsg (_("Could not update vapi files: %s\n"), e.message);
             return null;
         }
         return list;
@@ -275,15 +266,13 @@ public class ProjectBrowser : UiElement {
         TreePath path;
         tree_view.get_cursor (out path, null);
         if (path == null) {
-            stderr.printf (_("Couldn't get current tree path: %s\n"), "ui_project_browser - on_add_button");
-            stderr.printf (_("Please report a bug!\n"));
+            bug_msg (_("Couldn't get current tree path: %s\n"), "ui_project_browser - on_add_button");
             return;
         }
 
         TreeIter iter;
         if (!tree_view.model.get_iter (out iter, path)) {
-            stderr.printf (_("Couldn't get iterator in TreeView: %s\n"), path.to_string());
-            stderr.printf (_("Please report a bug!\n"));
+            bug_msg (_("Couldn't get iterator in TreeView: %s\n"), path.to_string());
             return;
         }
 
@@ -307,8 +296,7 @@ public class ProjectBrowser : UiElement {
                 StoreType stype;
                 while (path.up()) {
                     if (!tree_view.model.get_iter (out iter, path)) {
-                        stderr.printf (_("Couldn't get iterator in TreeView: %s\n"), path.to_string());
-                        stderr.printf (_("Please report a bug!\n"));
+                        bug_msg (_("Couldn't get iterator in TreeView: %s\n"), path.to_string());
                         return;
                     }
                     tree_view.model.get (iter, 0, out val, 1, out stype, -1);
@@ -338,8 +326,7 @@ public class ProjectBrowser : UiElement {
                 }
                 break;
             default:
-                stderr.printf (_("Unexpected enum value: %s: %d\n"), "ui_project_browser - add_button", store_type);
-                stderr.printf (_("Please report a bug!\n"));
+                bug_msg (_("Unexpected enum value: %s: %d\n"), "ui_project_browser - add_button", store_type);
                 break;
         }
     }
@@ -348,15 +335,13 @@ public class ProjectBrowser : UiElement {
         TreePath path;
         tree_view.get_cursor (out path, null);
         if (path == null) {
-            stderr.printf (_("Couldn't get current tree path: %s\n"), "ui_project_browser - on_remove_button");
-            stderr.printf (_("Please report a bug!\n"));
+            bug_msg (_("Couldn't get current tree path: %s\n"), "ui_project_browser - on_remove_button");
             return;
         }
 
         TreeIter iter;
         if (!tree_view.model.get_iter (out iter, path)) {
-            stderr.printf (_("Couldn't get iterator in TreeView: %s\n"), path.to_string());
-            stderr.printf (_("Please report a bug!\n"));
+            bug_msg (_("Couldn't get iterator in TreeView: %s\n"), path.to_string());
             return;
         }
 
@@ -374,8 +359,7 @@ public class ProjectBrowser : UiElement {
                 StoreType stype;
                 while (path.up()) {
                     if (!tree_view.model.get_iter (out iter, path)) {
-                        stderr.printf (_("Couldn't get iterator in TreeView: %s\n"), path.to_string());
-                        stderr.printf (_("Please report a bug!\n"));
+                        bug_msg (_("Couldn't get iterator in TreeView: %s\n"), path.to_string());
                         return;
                     }
                     tree_view.model.get (iter, 0, out val, 1, out stype, -1);
@@ -402,7 +386,7 @@ public class ProjectBrowser : UiElement {
                         pathmap.unset (filepath);
                         update();
                     } catch (GLib.Error e) {
-                        stderr.printf (_("Unable to delete source file '%s': %s\n"), filepath, e.message);
+                        errmsg (_("Unable to delete source file '%s': %s\n"), filepath, e.message);
                     }
                 }
                 break;
@@ -411,8 +395,7 @@ public class ProjectBrowser : UiElement {
                 update();
                 break;
             default:
-                stderr.printf (_("Unexpected enum value: %s: %d\n"), "ui_project_browser - cursor_changed", store_type);
-                stderr.printf (_("Please report a bug!\n"));
+                bug_msg (_("Unexpected enum value: %s: %d\n"), "ui_project_browser - cursor_changed", store_type);
                 break;
         }
     }

@@ -78,9 +78,9 @@ public SourceFile? ui_create_file_dialog (ValamaProject project, string path = "
                 try {
                         f.create (FileCreateFlags.NONE).close();
                 } catch (GLib.IOError e) {
-                    stderr.printf (_("Could not write to new file: %s"), e.message);
+                    errmsg (_("Could not write to new file: %s"), e.message);
                 } catch (GLib.Error e) {
-                    stderr.printf (_("Could not create new file: %s"), e.message);
+                    errmsg (_("Could not create new file: %s"), e.message);
                 }
             }
             source_file = project.guanako_project.add_source_file_by_name(filename);

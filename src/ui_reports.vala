@@ -54,9 +54,7 @@ class UiReport : UiElement {
     public signal void error_selected (ReportWrapper.Error error);
 
     public override void build() {
-#if DEBUG
-        stderr.printf (_("Run %s update!\n"), element_name);
-#endif
+        debug_msg (_("Run %s update!\n"), element_name);
         var store = new ListStore (2, typeof (string), typeof (string));
         tree_view.set_model (store);
 
@@ -110,12 +108,8 @@ class UiReport : UiElement {
             bfr.apply_tag_by_name (
         }*/
 
-#if DEBUG
-        stdout.printf (_("Errors: %i, Warnings: %i\n"), report.errors_list.size, report.warnings_list.size);
-#endif
-#if DEBUG
-        stderr.printf (_("%s update finished!\n"), element_name);
-#endif
+        debug_msg (_("Errors: %i, Warnings: %i\n"), report.errors_list.size, report.warnings_list.size);
+        debug_msg (_("%s update finished!\n"), element_name);
     }
 }
 
@@ -135,15 +129,13 @@ public class ReportWrapper : Vala.Report {
     }
 
     public override void warn (Vala.SourceReference? source, string message) {
-#if DEBUG
-        stdout.printf (_("Warning found: %s: %d(%d)-%d(%d): %s\n"),
+        debug_msg (_("Warning found: %s: %d(%d)-%d(%d): %s\n"),
                                                source.file.filename,
                                                source.begin.line,
                                                source.end.column,
                                                source.end.line,
                                                source.end.column,
                                                message);
-#endif
         if (source == null)
             return;
         //lock (errors_list) {
@@ -152,15 +144,13 @@ public class ReportWrapper : Vala.Report {
      }
 
      public override void err (Vala.SourceReference? source, string message) {
-#if DEBUG
-        stdout.printf (_("Error found: %s: %d(%d)-%d(%d): %s\n"),
+        debug_msg (_("Error found: %s: %d(%d)-%d(%d): %s\n"),
                                                source.file.filename,
                                                source.begin.line,
                                                source.begin.column,
                                                source.end.line,
                                                source.end.column,
                                                message);
-#endif
 
          if (source == null) {
              general_error = true;
