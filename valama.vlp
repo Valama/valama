@@ -1,4 +1,4 @@
-<project>
+<project version="0.1">
 	<name>Valama</name>
 	<buildsystem>cmake</buildsystem>
 	<version>

@@ -25,6 +25,11 @@ using Gtk;
 using Pango;
 
 /**
+ * Current compatible version of project file.
+ */
+const string VLP_VERSION_MIN = "0.1";
+
+/**
  * Valama project application.
  */
 public class ValamaProject {
@@ -72,6 +77,10 @@ public class ValamaProject {
      * Name of project.
      */
     public string project_name { get; set; default = _("valama_project"); }
+    /**
+     * Version of .vlp file
+     */
+    public string project_file_version { get; private set; default = "0"; }
 
     /**
      * List of source files.
@@ -94,7 +103,7 @@ public class ValamaProject {
     private TestProvider comp_provider;
 
     /**
-     * The project's buildsystem (valama/cmake/...)
+     * The project's buildsystem (valama/cmake/...).
      */
     public string buildsystem = "cmake";
 
@@ -179,8 +188,8 @@ public class ValamaProject {
      *               file list.
      */
     private void generate_file_list(string[] directories,
-                           string[] files,
-                           FileCallback? action = null) {
+                                    string[] files,
+                                    FileCallback? action = null) {
         try {
             File directory;
             FileEnumerator enumerator;
@@ -228,9 +237,18 @@ public class ValamaProject {
         }
 
         Xml.Node* root_node = doc->get_root_element();
-        if (root_node == null) {
+        if (root_node == null || root_node->name != "project") {
             delete doc;
-            throw new LoadingError.FILE_IS_EMPTY (_("File does not contain enough information"));
+            throw new LoadingError.FILE_IS_EMPTY (_("File does not contain enough information."));
+        }
+
+        if (root_node->has_prop ("version") != null)
+            project_file_version = root_node->get_prop ("version");
+        if (comp_proj_version (project_file_version, VLP_VERSION_MIN) < 0) {
+            delete doc;
+            throw new LoadingError.FILE_IS_OLD (_("Project file to old: %s < %s"),
+                                                project_file_version,
+                                                VLP_VERSION_MIN);
         }
 
         var packages = new string[0];
@@ -309,6 +327,7 @@ public class ValamaProject {
         writer.set_indent_string ("\t");
 
         writer.start_element ("project");
+        writer.write_attribute ("version", project_file_version);
         writer.write_element ("name", project_name);
         writer.write_element ("buildsystem", buildsystem);
 
@@ -662,6 +681,10 @@ public class SourceBuffer : Gtk.SourceBuffer {
  * Throw on project file loading errors.
  */
 errordomain LoadingError {
+    /**
+     * File content probably too old.
+     */
+    FILE_IS_OLD,
     /**
      * File does not contain enough information.
      */

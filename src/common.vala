@@ -587,4 +587,34 @@ public bool save_file (string filename, string text) {
 }
 
 
+/**
+ * Compare two versions. Delimiter is a dot.
+ *
+ * @param ver_a First version.
+ * @param ver_b Second version.
+ * @return If first version is smaller return 1. If second version is smaller
+ *         return -1. On equality return 0.
+ */
+/*
+ * Currently no real difference to strcmp.
+ */
+public int comp_proj_version (string ver_a, string ver_b) {
+    //TODO: Epoch and ~ checks.
+    string[] a_parts = ver_a.split (".");
+    string[] b_parts = ver_b.split (".");
+
+    int max = (a_parts.length >= b_parts.length) ? a_parts.length : b_parts.length;
+
+    for (int i = 0; i < max; ++i) {
+        var ret = strcmp (a_parts[i], b_parts[i]);
+        stdout.printf ("a: %s\n", a_parts[i]);
+        stdout.printf ("b: %s\n", b_parts[i]);
+        if (ret > 0)
+            return 1;
+        else if (ret < 0)
+            return -1;
+    }
+    return 0;
+}
+
 // vim: set ai ts=4 sts=4 et sw=4
