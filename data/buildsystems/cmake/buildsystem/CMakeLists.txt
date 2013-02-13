@@ -17,6 +17,7 @@
 #
 
 include("${CMAKE_SOURCE_DIR}/cmake/project.cmake")
+include("${CMAKE_SOURCE_DIR}/cmake/Common.cmake")
 
 cmake_minimum_required(VERSION "2.8.4")
 project("${project_name}" C)
@@ -97,6 +98,9 @@ add_definitions(-DPIXMAP_DIR="${CMAKE_INSTALL_PREFIX}/${pixdir}")
 add_definitions(-DVALA_VERSION="${valashort_ver}")
 
 
+add_executable("${project_name_lower}" ${VALA_C})
+target_link_libraries("${project_name_lower}" ${PROJECT_LDFLAGS})
+add_definitions(${PROJECT_C_FLAGS})
 install(TARGETS ${project_name_lower} DESTINATION "${bindir}")
 
 
