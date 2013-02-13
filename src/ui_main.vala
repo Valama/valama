@@ -155,7 +155,7 @@ public class MainWindow : Window {
                 // pa.grab_focus();
                 /* If something strange happens (pa == null) break the loop. */
                 while (!(pa is Dock) && (pa != null)) {
-                    //stdout.printf("item: %s\n", pa.name);
+                    //stdout.printf ("item: %s\n", pa.name);
                     if (pa is Switcher) {
                         var nbook = (Notebook) pa;
                         nbook.page = nbook.page_num (srcitem);

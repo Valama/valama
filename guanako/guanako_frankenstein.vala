@@ -1,6 +1,6 @@
 /*
  * guanako/guanako_frankenstein.vala
- * Copyright (C) 2012, 2013, Valama development team
+ * Copyright (C) 2013, Valama development team
  *
  * Valama is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -26,6 +26,7 @@ namespace Guanako {
                   () => {},
                   () => stderr.printf ("Could not aquire name\n"));
         }
+
         void on_bus_aquired (DBusConnection conn) {
             try {
                 conn.register_object ("/app/valama/frankenstein", new FrankenDBUS (this));
@@ -33,9 +34,10 @@ namespace Guanako {
                 stderr.printf ("Could not register service\n");
             }
         }
+
         [DBus (name = "app.valama.frankenstein")]
         class FrankenDBUS : Object {
-            public FrankenDBUS (FrankenStein parent){
+            public FrankenDBUS (FrankenStein parent) {
                 this.parent = parent;
             }
             FrankenStein parent;
@@ -50,8 +52,10 @@ namespace Guanako {
             public int end_line;
             public bool active;
         }
+
         public Gee.ArrayList<FrankenTimer?> frankentimers = new Gee.ArrayList<FrankenTimer?>();
         public signal void timer_finished (FrankenTimer timer, double time);
+
         public string frankensteinify_sourcefile (SourceFile file) {
             string[] lines = file.content.split ("\n");
             int cnt = 0;
@@ -78,3 +82,5 @@ namespace Guanako {
     }
 
 }
+
+// vim: set ai ts=4 sts=4 et sw=4

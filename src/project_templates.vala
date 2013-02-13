@@ -33,7 +33,7 @@ public class ProjectTemplate {
  * @param language Current locale.
  * @return Return list of all found templates.
  */
-public ProjectTemplate[] load_templates (string language){
+public ProjectTemplate[] load_templates (string language) {
     FileInfo file_info;
     ProjectTemplate[] ret = new ProjectTemplate[0];
 

@@ -43,7 +43,7 @@ public static int main (string[] args) {
     // /* Command line parsing. */
     // /* Copied from Yorba application. */
     unowned string[] a = args;
-    Gtk.init(ref a);
+    Gtk.init (ref a);
     // Sanitize the args.  Gtk's init function will leave null elements
     // in the array, which then causes OptionContext to crash.
     // See ticket: https://bugzilla.gnome.org/show_bug.cgi?id=674837
@@ -59,12 +59,14 @@ public static int main (string[] args) {
     else if (ret < 0)
         return 0;
 
+    Guanako.debug = Args.debug;
+
 
     loop_update  = new MainLoop();
 
     try {
         if (Args.projectfiles.length > 0)
-            project = new ValamaProject(args[1]);
+            project = new ValamaProject (args[1]);
         else {
             project = ui_create_project_dialog();
             if (project == null)
@@ -227,7 +229,7 @@ public static int main (string[] args) {
     var btnFrankentest = new Gtk.ToolButton.from_stock (Stock.DIALOG_WARNING);
     window_main.add_button (btnFrankentest);
     var stein = new Guanako.FrankenStein();
-    btnFrankentest.clicked.connect(()=>{
+    btnFrankentest.clicked.connect (() => {
         //var sourcefiles = project.guanako_project.get_source_files();
         var myfile = project.guanako_project.get_source_file_by_name ("/home/linus/source/valama/src/main.vala");
         var timer1 = FrankenStein.FrankenTimer() { file = myfile,
@@ -243,8 +245,8 @@ public static int main (string[] args) {
 
     var btnRun = new Gtk.ToolButton.from_stock (Stock.MEDIA_PLAY);
     window_main.add_button (btnRun);
-    btnRun.set_tooltip_text(_("Run application"));
-    btnRun.clicked.connect (()=>{
+    btnRun.set_tooltip_text (_("Run application"));
+    btnRun.clicked.connect (() => {
         if (project_builder.app_running)
             project_builder.quit();
         else
@@ -393,7 +395,7 @@ static void on_error_selected (ReportWrapper.Error err) {
 }
 
 
-static void on_file_selected (string filename){
+static void on_file_selected (string filename) {
     var pfile = File.new_for_path (project.project_path);
     var fname = pfile.get_relative_path (File.new_for_path (filename));
 
@@ -477,11 +479,12 @@ class TestProvider : Gtk.SourceCompletionProvider, Object {
         if (parsing)
             loop_update.run();
 
-        new Thread<void*>.try (_("Completion"), () => {
-            /* Get completion proposals from Guanako */
-	    Timer tmr = new Timer();
-	    tmr.start();
-            var guanako_proposals = project.guanako_project.propose_symbols (
+        try {
+            new Thread<void*>.try (_("Completion"), () => {
+                /* Get completion proposals from Guanako */
+                Timer tmr = new Timer();
+                tmr.start();
+                var guanako_proposals = project.guanako_project.propose_symbols (
                                     project.guanako_project.get_source_file_by_name (
                                             Path.build_path (Path.DIR_SEPARATOR_S,
                                                              project.project_path,
@@ -489,35 +492,42 @@ class TestProvider : Gtk.SourceCompletionProvider, Object {
                                     line,
                                     col,
                                     current_line);
-	    window_main.title = tmr.elapsed().to_string();
-            /* Assign icons and pass the proposals on to Gtk.SourceView */
-            var props = new GLib.List<Gtk.SourceCompletionItem>();
-            foreach (Gee.TreeSet<CompletionProposal> list in guanako_proposals)
-            foreach (CompletionProposal guanako_proposal in list) {
-                if (guanako_proposal.symbol.name != null) {
+	            window_main.title = tmr.elapsed().to_string();
+                /* Assign icons and pass the proposals on to Gtk.SourceView */
+                var props = new GLib.List<Gtk.SourceCompletionItem>();
+                foreach (Gee.TreeSet<CompletionProposal> list in guanako_proposals)
+                foreach (CompletionProposal guanako_proposal in list) {
+                    if (guanako_proposal.symbol.name != null) {
 
-                    Gdk.Pixbuf pixbuf = null;
-                    if (guanako_proposal.symbol is Namespace)   pixbuf = map_icons["namespace"];
-                    if (guanako_proposal.symbol is Property)    pixbuf = map_icons["property"];
-                    if (guanako_proposal.symbol is Struct)      pixbuf = map_icons["struct"];
-                    if (guanako_proposal.symbol is Method)      pixbuf = map_icons["method"];
-                    if (guanako_proposal.symbol is Variable)    pixbuf = map_icons["field"];
-                    if (guanako_proposal.symbol is Enum)        pixbuf = map_icons["enum"];
-                    if (guanako_proposal.symbol is Class)       pixbuf = map_icons["class"];
-                    if (guanako_proposal.symbol is Constant)    pixbuf = map_icons["constant"];
-                    if (guanako_proposal.symbol is Vala.Signal) pixbuf = map_icons["signal"];
+                        Gdk.Pixbuf pixbuf = null;
+                        if (guanako_proposal.symbol      is Namespace)   pixbuf = map_icons["namespace"];
+                        else if (guanako_proposal.symbol is Property)    pixbuf = map_icons["property"];
+                        else if (guanako_proposal.symbol is Struct)      pixbuf = map_icons["struct"];
+                        else if (guanako_proposal.symbol is Method)      pixbuf = map_icons["method"];
+                        else if (guanako_proposal.symbol is Variable)    pixbuf = map_icons["field"];
+                        else if (guanako_proposal.symbol is Enum)        pixbuf = map_icons["enum"];
+                        else if (guanako_proposal.symbol is Class)       pixbuf = map_icons["class"];
+                        else if (guanako_proposal.symbol is Constant)    pixbuf = map_icons["constant"];
+                        else if (guanako_proposal.symbol is Vala.Signal) pixbuf = map_icons["signal"];
 
-                    var item = new ComplItem (guanako_proposal.symbol.name, guanako_proposal.symbol.name, pixbuf, null, guanako_proposal);
-                    props.append (item);
+                        var item = new ComplItem (guanako_proposal.symbol.name,
+                                                  guanako_proposal.symbol.name,
+                                                  pixbuf,
+                                                  null,
+                                                  guanako_proposal);
+                        props.append (item);
+                    }
                 }
-            }
-            GLib.Idle.add (()=>{
-                if (context is SourceCompletionContext)
-                    context.add_proposals (this, props, true);
-                return false;
+                GLib.Idle.add (() => {
+                    if (context is SourceCompletionContext)
+                        context.add_proposals (this, props, true);
+                    return false;
+                });
+                return null;
             });
-            return null;
-        });
+        } catch (GLib.Error e) {
+            stderr.printf (_("Could not launch completion thread successfully: %s\n"), e.message);
+        }
     }
 
     public unowned Gdk.Pixbuf? get_icon() {
@@ -582,12 +592,12 @@ class TestProvider : Gtk.SourceCompletionProvider, Object {
         var prop = ((ComplItem)proposal).guanako_proposal;
         if (prop is Method) {
             var mth = prop.symbol as Method;
-            var vbox = new Box(Orientation.VERTICAL, 0);
+            var vbox = new Box (Orientation.VERTICAL, 0);
             string param_string = "";
             foreach (Vala.Parameter param in mth.get_parameters())
                 param_string += param.variable_type.data_type.name + " " + param.name + ", ";
             if (param_string.length > 1)
-                param_string = param_string.substring(0, param_string.length - 2);
+                param_string = param_string.substring (0, param_string.length - 2);
             else
                 param_string = _("none");
             vbox.pack_start (new Label (_("Parameters:\n") + param_string +
@@ -607,8 +617,8 @@ class TestProvider : Gtk.SourceCompletionProvider, Object {
  * corresponding Guanako proposal.
  */
 class ComplItem : SourceCompletionItem {
-    public ComplItem(string label, string text, Gdk.Pixbuf? icon, string? info, CompletionProposal guanako_proposal){
-        Object(label: label, text: text, icon: icon, info: info);
+    public ComplItem (string label, string text, Gdk.Pixbuf? icon, string? info, CompletionProposal guanako_proposal) {
+        Object (label: label, text: text, icon: icon, info: info);
         this.guanako_proposal = guanako_proposal;
     }
     public CompletionProposal guanako_proposal;

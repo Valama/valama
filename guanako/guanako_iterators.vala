@@ -32,15 +32,15 @@ namespace Guanako {
             var p = (Class) parent;
             if (p.base_class != null)
                 ret = get_child_symbols (p.base_class);
-            foreach (DataType type in p.get_base_types()){
-                iter_symbol(type.data_type, (s, depth) => {
+            foreach (DataType type in p.get_base_types()) {
+                iter_symbol (type.data_type, (s, depth) => {
                     ret += s;
                     return iter_callback_returns.abort_branch;
                 });
             }
         }
 
-        iter_symbol(parent, (s, depth) => {
+        iter_symbol (parent, (s, depth) => {
             ret += s;
             return iter_callback_returns.abort_branch;
         });
@@ -72,7 +72,7 @@ namespace Guanako {
      * Iterate through a symbol and its children.
      */
     public static bool iter_symbol (Symbol smb, iter_callback callback, int depth = 0) {
-        if (depth > 0){
+        if (depth > 0) {
             if (smb.name != null)  //TODO: This is a part of a nasty workaround to ignore old symbols left after re-parsing.
                 if (smb.name == "")
                     return true;
@@ -88,7 +88,7 @@ namespace Guanako {
             var cv = (Namespace) smb;
             var ch = cv.get_namespaces();
             foreach (Symbol s in ch)
-                if (!iter_symbol(s, callback, depth + 1))
+                if (!iter_symbol (s, callback, depth + 1))
                     return false;
             var mth = cv.get_methods();
             foreach (Symbol s in mth)
@@ -132,7 +132,7 @@ namespace Guanako {
                     return false;
             }
             var fld = cv.get_fields();
-            foreach (Symbol s in fld){
+            foreach (Symbol s in fld) {
                 if (!iter_symbol (s, callback, depth + 1))
                     return false;
             }
@@ -148,27 +148,27 @@ namespace Guanako {
         if (smb is Struct) {
             var cv = (Struct) smb;
             var mth = cv.get_methods();
-            foreach (Symbol s in mth){
+            foreach (Symbol s in mth) {
                 if (!iter_symbol (s, callback, depth + 1))
                     return false;
             }
             var cst = cv.get_constants();
-            foreach (Symbol s in cst){
+            foreach (Symbol s in cst) {
                 if (!iter_symbol (s, callback, depth + 1))
                     return false;
             }
             var fld = cv.get_fields();
-            foreach (Symbol s in fld){
+            foreach (Symbol s in fld) {
                 if (!iter_symbol (s, callback, depth + 1))
                     return false;
             }
             var prp = cv.get_properties();
-            foreach (Symbol s in prp){
+            foreach (Symbol s in prp) {
                 if (!iter_symbol (s, callback, depth + 1))
                     return false;
             }
         }
-        if (smb is Enum){
+        if (smb is Enum) {
             var enm = (Enum)smb;
             foreach (Symbol s in enm.get_values())
                 if (!iter_symbol (s, callback, depth + 1))
@@ -185,7 +185,7 @@ namespace Guanako {
                 if (!iter_symbol (s, callback, depth + 1))
                     return false;
             var prp = cv.get_properties();
-            foreach (Symbol s in prp){
+            foreach (Symbol s in prp) {
                 if (!iter_symbol (s, callback, depth + 1))
                     return false;
             }
@@ -231,7 +231,7 @@ namespace Guanako {
         }
         if (statement is ForStatement) {
             var st = (ForStatement) statement;
-            foreach (Statement ch in st.body.get_statements()){
+            foreach (Statement ch in st.body.get_statements()) {
                 if (!iter_statement (ch, callback, depth + 1))
                     return false;
             }

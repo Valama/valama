@@ -56,7 +56,7 @@ public abstract class UiElement {
      * Dependencies can be added with {@link add_deps}. They are invoked in
      * parallel with {@link GLib.Thread} instances.
      */
-    public void update(ValamaProject? vproject=null) {
+    public void update (ValamaProject? vproject=null) {
         if (vproject != null)
             project = vproject;
         /* Already start first update. */

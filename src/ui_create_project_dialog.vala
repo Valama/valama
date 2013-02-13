@@ -92,9 +92,9 @@ public ValamaProject? ui_create_project_dialog() {
     box_main.pack_start (selector.widget, true, true);
 
 
-    var lbl = new Label(_("Project name"));
+    var lbl = new Label (_("Project name"));
     lbl.halign = Align.START;
-    box_main.pack_start(lbl, false, false);
+    box_main.pack_start (lbl, false, false);
 
     var ent_proj_name_err = new Label ("");
     ent_proj_name_err.sensitive = false;

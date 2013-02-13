@@ -21,11 +21,13 @@ using GLib;
 
 namespace Args {
     public bool version = false;
+    public bool debug = false;
     [CCode (array_length = false, array_null_terminated = true)]
     public string[]? projectfiles = null;
 
     private const OptionEntry[] options = {
         {"version", 'v', 0, OptionArg.NONE, ref version, N_("Display version number."), null},
+        {"debug", 'd', 0, OptionArg.NONE, ref debug, N_("Output debug information."), null},
         {"", 0, 0, OptionArg.FILENAME_ARRAY, ref projectfiles, N_("Load project from file."), N_("[FILE...]")},
         {null}
     };

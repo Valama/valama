@@ -485,7 +485,7 @@ public class FileTransfer : Object {
 #endif
                 if (counter_on) {
                     from.copy (dest, copy_flag, cancellable, (cur, tot) => {
-                        byte_count_changed((current_size + (double) cur)/ total_size);
+                        byte_count_changed ((current_size + (double) cur)/ total_size);
                     });
                     current_size += size;
                     ++count_current;
@@ -501,7 +501,7 @@ public class FileTransfer : Object {
 #endif
                 if (counter_on) {
                     from.move (dest, copy_flag, cancellable, (cur, tot) => {
-                        byte_count_changed((current_size + (double) cur)/ total_size);
+                        byte_count_changed ((current_size + (double) cur)/ total_size);
                     });
                     current_size += size;
                     ++count_current;
@@ -607,8 +607,6 @@ public int comp_proj_version (string ver_a, string ver_b) {
 
     for (int i = 0; i < max; ++i) {
         var ret = strcmp (a_parts[i], b_parts[i]);
-        stdout.printf ("a: %s\n", a_parts[i]);
-        stdout.printf ("b: %s\n", b_parts[i]);
         if (ret > 0)
             return 1;
         else if (ret < 0)

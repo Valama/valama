@@ -71,7 +71,7 @@ class UiReport : UiElement {
             store.set (next, 0, err.source.begin.line.to_string(), 1, err.message, -1);
         }
 
-        project.foreach_buffer((s, bfr)=>{
+        project.foreach_buffer ((s, bfr) => {
             TextIter first_iter;
             TextIter end_iter;
             bfr.get_start_iter (out first_iter);
@@ -106,7 +106,7 @@ class UiReport : UiElement {
             bfr.apply_tag_by_name ("warning_bg", iter_start, iter_end);
         }
 
-        /*while (first_iter.forward_search ("guanako", TextSearchFlags.TEXT_ONLY | TextSearchFlags.VISIBLE_ONLY, out start_match, out end_match, null)){
+        /*while (first_iter.forward_search ("guanako", TextSearchFlags.TEXT_ONLY | TextSearchFlags.VISIBLE_ONLY, out start_match, out end_match, null)) {
             bfr.apply_tag_by_name (
         }*/
 
@@ -147,7 +147,7 @@ public class ReportWrapper : Vala.Report {
         if (source == null)
             return;
         //lock (errors_list) {
-        warnings_list.add(Error() {source = source, message = message});
+        warnings_list.add (Error() {source = source, message = message});
         //}
      }
 

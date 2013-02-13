@@ -119,7 +119,7 @@ public void ui_project_dialog (ValamaProject? project) {
 
     /* Set project name. */
     var box_project_name = new Box (Orientation.VERTICAL, 0);
-    box_project_name.pack_start(new Label (_("Project name:")), false, false);
+    box_project_name.pack_start (new Label (_("Project name:")), false, false);
     var ent_proj_name_err = new Label ("");
     ent_proj_name_err.sensitive = false;
 
@@ -137,7 +137,7 @@ public void ui_project_dialog (ValamaProject? project) {
     box_project_name.pack_start (ent_proj_name, false, false);
     box_project_name.pack_start (ent_proj_name_err, false, false);
     box_project.pack_start (box_project_name, false, false);
-    //box_project.pack_start (new Separator(Orientation.HORIZONTAL), false, false);
+    //box_project.pack_start (new Separator (Orientation.HORIZONTAL), false, false);
 
 
     /*
@@ -147,7 +147,7 @@ public void ui_project_dialog (ValamaProject? project) {
      */
     var box_version = new Box (Orientation.VERTICAL, 0);
     var box_version_types = new Box (Orientation.HORIZONTAL, 0);
-    box_version.pack_start(new Label (_("Version:")), false, false);
+    box_version.pack_start (new Label (_("Version:")), false, false);
 
     var ent_major = new SpinButton.with_range (0, 999, 1);
     ent_major.value = (double) project.version_major;
