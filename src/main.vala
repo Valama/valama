@@ -62,12 +62,11 @@ public static int main (string[] args) {
 
     Guanako.debug = Args.debug;
 
-
     loop_update  = new MainLoop();
 
     try {
         if (Args.projectfiles.length > 0)
-            project = new ValamaProject (args[1]);
+            project = new ValamaProject (Args.projectfiles[0]);
         else {
             project = ui_create_project_dialog();
             if (project == null)
