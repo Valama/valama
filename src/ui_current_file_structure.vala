@@ -34,6 +34,7 @@ public class UiCurrentFileStructure : UiElement {
 
         tree_view = new TreeView();
         tree_view.insert_column_with_attributes (-1, _("Symbol"), new CellRendererText(), "text", 0, null);
+        tree_view.cursor_changed.connect (on_tree_view_cursor_changed);
 
         var scrw = new ScrolledWindow (null, null);
         scrw.add (tree_view);
@@ -46,17 +47,46 @@ public class UiCurrentFileStructure : UiElement {
         widget = vbox;
     }
 
+    void on_tree_view_cursor_changed() {
+        TreePath path;
+        tree_view.get_cursor (out path, null);
+        TreeIter iter;
+        if (!store.get_iter (out iter, path))
+            return;
+        //Value val;
+        //store.get_value (iter, 1, out val);
+        //Symbol smb = (Symbol)val;
+        Symbol smb = map_iter_symbols[path.to_string()];
+        TextIter titer;
+        window_main.current_srcbuffer.get_iter_at_line_offset (out titer,
+                                     smb.source_reference.begin.line - 1,
+                                     0);
+        window_main.current_srcbuffer.select_range (titer, titer);
+        window_main.current_srcview.scroll_to_iter (titer, 0.2, false, 0, 0);
+    }
+    Gee.HashMap<string, Symbol> map_iter_symbols = new Gee.HashMap<string, Symbol>();
+
+    TreeStore store;
     protected override void build() {
-        var store = new TreeStore (1, typeof (string));
+        map_iter_symbols = new Gee.HashMap<string, Symbol>();
+        store = new TreeStore (1, typeof (string));//, typeof (Symbol));
         tree_view.set_model (store);
         var focus_file = project.guanako_project.get_source_file_by_name (Path.build_path (Path.DIR_SEPARATOR_S, project.project_path, window_main.current_srcfocus));
+        if (focus_file == null)
+            return;
 
+        var mark_insert = window_main.current_srcbuffer.get_insert();
+        TextIter iter;
+        window_main.current_srcbuffer.get_iter_at_mark (out iter, mark_insert);
+
+        var current_symbol = project.guanako_project.get_symbol_at_pos (focus_file, iter.get_line(), iter.get_line_offset());
         foreach (CodeNode node in focus_file.get_nodes()) {
             if (!(node is Namespace || node is Class || node is Subroutine))
                 continue;
             TreeIter parent;
             store.append (out parent, null);
-            store.set (parent, 0, ((Symbol)node).name, -1);
+            store.set (parent, 0, ((Symbol)node).name, 1, (Symbol)node, -1);
+            map_iter_symbols[store.get_path(parent).to_string()] = (Symbol)node;
 
             TreeIter[] iters = new TreeIter[0];
             Guanako.iter_symbol ((Symbol)node, (smb, depth) => {
@@ -66,7 +96,8 @@ public class UiCurrentFileStructure : UiElement {
                         store.append (out next, parent);
                     else
                         store.append (out next, iters[depth - 2]);
-                    store.set (next, 0, smb.name, -1);
+                    store.set (next, 0, smb.name);//, 1, smb, -1);
+                    map_iter_symbols[store.get_path(next).to_string()] = smb;
                     if (iters.length < depth)
                         iters += next;
                     else
