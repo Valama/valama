@@ -1,5 +1,5 @@
 /*
- * src/ui_elements.vala
+ * src/ui/ui_elements.vala
  * Copyright (C) 2012, 2013, Valama development team
  *
  * Valama is free software: you can redistribute it and/or modify it

@@ -1,5 +1,5 @@
 /*
- * src/args.vala
+ * src/common/args.vala
  * Copyright (C) 2013, Valama development team
  *
  * Valama is free software: you can redistribute it and/or modify it

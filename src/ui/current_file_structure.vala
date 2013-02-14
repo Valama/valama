@@ -1,5 +1,5 @@
 /*
- * src/ui_current_file_structure.vala
+ * src/ui/current_file_structure.vala
  * Copyright (C) 2013, Valama development team
  *
  * Valama is free software: you can redistribute it and/or modify it
@@ -58,7 +58,7 @@ public class UiCurrentFileStructure : UiElement {
                                      smb.source_reference.begin.line - 1,
                                      0);
         window_main.current_srcbuffer.select_range (titer, titer);
-        window_main.current_srcview.scroll_to_iter (titer, 0.2, false, 0, 0);
+        window_main.current_srcview.scroll_to_iter (titer, 0.42, true, 0, 1.0);
     }
     Gee.HashMap<string, Symbol> map_iter_symbols = new Gee.HashMap<string, Symbol>();
 
