@@ -50,12 +50,8 @@ public class UiCurrentFileStructure : UiElement {
     void on_tree_view_cursor_changed() {
         TreePath path;
         tree_view.get_cursor (out path, null);
-        TreeIter iter;
-        if (!store.get_iter (out iter, path))
+        if (path == null)
             return;
-        //Value val;
-        //store.get_value (iter, 1, out val);
-        //Symbol smb = (Symbol)val;
         Symbol smb = map_iter_symbols[path.to_string()];
         TextIter titer;
         window_main.current_srcbuffer.get_iter_at_line_offset (out titer,
@@ -69,7 +65,7 @@ public class UiCurrentFileStructure : UiElement {
     TreeStore store;
     protected override void build() {
         map_iter_symbols = new Gee.HashMap<string, Symbol>();
-        store = new TreeStore (1, typeof (string));//, typeof (Symbol));
+        store = new TreeStore (1, typeof (string));
         tree_view.set_model (store);
         var focus_file = project.guanako_project.get_source_file_by_name (Path.build_path (Path.DIR_SEPARATOR_S, project.project_path, window_main.current_srcfocus));
         if (focus_file == null)
@@ -85,7 +81,7 @@ public class UiCurrentFileStructure : UiElement {
                 continue;
             TreeIter parent;
             store.append (out parent, null);
-            store.set (parent, 0, ((Symbol)node).name, 1, (Symbol)node, -1);
+            store.set (parent, 0, ((Symbol)node).name, -1);
             map_iter_symbols[store.get_path(parent).to_string()] = (Symbol)node;
 
             TreeIter[] iters = new TreeIter[0];
@@ -96,7 +92,7 @@ public class UiCurrentFileStructure : UiElement {
                         store.append (out next, parent);
                     else
                         store.append (out next, iters[depth - 2]);
-                    store.set (next, 0, smb.name);//, 1, smb, -1);
+                    store.set (next, 0, smb.name);
                     map_iter_symbols[store.get_path(next).to_string()] = smb;
                     if (iters.length < depth)
                         iters += next;
