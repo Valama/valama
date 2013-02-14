@@ -34,6 +34,7 @@ set(srcfiles
 "src/ui/reports.vala"
 "src/ui/symbol_browser.vala"
 "src/ui/ui_elements.vala"
+"src/ui/ui_source_viewer.vala"
 "src/ui_main.vala"
 )
 set(vapifiles

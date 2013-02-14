@@ -103,11 +103,11 @@ class UiBreakpoints : UiElement {
     void on_btn_add_clicked() {
         TextIter iter_start;
         TextIter iter_end;
-        var focus_file = project.guanako_project.get_source_file_by_name (Path.build_path (Path.DIR_SEPARATOR_S, project.project_path, window_main.current_srcfocus));
-        if (!window_main.current_srcbuffer.get_selection_bounds (out iter_start, out iter_end)) {
-            var mark_insert = window_main.current_srcbuffer.get_insert();
+        var focus_file = project.guanako_project.get_source_file_by_name (Path.build_path (Path.DIR_SEPARATOR_S, project.project_path, source_viewer.current_srcfocus));
+        if (!source_viewer.current_srcbuffer.get_selection_bounds (out iter_start, out iter_end)) {
+            var mark_insert = source_viewer.current_srcbuffer.get_insert();
             TextIter iter;
-            window_main.current_srcbuffer.get_iter_at_mark (out iter, mark_insert);
+            source_viewer.current_srcbuffer.get_iter_at_mark (out iter, mark_insert);
             var new_stop = FrankenStein.FrankenStop() { file = focus_file, line = iter.get_line() + 1 };
             frankenstein.frankenstops.add (new_stop);
         } else {

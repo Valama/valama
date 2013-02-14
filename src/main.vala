@@ -36,6 +36,7 @@ static ProjectBrowser pbrw;
 static ReportWrapper report_wrapper;
 static UiReport wdg_report;
 static ProjectBuilder project_builder;
+static UiSourceViewer source_viewer;
 
 public static int main (string[] args) {
     Intl.textdomain (Config.GETTEXT_PACKAGE);
@@ -80,6 +81,7 @@ public static int main (string[] args) {
         return 1;
     }
 
+    source_viewer = new UiSourceViewer();
     window_main = new MainWindow();
     project_builder = new ProjectBuilder (project);
     frankenstein = new Guanako.FrankenStein();
@@ -276,17 +278,17 @@ public static int main (string[] args) {
 
 
     /* Application signals. */
-    window_main.buffer_close.connect (project.close_buffer);
+    source_viewer.buffer_close.connect (project.close_buffer);
 
-    window_main.notify["current-srcbuffer"].connect (() => {
-        var srcbuf = window_main.current_srcbuffer;
+    source_viewer.notify["current-srcbuffer"].connect (() => {
+        var srcbuf = source_viewer.current_srcbuffer;
         project.undo_changed (srcbuf.can_undo);
         project.redo_changed (srcbuf.can_redo);
-        if (window_main.current_srcfocus != _("New document"))
+        if (source_viewer.current_srcfocus != _("New document"))
             project.buffer_changed (project.buffer_is_dirty (
                         Path.build_path (Path.DIR_SEPARATOR_S,
                                          project.project_path,
-                                         window_main.current_srcfocus)));
+                                         source_viewer.current_srcfocus)));
         else
             project.buffer_changed (true);
     });
@@ -302,7 +304,7 @@ public static int main (string[] args) {
     var wdg_current_file_structure = new UiCurrentFileStructure();
 
     /* Init new empty buffer. */
-    window_main.add_srcitem (project.open_new_buffer ("", "", true));
+    source_viewer.add_srcitem (project.open_new_buffer ("", "", true));
     window_main.add_item ("ReportWrapper", _("Report widget"), src_report,
                           Stock.INFO,
                           DockItemBehavior.CANT_CLOSE, //temporary solution until items can be added later
@@ -366,13 +368,13 @@ static void create_new_file() {
 }
 
 static void undo_change() {
-    var srcbuf = window_main.current_srcbuffer;
+    var srcbuf =source_viewer.current_srcbuffer;
     var manager = srcbuf.get_undo_manager();
     manager.undo();
 }
 
 static void redo_change() {
-    var srcbuf = window_main.current_srcbuffer;
+    var srcbuf = source_viewer.current_srcbuffer;
     var manager = srcbuf.get_undo_manager();
     manager.redo();
 }
@@ -380,7 +382,7 @@ static void redo_change() {
 // static void on_auto_indent_button_clicked() {
 //     string indented = Guanako.auto_indent_buffer (project.guanako_project, current_source_file);
 //     current_source_file.content = indented;
-//     window_main.current_srcbuffer.text = indented;
+//     source_viewer.current_srcbuffer.text = indented;
 // }
 
 static void on_error_selected (ReportWrapper.Error err) {
@@ -408,7 +410,7 @@ static void on_file_selected (string filename) {
     var pfile = File.new_for_path (project.project_path);
     var fname = pfile.get_relative_path (File.new_for_path (filename));
 
-    if (window_main.current_srcfocus == fname)
+    if (source_viewer.current_srcfocus == fname)
         return;
 
     string txt = "";
@@ -416,8 +418,8 @@ static void on_file_selected (string filename) {
         FileUtils.get_contents (filename, out txt);
         var view = project.open_new_buffer (txt, filename);
         if (view != null)
-            window_main.add_srcitem (view, fname);
-        window_main.focus_src (fname);
+            source_viewer.add_srcitem (view, fname);
+        source_viewer.focus_src (fname);
     } catch (GLib.FileError e) {
         errmsg (_("Could not load file: %s\n"), e.message);
     }
@@ -475,15 +477,15 @@ class TestProvider : Gtk.SourceCompletionProvider, Object {
     public void populate (Gtk.SourceCompletionContext context) {
 
         /* Get current line */
-        var mark = window_main.current_srcbuffer.get_insert();
+        var mark = source_viewer.current_srcbuffer.get_insert();
         TextIter iter;
-        window_main.current_srcbuffer.get_iter_at_mark (out iter, mark);
+        source_viewer.current_srcbuffer.get_iter_at_mark (out iter, mark);
         var line = iter.get_line() + 1;
         var col = iter.get_line_offset();
 
         TextIter iter_start;
-        window_main.current_srcbuffer.get_iter_at_line (out iter_start, line - 1);
-        var current_line = window_main.current_srcbuffer.get_text (iter_start, iter, false);
+        source_viewer.current_srcbuffer.get_iter_at_line (out iter_start, line - 1);
+        var current_line = source_viewer.current_srcbuffer.get_text (iter_start, iter, false);
 
         if (parsing)
             loop_update.run();
@@ -495,7 +497,7 @@ class TestProvider : Gtk.SourceCompletionProvider, Object {
                                     project.guanako_project.get_source_file_by_name (
                                             Path.build_path (Path.DIR_SEPARATOR_S,
                                                              project.project_path,
-                                                             window_main.current_srcfocus)),
+                                                             source_viewer.current_srcfocus)),
                                     line,
                                     col,
                                     current_line);
@@ -556,8 +558,8 @@ class TestProvider : Gtk.SourceCompletionProvider, Object {
         TextIter start = iter;
         start.backward_chars (prop.replace_length);
 
-        window_main.current_srcbuffer.delete (ref start, ref iter);
-        window_main.current_srcbuffer.insert (ref start, prop.symbol.name, prop.symbol.name.length);
+        source_viewer.current_srcbuffer.delete (ref start, ref iter);
+        source_viewer.current_srcbuffer.insert (ref start, prop.symbol.name, prop.symbol.name.length);
         return true;
     }
 
@@ -579,9 +581,9 @@ class TestProvider : Gtk.SourceCompletionProvider, Object {
     public bool get_start_iter (Gtk.SourceCompletionContext context,
                                 Gtk.SourceCompletionProposal proposal,
                                 Gtk.TextIter iter) {
-        var mark = window_main.current_srcbuffer.get_insert();
+        var mark = source_viewer.current_srcbuffer.get_insert();
         TextIter cursor_iter;
-        window_main.current_srcbuffer.get_iter_at_mark (out cursor_iter, mark);
+        source_viewer.current_srcbuffer.get_iter_at_mark (out cursor_iter, mark);
 
         var prop = ((ComplItem)proposal).guanako_proposal;
         cursor_iter.backward_chars (prop.replace_length);

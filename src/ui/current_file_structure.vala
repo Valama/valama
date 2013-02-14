@@ -40,7 +40,7 @@ public class UiCurrentFileStructure : UiElement {
         scrw.add (tree_view);
         vbox.pack_start (scrw, true, true);
 
-        window_main.notify["current-srcbuffer"].connect(()=>{
+        source_viewer.notify["current-srcbuffer"].connect(()=>{
             build();
         });
 
@@ -54,11 +54,11 @@ public class UiCurrentFileStructure : UiElement {
             return;
         Symbol smb = map_iter_symbols[path.to_string()];
         TextIter titer;
-        window_main.current_srcbuffer.get_iter_at_line_offset (out titer,
+        source_viewer.current_srcbuffer.get_iter_at_line_offset (out titer,
                                      smb.source_reference.begin.line - 1,
                                      0);
-        window_main.current_srcbuffer.select_range (titer, titer);
-        window_main.current_srcview.scroll_to_iter (titer, 0.42, true, 0, 1.0);
+        source_viewer.current_srcbuffer.select_range (titer, titer);
+        source_viewer.current_srcview.scroll_to_iter (titer, 0.42, true, 0, 1.0);
     }
     Gee.HashMap<string, Symbol> map_iter_symbols = new Gee.HashMap<string, Symbol>();
 
@@ -67,13 +67,13 @@ public class UiCurrentFileStructure : UiElement {
         map_iter_symbols = new Gee.HashMap<string, Symbol>();
         store = new TreeStore (1, typeof (string));
         tree_view.set_model (store);
-        var focus_file = project.guanako_project.get_source_file_by_name (Path.build_path (Path.DIR_SEPARATOR_S, project.project_path, window_main.current_srcfocus));
+        var focus_file = project.guanako_project.get_source_file_by_name (Path.build_path (Path.DIR_SEPARATOR_S, project.project_path, source_viewer.current_srcfocus));
         if (focus_file == null)
             return;
 
-        var mark_insert = window_main.current_srcbuffer.get_insert();
+        var mark_insert = source_viewer.current_srcbuffer.get_insert();
         TextIter iter;
-        window_main.current_srcbuffer.get_iter_at_mark (out iter, mark_insert);
+        source_viewer.current_srcbuffer.get_iter_at_mark (out iter, mark_insert);
 
         var current_symbol = project.guanako_project.get_symbol_at_pos (focus_file, iter.get_line(), iter.get_line_offset());
         foreach (CodeNode node in focus_file.get_nodes()) {

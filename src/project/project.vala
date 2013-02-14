@@ -466,9 +466,9 @@ public class ValamaProject {
 
             /* Immediate update after switching to a new line */
             if (!parsing) {
-                var mark = window_main.current_srcbuffer.get_insert();
+                var mark = source_viewer.current_srcbuffer.get_insert();
                 TextIter iter;
-                window_main.current_srcbuffer.get_iter_at_mark (out iter, mark);
+                source_viewer.current_srcbuffer.get_iter_at_mark (out iter, mark);
                 var line = iter.get_line() + 1;
                 if (bfr.last_active_line == line)
                     return;
@@ -496,7 +496,7 @@ public class ValamaProject {
                 var source_file = this.guanako_project.get_source_file_by_name (Path.build_path (
                                                 Path.DIR_SEPARATOR_S,
                                                 this.project_path,
-                                                window_main.current_srcfocus));
+                                                source_viewer.current_srcfocus));
                 this.guanako_project.update_file (source_file, buffer_content);
                 Idle.add (() => {
                     wdg_report.update();
@@ -550,13 +550,13 @@ public class ValamaProject {
          * GLib.Path.build_path. */
         string filepath = filename;
         if (filepath == "") {
-            if (window_main.current_srcfocus == null) {
+            if (source_viewer.current_srcfocus == null) {
                 warning_msg (_("No file selected.\n"));
                 return false;
             }
             filepath = Path.build_path (Path.DIR_SEPARATOR_S,
                                         this.project_path,
-                                        window_main.current_srcfocus);
+                                        source_viewer.current_srcfocus);
         } else if (!Path.is_absolute (filepath))
             filepath = Path.build_path (Path.DIR_SEPARATOR_S,
                                         this.project_path,

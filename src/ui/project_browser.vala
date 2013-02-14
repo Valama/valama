@@ -373,7 +373,7 @@ public class ProjectBrowser : UiElement {
                     var pfile = File.new_for_path (project.project_path);
                     var file = File.new_for_path (abs_filepath);
                     var fname = pfile.get_relative_path (file);
-                    window_main.close_srcitem (fname);
+                    source_viewer.close_srcitem (fname);
                     try {
                         file.delete();
                         project.guanako_project.remove_file (project.guanako_project.get_source_file (abs_filepath));

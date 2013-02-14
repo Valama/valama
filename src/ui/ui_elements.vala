@@ -29,7 +29,7 @@ using Gee;
  * (e.g. an instance field ui_connections).
  * Depencency interface is implented (update calls).
  */
-public abstract class UiElement {
+public abstract class UiElement : Object{
     /**
       * Element name to identify elements easily.
       */
