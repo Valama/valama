@@ -32,9 +32,10 @@ set(srcfiles
 "src/ui/current_file_structure.vala"
 "src/ui/project_browser.vala"
 "src/ui/reports.vala"
+"src/ui/search.vala"
+"src/ui/source_viewer.vala"
 "src/ui/symbol_browser.vala"
 "src/ui/ui_elements.vala"
-"src/ui/source_viewer.vala"
 "src/ui_main.vala"
 )
 set(vapifiles

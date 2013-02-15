@@ -302,6 +302,7 @@ public static int main (string[] args) {
     src_report.add (wdg_report.widget);
 
     var wdg_current_file_structure = new UiCurrentFileStructure();
+    var wdg_search = new UiSearch();
 
     /* Init new empty buffer. */
     source_viewer.add_srcitem (project.open_new_buffer ("", "", true));
@@ -316,6 +317,10 @@ public static int main (string[] args) {
                           DockPlacement.LEFT);
     window_main.add_item ("BuildOutput", _("Build output"), build_output.widget,
                           Stock.FILE,
+                          DockItemBehavior.CANT_CLOSE,
+                          DockPlacement.LEFT);
+    window_main.add_item ("Search", _("Search"), wdg_search.widget,
+                          Stock.FIND,
                           DockItemBehavior.CANT_CLOSE,
                           DockPlacement.LEFT);
     window_main.add_item ("Breakpoints", _("Breakpoints / Timers"), wdg_breakpoints.widget,
