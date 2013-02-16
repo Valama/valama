@@ -409,9 +409,7 @@ static void on_error_selected (ReportWrapper.Error err) {
 
 
 static void on_file_selected (string filename) {
-    var fname = project.get_relative_path (filename);
-
-    if (source_viewer.current_srcfocus == fname)
+    if (source_viewer.current_srcfocus == filename)
         return;
 
     string txt = "";
@@ -419,8 +417,8 @@ static void on_file_selected (string filename) {
         FileUtils.get_contents (filename, out txt);
         var view = project.open_new_buffer (txt, filename);
         if (view != null)
-            source_viewer.add_srcitem (view, fname);
-        source_viewer.focus_src (fname);
+            source_viewer.add_srcitem (view, filename);
+        source_viewer.focus_src (filename);
     } catch (GLib.FileError e) {
         errmsg (_("Could not load file: %s\n"), e.message);
     }
