@@ -47,7 +47,11 @@ public class UiSearch : UiElement {
 
         var box_main = new Box (Orientation.VERTICAL, 0);
 
+#if GTK_LESS_3_6
+        var entry_search = new Entry();
+#else
         var entry_search = new SearchEntry();
+#endif
         entry_search.changed.connect(() => {
             if (entry_search.text != "")
                 search (entry_search.text);
