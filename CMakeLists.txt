@@ -91,9 +91,18 @@ if(TRANSLATION)
   add_subdirectory("po")
 endif()
 
+
+# Custom library version checks.
+find_package(PkgConfig)
+pkg_check_modules(GTK3.0 REQUIRED "gtk-3.0")
+if("3.6" STRGREATER GTK3.0_VERSION)
+  list(APPEND valac_cond "-D;GTK_LESS_3_6")
+endif()
+
+
 set(default_vala_flags
   "--thread"
-  "--target-glib" "2.32"  # enable this to use new(tm) thread syntax
+  "--target-glib" "2.32"
   ${guanako_opt}
   ${debug_opt}
   ${threaded_opt}

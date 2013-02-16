@@ -373,7 +373,7 @@ public class ProjectBrowser : UiElement {
                     source_viewer.close_srcitem (fname);
                     try {
                         file.delete();
-                        project.guanako_project.remove_file (project.guanako_project.get_source_file (abs_filepath));
+                        project.remove_source_file (abs_filepath);
                         //FIXME: Remove file from project (project.files project.b_files).
                         /*
                          * Not necessary here because pathmap will completely

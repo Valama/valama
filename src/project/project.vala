@@ -176,6 +176,23 @@ public class ValamaProject {
     }
 
     /**
+     * Remove sourcefile from project and unlink from Guanako. Don't remove
+     * file from disk. Keep track to not include it with source directories
+     * next time.
+     *
+     * @param filename Absolute path to file to unregister.
+     * @return Return true on success else false (e.g. if file was not found).
+     */
+    //TODO: Remove it also from .vlp file.
+    public bool remove_source_file (string filename) {
+        if (!(filename in files))
+            return false;
+        files.remove (filename);
+        guanako_project.remove_file (guanako_project.get_source_file_by_name (filename));
+        return true;
+    }
+
+    /**
      * Add file to buildsystem list.
      *
      * @param filename Path to file.
