@@ -301,6 +301,13 @@ class UiSourceViewer : UiElement {
         return -1;
     }
 
+    public SourceView? get_sourceview_by_file (string filename) {
+        var id = get_sourceview_id(filename);
+        if (id == -1)
+            return null;
+        return get_sourceview (this.srcitems[id]);
+    }
+
     public override void build() {
         debug_msg (_("Run %s update!\n"), element_name);
         debug_msg (_("%s update finished!\n"), element_name);

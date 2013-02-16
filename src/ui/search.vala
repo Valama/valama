@@ -27,17 +27,20 @@ public class UiSearch : UiElement {
         element_name = "Search";
 
         tree_view = new TreeView();
+        var line_renderer = new CellRendererText();
+        line_renderer.yalign = 0;
+        tree_view.cursor_changed.connect (on_tree_view_cursor_changed);
         tree_view.insert_column_with_attributes (-1,
-                                                 _("Location"),
-                                                 new CellRendererText(),
+                                                 _("Line"),
+                                                 line_renderer,
                                                  "text",
                                                  0,
                                                  null);
 
         tree_view.insert_column_with_attributes (-1,
-                                                 _("File"),
+                                                 "",
                                                  new CellRendererText(),
-                                                 "text",
+                                                 "markup",
                                                  1,
                                                  null);
 
@@ -63,9 +66,38 @@ public class UiSearch : UiElement {
     TreeView tree_view;
     public Widget widget;
 
+    Gee.HashMap<string, SearchResult?> map_paths_results;
+    struct SearchResult {
+        public int line;
+        public string filename;
+    }
+
+    void on_tree_view_cursor_changed() {
+        TreePath path;
+        tree_view.get_cursor (out path, null);
+        if (path == null)
+            return;
+        SearchResult? result = map_paths_results[path.to_string()];
+        if (result == null)
+            return;
+        TextIter titer;
+        var bfr = project.get_buffer_by_file (result.filename);
+        bfr.get_iter_at_line_offset (out titer,
+                                     result.line,
+                                     0);
+        bfr.select_range (titer, titer);
+
+        var pfile = File.new_for_path (project.project_path);
+        var fname = pfile.get_relative_path (File.new_for_path (result.filename));
+
+        source_viewer.focus_src (fname);
+        source_viewer.get_sourceview_by_file(fname).scroll_to_iter (titer, 0.42, true, 0, 1.0);
+    }
+
     Thread<void*> search_thread = null;
     bool abort_search_thread = false;
     void search(string search) {
+        map_paths_results = new Gee.HashMap<string, SearchResult?>();
         if (search_thread != null) {
             abort_search_thread = true;
             search_thread.join();
@@ -76,18 +108,34 @@ public class UiSearch : UiElement {
         search_thread = new Thread<void*> (_("Search"), () => {
             var store = new TreeStore (2, typeof (string), typeof (string));
             project.foreach_buffer ((filename, bfr) => {
-                TextIter match_start;
-                TextIter match_end;
+                TextIter? match_start = null;
+                TextIter? match_end = null;
                 bfr.get_start_iter(out match_end);
                 TreeIter? iter_parent = null;
                 while (!abort_search_thread && match_end.forward_search (search, TextSearchFlags.CASE_INSENSITIVE, out match_start, out match_end, null)) {
                     if (iter_parent == null) {
                         store.append (out iter_parent, null);
-                        store.set (iter_parent, 0, filename, 1, "", -1);
+                        store.set (iter_parent, 0, "", 1, filename, -1);
                     }
                     TreeIter iter_append;
                     store.append (out iter_append, iter_parent);
-                    store.set (iter_append, 0, (match_end.get_line() + 1).to_string(), 1, "", -1);
+
+                    match_start.backward_chars (match_start.get_line_offset());
+                    TextIter prepend = match_start;
+                    prepend.backward_line();
+                    prepend.backward_line();
+                    match_end.forward_to_line_end();
+                    TextIter append = match_end;
+                    append.forward_line();
+                    append.forward_to_line_end();
+
+                    var shown_text = """<tt><span color="#A0A0A0">""" + Markup.escape_text(bfr.get_slice (prepend, match_start, true)) + "</span>"
+                                 + Markup.escape_text(bfr.get_slice(match_start, match_end, true)).replace(search, "<b>" + search + "</b>")
+                                 + """<span color="#A0A0A0">""" + Markup.escape_text(bfr.get_slice (match_end, append, true)) + "</span></tt>\n";
+                    //TODO: Make <b> stuff case insensitive!
+
+                    map_paths_results[store.get_path((TreeIter)iter_append).to_string()] =  SearchResult() { line = match_end.get_line(), filename = filename };
+                    store.set (iter_append, 0, (match_end.get_line() + 1).to_string(), 1, shown_text, -1);
                 }
             });
             if (!abort_search_thread)
@@ -98,6 +146,7 @@ public class UiSearch : UiElement {
             search_thread = null;
             return null;
         });
+        TextIter iter;
     }
 
     public override void build() {
