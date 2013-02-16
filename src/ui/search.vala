@@ -47,7 +47,7 @@ public class UiSearch : UiElement {
 
         var box_main = new Box (Orientation.VERTICAL, 0);
 
-        var entry_search = new Entry();
+        var entry_search = new SearchEntry();
         entry_search.changed.connect(() => {
             if (entry_search.text != "")
                 search (entry_search.text);
@@ -69,6 +69,8 @@ public class UiSearch : UiElement {
     Gee.HashMap<string, SearchResult?> map_paths_results;
     struct SearchResult {
         public int line;
+        public int col_start;
+        public int col_end;
         public string filename;
     }
 
@@ -94,31 +96,42 @@ public class UiSearch : UiElement {
         source_viewer.get_sourceview_by_file(fname).scroll_to_iter (titer, 0.42, true, 0, 1.0);
     }
 
-    Thread<void*> search_thread = null;
-    bool abort_search_thread = false;
+    //Thread<void*> search_thread = null;
+    //bool abort_search_thread = false;
     void search(string search) {
         map_paths_results = new Gee.HashMap<string, SearchResult?>();
-        if (search_thread != null) {
+        /*if (search_thread != null) {
             abort_search_thread = true;
             search_thread.join();
         }
         abort_search_thread = false;
         if (search_thread != null)
-            return;
-        search_thread = new Thread<void*> (_("Search"), () => {
+            return;*/
+        //search_thread = new Thread<void*> (_("Search"), () => {
             var store = new TreeStore (2, typeof (string), typeof (string));
             project.foreach_buffer ((filename, bfr) => {
+                TextIter first_iter;
+                TextIter end_iter;
+                bfr.get_start_iter (out first_iter);
+                bfr.get_end_iter (out end_iter);
+                bfr.remove_tag_by_name ("search", first_iter, end_iter);
+
                 TextIter? match_start = null;
                 TextIter? match_end = null;
                 bfr.get_start_iter(out match_end);
                 TreeIter? iter_parent = null;
-                while (!abort_search_thread && match_end.forward_search (search, TextSearchFlags.CASE_INSENSITIVE, out match_start, out match_end, null)) {
+                //while (!abort_search_thread && match_end.forward_search (search, TextSearchFlags.CASE_INSENSITIVE, out match_start, out match_end, null)) {
+                while (match_end.forward_search (search, TextSearchFlags.CASE_INSENSITIVE, out match_start, out match_end, null)) {
                     if (iter_parent == null) {
                         store.append (out iter_parent, null);
                         store.set (iter_parent, 0, "", 1, filename, -1);
                     }
                     TreeIter iter_append;
                     store.append (out iter_append, iter_parent);
+
+                    int col_start = match_start.get_line_offset();
+                    int col_end = match_end.get_line_offset();
+                    bfr.apply_tag_by_name ("search", match_start, match_end);
 
                     match_start.backward_chars (match_start.get_line_offset());
                     TextIter prepend = match_start;
@@ -127,26 +140,43 @@ public class UiSearch : UiElement {
                     match_end.forward_to_line_end();
                     TextIter append = match_end;
                     append.forward_line();
+                    append.forward_line();
                     append.forward_to_line_end();
-
                     var shown_text = """<tt><span color="#A0A0A0">""" + Markup.escape_text(bfr.get_slice (prepend, match_start, true)) + "</span>"
                                  + Markup.escape_text(bfr.get_slice(match_start, match_end, true)).replace(search, "<b>" + search + "</b>")
                                  + """<span color="#A0A0A0">""" + Markup.escape_text(bfr.get_slice (match_end, append, true)) + "</span></tt>\n";
                     //TODO: Make <b> stuff case insensitive!
 
-                    map_paths_results[store.get_path((TreeIter)iter_append).to_string()] =  SearchResult() { line = match_end.get_line(), filename = filename };
+                    map_paths_results[store.get_path((TreeIter)iter_append).to_string()] =  SearchResult() { line = match_end.get_line(), filename = filename, col_start = col_start, col_end = col_end };
                     store.set (iter_append, 0, (match_end.get_line() + 1).to_string(), 1, shown_text, -1);
                 }
+                tree_view.set_model (store);
+                /*if (!abort_search_thread)
+                    GLib.Idle.add (()=> {
+                        var results = map_paths_results.values;
+                        project.foreach_buffer ((filename, bfr) => {
+                            TextIter first_iter;
+                            TextIter end_iter;
+                            bfr.get_start_iter (out first_iter);
+                            bfr.get_end_iter (out end_iter);
+                            bfr.remove_tag_by_name ("search", first_iter, end_iter);
+                            foreach (SearchResult result in results)
+                                if (result.filename == filename) {
+                                    TextIter tag_start, tag_end;
+                                    bfr.get_iter_at_line_offset (out tag_start, result.line, result.col_start);
+                                    bfr.get_iter_at_line_offset (out tag_end, result.line, result.col_end);
+                                    bfr.apply_tag_by_name ("search", tag_start, tag_end);
+
+                                }
+                        });
+
+                        tree_view.set_model (store);
+                        return false;
+                    });*/
             });
-            if (!abort_search_thread)
-                GLib.Idle.add (()=> {
-                    tree_view.set_model (store);
-                    return false;
-                });
-            search_thread = null;
-            return null;
-        });
-        TextIter iter;
+            //search_thread = null;
+            //return null;
+        //});
     }
 
     public override void build() {

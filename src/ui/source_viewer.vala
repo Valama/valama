@@ -161,6 +161,7 @@ class UiSourceViewer : UiElement {
         view.show_line_marks = true;
         srcbuf.create_tag ("error_bg", "underline", Pango.Underline.ERROR, null);
         srcbuf.create_tag ("warning_bg", "background", "yellow", null);
+        srcbuf.create_tag ("search", "background", "blue", null);
 
         //"left-margin", "1", "left-margin-set", "true",
         /*
