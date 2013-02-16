@@ -71,8 +71,8 @@ class UiSourceViewer : UiElement {
                 this.current_srcview = get_sourceview (this.srcitems[this.current_srcid]);
                 this.current_srcbuffer = (SourceBuffer) this.current_srcview.buffer;
             } else
-                errmsg (_("Warning: Could not select current source view: %s\n" +
-                                 "Expected behavior may change.\n"), this._current_srcfocus);
+                warning_msg (_("Could not select current source view: %s\n" +
+                             "Expected behavior may change.\n"), this._current_srcfocus);
         }
     }
     /**
@@ -92,11 +92,11 @@ class UiSourceViewer : UiElement {
      * Focus source view {@link Gdl.DockItem} in {@link Gdl.Dock} and select
      * recursively all {@link Gdl.DockNotebook} tabs.
      *
-     * @param filename Name of file to focus.
+     * @param filename Absolute name of file to focus.
      */
     public void focus_src (string filename) {
         foreach (var srcitem in srcitems) {
-            if (srcitem.long_name == filename) {
+            if (project.get_absolute_path (srcitem.long_name) == filename) {
                 /* Hack arround gdl_dock_notebook with gtk_notebook. */
                 var pa = srcitem.parent;
                 // pa.grab_focus();
@@ -113,6 +113,7 @@ class UiSourceViewer : UiElement {
                 return;
             }
         }
+        warning_msg (_("Could not change focus to: %s\n"), filename);
     }
 
     /**
@@ -128,11 +129,11 @@ class UiSourceViewer : UiElement {
      * Hide (close) {@link Gdl.DockItem} with {@link Gtk.SourceView} by
      * filename.
      *
-     * @param filename Name of source file to close.
+     * @param filename Absolute name of source file to close.
      */
     public void close_srcitem (string filename) {
         foreach (var srcitem in srcitems)
-            if (srcitem.long_name == filename) {
+            if (project.get_absolute_path (srcitem.long_name) == filename) {
                 srcitems.remove (srcitem);
                 srcitem.hide_item();
             }
@@ -142,11 +143,17 @@ class UiSourceViewer : UiElement {
      * Add new source view item to source dock {@link srcdock}.
      *
      * @param view {@link Gtk.SourceView} object to add.
-     * @param filename Name of file (used to identify item).
+     * @param filepath Name of file (used to identify item).
      */
-    public void add_srcitem (SourceView view, string filename = "") {
-        if (filename == "")
-            filename = _("New document");
+    public void add_srcitem (SourceView view, string filepath = "") {
+        string displayname, filename = filepath;
+        if (filename == "") {
+            displayname = filename = _("New document");
+
+        } else {
+            filename = project.get_absolute_path (filename);
+            displayname = project.get_relative_path (filename);
+        }
 
         var src_view = new ScrolledWindow (null, null);
         src_view.add (view);
@@ -168,7 +175,7 @@ class UiSourceViewer : UiElement {
          * NOTE: Keep this in sync with get_sourceview method.
          */
         var item = new DockItem.with_stock ("SourceView " + srcitems.size.to_string(),
-                                            filename,
+                                            displayname,
                                             (srcbuf.dirty) ? Stock.NEW : Stock.EDIT,
                                             DockItemBehavior.LOCKED);
         srcbuf.notify["dirty"].connect ((sender, property) => {
@@ -280,7 +287,7 @@ class UiSourceViewer : UiElement {
                 scroll_widget = (ScrolledWindow) child;
         });
         if (scroll_widget == null)
-            bug_msg (("Could not find ScrolledWindow widget: %s\n"), item.name);
+            bug_msg (_("Could not find ScrolledWindow widget: %s\n"), item.name);
 #else
         var scroll_widget = (ScrolledWindow) item.get_child();
 #endif
@@ -295,15 +302,28 @@ class UiSourceViewer : UiElement {
      *         {@link srcitems}. Else -1.
      */
     private int get_sourceview_id (string filename) {
-        for (int i = 0; i < srcitems.size; ++i)
-            if (srcitems[i].long_name == filename)
-                return i;
-        debug_msg ("No such file found in opened buffers: %s\n", filename);
+        if (filename != _("New document")) {
+            for (int i = 0; i < srcitems.size; ++i)
+                if (project.get_absolute_path (srcitems[i].long_name) == filename)
+                    return i;
+        } else {
+            for (int i = 0; i < srcitems.size; ++i)
+                if (srcitems[i].long_name == filename)
+                    return i;
+        }
+        warning_msg (_("No such file found in opened buffers: %s\n"), filename);
         return -1;
     }
 
+    /**
+     * Get {@link Gtk.SourceView} by filename.
+     *
+     * @param filename Name of source file.
+     * @return If file was found return {@link Gtk.SourceView} object else
+     *         null.
+     */
     public SourceView? get_sourceview_by_file (string filename) {
-        var id = get_sourceview_id(filename);
+        var id = get_sourceview_id (filename);
         if (id == -1)
             return null;
         return get_sourceview (this.srcitems[id]);

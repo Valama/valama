@@ -37,28 +37,43 @@ public class ValamaProject {
      * Attached Guanako project to provide code completion.
      */
     public Guanako.Project guanako_project { get; private set; }
+
+    private string _project_path;
     /**
      * Absolute path to project root.
      */
-    public string project_path { get; private set; }
+    public string project_path {
+        get {
+            return _project_path;
+        }
+        private set {
+            _project_path = value;
+            project_path_file = File.new_for_path (value);
+        }
+    }
+
+    /**
+     * Project path file object.
+     */
+    public File project_path_file { get; private set; }
     /**
      * Absolute path to project file.
      */
     public string project_file { get; private set; }
     /**
-     * Project source directories.
+     * Project source directories (absolute paths).
      */
     public string[] project_source_dirs { get; private set; }
     /**
-     * Project extra source files.
+     * Project extra source files (absolute paths).
      */
     public string[] project_source_files { get; private set; }
     /**
-     * Project buildsystem directories.
+     * Project buildsystem directories (absolute paths).
      */
     public string[] project_buildsystem_dirs { get; private set; }
     /**
-     * Project extra buildsystem files.
+     * Project extra buildsystem files (absolute paths).
      */
     public string[] project_buildsystem_files { get; private set; }
     /**
@@ -196,24 +211,22 @@ public class ValamaProject {
             FileInfo file_info;
 
             foreach (string dir in directories) {
-                directory = File.new_for_path (Path.build_path (Path.DIR_SEPARATOR_S, project_path, dir));
+                directory = File.new_for_path (dir);
                 enumerator = directory.enumerate_children (FileAttribute.STANDARD_NAME, 0);
 
                 while ((file_info = enumerator.next_file()) != null) {
                     action (Path.build_path (Path.DIR_SEPARATOR_S,
-                                             project_path,
                                              dir,
                                              file_info.get_name()));
                 }
             }
 
             foreach (string filename in files) {
-                var path = Path.build_path (Path.DIR_SEPARATOR_S, project_path, filename);
-                var file = File.new_for_path (path);
+                var file = File.new_for_path (filename);
                 if (file.query_exists())
-                    action (path);
+                    action (filename);
                 else
-                    warning_msg (_("File not found: %s\n"), path);
+                    warning_msg (_("File not found: %s\n"), filename);
             }
         } catch (GLib.Error e) {
             errmsg (_("Could not open file: %s\n"), e.message);
@@ -284,22 +297,22 @@ public class ValamaProject {
                 case "source-directories":
                     for (Xml.Node* p = i-> children; p != null; p = p->next)
                         if (p->name == "directory")
-                            source_dirs += p->get_content();
+                            source_dirs += get_absolute_path (p->get_content());
                     break;
                 case "source-files":
                     for (Xml.Node* p = i-> children; p != null; p = p->next)
                         if (p->name == "file")
-                            source_files += p->get_content();
+                            source_files += get_absolute_path (p->get_content());
                     break;
                 case "buildsystem-directories":
                     for (Xml.Node* p = i-> children; p != null; p = p->next)
                         if (p->name == "directory")
-                            buildsystem_dirs += p->get_content();
+                            buildsystem_dirs += get_absolute_path (p->get_content());
                     break;
                 case "buildsystem-files":
                     for (Xml.Node* p = i-> children; p != null; p = p->next)
                         if (p->name == "file")
-                            buildsystem_files += p->get_content();
+                            buildsystem_files += get_absolute_path (p->get_content());
                     break;
                 default:
                     errmsg ("Warning: Unknown configuration file value: %s", i->name);
@@ -344,22 +357,22 @@ public class ValamaProject {
 
         writer.start_element ("source-directories");
         foreach (string directory in project_source_dirs)
-            writer.write_element ("directory", directory);
+            writer.write_element ("directory", get_relative_path (directory));
         writer.end_element();
 
         writer.start_element ("source-files");
         foreach (string directory in project_source_files)
-            writer.write_element ("file", directory);
+            writer.write_element ("file", get_relative_path (directory));
         writer.end_element();
 
         writer.start_element ("buildsystem-directories");
         foreach (string directory in project_buildsystem_dirs)
-            writer.write_element ("directory", directory);
+            writer.write_element ("directory", get_relative_path (directory));
         writer.end_element();
 
         writer.start_element ("buildsystem-files");
         foreach (string directory in project_buildsystem_files)
-            writer.write_element ("file", directory);
+            writer.write_element ("file", get_relative_path (directory));
         writer.end_element();
 
         writer.end_element();
@@ -385,7 +398,9 @@ public class ValamaProject {
      * @return Return {@link Gtk.SourceView} if new buffer was created else null.
      */
     public SourceView? open_new_buffer (string txt = "", string filename = "", bool dirty = false) {
-        debug_msg (_("Load new buffer: %s\n"), (filename == "") ? _("(new file)") : filename);
+        debug_msg (_("Load new buffer: %s\n"),
+                   (filename == "") ? _("(new file)")
+                                    : get_absolute_path (filename));
 
         foreach (var viewelement in vieworder) {
             if (viewelement.filename == filename) {
@@ -493,10 +508,8 @@ public class ValamaProject {
             string buffer_content =  buffer.text;
             new Thread<void*>.try (_("Buffer update"), () => {
                 report_wrapper.clear();
-                var source_file = this.guanako_project.get_source_file_by_name (Path.build_path (
-                                                Path.DIR_SEPARATOR_S,
-                                                this.project_path,
-                                                source_viewer.current_srcfocus));
+                var source_file = this.guanako_project.get_source_file_by_name (
+                                                source_viewer.current_srcfocus);
                 this.guanako_project.update_file (source_file, buffer_content);
                 Idle.add (() => {
                     wdg_report.update();
@@ -546,21 +559,16 @@ public class ValamaProject {
      * @return Return true on success else false.
      */
     public bool buffer_save (string filename = "") {
-        /* Use temporary variable to work arround onowned var issue with
-         * GLib.Path.build_path. */
+        /* Use temporary variable to work arround unowned var issue. */
         string filepath = filename;
         if (filepath == "") {
             if (source_viewer.current_srcfocus == null) {
                 warning_msg (_("No file selected.\n"));
                 return false;
             }
-            filepath = Path.build_path (Path.DIR_SEPARATOR_S,
-                                        this.project_path,
-                                        source_viewer.current_srcfocus);
-        } else if (!Path.is_absolute (filepath))
-            filepath = Path.build_path (Path.DIR_SEPARATOR_S,
-                                        this.project_path,
-                                        filepath);
+            filepath = source_viewer.current_srcfocus;
+        } else
+            filepath = get_absolute_path (filepath);
         foreach (var map in vieworder)
             if (map.filename == filepath) {
                 var srcbuf = (SourceBuffer) map.view.buffer;
@@ -584,7 +592,7 @@ public class ValamaProject {
                 var srcbuf = (SourceBuffer) map.view.buffer;
                 return srcbuf.dirty;
             }
-        debug_msg (_("Warning: File not registered in project to check if buffer is dirty: %s\n"), filename);
+        warning_msg (_("File not registered in project to check if buffer is dirty: %s\n"), filename);
         return false;
     }
 
@@ -650,6 +658,34 @@ public class ValamaProject {
     public void foreach_buffer (ViewCallback action) {
         foreach (var map in vieworder)
             action (map.filename, (SourceBuffer) map.view.buffer);
+    }
+
+    /**
+     * Get absolute path to file.
+     *
+     * @param path Absolute path or path relative to project root directory.
+     * @return Return absolute path to directory.
+     */
+    public string get_absolute_path (string path) {
+        if (Path.is_absolute (path))
+            return path;
+        return Path.build_path (Path.DIR_SEPARATOR_S, project_path, path);
+    }
+
+    /**
+     * Get relative path to project directory if file is in same directory
+     * tree.
+     *
+     * @param path Absolute or relative path.
+     * @return Return relative path to project root directory or absolute path
+     *         if file is not in tree below project root.
+     */
+    public string get_relative_path (string path) {
+        if (!Path.is_absolute (path))
+            return path;
+        if (path.has_prefix (project_path))  // only simple string comparison
+            return project_path_file.get_relative_path (File.new_for_path (path));
+        return path;
     }
 }
 

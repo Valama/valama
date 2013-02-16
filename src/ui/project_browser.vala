@@ -92,9 +92,7 @@ public class ProjectBrowser : UiElement {
                             break;
                         filepath = Path.build_path (Path.DIR_SEPARATOR_S, val, filepath);
                     }
-                    file_selected (Path.build_path (Path.DIR_SEPARATOR_S,
-                                                    project.project_path,
-                                                    filepath));
+                    file_selected (project.get_absolute_path (filepath));
                     break;
                 case StoreType.FILE_TREE:
                 case StoreType.DIRECTORY:
@@ -367,12 +365,11 @@ public class ProjectBrowser : UiElement {
                         break;
                     filepath = Path.build_path (Path.DIR_SEPARATOR_S, val, filepath);
                 }
-                var abs_filepath = Path.build_path (Path.DIR_SEPARATOR_S, project.project_path, filepath);
+                var abs_filepath = project.get_absolute_path (filepath);
 
                 if (ui_ask_warning (_("Do you want to delete this file?")) == ResponseType.YES) {
-                    var pfile = File.new_for_path (project.project_path);
                     var file = File.new_for_path (abs_filepath);
-                    var fname = pfile.get_relative_path (file);
+                    var fname = project.get_relative_path (filepath);
                     source_viewer.close_srcitem (fname);
                     try {
                         file.delete();

@@ -89,11 +89,8 @@ public class UiSearch : UiElement {
                                      0);
         bfr.select_range (titer, titer);
 
-        var pfile = File.new_for_path (project.project_path);
-        var fname = pfile.get_relative_path (File.new_for_path (result.filename));
-
-        source_viewer.focus_src (fname);
-        source_viewer.get_sourceview_by_file(fname).scroll_to_iter (titer, 0.42, true, 0, 1.0);
+        source_viewer.focus_src (result.filename);
+        source_viewer.get_sourceview_by_file (result.filename).scroll_to_iter (titer, 0.42, true, 0, 1.0);
     }
 
     //Thread<void*> search_thread = null;
