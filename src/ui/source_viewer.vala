@@ -166,9 +166,12 @@ class UiSourceViewer : UiElement {
         attr2.stock_id = Stock.STOP;
         view.set_mark_attributes ("stop", attr2, 0);
         view.show_line_marks = true;
-        srcbuf.create_tag ("error_bg", "underline", Pango.Underline.ERROR, null);
-        srcbuf.create_tag ("warning_bg", "background", "yellow", null);
-        srcbuf.create_tag ("search", "background", "blue", null);
+        TextTag tag = srcbuf.create_tag ("error_bg", null);
+        tag.underline = Pango.Underline.ERROR;
+        tag = srcbuf.create_tag ("warning_bg", null);
+        tag.background_rgba = Gdk.RGBA() { red = 1.0, green = 1.0, blue = 0, alpha = 0.8 };
+        tag = srcbuf.create_tag ("search", null);
+        tag.background_rgba = Gdk.RGBA() { red = 1.0, green = 1.0, blue = 0.8, alpha = 1.0 };
 
         //"left-margin", "1", "left-margin-set", "true",
         /*

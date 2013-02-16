@@ -49,8 +49,7 @@ public class UiSearch : UiElement {
 
         var entry_search = new SearchEntry();
         entry_search.changed.connect(() => {
-            if (entry_search.text != "")
-                search (entry_search.text);
+            search (entry_search.text);
         });
         box_main.pack_start (entry_search, false, true);
 
@@ -93,9 +92,22 @@ public class UiSearch : UiElement {
         source_viewer.get_sourceview_by_file (result.filename).scroll_to_iter (titer, 0.42, true, 0, 1.0);
     }
 
+    void clear_search_tag() {
+        project.foreach_buffer ((filename, bfr) => {
+            TextIter first_iter;
+            TextIter end_iter;
+            bfr.get_start_iter (out first_iter);
+            bfr.get_end_iter (out end_iter);
+            bfr.remove_tag_by_name ("search", first_iter, end_iter);
+        });
+    }
+
     //Thread<void*> search_thread = null;
     //bool abort_search_thread = false;
     void search(string search) {
+        clear_search_tag();
+        if (search == "")
+            return;
         map_paths_results = new Gee.HashMap<string, SearchResult?>();
         /*if (search_thread != null) {
             abort_search_thread = true;
@@ -137,11 +149,11 @@ public class UiSearch : UiElement {
                     match_end.forward_to_line_end();
                     TextIter append = match_end;
                     append.forward_line();
-                    append.forward_line();
                     append.forward_to_line_end();
                     var shown_text = """<tt><span color="#A0A0A0">""" + Markup.escape_text(bfr.get_slice (prepend, match_start, true)) + "</span>"
                                  + Markup.escape_text(bfr.get_slice(match_start, match_end, true)).replace(search, "<b>" + search + "</b>")
                                  + """<span color="#A0A0A0">""" + Markup.escape_text(bfr.get_slice (match_end, append, true)) + "</span></tt>\n";
+                    shown_text = shown_text.strip();
                     //TODO: Make <b> stuff case insensitive!
 
                     map_paths_results[store.get_path((TreeIter)iter_append).to_string()] =  SearchResult() { line = match_end.get_line(), filename = filename, col_start = col_start, col_end = col_end };
