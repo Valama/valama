@@ -195,10 +195,8 @@ public void build_file_treestore (string storename,
         store.append (out iter_base, null);
         store.set (iter_base, 0, storename, 1, StoreType.FILE_TREE, -1);
 
-        var pfile = File.new_for_path (project.project_path);
         foreach (string file in files) {
-            var name = pfile.get_relative_path (File.new_for_path (file));
-            var pathparts = split_path (name, false);
+            var pathparts = split_path (project.get_relative_path (file), false);
 
             if (pathparts.length == 0) {
                 bug_msg (_("Couldn't add element to TreeStore '%s': %s\n"), storename, file);

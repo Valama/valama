@@ -150,10 +150,8 @@ public class ProjectBuilder {
 
             string srcfiles = "set(srcfiles\n";
             string vapifiles = "set(vapifiles\n";
-            var pfile = File.new_for_path (project.project_path);
             foreach (var filepath in project.files) {
-                var file = File.new_for_path (filepath);
-                var fname = pfile.get_relative_path (file);
+                var fname = project.get_relative_path (filepath);
                 if (filepath.has_suffix (".vapi")) {
                     vapifiles += @"\"$fname\"\n";
                 } else {

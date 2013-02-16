@@ -285,10 +285,7 @@ public static int main (string[] args) {
         project.undo_changed (srcbuf.can_undo);
         project.redo_changed (srcbuf.can_redo);
         if (source_viewer.current_srcfocus != _("New document"))
-            project.buffer_changed (project.buffer_is_dirty (
-                        Path.build_path (Path.DIR_SEPARATOR_S,
-                                         project.project_path,
-                                         source_viewer.current_srcfocus)));
+            project.buffer_changed (project.buffer_is_dirty (source_viewer.current_srcfocus));
         else
             project.buffer_changed (true);
     });
@@ -412,8 +409,7 @@ static void on_error_selected (ReportWrapper.Error err) {
 
 
 static void on_file_selected (string filename) {
-    var pfile = File.new_for_path (project.project_path);
-    var fname = pfile.get_relative_path (File.new_for_path (filename));
+    var fname = project.get_relative_path (filename);
 
     if (source_viewer.current_srcfocus == fname)
         return;
@@ -499,13 +495,10 @@ class TestProvider : Gtk.SourceCompletionProvider, Object {
             new Thread<void*>.try (_("Completion"), () => {
                 /* Get completion proposals from Guanako */
                 var guanako_proposals = project.guanako_project.propose_symbols (
-                                    project.guanako_project.get_source_file_by_name (
-                                            Path.build_path (Path.DIR_SEPARATOR_S,
-                                                             project.project_path,
-                                                             source_viewer.current_srcfocus)),
-                                    line,
-                                    col,
-                                    current_line);
+                            project.guanako_project.get_source_file_by_name (source_viewer.current_srcfocus),
+                            line,
+                            col,
+                            current_line);
 
                 /* Assign icons and pass the proposals on to Gtk.SourceView */
                 var props = new GLib.List<Gtk.SourceCompletionItem>();

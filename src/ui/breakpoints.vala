@@ -103,7 +103,7 @@ class UiBreakpoints : UiElement {
     void on_btn_add_clicked() {
         TextIter iter_start;
         TextIter iter_end;
-        var focus_file = project.guanako_project.get_source_file_by_name (Path.build_path (Path.DIR_SEPARATOR_S, project.project_path, source_viewer.current_srcfocus));
+        var focus_file = project.guanako_project.get_source_file_by_name (source_viewer.current_srcfocus);
         int line_start, line_end;
         if (!source_viewer.current_srcbuffer.get_selection_bounds (out iter_start, out iter_end)) {
             var mark_insert = source_viewer.current_srcbuffer.get_insert();
@@ -111,10 +111,13 @@ class UiBreakpoints : UiElement {
             iter_end = iter_start;
         }
         if (iter_start.get_line() == iter_end.get_line()){
-            var new_stop = FrankenStein.FrankenStop() { file = focus_file, line = iter_start.get_line() + 1};
+            var new_stop = FrankenStein.FrankenStop() { file = focus_file,
+                                                        line = iter_start.get_line() + 1};
             frankenstein.frankenstops.add (new_stop);
         } else {
-            var new_timer = FrankenStein.FrankenTimer() { file = focus_file, start_line = iter_start.get_line() + 1, end_line = iter_end.get_line() + 1 };
+            var new_timer = FrankenStein.FrankenTimer() { file = focus_file,
+                                                          start_line = iter_start.get_line() + 1,
+                                                          end_line = iter_end.get_line() + 1 };
             frankenstein.frankentimers.add (new_timer);
         }
         build();

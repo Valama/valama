@@ -103,13 +103,13 @@ public abstract class UiElement : Object{
     /**
      * Add an existing {@link UiElement} to equitable dependencies.
      */
-    public void connect (UiElement element) {
+    public new void connect (UiElement element) {
         ui_connections.add (element);
     }
     /**
      * Remove an existing {@link UiElement} from equitable dependencies.
      */
-    public void disconnect (UiElement element) {
+    public new void disconnect (UiElement element) {
         ui_connections.remove (element);
     }
     //public void s_connect (UiElement element) {

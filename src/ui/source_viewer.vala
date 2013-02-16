@@ -142,11 +142,12 @@ class UiSourceViewer : UiElement {
      * Add new source view item to source dock {@link srcdock}.
      *
      * @param view {@link Gtk.SourceView} object to add.
-     * @param filename Name of file (used to identify item).
+     * @param filepath Name of file (used to identify item).
      */
-    public void add_srcitem (SourceView view, string filename = "") {
-        if (filename == "")
-            filename = _("New document");
+    public void add_srcitem (SourceView view, string filepath = "") {
+        var filename = filepath;
+        (filename == "") ? filename = _("New document")
+                         : filename = project.get_absolute_path (filename);
 
         var src_view = new ScrolledWindow (null, null);
         src_view.add (view);
@@ -167,7 +168,7 @@ class UiSourceViewer : UiElement {
          * NOTE: Keep this in sync with get_sourceview method.
          */
         var item = new DockItem.with_stock ("SourceView " + srcitems.size.to_string(),
-                                            filename,
+                                            project.get_relative_path (filename),
                                             (srcbuf.dirty) ? Stock.NEW : Stock.EDIT,
                                             DockItemBehavior.LOCKED);
         srcbuf.notify["dirty"].connect ((sender, property) => {
@@ -295,7 +296,7 @@ class UiSourceViewer : UiElement {
      */
     private int get_sourceview_id (string filename) {
         for (int i = 0; i < srcitems.size; ++i)
-            if (srcitems[i].long_name == filename)
+            if (project.get_absolute_path (srcitems[i].long_name) == filename)
                 return i;
         debug_msg ("No such file found in opened buffers: %s\n", filename);
         return -1;
