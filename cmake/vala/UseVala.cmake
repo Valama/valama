@@ -162,7 +162,9 @@ function(vala_precompile output)
     list(APPEND header_arguments "--internal-header=${DIRECTORY}/${ARGS_GENERATE_HEADER}_internal.h")
   endif()
 
-  add_custom_command(OUTPUT ${out_files}
+  add_custom_command(
+    OUTPUT
+      ${out_files}
     COMMAND
       ${VALA_EXECUTABLE}
         "-C"

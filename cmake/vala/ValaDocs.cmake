@@ -95,12 +95,21 @@ if(VALADOC_FOUND)
         list(APPEND valadoc_options ${ARGS_OPTIONS})
       endif()
 
-      add_custom_target(docs
-        ${make_all}
+      add_custom_command(
+        OUTPUT
+          "${docdir}/index.html"
         COMMAND
           ${CMAKE_COMMAND} -E remove_directory "${docdir}"
         COMMAND
           ${VALADOC_EXECUTABLE} ${srcfiles} ${pkg_opts} ${valadoc_options}
+        DEPENDS
+          ${ARGS_SRCFILES}
+      )
+
+      add_custom_target(docs
+        ${make_all}
+        DEPENDS
+          "${docdir}/index.html"
         COMMENT
           "Generating documentation with valadoc." VERBATIM
       )
