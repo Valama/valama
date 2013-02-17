@@ -137,7 +137,7 @@ public class UiSearch : UiElement {
                 while (match_end.forward_search (search, TextSearchFlags.CASE_INSENSITIVE, out match_start, out match_end, null)) {
                     if (iter_parent == null) {
                         store.append (out iter_parent, null);
-                        store.set (iter_parent, 0, "", 1, filename, -1);
+                        store.set (iter_parent, 0, "", 1, project.get_relative_path (filename), -1);
                     }
                     TreeIter iter_append;
                     store.append (out iter_append, iter_parent);

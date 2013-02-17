@@ -408,7 +408,7 @@ static void create_new_file() {
 }
 
 static void undo_change() {
-    var srcbuf =source_viewer.current_srcbuffer;
+    var srcbuf = source_viewer.current_srcbuffer;
     var manager = srcbuf.get_undo_manager();
     manager.undo();
 }
@@ -428,9 +428,7 @@ static void redo_change() {
 static void on_error_selected (ReportWrapper.Error err) {
     on_file_selected (err.source.file.filename);
 
-    var bfr = project.get_buffer_by_file (Path.build_path (Path.DIR_SEPARATOR_S,
-                                                           project.project_path,
-                                                           err.source.file.filename));
+    var bfr = project.get_buffer_by_file (err.source.file.filename);
     if (bfr == null)
         return;
 
@@ -443,6 +441,7 @@ static void on_error_selected (ReportWrapper.Error err) {
                                  err.source.end.line - 1,
                                  err.source.end.column - 1);
     bfr.select_range (start, end);
+    source_viewer.focus_src (err.source.file.filename);
 }
 
 

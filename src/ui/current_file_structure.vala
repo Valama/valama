@@ -41,12 +41,6 @@ public class UiCurrentFileStructure : UiElement {
         var text_renderer = new CellRendererText();
         col.pack_start (text_renderer, true);
         col.set_attributes (text_renderer, "text", 0);
-        /*tree_view.insert_column_with_attributes (-1,
-                                                 _("Symbol"),
-                                                 new CellRendererText(),
-                                                 "text",
-                                                 0,
-                                                 null);*/
         tree_view.cursor_changed.connect (on_tree_view_cursor_changed);
 
         var scrw = new ScrolledWindow (null, null);
@@ -98,6 +92,8 @@ public class UiCurrentFileStructure : UiElement {
             store.append (out parent, null);
             store.set (parent, 0, ((Symbol)node).name, 1, get_pixbuf_for_symbol((Symbol)node), -1);
             map_iter_symbols[store.get_path(parent).to_string()] = (Symbol)node;
+            if (node == current_symbol)
+                tree_view.get_selection().select_iter (parent);
 
             TreeIter[] iters = new TreeIter[0];
             Guanako.iter_symbol ((Symbol)node, (smb, depth) => {
@@ -108,6 +104,8 @@ public class UiCurrentFileStructure : UiElement {
                     else
                         store.append (out next, iters[depth - 2]);
                     store.set (next, 0, smb.name, 1, get_pixbuf_for_symbol(smb));
+                    if (smb == current_symbol)
+                        tree_view.get_selection().select_iter (next);
                     map_iter_symbols[store.get_path(next).to_string()] = smb;
                     if (iters.length < depth)
                         iters += next;
@@ -117,6 +115,7 @@ public class UiCurrentFileStructure : UiElement {
                 return Guanako.iter_callback_returns.continue;
             });
         }
+        tree_view.expand_all();
     }
 }
 
