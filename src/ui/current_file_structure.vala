@@ -27,18 +27,41 @@ using GLib;
 public class UiCurrentFileStructure : UiElement {
     public Widget widget;
     TreeView tree_view;
+    Gee.HashMap<string, Gdk.Pixbuf> map_icons = new Gee.HashMap<string, Gdk.Pixbuf>();
 
     public UiCurrentFileStructure () {
+        foreach (string type in new string[] {"class",
+                                              "enum",
+                                              "field",
+                                              "method",
+                                              "namespace",
+                                              "property",
+                                              "struct",
+                                              "signal",
+                                              "constant"})
+        map_icons[type] = new Gdk.Pixbuf.from_file (Path.build_path (
+                                        Path.DIR_SEPARATOR_S,
+                                        Config.PIXMAP_DIR,
+                                        "element-" + type + "-16.png"));
+
         element_name = "CurrentFileStructure";
         var vbox = new Box (Orientation.VERTICAL, 0);
 
         tree_view = new TreeView();
-        tree_view.insert_column_with_attributes (-1,
+        var col = new TreeViewColumn();
+        tree_view.insert_column (col, -1);
+        var pixbuf_renderer = new CellRendererPixbuf();
+        col.pack_start (pixbuf_renderer, false);
+        col.set_attributes (pixbuf_renderer, "pixbuf", 1);
+        var text_renderer = new CellRendererText();
+        col.pack_start (text_renderer, true);
+        col.set_attributes (text_renderer, "text", 0);
+        /*tree_view.insert_column_with_attributes (-1,
                                                  _("Symbol"),
                                                  new CellRendererText(),
                                                  "text",
                                                  0,
-                                                 null);
+                                                 null);*/
         tree_view.cursor_changed.connect (on_tree_view_cursor_changed);
 
         var scrw = new ScrolledWindow (null, null);
@@ -70,7 +93,7 @@ public class UiCurrentFileStructure : UiElement {
     TreeStore store;
     protected override void build() {
         map_iter_symbols = new Gee.HashMap<string, Symbol>();
-        store = new TreeStore (1, typeof (string));
+        store = new TreeStore (2, typeof (string), typeof (Gdk.Pixbuf));
         tree_view.set_model (store);
         var focus_file = project.guanako_project.get_source_file_by_name (source_viewer.current_srcfocus);
         if (focus_file == null)
@@ -88,7 +111,7 @@ public class UiCurrentFileStructure : UiElement {
                 continue;
             TreeIter parent;
             store.append (out parent, null);
-            store.set (parent, 0, ((Symbol)node).name, -1);
+            store.set (parent, 0, ((Symbol)node).name, 1, get_pixbuf_for_symbol((Symbol)node), -1);
             map_iter_symbols[store.get_path(parent).to_string()] = (Symbol)node;
 
             TreeIter[] iters = new TreeIter[0];
@@ -99,7 +122,7 @@ public class UiCurrentFileStructure : UiElement {
                         store.append (out next, parent);
                     else
                         store.append (out next, iters[depth - 2]);
-                    store.set (next, 0, smb.name);
+                    store.set (next, 0, smb.name, 1, get_pixbuf_for_symbol(smb));
                     map_iter_symbols[store.get_path(next).to_string()] = smb;
                     if (iters.length < depth)
                         iters += next;

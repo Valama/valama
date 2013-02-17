@@ -38,6 +38,8 @@ static UiReport wdg_report;
 static ProjectBuilder project_builder;
 static UiSourceViewer source_viewer;
 
+static Gee.HashMap<string, Gdk.Pixbuf> map_icons;
+
 public static int main (string[] args) {
     Intl.textdomain (Config.GETTEXT_PACKAGE);
     Intl.bindtextdomain (Config.GETTEXT_PACKAGE, Config.LOCALE_DIR);
@@ -79,6 +81,29 @@ public static int main (string[] args) {
         errmsg (_("Couldn't load Valama project: %s\n"), e.message);
         project = null;
         return 1;
+    }
+
+    map_icons = new Gee.HashMap<string, Gdk.Pixbuf>();
+    try {
+        foreach (string type in new string[] {"class",
+                                              "enum",
+                                              "field",
+                                              "method",
+                                              "namespace",
+                                              "property",
+                                              "struct",
+                                              "signal",
+                                              "constant"})
+            map_icons[type] = new Gdk.Pixbuf.from_file (Path.build_path (
+                                            Path.DIR_SEPARATOR_S,
+                                            Config.PIXMAP_DIR,
+                                            "element-" + type + "-16.png"));
+    } catch (Gdk.PixbufError e) {
+        errmsg (_("Could not load pixmap: %s\n"), e.message);
+    } catch (GLib.FileError e) {
+        errmsg (_("Could not open pixmaps file: %s\n"), e.message);
+    } catch (GLib.Error e) {
+        errmsg (_("Pixmap loading failed: %s\n"), e.message);
     }
 
     source_viewer = new UiSourceViewer();
@@ -360,6 +385,19 @@ public static int main (string[] args) {
     return 0;
 }
 
+static Gdk.Pixbuf? get_pixbuf_for_symbol (Symbol symbol) {
+    if (symbol is Namespace)   return map_icons["namespace"];
+    else if (symbol is Property)    return map_icons["property"];
+    else if (symbol is Struct)      return map_icons["struct"];
+    else if (symbol is Method)      return map_icons["method"];
+    else if (symbol is Variable)    return map_icons["field"];
+    else if (symbol is Enum)        return map_icons["enum"];
+    else if (symbol is Class)       return map_icons["class"];
+    else if (symbol is Constant)    return map_icons["constant"];
+    else if (symbol is Vala.Signal) return map_icons["signal"];
+    return null;
+}
+
 static void create_new_file() {
     var source_file = ui_create_file_dialog (project);
     if (source_file != null) {
@@ -435,31 +473,7 @@ class TestProvider : Gtk.SourceCompletionProvider, Object {
         Gdk.Pixbuf icon = this.get_icon();
 
         this.proposals = new GLib.List<Gtk.SourceCompletionItem>();
-
-        try {
-            foreach (string type in new string[] {"class",
-                                                  "enum",
-                                                  "field",
-                                                  "method",
-                                                  "namespace",
-                                                  "property",
-                                                  "struct",
-                                                  "signal",
-                                                  "constant"})
-                map_icons[type] = new Gdk.Pixbuf.from_file (Path.build_path (
-                                                Path.DIR_SEPARATOR_S,
-                                                Config.PIXMAP_DIR,
-                                                "element-" + type + "-16.png"));
-        } catch (Gdk.PixbufError e) {
-            errmsg (_("Could not load pixmap: %s\n"), e.message);
-        } catch (GLib.FileError e) {
-            errmsg (_("Could not open pixmaps file: %s\n"), e.message);
-        } catch (GLib.Error e) {
-            errmsg (_("Pixmap loading failed: %s\n"), e.message);
-        }
     }
-
-    Gee.HashMap<string, Gdk.Pixbuf> map_icons = new Gee.HashMap<string, Gdk.Pixbuf>();
 
     public string get_name() {
         return this.name;
@@ -504,16 +518,7 @@ class TestProvider : Gtk.SourceCompletionProvider, Object {
                 foreach (CompletionProposal guanako_proposal in list) {
                     if (guanako_proposal.symbol.name != null) {
 
-                        Gdk.Pixbuf pixbuf = null;
-                        if (guanako_proposal.symbol      is Namespace)   pixbuf = map_icons["namespace"];
-                        else if (guanako_proposal.symbol is Property)    pixbuf = map_icons["property"];
-                        else if (guanako_proposal.symbol is Struct)      pixbuf = map_icons["struct"];
-                        else if (guanako_proposal.symbol is Method)      pixbuf = map_icons["method"];
-                        else if (guanako_proposal.symbol is Variable)    pixbuf = map_icons["field"];
-                        else if (guanako_proposal.symbol is Enum)        pixbuf = map_icons["enum"];
-                        else if (guanako_proposal.symbol is Class)       pixbuf = map_icons["class"];
-                        else if (guanako_proposal.symbol is Constant)    pixbuf = map_icons["constant"];
-                        else if (guanako_proposal.symbol is Vala.Signal) pixbuf = map_icons["signal"];
+                        Gdk.Pixbuf pixbuf = get_pixbuf_for_symbol (guanako_proposal.symbol);
 
                         var item = new ComplItem (guanako_proposal.symbol.name,
                                                   guanako_proposal.symbol.name,
