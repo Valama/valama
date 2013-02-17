@@ -42,8 +42,14 @@ namespace Guanako {
         int glib_major = 2;  //TODO: Make this an option.
         int glib_minor = 32;
 
-        //TODO: Use sorted list.
-        public Gee.ArrayList<string> packages;
+        /**
+         * Manually added packages.
+         */
+        public Gee.TreeSet<string> packages { get; private set; }
+        /**
+         * Manually added source files.
+         */
+        public Gee.TreeSet<SourceFile> sourcefiles { get; private set; }
 
         /*
          * Not a beautiful piece of code, but necessary to convert from
@@ -62,6 +68,7 @@ namespace Guanako {
                 if (file.filename == source_file.filename)
                     return false;
             context.add_source_file (source_file);
+            sourcefiles.add (source_file);
             return true;
         }
 
@@ -88,7 +95,8 @@ namespace Guanako {
         public Project() {
             context = new CodeContext();
             parser = new Vala.Parser();
-            packages = new Gee.ArrayList<string>();
+            packages = new Gee.TreeSet<string>();
+            sourcefiles = new Gee.TreeSet<SourceFile>();
 
             context_prep();
 
@@ -124,6 +132,7 @@ namespace Guanako {
             foreach (string pkg in old_packages)
                 context.add_package (pkg);
             update();
+            sourcefiles.remove (file);
         }
 
         public Symbol root_symbol {
@@ -145,7 +154,7 @@ namespace Guanako {
                         missing_packages += pkg;
                         continue;
                     }
-                        debug_msg (_("Vapi found: %s\n"), vapi_path);
+                    debug_msg (_("Vapi found: %s\n"), vapi_path);
                     new_deps += pkg;
                 }
 
@@ -161,14 +170,17 @@ namespace Guanako {
                 debug_msg (_("Vapi found: %s\n"), vapi_path);
                 context.add_external_package (package_name);
             }
-            packages.sort();
 
             /* Update completion info of all the new packages */
             if (auto_update)
                 foreach (string pkg in new_deps) {
-                    var pkg_file = get_source_file (context.get_vapi_path (pkg));
-                    if (pkg_file == null)
+                    var vapi_path = context.get_vapi_path (pkg);
+                    var pkg_file = get_source_file (vapi_path);
+                    if (pkg_file == null) {
+                        stderr.printf (_("Could not load vapi: %s\n"), vapi_path);
+                        missing_packages += pkg;
                         continue;
+                    }
                     update_file (pkg_file);
                 }
 

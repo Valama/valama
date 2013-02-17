@@ -100,12 +100,11 @@ public class ValamaProject {
     /**
      * List of source files.
      */
-    //TODO: Use sorted list.
-    public Gee.ArrayList<string> files { get; private set; }
+    public Gee.TreeSet<string> files { get; private set; }
     /**
      * List of buildsystem files.
      */
-    public Gee.ArrayList<string> b_files { get; private set; }
+    public Gee.TreeSet<string> b_files { get; private set; }
 
     /**
      * Ordered list of all opened Buffers mapped with filenames.
@@ -135,8 +134,8 @@ public class ValamaProject {
         project_path = proj_file.get_parent().get_path(); //TODO: Check valid path?
 
         guanako_project = new Guanako.Project();
-        files = new Gee.ArrayList<string>();
-        b_files = new Gee.ArrayList<string>();
+        files = new Gee.TreeSet<string>();
+        b_files = new Gee.TreeSet<string>();
 
         msg (_("Load project file: %s\n"), this.project_file);
         load_project_file();  // can throw LoadingError
@@ -144,11 +143,9 @@ public class ValamaProject {
         generate_file_list (project_source_dirs,
                             project_source_files,
                             add_source_file);
-        files.sort();
         generate_file_list (project_buildsystem_dirs,
                             project_buildsystem_files,
                             add_buildsystem_file);
-        b_files.sort();
 
         guanako_project.update();
 
@@ -169,10 +166,10 @@ public class ValamaProject {
         if (!(filename.has_suffix (".vala") || filename.has_suffix (".vapi")))
             return;
         msg (_("Found file %s\n"), filename);
-        if (!this.files.contains (filename)) {
+        if (this.files.add (filename))
             guanako_project.add_source_file_by_name (filename);
-            this.files.add (filename);
-        }
+        else
+            debug_msg (_("Skip already added file: %s"), filename);
     }
 
     /**
@@ -185,9 +182,8 @@ public class ValamaProject {
      */
     //TODO: Remove it also from .vlp file.
     public bool remove_source_file (string filename) {
-        if (!(filename in files))
+        if (!files.remove (filename))
             return false;
-        files.remove (filename);
         guanako_project.remove_file (guanako_project.get_source_file_by_name (filename));
         return true;
     }
@@ -201,8 +197,8 @@ public class ValamaProject {
         if (!(filename.has_suffix (".cmake") || Path.get_basename (filename) == ("CMakeLists.txt")))
             return;
         msg (_("Found file %s\n"), filename);
-        if (!this.b_files.contains (filename))
-            this.b_files.add (filename);
+        if (!this.b_files.add (filename))
+            debug_msg (_("Skip already added file: %s"), filename);
     }
 
     /**
@@ -214,20 +210,20 @@ public class ValamaProject {
     /**
      * Iterate over directories and files and fill list.
      *
-     * @param directories List of directories.
-     * @param files List of files.
+     * @param dirlist List of directories.
+     * @param filelist List of files.
      * @param action Method to perform on each found file in directory or
      *               file list.
      */
-    private void generate_file_list (string[] directories,
-                                     string[] files,
+    private void generate_file_list (string[] dirlist,
+                                     string[] filelist,
                                      FileCallback? action = null) {
         try {
             File directory;
             FileEnumerator enumerator;
             FileInfo file_info;
 
-            foreach (string dir in directories) {
+            foreach (string dir in dirlist) {
                 directory = File.new_for_path (dir);
                 enumerator = directory.enumerate_children (FileAttribute.STANDARD_NAME, 0);
 
@@ -238,7 +234,7 @@ public class ValamaProject {
                 }
             }
 
-            foreach (string filename in files) {
+            foreach (string filename in filelist) {
                 var file = File.new_for_path (filename);
                 if (file.query_exists())
                     action (filename);
