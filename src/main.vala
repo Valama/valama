@@ -368,7 +368,7 @@ public static int main (string[] args) {
     string system_layout_filename = Path.build_path (Path.DIR_SEPARATOR_S,
                                                      Config.PACKAGE_DATA_DIR,
                                                      "layout.xml");
-    if (!window_main.load_layout (local_layout_filename))
+    if (Args.reset_layout || !window_main.load_layout (local_layout_filename))
         window_main.load_layout (system_layout_filename);
 
     Gtk.main();
