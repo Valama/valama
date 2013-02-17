@@ -27,23 +27,8 @@ using GLib;
 public class UiCurrentFileStructure : UiElement {
     public Widget widget;
     TreeView tree_view;
-    Gee.HashMap<string, Gdk.Pixbuf> map_icons = new Gee.HashMap<string, Gdk.Pixbuf>();
 
     public UiCurrentFileStructure () {
-        foreach (string type in new string[] {"class",
-                                              "enum",
-                                              "field",
-                                              "method",
-                                              "namespace",
-                                              "property",
-                                              "struct",
-                                              "signal",
-                                              "constant"})
-        map_icons[type] = new Gdk.Pixbuf.from_file (Path.build_path (
-                                        Path.DIR_SEPARATOR_S,
-                                        Config.PIXMAP_DIR,
-                                        "element-" + type + "-16.png"));
-
         element_name = "CurrentFileStructure";
         var vbox = new Box (Orientation.VERTICAL, 0);
 
