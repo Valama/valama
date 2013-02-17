@@ -85,6 +85,7 @@ public class UiCurrentFileStructure : UiElement {
         var current_symbol = project.guanako_project.get_symbol_at_pos (focus_file,
                                                                         iter.get_line(),
                                                                         iter.get_line_offset());
+        TreeIter? current_iter = null;
         foreach (CodeNode node in focus_file.get_nodes()) {
             if (!(node is Namespace || node is Class || node is Subroutine))
                 continue;
@@ -93,7 +94,7 @@ public class UiCurrentFileStructure : UiElement {
             store.set (parent, 0, ((Symbol)node).name, 1, get_pixbuf_for_symbol((Symbol)node), -1);
             map_iter_symbols[store.get_path(parent).to_string()] = (Symbol)node;
             if (node == current_symbol)
-                tree_view.get_selection().select_iter (parent);
+                current_iter = parent;
 
             TreeIter[] iters = new TreeIter[0];
             Guanako.iter_symbol ((Symbol)node, (smb, depth) => {
@@ -105,7 +106,7 @@ public class UiCurrentFileStructure : UiElement {
                         store.append (out next, iters[depth - 2]);
                     store.set (next, 0, smb.name, 1, get_pixbuf_for_symbol(smb));
                     if (smb == current_symbol)
-                        tree_view.get_selection().select_iter (next);
+                        current_iter = next;
                     map_iter_symbols[store.get_path(next).to_string()] = smb;
                     if (iters.length < depth)
                         iters += next;
@@ -116,6 +117,8 @@ public class UiCurrentFileStructure : UiElement {
             });
         }
         tree_view.expand_all();
+        if (current_symbol != null)
+            tree_view.get_selection().select_iter (current_iter);
     }
 }
 
