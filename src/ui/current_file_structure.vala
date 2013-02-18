@@ -27,6 +27,7 @@ using GLib;
 public class UiCurrentFileStructure : UiElement {
     public Widget widget;
     TreeView tree_view;
+    CheckButton chk_private_symbol;
 
     public UiCurrentFileStructure () {
         element_name = "CurrentFileStructure";
@@ -46,6 +47,12 @@ public class UiCurrentFileStructure : UiElement {
         var scrw = new ScrolledWindow (null, null);
         scrw.add (tree_view);
         vbox.pack_start (scrw, true, true);
+
+        chk_private_symbol = new CheckButton.with_label (_("Private"));
+        chk_private_symbol.clicked.connect(() => {
+            build();
+        });
+        vbox.pack_start (chk_private_symbol, false, true);
 
         source_viewer.notify["current-srcbuffer"].connect(()=>{
             build();
@@ -77,7 +84,6 @@ public class UiCurrentFileStructure : UiElement {
         var focus_file = project.guanako_project.get_source_file_by_name (source_viewer.current_srcfocus);
         if (focus_file == null)
             return;
-
         var mark_insert = source_viewer.current_srcbuffer.get_insert();
         TextIter iter;
         source_viewer.current_srcbuffer.get_iter_at_mark (out iter, mark_insert);
@@ -87,8 +93,9 @@ public class UiCurrentFileStructure : UiElement {
                                                                         iter.get_line_offset());
         TreeIter? current_iter = null;
         foreach (CodeNode node in focus_file.get_nodes()) {
-            if (!(node is Namespace || node is Class || node is Subroutine))
+            if (!(node is Namespace || node is Class || node is Subroutine || node is Vala.Signal || node is Variable))
                 continue;
+
             TreeIter parent;
             store.append (out parent, null);
             store.set (parent, 0, ((Symbol)node).name, 1, get_pixbuf_for_symbol((Symbol)node), -1);
@@ -98,7 +105,9 @@ public class UiCurrentFileStructure : UiElement {
 
             TreeIter[] iters = new TreeIter[0];
             Guanako.iter_symbol ((Symbol)node, (smb, depth) => {
-                if (smb.name != null && (smb is Namespace || smb is Class || smb is Subroutine)) {
+                if (smb.name != null && (smb is Namespace || smb is Class || smb is Subroutine || smb is Vala.Signal || smb is Variable)) {
+                    if (smb.access == SymbolAccessibility.PRIVATE && !chk_private_symbol.active)
+                        return Guanako.iter_callback_returns.abort_branch;
                     TreeIter next;
                     if (depth == 1)
                         store.append (out next, parent);
@@ -112,12 +121,13 @@ public class UiCurrentFileStructure : UiElement {
                         iters += next;
                     else
                         iters[depth - 1] = next;
-                }
-                return Guanako.iter_callback_returns.continue;
+                    return Guanako.iter_callback_returns.continue;
+                } else
+                    return Guanako.iter_callback_returns.abort_branch;
             });
         }
         tree_view.expand_all();
-        if (current_symbol != null)
+        if (current_iter != null)
             tree_view.get_selection().select_iter (current_iter);
     }
 }
