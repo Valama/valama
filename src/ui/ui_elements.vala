@@ -31,8 +31,8 @@ using Gee;
  */
 public abstract class UiElement : Object{
     /**
-      * Element name to identify elements easily.
-      */
+     * Element name to identify elements easily.
+     */
     protected string element_name;
 
     /**

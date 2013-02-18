@@ -22,12 +22,17 @@ using Gtk;
 using Guanako;
 
 /**
- * Setting break points etc
+ * Setting break points etc.
  */
 class UiBreakpoints : UiElement {
     TreeView tree_view;
     public Widget widget;
     Guanako.FrankenStein frankenstein;
+    ListStore? store = null;
+    MainLoop resume_wait_loop = new MainLoop();
+
+    ToolButton btn_add;
+    ToolButton btn_remove;
     ToolButton btn_resume;
 
     public UiBreakpoints (Guanako.FrankenStein frankenstein) {
@@ -40,22 +45,27 @@ class UiBreakpoints : UiElement {
         var box_main = new Box (Orientation.VERTICAL, 0);
 
         tree_view = new TreeView();
-        tree_view.insert_column_with_attributes (-1, _("Line"), new CellRendererText(), "text", 0, null);
-        tree_view.insert_column_with_attributes (-1, _("File"), new CellRendererText(), "text", 1, null);
-        tree_view.insert_column_with_attributes (-1, _("Time"), new CellRendererText(), "text", 2, null);
+        tree_view.insert_column_with_attributes (-1,
+                                                 _("Line"),
+                                                 new CellRendererText(),
+                                                 "text",
+                                                 0,
+                                                 null);
+        tree_view.insert_column_with_attributes (-1,
+                                                 _("File"),
+                                                 new CellRendererText(),
+                                                 "text",
+                                                 1,
+                                                 null);
+        tree_view.insert_column_with_attributes (-1,
+                                                 _("Time"),
+                                                 new CellRendererText(),
+                                                 "text",
+                                                 2,
+                                                 null);
 
         build();
 
-        /*tree_view.cursor_changed.connect (() => {
-
-        });*/
-        tree_view.row_activated.connect ((path) => {
-            /*int index = path.get_indices()[0];
-            if (report.errors_list.size > index)
-                error_selected (report.errors_list[index]);
-            else
-                error_selected (report.warnings_list[index - report.errors_list.size]);*/
-        });
         tree_view.can_focus = false;
         var scrw = new ScrolledWindow (null, null);
         scrw.add (tree_view);
@@ -63,19 +73,25 @@ class UiBreakpoints : UiElement {
 
         var toolbar = new Toolbar();
         toolbar.icon_size = 1;
-        var btn_add = new ToolButton (null, null);
+
+        btn_add = new ToolButton (null, null);
+        btn_add.sensitive = false;
         btn_add.icon_name = "list-add-symbolic";
         btn_add.clicked.connect (on_btn_add_clicked);
         toolbar.add (btn_add);
-        var btn_remove = new ToolButton (null, null);
+
+        btn_remove = new ToolButton (null, null);
+        btn_remove.sensitive = false;
         btn_remove.icon_name = "list-remove-symbolic";
         btn_remove.clicked.connect (on_btn_remove_clicked);
         toolbar.add (btn_remove);
+
         btn_resume = new ToolButton (null, null);
+        btn_resume.sensitive = false;
         btn_resume.stock_id = Stock.MEDIA_PLAY;
         btn_resume.clicked.connect (on_btn_resume_clicked);
         toolbar.add (btn_resume);
-        btn_resume.sensitive = false;
+
         box_main.pack_start (toolbar, false, true);
 
         window_main.IDEmode_changed.connect(()=>{
@@ -83,27 +99,51 @@ class UiBreakpoints : UiElement {
             box_main.sensitive = active;
         });
 
+        source_viewer.notify["current-srcbuffer"].connect (() => {
+            /* Don't enable button on non-source files. */
+            if (source_viewer.current_srcfocus != null &&
+                        project.guanako_project.get_source_file (
+                                    source_viewer.current_srcfocus) != null)
+                btn_add.sensitive = true;
+            else
+                btn_add.sensitive = false;
+        });
+
+        tree_view.cursor_changed.connect (() => {
+            TreePath path;
+            tree_view.get_cursor (out path, null);
+            if (path == null)
+                btn_remove.sensitive = false;
+            else
+                btn_remove.sensitive = true;
+        });
+
         widget = box_main;
     }
-    MainLoop resume_wait_loop = new MainLoop();
+
     void timer_finished (FrankenStein.FrankenTimer timer, int timer_id, double time) {
         var pth = new TreePath.from_indices (timer_id);
         TreeIter iter;
         store.get_iter (out iter, pth);
         store.set (iter, 2, time.to_string(), -1);
     }
+
     void stop_reached (FrankenStein.FrankenStop stop, int stop_id) {
         btn_resume.sensitive = true;
         resume_wait_loop.run();
     }
+
     void on_btn_resume_clicked() {
         btn_resume.sensitive = false;
         resume_wait_loop.quit();
     }
+
     void on_btn_add_clicked() {
         TextIter iter_start;
         TextIter iter_end;
-        var focus_file = project.guanako_project.get_source_file_by_name (source_viewer.current_srcfocus);
+        /* Make sure current_srcfocus != null. */
+        var focus_file = project.guanako_project.get_source_file_by_name (
+                                                        source_viewer.current_srcfocus);
         int line_start, line_end;
         if (!source_viewer.current_srcbuffer.get_selection_bounds (out iter_start, out iter_end)) {
             var mark_insert = source_viewer.current_srcbuffer.get_insert();
@@ -114,14 +154,18 @@ class UiBreakpoints : UiElement {
             var new_stop = FrankenStein.FrankenStop() { file = focus_file,
                                                         line = iter_start.get_line() + 1};
             frankenstein.frankenstops.add (new_stop);
+            btn_remove.sensitive = true;
         } else {
             var new_timer = FrankenStein.FrankenTimer() { file = focus_file,
                                                           start_line = iter_start.get_line() + 1,
                                                           end_line = iter_end.get_line() + 1 };
             frankenstein.frankentimers.add (new_timer);
+            btn_remove.sensitive = true;
         }
+        //TODO: automatically select added entry
         build();
     }
+
     void on_btn_remove_clicked() {
         TreePath path;
         tree_view.get_cursor (out path, null);
@@ -133,10 +177,13 @@ class UiBreakpoints : UiElement {
         else
             frankenstein.frankenstops.remove_at (index - frankenstein.frankentimers.size);
 
+        if (frankenstein.frankentimers.size == 0 && frankenstein.frankenstops.size == 0)
+            btn_remove.sensitive = false;
+
+        //TODO: automatically select last entry or entry before removed entry
         build();
     }
 
-    ListStore store = null;
     public override void build() {
         debug_msg (_("Run %s update!\n"), element_name);
         store = new ListStore (3, typeof (string), typeof (string), typeof (string));
@@ -154,7 +201,12 @@ class UiBreakpoints : UiElement {
         foreach (Guanako.FrankenStein.FrankenTimer timer in frankenstein.frankentimers) {
             TreeIter next;
             store.append (out next);
-            store.set (next, 0, timer.start_line.to_string() + " - " + timer.end_line.to_string(), 1, timer.file.filename, -1);
+            store.set (next,
+                       0,
+                       timer.start_line.to_string() + " - " + timer.end_line.to_string(),
+                       1,
+                       project.get_relative_path (timer.file.filename),
+                       -1);
 
             var bfr = project.get_buffer_by_file (timer.file.filename);
             TextIter iter_start;
@@ -164,10 +216,16 @@ class UiBreakpoints : UiElement {
             bfr.create_source_mark (null, "timer", iter_start);
             bfr.create_source_mark (null, "timer", iter_end);
         }
+
         foreach (Guanako.FrankenStein.FrankenStop stop in frankenstein.frankenstops) {
             TreeIter next;
             store.append (out next);
-            store.set (next, 0, stop.line.to_string(), 1, stop.file.filename, -1);
+            store.set (next,
+                       0,
+                       stop.line.to_string(),
+                       1,
+                       project.get_relative_path (stop.file.filename),
+                       -1);
 
             var bfr = project.get_buffer_by_file (stop.file.filename);
             TextIter iter;

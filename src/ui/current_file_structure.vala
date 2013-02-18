@@ -55,7 +55,15 @@ public class UiCurrentFileStructure : UiElement {
         vbox.pack_start (chk_private_symbol, false, true);
 
         source_viewer.notify["current-srcbuffer"].connect(()=>{
-            build();
+            lock (store)
+                build();
+        });
+
+        //TODO: Update only on changes.
+        Timeout.add_seconds (2, () => {
+            lock (store)
+                build();
+            return false;
         });
 
         widget = vbox;
@@ -78,6 +86,9 @@ public class UiCurrentFileStructure : UiElement {
 
     TreeStore store;
     protected override void build() {
+        if (source_viewer.current_srcfocus == null)
+            return;
+
         map_iter_symbols = new Gee.HashMap<string, Symbol>();
         store = new TreeStore (2, typeof (string), typeof (Gdk.Pixbuf));
         tree_view.set_model (store);

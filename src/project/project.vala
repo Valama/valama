@@ -477,6 +477,11 @@ public class ValamaProject {
 
         bfr.changed.connect (() => {
             bfr.dirty = true;
+
+            /* Don't try to update non-source files. */
+            if (!(filename in files))
+                return;
+
             bfr.needs_guanako_update = true;
 
             /* Update after timeout */

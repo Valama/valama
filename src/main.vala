@@ -106,6 +106,8 @@ public static int main (string[] args) {
         errmsg (_("Pixmap loading failed: %s\n"), e.message);
     }
 
+    /* Keep sourceview before main window in order. */
+    //TODO: Fix this.
     source_viewer = new UiSourceViewer();
     window_main = new MainWindow();
     project_builder = new ProjectBuilder (project);
@@ -331,7 +333,7 @@ public static int main (string[] args) {
     window_main.add_item ("ReportWrapper", _("Report widget"), src_report,
                           Stock.INFO,
                           DockItemBehavior.CANT_CLOSE, //temporary solution until items can be added later
-                          //DockItemBehavior.NORMAL,
+                          //DockItemBehavior.NORMAL,  //TODO: change this behaviour for all widgets
                           DockPlacement.BOTTOM);
     window_main.add_item ("ProjectBrowser", _("Project browser"), pbrw.widget,
                           Stock.FILE,
@@ -355,8 +357,7 @@ public static int main (string[] args) {
                           DockPlacement.LEFT);
     window_main.add_item ("SymbolBrowser", _("Symbol browser"), src_symbol,
                           Stock.CONVERT,
-                          DockItemBehavior.CANT_CLOSE, //temporary solution until items can be added later
-                          //DockItemBehavior.NORMAL,
+                          DockItemBehavior.CANT_CLOSE,
                           DockPlacement.RIGHT);
     window_main.show_all();
 
@@ -487,6 +488,9 @@ class TestProvider : Gtk.SourceCompletionProvider, Object {
     }
 
     public void populate (Gtk.SourceCompletionContext context) {
+        //TODO: Provide way to get completion for not saved content.
+        if (source_viewer.current_srcfocus == _("New document"))
+            return;
 
         /* Get current line */
         var mark = source_viewer.current_srcbuffer.get_insert();
