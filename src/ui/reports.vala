@@ -41,17 +41,17 @@ class UiReport : UiElement {
 
         tree_view.row_activated.connect ((path) => {
             int index = path.get_indices()[0];
+            ReportWrapper.Error err;
             if (report.errors_list.size > index)
-                error_selected (report.errors_list[index]);
+                err = report.errors_list[index];
             else
-                error_selected (report.warnings_list[index - report.errors_list.size]);
+                err = report.warnings_list[index - report.errors_list.size];
+            source_viewer.jump_to_position (err.source.file.filename, err.source.begin.line - 1, 0);
         });
         tree_view.can_focus = false;
 
         widget = tree_view;
     }
-
-    public signal void error_selected (ReportWrapper.Error error);
 
     public override void build() {
         debug_msg (_("Run %s update!\n"), element_name);

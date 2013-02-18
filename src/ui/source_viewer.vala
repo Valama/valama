@@ -319,6 +319,20 @@ class UiSourceViewer : UiElement {
     }
 
     /**
+     * Set focus and insert mark to the given position
+     */
+    public void jump_to_position (string filename, int line, int col) {
+        focus_src (filename);
+        var srcbuffer = project.get_buffer_by_file (filename);
+        if (srcbuffer == null)
+            return;
+        TextIter titer;
+        srcbuffer.get_iter_at_line_offset (out titer, line, col);
+        srcbuffer.select_range (titer, titer);
+        get_sourceview_by_file (filename).scroll_to_iter (titer, 0.42, true, 0, 1.0);
+    }
+
+    /**
      * Get {@link Gtk.SourceView} by filename.
      *
      * @param filename Name of source file.

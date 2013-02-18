@@ -128,7 +128,6 @@ public static int main (string[] args) {
     project.guanako_project.set_report_wrapper (report_wrapper);
     wdg_report = new UiReport (report_wrapper);
     var wdg_breakpoints = new UiBreakpoints (frankenstein);
-    wdg_report.error_selected.connect (on_error_selected);
 
     ui_elements_pool.add (wdg_report);
 
@@ -425,26 +424,6 @@ static void redo_change() {
 //     current_source_file.content = indented;
 //     source_viewer.current_srcbuffer.text = indented;
 // }
-
-static void on_error_selected (ReportWrapper.Error err) {
-    on_file_selected (err.source.file.filename);
-
-    var bfr = project.get_buffer_by_file (err.source.file.filename);
-    if (bfr == null)
-        return;
-
-    TextIter start;
-    bfr.get_iter_at_line_offset (out start,
-                                 err.source.begin.line - 1,
-                                 err.source.begin.column - 1);
-    TextIter end;
-    bfr.get_iter_at_line_offset (out end,
-                                 err.source.end.line - 1,
-                                 err.source.end.column - 1);
-    bfr.select_range (start, end);
-    source_viewer.focus_src (err.source.file.filename);
-}
-
 
 static void on_file_selected (string filename) {
     if (source_viewer.current_srcfocus == filename)

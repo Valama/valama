@@ -79,12 +79,7 @@ public class UiCurrentFileStructure : UiElement {
         if (path == null)
             return;
         Symbol smb = map_iter_symbols[path.to_string()];
-        TextIter titer;
-        source_viewer.current_srcbuffer.get_iter_at_line_offset (out titer,
-                                     smb.source_reference.begin.line - 1,
-                                     0);
-        source_viewer.current_srcbuffer.select_range (titer, titer);
-        source_viewer.current_srcview.scroll_to_iter (titer, 0.42, true, 0, 1.0);
+        source_viewer.jump_to_position (source_viewer.current_srcfocus, smb.source_reference.begin.line - 1, 0);
     }
 
     protected override void build() {
@@ -106,7 +101,7 @@ public class UiCurrentFileStructure : UiElement {
                                                                         iter.get_line_offset());
         TreeIter? current_iter = null;
         foreach (CodeNode node in focus_file.get_nodes()) {
-            if (!(node is Namespace || node is Class || node is Subroutine || node is Vala.Signal || node is Variable))
+            if (!(node is Namespace || node is Class || node is Subroutine || node is Vala.Signal || node is Variable || node is Property))
                 continue;
 
             TreeIter parent;
@@ -118,7 +113,7 @@ public class UiCurrentFileStructure : UiElement {
 
             TreeIter[] iters = new TreeIter[0];
             Guanako.iter_symbol ((Symbol)node, (smb, depth) => {
-                if (smb.name != null && (smb is Namespace || smb is Class || smb is Subroutine || smb is Vala.Signal || smb is Variable)) {
+                if (smb.name != null && (smb is Namespace || smb is Class || smb is Subroutine || smb is Vala.Signal || smb is Variable || smb is Property)) {
                     if (smb.access == SymbolAccessibility.PRIVATE && !chk_private_symbol.active)
                         return Guanako.iter_callback_returns.abort_branch;
                     TreeIter next;
