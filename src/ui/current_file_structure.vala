@@ -28,6 +28,8 @@ public class UiCurrentFileStructure : UiElement {
     public Widget widget;
     TreeView tree_view;
     CheckButton chk_private_symbol;
+    Gee.HashMap<string, Symbol> map_iter_symbols = new Gee.HashMap<string, Symbol>();
+    TreeStore store;
 
     public UiCurrentFileStructure () {
         element_name = "CurrentFileStructure";
@@ -50,7 +52,8 @@ public class UiCurrentFileStructure : UiElement {
 
         chk_private_symbol = new CheckButton.with_label (_("Private"));
         chk_private_symbol.clicked.connect(() => {
-            build();
+            lock (store)
+                build();
         });
         vbox.pack_start (chk_private_symbol, false, true);
 
@@ -61,6 +64,7 @@ public class UiCurrentFileStructure : UiElement {
 
         //TODO: Update only on changes.
         Timeout.add_seconds (2, () => {
+            /* Lock all store changes to avoid race conditions. */
             lock (store)
                 build();
             return false;
@@ -82,9 +86,7 @@ public class UiCurrentFileStructure : UiElement {
         source_viewer.current_srcbuffer.select_range (titer, titer);
         source_viewer.current_srcview.scroll_to_iter (titer, 0.42, true, 0, 1.0);
     }
-    Gee.HashMap<string, Symbol> map_iter_symbols = new Gee.HashMap<string, Symbol>();
 
-    TreeStore store;
     protected override void build() {
         if (source_viewer.current_srcfocus == null)
             return;
