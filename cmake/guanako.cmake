@@ -8,6 +8,7 @@ set(required_pkgs
 "gee-1.0"
 "libvala-0.18"
 "libvala-0.20"
+"libxml-2.0"
 )
 set(srcfiles
 "guanako_auto_indent.vala"
@@ -16,6 +17,7 @@ set(srcfiles
 "guanako.vala"
 "guanako_vapi_discoverer.vala"
 "guanako_frankenstein.vala"
+"stylecheck.vala"
 )
 set(vapifiles
 "config.vapi"

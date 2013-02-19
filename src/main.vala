@@ -340,6 +340,7 @@ public static int main (string[] args) {
 
     var wdg_current_file_structure = new UiCurrentFileStructure();
     var wdg_search = new UiSearch();
+    var wdg_stylechecker = new UiStyleChecker();
 
     /* Init new empty buffer. */
     source_viewer.add_srcitem (project.open_new_buffer ("", "", true));
@@ -371,6 +372,10 @@ public static int main (string[] args) {
                           DockPlacement.LEFT);
     widget_main.add_item ("CurrentFileStructure", _("Current file"), wdg_current_file_structure.widget,
                           Stock.FILE,
+                          DockItemBehavior.CANT_CLOSE,
+                          DockPlacement.LEFT);
+    widget_main.add_item ("StyleChecker", _("Coding style checker"), wdg_stylechecker.widget,
+                          Stock.COLOR_PICKER,
                           DockItemBehavior.CANT_CLOSE,
                           DockPlacement.LEFT);
     widget_main.add_item ("SymbolBrowser", _("Symbol browser"), src_symbol,

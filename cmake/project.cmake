@@ -37,6 +37,7 @@ set(srcfiles
 "src/ui/symbol_browser.vala"
 "src/ui/ui_elements.vala"
 "src/ui_main.vala"
+"src/ui/stylechecker.vala"
 )
 set(vapifiles
 "vapi/config.vapi"

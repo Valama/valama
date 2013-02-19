@@ -16,6 +16,7 @@
                 <item name="BuildOutput" orientation="vertical" locked="no" iconified="no" closed="no"/>
                 <item name="Breakpoints" orientation="vertical" locked="no" iconified="no" closed="no"/>
                 <item name="Search" orientation="vertical" locked="no" iconified="no" closed="no"/>
+                <item name="StyleChecker" orientation="vertical" locked="no" iconified="no" closed="no"/>
               </notebook>
             </paned>
           </paned>

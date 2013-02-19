@@ -101,7 +101,13 @@ public class UiCurrentFileStructure : UiElement {
                                                                         iter.get_line_offset());
         TreeIter? current_iter = null;
         foreach (CodeNode node in focus_file.get_nodes()) {
-            if (!(node is Namespace || node is Class || node is Subroutine || node is Vala.Signal || node is Variable || node is Property))
+            if (!(node is Namespace ||
+                  node is Class ||
+                  node is TypeSymbol ||
+                  node is Subroutine ||
+                  node is Vala.Signal ||
+                  node is Variable ||
+                  node is Property))
                 continue;
 
             TreeIter parent;
@@ -113,7 +119,14 @@ public class UiCurrentFileStructure : UiElement {
 
             TreeIter[] iters = new TreeIter[0];
             Guanako.iter_symbol ((Symbol)node, (smb, depth, typename) => {
-                if (smb.name != null && (smb is Namespace || smb is Class || smb is Subroutine || smb is Vala.Signal || smb is Variable || smb is Property)) {
+                if (smb.name != null && (smb is Namespace ||
+                                         smb is Class ||
+                                         smb is TypeSymbol ||
+                                         smb is Subroutine ||
+                                         smb is Vala.Signal ||
+                                         smb is Variable ||
+                                         smb is Property ||
+                                         smb is Constant)) {
                     if (smb.access == SymbolAccessibility.PRIVATE && !chk_private_symbol.active)
                         return Guanako.IterCallbackReturns.ABORT_BRANCH;
                     TreeIter next;
