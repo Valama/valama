@@ -445,15 +445,20 @@ public static int main (string[] args) {
 }
 
 static Gdk.Pixbuf? get_pixbuf_for_symbol (Symbol symbol) {
-    if (symbol is Namespace)   return map_icons["namespace"];
-    else if (symbol is Property)    return map_icons["property"];
-    else if (symbol is Struct)      return map_icons["struct"];
-    else if (symbol is Method)      return map_icons["method"];
-    else if (symbol is Variable)    return map_icons["field"];
-    else if (symbol is Enum)        return map_icons["enum"];
-    else if (symbol is Class)       return map_icons["class"];
-    else if (symbol is Constant)    return map_icons["constant"];
-    else if (symbol is Vala.Signal) return map_icons["signal"];
+    if (symbol is Class)        return map_icons["class"];
+    if (symbol is Constant)     return map_icons["constant"];
+    if (symbol is Delegate)     return map_icons["delegate"];
+    if (symbol is Enum)         return map_icons["enum"];
+    if (symbol is Vala.EnumValue) return map_icons["enum_value"];
+    if (symbol is ErrorCode)    return map_icons["error_code"];
+    if (symbol is ErrorDomain)  return map_icons["error_domain"];
+    if (symbol is Variable)     return map_icons["field"];
+    if (symbol is Interface)    return map_icons["interface"];
+    if (symbol is Method)       return map_icons["method"];
+    if (symbol is Namespace)    return map_icons["namespace"];
+    if (symbol is Property)     return map_icons["property"];
+    if (symbol is Vala.Signal)  return map_icons["signal"];
+    if (symbol is Struct)       return map_icons["struct"];
     return null;
 }
 
