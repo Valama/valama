@@ -151,11 +151,18 @@ public ValamaProject? ui_create_project_dialog() {
                           CopyRecursiveFlags.SKIP_EXISTENT).move();
 
         //TODO: Do this with cmake buildsystem plugin.
-        string buildsystem_path = Path.build_path (Path.DIR_SEPARATOR_S,
-                                                   Config.PACKAGE_DATA_DIR,
-                                                   "buildsystems",
-                                                   "cmake",
-                                                   "buildsystem");
+        string buildsystem_path;
+        if (Args.buildsystemsdir == null)
+            buildsystem_path = Path.build_path (Path.DIR_SEPARATOR_S,
+                                                Config.PACKAGE_DATA_DIR,
+                                                "buildsystems",
+                                                "cmake",
+                                                "buildsystem");
+        else
+            buildsystem_path = Path.build_path (Path.DIR_SEPARATOR_S,
+                                                Args.buildsystemsdir,
+                                                "cmake",
+                                                "buildsystem");
         new FileTransfer (buildsystem_path,
                           target_folder,
                           CopyRecursiveFlags.SKIP_EXISTENT).copy();

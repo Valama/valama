@@ -69,7 +69,7 @@ public static int main (string[] args) {
 
     try {
         if (Args.projectfiles.length > 0)
-            project = new ValamaProject (Args.projectfiles[0]);
+            project = new ValamaProject (Args.projectfiles[0], Args.syntaxfile);
         else {
             project = ui_create_project_dialog();
             if (project == null)
@@ -106,10 +106,9 @@ public static int main (string[] args) {
         errmsg (_("Pixmap loading failed: %s\n"), e.message);
     }
 
-    /* Keep sourceview before main window in order. */
-    //TODO: Fix this.
-    source_viewer = new UiSourceViewer();
     window_main = new MainWindow();
+
+    source_viewer = new UiSourceViewer();
     project_builder = new ProjectBuilder (project);
     frankenstein = new Guanako.FrankenStein();
     var build_output = new BuildOutput();
@@ -254,8 +253,8 @@ public static int main (string[] args) {
     target_selector.append_text (_("Debug"));
     target_selector.append_text (_("Release"));
     target_selector.active = 0;
-    target_selector.changed.connect (()=>{
-        window_main.IDEmode = (IDEmodes)target_selector.active;
+    target_selector.changed.connect (() => {
+        project.idemode = (IdeModes) target_selector.active;
     });
     window_main.add_button (ti);
 
@@ -264,10 +263,17 @@ public static int main (string[] args) {
     btnBuild.set_tooltip_text (_("Save current file and build project"));
     btnBuild.clicked.connect (() => {
         build_output.clear();
-        if (window_main.IDEmode == IDEmodes.RELEASE)
-            project_builder.build_project();
-        else if (window_main.IDEmode == IDEmodes.DEBUG)
-            project_builder.build_project (frankenstein);
+        switch (project.idemode) {
+            case IdeModes.RELEASE:
+                project_builder.build_project();
+                break;
+            case IdeModes.DEBUG:
+                project_builder.build_project (frankenstein);
+                break;
+            default:
+                bug_msg (_("Unknown IDE mode: %s\n"), project.idemode.to_string());
+                break;
+        }
     });
 
     var btnRun = new Gtk.ToolButton.from_stock (Stock.MEDIA_PLAY);
@@ -329,6 +335,11 @@ public static int main (string[] args) {
 
     /* Init new empty buffer. */
     source_viewer.add_srcitem (project.open_new_buffer ("", "", true));
+    window_main.add_item ("SourceView", _("Source view"), source_viewer.widget,
+                          null,
+                          DockItemBehavior.NO_GRIP | DockItemBehavior.CANT_DOCK_CENTER |
+                                DockItemBehavior.CANT_CLOSE,
+                          DockPlacement.TOP);
     window_main.add_item ("ReportWrapper", _("Report widget"), src_report,
                           Stock.INFO,
                           DockItemBehavior.CANT_CLOSE, //temporary solution until items can be added later
@@ -361,10 +372,14 @@ public static int main (string[] args) {
     window_main.show_all();
 
     /* Load default layout. Either local one or system wide. */
-    string local_layout_filename = Path.build_path (Path.DIR_SEPARATOR_S,
-                                                    Environment.get_user_cache_dir(),
-                                                    "valama",
-                                                    "layout.xml");
+    string local_layout_filename;
+    if (Args.layoutfile == null)
+        local_layout_filename = Path.build_path (Path.DIR_SEPARATOR_S,
+                                                 Environment.get_user_cache_dir(),
+                                                 "valama",
+                                                 "layout.xml");
+    else
+        local_layout_filename = Args.layoutfile;
     string system_layout_filename = Path.build_path (Path.DIR_SEPARATOR_S,
                                                      Config.PACKAGE_DATA_DIR,
                                                      "layout.xml");

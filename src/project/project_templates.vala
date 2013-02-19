@@ -37,9 +37,13 @@ public ProjectTemplate[] load_templates (string language) {
     FileInfo file_info;
     ProjectTemplate[] ret = new ProjectTemplate[0];
 
-    var dirpath = Path.build_path (Path.DIR_SEPARATOR_S,
+    string dirpath;
+    if (Args.templatesdir == null)
+        dirpath = Path.build_path (Path.DIR_SEPARATOR_S,
                                    Config.PACKAGE_DATA_DIR,
                                    "templates");
+    else
+        dirpath = Args.templatesdir;
     var directory = File.new_for_path (dirpath);
     try {
         var enumerator = directory.enumerate_children (FileAttribute.STANDARD_NAME, 0);

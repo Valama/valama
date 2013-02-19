@@ -4,10 +4,10 @@ set(soversion "1")
 set(required_pkgs
 "gobject-2.0"
 "glib-2.0"
+"gio-2.0"
 "gee-1.0"
 "libvala-0.18"
 "libvala-0.20"
-"gtk+-3.0"
 )
 set(srcfiles
 "guanako_auto_indent.vala"

@@ -18,7 +18,6 @@
  */
 
 using GLib;
-using Gtk;
 using Vala;
 
 namespace Guanako {

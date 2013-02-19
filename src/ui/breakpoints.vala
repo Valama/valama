@@ -94,9 +94,8 @@ class UiBreakpoints : UiElement {
 
         box_main.pack_start (toolbar, false, true);
 
-        window_main.IDEmode_changed.connect(()=>{
-            var active = window_main.IDEmode == IDEmodes.DEBUG;
-            box_main.sensitive = active;
+        project.notify["idemode"].connect(() => {
+            box_main.sensitive = project.idemode == IdeModes.DEBUG;
         });
 
         source_viewer.notify["current-srcbuffer"].connect (() => {

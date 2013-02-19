@@ -34,7 +34,14 @@ If you want to use a newer version of `libvala`, change  `cmake/project.cmake` a
  1. `make -j2`
 
 ### Installation ###
- 1. `sudo make install` (real installation is required for syntax definitions and templates)
+ 1. `sudo make install`
+
+#### Local installation ####
+Build Valama then run with following options directly from build directory:
+
+    ./valama --syntax ../guanako/data/syntax --templates ../data/templates --buildsystems ../data/buildsystems [FILE]
+
+Optionally use `--layout ../data/layout.xml` to use standard layout.
 
 
 ## Packaging files for distributions ##

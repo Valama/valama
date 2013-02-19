@@ -21,14 +21,22 @@ using GLib;
 
 namespace Args {
     public bool version = false;
+    public string? syntaxfile = null;
+    public string? templatesdir = null;
+    public string? buildsystemsdir = null;
     public bool debug = false;
+    public string? layoutfile = null;
     public bool reset_layout = false;
     [CCode (array_length = false, array_null_terminated = true)]
     public string[]? projectfiles = null;
 
     private const OptionEntry[] options = {
         {"version", 'v', 0, OptionArg.NONE, ref version, N_("Display version number."), null},
+        {"syntax", 0, 0, OptionArg.FILENAME, ref syntaxfile, N_("Guanako syntax file."), N_("FILE")},
+        {"templates", 0, 0, OptionArg.FILENAME, ref templatesdir, N_("Templates directory."), N_("DIRECTORY")},
+        {"buildsystems", 0, 0, OptionArg.FILENAME, ref buildsystemsdir, N_("Buildsystems directory."), N_("DIRECTORY")},
         {"debug", 'd', 0, OptionArg.NONE, ref debug, N_("Output debug information."), null},
+        {"layout", 0, 0, OptionArg.FILENAME, ref layoutfile, N_("Path to layout file."), N_("FILE")},
         {"reset-layout", 0, 0, OptionArg.NONE, ref reset_layout, N_("Load default layout."), null},
         {"", 0, 0, OptionArg.FILENAME_ARRAY, ref projectfiles, N_("Load project from file."), N_("[FILE...]")},
         {null}

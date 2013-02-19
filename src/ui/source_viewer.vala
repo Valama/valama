@@ -26,34 +26,22 @@ using Gee;
  * Report build status and code warnings/errors.
  */
 class UiSourceViewer : UiElement {
-
-    public UiSourceViewer() {
-        this.srcdock.master.switcher_style = SwitcherStyle.TABS;
-        this.srclayout = new DockLayout (this.srcdock);
-        var box = new Box (Orientation.HORIZONTAL, 0);
-        box.pack_end (this.srcdock);
-
-        /* Don't make source view dockable. */
-        dock_item = new DockItem ("SourceView",  _("Source"),
-                                    DockItemBehavior.NO_GRIP |
-                                    DockItemBehavior.CANT_DOCK_CENTER);
-        dock_item.add (box);
-    }
-    public DockItem dock_item;
+    /**
+     * Master widget to connect with parent widgets.
+     */
+    public Box widget { get; private set; }
     /**
      * Source code dock.
      */
-    private Dock srcdock = new Dock();
+    private Dock srcdock;
     /**
      * Layout of source code dock {@link srcdock}.
      */
     private DockLayout srclayout;
-
     /**
      * List of all {@link DockItem} objects in source dock {@link srcdock}.
      */
     private ArrayList<DockItem> srcitems = new ArrayList<DockItem>();
-
 
     private string? _current_srcfocus = null;
     /**
@@ -87,6 +75,18 @@ class UiSourceViewer : UiElement {
      * Currently selected {@link SourceBuffer}.
      */
     public SourceBuffer? current_srcbuffer { get; private set; default = null; }
+
+    /**
+     * Create source viewer object and initialize {@link Gdl.Dock}.
+     */
+    public UiSourceViewer() {
+        srcdock = new Dock();
+        this.srcdock.master.switcher_style = SwitcherStyle.TABS;
+        this.srclayout = new DockLayout (this.srcdock);
+
+        widget = new Box (Orientation.HORIZONTAL, 0);
+        widget.pack_end (this.srcdock);
+    }
 
     /**
      * Focus source view {@link Gdl.DockItem} in {@link Gdl.Dock} and select
@@ -320,6 +320,10 @@ class UiSourceViewer : UiElement {
 
     /**
      * Set focus and insert mark to the given position
+     *
+     * @param filename Name of file to switch to.
+     * @param line Line where to jump.
+     * @param col Column where to jump.
      */
     public void jump_to_position (string filename, int line, int col) {
         focus_src (filename);

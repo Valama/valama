@@ -92,7 +92,7 @@ namespace Guanako {
             context.report = report_wrapper;
         }
 
-        public Project() {
+        public Project (string? filename = null) throws IOError, Error {
             context = new CodeContext();
             parser = new Vala.Parser();
             packages = new Gee.TreeSet<string>();
@@ -103,7 +103,7 @@ namespace Guanako {
             universal_parameter = new CallParameter();
             universal_parameter.name = "@";
 
-            build_syntax_map();
+            build_syntax_map (filename);
         }
 
         /**
@@ -225,43 +225,38 @@ namespace Guanako {
             CodeContext.pop();
         }
 
-        void build_syntax_map() {
-            var file = File.new_for_path (Path.build_path (Path.DIR_SEPARATOR_S,
-                                                           Config.PACKAGE_DATA_DIR,
-                                                           "syntax"));
-            try {
-                var dis = new DataInputStream (file.read());
-                string line;
-                while ((line = dis.read_line (null)) != null) {
-                    if (line.strip() == "" || line.has_prefix ("#"))
-                        continue;
+        void build_syntax_map (string? filename = null) throws IOError, Error {
+            string fname;
+            if (filename == null)
+                fname = Path.build_path (Path.DIR_SEPARATOR_S,
+                                         Config.PACKAGE_DATA_DIR,
+                                         "syntax");
+            else
+                fname = filename;
+            debug_msg (_("Load syntax file: %s\n"), fname);
+            var file = File.new_for_path (fname);
+            var dis = new DataInputStream (file.read());
+            string line;
+            while ((line = dis.read_line (null)) != null) {
+                if (line.strip() == "" || line.has_prefix ("#"))
+                    continue;
 
-                    string[] rule_line_split = dis.read_line (null).split (" ");
-                    RuleExpression[] rule_exprs = new RuleExpression[rule_line_split.length];
-                    for (int q = 0; q < rule_line_split.length; q++) {
-                        rule_exprs[q] = new RuleExpression();
-                        rule_exprs[q].expr = rule_line_split[q];
-                    }
-
-                    string[] namesplit = line.split_set (" :,");
-
-                    string[] parameters = new string[0];
-                    foreach (string splt in namesplit[1:namesplit.length])
-                        if (splt != "")
-                            parameters += splt;
-
-                    map_syntax[namesplit[0]] = new SyntaxRule (parameters, rule_exprs);
+                string[] rule_line_split = dis.read_line (null).split (" ");
+                RuleExpression[] rule_exprs = new RuleExpression[rule_line_split.length];
+                for (int q = 0; q < rule_line_split.length; q++) {
+                    rule_exprs[q] = new RuleExpression();
+                    rule_exprs[q].expr = rule_line_split[q];
                 }
-            } catch (IOError e) {
-                stderr.printf (_("Could not read syntax file: %s"), e.message);
-                Gtk.main_quit();
-                // return 1;
-            } catch (Error e) {
-                stderr.printf (_("An error occured: %s"), e.message);
-                Gtk.main_quit();
-                // return 1;
-            }
 
+                string[] namesplit = line.split_set (" :,");
+
+                string[] parameters = new string[0];
+                foreach (string splt in namesplit[1:namesplit.length])
+                    if (splt != "")
+                        parameters += splt;
+
+                map_syntax[namesplit[0]] = new SyntaxRule (parameters, rule_exprs);
+            }
         }
 
         class SyntaxRule {
@@ -995,19 +990,19 @@ namespace Guanako {
                 Vala.CodeContext.pop();
             }
         }
-
-        /**
-         * Print debug information if {@link debug} is true.
-         *
-         * @param format Format string.
-         * @param ... Arguments for format string.
-         */
-        private void debug_msg (string format, ...) {
-            if (debug)
-                stdout.printf (format.vprintf (va_list()));
-
-        }
      }
+
+    /**
+     * Print debug information if {@link debug} is true.
+     *
+     * @param format Format string.
+     * @param ... Arguments for format string.
+     */
+    private void debug_msg (string format, ...) {
+        if (debug)
+            stdout.printf (format.vprintf (va_list()));
+
+    }
 }
 
 // vim: set ai ts=4 sts=4 et sw=4

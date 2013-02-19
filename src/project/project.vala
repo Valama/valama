@@ -30,9 +30,18 @@ using Pango;
 const string VLP_VERSION_MIN = "0.1";
 
 /**
+ * IDE modes on which plugins can decide how to do some tasks.
+ */
+public enum IdeModes {
+    DEBUG   = 0,
+    RELEASE = 1
+}
+
+
+/**
  * Valama project application.
  */
-public class ValamaProject {
+public class ValamaProject : Object {
     /**
      * Attached Guanako project to provide code completion.
      */
@@ -96,6 +105,10 @@ public class ValamaProject {
      * Version of .vlp file
      */
     public string project_file_version { get; private set; default = "0"; }
+    /**
+     * Identifier to provide context state to plugins.
+     */
+    public IdeModes idemode { get; set; default = IdeModes.DEBUG; }
 
     /**
      * List of source files.
@@ -126,14 +139,24 @@ public class ValamaProject {
      * Create {@link ValamaProject} and load it from project file.
      *
      * @param project_file Load project from this file.
+     * @param syntaxfile Load Guanako syntax definitions from this file.
      * @throws LoadingError Throw on error while loading project file.
      */
-    public ValamaProject (string project_file) throws LoadingError {
+    public ValamaProject (string project_file, string? syntaxfile = null) throws LoadingError {
         var proj_file = File.new_for_path (project_file);
         this.project_file = proj_file.get_path();
         project_path = proj_file.get_parent().get_path(); //TODO: Check valid path?
 
-        guanako_project = new Guanako.Project();
+        try {
+            guanako_project = new Guanako.Project (syntaxfile);
+        } catch (GLib.IOError e) {
+            stderr.printf (_("Could not read syntax file: %s"), e.message);
+            Gtk.main_quit();
+        } catch (GLib.Error e) {
+            stderr.printf (_("An error occured: %s"), e.message);
+            Gtk.main_quit();
+        }
+
         files = new Gee.TreeSet<string>();
         b_files = new Gee.TreeSet<string>();
 
@@ -393,10 +416,14 @@ public class ValamaProject {
 
     /**
      * Emit when undo flag of current {@link SourceBuffer} has changed.
+     *
+     * @param undo_possibility True if undo is possible.
      */
     public signal void undo_changed (bool undo_possibility);
     /**
      * Emit when redo flag of current {@link SourceBuffer} has changed.
+     *
+     * @param redo_possibility True if redo is possible.
      */
     public signal void redo_changed (bool redo_possibility);
 
@@ -516,7 +543,13 @@ public class ValamaProject {
         return view;
     }
 
-    void update_guanako (SourceBuffer buffer) {
+    /**
+     * Update Guanako completion proposals for buffer and run update for
+     * current sourcefocus.
+     *
+     * @param buffer {@link Gtk.SourceBuffer} to look for completions.
+     */
+    private void update_guanako (SourceBuffer buffer) {
         parsing = true;
         buffer.needs_guanako_update = false;
         try {
