@@ -25,7 +25,7 @@ using Gee;
 /**
  * Main window class. Setup {@link Gdl.Dock} and {@link Gdl.DockBar} stuff.
  */
-public class MainWindow : Window {
+public class MainWidget : Box {
     /**
      * Master dock for all items except tool and menubar.
      */
@@ -46,24 +46,19 @@ public class MainWindow : Window {
     /**
      * Global shortcut object.
      */
-    private AccelGroup accel_group;
+    public AccelGroup accel_group;
 
     /**
      * Create MainWindow. Initialize menubar, toolbar, master dock and source
      * dock.
      */
-    public MainWindow() {
+    public MainWidget() {
         this.destroy.connect (main_quit);
-        this.title = _("Valama");
-        this.hide_titlebar_when_maximized = true;
-        this.set_default_size (1200, 600);
-        this.maximize();
 
         accel_group = new AccelGroup();
-        this.add_accel_group (accel_group);
 
         var vbox_main = new Box (Orientation.VERTICAL, 0);
-        this.add (vbox_main);
+        this.pack_start (vbox_main, true, true);
 
         /* Menubar. */
         this.menubar = new MenuBar();

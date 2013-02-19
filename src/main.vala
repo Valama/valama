@@ -23,7 +23,8 @@ using Vala;
 using GLib;
 using Guanako;
 
-static MainWindow window_main;
+static Window window_main;
+static MainWidget widget_main;
 
 static ValamaProject project;
 static Guanako.FrankenStein frankenstein;
@@ -106,7 +107,14 @@ public static int main (string[] args) {
         errmsg (_("Pixmap loading failed: %s\n"), e.message);
     }
 
-    window_main = new MainWindow();
+    window_main = new Window();
+    widget_main = new MainWidget();
+    window_main.add (widget_main);
+    window_main.title = _("Valama");
+    window_main.hide_titlebar_when_maximized = true;
+    window_main.set_default_size (1200, 600);
+    window_main.maximize();
+    window_main.add_accel_group (widget_main.accel_group);
 
     source_viewer = new UiSourceViewer();
     project_builder = new ProjectBuilder (project);
@@ -133,7 +141,7 @@ public static int main (string[] args) {
     /* Menu */
     /* File */
     var item_file = new Gtk.MenuItem.with_mnemonic ("_" + _("File"));
-    window_main.add_menu (item_file);
+    widget_main.add_menu (item_file);
 
     var menu_file = new Gtk.Menu();
     item_file.set_submenu (menu_file);
@@ -141,14 +149,14 @@ public static int main (string[] args) {
     var item_new = new ImageMenuItem.from_stock (Stock.NEW, null);
     menu_file.append (item_new);
     item_new.activate.connect (create_new_file);
-    window_main.add_accel_activate (item_new, "n");
+    widget_main.add_accel_activate (item_new, "n");
 
     var item_open = new ImageMenuItem.from_stock (Stock.OPEN, null);
     menu_file.append (item_open);
     item_open.activate.connect (() => {
         ui_load_project (ui_elements_pool);
     });
-    window_main.add_accel_activate (item_open, "o");
+    widget_main.add_accel_activate (item_open, "o");
 
     var item_save = new ImageMenuItem.from_stock (Stock.SAVE, null);
     menu_file.append (item_save);
@@ -156,18 +164,18 @@ public static int main (string[] args) {
         project.buffer_save();
     });
     project.buffer_changed.connect (item_save.set_sensitive);
-    window_main.add_accel_activate (item_save, "s");
+    widget_main.add_accel_activate (item_save, "s");
 
     menu_file.append (new SeparatorMenuItem());
 
     var item_quit = new ImageMenuItem.from_stock (Stock.QUIT, null);
     menu_file.append (item_quit);
     item_quit.activate.connect (main_quit);
-    window_main.add_accel_activate (item_quit, "q");
+    widget_main.add_accel_activate (item_quit, "q");
 
     /* Edit */
     var item_edit = new Gtk.MenuItem.with_mnemonic ("_" + _("Edit"));
-    window_main.add_menu (item_edit);
+    widget_main.add_menu (item_edit);
     var menu_edit = new Gtk.Menu();
     item_edit.set_submenu (menu_edit);
 
@@ -176,28 +184,28 @@ public static int main (string[] args) {
     menu_edit.append (item_undo);
     item_undo.activate.connect (undo_change);
     project.undo_changed.connect (item_undo.set_sensitive);
-    window_main.add_accel_activate (item_undo, "u");
+    widget_main.add_accel_activate (item_undo, "u");
 
     var item_redo = new ImageMenuItem.from_stock (Stock.REDO, null);
     item_redo.set_sensitive (false);
     menu_edit.append (item_redo);
     item_redo.activate.connect (redo_change);
     project.redo_changed.connect (item_redo.set_sensitive);
-    window_main.add_accel_activate (item_redo, "r");
+    widget_main.add_accel_activate (item_redo, "r");
 
     /* View */
     var item_view = new Gtk.MenuItem.with_mnemonic ("_" + _("View"));
     item_view.set_sensitive (false);
-    window_main.add_menu (item_view);
+    widget_main.add_menu (item_view);
 
     /* Project */
     var item_project = new Gtk.MenuItem.with_mnemonic ("_" + _("Project"));
     item_project.set_sensitive (false);
-    window_main.add_menu (item_project);
+    widget_main.add_menu (item_project);
 
     /* Help */
     var item_help = new Gtk.MenuItem.with_mnemonic ("_" + _("Help"));
-    window_main.add_menu (item_help);
+    widget_main.add_menu (item_help);
 
     var menu_help = new Gtk.Menu();
     item_help.set_submenu (menu_help);
@@ -209,42 +217,42 @@ public static int main (string[] args) {
 
     /* Buttons. */
     var btnNewFile = new ToolButton.from_stock (Stock.NEW);
-    window_main.add_button (btnNewFile);
+    widget_main.add_button (btnNewFile);
     btnNewFile.set_tooltip_text (_("Create new file"));
     btnNewFile.clicked.connect (create_new_file);
 
     var btnLoadProject = new ToolButton.from_stock (Stock.OPEN);
-    window_main.add_button (btnLoadProject);
+    widget_main.add_button (btnLoadProject);
     btnLoadProject.set_tooltip_text (_("Open project"));
     btnLoadProject.clicked.connect (() => {
         ui_load_project (ui_elements_pool);
     });
 
     var btnSave = new ToolButton.from_stock (Stock.SAVE);
-    window_main.add_button (btnSave);
+    widget_main.add_button (btnSave);
     btnSave.set_tooltip_text (_("Save current file"));
     btnSave.clicked.connect (() => {
         project.buffer_save();
     });
     project.buffer_changed.connect (btnSave.set_sensitive);
 
-    window_main.add_button (new SeparatorToolItem());
+    widget_main.add_button (new SeparatorToolItem());
 
     var btnUndo = new ToolButton.from_stock (Stock.UNDO);
     btnUndo.set_sensitive (false);
-    window_main.add_button (btnUndo);
+    widget_main.add_button (btnUndo);
     btnUndo.set_tooltip_text (_("Undo last change"));
     btnUndo.clicked.connect (undo_change);
     project.undo_changed.connect (btnUndo.set_sensitive);
 
     var btnRedo = new ToolButton.from_stock (Stock.REDO);
     btnRedo.set_sensitive (false);
-    window_main.add_button (btnRedo);
+    widget_main.add_button (btnRedo);
     btnRedo.set_tooltip_text (_("Redo last change"));
     btnRedo.clicked.connect (redo_change);
     project.redo_changed.connect (btnRedo.set_sensitive);
 
-    window_main.add_button (new SeparatorToolItem());
+    widget_main.add_button (new SeparatorToolItem());
 
     var target_selector = new ComboBoxText();
     target_selector.set_tooltip_text (_("IDE mode"));
@@ -256,10 +264,10 @@ public static int main (string[] args) {
     target_selector.changed.connect (() => {
         project.idemode = (IdeModes) target_selector.active;
     });
-    window_main.add_button (ti);
+    widget_main.add_button (ti);
 
     var btnBuild = new Gtk.ToolButton.from_stock (Stock.EXECUTE);
-    window_main.add_button (btnBuild);
+    widget_main.add_button (btnBuild);
     btnBuild.set_tooltip_text (_("Save current file and build project"));
     btnBuild.clicked.connect (() => {
         build_output.clear();
@@ -277,7 +285,7 @@ public static int main (string[] args) {
     });
 
     var btnRun = new Gtk.ToolButton.from_stock (Stock.MEDIA_PLAY);
-    window_main.add_button (btnRun);
+    widget_main.add_button (btnRun);
     btnRun.set_tooltip_text (_("Run application"));
     btnRun.clicked.connect (() => {
         if (project_builder.app_running)
@@ -292,7 +300,7 @@ public static int main (string[] args) {
             btnRun.stock_id = Stock.MEDIA_PLAY;
     });
 
-    window_main.add_button (new SeparatorToolItem());
+    widget_main.add_button (new SeparatorToolItem());
 
     /*
     var btnAutoIndent = new Gtk.ToolButton.from_stock (Stock.REFRESH);
@@ -302,7 +310,7 @@ public static int main (string[] args) {
     */
 
     var btnSettings = new Gtk.ToolButton.from_stock (Stock.PREFERENCES);
-    window_main.add_button (btnSettings);
+    widget_main.add_button (btnSettings);
     btnSettings.set_tooltip_text (_("Settings"));
     btnSettings.clicked.connect (() => {
         ui_project_dialog (project);
@@ -335,37 +343,37 @@ public static int main (string[] args) {
 
     /* Init new empty buffer. */
     source_viewer.add_srcitem (project.open_new_buffer ("", "", true));
-    window_main.add_item ("SourceView", _("Source view"), source_viewer.widget,
+    widget_main.add_item ("SourceView", _("Source view"), source_viewer.widget,
                           null,
                           DockItemBehavior.NO_GRIP | DockItemBehavior.CANT_DOCK_CENTER |
                                 DockItemBehavior.CANT_CLOSE,
                           DockPlacement.TOP);
-    window_main.add_item ("ReportWrapper", _("Report widget"), src_report,
+    widget_main.add_item ("ReportWrapper", _("Report widget"), src_report,
                           Stock.INFO,
                           DockItemBehavior.CANT_CLOSE, //temporary solution until items can be added later
                           //DockItemBehavior.NORMAL,  //TODO: change this behaviour for all widgets
                           DockPlacement.BOTTOM);
-    window_main.add_item ("ProjectBrowser", _("Project browser"), pbrw.widget,
+    widget_main.add_item ("ProjectBrowser", _("Project browser"), pbrw.widget,
                           Stock.FILE,
                           DockItemBehavior.CANT_CLOSE,
                           DockPlacement.LEFT);
-    window_main.add_item ("BuildOutput", _("Build output"), build_output.widget,
+    widget_main.add_item ("BuildOutput", _("Build output"), build_output.widget,
                           Stock.FILE,
                           DockItemBehavior.CANT_CLOSE,
                           DockPlacement.LEFT);
-    window_main.add_item ("Search", _("Search"), wdg_search.widget,
+    widget_main.add_item ("Search", _("Search"), wdg_search.widget,
                           Stock.FIND,
                           DockItemBehavior.CANT_CLOSE,
                           DockPlacement.LEFT);
-    window_main.add_item ("Breakpoints", _("Breakpoints / Timers"), wdg_breakpoints.widget,
+    widget_main.add_item ("Breakpoints", _("Breakpoints / Timers"), wdg_breakpoints.widget,
                           Stock.FILE,
                           DockItemBehavior.CANT_CLOSE,
                           DockPlacement.LEFT);
-    window_main.add_item ("CurrentFileStructure", _("Current file"), wdg_current_file_structure.widget,
+    widget_main.add_item ("CurrentFileStructure", _("Current file"), wdg_current_file_structure.widget,
                           Stock.FILE,
                           DockItemBehavior.CANT_CLOSE,
                           DockPlacement.LEFT);
-    window_main.add_item ("SymbolBrowser", _("Symbol browser"), src_symbol,
+    widget_main.add_item ("SymbolBrowser", _("Symbol browser"), src_symbol,
                           Stock.CONVERT,
                           DockItemBehavior.CANT_CLOSE,
                           DockPlacement.RIGHT);
@@ -383,8 +391,8 @@ public static int main (string[] args) {
     string system_layout_filename = Path.build_path (Path.DIR_SEPARATOR_S,
                                                      Config.PACKAGE_DATA_DIR,
                                                      "layout.xml");
-    if (Args.reset_layout || !window_main.load_layout (local_layout_filename))
-        window_main.load_layout (system_layout_filename);
+    if (Args.reset_layout || !widget_main.load_layout (local_layout_filename))
+        widget_main.load_layout (system_layout_filename);
 
     Gtk.main();
 
@@ -395,7 +403,7 @@ public static int main (string[] args) {
         } catch (GLib.Error e) {
             errmsg (_("Couldn't create cache directory: %s\n"), e.message);
         }
-    window_main.save_layout (local_layout_filename);
+    widget_main.save_layout (local_layout_filename);
     project.save();
     return 0;
 }
