@@ -102,33 +102,45 @@ public class UiCurrentFileStructure : UiElement {
         TreeIter? current_iter = null;
         foreach (CodeNode node in focus_file.get_nodes()) {
             if (!(node is Namespace ||
-                  node is Class ||
-                  node is TypeSymbol ||
-                  node is Subroutine ||
+                  node is Property ||
                   node is Vala.Signal ||
+                  node is Subroutine ||
                   node is Variable ||
-                  node is Property))
+                  node is TypeSymbol))
                 continue;
 
             TreeIter parent;
             store.append (out parent, null);
-            store.set (parent, 0, ((Symbol)node).name, 1, get_pixbuf_for_symbol ((Symbol)node), -1);
+
+            Gdk.Pixbuf? pbuf;
+            if (node is ErrorDomain)
+                pbuf = get_pixbuf_by_name ("error_domain");
+            else
+                pbuf = get_pixbuf_for_symbol ((Symbol) node);
+
+            store.set (parent, 0, ((Symbol)node).name, 1, pbuf, -1);
             map_iter_symbols[store.get_path(parent).to_string()] = (Symbol)node;
             if (node == current_symbol)
                 current_iter = parent;
 
             TreeIter[] iters = new TreeIter[0];
-            Guanako.iter_symbol ((Symbol)node, (smb, depth, typename) => {
-                if (smb.name != null && (smb is Namespace ||
-                                         smb is Class ||
-                                         smb is TypeSymbol ||
-                                         smb is Subroutine ||
-                                         smb is Vala.Signal ||
-                                         smb is Variable ||
+            Guanako.iter_symbol ((Symbol)node, (smb, depth, tmptypename) => {
+                var typename = tmptypename;
+                if (smb.name != null && (smb is Constant ||
+                                         smb is Namespace ||
                                          smb is Property ||
-                                         smb is Constant)) {
-                    if (smb.access == SymbolAccessibility.PRIVATE && !chk_private_symbol.active)
-                        return Guanako.IterCallbackReturns.ABORT_BRANCH;
+                                         smb is Vala.Signal ||
+                                         smb is Subroutine ||
+                                         smb is Variable ||
+                                         smb is TypeSymbol)) {
+                    stdout.printf ("typename: %s: %s\n",typename, smb.name);
+                    if (smb.access == SymbolAccessibility.PRIVATE) {
+                        if (!chk_private_symbol.active)
+                            return Guanako.IterCallbackReturns.ABORT_BRANCH;
+                        typename += "-private";
+                    }
+                    stdout.printf ("typename: %s: %s\n",typename, smb.name);
+
                     TreeIter next;
                     if (depth == 1)
                         store.append (out next, parent);

@@ -85,27 +85,58 @@ public static int main (string[] args) {
     }
 
     map_icons = new Gee.HashMap<string, Gdk.Pixbuf>();
-    try {
-        foreach (string type in new string[] {"class",
-                                              "enum",
-                                              "field",
-                                              "method",
-                                              "namespace",
-                                              "property",
-                                              "struct",
-                                              "signal",
-                                              "constant"})
-            map_icons[type] = new Gdk.Pixbuf.from_file (Path.build_path (
-                                            Path.DIR_SEPARATOR_S,
-                                            Config.PIXMAP_DIR,
-                                            "element-" + type + "-16.png"));
-    } catch (Gdk.PixbufError e) {
-        errmsg (_("Could not load pixmap: %s\n"), e.message);
-    } catch (GLib.FileError e) {
-        errmsg (_("Could not open pixmaps file: %s\n"), e.message);
-    } catch (GLib.Error e) {
-        errmsg (_("Pixmap loading failed: %s\n"), e.message);
-    }
+    foreach (string type in new string[] {"class",
+                                          "class-private",
+                                          "class-public",
+                                          "constant",
+                                          "constant-private",
+                                          "constant-public",
+                                          "delegate",
+                                          "delegate-private",
+                                          "delegate-protected",
+                                          "delegate-public",
+                                          "enum",
+                                          "enum-private",
+                                          "enum-public",
+                                          "enum_value",
+                                          "error_code",
+                                          "error_code-private",
+                                          "error_code-public",
+                                          "error_domain",
+                                          "error_domain-private",
+                                          "error_domain-public",
+                                          "field",
+                                          "field-private",
+                                          "field-public",
+                                          "interface",
+                                          "interface-private",
+                                          "interface-protected",
+                                          "interface-public",
+                                          "method",
+                                          "method-private",
+                                          "method-protected",
+                                          "method-public",
+                                          "namespace",
+                                          "property",
+                                          "property-private",
+                                          "property-protected",
+                                          "property-public",
+                                          "signal",
+                                          "struct",
+                                          "struct-private",
+                                          "struct-public"})
+        try {
+                map_icons[type] = new Gdk.Pixbuf.from_file (Path.build_path (
+                                                Path.DIR_SEPARATOR_S,
+                                                Config.PIXMAP_DIR,
+                                                "element-" + type + "-16.png"));
+        } catch (Gdk.PixbufError e) {
+            errmsg (_("Could not load pixmap: %s\n"), e.message);
+        } catch (GLib.FileError e) {
+            errmsg (_("Could not open pixmaps file: %s\n"), e.message);
+        } catch (GLib.Error e) {
+            errmsg (_("Pixmap loading failed: %s\n"), e.message);
+        }
 
     window_main = new Window();
     widget_main = new MainWidget();

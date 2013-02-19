@@ -88,52 +88,52 @@ namespace Guanako {
 
         if (smb is Namespace) {
             var cv = (Namespace) smb;
-            var ch = cv.get_namespaces();
-            foreach (Symbol s in ch)
+            var nam = cv.get_namespaces();
+            foreach (Symbol s in nam)
                 if (!iter_symbol (s, callback, depth + 1, "namespace"))
                     return false;
-            var mth = cv.get_methods();
-            foreach (Symbol s in mth)
-                if (!iter_symbol (s, callback, depth + 1, "method"))
+            var cst = cv.get_constants();
+            foreach (Symbol s in cst)
+                if (!iter_symbol (s, callback, depth + 1, "constant"))
                     return false;
-            var cls = cv.get_classes();
-            foreach (Symbol s in cls)
-                if (!iter_symbol (s, callback, depth + 1, "class"))
+            var enm = cv.get_enums();
+            foreach (Symbol s in enm)
+                if (!iter_symbol (s, callback, depth + 1, "enum"))
+                    return false;
+            var err = cv.get_error_domains();
+            foreach (Symbol s in err)
+                if (!iter_symbol (s, callback, depth + 1, "error_domain"))
+                    return false;
+            var str = cv.get_structs();
+            foreach (Symbol s in str)
+                if (!iter_symbol (s, callback, depth + 1, "struct"))
                     return false;
             var inf = cv.get_interfaces();
             foreach (Interface s in inf)
                 if (!iter_symbol (s, callback, depth + 1, "interface"))
                     return false;
-            var cst = cv.get_constants();
-            foreach (Symbol s in cst)
-                if (!iter_symbol (s, callback, depth + 1, "constant"))
-                    return false;
-            var fld = cv.get_fields();
-            foreach (Symbol s in fld)
-                if (!iter_symbol (s, callback, depth + 1, "field"))
-                    return false;
-            var enm = cv.get_enums();
-            foreach (Symbol s in enm)
-                if (!iter_symbol (s, callback, depth + 1, "enum"))
-                    return false;
-            var str = cv.get_structs();
-            foreach (Symbol s in str)
-                if (!iter_symbol (s, callback, depth + 1, "struct"))
-                    return false;
-        }
-        if (smb is Class) {
-            var cv = (Class) smb;
             var cls = cv.get_classes();
             foreach (Symbol s in cls)
                 if (!iter_symbol (s, callback, depth + 1, "class"))
                     return false;
-            var cst = cv.get_constants();
-            foreach (Symbol s in cst)
-                if (!iter_symbol (s, callback, depth + 1, "constant"))
-                    return false;
             var fld = cv.get_fields();
             foreach (Symbol s in fld)
                 if (!iter_symbol (s, callback, depth + 1, "field"))
+                    return false;
+            var del = cv.get_delegates();
+            foreach (Symbol s in del)
+                if (!iter_symbol (s, callback, depth + 1, "delegate"))
+                    return false;
+            var mth = cv.get_methods();
+            foreach (Symbol s in mth)
+                if (!iter_symbol (s, callback, depth + 1, "method"))
+                    return false;
+        }
+        if (smb is Class) {
+            var cv = (Class) smb;
+            var cst = cv.get_constants();
+            foreach (Symbol s in cst)
+                if (!iter_symbol (s, callback, depth + 1, "constant"))
                     return false;
             var enm = cv.get_enums();
             foreach (Symbol s in enm)
@@ -143,34 +143,97 @@ namespace Guanako {
             foreach (Symbol s in str)
                 if (!iter_symbol (s, callback, depth + 1, "struct"))
                     return false;
+            var cls = cv.get_classes();
+            foreach (Symbol s in cls)
+                if (!iter_symbol (s, callback, depth + 1, "class"))
+                    return false;
+            var fld = cv.get_fields();
+            foreach (Symbol s in fld)
+                if (!iter_symbol (s, callback, depth + 1, "field"))
+                    return false;
+            var del = cv.get_delegates();
+            foreach (Symbol s in del)
+                if (!iter_symbol (s, callback, depth + 1, "delegate"))
+                    return false;
         }
-        if (smb is Struct) {
-            var cv = (Struct) smb;
-            var mth = cv.get_methods();
-            foreach (Symbol s in mth)
-                if (!iter_symbol (s, callback, depth + 1, "method"))
+        if (smb is Enum) {
+            var cv = (Enum) smb;
+            var val = cv.get_values();
+            foreach (Symbol s in val)
+                if (!iter_symbol (s, callback, depth + 1, "enum_value"))
                     return false;
             var cst = cv.get_constants();
             foreach (Symbol s in cst)
                 if (!iter_symbol (s, callback, depth + 1, "constant"))
                     return false;
+            var mth = cv.get_methods();
+            foreach (Symbol s in mth)
+                if (!iter_symbol (s, callback, depth + 1, "method"))
+                    return false;
+        }
+        if (smb is ErrorDomain) {
+            var cv = (ErrorDomain) smb;
+            var erc = cv.get_codes();
+            foreach (Symbol s in erc)
+                if (!iter_symbol (s, callback, depth + 1, "error_code"))
+                    return false;
+            var mth = cv.get_methods();
+            foreach (Symbol s in mth)
+                if (!iter_symbol (s, callback, depth + 1, "method"))
+                    return false;
+        }
+        if (smb is Interface) {
+            var cv = (Interface) smb;
+            var cst = cv.get_constants();
+            foreach (Symbol s in cst)
+                if (!iter_symbol (s, callback, depth + 1, "constant"))
+                    return false;
+            var enm = cv.get_enums();
+            foreach (Symbol s in enm)
+                if (!iter_symbol (s, callback, depth + 1, "enum"))
+                    return false;
+            var str = cv.get_structs();
+            foreach (Symbol s in str)
+                if (!iter_symbol (s, callback, depth + 1, "struct"))
+                    return false;
+            var cls = cv.get_classes();
+            foreach (Symbol s in cls)
+                if (!iter_symbol (s, callback, depth + 1, "class"))
+                    return false;
             var fld = cv.get_fields();
             foreach (Symbol s in fld)
                 if (!iter_symbol (s, callback, depth + 1, "field"))
+                    return false;
+            var del = cv.get_delegates();
+            foreach (Symbol s in del)
+                if (!iter_symbol (s, callback, depth + 1, "delegate"))
+                    return false;
+        }
+        if (smb is Struct) {
+            var cv = (Struct) smb;
+            var cst = cv.get_constants();
+            foreach (Symbol s in cst)
+                if (!iter_symbol (s, callback, depth + 1, "constant"))
                     return false;
             var prp = cv.get_properties();
             foreach (Symbol s in prp)
                 if (!iter_symbol (s, callback, depth + 1, "property"))
                     return false;
-        }
-        if (smb is Enum) {
-            var enm = (Enum)smb;
-            foreach (Symbol s in enm.get_values())
-                if (!iter_symbol (s, callback, depth + 1, "enum_value"))
+            var fld = cv.get_fields();
+            foreach (Symbol s in fld)
+                if (!iter_symbol (s, callback, depth + 1, "field"))
+                    return false;
+            var mth = cv.get_methods();
+            foreach (Symbol s in mth)
+                if (!iter_symbol (s, callback, depth + 1, "method"))
                     return false;
         }
         if (smb is ObjectTypeSymbol) {
             var cv = (ObjectTypeSymbol) smb;
+            var prp = cv.get_properties();
+            foreach (Symbol s in prp)
+                if (!iter_symbol (s, callback, depth + 1, "property"))
+                    return false;
             var mth = cv.get_methods();
             foreach (Symbol s in mth)
                 if (!iter_symbol (s, callback, depth + 1, "method"))
@@ -178,10 +241,6 @@ namespace Guanako {
             var sgn = cv.get_signals();
             foreach (Symbol s in sgn)
                 if (!iter_symbol (s, callback, depth + 1, "signal"))
-                    return false;
-            var prp = cv.get_properties();
-            foreach (Symbol s in prp)
-                if (!iter_symbol (s, callback, depth + 1, "property"))
                     return false;
         }
         return true;
