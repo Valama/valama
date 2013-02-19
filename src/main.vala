@@ -421,6 +421,12 @@ static Gdk.Pixbuf? get_pixbuf_for_symbol (Symbol symbol) {
     return null;
 }
 
+static Gdk.Pixbuf? get_pixbuf_by_name (string typename) {
+    if (typename in map_icons)
+        return map_icons[typename];
+    return null;
+}
+
 static void create_new_file() {
     var source_file = ui_create_file_dialog (project);
     if (source_file != null) {

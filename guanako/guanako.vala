@@ -823,18 +823,18 @@ namespace Guanako {
                     if (inside_source_ref (file, line, col, statement.source_reference)) {
                         if (depth > last_depth)
                             last_depth = depth;
-                        return iter_callback_returns.abort_tree;
+                        return IterCallbackReturns.ABORT_TREE;
                     }
                     if (before_source_ref (file, line, col, statement.source_reference)) {
                         if (depth > last_depth)
                             last_depth = depth;
-                        return iter_callback_returns.abort_tree;
+                        return IterCallbackReturns.ABORT_TREE;
                     }
                     if (statement is DeclarationStatement || statement is ForeachStatement) {
                         candidates += statement;
                         depths += depth;
                     }
-                    return iter_callback_returns.continue;
+                    return IterCallbackReturns.CONTINUE;
                 });
 
                 /*
@@ -877,7 +877,7 @@ namespace Guanako {
                             if (smb.name != null) {
                                 SourceReference sref = smb.source_reference;
                                 if (sref == null)
-                                    return iter_callback_returns.continue;
+                                    return IterCallbackReturns.CONTINUE;
 
                                 /*
                                  * Check symbol's own source reference.
@@ -903,9 +903,8 @@ namespace Guanako {
                                             }
                                 }
                             }
-                            return iter_callback_returns.continue;
-                         },
-                         0);
+                            return IterCallbackReturns.CONTINUE;
+                         });
             return ret;
         }
 

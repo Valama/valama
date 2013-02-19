@@ -36,10 +36,10 @@ namespace Guanako {
                             for (int q = s.source_reference.begin.line - 1; q <= s.source_reference.end.line - 1; q++)
                                 for (int i = 0; i < 1 + depth2; i++)
                                     lines[q] = "    " + lines[q];
-                            return iter_callback_returns.continue;
+                            return IterCallbackReturns.CONTINUE;
                         });
                     }
-                    return iter_callback_returns.continue;
+                    return IterCallbackReturns.CONTINUE;
                 });
             }
         }

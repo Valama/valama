@@ -106,22 +106,22 @@ public class UiCurrentFileStructure : UiElement {
 
             TreeIter parent;
             store.append (out parent, null);
-            store.set (parent, 0, ((Symbol)node).name, 1, get_pixbuf_for_symbol((Symbol)node), -1);
+            store.set (parent, 0, ((Symbol)node).name, 1, get_pixbuf_for_symbol ((Symbol)node), -1);
             map_iter_symbols[store.get_path(parent).to_string()] = (Symbol)node;
             if (node == current_symbol)
                 current_iter = parent;
 
             TreeIter[] iters = new TreeIter[0];
-            Guanako.iter_symbol ((Symbol)node, (smb, depth) => {
+            Guanako.iter_symbol ((Symbol)node, (smb, depth, typename) => {
                 if (smb.name != null && (smb is Namespace || smb is Class || smb is Subroutine || smb is Vala.Signal || smb is Variable || smb is Property)) {
                     if (smb.access == SymbolAccessibility.PRIVATE && !chk_private_symbol.active)
-                        return Guanako.iter_callback_returns.abort_branch;
+                        return Guanako.IterCallbackReturns.ABORT_BRANCH;
                     TreeIter next;
                     if (depth == 1)
                         store.append (out next, parent);
                     else
                         store.append (out next, iters[depth - 2]);
-                    store.set (next, 0, smb.name, 1, get_pixbuf_for_symbol(smb));
+                    store.set (next, 0, smb.name, 1, get_pixbuf_by_name (typename), -1);
                     if (smb == current_symbol)
                         current_iter = next;
                     map_iter_symbols[store.get_path(next).to_string()] = smb;
@@ -129,9 +129,9 @@ public class UiCurrentFileStructure : UiElement {
                         iters += next;
                     else
                         iters[depth - 1] = next;
-                    return Guanako.iter_callback_returns.continue;
+                    return Guanako.IterCallbackReturns.CONTINUE;
                 } else
-                    return Guanako.iter_callback_returns.abort_branch;
+                    return Guanako.IterCallbackReturns.ABORT_BRANCH;
             });
         }
         tree_view.expand_all();

@@ -31,6 +31,13 @@ public class SymbolBrowser : UiElement {
 
         tree_view = new TreeView();
         tree_view.insert_column_with_attributes (-1,
+                                                 null,
+                                                 new CellRendererPixbuf(),
+                                                 "pixbuf",
+                                                 2,
+                                                 null);
+
+        tree_view.insert_column_with_attributes (-1,
                                                  _("Symbol"),
                                                  new CellRendererText(),
                                                  "text",
@@ -54,32 +61,38 @@ public class SymbolBrowser : UiElement {
 
     public override void build() {
         debug_msg (_("Run %s update!\n"), element_name);
-        var store = new TreeStore (2, typeof (string), typeof (string));
+        var store = new TreeStore (3, typeof (string), typeof (string), typeof (Gdk.Pixbuf));
         tree_view.set_model (store);
 
         TreeIter[] iters = new TreeIter[0];
 
-        Guanako.iter_symbol (project.guanako_project.root_symbol, (smb, depth) => {
+        Guanako.iter_symbol (project.guanako_project.root_symbol, (smb, depth, typename) => {
             if (smb.name != null) {
                 string tpe = "";
-                if (smb is Class)    tpe = "Class";
-                else if (smb is Method)   tpe = "Method";
-                else if (smb is Field)    tpe = "Field";
-                else if (smb is Constant) tpe = "Constant";
-                else if (smb is Property) tpe = "Property";
+                foreach (var part in typename.split ("_"))
+                    switch (part.length) {
+                        case 0:
+                            break;
+                        case 1:
+                            tpe += part.up (1);
+                            break;
+                        default:
+                            tpe += part.up (1) + part.slice (1, part.length);
+                            break;
+                    }
 
                 TreeIter next;
                 if (depth == 1)
                     store.append (out next, null);
                 else
                     store.append (out next, iters[depth - 2]);
-                store.set (next, 0, smb.name, 1, tpe, -1);
+                store.set (next, 0, smb.name, 1, tpe, 2, get_pixbuf_by_name (typename), -1);
                 if (iters.length < depth)
                     iters += next;
                 else
                     iters[depth - 1] = next;
             }
-            return Guanako.iter_callback_returns.continue;
+            return Guanako.IterCallbackReturns.CONTINUE;
         });
         debug_msg (_("%s update finished!\n"), element_name);
     }
