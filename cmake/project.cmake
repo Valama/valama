@@ -34,10 +34,10 @@ set(srcfiles
 "src/ui/reports.vala"
 "src/ui/search.vala"
 "src/ui/source_viewer.vala"
+"src/ui/stylechecker.vala"
 "src/ui/symbol_browser.vala"
 "src/ui/ui_elements.vala"
 "src/ui_main.vala"
-"src/ui/stylechecker.vala"
 )
 set(vapifiles
 "vapi/config.vapi"
