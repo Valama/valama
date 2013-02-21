@@ -65,12 +65,16 @@ public class UiCurrentFileStructure : UiElement {
         //TODO: Update only on changes.
         Timeout.add_seconds (2, () => {
             /* Lock all store changes to avoid race conditions. */
+            //TODO: Remember current selection  or detect current position automatically.
             lock (store)
                 build();
-            return false;
+            return true;
         });
 
         widget = vbox;
+
+        lock(store)
+            build();
     }
 
     void on_tree_view_cursor_changed() {
@@ -83,15 +87,20 @@ public class UiCurrentFileStructure : UiElement {
     }
 
     protected override void build() {
-        if (source_viewer.current_srcfocus == null)
+        debug_msg (_("Run %s update!\n"), element_name);
+        if (source_viewer.current_srcfocus == null) {
+            debug_msg (_("%s update finished (not a valid buffer)!\n"), element_name);
             return;
+        }
 
         map_iter_symbols = new Gee.HashMap<string, Symbol>();
         store = new TreeStore (2, typeof (string), typeof (Gdk.Pixbuf));
         tree_view.set_model (store);
         var focus_file = project.guanako_project.get_source_file_by_name (source_viewer.current_srcfocus);
-        if (focus_file == null)
+        if (focus_file == null) {
+            debug_msg (_("%s update finished (not a valid source buffer)!\n"), element_name);
             return;
+        }
         var mark_insert = source_viewer.current_srcbuffer.get_insert();
         TextIter iter;
         source_viewer.current_srcbuffer.get_iter_at_mark (out iter, mark_insert);
@@ -154,6 +163,8 @@ public class UiCurrentFileStructure : UiElement {
         tree_view.expand_all();
         if (current_iter != null)
             tree_view.get_selection().select_iter (current_iter);
+
+        debug_msg (_("%s update finished!\n"), element_name);
     }
 }
 

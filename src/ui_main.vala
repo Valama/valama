@@ -36,6 +36,7 @@ static ProjectBuilder project_builder;
 static UiSourceViewer source_viewer;
 static UiElementPool ui_elements_pool;
 static BuildOutput build_output;
+static UiCurrentFileStructure wdg_current_file_structure;
 
 static Gee.HashMap<string, Gdk.Pixbuf> map_icons;
 
@@ -123,7 +124,7 @@ public class MainWidget : Box {
         var src_report = new ScrolledWindow (null, null);
         src_report.add (wdg_report.widget);
 
-        var wdg_current_file_structure = new UiCurrentFileStructure();
+        wdg_current_file_structure = new UiCurrentFileStructure();
         var wdg_search = new UiSearch();
         var wdg_stylechecker = new UiStyleChecker();
 
@@ -131,8 +132,9 @@ public class MainWidget : Box {
         source_viewer.add_srcitem (project.open_new_buffer ("", "", true));
         add_item ("SourceView", _("Source view"), source_viewer.widget,
                               null,
-                              DockItemBehavior.NO_GRIP | DockItemBehavior.CANT_DOCK_CENTER |
-                              DockItemBehavior.CANT_CLOSE,
+                              DockItemBehavior.NO_GRIP |
+                                    DockItemBehavior.CANT_DOCK_CENTER |
+                                    DockItemBehavior.CANT_CLOSE,
                               DockPlacement.TOP);
         add_item ("ReportWrapper", _("Report widget"), src_report,
                               Stock.INFO,
