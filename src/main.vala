@@ -130,6 +130,8 @@ public static int main (string[] args) {
     window_main.set_default_size (1200, 600);
     window_main.maximize();
 
+    window_main.show();
+
     source_viewer = new UiSourceViewer();
     project_builder = new ProjectBuilder (project);
     frankenstein = new Guanako.FrankenStein();
@@ -138,7 +140,6 @@ public static int main (string[] args) {
     widget_main = new MainWidget();
     window_main.add (widget_main);
     window_main.add_accel_group (widget_main.accel_group);
-    window_main.show();
 
     /* Application signals. */
     source_viewer.buffer_close.connect (project.close_buffer);

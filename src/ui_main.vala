@@ -66,8 +66,6 @@ public class MainWidget : Box {
      */
     public AccelGroup accel_group;
 
-    string local_layout_filename;
-
     /**
      * Create MainWindow. Initialize menubar, toolbar, master dock and source
      * dock.
@@ -173,24 +171,34 @@ public class MainWidget : Box {
         build_toolbar();
         build_menu();
 
-        /* Load default layout. Either local one or system wide. */
+        /* Keep this before layout loading. */
+        this.show_all();
 
+        /* Load default layout. Either local one or system wide. */
+        bool err = false;
+        string local_layout_filename;
         if (Args.layoutfile == null)
             local_layout_filename = Path.build_path (Path.DIR_SEPARATOR_S,
                                                      Environment.get_user_cache_dir(),
                                                      "valama",
                                                      "layout.xml");
-        else
+        else {
             local_layout_filename = Args.layoutfile;
+            err = true;
+        }
         string system_layout_filename = Path.build_path (Path.DIR_SEPARATOR_S,
                                                          Config.PACKAGE_DATA_DIR,
                                                          "layout.xml");
-        if (Args.reset_layout || !load_layout (local_layout_filename))
+        if (Args.reset_layout || (!load_layout (local_layout_filename, null, err) &&
+                                                                Args.layoutfile == null))
             load_layout (system_layout_filename);
-
-        this.show_all();
     }
+
     void on_destroy() {
+        var local_layout_filename = Path.build_path (Path.DIR_SEPARATOR_S,
+                                                     Environment.get_user_cache_dir(),
+                                                     "valama",
+                                                     "layout.xml");
         var f = File.new_for_path (local_layout_filename).get_parent();
         if (!f.query_exists())
             try {
@@ -420,14 +428,16 @@ public class MainWidget : Box {
      * Save current {@link Gdl.DockLayout} to file.
      *
      * @param  filename Name of file to save layout to.
+     * @param section Save specific layout section.
      * @return Return true on success else false.
      */
-    public bool save_layout (string filename) {
+    public bool save_layout (string filename, string section = "__default__") {
+        this.layout.save_layout (section);
         bool ret = this.layout.save_to_file (filename);
         if (!ret)
             errmsg (_("Couldn't save layout to file: %s\n"), filename);
         else
-            debug_msg (_("Layout saved to file: %s\n"), filename);
+            debug_msg (_("Layout '%s' saved to file: %s\n"), section, filename);
         return ret;
     }
 
@@ -436,15 +446,19 @@ public class MainWidget : Box {
      *
      * @param filename Name of file to load layout from.
      * @param section Name of default section to load settings from.
+     * @param error Display error if layout file loading failed.
      * @return Return true on success else false.
      */
-    public bool load_layout (string filename, string section = "__default__") {
+    public bool load_layout (string filename,
+                             string? section = null,
+                             bool error = true) {
+        string lsection = (section != null) ? section : "__default__";
         bool ret = this.layout.load_from_file (filename);
-        if (!ret)
+        if (ret)
+            debug_msg (_("Layouts loaded from file: %s\n"), filename);
+        else if (error)
             errmsg (_("Couldn't load layout file: %s\n"), filename);
-        else
-            debug_msg (_("Layout loaded from file: %s\n"), filename);
-        return (ret && this.layout_reload (section));
+        return (ret && this.layout_reload (lsection));
     }
 
     /**
