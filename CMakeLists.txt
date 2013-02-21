@@ -94,7 +94,7 @@ endif()
 
 # Custom library version checks.
 find_package(PkgConfig)
-pkg_check_modules(GTK3.0 REQUIRED "gtk-3.0")
+pkg_check_modules(GTK3.0 REQUIRED "gtk+-3.0")
 if("3.6" STRGREATER GTK3.0_VERSION)
   list(APPEND valac_cond "-D;GTK_LESS_3_6")
 endif()
