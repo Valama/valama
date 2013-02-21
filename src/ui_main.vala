@@ -66,12 +66,14 @@ public class MainWidget : Box {
      */
     public AccelGroup accel_group;
 
+    string local_layout_filename;
+
     /**
      * Create MainWindow. Initialize menubar, toolbar, master dock and source
      * dock.
      */
     public MainWidget() {
-        this.destroy.connect (main_quit);
+        this.destroy.connect (on_destroy);
 
         accel_group = new AccelGroup();
 
@@ -96,12 +98,107 @@ public class MainWidget : Box {
         dockbar.set_style (DockBarStyle.TEXT);
 
         var box = new Box (Orientation.HORIZONTAL, 5);
-        vbox_main.pack_start (box, true, true, 0);
         box.pack_start (dockbar, false, false, 0);
         box.pack_end (dock, true, true, 0);
+        vbox_main.pack_start (box, true, true, 0);
+
+        /* Ui elements. */
+        ui_elements_pool = new UiElementPool();
+        pbrw = new ProjectBrowser (project);
+        pbrw.file_selected.connect (on_file_selected);
+
+        var smb_browser = new SymbolBrowser();
+        pbrw.connect (smb_browser);
+        ui_elements_pool.add (pbrw);
+
+        report_wrapper = new ReportWrapper();
+        project.guanako_project.set_report_wrapper (report_wrapper);
+        wdg_report = new UiReport (report_wrapper);
+        var wdg_breakpoints = new UiBreakpoints (frankenstein);
+
+        ui_elements_pool.add (wdg_report);
+
+        /* Gdl elements. */
+        var src_symbol = new ScrolledWindow (null, null);
+        src_symbol.add (smb_browser.widget);
+
+        var src_report = new ScrolledWindow (null, null);
+        src_report.add (wdg_report.widget);
+
+        var wdg_current_file_structure = new UiCurrentFileStructure();
+        var wdg_search = new UiSearch();
+        var wdg_stylechecker = new UiStyleChecker();
+
+        /* Init new empty buffer. */
+        source_viewer.add_srcitem (project.open_new_buffer ("", "", true));
+        add_item ("SourceView", _("Source view"), source_viewer.widget,
+                              null,
+                              DockItemBehavior.NO_GRIP | DockItemBehavior.CANT_DOCK_CENTER |
+                              DockItemBehavior.CANT_CLOSE,
+                              DockPlacement.TOP);
+        add_item ("ReportWrapper", _("Report widget"), src_report,
+                              Stock.INFO,
+                              DockItemBehavior.CANT_CLOSE, //temporary solution until items can be added later
+                              //DockItemBehavior.NORMAL,  //TODO: change this behaviour for all widgets
+                              DockPlacement.BOTTOM);
+        add_item ("ProjectBrowser", _("Project browser"), pbrw.widget,
+                              Stock.FILE,
+                              DockItemBehavior.CANT_CLOSE,
+                              DockPlacement.LEFT);
+        add_item ("BuildOutput", _("Build output"), build_output.widget,
+                              Stock.FILE,
+                              DockItemBehavior.CANT_CLOSE,
+                              DockPlacement.LEFT);
+        add_item ("Search", _("Search"), wdg_search.widget,
+                              Stock.FIND,
+                              DockItemBehavior.CANT_CLOSE,
+                              DockPlacement.LEFT);
+        add_item ("Breakpoints", _("Breakpoints / Timers"), wdg_breakpoints.widget,
+                              Stock.FILE,
+                              DockItemBehavior.CANT_CLOSE,
+                              DockPlacement.LEFT);
+        add_item ("CurrentFileStructure", _("Current file"), wdg_current_file_structure.widget,
+                              Stock.FILE,
+                              DockItemBehavior.CANT_CLOSE,
+                              DockPlacement.LEFT);
+        add_item ("StyleChecker", _("Coding style checker"), wdg_stylechecker.widget,
+                              Stock.COLOR_PICKER,
+                              DockItemBehavior.CANT_CLOSE,
+                              DockPlacement.LEFT);
+        add_item ("SymbolBrowser", _("Symbol browser"), src_symbol,
+                              Stock.CONVERT,
+                              DockItemBehavior.CANT_CLOSE,
+                              DockPlacement.RIGHT);
 
         build_toolbar();
         build_menu();
+
+        /* Load default layout. Either local one or system wide. */
+
+        if (Args.layoutfile == null)
+            local_layout_filename = Path.build_path (Path.DIR_SEPARATOR_S,
+                                                     Environment.get_user_cache_dir(),
+                                                     "valama",
+                                                     "layout.xml");
+        else
+            local_layout_filename = Args.layoutfile;
+        string system_layout_filename = Path.build_path (Path.DIR_SEPARATOR_S,
+                                                         Config.PACKAGE_DATA_DIR,
+                                                         "layout.xml");
+        if (Args.reset_layout || !load_layout (local_layout_filename))
+            load_layout (system_layout_filename);
+
+        this.show_all();
+    }
+    void on_destroy() {
+        var f = File.new_for_path (local_layout_filename).get_parent();
+        if (!f.query_exists())
+            try {
+                f.make_directory_with_parents();
+            } catch (GLib.Error e) {
+                errmsg (_("Couldn't create cache directory: %s\n"), e.message);
+            }
+        save_layout (local_layout_filename);
     }
 
     void build_menu() {

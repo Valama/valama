@@ -124,37 +124,21 @@ public static int main (string[] args) {
         }
 
     window_main = new Window();
-    widget_main = new MainWidget();
-    window_main.add (widget_main);
+    window_main.destroy.connect (main_quit);
     window_main.title = _("Valama");
     window_main.hide_titlebar_when_maximized = true;
     window_main.set_default_size (1200, 600);
     window_main.maximize();
-    window_main.add_accel_group (widget_main.accel_group);
 
     source_viewer = new UiSourceViewer();
     project_builder = new ProjectBuilder (project);
     frankenstein = new Guanako.FrankenStein();
-    var build_output = new BuildOutput();
+    build_output = new BuildOutput();
 
-    /* Ui elements. */
-    ui_elements_pool = new UiElementPool();
-    pbrw = new ProjectBrowser (project);
-    pbrw.file_selected.connect (on_file_selected);
-
-    var smb_browser = new SymbolBrowser();
-    pbrw.connect (smb_browser);
-    ui_elements_pool.add (pbrw);
-    //ui_elements_pool.add (smb_browser);  // dangerous (circulare deps)
-
-    report_wrapper = new ReportWrapper();
-    project.guanako_project.set_report_wrapper (report_wrapper);
-    wdg_report = new UiReport (report_wrapper);
-    var wdg_breakpoints = new UiBreakpoints (frankenstein);
-
-    ui_elements_pool.add (wdg_report);
-
-    /* Menu */
+    widget_main = new MainWidget();
+    window_main.add (widget_main);
+    window_main.add_accel_group (widget_main.accel_group);
+    window_main.show();
 
     /* Application signals. */
     source_viewer.buffer_close.connect (project.close_buffer);
@@ -169,85 +153,8 @@ public static int main (string[] args) {
             project.buffer_changed (true);
     });
 
-
-    /* Gdl elements. */
-    var src_symbol = new ScrolledWindow (null, null);
-    src_symbol.add (smb_browser.widget);
-
-    var src_report = new ScrolledWindow (null, null);
-    src_report.add (wdg_report.widget);
-
-    var wdg_current_file_structure = new UiCurrentFileStructure();
-    var wdg_search = new UiSearch();
-    var wdg_stylechecker = new UiStyleChecker();
-
-    /* Init new empty buffer. */
-    source_viewer.add_srcitem (project.open_new_buffer ("", "", true));
-    widget_main.add_item ("SourceView", _("Source view"), source_viewer.widget,
-                          null,
-                          DockItemBehavior.NO_GRIP | DockItemBehavior.CANT_DOCK_CENTER |
-                                DockItemBehavior.CANT_CLOSE,
-                          DockPlacement.TOP);
-    widget_main.add_item ("ReportWrapper", _("Report widget"), src_report,
-                          Stock.INFO,
-                          DockItemBehavior.CANT_CLOSE, //temporary solution until items can be added later
-                          //DockItemBehavior.NORMAL,  //TODO: change this behaviour for all widgets
-                          DockPlacement.BOTTOM);
-    widget_main.add_item ("ProjectBrowser", _("Project browser"), pbrw.widget,
-                          Stock.FILE,
-                          DockItemBehavior.CANT_CLOSE,
-                          DockPlacement.LEFT);
-    widget_main.add_item ("BuildOutput", _("Build output"), build_output.widget,
-                          Stock.FILE,
-                          DockItemBehavior.CANT_CLOSE,
-                          DockPlacement.LEFT);
-    widget_main.add_item ("Search", _("Search"), wdg_search.widget,
-                          Stock.FIND,
-                          DockItemBehavior.CANT_CLOSE,
-                          DockPlacement.LEFT);
-    widget_main.add_item ("Breakpoints", _("Breakpoints / Timers"), wdg_breakpoints.widget,
-                          Stock.FILE,
-                          DockItemBehavior.CANT_CLOSE,
-                          DockPlacement.LEFT);
-    widget_main.add_item ("CurrentFileStructure", _("Current file"), wdg_current_file_structure.widget,
-                          Stock.FILE,
-                          DockItemBehavior.CANT_CLOSE,
-                          DockPlacement.LEFT);
-    widget_main.add_item ("StyleChecker", _("Coding style checker"), wdg_stylechecker.widget,
-                          Stock.COLOR_PICKER,
-                          DockItemBehavior.CANT_CLOSE,
-                          DockPlacement.LEFT);
-    widget_main.add_item ("SymbolBrowser", _("Symbol browser"), src_symbol,
-                          Stock.CONVERT,
-                          DockItemBehavior.CANT_CLOSE,
-                          DockPlacement.RIGHT);
-    window_main.show_all();
-
-    /* Load default layout. Either local one or system wide. */
-    string local_layout_filename;
-    if (Args.layoutfile == null)
-        local_layout_filename = Path.build_path (Path.DIR_SEPARATOR_S,
-                                                 Environment.get_user_cache_dir(),
-                                                 "valama",
-                                                 "layout.xml");
-    else
-        local_layout_filename = Args.layoutfile;
-    string system_layout_filename = Path.build_path (Path.DIR_SEPARATOR_S,
-                                                     Config.PACKAGE_DATA_DIR,
-                                                     "layout.xml");
-    if (Args.reset_layout || !widget_main.load_layout (local_layout_filename))
-        widget_main.load_layout (system_layout_filename);
-
     Gtk.main();
 
-    var f = File.new_for_path (local_layout_filename).get_parent();
-    if (!f.query_exists())
-        try {
-            f.make_directory_with_parents();
-        } catch (GLib.Error e) {
-            errmsg (_("Couldn't create cache directory: %s\n"), e.message);
-        }
-    widget_main.save_layout (local_layout_filename);
     project.save();
     return 0;
 }
