@@ -206,14 +206,14 @@ public class MainWidget : Box {
 
         var btnUndo = new ToolButton.from_stock (Stock.UNDO);
         btnUndo.set_sensitive (false);
-        widget_main.add_button (btnUndo);
+        add_button (btnUndo);
         btnUndo.set_tooltip_text (_("Undo last change"));
         btnUndo.clicked.connect (undo_change);
         project.undo_changed.connect (btnUndo.set_sensitive);
 
         var btnRedo = new ToolButton.from_stock (Stock.REDO);
         btnRedo.set_sensitive (false);
-        widget_main.add_button (btnRedo);
+        add_button (btnRedo);
         btnRedo.set_tooltip_text (_("Redo last change"));
         btnRedo.clicked.connect (redo_change);
         project.redo_changed.connect (btnRedo.set_sensitive);
