@@ -99,16 +99,17 @@ class UiSourceViewer : UiElement {
             if (project.get_absolute_path (srcitem.long_name) == filename) {
                 /* Hack arround gdl_dock_notebook with gtk_notebook. */
                 var pa = srcitem.parent;
-                // pa.grab_focus();
                 /* If something strange happens (pa == null) break the loop. */
                 while (!(pa is Dock) && (pa != null)) {
-                    //msg ("item: %s\n", pa.name);
                     if (pa is Switcher) {
                         var nbook = (Notebook) pa;
                         nbook.page = nbook.page_num (srcitem);
                     }
                     pa = pa.parent;
-                    // pa.grab_focus();
+                    Idle.add (() => {
+                        get_sourceview(srcitem).grab_focus();
+                        return false;
+                    });
                 }
                 return;
             }
@@ -335,11 +336,12 @@ class UiSourceViewer : UiElement {
         TextIter titer;
         srcbuffer.get_iter_at_line_offset (out titer, line, col);
         srcbuffer.select_range (titer, titer);
-        //FIXME: Does not scroll with first try to iter (only after buffer switch).
         var srcview = get_sourceview_by_file (filename);
-        srcview.scroll_to_iter (titer, 0.42, true, 1.0, 1.0);
-        //TODO: Grab focus.
-        // srcview.grab_focus();
+        GLib.Idle.add(()=>{
+            srcview.grab_focus();
+            srcview.scroll_to_iter (titer, 0.42, true, 1.0, 1.0);
+            return false;
+        });
         if (setcursor)
             srcbuffer.place_cursor (titer);
     }

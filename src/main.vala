@@ -243,6 +243,7 @@ static bool on_file_selected (string filename) {
         if (view != null)
             source_viewer.add_srcitem (view, filename);
         source_viewer.focus_src (filename);
+        source_viewer.jump_to_position (filename, 0, 0, true);
         return true;
     } catch (GLib.FileError e) {
         errmsg (_("Could not load file: %s\n"), e.message);
