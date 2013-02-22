@@ -224,9 +224,16 @@ static void redo_change() {
 //     source_viewer.current_srcbuffer.text = indented;
 // }
 
-static void on_file_selected (string filename) {
+/**
+ * Load file and change focus.
+ *
+ * @param filename Name of file.
+ * @return Return true on success else false.
+ */
+//TODO: Grab focus.
+static bool on_file_selected (string filename) {
     if (source_viewer.current_srcfocus == filename)
-        return;
+        return true;
 
     string txt = "";
     try {
@@ -235,8 +242,10 @@ static void on_file_selected (string filename) {
         if (view != null)
             source_viewer.add_srcitem (view, filename);
         source_viewer.focus_src (filename);
+        return true;
     } catch (GLib.FileError e) {
         errmsg (_("Could not load file: %s\n"), e.message);
+        return false;
     }
 }
 

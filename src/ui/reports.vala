@@ -48,7 +48,9 @@ class UiReport : UiElement {
                 err = report.errors_list[index];
             else
                 err = report.warnings_list[index - report.errors_list.size];
-            source_viewer.jump_to_position (err.source.file.filename, err.source.begin.line - 1, 0);
+            source_viewer.jump_to_position (err.source.file.filename,
+                                            err.source.begin.line - 1,
+                                            err.source.begin.column - 1);
         });
         tree_view.can_focus = false;
 

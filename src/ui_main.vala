@@ -109,7 +109,9 @@ public class MainWidget : Box {
         /* Ui elements. */
         ui_elements_pool = new UiElementPool();
         pbrw = new ProjectBrowser (project);
-        pbrw.file_selected.connect (on_file_selected);
+        pbrw.file_selected.connect ((filename) => {
+            on_file_selected(filename);
+        });
 
         var smb_browser = new SymbolBrowser();
         pbrw.connect (smb_browser);

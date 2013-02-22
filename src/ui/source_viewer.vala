@@ -319,21 +319,29 @@ class UiSourceViewer : UiElement {
     }
 
     /**
-     * Set focus and insert mark to the given position
+     * Set focus and insert mark to the given position and open file if
+     * necessary.
      *
      * @param filename Name of file to switch to.
      * @param line Line where to jump.
+     * @param setcursor If true set cursor to position.
      * @param col Column where to jump.
      */
-    public void jump_to_position (string filename, int line, int col) {
-        focus_src (filename);
+    public void jump_to_position (string filename, int line, int col, bool setcursor = true) {
+        on_file_selected (filename);
         var srcbuffer = project.get_buffer_by_file (filename);
         if (srcbuffer == null)
             return;
         TextIter titer;
         srcbuffer.get_iter_at_line_offset (out titer, line, col);
         srcbuffer.select_range (titer, titer);
-        get_sourceview_by_file (filename).scroll_to_iter (titer, 0.42, true, 0, 1.0);
+        //FIXME: Does not scroll with first try to iter (only after buffer switch).
+        var srcview = get_sourceview_by_file (filename);
+        srcview.scroll_to_iter (titer, 0.42, true, 1.0, 1.0);
+        //TODO: Grab focus.
+        // srcview.grab_focus();
+        if (setcursor)
+            srcbuffer.place_cursor (titer);
     }
 
     /**

@@ -54,10 +54,7 @@ public class UiCurrentFileStructure : UiElement {
         chk_private_symbol.clicked.connect(build);
         vbox.pack_start (chk_private_symbol, false, true);
 
-        source_viewer.notify["current-srcbuffer"].connect(()=>{
-            build();
-        });
-
+        source_viewer.notify["current-srcbuffer"].connect(build);
         project.guanako_update_finished.connect (build);
 
         widget = vbox;
@@ -72,7 +69,9 @@ public class UiCurrentFileStructure : UiElement {
         if (path == null)
             return;
         Symbol smb = map_iter_symbols[path.to_string()];
-        source_viewer.jump_to_position (source_viewer.current_srcfocus, smb.source_reference.begin.line - 1, 0);
+        source_viewer.jump_to_position (source_viewer.current_srcfocus,
+                                        smb.source_reference.begin.line - 1,
+                                        smb.source_reference.begin.column - 1);
     }
 
     protected override void build() {
