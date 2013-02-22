@@ -32,7 +32,7 @@ public static int main (string[] args) {
     Intl.textdomain (Config.GETTEXT_PACKAGE);
     Intl.bindtextdomain (Config.GETTEXT_PACKAGE, Config.LOCALE_DIR);
     recentmgr = (RecentManager) GLib.Object.new (typeof(RecentManager),
-            filename: Path.build_path (Path.DIR_SEPARATOR_S, Environment.get_user_cache_dir(), "recent_projects"));
+            filename: Path.build_path (Path.DIR_SEPARATOR_S, Environment.get_user_cache_dir(), "valama", "recent_projects"));
 
     // /* Command line parsing. */
     // /* Copied from Yorba application. */

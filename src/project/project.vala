@@ -143,11 +143,11 @@ public class ValamaProject : Object {
      * @throws LoadingError Throw on error while loading project file.
      */
     public ValamaProject (string project_file, string? syntaxfile = null) throws LoadingError {
-        recentmgr.add_item (project_file);
-
         var proj_file = File.new_for_path (project_file);
         this.project_file = proj_file.get_path();
         project_path = proj_file.get_parent().get_path(); //TODO: Check valid path?
+
+        recentmgr.add_item (get_absolute_path(project_file));
 
         try {
             guanako_project = new Guanako.Project (syntaxfile);
