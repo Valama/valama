@@ -62,13 +62,10 @@ public class UiCurrentFileStructure : UiElement {
                 build();
         });
 
-        //TODO: Update only on changes.
-        Timeout.add_seconds (2, () => {
-            /* Lock all store changes to avoid race conditions. */
+        project.guanako_update_started.connect (() => {
             //TODO: Remember current selection  or detect current position automatically.
             lock (store)
                 build();
-            return true;
         });
 
         widget = vbox;

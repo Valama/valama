@@ -26,13 +26,16 @@ using Guanako;
 static Window window_main;
 static MainWidget widget_main;
 static RecentManager recentmgr;
-static WelcomeScreen vscreen;
+static WelcomeScreen? vscreen = null;
 
 public static int main (string[] args) {
     Intl.textdomain (Config.GETTEXT_PACKAGE);
     Intl.bindtextdomain (Config.GETTEXT_PACKAGE, Config.LOCALE_DIR);
     recentmgr = (RecentManager) GLib.Object.new (typeof(RecentManager),
-            filename: Path.build_path (Path.DIR_SEPARATOR_S, Environment.get_user_cache_dir(), "valama", "recent_projects"));
+            filename: Path.build_path (Path.DIR_SEPARATOR_S,
+                                       Environment.get_user_cache_dir(),
+                                       "valama",
+                                       "recent_projects"));
 
     // /* Command line parsing. */
     // /* Copied from Yorba application. */
@@ -57,17 +60,13 @@ public static int main (string[] args) {
 
     loop_update = new MainLoop();
 
-    try {
-        if (Args.projectfiles.length > 0) {
+    if (Args.projectfiles.length > 0)
+        try {
             project = new ValamaProject (Args.projectfiles[0], Args.syntaxfile);
+        } catch (LoadingError e) {
+            errmsg (_("Couldn't load Valama project: %s\n"), e.message);
+            project = null;
         }
-    } catch (LoadingError e) {
-        //FIXME: Handle this error (properly) instead of this pseudo hack
-        //       (same as above).
-        errmsg (_("Couldn't load Valama project: %s\n"), e.message);
-        project = null;
-        return 1;
-    }
 
     load_icons();
 
@@ -88,6 +87,21 @@ public static int main (string[] args) {
         vscreen.project_loaded.connect (show_main_screen);
     }
 
+    Gtk.main();
+
+    project.save();
+    return 0;
+}
+
+static void show_main_screen (ValamaProject load_project) {
+    if (vscreen != null)
+        vscreen.destroy();
+
+    project = load_project;
+    widget_main = new MainWidget();
+    window_main.add (widget_main);
+    window_main.add_accel_group (widget_main.accel_group);
+
     /* Application signals. */
     source_viewer.buffer_close.connect (project.close_buffer);
 
@@ -96,24 +110,11 @@ public static int main (string[] args) {
         project.undo_changed (srcbuf.can_undo);
         project.redo_changed (srcbuf.can_redo);
         if (source_viewer.current_srcfocus != _("New document"))
-            project.buffer_changed (project.buffer_is_dirty (source_viewer.current_srcfocus));
+            project.buffer_changed (project.buffer_is_dirty (
+                                            source_viewer.current_srcfocus));
         else
             project.buffer_changed (true);
     });
-
-    Gtk.main();
-
-    project.save();
-    return 0;
-}
-
-static void show_main_screen (ValamaProject load_project) {
-    vscreen.destroy();
-
-    project = load_project;
-    widget_main = new MainWidget();
-    window_main.add (widget_main);
-    window_main.add_accel_group (widget_main.accel_group);
 }
 
 static void load_icons() {

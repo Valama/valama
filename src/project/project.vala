@@ -499,7 +499,7 @@ public class ValamaProject : Object {
         }
 
         /* Modified flag. */
-        bfr.notify["dirty"].connect ((sender, property) => {
+        bfr.notify["dirty"].connect (() => {
             this.buffer_changed (bfr.dirty);
         });
         bfr.dirty = dirty;
@@ -554,6 +554,7 @@ public class ValamaProject : Object {
     private void update_guanako (SourceBuffer buffer) {
         parsing = true;
         buffer.needs_guanako_update = false;
+        guanako_update_started();
         try {
             /* Get a copy of the buffer that is safe to work on
              * Otherwise, the thread might crash accessing it
@@ -584,6 +585,11 @@ public class ValamaProject : Object {
      * @param has_changes True if buffer is dirty else false.
      */
     public signal void buffer_changed (bool has_changes);
+
+    /**
+     * Emit signal when Guanako update starts.
+     */
+    public signal void guanako_update_started();
 
     /**
      * Save all opened project files.

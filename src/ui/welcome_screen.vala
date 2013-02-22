@@ -24,7 +24,7 @@ public class WelcomeScreen : Grid {
 
     public WelcomeScreen() {
         var box_horiz = new Box (Orientation.HORIZONTAL, 50);
-        box_horiz.homogeneous = true;
+        // box_horiz.homogeneous = true;
         box_horiz.set_size_request (600, 200);
 
         var tv_recent = new TreeView();
@@ -40,16 +40,21 @@ public class WelcomeScreen : Grid {
         foreach (RecentInfo info in recentmgr.get_items()){
             TreeIter iter;
             store.append(out iter, null);
-            store.set (iter, 0, info.get_uri(), 1, info.get_uri());
+            store.set (iter, 0, info.get_uri(), 1, info.get_uri(), -1);
+
         }
         tv_recent.row_activated.connect (on_row_activated);
 
         box_horiz.pack_start (tv_recent, false, true);
 
         var box_actions = new Box (Orientation.VERTICAL, 20);
+
         var btn_create = new Button.with_label("Create new project");
+        btn_create.sensitive = false;
         box_actions.pack_start (btn_create, false, true);
+
         var btn_open = new Button.with_label("Open project");
+        btn_open.sensitive = false;
         box_actions.pack_start (btn_open, false, true);
         box_horiz.pack_start (box_actions, true, true);
 
@@ -71,12 +76,16 @@ public class WelcomeScreen : Grid {
             project_loaded (proj);
     }
 
-    void on_row_activated(TreePath path, TreeViewColumn column) {
+    void on_row_activated (TreePath path, TreeViewColumn column) {
         TreeIter iter;
         store.get_iter (out iter, path);
         string proj_path;
         store.get (iter, 0, out proj_path);
-        project_loaded (new ValamaProject (proj_path, Args.syntaxfile));
+        try {
+            project_loaded (new ValamaProject (proj_path, Args.syntaxfile));
+        } catch (LoadingError e) {
+            error_msg (_("Could not load new project: %s\n"), e.message);
+        }
     }
 
     public signal void project_loaded(ValamaProject project);
