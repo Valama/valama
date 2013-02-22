@@ -172,7 +172,16 @@ public class ValamaProject : Object {
                             project_buildsystem_files,
                             add_buildsystem_file);
 
-        guanako_project.update();
+        parsing = true;
+        new Thread<void*>.try (_("Initial buffer update"), () => {
+            guanako_project.update();
+            Idle.add (() => {
+                guanako_update_finished();
+                parsing = false;
+                return false;
+            });
+            return null;
+        });
 
         vieworder = new Gee.LinkedList<ViewMap?>();
 
