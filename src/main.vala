@@ -25,10 +25,14 @@ using Guanako;
 
 static Window window_main;
 static MainWidget widget_main;
+static RecentManager recentmgr;
+static WelcomeScreen vscreen;
 
 public static int main (string[] args) {
     Intl.textdomain (Config.GETTEXT_PACKAGE);
     Intl.bindtextdomain (Config.GETTEXT_PACKAGE, Config.LOCALE_DIR);
+    recentmgr = (RecentManager) GLib.Object.new (typeof(RecentManager),
+            filename: Path.build_path (Path.DIR_SEPARATOR_S, Environment.get_user_cache_dir(), "recent_projects"));
 
     // /* Command line parsing. */
     // /* Copied from Yorba application. */
@@ -51,15 +55,11 @@ public static int main (string[] args) {
 
     Guanako.debug = Args.debug;
 
-    loop_update  = new MainLoop();
+    loop_update = new MainLoop();
 
     try {
-        if (Args.projectfiles.length > 0)
+        if (Args.projectfiles.length > 0) {
             project = new ValamaProject (Args.projectfiles[0], Args.syntaxfile);
-        else {
-            project = ui_create_project_dialog();
-            if (project == null)
-                return 1;
         }
     } catch (LoadingError e) {
         //FIXME: Handle this error (properly) instead of this pseudo hack
@@ -69,6 +69,54 @@ public static int main (string[] args) {
         return 1;
     }
 
+    load_icons();
+
+    window_main = new Window();
+    window_main.destroy.connect (main_quit);
+    window_main.title = _("Valama");
+    window_main.hide_titlebar_when_maximized = true;
+    window_main.set_default_size (1200, 600);
+    window_main.maximize();
+
+    window_main.show();
+
+    if (project != null) {
+        show_main_screen (project);
+    } else {
+        vscreen = new WelcomeScreen();
+        window_main.add (vscreen);
+        vscreen.project_loaded.connect (show_main_screen);
+    }
+
+    /* Application signals. */
+    source_viewer.buffer_close.connect (project.close_buffer);
+
+    source_viewer.notify["current-srcbuffer"].connect (() => {
+        var srcbuf = source_viewer.current_srcbuffer;
+        project.undo_changed (srcbuf.can_undo);
+        project.redo_changed (srcbuf.can_redo);
+        if (source_viewer.current_srcfocus != _("New document"))
+            project.buffer_changed (project.buffer_is_dirty (source_viewer.current_srcfocus));
+        else
+            project.buffer_changed (true);
+    });
+
+    Gtk.main();
+
+    project.save();
+    return 0;
+}
+
+static void show_main_screen (ValamaProject load_project) {
+    vscreen.destroy();
+
+    project = load_project;
+    widget_main = new MainWidget();
+    window_main.add (widget_main);
+    window_main.add_accel_group (widget_main.accel_group);
+}
+
+static void load_icons() {
     map_icons = new Gee.HashMap<string, Gdk.Pixbuf>();
     foreach (string type in new string[] {"class",
                                           "class-private",
@@ -110,54 +158,18 @@ public static int main (string[] args) {
                                           "struct",
                                           "struct-private",
                                           "struct-public"})
-        try {
-                map_icons[type] = new Gdk.Pixbuf.from_file (Path.build_path (
-                                                Path.DIR_SEPARATOR_S,
-                                                Config.PIXMAP_DIR,
-                                                "element-" + type + "-16.png"));
-        } catch (Gdk.PixbufError e) {
-            errmsg (_("Could not load pixmap: %s\n"), e.message);
-        } catch (GLib.FileError e) {
-            errmsg (_("Could not open pixmaps file: %s\n"), e.message);
-        } catch (GLib.Error e) {
-            errmsg (_("Pixmap loading failed: %s\n"), e.message);
-        }
-
-    window_main = new Window();
-    window_main.destroy.connect (main_quit);
-    window_main.title = _("Valama");
-    window_main.hide_titlebar_when_maximized = true;
-    window_main.set_default_size (1200, 600);
-    window_main.maximize();
-
-    window_main.show();
-
-    source_viewer = new UiSourceViewer();
-    project_builder = new ProjectBuilder (project);
-    frankenstein = new Guanako.FrankenStein();
-    build_output = new BuildOutput();
-
-    widget_main = new MainWidget();
-    window_main.add (widget_main);
-    window_main.add_accel_group (widget_main.accel_group);
-
-    /* Application signals. */
-    source_viewer.buffer_close.connect (project.close_buffer);
-
-    source_viewer.notify["current-srcbuffer"].connect (() => {
-        var srcbuf = source_viewer.current_srcbuffer;
-        project.undo_changed (srcbuf.can_undo);
-        project.redo_changed (srcbuf.can_redo);
-        if (source_viewer.current_srcfocus != _("New document"))
-            project.buffer_changed (project.buffer_is_dirty (source_viewer.current_srcfocus));
-        else
-            project.buffer_changed (true);
-    });
-
-    Gtk.main();
-
-    project.save();
-    return 0;
+    try {
+            map_icons[type] = new Gdk.Pixbuf.from_file (Path.build_path (
+                                            Path.DIR_SEPARATOR_S,
+                                            Config.PIXMAP_DIR,
+                                            "element-" + type + "-16.png"));
+    } catch (Gdk.PixbufError e) {
+        errmsg (_("Could not load pixmap: %s\n"), e.message);
+    } catch (GLib.FileError e) {
+        errmsg (_("Could not open pixmaps file: %s\n"), e.message);
+    } catch (GLib.Error e) {
+        errmsg (_("Pixmap loading failed: %s\n"), e.message);
+    }
 }
 
 static Gdk.Pixbuf? get_pixbuf_for_symbol (Symbol symbol) {

@@ -74,6 +74,11 @@ public class MainWidget : Box {
     public MainWidget() {
         this.destroy.connect (on_destroy);
 
+        source_viewer = new UiSourceViewer();
+        project_builder = new ProjectBuilder (project);
+        frankenstein = new Guanako.FrankenStein();
+        build_output = new BuildOutput();
+
         accel_group = new AccelGroup();
 
         var vbox_main = new Box (Orientation.VERTICAL, 0);
