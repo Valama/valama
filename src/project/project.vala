@@ -554,7 +554,6 @@ public class ValamaProject : Object {
     private void update_guanako (SourceBuffer buffer) {
         parsing = true;
         buffer.needs_guanako_update = false;
-        guanako_update_started();
         try {
             /* Get a copy of the buffer that is safe to work on
              * Otherwise, the thread might crash accessing it
@@ -566,7 +565,7 @@ public class ValamaProject : Object {
                                                 source_viewer.current_srcfocus);
                 this.guanako_project.update_file (source_file, buffer_content);
                 Idle.add (() => {
-                    wdg_report.update();
+                    guanako_update_finished();
                     parsing = false;
                     if (loop_update.is_running())
                         loop_update.quit();
@@ -587,9 +586,9 @@ public class ValamaProject : Object {
     public signal void buffer_changed (bool has_changes);
 
     /**
-     * Emit signal when Guanako update starts.
+     * Emit signal when Guanako update is finished.
      */
-    public signal void guanako_update_started();
+    public signal void guanako_update_finished();
 
     /**
      * Save all opened project files.

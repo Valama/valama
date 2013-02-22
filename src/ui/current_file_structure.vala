@@ -51,22 +51,14 @@ public class UiCurrentFileStructure : UiElement {
         vbox.pack_start (scrw, true, true);
 
         chk_private_symbol = new CheckButton.with_label (_("Private"));
-        chk_private_symbol.clicked.connect(() => {
-            lock (store)
-                build();
-        });
+        chk_private_symbol.clicked.connect(build);
         vbox.pack_start (chk_private_symbol, false, true);
 
         source_viewer.notify["current-srcbuffer"].connect(()=>{
-            lock (store)
-                build();
+            build();
         });
 
-        project.guanako_update_started.connect (() => {
-            //TODO: Remember current selection  or detect current position automatically.
-            lock (store)
-                build();
-        });
+        project.guanako_update_finished.connect (build);
 
         widget = vbox;
 
@@ -145,6 +137,7 @@ public class UiCurrentFileStructure : UiElement {
                     else
                         store.append (out next, iters[depth - 2]);
                     store.set (next, 0, smb.name, 1, get_pixbuf_by_name (typename), -1);
+                    //TODO: Also recognize fields, classes etc
                     if (smb == current_symbol)
                         current_iter = next;
                     map_iter_symbols[store.get_path(next).to_string()] = smb;
@@ -158,8 +151,11 @@ public class UiCurrentFileStructure : UiElement {
             });
         }
         tree_view.expand_all();
-        if (current_iter != null)
+        if (current_iter != null) {
             tree_view.get_selection().select_iter (current_iter);
+            var path = store.get_path (current_iter);
+            tree_view.scroll_to_cell (path, null, true, 0.5f, 0);
+        }
 
         debug_msg (_("%s update finished!\n"), element_name);
     }

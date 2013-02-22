@@ -50,7 +50,6 @@ public class WelcomeScreen : Grid {
         var box_actions = new Box (Orientation.VERTICAL, 20);
 
         var btn_create = new Button.with_label("Create new project");
-        btn_create.sensitive = false;
         box_actions.pack_start (btn_create, false, true);
 
         var btn_open = new Button.with_label("Open project");

@@ -37,6 +37,8 @@ class UiReport : UiElement {
         tree_view.insert_column_with_attributes (-1, _("Location"), new CellRendererText(), "text", 0, null);
         tree_view.insert_column_with_attributes (-1, _("Error"), new CellRendererText(), "text", 1, null);
 
+        project.guanako_update_finished.connect (build);
+
         build();
 
         tree_view.row_activated.connect ((path) => {
