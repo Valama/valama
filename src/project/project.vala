@@ -152,10 +152,10 @@ public class ValamaProject : Object {
         try {
             guanako_project = new Guanako.Project (syntaxfile);
         } catch (GLib.IOError e) {
-            stderr.printf (_("Could not read syntax file: %s"), e.message);
+            errmsg (_("Could not read syntax file: %s"), e.message);
             Gtk.main_quit();
         } catch (GLib.Error e) {
-            stderr.printf (_("An error occured: %s"), e.message);
+            errmsg (_("An error occured: %s"), e.message);
             Gtk.main_quit();
         }
 

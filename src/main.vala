@@ -89,7 +89,8 @@ public static int main (string[] args) {
 
     Gtk.main();
 
-    project.save();
+    if (project != null)
+        project.save();
     return 0;
 }
 
@@ -326,7 +327,7 @@ class TestProvider : Gtk.SourceCompletionProvider, Object {
                 return null;
             });
         } catch (GLib.Error e) {
-            stderr.printf (_("Could not launch completion thread successfully: %s\n"), e.message);
+            errmsg (_("Could not launch completion thread successfully: %s\n"), e.message);
         }
     }
 
