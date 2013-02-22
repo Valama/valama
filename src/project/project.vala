@@ -147,7 +147,7 @@ public class ValamaProject : Object {
         this.project_file = proj_file.get_path();
         project_path = proj_file.get_parent().get_path(); //TODO: Check valid path?
 
-        recentmgr.add_item (get_absolute_path(project_file));
+        recentmgr.add_item (get_absolute_path(this.project_file));
 
         try {
             guanako_project = new Guanako.Project (syntaxfile);
