@@ -24,6 +24,7 @@ public class WelcomeScreen : Alignment {
     TreeStore store;
     Grid grid_create_project_template;
     Grid grid_create_project_name;
+    Grid grid_open_project;
     Grid grid_main;
 
     public WelcomeScreen() {
@@ -31,6 +32,19 @@ public class WelcomeScreen : Alignment {
         this.yalign = 0.5f;
         this.xscale = 0.0f;
         this.yscale = 0.0f;
+        /*stdout.printf (color.red.to_string() + ":" + color.green.to_string() + ":" + color.blue.to_string() + "\n");
+        var clr = Gdk.Color(){red = (uint16)(color.red * 256), blue = (uint16)(color.blue * 256), green = (uint16)(color.green * 256)};
+        clr = Gdk.Color(){red = 255, blue = 0, green = 255};
+        this.modify_bg (StateType.NORMAL, clr);
+        this.modify_bg (StateType.ACTIVE, clr);
+        this.modify_bg (StateType.INSENSITIVE, clr);
+        this.modify_base (StateType.NORMAL, clr);
+        this.modify_base (StateType.ACTIVE, clr);
+        this.modify_base (StateType.INSENSITIVE, clr);
+        this.modify_base (StateType.FOCUSED, clr);
+        window_main.override_background_color (StateFlags.NORMAL, color);*/
+        //var color = window_main.get_style_context().get_color (StateFlags.BACKDROP);
+        //window_main.override_background_color (StateFlags.NORMAL, color);
 
         grid_main = new Grid();
         grid_main.column_spacing = 30;
@@ -75,7 +89,10 @@ public class WelcomeScreen : Alignment {
         grid_main.attach (btn_create, 1, 1, 1, 1);
 
         var btn_open = new Button.with_label("Open project");
-        btn_open.sensitive = false;
+        btn_open.clicked.connect(()=>{
+            this.remove (grid_main);
+            this.add (grid_open_project);
+        });
         grid_main.attach (btn_open, 1, 2, 1, 1);
 
         var p1 = new Label (""); //Stupid placeholder
@@ -92,10 +109,14 @@ public class WelcomeScreen : Alignment {
             this.add (grid_main);
         });
         toolbar_template.add (btn_template_back);
-        var separator2 = new SeparatorToolItem();
-        separator2.set_expand (true);
-        separator2.draw = false;
-        toolbar_template.add (separator2);
+        var lbl_template_title = new Label (_("<b>Create project</b>\nSelect template"));
+        lbl_template_title.use_markup = true;
+        lbl_template_title.justify = Justification.CENTER;
+        var ti_template_title = new ToolItem();
+        ti_template_title.add (lbl_template_title);
+        ti_template_title.set_expand (true);
+        toolbar_template.add (ti_template_title);
+
         var btn_template_next = new ToolButton (new Image.from_icon_name ("go-next-symbolic", IconSize.BUTTON), _("Next"));
         btn_template_next.clicked.connect (()=>{
             this.remove (grid_create_project_template);
@@ -119,11 +140,15 @@ public class WelcomeScreen : Alignment {
             this.add (grid_create_project_template);
         });
         toolbar_name.add (btn_name_back);
-        var separator1 = new SeparatorToolItem();
-        separator1.set_expand (true);
-        separator1.draw = false;
-        toolbar_name.add (separator1);
+        var lbl_name_title = new Label (_("<b>Create project</b>\nProject info"));
+        lbl_name_title.use_markup = true;
+        lbl_name_title.justify = Justification.CENTER;
+        var ti_name_title = new ToolItem();
+        ti_name_title.add (lbl_name_title);
+        ti_name_title.set_expand (true);
+        toolbar_name.add (ti_name_title);
         var btn_name_next = new ToolButton (new Image.from_icon_name ("go-next-symbolic", IconSize.BUTTON), _("Create"));
+        btn_name_next.sensitive = false;
         btn_name_next.is_important = true;
         toolbar_name.add (btn_name_next);
         toolbar_name.hexpand = true;
@@ -139,10 +164,17 @@ public class WelcomeScreen : Alignment {
         ent_proj_name_err.sensitive = false;
         var ent_proj_name = new Entry.with_inputcheck (ent_proj_name_err, valid_chars);
         ent_proj_name.set_placeholder_text (_("Project name"));
+        ent_proj_name.valid_input.connect(()=>{
+            btn_name_next.sensitive = true;
+        });
+        ent_proj_name.invalid_input.connect(()=>{
+            btn_name_next.sensitive = false;
+        });
         var lbl_proj_name = new Label (_("Project name"));
         lbl_proj_name.halign = Align.END;
         grid_proj_info.attach (lbl_proj_name, 0, 2, 1, 1);
         grid_proj_info.attach (ent_proj_name, 1, 2, 1, 1);
+        grid_proj_info.attach (ent_proj_name_err, 2, 2, 1, 1);
         //grid_proj_info.attach (ent_proj_name_err, 1, 3, 1, 1);
 
         var lbl_proj_location = new Label (_("Location"));
@@ -160,21 +192,63 @@ public class WelcomeScreen : Alignment {
             //project_loaded();
         });
 
-        /*var p1 = new Label (""); //Stupid placeholders
-        p1.vexpand = true;
-        grid_proj_info.attach (p1, 0, 1, 1, 1);
-        //lbl_proj_name.hexpand = true;
-        var p2 = new Label ("");
-        p2.vexpand = true;
-        grid_proj_info.attach (p1, 0, 5, 1, 1);*/
         var align_proj_info = new Alignment(0.5f, 0.5f, 0.0f, 0.0f);
+        align_proj_info.expand = true;
         align_proj_info.add (grid_proj_info);
 
         grid_create_project_name.attach (align_proj_info, 0, 1, 1, 1);
 
+
+        grid_open_project = new Grid();
+        grid_open_project.set_size_request (600, 400);
+
+        var toolbar_open = new Toolbar();
+        grid_open_project.attach (toolbar_open, 0, 0, 1, 1);
+        var btn_open_back = new ToolButton (new Image.from_icon_name ("go-previous-symbolic", IconSize.BUTTON), _("Back"));
+        btn_open_back.clicked.connect (()=>{
+            this.remove (grid_open_project);
+            this.add (grid_main);
+        });
+        toolbar_open.add (btn_open_back);
+        var lbl_open_title = new Label (_("<b>Open project</b>"));
+        lbl_open_title.use_markup = true;
+        var ti_open_title = new ToolItem();
+        ti_open_title.add (lbl_open_title);
+        ti_open_title.set_expand (true);
+        toolbar_open.add (ti_open_title);
+        var btn_open_next = new ToolButton (new Image.from_icon_name ("go-next-symbolic", IconSize.BUTTON), _("Open"));
+        var chooser_open = new FileChooserWidget (FileChooserAction.OPEN);
+        chooser_open.expand = true;
+        grid_open_project.attach (chooser_open, 0, 1, 1, 1);
+        var filter_vlp = new FileFilter();
+        filter_vlp.set_filter_name (_("Valama project files (*.vlp)"));
+        filter_vlp.add_pattern ("*.vlp");
+        chooser_open.add_filter (filter_vlp);
+        chooser_open.set_filter (filter_vlp);  // set default filter
+        chooser_open.selection_changed.connect(()=>{
+            var selected_filename = chooser_open.get_filename();
+            if (File.new_for_path (selected_filename).query_file_type(FileQueryInfoFlags.NONE) != FileType.REGULAR)
+                btn_open_next.sensitive = false;
+            else
+                btn_open_next.sensitive = selected_filename.has_suffix (".vlp");
+        });
+        //btn_open_next.sensitive = false;
+        btn_open_next.clicked.connect(()=>{
+            try {
+                project_loaded (new ValamaProject (chooser_open.get_filename(), Args.syntaxfile));
+            } catch (LoadingError e) {
+                error_msg (_("Could not load project: %s\n"), e.message);
+            }
+        });
+        btn_open_next.is_important = true;
+        toolbar_open.add (btn_open_next);
+        toolbar_open.hexpand = true;
+
+
         this.add (grid_main);
         grid_create_project_template.show_all();
         grid_create_project_name.show_all();
+        grid_open_project.show_all();
         this.show_all();
     }
 
