@@ -23,8 +23,8 @@ using Gtk;
 /**
  * Template selection widget; Can return selected item
  */
-public class uiTemplateSelector {
-    public uiTemplateSelector() {
+public class UiTemplateSelector {
+    public UiTemplateSelector() {
 
         tree_view = new TreeView();
         var listmodel = new ListStore (2, typeof (string), typeof (Gdk.Pixbuf));
@@ -43,13 +43,21 @@ public class uiTemplateSelector {
 
         available_templates = load_templates ("en");
 
+        bool first_entry = true;
         foreach (ProjectTemplate template in available_templates) {
             TreeIter iter;
             listmodel.append (out iter);
             listmodel.set (iter, 0, "<b>" + template.name + "</b>\n" + template.description, 1, template.icon);
+            /* Select first entry */
+            if (first_entry) {
+                tree_view.get_selection().select_iter(iter);
+                first_entry = false;
+            }
         }
 
-        this.widget = tree_view;
+        var scrw = new ScrolledWindow (null, null);
+        scrw.add (tree_view);
+        this.widget = scrw;
     }
 
     TreeView tree_view;
@@ -86,7 +94,7 @@ public ValamaProject? ui_create_project_dialog() {
     dlg.set_size_request (420, 300);
     dlg.resizable = false;
 
-    var selector = new uiTemplateSelector();
+    var selector = new UiTemplateSelector();
 
     var box_main = new Box (Orientation.VERTICAL, 0);
     box_main.pack_start (selector.widget, true, true);
@@ -125,17 +133,18 @@ public ValamaProject? ui_create_project_dialog() {
     dlg.set_response_sensitive (ResponseType.ACCEPT, false);
 
     var res = dlg.run();
-
     var template = selector.get_selected_template();
-    string proj_name = ent_proj_name.text;
-    string target_folder = Path.build_path (Path.DIR_SEPARATOR_S,
-                                            chooser_target.get_current_folder(),
-                                            proj_name);
-
     dlg.destroy();
     if (res == ResponseType.CANCEL || res == ResponseType.DELETE_EVENT || template == null)
         return null;
 
+    string target_folder = Path.build_path (Path.DIR_SEPARATOR_S,
+                                            chooser_target.get_current_folder(),
+                                            ent_proj_name.text);
+    return  create_project_from_template (template, target_folder, ent_proj_name.text);
+}
+
+static ValamaProject? create_project_from_template(ProjectTemplate template, string target_folder, string project_name) {
     try { //TODO: Separate different error catchings to provide differentiate error messages.
         //TODO: Add progress bar and at least warn on overwrite (don't skip
         //      without warning).
@@ -147,7 +156,7 @@ public ValamaProject? ui_create_project_dialog() {
                                            "template.vlp"),
                           Path.build_path (Path.DIR_SEPARATOR_S,
                                            target_folder,
-                                           proj_name + ".vlp"),
+                                           project_name + ".vlp"),
                           CopyRecursiveFlags.SKIP_EXISTENT).move();
 
         //TODO: Do this with cmake buildsystem plugin.
@@ -176,8 +185,8 @@ public ValamaProject? ui_create_project_dialog() {
     try {
         new_proj = new ValamaProject (Path.build_path (Path.DIR_SEPARATOR_S,
                                                        target_folder,
-                                                       proj_name + ".vlp"));
-        new_proj.project_name = proj_name;
+                                                       project_name + ".vlp"));
+        new_proj.project_name = project_name;
     } catch (LoadingError e) {
         errmsg (_("Couln't load new project: %s\n"), e.message);
     }

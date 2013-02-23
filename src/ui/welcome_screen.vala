@@ -18,14 +18,31 @@
  */
 
 using Gtk;
+using Gdk;
 
-public class WelcomeScreen : Grid {
+public class WelcomeScreen : Alignment {
     TreeStore store;
+    Grid grid_create_project_template;
+    Grid grid_create_project_name;
+    Grid grid_main;
 
     public WelcomeScreen() {
-        var box_horiz = new Box (Orientation.HORIZONTAL, 50);
-        // box_horiz.homogeneous = true;
-        box_horiz.set_size_request (600, 200);
+        this.xalign = 0.5f;
+        this.yalign = 0.5f;
+        this.xscale = 0.0f;
+        this.yscale = 0.0f;
+
+        grid_main = new Grid();
+        grid_main.column_spacing = 30;
+        grid_main.row_spacing = 15;
+        grid_main.row_homogeneous = false;
+        grid_main.column_homogeneous = true;
+        grid_main.set_size_request (600, 400);
+
+        var img_valama = new Image.from_pixbuf(new Pixbuf.from_file (Path.build_path (Path.DIR_SEPARATOR_S,
+                                                      Config.PACKAGE_DATA_DIR,
+                                                      "valama-text.png")));
+        grid_main.attach (img_valama, 0, 0, 1, 1);
 
         var tv_recent = new TreeView();
         store = new TreeStore (2, typeof (string), typeof (string));
@@ -44,36 +61,123 @@ public class WelcomeScreen : Grid {
 
         }
         tv_recent.row_activated.connect (on_row_activated);
+        var scrw = new ScrolledWindow (null, null);
+        scrw.add (tv_recent);
+        scrw.vexpand = true;
 
-        box_horiz.pack_start (tv_recent, false, true);
-
-        var box_actions = new Box (Orientation.VERTICAL, 20);
+        grid_main.attach (scrw, 0, 1, 1, 3);
 
         var btn_create = new Button.with_label("Create new project");
-        box_actions.pack_start (btn_create, false, true);
+        btn_create.clicked.connect(()=>{
+            this.remove (grid_main);
+            this.add (grid_create_project_template);
+        });
+        grid_main.attach (btn_create, 1, 1, 1, 1);
 
         var btn_open = new Button.with_label("Open project");
         btn_open.sensitive = false;
-        box_actions.pack_start (btn_open, false, true);
-        box_horiz.pack_start (box_actions, true, true);
+        grid_main.attach (btn_open, 1, 2, 1, 1);
 
-        var p1 = new Label (""); //Stupid placeholders
-        p1.expand = true;
+        var p1 = new Label (""); //Stupid placeholder
+        p1.vexpand = true;
+        grid_main.attach (p1, 1, 3, 1, 1);
+
+        grid_create_project_template = new Grid();
+        grid_create_project_template.set_size_request (600, 400);
+        var toolbar_template = new Toolbar();
+        grid_create_project_template.attach (toolbar_template, 0, 0, 1, 1);
+        var btn_template_back = new ToolButton (new Image.from_icon_name ("go-previous-symbolic", IconSize.BUTTON), _("Back"));
+        btn_template_back.clicked.connect (()=>{
+            this.remove (grid_create_project_template);
+            this.add (grid_main);
+        });
+        toolbar_template.add (btn_template_back);
+        var separator2 = new SeparatorToolItem();
+        separator2.set_expand (true);
+        separator2.draw = false;
+        toolbar_template.add (separator2);
+        var btn_template_next = new ToolButton (new Image.from_icon_name ("go-next-symbolic", IconSize.BUTTON), _("Next"));
+        btn_template_next.clicked.connect (()=>{
+            this.remove (grid_create_project_template);
+            this.add (grid_create_project_name);
+        });
+        toolbar_template.add (btn_template_next);
+
+        var template_selector = new UiTemplateSelector();
+        template_selector.widget.expand = true;
+        grid_create_project_template.attach (template_selector.widget, 0, 1, 1, 1);
+
+
+        grid_create_project_name = new Grid();
+        grid_create_project_name.set_size_request (600, 400);
+
+        var toolbar_name = new Toolbar();
+        grid_create_project_name.attach (toolbar_name, 0, 0, 3, 1);
+        var btn_name_back = new ToolButton (new Image.from_icon_name ("go-previous-symbolic", IconSize.BUTTON), _("Back"));
+        btn_name_back.clicked.connect (()=>{
+            this.remove (grid_create_project_name);
+            this.add (grid_create_project_template);
+        });
+        toolbar_name.add (btn_name_back);
+        var separator1 = new SeparatorToolItem();
+        separator1.set_expand (true);
+        separator1.draw = false;
+        toolbar_name.add (separator1);
+        var btn_name_next = new ToolButton (new Image.from_icon_name ("go-next-symbolic", IconSize.BUTTON), _("Create"));
+        btn_name_next.is_important = true;
+        toolbar_name.add (btn_name_next);
+        toolbar_name.hexpand = true;
+
+
+        var grid_proj_info = new Grid();
+        grid_proj_info.column_spacing = 10;
+        grid_proj_info.row_spacing = 15;
+        grid_proj_info.row_homogeneous = false;
+        grid_proj_info.column_homogeneous = true;
+        Regex valid_chars = /^[a-z0-9.:_-]+$/i;  // keep "-" at the end!
+        var ent_proj_name_err = new Label ("");
+        ent_proj_name_err.sensitive = false;
+        var ent_proj_name = new Entry.with_inputcheck (ent_proj_name_err, valid_chars);
+        ent_proj_name.set_placeholder_text (_("Project name"));
+        var lbl_proj_name = new Label (_("Project name"));
+        lbl_proj_name.halign = Align.END;
+        grid_proj_info.attach (lbl_proj_name, 0, 2, 1, 1);
+        grid_proj_info.attach (ent_proj_name, 1, 2, 1, 1);
+        //grid_proj_info.attach (ent_proj_name_err, 1, 3, 1, 1);
+
+        var lbl_proj_location = new Label (_("Location"));
+        lbl_proj_location.halign = Align.END;
+        grid_proj_info.attach (lbl_proj_location, 0, 4, 1, 1);
+        var chooser_location = new FileChooserButton (_("New project location"), Gtk.FileChooserAction.SELECT_FOLDER);
+        grid_proj_info.attach (chooser_location, 1, 4, 1, 1);
+
+        btn_name_next.clicked.connect (()=>{
+            var target_folder = Path.build_path (Path.DIR_SEPARATOR_S,
+                                                chooser_location.get_current_folder(),
+                                                ent_proj_name.text);
+            var new_project = create_project_from_template (template_selector.get_selected_template(), target_folder, ent_proj_name.text);
+            project_loaded (new_project);
+            //project_loaded();
+        });
+
+        /*var p1 = new Label (""); //Stupid placeholders
+        p1.vexpand = true;
+        grid_proj_info.attach (p1, 0, 1, 1, 1);
+        //lbl_proj_name.hexpand = true;
         var p2 = new Label ("");
-        p2.expand = true;
-        this.attach (p1, 0, 0, 1, 1);
-        this.attach (box_horiz, 1, 1, 1, 1);
-        this.attach (p2, 2, 2, 1, 1);
-        btn_create.clicked.connect (on_create_button_clicked);
+        p2.vexpand = true;
+        grid_proj_info.attach (p1, 0, 5, 1, 1);*/
+        var align_proj_info = new Alignment(0.5f, 0.5f, 0.0f, 0.0f);
+        align_proj_info.add (grid_proj_info);
 
+        grid_create_project_name.attach (align_proj_info, 0, 1, 1, 1);
+
+        this.add (grid_main);
+        grid_create_project_template.show_all();
+        grid_create_project_name.show_all();
         this.show_all();
     }
 
-    void on_create_button_clicked() {
-        var proj = ui_create_project_dialog();
-        if (proj != null)
-            project_loaded (proj);
-    }
 
     void on_row_activated (TreePath path, TreeViewColumn column) {
         TreeIter iter;
