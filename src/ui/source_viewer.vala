@@ -101,7 +101,7 @@ class UiSourceViewer : UiElement {
                 var pa = srcitem.parent;
                 /* If something strange happens (pa == null) break the loop. */
                 while (!(pa is Dock) && (pa != null)) {
-                    if (pa is Switcher) {
+                    if (pa is Notebook) {
                         var nbook = (Notebook) pa;
                         nbook.page = nbook.page_num (srcitem);
                     }
@@ -262,7 +262,7 @@ class UiSourceViewer : UiElement {
      */
     private void set_notebook_tabs (DockItem item) {
         var pa = item.parent;
-        if (pa is Switcher) {
+        if (pa is Notebook) {
             var nbook = (Notebook) pa;
             nbook.set_tab_pos (PositionType.TOP);
             foreach (var child in nbook.get_children())
