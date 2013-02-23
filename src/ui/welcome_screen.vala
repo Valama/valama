@@ -58,46 +58,73 @@ public class WelcomeScreen : Alignment {
                                                       "valama-text.png")));
         grid_main.attach (img_valama, 0, 0, 1, 1);
 
-        var tv_recent = new TreeView();
-        store = new TreeStore (2, typeof (string), typeof (string));
-        tv_recent.set_model (store);
-        tv_recent.set_headers_visible (false);
-        tv_recent.insert_column_with_attributes (-1,
-                                                 "",
-                                                 new CellRendererText(),
-                                                 "text",
-                                                 0,
-                                                 null);
-        foreach (RecentInfo info in recentmgr.get_items()){
-            TreeIter iter;
-            store.append(out iter, null);
-            store.set (iter, 0, info.get_uri(), 1, info.get_uri(), -1);
+        var grid_recent_projects = new Grid();
 
+        int cnt = 0;
+        if (recentmgr.get_items().length() > 0) {
+            foreach (RecentInfo info in recentmgr.get_items()){
+                var btn_proj = new Button();
+                btn_proj.clicked.connect (()=>{
+                    try {
+                        project_loaded (new ValamaProject (info.get_uri(), Args.syntaxfile));
+                    } catch (LoadingError e) {
+                        error_msg (_("Could not load new project: %s\n"), e.message);
+                    }
+                });
+                var grid_label = new Grid();
+                var lbl_proj_name = new Label ("<b>" + info.get_short_name() + "</b>");
+                lbl_proj_name.ellipsize = Pango.EllipsizeMode.END;
+                lbl_proj_name.halign = Align.START;
+                lbl_proj_name.use_markup = true;
+                grid_label.attach (lbl_proj_name, 0, 0, 1, 1);
+                var lbl_proj_path = new Label ("<i>" + info.get_uri_display() + "</i>");
+                lbl_proj_path.sensitive = false;
+                lbl_proj_path.ellipsize = Pango.EllipsizeMode.START;
+                lbl_proj_path.halign = Align.START;
+                lbl_proj_path.use_markup = true;
+                grid_label.attach (lbl_proj_path, 0, 1, 1, 1);
+                btn_proj.add (grid_label);
+                //lbl_proj_name.expand = false;
+                btn_proj.hexpand = true;
+                grid_recent_projects.attach (btn_proj, 0, cnt, 1, 1);
+                cnt++;
+            }
+        } else {
+            var lbl_no_recent_projects = new Label (_("No recent projects"));
+            lbl_no_recent_projects.sensitive = false;
+            lbl_no_recent_projects.expand = true;
+            grid_recent_projects.attach (lbl_no_recent_projects, 0, 0, 1, 1);
         }
-        tv_recent.row_activated.connect (on_row_activated);
         var scrw = new ScrolledWindow (null, null);
-        scrw.add (tv_recent);
+        scrw.add_with_viewport (grid_recent_projects);
         scrw.vexpand = true;
+        var lbl_recent_projects = new Label (_("Recent projects"));
+        lbl_recent_projects.halign = Align.START;
+        lbl_recent_projects.sensitive = false;
+        grid_main.attach (lbl_recent_projects, 0, 1, 1, 1);
+        grid_main.attach (scrw, 0, 2, 1, 4);
 
-        grid_main.attach (scrw, 0, 1, 1, 3);
-
-        var btn_create = new Button.with_label("Create new project");
+        var btn_create = new Button.with_label(_("Create new project"));
         btn_create.clicked.connect(()=>{
             this.remove (grid_main);
             this.add (grid_create_project_template);
         });
-        grid_main.attach (btn_create, 1, 1, 1, 1);
+        grid_main.attach (btn_create, 1, 2, 1, 1);
 
-        var btn_open = new Button.with_label("Open project");
+        var btn_open = new Button.with_label(_("Open project"));
         btn_open.clicked.connect(()=>{
             this.remove (grid_main);
             this.add (grid_open_project);
         });
-        grid_main.attach (btn_open, 1, 2, 1, 1);
+        grid_main.attach (btn_open, 1, 3, 1, 1);
 
         var p1 = new Label (""); //Stupid placeholder
         p1.vexpand = true;
-        grid_main.attach (p1, 1, 3, 1, 1);
+        grid_main.attach (p1, 1, 4, 1, 1);
+
+        var btn_quit = new Button.with_label(_("Quit"));
+        btn_quit.clicked.connect(Gtk.main_quit);
+        grid_main.attach (btn_quit, 1, 5, 1, 1);
 
         grid_create_project_template = new Grid();
         grid_create_project_template.set_size_request (600, 400);
@@ -250,19 +277,6 @@ public class WelcomeScreen : Alignment {
         grid_create_project_name.show_all();
         grid_open_project.show_all();
         this.show_all();
-    }
-
-
-    void on_row_activated (TreePath path, TreeViewColumn column) {
-        TreeIter iter;
-        store.get_iter (out iter, path);
-        string proj_path;
-        store.get (iter, 0, out proj_path);
-        try {
-            project_loaded (new ValamaProject (proj_path, Args.syntaxfile));
-        } catch (LoadingError e) {
-            error_msg (_("Could not load new project: %s\n"), e.message);
-        }
     }
 
     public signal void project_loaded(ValamaProject project);
