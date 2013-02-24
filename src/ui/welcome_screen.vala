@@ -21,7 +21,6 @@ using Gtk;
 using Gdk;
 
 public class WelcomeScreen : Alignment {
-    TreeStore store;
     Grid grid_create_project_template;
     Grid grid_create_project_name;
     Grid grid_open_project;
@@ -53,9 +52,15 @@ public class WelcomeScreen : Alignment {
         grid_main.column_homogeneous = true;
         grid_main.set_size_request (600, 400);
 
-        var img_valama = new Image.from_pixbuf(new Pixbuf.from_file (Path.build_path (Path.DIR_SEPARATOR_S,
-                                                      Config.PACKAGE_DATA_DIR,
-                                                      "valama-text.png")));
+        Image? img_valama = null;
+        try {
+            img_valama = new Image.from_pixbuf(new Pixbuf.from_file (
+                                        Path.build_path (Path.DIR_SEPARATOR_S,
+                                                         Config.PACKAGE_DATA_DIR,
+                                                         "valama-text.png")));
+        } catch (GLib.Error e) {
+            errmsg (_("Could not load Valama text logo: %s\n"), e.message);
+        }
         grid_main.attach (img_valama, 0, 0, 1, 1);
 
         var grid_recent_projects = new Grid();

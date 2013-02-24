@@ -173,7 +173,7 @@ public class ValamaProject : Object {
                             add_buildsystem_file);
 
         parsing = true;
-        new Thread<void*>.try (_("Initial buffer update"), () => {
+        new Thread<void*> (_("Initial buffer update"), () => {
             guanako_project.update();
             Idle.add (() => {
                 guanako_update_finished();
