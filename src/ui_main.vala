@@ -37,7 +37,7 @@ static UiSourceViewer source_viewer;
 static UiElementPool ui_elements_pool;
 static BuildOutput build_output;
 static UiCurrentFileStructure wdg_current_file_structure;
-
+static UiBreakpoints wdg_breakpoints;
 static Gee.HashMap<string, Gdk.Pixbuf> map_icons;
 
 
@@ -122,7 +122,7 @@ public class MainWidget : Box {
         report_wrapper = new ReportWrapper();
         project.guanako_project.set_report_wrapper (report_wrapper);
         wdg_report = new UiReport (report_wrapper);
-        var wdg_breakpoints = new UiBreakpoints (frankenstein);
+        wdg_breakpoints = new UiBreakpoints (frankenstein);
 
         ui_elements_pool.add (wdg_report);
 
@@ -343,10 +343,10 @@ public class MainWidget : Box {
         ti.add (target_selector);
         target_selector.append_text (_("Debug"));
         target_selector.append_text (_("Release"));
-        target_selector.active = 0;
         target_selector.changed.connect (() => {
             project.idemode = (IdeModes) target_selector.active;
         });
+        target_selector.active = 0; //Make sure the idemode signal will be emitted
         add_button (ti);
 
         var btnBuild = new Gtk.ToolButton.from_stock (Stock.EXECUTE);
