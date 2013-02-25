@@ -67,6 +67,8 @@ public class MainWidget : Box {
      */
     public AccelGroup accel_group;
 
+    public signal void request_close ();
+
     /**
      * Create MainWindow. Initialize menubar, toolbar, master dock and source
      * dock.
@@ -125,60 +127,54 @@ public class MainWidget : Box {
         ui_elements_pool.add (wdg_report);
 
         /* Gdl elements. */
-        var src_symbol = new ScrolledWindow (null, null);
-        src_symbol.add (smb_browser.widget);
-
-        var src_report = new ScrolledWindow (null, null);
-        src_report.add (wdg_report.widget);
-
         wdg_current_file_structure = new UiCurrentFileStructure();
         var wdg_search = new UiSearch();
         var wdg_stylechecker = new UiStyleChecker();
 
         /* Init new empty buffer. */
         source_viewer.add_srcitem (project.open_new_buffer ("", "", true));
-        add_item ("SourceView", _("Source view"), source_viewer.widget,
+        add_item ("SourceView", _("Source view"), source_viewer,
                               null,
                               DockItemBehavior.NO_GRIP |
                                     DockItemBehavior.CANT_DOCK_CENTER |
                                     DockItemBehavior.CANT_CLOSE,
                               DockPlacement.TOP);
-        add_item ("ReportWrapper", _("Report widget"), src_report,
+        add_item ("ReportWrapper", _("Report widget"), wdg_report,
                               Stock.INFO,
                               DockItemBehavior.CANT_CLOSE, //temporary solution until items can be added later
                               //DockItemBehavior.NORMAL,  //TODO: change this behaviour for all widgets
                               DockPlacement.BOTTOM);
-        add_item ("ProjectBrowser", _("Project browser"), pbrw.widget,
+        add_item ("ProjectBrowser", _("Project browser"), pbrw,
                               Stock.FILE,
                               DockItemBehavior.CANT_CLOSE,
                               DockPlacement.LEFT);
-        add_item ("BuildOutput", _("Build output"), build_output.widget,
+        add_item ("BuildOutput", _("Build output"), build_output,
                               Stock.FILE,
                               DockItemBehavior.CANT_CLOSE,
                               DockPlacement.LEFT);
-        add_item ("Search", _("Search"), wdg_search.widget,
+        add_item ("Search", _("Search"), wdg_search,
                               Stock.FIND,
                               DockItemBehavior.CANT_CLOSE,
                               DockPlacement.LEFT);
-        add_item ("Breakpoints", _("Breakpoints / Timers"), wdg_breakpoints.widget,
+        add_item ("Breakpoints", _("Breakpoints / Timers"), wdg_breakpoints,
                               Stock.FILE,
                               DockItemBehavior.CANT_CLOSE,
                               DockPlacement.LEFT);
-        add_item ("CurrentFileStructure", _("Current file"), wdg_current_file_structure.widget,
+        add_item ("CurrentFileStructure", _("Current file"), wdg_current_file_structure,
                               Stock.FILE,
                               DockItemBehavior.CANT_CLOSE,
                               DockPlacement.LEFT);
-        add_item ("StyleChecker", _("Coding style checker"), wdg_stylechecker.widget,
+        add_item ("StyleChecker", _("Coding style checker"), wdg_stylechecker,
                               Stock.COLOR_PICKER,
                               DockItemBehavior.CANT_CLOSE,
                               DockPlacement.LEFT);
-        add_item ("SymbolBrowser", _("Symbol browser"), src_symbol,
+        add_item ("SymbolBrowser", _("Symbol browser"), smb_browser,
                               Stock.CONVERT,
                               DockItemBehavior.CANT_CLOSE,
                               DockPlacement.RIGHT);
 
         build_toolbar();
-        build_menu();
+        // build_menu();
 
         /* Keep this before layout loading. */
         this.show_all();
@@ -296,17 +292,24 @@ public class MainWidget : Box {
     }
 
     void build_toolbar() {
+        var btnReturn = new ToolButton (new Image.from_icon_name ("go-previous-symbolic", IconSize.BUTTON), _("Back"));
+        add_button (btnReturn);
+        btnReturn.set_tooltip_text (_("Close project"));
+        btnReturn.clicked.connect (()=>{ request_close(); });
+
+        add_button (new SeparatorToolItem());
+
         var btnNewFile = new ToolButton.from_stock (Stock.NEW);
         add_button (btnNewFile);
         btnNewFile.set_tooltip_text (_("Create new file"));
         btnNewFile.clicked.connect (create_new_file);
 
-        var btnLoadProject = new ToolButton.from_stock (Stock.OPEN);
+        /*var btnLoadProject = new ToolButton.from_stock (Stock.OPEN);
         add_button (btnLoadProject);
         btnLoadProject.set_tooltip_text (_("Open project"));
         btnLoadProject.clicked.connect (() => {
             ui_load_project (ui_elements_pool);
-        });
+        });*/
 
         var btnSave = new ToolButton.from_stock (Stock.SAVE);
         add_button (btnSave);
@@ -380,14 +383,37 @@ public class MainWidget : Box {
                 btnRun.stock_id = Stock.MEDIA_PLAY;
         });
 
-        add_button (new SeparatorToolItem());
+        var separator_expand = new SeparatorToolItem();
+        separator_expand.set_expand (true);
+        separator_expand.draw = false;
+        toolbar.add (separator_expand);
 
-        var btnSettings = new Gtk.ToolButton.from_stock (Stock.PREFERENCES);
-        add_button (btnSettings);
-        btnSettings.set_tooltip_text (_("Settings"));
-        btnSettings.clicked.connect (() => {
-            ui_project_dialog (project);
+        var btn_lock = new ToggleToolButton ();
+        btn_lock.icon_name = "changes-prevent-symbolic";
+        btn_lock.clicked.connect (()=>{
+            foreach (UiElement element in new UiElement[] {wdg_current_file_structure, pbrw, build_output, wdg_report}) {
+                if (btn_lock.active) {
+                    //wdg_current_file_structure.dock_item.behavior += DockItemBehavior.NO_GRIP;
+                    element.dock_item.behavior = DockItemBehavior.NO_GRIP;
+                    element.dock_item.locked = true;
+                    element.dock_item.hide_grip();
+                    //wdg_current_file_structure.dock_item.locked = true;
+                    //wdg_current_file_structure.dock_item.behavior -= DockItemBehavior.NORMAL;
+                    //wdg_current_file_structure.dock_item.
+                    //wdg_current_file_structure.dock_item.behavior += DockItemBehavior.LOCKED;
+                } else {
+                    //wdg_current_file_structure.dock_item.behavior -= DockItemBehavior.NO_GRIP;
+                    element.dock_item.behavior = DockItemBehavior.CANT_CLOSE;
+                    element.dock_item.locked = false;
+                    element.dock_item.show_grip();
+                    //wdg_current_file_structure.dock_item.locked = false;
+                    //wdg_current_file_structure.dock_item.behavior += DockItemBehavior.NORMAL;
+                    //wdg_current_file_structure.dock_item.behavior -= DockItemBehavior.LOCKED;
+                }
+                element.dock_item.queue_resize();
+            }
         });
+        toolbar.add (btn_lock);
     }
 
     /**
@@ -401,7 +427,7 @@ public class MainWidget : Box {
      * @param placement {@link Gdl.DockPlacement} of new {@link Gdl.DockItem}.
      */
     public void add_item (string item_name, string item_long_name,
-                          Widget widget,
+                          UiElement element,
                           string? stock = null,
                           DockItemBehavior behavior,
                           DockPlacement placement) {
@@ -410,7 +436,8 @@ public class MainWidget : Box {
             item = new DockItem (item_name, item_long_name, behavior);
         else
             item = new DockItem.with_stock (item_name, item_long_name, stock, behavior);
-        item.add (widget);
+        item.add (element.widget);
+        element.dock_item = item;
         this.dock.add_item (item, placement);
         item.show();
     }

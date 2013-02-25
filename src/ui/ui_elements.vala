@@ -35,6 +35,9 @@ public abstract class UiElement : Object{
      */
     protected string element_name;
 
+    public Gtk.Widget widget;
+    public Gdl.DockItem dock_item;
+
     /**
      * Share the project ({@link ValamaProject}) between all elements.
      */

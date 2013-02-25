@@ -67,7 +67,6 @@ public class UiSearch : UiElement {
     }
 
     TreeView tree_view;
-    public Widget widget;
 
     Gee.HashMap<string, SearchResult?> map_paths_results;
     struct SearchResult {

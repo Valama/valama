@@ -26,7 +26,6 @@ using Gtk;
 class UiReport : UiElement {
     ReportWrapper report;
     TreeView tree_view;
-    public Widget widget;
 
     public UiReport (ReportWrapper report) {
         this.report = report;
@@ -54,7 +53,10 @@ class UiReport : UiElement {
         });
         tree_view.can_focus = false;
 
-        widget = tree_view;
+        var scrw = new ScrolledWindow (null, null);
+        scrw.add (tree_view);
+
+        widget = scrw;
     }
 
     public override void build() {

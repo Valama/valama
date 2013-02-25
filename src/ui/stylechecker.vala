@@ -25,7 +25,6 @@ using Gtk;
  */
 public class UiStyleChecker : UiElement {
     TreeView tree_view;
-    public Widget widget;
 
     public UiStyleChecker() {
         element_name = "StyleChecker";

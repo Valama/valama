@@ -79,10 +79,10 @@ public static int main (string[] args) {
 
     window_main.show();
 
+    vscreen = new WelcomeScreen();
     if (project != null) {
         show_main_screen (project);
     } else {
-        vscreen = new WelcomeScreen();
         window_main.add (vscreen);
         vscreen.project_loaded.connect (show_main_screen);
     }
@@ -96,7 +96,7 @@ public static int main (string[] args) {
 
 static void show_main_screen (ValamaProject load_project) {
     if (vscreen != null)
-        vscreen.destroy();
+        window_main.remove (vscreen);
 
     project = load_project;
     widget_main = new MainWidget();
@@ -115,6 +115,10 @@ static void show_main_screen (ValamaProject load_project) {
                                             source_viewer.current_srcfocus));
         else
             project.buffer_changed (true);
+    });
+    widget_main.request_close.connect(()=>{
+        window_main.remove (widget_main);
+        window_main.add (vscreen);
     });
 }
 

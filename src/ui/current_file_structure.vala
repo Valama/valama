@@ -25,9 +25,8 @@ using GLib;
  * Show current file's basic structure
  */
 public class UiCurrentFileStructure : UiElement {
-    public Widget widget;
     TreeView tree_view;
-    CheckButton chk_private_symbol;
+    ToggleToolButton btn_show_private;
     Gee.HashMap<string, Symbol> map_iter_symbols = new Gee.HashMap<string, Symbol>();
     TreeStore store;
 
@@ -35,7 +34,27 @@ public class UiCurrentFileStructure : UiElement {
         element_name = "CurrentFileStructure";
         var vbox = new Box (Orientation.VERTICAL, 0);
 
+        var toolbar_title = new Toolbar ();
+        toolbar_title.get_style_context().add_class (STYLE_CLASS_PRIMARY_TOOLBAR);
+        var ti_title = new ToolItem();
+        ti_title.add (new Label (_("Current file")));
+        toolbar_title.add(ti_title);
+
+        var separator_stretch = new SeparatorToolItem();
+        separator_stretch.set_expand (true);
+        separator_stretch.draw = false;
+        toolbar_title.add (separator_stretch);
+
+        btn_show_private = new ToggleToolButton ();
+        btn_show_private.clicked.connect (build);
+        btn_show_private.label = _("Private");
+        btn_show_private.is_important = true;
+        toolbar_title.add (btn_show_private);
+
+        vbox.pack_start (toolbar_title, false, true);
+
         tree_view = new TreeView();
+        tree_view.headers_visible = false;
         var col = new TreeViewColumn();
         tree_view.insert_column (col, -1);
         var pixbuf_renderer = new CellRendererPixbuf();
@@ -49,10 +68,6 @@ public class UiCurrentFileStructure : UiElement {
         var scrw = new ScrolledWindow (null, null);
         scrw.add (tree_view);
         vbox.pack_start (scrw, true, true);
-
-        chk_private_symbol = new CheckButton.with_label (_("Private"));
-        chk_private_symbol.clicked.connect(build);
-        vbox.pack_start (chk_private_symbol, false, true);
 
         source_viewer.notify["current-srcbuffer"].connect(build);
         project.guanako_update_finished.connect (build);
@@ -125,7 +140,7 @@ public class UiCurrentFileStructure : UiElement {
                                          smb is Variable ||
                                          smb is TypeSymbol)) {
                     if (smb.access == SymbolAccessibility.PRIVATE) {
-                        if (!chk_private_symbol.active)
+                        if (!btn_show_private.active)
                             return Guanako.IterCallbackReturns.ABORT_BRANCH;
                         typename += "-private";
                     }

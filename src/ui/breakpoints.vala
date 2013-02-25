@@ -26,7 +26,6 @@ using Guanako;
  */
 class UiBreakpoints : UiElement {
     TreeView tree_view;
-    public Widget widget;
     Guanako.FrankenStein frankenstein;
     ListStore? store = null;
     MainLoop resume_wait_loop = new MainLoop();

@@ -27,10 +27,6 @@ using Gee;
  */
 class UiSourceViewer : UiElement {
     /**
-     * Master widget to connect with parent widgets.
-     */
-    public Box widget { get; private set; }
-    /**
      * Source code dock.
      */
     private Dock srcdock;
@@ -85,7 +81,7 @@ class UiSourceViewer : UiElement {
         this.srclayout = new DockLayout (this.srcdock);
 
         widget = new Box (Orientation.HORIZONTAL, 0);
-        widget.pack_end (this.srcdock);
+        ((Box)widget).pack_end (this.srcdock);
     }
 
     /**

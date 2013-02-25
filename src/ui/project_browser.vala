@@ -26,7 +26,6 @@ using GLib;
  */
 public class ProjectBrowser : UiElement {
     private TreeView tree_view;
-    public Widget widget;
 
     private Gee.ArrayList<TreePath> tree_view_expanded;
 
@@ -36,6 +35,7 @@ public class ProjectBrowser : UiElement {
         element_name = "ProjectBrowser";
 
         tree_view = new TreeView();
+        tree_view.headers_visible = false;
         tree_view.insert_column_with_attributes (-1,
                                                  _("Project"),
                                                  new CellRendererText(),
@@ -63,7 +63,27 @@ public class ProjectBrowser : UiElement {
         btn_rem.sensitive = false;
         toolbar.add (btn_rem);
 
+        var toolbar_title = new Toolbar ();
+        toolbar_title.get_style_context().add_class (STYLE_CLASS_PRIMARY_TOOLBAR);
+        var ti_title = new ToolItem();
+        ti_title.add (new Label (_("Project")));
+        toolbar_title.add(ti_title);
+
+        var separator_stretch = new SeparatorToolItem();
+        separator_stretch.set_expand (true);
+        separator_stretch.draw = false;
+        toolbar_title.add (separator_stretch);
+
+        var btnSettings = new Gtk.ToolButton (null, null);
+        btnSettings.icon_name = "emblem-system-symbolic";
+        toolbar_title.add (btnSettings);
+        btnSettings.set_tooltip_text (_("Settings"));
+        btnSettings.clicked.connect (() => {
+            ui_project_dialog (project);
+        });
+
         var vbox = new Box (Orientation.VERTICAL, 0);
+        vbox.pack_start (toolbar_title, false, true);
         vbox.pack_start (scrw, true, true);
         vbox.pack_start (toolbar, false, true);
 

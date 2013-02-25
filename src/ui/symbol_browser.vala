@@ -53,11 +53,13 @@ public class SymbolBrowser : UiElement {
 
         build();
 
-        widget = tree_view;
+        var scrw = new ScrolledWindow (null, null);
+        scrw.add (tree_view);
+
+        widget = scrw;
     }
 
     TreeView tree_view;
-    public Widget widget;
 
     public override void build() {
         debug_msg (_("Run %s update!\n"), element_name);

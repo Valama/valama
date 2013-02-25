@@ -25,7 +25,6 @@ using GLib;
  * Browse source code.
  */
 public class BuildOutput : UiElement {
-    public Widget widget;
     private TextView textview;
     private ProgressBar progressbar;
 
