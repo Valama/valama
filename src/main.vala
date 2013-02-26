@@ -80,15 +80,14 @@ public static int main (string[] args) {
     window_main.show();
 
     vscreen = new WelcomeScreen();
-    if (project != null) {
+    vscreen.project_loaded.connect ((project) => {
+        window_main.remove (vscreen);
         show_main_screen (project);
-    } else {
+    });
+    if (project != null)
+        show_main_screen (project);
+    else
         window_main.add (vscreen);
-        vscreen.project_loaded.connect ((project) => {
-            window_main.remove (vscreen);
-            show_main_screen (project);
-        });
-    }
 
     Gtk.main();
 
