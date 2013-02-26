@@ -76,6 +76,8 @@ class UiSourceViewer : UiElement {
      * Create source viewer object and initialize {@link Gdl.Dock}.
      */
     public UiSourceViewer() {
+        locking = false;
+
         srcdock = new Dock();
         this.srcdock.master.switcher_style = SwitcherStyle.TABS;
         this.srclayout = new DockLayout (this.srcdock);
@@ -357,7 +359,7 @@ class UiSourceViewer : UiElement {
     }
 
     public override void build() {
-        debug_msg (_("Run %s update!\n"), element_name);
-        debug_msg (_("%s update finished!\n"), element_name);
+        debug_msg (_("Run %s update!\n"), get_name());
+        debug_msg (_("%s update finished!\n"), get_name());
     }
 }

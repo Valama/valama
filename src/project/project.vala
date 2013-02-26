@@ -32,9 +32,70 @@ const string VLP_VERSION_MIN = "0.1";
 /**
  * IDE modes on which plugins can decide how to do some tasks.
  */
+[Flags]
 public enum IdeModes {
-    DEBUG   = 0,
-    RELEASE = 1
+    DEBUG,
+    RELEASE;
+
+    /**
+     * Number of modes.
+     */
+    const int size = 2;
+
+    /**
+     * Convert mode to string.
+     *
+     * @param mode {@link IdeModes} mode.
+     * @return Return associated string or null.
+     */
+    public string? to_string() {
+        switch (this) {
+            case DEBUG:
+                return _("Debug");
+            case RELEASE:
+                return _("Release");
+            default:
+                error_msg (_("Could not convert IdeModes to string: %u\n"), (int) this);
+                return null;
+        }
+    }
+
+    /**
+     * Convert int to {@link IdeModes}.
+     *
+     * @param num Integer number.
+     * @return Return corresponding mode or {@link IdeModes.DEBUG}.
+     */
+    public static IdeModes int_to_mode (int num) {
+        int ret = 1;
+        for (int i = 0; i < num; ++i)
+            ret *= 2;
+        return (IdeModes) ret;
+    }
+
+    /**
+     * Convert {@link IdeModes} to int.
+     */
+    public static int to_int (IdeModes mode) {
+        int ret = -1;
+        int t = (int) mode;
+        do {
+            t >>= 1;
+            ++ret;
+        } while (t > 0);
+        return ret;
+    }
+
+    /**
+     * List of all enum values.
+     */
+    public static IdeModes[] values() {
+        var ret = new IdeModes[0];
+        var ec = (EnumClass) typeof (IdeModes).class_ref();
+        for (int i = 0; i < size; ++i)
+            ret += IdeModes.int_to_mode (i);
+        return ret;
+    }
 }
 
 

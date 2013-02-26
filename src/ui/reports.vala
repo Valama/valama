@@ -30,8 +30,6 @@ class UiReport : UiElement {
     public UiReport (ReportWrapper report) {
         this.report = report;
 
-        element_name = "UiReport";
-
         tree_view = new TreeView();
         tree_view.insert_column_with_attributes (-1, _("Location"), new CellRendererText(), "text", 0, null);
         tree_view.insert_column_with_attributes (-1, _("Error"), new CellRendererText(), "text", 1, null);
@@ -60,7 +58,7 @@ class UiReport : UiElement {
     }
 
     public override void build() {
-        debug_msg (_("Run %s update!\n"), element_name);
+        debug_msg (_("Run %s update!\n"), get_name());
         var store = new ListStore (2, typeof (string), typeof (string));
         tree_view.set_model (store);
 
@@ -115,7 +113,7 @@ class UiReport : UiElement {
         }*/
 
         debug_msg (_("Errors: %i, Warnings: %i\n"), report.errors_list.size, report.warnings_list.size);
-        debug_msg (_("%s update finished!\n"), element_name);
+        debug_msg (_("%s update finished!\n"), get_name());
     }
 }
 

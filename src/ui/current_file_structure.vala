@@ -31,7 +31,6 @@ public class UiCurrentFileStructure : UiElement {
     TreeStore store;
 
     public UiCurrentFileStructure () {
-        element_name = "CurrentFileStructure";
         var vbox = new Box (Orientation.VERTICAL, 0);
 
         var toolbar_title = new Toolbar ();
@@ -90,9 +89,9 @@ public class UiCurrentFileStructure : UiElement {
     }
 
     protected override void build() {
-        debug_msg (_("Run %s update!\n"), element_name);
+        debug_msg (_("Run %s update!\n"), get_name());
         if (source_viewer.current_srcfocus == null) {
-            debug_msg (_("%s update finished (not a valid buffer)!\n"), element_name);
+            debug_msg (_("%s update finished (not a valid buffer)!\n"), get_name());
             return;
         }
 
@@ -101,7 +100,7 @@ public class UiCurrentFileStructure : UiElement {
         tree_view.set_model (store);
         var focus_file = project.guanako_project.get_source_file_by_name (source_viewer.current_srcfocus);
         if (focus_file == null) {
-            debug_msg (_("%s update finished (not a valid source buffer)!\n"), element_name);
+            debug_msg (_("%s update finished (not a valid source buffer)!\n"), get_name());
             return;
         }
         var mark_insert = source_viewer.current_srcbuffer.get_insert();
@@ -171,7 +170,7 @@ public class UiCurrentFileStructure : UiElement {
             tree_view.scroll_to_cell (path, null, true, 0.5f, 0);
         }
 
-        debug_msg (_("%s update finished!\n"), element_name);
+        debug_msg (_("%s update finished!\n"), get_name());
     }
 }
 

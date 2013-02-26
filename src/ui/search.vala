@@ -24,8 +24,6 @@ using Gtk;
  */
 public class UiSearch : UiElement {
     public UiSearch () {
-        element_name = "Search";
-
         tree_view = new TreeView();
         var line_renderer = new CellRendererText();
         line_renderer.yalign = 0;
@@ -192,8 +190,8 @@ public class UiSearch : UiElement {
     }
 
     public override void build() {
-        debug_msg (_("Run %s update!\n"), element_name);
-        debug_msg (_("%s update finished!\n"), element_name);
+        debug_msg (_("Run %s update!\n"), get_name());
+        debug_msg (_("%s update finished!\n"), get_name());
     }
 }
 

@@ -29,13 +29,12 @@ static bool parsing = false;
 static MainLoop loop_update;
 
 //FIXME: Avoid those globals with signals.
-static ProjectBrowser pbrw;
+static ProjectBrowser wdg_pbrw;
 static ReportWrapper report_wrapper;
 static UiReport wdg_report;
 static ProjectBuilder project_builder;
 static UiSourceViewer source_viewer;
-static UiElementPool ui_elements_pool;
-static BuildOutput build_output;
+static BuildOutput wdg_build_output;
 static UiCurrentFileStructure wdg_current_file_structure;
 static UiBreakpoints wdg_breakpoints;
 static Gee.HashMap<string, Gdk.Pixbuf> map_icons;
@@ -67,7 +66,19 @@ public class MainWidget : Box {
      */
     public AccelGroup accel_group;
 
-    public signal void request_close ();
+    /**
+     * Emit when widget can be closed.
+     */
+    public signal void request_close();
+
+    /**
+     * Emit to hide dock item grip (if not disabled).
+     */
+    public signal void lock_items();
+    /**
+     * Emit to show dock item grip.
+     */
+    public signal void unlock_items();
 
     /**
      * Create MainWindow. Initialize menubar, toolbar, master dock and source
@@ -76,23 +87,18 @@ public class MainWidget : Box {
     public MainWidget() {
         this.destroy.connect (on_destroy);
 
-        source_viewer = new UiSourceViewer();
-        project_builder = new ProjectBuilder (project);
-        frankenstein = new Guanako.FrankenStein();
-        build_output = new BuildOutput();
-
         accel_group = new AccelGroup();
 
-        var vbox_main = new Box (Orientation.VERTICAL, 0);
-        this.pack_start (vbox_main, true, true);
+        this.orientation = Orientation.VERTICAL;
+        this.spacing = 0;
 
         /* Menubar. */
         this.menubar = new MenuBar();
-        vbox_main.pack_start (menubar, false, true);
+        this.pack_start (menubar, false, true);
 
         /* Toolbar. */
         this.toolbar = new Toolbar();
-        vbox_main.pack_start (toolbar, false, true);
+        this.pack_start (toolbar, false, true);
         var toolbar_scon = toolbar.get_style_context();
         toolbar_scon.add_class (STYLE_CLASS_PRIMARY_TOOLBAR);
 
@@ -106,78 +112,77 @@ public class MainWidget : Box {
         var box = new Box (Orientation.HORIZONTAL, 5);
         box.pack_start (dockbar, false, false, 0);
         box.pack_end (dock, true, true, 0);
-        vbox_main.pack_start (box, true, true, 0);
+        this.pack_start (box, true, true, 0);
+    }
 
-        /* Ui elements. */
-        ui_elements_pool = new UiElementPool();
-        pbrw = new ProjectBrowser (project);
-        pbrw.file_selected.connect ((filename) => {
+    /**
+     * Initialize Ui elements, menu and toolbar.
+     */
+    public void init() {
+        source_viewer = new UiSourceViewer();
+        source_viewer.add_srcitem (project.open_new_buffer ("", "", true));
+
+        wdg_pbrw = new ProjectBrowser (project);
+        wdg_pbrw.file_selected.connect ((filename) => {
             on_file_selected(filename);
         });
 
-        var smb_browser = new SymbolBrowser();
-        pbrw.connect (smb_browser);
-        ui_elements_pool.add (pbrw);
+        var wdg_smb_browser = new SymbolBrowser();
+        wdg_pbrw.connect (wdg_smb_browser);
 
         report_wrapper = new ReportWrapper();
         project.guanako_project.set_report_wrapper (report_wrapper);
         wdg_report = new UiReport (report_wrapper);
+
+        frankenstein = new Guanako.FrankenStein();
         wdg_breakpoints = new UiBreakpoints (frankenstein);
 
-        ui_elements_pool.add (wdg_report);
-
-        /* Gdl elements. */
+        project_builder = new ProjectBuilder (project);
+        wdg_build_output = new BuildOutput();
         wdg_current_file_structure = new UiCurrentFileStructure();
         var wdg_search = new UiSearch();
         var wdg_stylechecker = new UiStyleChecker();
 
-        /* Init new empty buffer. */
-        source_viewer.add_srcitem (project.open_new_buffer ("", "", true));
+        /* Gdl elements. */
         add_item ("SourceView", _("Source view"), source_viewer,
                               null,
-                              DockItemBehavior.NO_GRIP |
-                                    DockItemBehavior.CANT_DOCK_CENTER |
-                                    DockItemBehavior.CANT_CLOSE,
+                              DockItemBehavior.NO_GRIP | DockItemBehavior.CANT_DOCK_CENTER,
                               DockPlacement.TOP);
         add_item ("ReportWrapper", _("Report widget"), wdg_report,
                               Stock.INFO,
-                              DockItemBehavior.CANT_CLOSE, //temporary solution until items can be added later
-                              //DockItemBehavior.NORMAL,  //TODO: change this behaviour for all widgets
+                              DockItemBehavior.NORMAL,
                               DockPlacement.BOTTOM);
-        add_item ("ProjectBrowser", _("Project browser"), pbrw,
+        add_item ("ProjectBrowser", _("Project browser"), wdg_pbrw,
                               Stock.FILE,
-                              DockItemBehavior.CANT_CLOSE,
+                              DockItemBehavior.NORMAL,
                               DockPlacement.LEFT);
-        add_item ("BuildOutput", _("Build output"), build_output,
+        add_item ("BuildOutput", _("Build output"), wdg_build_output,
                               Stock.FILE,
-                              DockItemBehavior.CANT_CLOSE,
+                              DockItemBehavior.NORMAL,
                               DockPlacement.LEFT);
         add_item ("Search", _("Search"), wdg_search,
                               Stock.FIND,
-                              DockItemBehavior.CANT_CLOSE,
+                              DockItemBehavior.NORMAL,
                               DockPlacement.LEFT);
         add_item ("Breakpoints", _("Breakpoints / Timers"), wdg_breakpoints,
                               Stock.FILE,
-                              DockItemBehavior.CANT_CLOSE,
+                              DockItemBehavior.NORMAL,
                               DockPlacement.LEFT);
         add_item ("CurrentFileStructure", _("Current file"), wdg_current_file_structure,
                               Stock.FILE,
-                              DockItemBehavior.CANT_CLOSE,
+                              DockItemBehavior.NORMAL,
                               DockPlacement.LEFT);
         add_item ("StyleChecker", _("Coding style checker"), wdg_stylechecker,
                               Stock.COLOR_PICKER,
-                              DockItemBehavior.CANT_CLOSE,
+                              DockItemBehavior.NORMAL,
                               DockPlacement.LEFT);
-        add_item ("SymbolBrowser", _("Symbol browser"), smb_browser,
+        add_item ("SymbolBrowser", _("Symbol browser"), wdg_smb_browser,
                               Stock.CONVERT,
-                              DockItemBehavior.CANT_CLOSE,
+                              DockItemBehavior.NORMAL,
                               DockPlacement.RIGHT);
 
-        build_toolbar();
-        // build_menu();
-
         /* Keep this before layout loading. */
-        this.show_all();
+        dock.show_all();
 
         /* Load default layout. Either local one or system wide. */
         bool err = false;
@@ -197,9 +202,18 @@ public class MainWidget : Box {
         if (Args.reset_layout || (!load_layout (local_layout_filename, null, err) &&
                                                                 Args.layoutfile == null))
             load_layout (system_layout_filename);
+
+        /* Keep this after layout loading. */
+        build_toolbar();
+        build_menu();
+
+        this.show_all();
     }
 
-    void on_destroy() {
+    /**
+     * Save gdl layout.
+     */
+    private void on_destroy() {
         var local_layout_filename = Path.build_path (Path.DIR_SEPARATOR_S,
                                                      Environment.get_user_cache_dir(),
                                                      "valama",
@@ -214,7 +228,10 @@ public class MainWidget : Box {
         save_layout (local_layout_filename);
     }
 
-    void build_menu() {
+    /**
+     * Build up menu.
+     */
+    private void build_menu() {
         /* File */
         var item_file = new Gtk.MenuItem.with_mnemonic ("_" + _("File"));
         add_menu (item_file);
@@ -230,7 +247,7 @@ public class MainWidget : Box {
         var item_open = new ImageMenuItem.from_stock (Stock.OPEN, null);
         menu_file.append (item_open);
         item_open.activate.connect (() => {
-            ui_load_project (ui_elements_pool);
+            ui_load_project();
         });
         add_accel_activate (item_open, "o");
 
@@ -291,11 +308,16 @@ public class MainWidget : Box {
         item_about.activate.connect (ui_about_dialog);
     }
 
-    void build_toolbar() {
+    /**
+     * Build up toolbar.
+     */
+    private void build_toolbar() {
         var btnReturn = new ToolButton (new Image.from_icon_name ("go-previous-symbolic", IconSize.BUTTON), _("Back"));
         add_button (btnReturn);
         btnReturn.set_tooltip_text (_("Close project"));
-        btnReturn.clicked.connect (()=>{ request_close(); });
+        btnReturn.clicked.connect (() => {
+            request_close();
+        });
 
         add_button (new SeparatorToolItem());
 
@@ -308,7 +330,7 @@ public class MainWidget : Box {
         add_button (btnLoadProject);
         btnLoadProject.set_tooltip_text (_("Open project"));
         btnLoadProject.clicked.connect (() => {
-            ui_load_project (ui_elements_pool);
+            ui_load_project();
         });*/
 
         var btnSave = new ToolButton.from_stock (Stock.SAVE);
@@ -341,19 +363,20 @@ public class MainWidget : Box {
         target_selector.set_tooltip_text (_("IDE mode"));
         var ti = new ToolItem();
         ti.add (target_selector);
-        target_selector.append_text (_("Debug"));
-        target_selector.append_text (_("Release"));
+        foreach (var mode in IdeModes.values())
+            target_selector.append_text (mode.to_string());
         target_selector.changed.connect (() => {
-            project.idemode = (IdeModes) target_selector.active;
+            project.idemode = IdeModes.int_to_mode (target_selector.active);
         });
-        target_selector.active = 0; //Make sure the idemode signal will be emitted
+        /* Make sure the idemode signal will be emitted. */
+        target_selector.active = IdeModes.to_int (project.idemode);
         add_button (ti);
 
         var btnBuild = new Gtk.ToolButton.from_stock (Stock.EXECUTE);
         add_button (btnBuild);
         btnBuild.set_tooltip_text (_("Save current file and build project"));
         btnBuild.clicked.connect (() => {
-            build_output.clear();
+            wdg_build_output.clear();
             switch (project.idemode) {
                 case IdeModes.RELEASE:
                     project_builder.build_project();
@@ -390,28 +413,11 @@ public class MainWidget : Box {
 
         var btn_lock = new ToggleToolButton ();
         btn_lock.icon_name = "changes-prevent-symbolic";
-        btn_lock.clicked.connect (()=>{
-            foreach (UiElement element in new UiElement[] {wdg_current_file_structure, pbrw, build_output, wdg_report}) {
-                if (btn_lock.active) {
-                    //wdg_current_file_structure.dock_item.behavior += DockItemBehavior.NO_GRIP;
-                    element.dock_item.behavior = DockItemBehavior.NO_GRIP;
-                    element.dock_item.locked = true;
-                    element.dock_item.hide_grip();
-                    //wdg_current_file_structure.dock_item.locked = true;
-                    //wdg_current_file_structure.dock_item.behavior -= DockItemBehavior.NORMAL;
-                    //wdg_current_file_structure.dock_item.
-                    //wdg_current_file_structure.dock_item.behavior += DockItemBehavior.LOCKED;
-                } else {
-                    //wdg_current_file_structure.dock_item.behavior -= DockItemBehavior.NO_GRIP;
-                    element.dock_item.behavior = DockItemBehavior.CANT_CLOSE;
-                    element.dock_item.locked = false;
-                    element.dock_item.show_grip();
-                    //wdg_current_file_structure.dock_item.locked = false;
-                    //wdg_current_file_structure.dock_item.behavior += DockItemBehavior.NORMAL;
-                    //wdg_current_file_structure.dock_item.behavior -= DockItemBehavior.LOCKED;
-                }
-                element.dock_item.queue_resize();
-            }
+        btn_lock.toggled.connect (() => {
+            if (btn_lock.active)
+                lock_items();
+            else
+                unlock_items();
         });
         toolbar.add (btn_lock);
     }
@@ -429,13 +435,15 @@ public class MainWidget : Box {
     public void add_item (string item_name, string item_long_name,
                           UiElement element,
                           string? stock = null,
-                          DockItemBehavior behavior,
-                          DockPlacement placement) {
+                          DockItemBehavior behavior = DockItemBehavior.NORMAL,
+                          DockPlacement placement = DockPlacement.LEFT) {
         DockItem item;
+        //FIXME: Temporarely prevent closing of items until they can be added.
         if (stock ==  null)
-            item = new DockItem (item_name, item_long_name, behavior);
+            item = new DockItem (item_name, item_long_name, behavior | DockItemBehavior.CANT_CLOSE);
         else
-            item = new DockItem.with_stock (item_name, item_long_name, stock, behavior);
+            item = new DockItem.with_stock (item_name, item_long_name, stock, behavior
+                                                            | DockItemBehavior.CANT_CLOSE);
         item.add (element.widget);
         element.dock_item = item;
         this.dock.add_item (item, placement);

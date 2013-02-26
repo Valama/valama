@@ -39,8 +39,6 @@ class UiBreakpoints : UiElement {
         frankenstein.timer_finished.connect (timer_finished);
         frankenstein.stop_reached.connect (stop_reached);
 
-        element_name = "UiBreakpoints";
-
         var box_main = new Box (Orientation.VERTICAL, 0);
 
         tree_view = new TreeView();
@@ -93,10 +91,7 @@ class UiBreakpoints : UiElement {
 
         box_main.pack_start (toolbar, false, true);
 
-        this.dock_item.visible = project.idemode == IdeModes.DEBUG;
-        project.notify["idemode"].connect(() => {
-            this.dock_item.visible = project.idemode == IdeModes.DEBUG;
-        });
+        mode_to_show (IdeModes.DEBUG);
 
         source_viewer.notify["current-srcbuffer"].connect (() => {
             /* Don't enable button on non-source files. */
@@ -184,7 +179,7 @@ class UiBreakpoints : UiElement {
     }
 
     public override void build() {
-        debug_msg (_("Run %s update!\n"), element_name);
+        debug_msg (_("Run %s update!\n"), get_name());
         store = new ListStore (3, typeof (string), typeof (string), typeof (string));
         tree_view.set_model (store);
 
@@ -232,7 +227,7 @@ class UiBreakpoints : UiElement {
             bfr.create_source_mark (null, "stop", iter);
         }
 
-        debug_msg (_("%s update finished!\n"), element_name);
+        debug_msg (_("%s update finished!\n"), get_name());
     }
 }
 

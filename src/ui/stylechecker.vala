@@ -27,8 +27,6 @@ public class UiStyleChecker : UiElement {
     TreeView tree_view;
 
     public UiStyleChecker() {
-        element_name = "StyleChecker";
-
         tree_view = new TreeView();
         var line_renderer = new CellRendererText();
         line_renderer.yalign = 0;

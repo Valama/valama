@@ -84,7 +84,10 @@ public static int main (string[] args) {
         show_main_screen (project);
     } else {
         window_main.add (vscreen);
-        vscreen.project_loaded.connect (show_main_screen);
+        vscreen.project_loaded.connect ((project) => {
+            window_main.remove (vscreen);
+            show_main_screen (project);
+        });
     }
 
     Gtk.main();
@@ -95,11 +98,9 @@ public static int main (string[] args) {
 }
 
 static void show_main_screen (ValamaProject load_project) {
-    if (vscreen != null)
-        window_main.remove (vscreen);
-
     project = load_project;
     widget_main = new MainWidget();
+    widget_main.init();
     window_main.add (widget_main);
     window_main.add_accel_group (widget_main.accel_group);
 
@@ -207,7 +208,7 @@ static void create_new_file() {
     if (source_file != null) {
         project.guanako_project.add_source_file (source_file);
         source_viewer.focus_src (source_file.filename);
-        pbrw.update();
+        wdg_pbrw.update();
     }
 }
 

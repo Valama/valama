@@ -27,7 +27,6 @@ public class SymbolBrowser : UiElement {
     public SymbolBrowser (ValamaProject? vproject=null) {
         if (vproject != null)
             project = vproject;
-        element_name = "SymbolBrowser";
 
         tree_view = new TreeView();
         tree_view.insert_column_with_attributes (-1,
@@ -62,7 +61,7 @@ public class SymbolBrowser : UiElement {
     TreeView tree_view;
 
     public override void build() {
-        debug_msg (_("Run %s update!\n"), element_name);
+        debug_msg (_("Run %s update!\n"), get_name());
         var store = new TreeStore (3, typeof (string), typeof (string), typeof (Gdk.Pixbuf));
         tree_view.set_model (store);
 
@@ -96,7 +95,7 @@ public class SymbolBrowser : UiElement {
             }
             return Guanako.IterCallbackReturns.CONTINUE;
         });
-        debug_msg (_("%s update finished!\n"), element_name);
+        debug_msg (_("%s update finished!\n"), get_name());
     }
 }
 

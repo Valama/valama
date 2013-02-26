@@ -32,7 +32,6 @@ public class ProjectBrowser : UiElement {
     public ProjectBrowser (ValamaProject? vproject = null) {
         if (vproject != null)
             project = vproject;
-        element_name = "ProjectBrowser";
 
         tree_view = new TreeView();
         tree_view.headers_visible = false;
@@ -66,8 +65,16 @@ public class ProjectBrowser : UiElement {
         var toolbar_title = new Toolbar ();
         toolbar_title.get_style_context().add_class (STYLE_CLASS_PRIMARY_TOOLBAR);
         var ti_title = new ToolItem();
-        ti_title.add (new Label (_("Project")));
+        var plabel = new Label (project.project_name);
+        ti_title.add (plabel);
         toolbar_title.add(ti_title);
+
+        project.notify["project-name"].connect (() => {
+            ti_title.remove (plabel);
+            plabel = new Label (project.project_name);
+            ti_title.add (plabel);
+            ti_title.show_all();
+        });
 
         var separator_stretch = new SeparatorToolItem();
         separator_stretch.set_expand (true);
@@ -180,7 +187,7 @@ public class ProjectBrowser : UiElement {
     private Gee.HashMap<string, TreeIter?> b_pathmap;
 
     protected override void build() {
-        debug_msg (_("Run %s update!\n"), element_name);
+        debug_msg (_("Run %s update!\n"), get_name());
         var store = new TreeStore (2, typeof (string), typeof (int));
         tree_view.set_model (store);
 
@@ -201,7 +208,7 @@ public class ProjectBrowser : UiElement {
 
         foreach (var path in tree_view_expanded)
             tree_view.expand_to_path (path);
-        debug_msg (_("%s update finished!\n"), element_name);
+        debug_msg (_("%s update finished!\n"), get_name());
     }
 
     /**

@@ -22,10 +22,8 @@ using GLib;
 
 /**
  * Load new projects (with dialog).
- *
- * @param ui_elements_pool Pool to update all connected {@link UiElement} components.
  */
-public void ui_load_project (UiElementPool ui_elements_pool) {
+public void ui_load_project() {
     var dlg = new FileChooserDialog (_("Open project"),
                                      window_main,
                                      FileChooserAction.OPEN,
@@ -79,8 +77,6 @@ public void ui_load_project (UiElementPool ui_elements_pool) {
             }
             dlg.close();
             project = new_project;
-            foreach (UiElement element in ui_elements_pool)
-                element.update (project);
             on_file_selected (project.guanako_project.get_source_files()[0].filename);
             return;
         } else {

@@ -31,17 +31,82 @@ using Gee;
  */
 public abstract class UiElement : Object{
     /**
-     * Element name to identify elements easily.
+     * Possibility to lock gdl items (lock and hide grip).
      */
-    protected string element_name;
+    protected bool locking;
 
     public Gtk.Widget widget;
-    public Gdl.DockItem dock_item;
+    public Gdl.DockItem? dock_item { get; set; default = null; }
 
     /**
      * Share the project ({@link ValamaProject}) between all elements.
      */
     public static ValamaProject project { get; set; }
+
+    /**
+     * Connect locking and unlocking signals.
+     */
+    public UiElement() {
+        if (widget_main is Object) {
+            widget_main.lock_items.connect (lock_item);
+            widget_main.unlock_items.connect (unlock_item);
+        } else {
+            error_msg (_("Could not connect locking signals.\n"));
+        }
+        locking = true;
+    }
+
+    /**
+     * Hide dock item grip and lock it.
+     */
+    private void lock_item() {
+        if (!locking || dock_item == null)
+            return;
+        dock_item.behavior = Gdl.DockItemBehavior.NO_GRIP | Gdl.DockItemBehavior.LOCKED;
+        /* Work arround gdl bug to not hide dockbar properly. */
+        dock_item.forall_internal (true, (child) => {
+            if (child is Gdl.DockItemGrip)
+                child.hide();
+        });
+    }
+
+    /**
+     * Show dock item grip and unlock it.
+     */
+    private void unlock_item() {
+        if (!locking || dock_item == null)
+            return;
+        dock_item.behavior = Gdl.DockItemBehavior.CANT_CLOSE;
+        dock_item.forall_internal (true, (child) => {
+            if (child is Gdl.DockItemGrip)
+                child.show();
+        });
+    }
+
+    /**
+     * Query element name to identify class object.
+     *
+     * @return Return name.
+     */
+    public inline virtual string get_name() {
+        return this.get_type().name();
+    }
+
+    /**
+     * Show item in some {@link IdeModes} modes.
+     */
+    //TODO: Add workaround for gdl < 3.5.5 to dock gdl item after hiding.
+    public void mode_to_show (IdeModes mode) {
+        project.notify["idemode"].connect(() => {
+            if (dock_item != null) {
+                if ((project.idemode & mode) != 0) {
+                    dock_item.show_item();
+                    dock_item.show_all();
+                } else
+                    dock_item.hide_item();
+            }
+        });
+    }
 
     /**
       * Update and generate this {@link UiElement}.
@@ -63,7 +128,7 @@ public abstract class UiElement : Object{
         if (vproject != null)
             project = vproject;
         /* Already start first update. */
-        //t = new Thread<void*> (element_name, (ThreadFunc<void*>) build);
+        //t = new Thread<void*> (get_name(), (ThreadFunc<void*>) build);
 #if NOT_THREADED
         //t.join();
 #endif
@@ -156,11 +221,5 @@ public abstract class UiElement : Object{
     //TODO: Not implemented.
     //public void abort() {}
 }
-
-/**
- * Toplevel UiElement pool. This is only transitional until gdl...
- */
-//FIXME: Replace this.
-public class UiElementPool : ArrayList<UiElement> {}
 
 // vim: set ai ts=4 sts=4 et sw=4
