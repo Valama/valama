@@ -142,10 +142,22 @@ public class UiCurrentFileStructure : UiElement {
                                          smb is Subroutine ||
                                          smb is Variable ||
                                          smb is TypeSymbol)) {
-                    if (smb.access == SymbolAccessibility.PRIVATE) {
-                        if (!btn_show_private.active)
-                            return Guanako.IterCallbackReturns.ABORT_BRANCH;
-                        typename += "-private";
+                    switch (smb.access) {
+                        case SymbolAccessibility.INTERNAL:  //TODO: Add internal icons
+                        case SymbolAccessibility.PRIVATE:
+                            if (!btn_show_private.active)
+                                return Guanako.IterCallbackReturns.ABORT_BRANCH;
+                            typename += "-private";
+                            break;
+                        case SymbolAccessibility.PUBLIC:
+                            // typename += "-public";
+                            break;
+                        case SymbolAccessibility.PROTECTED:
+                            typename += "-protected";
+                            break;
+                        default:
+                            bug_msg (_("Unknown SymbolAccessibility type: %d\n"), smb.access);
+                            break;
                     }
 
                     TreeIter next;
