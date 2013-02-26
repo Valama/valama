@@ -520,6 +520,25 @@ public class MainWidget : Box {
     }
 
     /**
+     * Focus a {@link Gdl.DockItem}.
+     *
+     * @param item The item to recveive focus.
+     */
+    public void focus_dock_item (DockItem item) {
+        /* Hack arround gdl_dock_notebook with gtk_notebook. */
+        var pa = item.parent;
+        /* If something strange happens (pa == null) break the loop. */
+        while (!(pa is Dock) && (pa != null)) {
+            if (pa is Notebook) {
+                var nbook = (Notebook) pa;
+                nbook.page = nbook.page_num (item);
+            }
+            pa = pa.parent;
+        }
+    }
+
+
+    /**
      * Add accelerator for "activate" signal.
      *
      * @param item {@link Gtk.Widget} to connect.

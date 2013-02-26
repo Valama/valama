@@ -60,6 +60,7 @@ public class BuildOutput : UiElement {
 
     private void buildsys_output (string output) {
         textview.buffer.text += output;
+        widget_main.focus_dock_item (this.dock_item);
     }
 
     protected override void build() {

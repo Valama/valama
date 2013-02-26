@@ -95,20 +95,11 @@ class UiSourceViewer : UiElement {
     public void focus_src (string filename) {
         foreach (var srcitem in srcitems) {
             if (project.get_absolute_path (srcitem.long_name) == filename) {
-                /* Hack arround gdl_dock_notebook with gtk_notebook. */
-                var pa = srcitem.parent;
-                /* If something strange happens (pa == null) break the loop. */
-                while (!(pa is Dock) && (pa != null)) {
-                    if (pa is Notebook) {
-                        var nbook = (Notebook) pa;
-                        nbook.page = nbook.page_num (srcitem);
-                    }
-                    pa = pa.parent;
-                    Idle.add (() => {
-                        get_sourceview(srcitem).grab_focus();
-                        return false;
-                    });
-                }
+                widget_main.focus_dock_item (srcitem);
+                Idle.add (() => {
+                    get_sourceview(srcitem).grab_focus();
+                    return false;
+                });
                 return;
             }
         }
