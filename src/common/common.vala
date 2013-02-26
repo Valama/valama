@@ -615,6 +615,11 @@ public void debug_msg (string format, ...) {
         stdout.printf (format.vprintf (va_list()));
 }
 
+public void debug_msg_level (int level, string format, ...) {
+    if (Args.debuglevel >= level)
+        stdout.printf (format.vprintf (va_list()));
+}
+
 public void warning_msg (string format, ...) {
     stdout.printf (_("Warning: ") + format.vprintf (va_list()));
 }

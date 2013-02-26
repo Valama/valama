@@ -30,7 +30,6 @@ static MainLoop loop_update;
 
 //FIXME: Avoid those globals with signals.
 static ProjectBrowser wdg_pbrw;
-static ReportWrapper report_wrapper;
 static UiReport wdg_report;
 static ProjectBuilder project_builder;
 static UiSourceViewer source_viewer;
@@ -130,7 +129,7 @@ public class MainWidget : Box {
         var wdg_smb_browser = new SymbolBrowser();
         wdg_pbrw.connect (wdg_smb_browser);
 
-        report_wrapper = new ReportWrapper();
+        var report_wrapper = new ReportWrapper();
         project.guanako_project.set_report_wrapper (report_wrapper);
         wdg_report = new UiReport (report_wrapper);
 

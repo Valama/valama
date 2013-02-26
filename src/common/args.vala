@@ -25,6 +25,7 @@ namespace Args {
     public string? templatesdir = null;
     public string? buildsystemsdir = null;
     public bool debug = false;
+    public int debuglevel = 0;
     public string? layoutfile = null;
     public bool reset_layout = false;
     [CCode (array_length = false, array_null_terminated = true)]
@@ -36,6 +37,7 @@ namespace Args {
         {"templates", 0, 0, OptionArg.FILENAME, ref templatesdir, N_("Templates directory."), N_("DIRECTORY")},
         {"buildsystems", 0, 0, OptionArg.FILENAME, ref buildsystemsdir, N_("Buildsystems directory."), N_("DIRECTORY")},
         {"debug", 'd', 0, OptionArg.NONE, ref debug, N_("Output debug information."), null},
+        {"debuglevel", 0, 0, OptionArg.INT, ref debuglevel, N_("Output verbose debug information."), N_("LEVEL")},
         {"layout", 0, 0, OptionArg.FILENAME, ref layoutfile, N_("Path to layout file."), N_("FILE")},
         {"reset-layout", 0, 0, OptionArg.NONE, ref reset_layout, N_("Load default layout."), null},
         {"", 0, 0, OptionArg.FILENAME_ARRAY, ref projectfiles, N_("Load project from file."), N_("[FILE...]")},

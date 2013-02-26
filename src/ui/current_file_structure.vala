@@ -54,14 +54,18 @@ public class UiCurrentFileStructure : UiElement {
 
         tree_view = new TreeView();
         tree_view.headers_visible = false;
+
         var col = new TreeViewColumn();
+
         tree_view.insert_column (col, -1);
         var pixbuf_renderer = new CellRendererPixbuf();
         col.pack_start (pixbuf_renderer, false);
         col.set_attributes (pixbuf_renderer, "pixbuf", 1);
+
         var text_renderer = new CellRendererText();
         col.pack_start (text_renderer, true);
         col.set_attributes (text_renderer, "text", 0);
+
         tree_view.cursor_changed.connect (on_tree_view_cursor_changed);
 
         var scrw = new ScrolledWindow (null, null);
@@ -150,7 +154,6 @@ public class UiCurrentFileStructure : UiElement {
                     else
                         store.append (out next, iters[depth - 2]);
                     store.set (next, 0, smb.name, 1, get_pixbuf_by_name (typename), -1);
-                    //TODO: Also recognize fields, classes etc
                     if (smb == current_symbol)
                         current_iter = next;
                     map_iter_symbols[store.get_path(next).to_string()] = smb;

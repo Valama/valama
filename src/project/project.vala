@@ -630,7 +630,7 @@ public class ValamaProject : Object {
              */
             string buffer_content =  buffer.text;
             new Thread<void*>.try (_("Buffer update"), () => {
-                report_wrapper.clear();
+                guanako_update_started();
                 var source_file = this.guanako_project.get_source_file_by_name (
                                                 source_viewer.current_srcfocus);
                 this.guanako_project.update_file (source_file, buffer_content);
@@ -659,6 +659,11 @@ public class ValamaProject : Object {
      * Emit signal when Guanako update is finished.
      */
     public signal void guanako_update_finished();
+
+    /**
+     * Emit signal when Guanako update has started.
+     */
+    public signal void guanako_update_started();
 
     /**
      * Save all opened project files.
