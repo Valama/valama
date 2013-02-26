@@ -65,7 +65,7 @@ public class ProjectBuilder {
                 foreach (string src_file_path in project.files){
                     if (src_file_path.has_suffix (".vapi"))
                         continue;
-                    string content;
+                    string content = "";
                     try {
                         FileUtils.get_contents (src_file_path, out content);
                     } catch (GLib.FileError e) {

@@ -17,6 +17,7 @@
  *
  */
 
+using GLib;
 using Gtk;
 using Gdk;
 

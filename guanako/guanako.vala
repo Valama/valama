@@ -79,8 +79,14 @@ namespace Guanako {
             return null;
         }
 
-        public SourceFile? add_source_file_by_name (string filename) {
-            var source_file = new SourceFile (context,
+        public SourceFile? add_source_file_by_name (string filename, bool is_vapi = false) {
+            SourceFile source_file;
+            if (is_vapi)
+                source_file = new SourceFile (context,
+                                              SourceFileType.PACKAGE,
+                                              filename);
+            else
+                source_file = new SourceFile (context,
                                               SourceFileType.SOURCE,
                                               filename);
             if (!add_source_file (source_file))

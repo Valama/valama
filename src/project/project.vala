@@ -262,7 +262,7 @@ public class ValamaProject : Object {
             return;
         msg (_("Found file %s\n"), filename);
         if (this.files.add (filename))
-            guanako_project.add_source_file_by_name (filename);
+            guanako_project.add_source_file_by_name (filename, filename.has_suffix (".vapi"));
         else
             debug_msg (_("Skip already added file: %s"), filename);
     }
