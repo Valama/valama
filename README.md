@@ -19,10 +19,11 @@ The next gen Vala IDE.
  * gtksourceview-3.0
  * libxml-2.0
  * gthread-2.0
+ * GNOME desktop icon theme (symbolic icons) (only required to display icons properly)
 
 On Debian based system install following packages:
 
-    sudo apt-get install build-essential valac-0.18 libvala-0.18-dev cmake pkg-config libgtk-3-dev libgtksourceview-3.0-dev libgee-dev libxml2-dev libgdl-3-dev
+    sudo apt-get install build-essential valac-0.18 libvala-0.18-dev cmake pkg-config libgtk-3-dev libgtksourceview-3.0-dev libgee-dev libxml2-dev libgdl-3-dev gnome-icon-theme-symbolic
 
 If you want to use `gee-0.8` instead of `gee-1.0`, change `cmake/project.cmake` and `cmake/guanako.cmake` accordingly.
 
