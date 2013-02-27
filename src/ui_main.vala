@@ -376,18 +376,7 @@ public class MainWidget : Box {
         add_button (btnBuild);
         btnBuild.set_tooltip_text (_("Save current file and build project"));
         btnBuild.clicked.connect (() => {
-            wdg_build_output.clear();
-            switch (project.idemode) {
-                case IdeModes.RELEASE:
-                    project_builder.build_project();
-                    break;
-                case IdeModes.DEBUG:
-                    project_builder.build_project (frankenstein);
-                    break;
-                default:
-                    bug_msg (_("Unknown IDE mode: %s\n"), project.idemode.to_string());
-                    break;
-            }
+            project_builder.build_project();
         });
 
         var btnRun = new Gtk.ToolButton.from_stock (Stock.MEDIA_PLAY);

@@ -19,17 +19,24 @@
 using GLib;
 using Guanako;
 
-public class ProjectBuilder {
+public class ProjectBuilder : Object{
     private ValamaProject project;
     public bool app_running { public get; private set; }
     private Pid app_pid;
+    private bool project_needs_compile = false;
 
     public ProjectBuilder (ValamaProject project) {
         this.project = project;
+        project.buffer_changed.connect((has_changes)=>{
+            if (has_changes)
+                project_needs_compile = true;
+        });
     }
 
-    public signal void buildsys_output (string output);
-    public signal void buildsys_progress (int percent);
+    public signal void build_started ();
+    public signal void build_output (string output);
+    public signal void build_progress (int percent);
+    public signal void build_finished ();
     public signal void app_state_changed (bool app_running);
 
     /**
@@ -38,7 +45,7 @@ public class ProjectBuilder {
      * @return Return true on success else false.
      */
     //FIXME: Currently no check if build was successful.
-    public bool build_project (FrankenStein? stein = null) {
+    public bool build_project () {
         var buildpath = Path.build_path (Path.DIR_SEPARATOR_S,
                                          project.project_path,
                                          "build");
@@ -50,6 +57,8 @@ public class ProjectBuilder {
             errmsg (_("Could not create directory '%s': %s\n"), buildpath, e.message);
         }
 
+        build_started();
+
         int exitstatus = 0;
 
         if (project.buildsystem == "valama") {
@@ -58,7 +67,7 @@ public class ProjectBuilder {
             valacargs += "--output=" + project.project_name.casefold();
             foreach (string pkg in project.guanako_project.packages)
                 valacargs += "--pkg=" + pkg;
-            if (stein == null){
+            if (project.idemode != IdeModes.DEBUG){
                 foreach (Vala.SourceFile file in project.guanako_project.get_source_files())
                     valacargs += file.filename;
             } else {
@@ -79,9 +88,9 @@ public class ProjectBuilder {
 
                     try {
                         var dos = new DataOutputStream (tmpfile.replace (null, false, FileCreateFlags.REPLACE_DESTINATION));
-                        dos.put_string (stein.frankensteinify_sourcefile(srcfile));
+                        dos.put_string (frankenstein.frankensteinify_sourcefile(srcfile));
                         if (cnt == 0)
-                            dos.put_string (stein.get_frankenstein_mainblock());
+                            dos.put_string (frankenstein.get_frankenstein_mainblock());
                     } catch (GLib.IOError e) {
                         errmsg (_("Could not update file: %s\n"), e.message);
                     } catch (GLib.Error e) {
@@ -118,7 +127,7 @@ public class ProjectBuilder {
                 } catch (GLib.IOChannelError e) {
                     errmsg (_("IOChannel operation failed: %s\n"), e.message);
                 }
-                buildsys_output (output);
+                build_output (output);
                 return false;
             });
             var chnerr = new IOChannel.unix_new (valac_error);
@@ -132,12 +141,14 @@ public class ProjectBuilder {
                 } catch (GLib.IOChannelError e) {
                     errmsg (_("IOChannel operation failed: %s\n"), e.message);
                 }
-                buildsys_output (output);
+                build_output (output);
                 return false;
             });
-            buildsys_output (_("Adding valac watch\n"));
+            build_output (_("Adding valac watch\n"));
             ChildWatch.add (valac_pid, (pid, status) => {
                 Process.close_pid (pid);
+                build_finished();
+                project_needs_compile = false;
             });
             return true;
         }
@@ -191,7 +202,7 @@ public class ProjectBuilder {
             errmsg (_("Could not open file: %s\n"), e.message);
         }
 
-        buildsys_output (_("Launching cmake...\n"));
+        build_output (_("Launching cmake...\n"));
         Pid cmake_pid;
         int cmake_stdout;
         int cmake_error;
@@ -219,13 +230,13 @@ public class ProjectBuilder {
             } catch (GLib.IOChannelError e) {
                 errmsg (_("IOChannel operation failed: %s\n"), e.message);
             }
-            buildsys_output (output);
+            build_output (output);
             return false;
         });
-        buildsys_output (_("Adding cmake watch\n"));
+        build_output (_("Adding cmake watch\n"));
         ChildWatch.add (cmake_pid, (pid, status) => {
             Process.close_pid (pid);
-            buildsys_output (_("Launching make...\n"));
+            build_output (_("Launching make...\n"));
             Pid make_pid;
             int make_stdout;
             int make_error;
@@ -254,17 +265,19 @@ public class ProjectBuilder {
                 } catch (GLib.IOChannelError e) {
                     errmsg (_("IOChannel operation failed: %s\n"), e.message);
                 }
-                buildsys_output (output);
+                build_output (output);
                 Regex r = /^\[(?P<percent>.*)\%\].*$/;
                 MatchInfo info;
                 if (r.match (output, 0, out info)) {
                     var percent_string = info.fetch_named ("percent");
-                    buildsys_progress (int.parse (percent_string));
+                    build_progress (int.parse (percent_string));
                 }
                 return true;
             });
             ChildWatch.add (make_pid, (pid, status) => {
                 Process.close_pid (pid);
+                build_finished();
+                project_needs_compile = false;
             });
         });
 
@@ -292,10 +305,22 @@ public class ProjectBuilder {
     /**
      * Launch application (and build if necessary).
      */
+    ulong handler_id;
     public void launch() {
         if (app_running)
             return;
 
+        if (project_needs_compile) {
+            build_project();
+            handler_id = build_finished.connect (()=>{
+                internal_launch();
+                this.disconnect (handler_id);
+            });
+        } else
+            internal_launch();
+    }
+
+    private void internal_launch() {
         var buildpath = Path.build_path (Path.DIR_SEPARATOR_S,
                                          project.project_path,
                                          "build");
@@ -343,7 +368,7 @@ public class ProjectBuilder {
             } catch (GLib.IOChannelError e) {
                 errmsg (_("IOChannel operation failed: %s\n"), e.message);
             }
-            buildsys_output (output);
+            build_output (output);
             return false;
         });
         ChildWatch.add (app_pid, (pid, status) => {

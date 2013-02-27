@@ -45,20 +45,22 @@ public class BuildOutput : UiElement {
         progressbar.halign = Align.START;
         progressbar.set_size_request (200, 0);
 
-        project_builder.buildsys_progress.connect (buildsys_progress);
-        project_builder.buildsys_output.connect (buildsys_output);
+        project_builder.build_started.connect (()=> {
+            textview.buffer.text = "";
+            progressbar.visible = true;
+        });
+        project_builder.build_finished.connect (()=> {
+            progressbar.visible = false;
+        });
+        project_builder.build_progress.connect (build_progress);
+        project_builder.build_output.connect (build_output);
     }
 
-    public void clear() {
-        textview.buffer.text = "";
-    }
-
-    private void buildsys_progress (int percent) {
+    private void build_progress (int percent) {
         progressbar.fraction = percent / 100f;
-        progressbar.visible = percent != 100;
     }
 
-    private void buildsys_output (string output) {
+    private void build_output (string output) {
         textview.buffer.text += output;
         widget_main.focus_dock_item (this.dock_item);
     }
