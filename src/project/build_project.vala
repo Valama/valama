@@ -31,6 +31,9 @@ public class ProjectBuilder : Object{
             if (has_changes)
                 project_needs_compile = true;
         });
+        project.notify["idemode"].connect(() => {
+            project_needs_compile = true;
+        });
     }
 
     public signal void build_started ();
