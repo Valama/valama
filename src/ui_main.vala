@@ -114,6 +114,7 @@ public class MainWidget : Box {
         box.pack_start (dockbar, false, false, 0);
         box.pack_end (dock, true, true, 0);
         this.pack_start (box, true, true, 0);
+        box.show_all();
     }
 
     /**
@@ -213,7 +214,7 @@ public class MainWidget : Box {
         build_toolbar();
         build_menu();
 
-        this.show_all();
+        show();
     }
 
     /**
@@ -241,36 +242,35 @@ public class MainWidget : Box {
         /* File */
         var item_file = new Gtk.MenuItem.with_mnemonic ("_" + _("File"));
         add_menu (item_file);
-
         var menu_file = new Gtk.Menu();
         item_file.set_submenu (menu_file);
 
-        var item_new = new ImageMenuItem.from_stock (Stock.NEW, null);
-        menu_file.append (item_new);
-        item_new.activate.connect (create_new_file);
-        add_accel_activate (item_new, Gdk.Key.n);
+        var item_file_new = new ImageMenuItem.from_stock (Stock.NEW, null);
+        menu_file.append (item_file_new);
+        item_file_new.activate.connect (create_new_file);
+        add_accel_activate (item_file_new, Gdk.Key.n);
 
-        var item_open = new ImageMenuItem.from_stock (Stock.OPEN, null);
-        menu_file.append (item_open);
-        item_open.activate.connect (() => {
+        var item_file_open = new ImageMenuItem.from_stock (Stock.OPEN, null);
+        menu_file.append (item_file_open);
+        item_file_open.activate.connect (() => {
             ui_load_project();
         });
-        add_accel_activate (item_open, Gdk.Key.o);
+        add_accel_activate (item_file_open, Gdk.Key.o);
 
-        var item_save = new ImageMenuItem.from_stock (Stock.SAVE, null);
-        menu_file.append (item_save);
-        item_save.activate.connect (() => {
+        var item_file_save = new ImageMenuItem.from_stock (Stock.SAVE, null);
+        menu_file.append (item_file_save);
+        item_file_save.activate.connect (() => {
             project.buffer_save();
         });
-        project.buffer_changed.connect (item_save.set_sensitive);
-        add_accel_activate (item_save, Gdk.Key.s);
+        project.buffer_changed.connect (item_file_save.set_sensitive);
+        add_accel_activate (item_file_save, Gdk.Key.s);
 
         menu_file.append (new SeparatorMenuItem());
 
-        var item_quit = new ImageMenuItem.from_stock (Stock.QUIT, null);
-        menu_file.append (item_quit);
-        item_quit.activate.connect (main_quit);
-        add_accel_activate (item_quit, Gdk.Key.q);
+        var item_file_quit = new ImageMenuItem.from_stock (Stock.QUIT, null);
+        menu_file.append (item_file_quit);
+        item_file_quit.activate.connect (main_quit);
+        add_accel_activate (item_file_quit, Gdk.Key.q);
 
         /* Edit */
         var item_edit = new Gtk.MenuItem.with_mnemonic ("_" + _("Edit"));
@@ -278,40 +278,77 @@ public class MainWidget : Box {
         var menu_edit = new Gtk.Menu();
         item_edit.set_submenu (menu_edit);
 
-        var item_undo = new ImageMenuItem.from_stock (Stock.UNDO, null);
-        item_undo.set_sensitive (false);
-        menu_edit.append (item_undo);
-        item_undo.activate.connect (undo_change);
-        project.undo_changed.connect (item_undo.set_sensitive);
-        add_accel_activate (item_undo, Gdk.Key.u);
+        var item_edit_undo = new ImageMenuItem.from_stock (Stock.UNDO, null);
+        item_edit_undo.set_sensitive (false);
+        menu_edit.append (item_edit_undo);
+        item_edit_undo.activate.connect (undo_change);
+        project.undo_changed.connect (item_edit_undo.set_sensitive);
+        add_accel_activate (item_edit_undo, Gdk.Key.u);
 
-        var item_redo = new ImageMenuItem.from_stock (Stock.REDO, null);
-        item_redo.set_sensitive (false);
-        menu_edit.append (item_redo);
-        item_redo.activate.connect (redo_change);
-        project.redo_changed.connect (item_redo.set_sensitive);
-        add_accel_activate (item_redo, Gdk.Key.r);
+        var item_edit_redo = new ImageMenuItem.from_stock (Stock.REDO, null);
+        item_edit_redo.set_sensitive (false);
+        menu_edit.append (item_edit_redo);
+        item_edit_redo.activate.connect (redo_change);
+        project.redo_changed.connect (item_edit_redo.set_sensitive);
+        add_accel_activate (item_edit_redo, Gdk.Key.r);
 
         /* View */
         var item_view = new Gtk.MenuItem.with_mnemonic ("_" + _("View"));
-        item_view.set_sensitive (false);
         add_menu (item_view);
+        var menu_view = new Gtk.Menu();
+        item_view.set_submenu (menu_view);
+
+        var item_view_search = new CheckMenuItem.with_mnemonic ("_" + _("Show search"));
+#if GDL_LESS_3_6
+        item_view_search.active = ((wdg_search.dock_item.flags & DockObjectFlags.ATTACHED) != 0);
+#else
+        item_view_search.active = !wdg_search.dock_item.is_closed();
+#endif
+        menu_view.append (item_view_search);
+        item_view_search.toggled.connect (() => {
+            wdg_search.show_search (item_view_search.active);
+        });
+        wdg_search.show_search.connect ((show) => {
+            if (show != item_view_search.active)
+                item_view_search.active = show;
+        });
+        add_accel_activate (item_view_search, Gdk.Key.f);
+
+
+        var item_view_lockhide = new CheckMenuItem.with_mnemonic ("_" + _("Lock elements"));
+        menu_view.append (item_view_lockhide);
+        item_view_lockhide.toggled.connect (() => {
+            if (item_view_lockhide.active)
+                lock_items();
+            else
+                unlock_items();
+        });
+        this.lock_items.connect (() => {
+            item_view_lockhide.active = true;
+        });
+        this.unlock_items.connect (() => {
+            item_view_lockhide.active = false;
+        });
+        add_accel_activate (item_view_lockhide, Gdk.Key.h);
 
         /* Project */
         var item_project = new Gtk.MenuItem.with_mnemonic ("_" + _("Project"));
         item_project.set_sensitive (false);
         add_menu (item_project);
+        var menu_project = new Gtk.Menu();
+        item_project.set_submenu (menu_project);
 
         /* Help */
         var item_help = new Gtk.MenuItem.with_mnemonic ("_" + _("Help"));
         add_menu (item_help);
-
         var menu_help = new Gtk.Menu();
         item_help.set_submenu (menu_help);
 
-        var item_about = new ImageMenuItem.from_stock (Stock.ABOUT, null);
-        menu_help.append (item_about);
-        item_about.activate.connect (ui_about_dialog);
+        var item_help_about = new ImageMenuItem.from_stock (Stock.ABOUT, null);
+        menu_help.append (item_help_about);
+        item_help_about.activate.connect (ui_about_dialog);
+
+        this.menubar.show_all();
     }
 
     /**
@@ -408,20 +445,23 @@ public class MainWidget : Box {
         separator_expand.draw = false;
         toolbar.add (separator_expand);
 
-        var btn_search = new ToggleToolButton ();
-        //TODO: Accelerator doesn't work
-        //add_accel_activate (btn_search, Gdk.Key.f, Gdk.ModifierType.CONTROL_MASK, "button_press_event");
+        var btn_search = new ToggleToolButton();
         btn_search.icon_name = "edit-find-symbolic";
+#if GDL_LESS_3_6
+        btn_search.active = ((wdg_search.dock_item.flags & DockObjectFlags.ATTACHED) != 0);
+#else
+        btn_search.active = !wdg_search.dock_item.is_closed();
+#endif
         btn_search.toggled.connect (() => {
-            if (btn_search.active) {
-                widget_main.focus_dock_item (wdg_search.dock_item);
-                wdg_search.focus_entry_search();
-            } else
-                unlock_items();
+            wdg_search.show_search (btn_search.active);
+        });
+        wdg_search.show_search.connect ((show) => {
+            if (show != btn_search.active)
+                btn_search.active = show;
         });
         toolbar.add (btn_search);
 
-        var btn_lock = new ToggleToolButton ();
+        var btn_lock = new ToggleToolButton();
         btn_lock.icon_name = "changes-prevent-symbolic";
         btn_lock.toggled.connect (() => {
             if (btn_lock.active)
@@ -429,7 +469,15 @@ public class MainWidget : Box {
             else
                 unlock_items();
         });
+        this.lock_items.connect (() => {
+            btn_lock.active = true;
+        });
+        this.unlock_items.connect (() => {
+            btn_lock.active = false;
+        });
         toolbar.add (btn_lock);
+
+        toolbar.show_all();
     }
 
     /**

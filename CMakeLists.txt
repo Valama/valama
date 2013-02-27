@@ -98,6 +98,10 @@ pkg_check_modules(GTK3.0 REQUIRED "gtk+-3.0")
 if("3.6" STRGREATER GTK3.0_VERSION)
   list(APPEND valac_cond "-D;GTK_LESS_3_6")
 endif()
+pkg_check_modules(GDL3.0 REQUIRED "gdl-3.0")
+if("3.6" STRGREATER GDL3.0_VERSION)
+  list(APPEND valac_cond "-D;GDL_LESS_3_6")
+endif()
 
 
 set(default_vala_flags

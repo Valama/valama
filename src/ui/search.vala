@@ -23,6 +23,13 @@ using Gtk;
  * Search widget
  */
 public class UiSearch : UiElement {
+    /**
+     * Emit to show search.
+     *
+     * @param show True to show, false to hide.
+     */
+    public signal void show_search (bool show);
+
     public UiSearch () {
         tree_view = new TreeView();
         var line_renderer = new CellRendererText();
@@ -60,6 +67,15 @@ public class UiSearch : UiElement {
         box_main.pack_start (scrw, true, true);
 
         build();
+
+        this.show_search.connect ((show) => {
+            if (show) {
+                dock_item.show_item();
+                widget_main.focus_dock_item (dock_item);
+                focus_entry_search();
+            } else
+                dock_item.hide_item();
+        });
 
         widget = box_main;
     }
