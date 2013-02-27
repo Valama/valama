@@ -34,6 +34,7 @@ static UiReport wdg_report;
 static ProjectBuilder project_builder;
 static UiSourceViewer source_viewer;
 static BuildOutput wdg_build_output;
+static AppOutput wdg_app_output;
 static UiCurrentFileStructure wdg_current_file_structure;
 static UiBreakpoints wdg_breakpoints;
 static UiSearch wdg_search;
@@ -139,6 +140,7 @@ public class MainWidget : Box {
 
         project_builder = new ProjectBuilder (project);
         wdg_build_output = new BuildOutput();
+        wdg_app_output = new AppOutput();
         wdg_current_file_structure = new UiCurrentFileStructure();
         wdg_search = new UiSearch();
         var wdg_stylechecker = new UiStyleChecker();
@@ -157,6 +159,10 @@ public class MainWidget : Box {
                               DockItemBehavior.NORMAL,
                               DockPlacement.LEFT);
         add_item ("BuildOutput", _("Build output"), wdg_build_output,
+                              Stock.FILE,
+                              DockItemBehavior.NORMAL,
+                              DockPlacement.LEFT);
+        add_item ("AppOutput", _("App output"), wdg_app_output,
                               Stock.FILE,
                               DockItemBehavior.NORMAL,
                               DockPlacement.LEFT);
