@@ -241,14 +241,14 @@ public class MainWidget : Box {
         var item_new = new ImageMenuItem.from_stock (Stock.NEW, null);
         menu_file.append (item_new);
         item_new.activate.connect (create_new_file);
-        add_accel_activate (item_new, "n");
+        add_accel_activate (item_new, Gdk.Key.n);
 
         var item_open = new ImageMenuItem.from_stock (Stock.OPEN, null);
         menu_file.append (item_open);
         item_open.activate.connect (() => {
             ui_load_project();
         });
-        add_accel_activate (item_open, "o");
+        add_accel_activate (item_open, Gdk.Key.o);
 
         var item_save = new ImageMenuItem.from_stock (Stock.SAVE, null);
         menu_file.append (item_save);
@@ -256,14 +256,14 @@ public class MainWidget : Box {
             project.buffer_save();
         });
         project.buffer_changed.connect (item_save.set_sensitive);
-        add_accel_activate (item_save, "s");
+        add_accel_activate (item_save, Gdk.Key.s);
 
         menu_file.append (new SeparatorMenuItem());
 
         var item_quit = new ImageMenuItem.from_stock (Stock.QUIT, null);
         menu_file.append (item_quit);
         item_quit.activate.connect (main_quit);
-        add_accel_activate (item_quit, "q");
+        add_accel_activate (item_quit, Gdk.Key.q);
 
         /* Edit */
         var item_edit = new Gtk.MenuItem.with_mnemonic ("_" + _("Edit"));
@@ -276,14 +276,14 @@ public class MainWidget : Box {
         menu_edit.append (item_undo);
         item_undo.activate.connect (undo_change);
         project.undo_changed.connect (item_undo.set_sensitive);
-        add_accel_activate (item_undo, "u");
+        add_accel_activate (item_undo, Gdk.Key.u);
 
         var item_redo = new ImageMenuItem.from_stock (Stock.REDO, null);
         item_redo.set_sensitive (false);
         menu_edit.append (item_redo);
         item_redo.activate.connect (redo_change);
         project.redo_changed.connect (item_redo.set_sensitive);
-        add_accel_activate (item_redo, "r");
+        add_accel_activate (item_redo, Gdk.Key.r);
 
         /* View */
         var item_view = new Gtk.MenuItem.with_mnemonic ("_" + _("View"));
@@ -372,6 +372,7 @@ public class MainWidget : Box {
         add_button (ti);
 
         var btnBuild = new Gtk.ToolButton.from_stock (Stock.EXECUTE);
+        add_accel_activate (btnBuild, Gdk.Key.b, Gdk.ModifierType.CONTROL_MASK, "clicked");
         add_button (btnBuild);
         btnBuild.set_tooltip_text (_("Save current file and build project"));
         btnBuild.clicked.connect (() => {
@@ -390,6 +391,7 @@ public class MainWidget : Box {
         });
 
         var btnRun = new Gtk.ToolButton.from_stock (Stock.MEDIA_PLAY);
+        add_accel_activate (btnRun, Gdk.Key.l, Gdk.ModifierType.CONTROL_MASK, "clicked");
         add_button (btnRun);
         btnRun.set_tooltip_text (_("Run application"));
         btnRun.clicked.connect (() => {
@@ -547,11 +549,12 @@ public class MainWidget : Box {
      *                with keyname. Default modifier key is "ctrl".
      */
     public void add_accel_activate (Widget item,
-                                    string keyname,
-                                    Gdk.ModifierType modtype = Gdk.ModifierType.CONTROL_MASK) {
-        item.add_accelerator ("activate",
+                                    int key,
+                                    Gdk.ModifierType modtype = Gdk.ModifierType.CONTROL_MASK,
+                                    string signal_name = "activate") {
+        item.add_accelerator (signal_name,
                               this.accel_group,
-                              Gdk.keyval_from_name (keyname),
+                              key,
                               modtype,
                               AccelFlags.VISIBLE);
     }
