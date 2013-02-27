@@ -36,6 +36,7 @@ static UiSourceViewer source_viewer;
 static BuildOutput wdg_build_output;
 static UiCurrentFileStructure wdg_current_file_structure;
 static UiBreakpoints wdg_breakpoints;
+static UiSearch wdg_search;
 static Gee.HashMap<string, Gdk.Pixbuf> map_icons;
 
 
@@ -139,7 +140,7 @@ public class MainWidget : Box {
         project_builder = new ProjectBuilder (project);
         wdg_build_output = new BuildOutput();
         wdg_current_file_structure = new UiCurrentFileStructure();
-        var wdg_search = new UiSearch();
+        wdg_search = new UiSearch();
         var wdg_stylechecker = new UiStyleChecker();
 
         /* Gdl elements. */
@@ -400,6 +401,19 @@ public class MainWidget : Box {
         separator_expand.set_expand (true);
         separator_expand.draw = false;
         toolbar.add (separator_expand);
+
+        var btn_search = new ToggleToolButton ();
+        //TODO: Accelerator doesn't work
+        //add_accel_activate (btn_search, Gdk.Key.f, Gdk.ModifierType.CONTROL_MASK, "button_press_event");
+        btn_search.icon_name = "edit-find-symbolic";
+        btn_search.toggled.connect (() => {
+            if (btn_search.active) {
+                widget_main.focus_dock_item (wdg_search.dock_item);
+                wdg_search.focus_entry_search();
+            } else
+                unlock_items();
+        });
+        toolbar.add (btn_search);
 
         var btn_lock = new ToggleToolButton ();
         btn_lock.icon_name = "changes-prevent-symbolic";

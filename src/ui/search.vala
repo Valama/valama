@@ -46,9 +46,9 @@ public class UiSearch : UiElement {
         var box_main = new Box (Orientation.VERTICAL, 0);
 
 #if GTK_LESS_3_6
-        var entry_search = new Entry();
+        entry_search = new Entry();
 #else
-        var entry_search = new SearchEntry();
+        entry_search = new SearchEntry();
 #endif
         entry_search.changed.connect(() => {
             search (entry_search.text);
@@ -65,6 +65,15 @@ public class UiSearch : UiElement {
     }
 
     TreeView tree_view;
+#if GTK_LESS_3_6
+    Entry entry_search;
+#else
+    SearchEntry entry_search;
+#endif
+    public void focus_entry_search() {
+        entry_search.grab_focus();
+        entry_search.select_region (0, entry_search.text.length);
+    }
 
     Gee.HashMap<string, SearchResult?> map_paths_results;
     struct SearchResult {
