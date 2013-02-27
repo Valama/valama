@@ -67,6 +67,13 @@ namespace Guanako {
             foreach (SourceFile file in get_source_files())
                 if (file.filename == source_file.filename)
                     return false;
+
+            if (source_file.file_type == SourceFileType.SOURCE) {
+                var ns_ref = new UsingDirective (new UnresolvedSymbol (null, "GLib"));
+                source_file.add_using_directive (ns_ref);
+                context.root.add_using_directive (ns_ref);
+            }
+
             context.add_source_file (source_file);
             sourcefiles.add (source_file);
             return true;
@@ -982,9 +989,11 @@ namespace Guanako {
                 vanish_file (file);
 
                 file.current_using_directives = new Vala.ArrayList<Vala.UsingDirective>();
-                var ns_ref = new Vala.UsingDirective (new Vala.UnresolvedSymbol (null, "GLib"));
-                file.add_using_directive (ns_ref);
-                context.root.add_using_directive (ns_ref);
+                if (file.file_type == SourceFileType.SOURCE) {
+                    var ns_ref = new Vala.UsingDirective (new Vala.UnresolvedSymbol (null, "GLib"));
+                    file.add_using_directive (ns_ref);
+                    context.root.add_using_directive (ns_ref);
+                }
 
                 parser.visit_source_file (file);
 
