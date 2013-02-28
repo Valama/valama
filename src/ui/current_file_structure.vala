@@ -72,7 +72,7 @@ public class UiCurrentFileStructure : UiElement {
         scrw.add (tree_view);
         vbox.pack_start (scrw, true, true);
 
-        source_viewer.notify["current-srcbuffer"].connect(build);
+        source_viewer.current_sourceview_changed.connect(build);
         project.guanako_update_finished.connect (build);
 
         widget = vbox;

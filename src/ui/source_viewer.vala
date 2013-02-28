@@ -49,14 +49,18 @@ class UiSourceViewer : UiElement {
         }
         private set {
             debug_msg (_("Change current focus: %s\n"), value);
+            bool emit_sourceview_changed = this._current_srcfocus != value;
+
             this._current_srcfocus = value;
-            this.current_srcid = get_sourceview_id (this._current_srcfocus);
+            this.current_srcid = get_sourceview_id (value);
             if (0 <= this.current_srcid < this.srcitems.size) {
                 this.current_srcview = get_sourceview (this.srcitems[this.current_srcid]);
                 this.current_srcbuffer = (SourceBuffer) this.current_srcview.buffer;
             } else
                 warning_msg (_("Could not select current source view: %s\n" +
                              "Expected behavior may change.\n"), this._current_srcfocus);
+            if (emit_sourceview_changed)
+                current_sourceview_changed();
         }
     }
     /**
@@ -71,6 +75,10 @@ class UiSourceViewer : UiElement {
      * Currently selected {@link SourceBuffer}.
      */
     public SourceBuffer? current_srcbuffer { get; private set; default = null; }
+    /**
+     * Gets emitted when another sourceview is selected
+     */
+    public signal void current_sourceview_changed();
 
     /**
      * Create source viewer object and initialize {@link Gdl.Dock}.

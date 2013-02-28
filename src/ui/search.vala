@@ -52,6 +52,27 @@ public class UiSearch : UiElement {
 
         var box_main = new Box (Orientation.VERTICAL, 0);
 
+        var toolbar_title = new Toolbar ();
+        toolbar_title.get_style_context().add_class (STYLE_CLASS_PRIMARY_TOOLBAR);
+        var ti_title = new ToolItem();
+        ti_title.add (new Label (_("Search")));
+        toolbar_title.add(ti_title);
+
+        var separator_stretch = new SeparatorToolItem();
+        separator_stretch.set_expand (true);
+        separator_stretch.draw = false;
+        toolbar_title.add (separator_stretch);
+
+        btn_all_files = new ToggleToolButton ();
+        btn_all_files.clicked.connect (()=>{
+            search (entry_search.text);
+        });
+        btn_all_files.label = _("All files");
+        btn_all_files.is_important = true;
+        toolbar_title.add (btn_all_files);
+        box_main.pack_start (toolbar_title, false, true);
+
+
 #if GTK_LESS_3_6
         entry_search = new Entry();
 #else
@@ -77,10 +98,17 @@ public class UiSearch : UiElement {
                 dock_item.hide_item();
         });
 
+        source_viewer.current_sourceview_changed.connect(()=>{
+            if (!btn_all_files.active)
+                search (entry_search.text);
+        });
+
+
         widget = box_main;
     }
 
     TreeView tree_view;
+    ToggleToolButton btn_all_files;
 #if GTK_LESS_3_6
     Entry entry_search;
 #else
@@ -113,7 +141,6 @@ public class UiSearch : UiElement {
                                      result.line,
                                      0);
         bfr.select_range (titer, titer);
-
         source_viewer.focus_src (result.filename);
         source_viewer.get_sourceview_by_file (result.filename).scroll_to_iter (titer, 0.42, true, 0, 1.0);
     }
@@ -128,90 +155,63 @@ public class UiSearch : UiElement {
         });
     }
 
-    //Thread<void*> search_thread = null;
-    //bool abort_search_thread = false;
+
     void search(string search) {
         clear_search_tag();
         if (search == "")
             return;
         map_paths_results = new Gee.HashMap<string, SearchResult?>();
-        /*if (search_thread != null) {
-            abort_search_thread = true;
-            search_thread.join();
-        }
-        abort_search_thread = false;
-        if (search_thread != null)
-            return;*/
-        //search_thread = new Thread<void*> (_("Search"), () => {
-            var store = new TreeStore (2, typeof (string), typeof (string));
+
+        var store = new TreeStore (2, typeof (string), typeof (string));
+        if (!btn_all_files.active)
+            search_buffer (search, source_viewer.current_srcbuffer, store, source_viewer.current_srcfocus);
+        else
             project.foreach_buffer ((filename, bfr) => {
-                TextIter first_iter;
-                TextIter end_iter;
-                bfr.get_start_iter (out first_iter);
-                bfr.get_end_iter (out end_iter);
-                bfr.remove_tag_by_name ("search", first_iter, end_iter);
-
-                TextIter? match_start = null;
-                TextIter? match_end = null;
-                bfr.get_start_iter(out match_end);
-                TreeIter? iter_parent = null;
-                //while (!abort_search_thread && match_end.forward_search (search, TextSearchFlags.CASE_INSENSITIVE, out match_start, out match_end, null)) {
-                while (match_end.forward_search (search, TextSearchFlags.CASE_INSENSITIVE, out match_start, out match_end, null)) {
-                    if (iter_parent == null) {
-                        store.append (out iter_parent, null);
-                        store.set (iter_parent, 0, "", 1, project.get_relative_path (filename), -1);
-                    }
-                    TreeIter iter_append;
-                    store.append (out iter_append, iter_parent);
-
-                    int col_start = match_start.get_line_offset();
-                    int col_end = match_end.get_line_offset();
-                    bfr.apply_tag_by_name ("search", match_start, match_end);
-
-                    match_start.backward_chars (match_start.get_line_offset());
-                    TextIter prepend = match_start;
-                    prepend.backward_line();
-                    prepend.backward_line();
-                    match_end.forward_to_line_end();
-                    TextIter append = match_end;
-                    append.forward_line();
-                    append.forward_to_line_end();
-                    var shown_text = """<tt><span color="#A0A0A0">""" + Markup.escape_text(bfr.get_slice (prepend, match_start, true)) + "</span>"
-                                 + Markup.escape_text(bfr.get_slice(match_start, match_end, true)).replace(search, "<b>" + search + "</b>")
-                                 + """<span color="#A0A0A0">""" + Markup.escape_text(bfr.get_slice (match_end, append, true)) + "</span></tt>\n";
-                    shown_text = shown_text.strip();
-                    //TODO: Make <b> stuff case insensitive!
-
-                    map_paths_results[store.get_path((TreeIter)iter_append).to_string()] =  SearchResult() { line = match_end.get_line(), filename = filename, col_start = col_start, col_end = col_end };
-                    store.set (iter_append, 0, (match_end.get_line() + 1).to_string(), 1, shown_text, -1);
-                }
-                tree_view.set_model (store);
-                /*if (!abort_search_thread)
-                    GLib.Idle.add (()=> {
-                        var results = map_paths_results.values;
-                        project.foreach_buffer ((filename, bfr) => {
-                            TextIter first_iter;
-                            TextIter end_iter;
-                            bfr.get_start_iter (out first_iter);
-                            bfr.get_end_iter (out end_iter);
-                            bfr.remove_tag_by_name ("search", first_iter, end_iter);
-                            foreach (SearchResult result in results)
-                                if (result.filename == filename) {
-                                    TextIter tag_start, tag_end;
-                                    bfr.get_iter_at_line_offset (out tag_start, result.line, result.col_start);
-                                    bfr.get_iter_at_line_offset (out tag_end, result.line, result.col_end);
-                                    bfr.apply_tag_by_name ("search", tag_start, tag_end);
-
-                                }
-                        });
-
-                        tree_view.set_model (store);
-                        return false;
-                    });*/
+                search_buffer (search, bfr, store, filename);
             });
-            //search_thread = null;
-            //return null;
-        //});
+        tree_view.set_model (store);
+    }
+
+    void search_buffer(string search, SourceBuffer bfr, TreeStore store, string filename) {
+        TextIter first_iter;
+        TextIter end_iter;
+        bfr.get_start_iter (out first_iter);
+        bfr.get_end_iter (out end_iter);
+        bfr.remove_tag_by_name ("search", first_iter, end_iter);
+
+        TextIter? match_start = null;
+        TextIter? match_end = null;
+        bfr.get_start_iter(out match_end);
+        TreeIter? iter_parent = null;
+
+        while (match_end.forward_search (search, TextSearchFlags.CASE_INSENSITIVE, out match_start, out match_end, null)) {
+            if (iter_parent == null && btn_all_files.active) {
+                store.append (out iter_parent, null);
+                store.set (iter_parent, 0, "", 1, project.get_relative_path (filename), -1);
+            }
+            TreeIter iter_append;
+            store.append (out iter_append, iter_parent);
+
+            int col_start = match_start.get_line_offset();
+            int col_end = match_end.get_line_offset();
+            bfr.apply_tag_by_name ("search", match_start, match_end);
+
+            match_start.backward_chars (match_start.get_line_offset());
+            TextIter prepend = match_start;
+            prepend.backward_line();
+            prepend.backward_line();
+            match_end.forward_to_line_end();
+            TextIter append = match_end;
+            append.forward_line();
+            append.forward_to_line_end();
+            var shown_text = """<tt><span color="#A0A0A0">""" + Markup.escape_text(bfr.get_slice (prepend, match_start, true)) + "</span>"
+                         + Markup.escape_text(bfr.get_slice(match_start, match_end, true)).replace(search, "<b>" + search + "</b>")
+                         + """<span color="#A0A0A0">""" + Markup.escape_text(bfr.get_slice (match_end, append, true)) + "</span></tt>\n";
+            shown_text = shown_text.strip();
+            //TODO: Make <b> stuff case insensitive!
+            map_paths_results[store.get_path((TreeIter)iter_append).to_string()] = SearchResult() { line = match_end.get_line(), filename = filename, col_start = col_start, col_end = col_end };
+            store.set (iter_append, 0, (match_end.get_line() + 1).to_string(), 1, shown_text, -1);
+        }
     }
 
     public override void build() {
