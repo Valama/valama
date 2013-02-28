@@ -93,6 +93,11 @@ public class UiSearch : UiElement {
             if (show) {
                 dock_item.show_item();
                 widget_main.focus_dock_item (dock_item);
+                if (source_viewer.current_srcbuffer != null) {
+                    TextIter sel_start, sel_end;
+                    source_viewer.current_srcbuffer.get_selection_bounds (out sel_start, out sel_end);
+                    entry_search.text = source_viewer.current_srcbuffer.get_text (sel_start, sel_end, true);
+                }
                 focus_entry_search();
             } else
                 dock_item.hide_item();
