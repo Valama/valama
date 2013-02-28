@@ -278,7 +278,7 @@ class UiSourceViewer : UiElement {
      *       objects at creation of new source views.
      */
     private SourceView get_sourceview (DockItem item) {
-#if VALA_0_20
+#if VALAC_0_20
         var scroll_widget = (ScrolledWindow) item.get_child();
 #else
         /*

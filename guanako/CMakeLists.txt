@@ -48,6 +48,20 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 find_package(Vala "0.17" REQUIRED)
 
+
+set(pc_prefix ${CMAKE_INSTALL_PREFIX})
+set(pc_exec_prefix "\${prefix}")
+set(pc_libdir "\${exec_prefix}/${libdir}")
+set(pc_includedir "\${prefix}/${includedir}")
+set(pc_datarootdir "\${prefix}/${datarootdir}")
+set(pc_vapidir "\${datarootdir}/${vapishort_dir}")
+set(pc_version "${${project_name}_VERSION}")
+
+
+# Custom library version checks.
+set(valac_cond)
+find_package(PkgConfig)
+# libvala-X.Y
 if(VALA_VERSION STRGREATER "0.19.0")
   list(REMOVE_ITEM required_pkgs "libvala-0.18" )
   set(valashort_ver "0.20")
@@ -57,14 +71,51 @@ else()
 endif()
 set(vapishort_dir "vala-${valashort_ver}/vapi")
 set(vapidir "/usr/share/${vapishort_dir}")
+# gee-1.0 and gee-0.8
+set(gee_ver)
+set(all_pkgs)
+list(APPEND all_pkgs ${required_pkgs} ${optional_pkgs})
+set(gee0.8_contains)
+list(FIND all_pkgs "gee-0.8" gee0.8_contains)
+if(gee0.8_contains STRGREATER "-1")
+  set(gee1.0_contains)
+  list(FIND all_pkgs "gee-1.0" gee1.0_contains)
+  if(gee1.0_contains STRGREATER "-1")
+    pkg_check_modules(GEE0.8 "gee-0.8")
+    pkg_check_modules(GEE1.0 "gee-1.0")
+    if(GEE0.8_FOUND AND GEE1.0_FOUND)
+      # Prefer first named package.
+      if (gee0_8_contains STRGREATER gee1_0_contains)
+        set(gee_ver "1.0")
+        list(REMOVE_ITEM required_pkgs "gee-0.8")
+        if(optional_pkgs)
+          list(REMOVE_ITEM optional_pkgs "gee-0.8")
+        endif()
+      else()
+        set(gee_ver "0.8")
+        list(REMOVE_ITEM required_pkgs "gee-1.0")
+        if(optional_pkgs)
+          list(REMOVE_ITEM optional_pkgs "gee-1.0")
+        endif()
+      endif()
+    elseif(GEE0.8_FOUND)
+      set(gee_ver "0.8")
+      list(REMOVE_ITEM required_pkgs "gee-1.0")
+      if(optional_pkgs)
+        list(REMOVE_ITEM optional_pkgs "gee-1.0")
+      endif()
+    elseif(GEE1.0_FOUND)
+      set(gee_ver "1.0")
+      list(REMOVE_ITEM required_pkgs "gee-0.8")
+      if(optional_pkgs)
+        list(REMOVE_ITEM optional_pkgs "gee-0.8")
+      endif()
+    endif()
+  endif()
+endif()
 
-set(pc_prefix ${CMAKE_INSTALL_PREFIX})
-set(pc_exec_prefix "\${prefix}")
-set(pc_libdir "\${exec_prefix}/${libdir}")
-set(pc_includedir "\${prefix}/${includedir}")
-set(pc_datarootdir "\${prefix}/${datarootdir}")
-set(pc_vapidir "\${datarootdir}/${vapishort_dir}")
-set(pc_version "${${project_name}_VERSION}")
+
+# Configure template files.
 base_list_to_delimited_string(pc_requirements
   DELIM " "
   BASE_LIST ${required_pkgs}
@@ -77,7 +128,7 @@ base_list_to_delimited_string(deps_requirements
 )
 configure_file("${project_name_lower}.deps.in" "${project_name_lower}.deps")
 
-set(valac_cond)
+
 set(default_vala_flags
   "--thread"
   "-H" "${project_name_lower}.h"

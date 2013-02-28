@@ -131,21 +131,25 @@ public class ValamaProject : Object {
      */
     public string project_file { get; private set; }
     /**
+     * List of package choices.
+     */
+    public Gee.ArrayList<PkgChoice?> package_choices { get; private set; }
+    /**
      * Project source directories (absolute paths).
      */
-    public string[] project_source_dirs { get; private set; }
+    public Gee.TreeSet<string> source_dirs { get; private set; }
     /**
      * Project extra source files (absolute paths).
      */
-    public string[] project_source_files { get; private set; }
+    public Gee.TreeSet<string> source_files { get; private set; }
     /**
      * Project buildsystem directories (absolute paths).
      */
-    public string[] project_buildsystem_dirs { get; private set; }
+    public Gee.TreeSet<string> buildsystem_dirs { get; private set; }
     /**
      * Project extra buildsystem files (absolute paths).
      */
-    public string[] project_buildsystem_files { get; private set; }
+    public Gee.TreeSet<string> buildsystem_files { get; private set; }
     /**
      * Project version first part.
      */
@@ -195,6 +199,21 @@ public class ValamaProject : Object {
      */
     public string buildsystem = "cmake";
 
+    /**
+     * Vala package alternatives.
+     */
+    public struct PkgChoice {
+        /**
+         * Indicate if all packages should go to buildsystem package list.
+         */
+        bool all;
+        /**
+         * Ordered list of packages. Priority of packages in the front is
+         * higher.
+         */
+        Gee.ArrayList<string> packages;
+    }
+
 
     /**
      * Create {@link ValamaProject} and load it from project file.
@@ -226,11 +245,11 @@ public class ValamaProject : Object {
         msg (_("Load project file: %s\n"), this.project_file);
         load_project_file();  // can throw LoadingError
 
-        generate_file_list (project_source_dirs,
-                            project_source_files,
+        generate_file_list (source_dirs.to_array(),
+                            source_files.to_array(),
                             add_source_file);
-        generate_file_list (project_buildsystem_dirs,
-                            project_buildsystem_files,
+        generate_file_list (buildsystem_dirs.to_array(),
+                            buildsystem_files.to_array(),
                             add_buildsystem_file);
 
         parsing = true;
@@ -372,11 +391,12 @@ public class ValamaProject : Object {
                                                 VLP_VERSION_MIN);
         }
 
-        var packages = new string[0];
-        var source_dirs = new string[0];
-        var source_files = new string[0];
-        var buildsystem_dirs = new string[0];
-        var buildsystem_files = new string[0];
+        var packages = new Gee.TreeSet<string>();
+        package_choices = new Gee.ArrayList<PkgChoice?>();
+        source_dirs = new Gee.TreeSet<string>();
+        source_files = new Gee.TreeSet<string>();
+        buildsystem_dirs = new Gee.TreeSet<string>();
+        buildsystem_files = new Gee.TreeSet<string>();
         for (Xml.Node* i = root_node->children; i != null; i = i->next) {
             if (i->type != ElementType.ELEMENT_NODE)
                 continue;
@@ -387,51 +407,149 @@ public class ValamaProject : Object {
                 case "buildsystem":
                     buildsystem = i->get_content();
                     break;
-                case "packages":
-                    for (Xml.Node* p = i->children; p != null; p = p->next)
-                        if (p->name == "package")
-                            packages += p->get_content();
-                    break;
                 case "version":
                     for (Xml.Node* p = i->children; p != null; p = p->next) {
-                        if (p->name == "major")
-                            version_major = int.parse (p->get_content());
-                        else if (p->name == "minor")
-                            version_minor = int.parse (p->get_content());
-                        else if (p->name == "patch")
-                            version_patch = int.parse (p->get_content());
+                        if (p->type != ElementType.ELEMENT_NODE)
+                            continue;
+                        switch (p->name) {
+                            case "major":
+                                version_major = int.parse (p->get_content());
+                                break;
+                            case "minor":
+                                version_minor = int.parse (p->get_content());
+                                break;
+                            case "patch":
+                                version_patch = int.parse (p->get_content());
+                                break;
+                            default:
+                                warning_msg (_("Unknown configuration file value line %hu: %s\n"), p->line, p->name);
+                                break;
+                        }
+                    }
+                    break;
+                case "packages":
+                    for (Xml.Node* p = i->children; p != null; p = p->next) {
+                        if (p->type != ElementType.ELEMENT_NODE)
+                            continue;
+                        switch (p->name) {
+                            case "choice":
+                                var choice = PkgChoice();
+                                choice.packages = new Gee.ArrayList<string>();
+                                if (p->has_prop ("all") != null)
+                                    switch (p->get_prop ("all")) {
+                                        case "yes":
+                                            choice.all = true;
+                                            break;
+                                        case "no":
+                                            choice.all = false;
+                                            break;
+                                        default:
+                                            warning_msg (_("Unknown property for 'choice' line %hu: %s\n" +
+                                                           "Will choose 'no'\n"), p->line, p->get_prop ("all"));
+                                            choice.all = false;
+                                            break;
+                                    }
+                                else
+                                    choice.all = false;
+                                for (Xml.Node* pp = p->children; pp != null; pp = pp->next) {
+                                    if (pp->type != ElementType.ELEMENT_NODE)
+                                        continue;
+                                    switch (pp->name) {
+                                        case "package":
+                                            choice.packages.add (pp->get_content());
+                                            break;
+                                        default:
+                                            warning_msg (_("Unknown configuration file value line %hu: %s\n"), pp->line, pp->name);
+                                            break;
+                                    }
+                                }
+                                if (choice.packages.size > 0)
+                                    package_choices.add (choice);
+                                else
+                                    warning_msg (_("No packages to choose between: line %hu\n"), p->line);
+                                break;
+                            case "package":
+                                packages.add (p->get_content());
+                                break;
+                            default:
+                                warning_msg (_("Unknown configuration file value line %hu: %s\n"), p->line, p->name);
+                                break;
+                        }
                     }
                     break;
                 case "source-directories":
-                    for (Xml.Node* p = i-> children; p != null; p = p->next)
-                        if (p->name == "directory")
-                            source_dirs += get_absolute_path (p->get_content());
+                    for (Xml.Node* p = i-> children; p != null; p = p->next) {
+                        if (p->type != ElementType.ELEMENT_NODE)
+                            continue;
+                        switch (p->name) {
+                            case "directory":
+                                source_dirs.add (get_absolute_path (p->get_content()));
+                                break;
+                            default:
+                                warning_msg (_("Unknown configuration file value line %hu: %s\n"), p->line, p->name);
+                                break;
+                        }
+                    }
                     break;
                 case "source-files":
-                    for (Xml.Node* p = i-> children; p != null; p = p->next)
-                        if (p->name == "file")
-                            source_files += get_absolute_path (p->get_content());
+                    for (Xml.Node* p = i-> children; p != null; p = p->next) {
+                        if (p->type != ElementType.ELEMENT_NODE)
+                            continue;
+                        switch (p->name) {
+                            case "file":
+                                source_files.add (get_absolute_path (p->get_content()));
+                                break;
+                            default:
+                                warning_msg (_("Unknown configuration file value line %hu: %s\n"), p->line, p->name);
+                                break;
+                        }
+                    }
                     break;
                 case "buildsystem-directories":
-                    for (Xml.Node* p = i-> children; p != null; p = p->next)
-                        if (p->name == "directory")
-                            buildsystem_dirs += get_absolute_path (p->get_content());
+                    for (Xml.Node* p = i-> children; p != null; p = p->next) {
+                        if (p->type != ElementType.ELEMENT_NODE)
+                            continue;
+                        switch (p->name) {
+                            case "directory":
+                                buildsystem_dirs.add (get_absolute_path (p->get_content()));
+                                break;
+                            default:
+                                warning_msg (_("Unknown configuration file value line %hu: %s\n"), p->line, p->name);
+                                break;
+                        }
+                    }
                     break;
                 case "buildsystem-files":
-                    for (Xml.Node* p = i-> children; p != null; p = p->next)
-                        if (p->name == "file")
-                            buildsystem_files += get_absolute_path (p->get_content());
+                    for (Xml.Node* p = i-> children; p != null; p = p->next) {
+                        if (p->type != ElementType.ELEMENT_NODE)
+                            continue;
+                        switch (p->name) {
+                            case "file":
+                                buildsystem_files.add (get_absolute_path (p->get_content()));
+                                break;
+                            default:
+                                warning_msg (_("Unknown configuration file value line %hu: %s\n"), p->line, p->name);
+                                break;
+                        }
+                    }
                     break;
                 default:
-                    errmsg ("Warning: Unknown configuration file value: %s", i->name);
+                    warning_msg (_("Unknown configuration file value line %hu: %s\n"), i->line, i->name);
                     break;
             }
         }
-        string[] missing_packages = guanako_project.add_packages (packages, false);
-        project_source_dirs = source_dirs;
-        project_source_files = source_files;
-        project_buildsystem_dirs = buildsystem_dirs;
-        project_buildsystem_files = buildsystem_files;
+
+        foreach (var choice in package_choices) {
+            var pkg = get_choice (choice);
+            if (pkg != null)
+                packages.add (pkg);
+            else {
+                warning_msg (_("Could not select a package from choice.\n"));
+                packages.add (choice.packages[0]);
+            }
+        }
+
+        string[] missing_packages = guanako_project.add_packages (packages.to_array(), false);
 
         if (missing_packages.length > 0)
             ui_missing_packages_dialog (missing_packages);
@@ -459,31 +577,59 @@ public class ValamaProject : Object {
         writer.end_element();
 
         writer.start_element ("packages");
+        var chpkgs = new TreeSet<string>();
+        foreach (var choice in package_choices) {
+            writer.start_element ("choice");
+            writer.write_attribute ("all", (choice.all) ? "yes" : "no");
+            foreach (var pkg in choice.packages) {
+                writer.write_element ("package", pkg);
+                chpkgs.add (pkg);
+            }
+            writer.end_element();
+        }
         foreach (string pkg in guanako_project.packages)
-            writer.write_element ("package", pkg);
+            if (!(pkg in chpkgs))
+                writer.write_element ("package", pkg);
         writer.end_element();
 
         writer.start_element ("source-directories");
-        foreach (string directory in project_source_dirs)
+        foreach (string directory in source_dirs)
             writer.write_element ("directory", get_relative_path (directory));
         writer.end_element();
 
         writer.start_element ("source-files");
-        foreach (string directory in project_source_files)
+        foreach (string directory in source_files)
             writer.write_element ("file", get_relative_path (directory));
         writer.end_element();
 
         writer.start_element ("buildsystem-directories");
-        foreach (string directory in project_buildsystem_dirs)
+        foreach (string directory in buildsystem_dirs)
             writer.write_element ("directory", get_relative_path (directory));
         writer.end_element();
 
         writer.start_element ("buildsystem-files");
-        foreach (string directory in project_buildsystem_files)
+        foreach (string directory in buildsystem_files)
             writer.write_element ("file", get_relative_path (directory));
         writer.end_element();
 
         writer.end_element();
+    }
+
+    /**
+     * Select first available package of {@link PkgChoice}. Does check for
+     * conflicts.
+     *
+     * @param choide {@link PkgChoice} to search for available packages.
+     * @return Return available package name or null.
+     */
+    private string? get_choice (PkgChoice choice) {
+        foreach (var pkg in choice.packages)
+            if (guanako_project.context.get_vapi_path (pkg) != null) {
+                debug_msg (_("Choose '%s' package.\n"), pkg);
+                return pkg;
+            } else
+                debug_msg (_("Skip '%s' choice.\n"), pkg);
+        return null;
     }
 
     /**
