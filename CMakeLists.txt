@@ -90,14 +90,15 @@ pkg_check_modules(GDL3.0 REQUIRED "gdl-3.0")
 if(NOT("3.6.2" STRGREATER GDL3.0_VERSION))
   list(APPEND valac_cond "-D;GDL_3_6_2")
   if("0.20" STRGREATER "${valashort_ver}")
-    message(WARNING "With gdl-3.0 >= 3.6.2 and valac < 0.20 checks for dock "
-                    "item state (closed, attached etc.) are disabled.\n"
+    message(WARNING "With gdl-3.0 ${GDL3.0_VERSION} >= 3.6.2 and valac "
+                    "${valashort_ver} < 0.20 checks for dock item state "
+                    "(is closed, attached etc.) are disabled.\n"
                     "Please upgrade your valac version or live with it.")
   endif()
-elseif("3.5.4" STRGREATER GDL3.0_VERSION)
-  message(WARNING "With gdl-3.0 < 3.5.4 dock item behaviour is poor: "
-                  "Hidden docks aren't saved in layout and will open "
-                  "detached.\n"
+elseif("3.5.5" STRGREATER GDL3.0_VERSION)
+  message(WARNING "With gdl-3.0 ${GDL3.0_VERSION} < 3.5.5 dock item "
+                  "behaviour is poor: Hidden docks aren't saved in layout "
+                  "and will open detached.\n"
                   "Please upgrade your gdl version or live with it.")
 endif()
 
