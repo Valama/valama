@@ -270,7 +270,9 @@ class UiSourceViewer : UiElement {
      *       objects at creation of new source views.
      */
     private SourceView get_sourceview (DockItem item) {
-#if VALAC_LESS_0_20
+#if VALA_0_20
+        var scroll_widget = (ScrolledWindow) item.get_child();
+#else
         /*
          * Work arround GNOME #693127.
          */
@@ -281,8 +283,6 @@ class UiSourceViewer : UiElement {
         });
         if (scroll_widget == null)
             bug_msg (_("Could not find ScrolledWindow widget: %s\n"), item.name);
-#else
-        var scroll_widget = (ScrolledWindow) item.get_child();
 #endif
         return (SourceView) scroll_widget.get_children().nth_data (0);
     }

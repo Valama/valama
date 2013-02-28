@@ -46,30 +46,14 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/vala")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 
-option(DEBUG "Debug output on console." ON)
-option(THREADED "Run multi-threaded." OFF)
-
-if(DEBUG)
-  set(debug_opt "-D;DEBUG")
-else()
-  set(debug_opt "")
-endif()
-if(NOT THREADED)
-  set(threaded_opt "-D;NOT_THREADED")
-else()
-  set(threaded_opt "")
-endif()
-
 find_package(Vala "0.17" REQUIRED)
 
 if(VALA_VERSION STRGREATER "0.19.0")
   list(REMOVE_ITEM required_pkgs "libvala-0.18" )
   set(valashort_ver "0.20")
-  set(valac_cond)
 else()
   list(REMOVE_ITEM required_pkgs "libvala-0.20" )
   set(valashort_ver "0.18")
-  set(valac_cond "")
 endif()
 set(vapishort_dir "vala-${valashort_ver}/vapi")
 set(vapidir "/usr/share/${vapishort_dir}")
@@ -93,14 +77,13 @@ base_list_to_delimited_string(deps_requirements
 )
 configure_file("${project_name_lower}.deps.in" "${project_name_lower}.deps")
 
+set(valac_cond)
 set(default_vala_flags
   "--thread"
   "-H" "${project_name_lower}.h"
   "--gir" "${project_name}-${${project_name}_VERSION}.gir"
   "--library" "${project_name_lower}"
   "--target-glib" "2.32"  # enable this to use new(tm) thread syntax
-  ${debug_opt}
-  ${threaded_opt}
   ${valac_cond}
 )
 include(ValaPkgs)

@@ -129,9 +129,7 @@ public abstract class UiElement : Object{
             project = vproject;
         /* Already start first update. */
         //t = new Thread<void*> (get_name(), (ThreadFunc<void*>) build);
-#if NOT_THREADED
         //t.join();
-#endif
         update_deps();
     }
 
@@ -202,11 +200,7 @@ public abstract class UiElement : Object{
         /* Then run all updates. */
         /*try {
             var tp = new ThreadPool<UiElement>.with_owned_data ((worker) => {worker.build();},
-#if NOT_THREADED
-                                                                0,
-#else
                                                                 q.size,
-#endif
                                                                 false);
             UiElement queue_element;
             while ((queue_element = q.poll()) != null)
