@@ -370,7 +370,7 @@ namespace Guanako {
                 stylefile_version = root_node->get_prop ("version");
             if (strcmp (stylefile_version, STYLE_VERSION_MIN) < 0) {
                 delete doc;
-                throw new IOError.INVALID_DATA (_("Project file to old: %s < %s"),
+                throw new IOError.INVALID_DATA (_("Project file to old: %s < %s\n"),
                                                 stylefile_version,
                                                 STYLE_VERSION_MIN);
             }
@@ -383,7 +383,9 @@ namespace Guanako {
                         string? description = null;
                         var rchecks = new Gee.ArrayList<RegexCheck?>();
                         CheckType? type = null;
-                        for (Xml.Node* p = i->children; p != null; p = p->next)
+                        for (Xml.Node* p = i->children; p != null; p = p->next) {
+                            if (p->type != Xml.ElementType.ELEMENT_NODE)
+                                continue;
                             switch (p->name) {
                                 case "description":
                                     if (description == null)
@@ -391,7 +393,7 @@ namespace Guanako {
                                     else {
                                         var new_desc = p->get_content();
                                         if (description != new_desc)
-                                            stderr.printf (_("Warning: Skip different description: '%s' - '%s'"),
+                                            stderr.printf (_("Warning: Skip different description: '%s' - '%s'\n"),
                                                            description, new_desc);
                                     }
                                     break;
@@ -404,7 +406,7 @@ namespace Guanako {
                                         if (!CheckType.parse_name (name, out new_type))
                                             stderr.printf (_("Warning: Unknown CheckType '%s', assume 'GLOBAL'.\n"), name);
                                         if (type != new_type)
-                                            stderr.printf (_("Warning: Skip different type: '%s' - '%s'"),
+                                            stderr.printf (_("Warning: Skip different type: '%s' - '%s'\n"),
                                                            type, new_type);
                                     }
                                     break;
@@ -412,6 +414,8 @@ namespace Guanako {
                                     string? regex = null;
                                     int? match_num = null;
                                     for (Xml.Node* pp = p->children; pp != null; pp = pp->next) {
+                                        if (pp->type != Xml.ElementType.ELEMENT_NODE)
+                                            continue;
                                         switch (pp->name) {
                                             case "regex":
                                                 if (regex == null)
@@ -419,7 +423,7 @@ namespace Guanako {
                                                 else {
                                                     var new_regex = p->get_content();
                                                     if (regex != new_regex)
-                                                        stderr.printf (_("Warning: Skip different regexes: '%s' - '%s'"),
+                                                        stderr.printf (_("Warning: Skip different regexes: '%s' - '%s'\n"),
                                                                        regex , new_regex);
                                                 }
                                                 break;
@@ -429,12 +433,12 @@ namespace Guanako {
                                                 else {
                                                     var new_match_num = int.parse (p->get_content());
                                                     if (match_num != new_match_num)
-                                                        stderr.printf (_("Warning: Skip different match groups: '%d' - '%d'"),
+                                                        stderr.printf (_("Warning: Skip different match groups: '%d' - '%d'\n"),
                                                                        match_num , new_match_num);
                                                 }
                                                 break;
                                             default:
-                                                stderr.printf (_("Warning: Unknown configuration file value: %s"), pp->name);
+                                                stderr.printf (_("Warning: Unknown configuration file value line %hu: %s\n"), pp->line, pp->name);
                                                 break;
                                         }
                                     }
@@ -449,9 +453,10 @@ namespace Guanako {
                                     rchecks.add (new RegexCheck.str (regex, match_num));
                                     break;
                                 default:
-                                    stderr.printf (_("Warning: Unknown configuration file value: %s"), p->name);
+                                    stderr.printf (_("Warning: Unknown configuration file value line %hu: %s\n"), p->line, p->name);
                                     break;
                             }
+                        }
                         if (description == null) {
                             description = "";
                             stderr.printf (_("Warning: No description found.\n"));
@@ -463,7 +468,7 @@ namespace Guanako {
                         add_checks (description, rchecks, type);
                         break;
                     default:
-                        stderr.printf ("Warning: Unknown configuration file value: %s", i->name);
+                        stderr.printf ("Warning: Unknown configuration file value line %hu: %s\n", i->line, i->name);
                         break;
                 }
             }

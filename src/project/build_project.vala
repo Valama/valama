@@ -16,8 +16,10 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
+
 using GLib;
 using Guanako;
+using Gee;
 
 public class ProjectBuilder : Object{
     private ValamaProject project;
@@ -164,7 +166,13 @@ public class ProjectBuilder : Object{
         /* Write project.cmake */
         try {
             string pkg_list = "set(required_pkgs\n";
-            foreach (string pkg in project.guanako_project.packages)
+            var chpkgs = new TreeSet<string>();
+            foreach (var choice in project.package_choices)
+                if (choice.all)
+                    foreach (var pkg in choice.packages)
+                        chpkgs.add (pkg);
+            chpkgs.add_all (project.guanako_project.packages);
+            foreach (string pkg in chpkgs)
                 pkg_list += @"\"$pkg\"\n";
             pkg_list += ")\n";
 
