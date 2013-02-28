@@ -48,15 +48,6 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 find_package(Vala "0.17" REQUIRED)
 
-if(VALA_VERSION STRGREATER "0.19.0")
-  list(REMOVE_ITEM required_pkgs "libvala-0.18" )
-  set(valashort_ver "0.20")
-else()
-  list(REMOVE_ITEM required_pkgs "libvala-0.20" )
-  set(valashort_ver "0.18")
-endif()
-set(vapishort_dir "vala-${valashort_ver}/vapi")
-set(vapidir "/usr/share/${vapishort_dir}")
 
 set(pc_prefix ${CMAKE_INSTALL_PREFIX})
 set(pc_exec_prefix "\${prefix}")
@@ -70,6 +61,16 @@ set(pc_version "${${project_name}_VERSION}")
 # Custom library version checks.
 set(valac_cond)
 find_package(PkgConfig)
+# libvala-X.Y
+if(VALA_VERSION STRGREATER "0.19.0")
+  list(REMOVE_ITEM required_pkgs "libvala-0.18" )
+  set(valashort_ver "0.20")
+else()
+  list(REMOVE_ITEM required_pkgs "libvala-0.20" )
+  set(valashort_ver "0.18")
+endif()
+set(vapishort_dir "vala-${valashort_ver}/vapi")
+set(vapidir "/usr/share/${vapishort_dir}")
 # gee-1.0 and gee-0.8
 set(gee_ver)
 set(all_pkgs)

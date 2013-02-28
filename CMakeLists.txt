@@ -41,16 +41,6 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 find_package(Vala "0.17" REQUIRED)
 
-if(VALA_VERSION STRGREATER "0.19.0")
-  list(REMOVE_ITEM required_pkgs "libvala-0.18")
-  set(valashort_ver "0.20")
-else()
-  list(REMOVE_ITEM required_pkgs "libvala-0.20")
-  set(valashort_ver "0.18")
-endif()
-set(vala_datadir "/usr/share/vala")
-set(vapidir "${vala_datadir}-${valashort_ver}/vapi")
-
 
 option(TRANSLATION "Build translation." ON)
 option(ICONS "Generate icons." ON)
@@ -77,6 +67,17 @@ endif()
 # Custom library version checks.
 set(valac_cond)
 find_package(PkgConfig)
+# libvala-X.Y
+if(VALA_VERSION STRGREATER "0.19.0")
+  list(REMOVE_ITEM required_pkgs "libvala-0.18")
+  set(valashort_ver "0.20")
+  set(valac_cond "-D;VALAC_0_20")
+else()
+  list(REMOVE_ITEM required_pkgs "libvala-0.20")
+  set(valashort_ver "0.18")
+endif()
+set(vala_datadir "/usr/share/vala")
+set(vapidir "${vala_datadir}-${valashort_ver}/vapi")
 # gtk+-3.0
 pkg_check_modules(GTK3.0 REQUIRED "gtk+-3.0")
 if(NOT("3.6" STRGREATER GTK3.0_VERSION))

@@ -299,7 +299,7 @@ public class MainWidget : Box {
         item_view.set_submenu (menu_view);
 
         var item_view_search = new CheckMenuItem.with_mnemonic ("_" + _("Show search"));
-#if GDL_3_6_2 && VALA_0_20
+#if GDL_3_6_2 && VALAC_0_20
         item_view_search.active = !wdg_search.dock_item.is_closed();
 #elif !GDL_3_6_2
         item_view_search.active = ((wdg_search.dock_item.flags & DockObjectFlags.ATTACHED) != 0);
@@ -447,7 +447,7 @@ public class MainWidget : Box {
 
         var btn_search = new ToggleToolButton();
         btn_search.icon_name = "edit-find-symbolic";
-#if GDL_3_6_2 && VALA_0_20
+#if GDL_3_6_2 && VALAC_0_20
         btn_search.active = !wdg_search.dock_item.is_closed();
 #elif !GDL_3_6_2
         btn_search.active = ((wdg_search.dock_item.flags & DockObjectFlags.ATTACHED) != 0);
