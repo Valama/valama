@@ -72,12 +72,12 @@ public class UiSearch : UiElement {
         toolbar_title.add (btn_all_files);
         box_main.pack_start (toolbar_title, false, true);
 
-
-#if GTK_LESS_3_6
-        entry_search = new Entry();
-#else
+#if GTK_3_6
         entry_search = new SearchEntry();
+#else
+        entry_search = new Entry();
 #endif
+
         entry_search.changed.connect(() => {
             search (entry_search.text);
         });
@@ -109,11 +109,12 @@ public class UiSearch : UiElement {
 
     TreeView tree_view;
     ToggleToolButton btn_all_files;
-#if GTK_LESS_3_6
-    Entry entry_search;
-#else
+#if GTK_3_6
     SearchEntry entry_search;
+#else
+    Entry entry_search;
 #endif
+
     public void focus_entry_search() {
         entry_search.grab_focus();
         entry_search.select_region (0, entry_search.text.length);

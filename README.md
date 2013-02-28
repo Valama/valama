@@ -5,7 +5,7 @@ The next gen Vala IDE.
 ## Manual installation ##
 
 ### Requirements
- * cmake (>= 2.8)
+ * cmake (>= 2.8.5)
  * valac (>= 0.17)
  * pkg-config
  * gobject-2.0
@@ -15,7 +15,7 @@ The next gen Vala IDE.
  * libvala-0.18 (>= 0.17) or newer libvala
  * gdk-3.0
  * gdl-3.0 (>= 3.5.5 is recommended)
- * gtk+-3.0
+ * gtk+-3.0 (>= 3.4)
  * gtksourceview-3.0
  * libxml-2.0
  * gthread-2.0
