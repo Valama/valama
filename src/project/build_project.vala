@@ -123,34 +123,16 @@ public class ProjectBuilder : Object{
                 errmsg (_("Could not spawn subprocess: %s\n"), e.message);
             }
             var chn = new IOChannel.unix_new (valac_stdout);
-            chn.add_watch (IOCondition.IN | IOCondition.HUP, (source, condition) => {
-                if (condition == IOCondition.HUP)
-                    return false;
-                string output;
-                try {
-                    source.read_line (out output, null, null);
-                } catch (GLib.ConvertError e) {
-                    errmsg (_("Could not convert all characters: %s\n"), e.message);
-                } catch (GLib.IOChannelError e) {
-                    errmsg (_("IOChannel operation failed: %s\n"), e.message);
-                }
-                build_output (output);
-                return true;
+            chn.add_watch (IOCondition.IN | IOCondition.HUP, (source, condition)=>{
+                bool ret;
+                build_output(channel_output_read_line (source, condition, out ret));
+                return ret;
             });
             var chnerr = new IOChannel.unix_new (valac_error);
-            chnerr.add_watch (IOCondition.IN | IOCondition.HUP, (source, condition) => {
-                if (condition == IOCondition.HUP)
-                    return false;
-                string output;
-                try {
-                    source.read_line (out output, null, null);
-                } catch (GLib.ConvertError e) {
-                    errmsg (_("Could not convert all characters: %s\n"), e.message);
-                } catch (GLib.IOChannelError e) {
-                    errmsg (_("IOChannel operation failed: %s\n"), e.message);
-                }
-                build_output (output);
-                return true;
+            chnerr.add_watch (IOCondition.IN | IOCondition.HUP, (source, condition)=>{
+                bool ret;
+                build_output(channel_output_read_line (source, condition, out ret));
+                return ret;
             });
             build_output (_("Adding valac watch\n"));
             ChildWatch.add (valac_pid, (pid, status) => {
@@ -228,19 +210,18 @@ public class ProjectBuilder : Object{
             errmsg (_("Could not spawn subprocess: %s\n"), e.message);
         }
         var chn = new IOChannel.unix_new (cmake_stdout);
-        chn.add_watch (IOCondition.IN | IOCondition.HUP, (source) => {
-            string output;
-            size_t len;
-            try {
-                source.read_to_end (out output, out len);
-            } catch (GLib.ConvertError e) {
-                errmsg (_("Could not convert all characters: %s\n"), e.message);
-            } catch (GLib.IOChannelError e) {
-                errmsg (_("IOChannel operation failed: %s\n"), e.message);
-            }
-            build_output (output);
-            return false;
+        chn.add_watch (IOCondition.IN | IOCondition.HUP, (source, condition)=>{
+            bool ret;
+            build_output(channel_output_read_line (source, condition, out ret));
+            return ret;
         });
+        var chn_err = new IOChannel.unix_new (cmake_error);
+        chn_err.add_watch (IOCondition.IN | IOCondition.HUP, (source, condition)=>{
+            bool ret;
+            build_output(channel_output_read_line (source, condition, out ret));
+            return ret;
+        });
+
         build_output (_("Adding cmake watch\n"));
         ChildWatch.add (cmake_pid, (pid, status) => {
             Process.close_pid (pid);
@@ -262,25 +243,23 @@ public class ProjectBuilder : Object{
                 errmsg (_("Could not spawn subprocess: %s\n"), e.message);
             }
             var chn_make = new IOChannel.unix_new (make_stdout);
-            chn_make.add_watch (IOCondition.IN | IOCondition.HUP, (source, condition) => {
-                if (condition == IOCondition.HUP)
-                    return false;
-                string output;
-                try {
-                    source.read_line (out output, null, null);
-                } catch (GLib.ConvertError e) {
-                    errmsg (_("Could not convert all characters: %s\n"), e.message);
-                } catch (GLib.IOChannelError e) {
-                    errmsg (_("IOChannel operation failed: %s\n"), e.message);
-                }
-                build_output (output);
+            chn_make.add_watch (IOCondition.IN | IOCondition.HUP, (source, condition)=>{
+                bool ret;
+                var output = channel_output_read_line (source, condition, out ret);
                 Regex r = /^\[(?P<percent>.*)\%\].*$/;
                 MatchInfo info;
                 if (r.match (output, 0, out info)) {
                     var percent_string = info.fetch_named ("percent");
                     build_progress (int.parse (percent_string));
                 }
-                return true;
+                build_output (output);
+                return ret;
+            });
+            var chn_make_err = new IOChannel.unix_new (make_error);
+            chn_make_err.add_watch (IOCondition.IN | IOCondition.HUP, (source, condition)=>{
+                bool ret;
+                build_output(channel_output_read_line (source, condition, out ret));
+                return ret;
             });
             ChildWatch.add (make_pid, (pid, status) => {
                 Process.close_pid (pid);
@@ -289,25 +268,25 @@ public class ProjectBuilder : Object{
             });
         });
 
-        /*var chn2 = new IOChannel.unix_new (cmake_error);
-        chn2.add_watch (IOCondition.IN | IOCondition.HUP, () => {
-            string output;
-            size_t len;
-            try {
-                chn2.read_to_end (out output, out len);
-            } catch (GLib.ConvertError e) {
-                errmsg (_("Could not convert all characters: %s\n"), e.message);
-            } catch (GLib.IOChannelError e) {
-                errmsg (_("IOChannel operation failed: %s\n"), e.message);
-            }
-            buildsys_output (output);
-            msg ("==================" + output + "\n");
-            return true;
-        });*/
-
         if (exitstatus == 0)
             return true;
         return false;
+    }
+    private string channel_output_read_line (IOChannel source, IOCondition condition, out bool return_value) {
+        if (condition == IOCondition.HUP) {
+            return_value = false;
+            return "";
+        }
+        string output = "";
+        try {
+            source.read_line (out output, null, null);
+        } catch (GLib.ConvertError e) {
+            errmsg (_("Could not convert all characters: %s\n"), e.message);
+        } catch (GLib.IOChannelError e) {
+            errmsg (_("IOChannel operation failed: %s\n"), e.message);
+        }
+        return_value = true;
+        return output;
     }
 
     /**
@@ -368,10 +347,10 @@ public class ProjectBuilder : Object{
 
         var chn = new IOChannel.unix_new (app_stdout);
         chn.add_watch (IOCondition.IN | IOCondition.HUP, (source, condition) => {
-            if (condition == IOCondition.HUP)
+            if (condition == IOCondition.HUP) {
                 return false;
-
-            string output = "";
+            }
+            string output;
             try {
                 source.read_line (out output, null, null);
             } catch (GLib.ConvertError e) {
@@ -384,10 +363,10 @@ public class ProjectBuilder : Object{
         });
         var chnerr = new IOChannel.unix_new (app_stderr);
         chnerr.add_watch (IOCondition.IN | IOCondition.HUP, (source, condition) => {
-            if (condition == IOCondition.HUP)
+            if (condition == IOCondition.HUP) {
                 return false;
-
-            string output = "";
+            }
+            string output;
             try {
                 source.read_line (out output, null, null);
             } catch (GLib.ConvertError e) {
