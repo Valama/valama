@@ -355,35 +355,15 @@ public class ProjectBuilder : Object{
 
         var chn = new IOChannel.unix_new (app_stdout);
         chn.add_watch (IOCondition.IN | IOCondition.HUP, (source, condition) => {
-            if (condition == IOCondition.HUP) {
-                return false;
-            }
-            string output;
-            try {
-                source.read_line (out output, null, null);
-            } catch (GLib.ConvertError e) {
-                errmsg (_("Could not convert all characters: %s\n"), e.message);
-            } catch (GLib.IOChannelError e) {
-                errmsg (_("IOChannel operation failed: %s\n"), e.message);
-            }
-            app_output_std (output);
-            return true;
+            bool ret;
+            app_output_std(channel_output_read_line (source, condition, out ret));
+            return ret;
         });
         var chnerr = new IOChannel.unix_new (app_stderr);
         chnerr.add_watch (IOCondition.IN | IOCondition.HUP, (source, condition) => {
-            if (condition == IOCondition.HUP) {
-                return false;
-            }
-            string output;
-            try {
-                source.read_line (out output, null, null);
-            } catch (GLib.ConvertError e) {
-                errmsg (_("Could not convert all characters: %s\n"), e.message);
-            } catch (GLib.IOChannelError e) {
-                errmsg (_("IOChannel operation failed: %s\n"), e.message);
-            }
-            app_output_err (output);
-            return true;
+            bool ret;
+            app_output_err(channel_output_read_line (source, condition, out ret));
+            return ret;
         });
         ChildWatch.add (app_pid, (pid, status) => {
             Process.close_pid (pid);

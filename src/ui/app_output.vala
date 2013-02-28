@@ -37,13 +37,6 @@ public class AppOutput : UiElement {
         ti_title.add (plabel);
         toolbar_title.add(ti_title);
 
-        project.notify["project-name"].connect (() => {
-            ti_title.remove (plabel);
-            plabel = new Label (project.project_name);
-            ti_title.add (plabel);
-            ti_title.show_all();
-        });
-
         var separator_stretch = new SeparatorToolItem();
         separator_stretch.set_expand (true);
         separator_stretch.draw = false;
