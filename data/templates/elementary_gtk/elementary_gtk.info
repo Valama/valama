@@ -1,0 +1,12 @@
+<template>
+    <author>
+        <name>Marcec Mario</name>
+        <mail>mario.marce42@googlmail.com</mail>
+    </author>
+    <name>
+        <en>Simple elemantary GTK</en>
+    </name>
+    <description>
+        <en>Simple elemantary GTK+ 3 project</en>
+    </description>
+</template>
