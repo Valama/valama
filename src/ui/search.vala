@@ -24,6 +24,12 @@ using Gtk;
  */
 public class UiSearch : UiElement {
     /**
+     * Status of dock_item. True if shown, false if hidden and null if
+     * undefined.
+     */
+    private bool? show;
+
+    /**
      * Emit to show search.
      *
      * @param show True to show, false to hide.
@@ -31,6 +37,7 @@ public class UiSearch : UiElement {
     public signal void show_search (bool show);
 
     public UiSearch () {
+        show = null;
         tree_view = new TreeView();
         var line_renderer = new CellRendererText();
         line_renderer.yalign = 0;
@@ -90,17 +97,20 @@ public class UiSearch : UiElement {
         build();
 
         this.show_search.connect ((show) => {
-            if (show) {
-                dock_item.show_item();
-                widget_main.focus_dock_item (dock_item);
-                if (source_viewer.current_srcbuffer != null) {
-                    TextIter sel_start, sel_end;
-                    source_viewer.current_srcbuffer.get_selection_bounds (out sel_start, out sel_end);
-                    entry_search.text = source_viewer.current_srcbuffer.get_text (sel_start, sel_end, true);
-                }
-                focus_entry_search();
-            } else
-                dock_item.hide_item();
+            if (this.show == null || show != this.show) {
+                this.show = show;
+                if (show) {
+                    dock_item.show_item();
+                    widget_main.focus_dock_item (dock_item);
+                    if (source_viewer.current_srcbuffer != null) {
+                        TextIter sel_start, sel_end;
+                        source_viewer.current_srcbuffer.get_selection_bounds (out sel_start, out sel_end);
+                        entry_search.text = source_viewer.current_srcbuffer.get_text (sel_start, sel_end, true);
+                    }
+                    focus_entry_search();
+                } else
+                    dock_item.hide_item();
+            }
         });
 
         source_viewer.current_sourceview_changed.connect(()=>{
