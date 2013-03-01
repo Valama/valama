@@ -12,7 +12,7 @@ The next gen Vala IDE.
  * glib-2.0
  * gio-2.0
  * gee-1.0 or gee-0.8
- * libvala-0.18 (>= 0.17) or newer libvala
+ * libvala-0.18 (>= 0.17) or libvala-0.20 (>= 0.19) or newer libvala
  * gdk-3.0
  * gdl-3.0 (>= 3.5.5 is recommended)
  * gtk+-3.0 (>= 3.4)
@@ -24,8 +24,6 @@ The next gen Vala IDE.
 On Debian based system install following packages:
 
     sudo apt-get install build-essential valac-0.18 libvala-0.18-dev cmake pkg-config libgtk-3-dev libgtksourceview-3.0-dev libgee-dev libxml2-dev libgdl-3-dev gnome-icon-theme-symbolic
-
-If you want to use `gee-0.8` instead of `gee-1.0`, change `cmake/project.cmake` and `cmake/guanako.cmake` accordingly.
 
 If you want to use a newer version of `libvala`, change  `cmake/project.cmake` and `cmake/guanako.cmake` (and if you want to use Valama `valama.vlp`) accordingly.
 
