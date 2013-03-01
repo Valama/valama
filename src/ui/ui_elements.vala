@@ -38,6 +38,8 @@ public abstract class UiElement : Object{
     public Gtk.Widget widget;
     public Gdl.DockItem? dock_item { get; set; default = null; }
 
+    private Gdl.DockItemBehavior? saved_behavior;
+
     /**
      * Share the project ({@link ValamaProject}) between all elements.
      */
@@ -50,10 +52,10 @@ public abstract class UiElement : Object{
         if (widget_main is Object) {
             widget_main.lock_items.connect (lock_item);
             widget_main.unlock_items.connect (unlock_item);
-        } else {
+        } else
             error_msg (_("Could not connect locking signals.\n"));
-        }
         locking = true;
+        saved_behavior = null;
     }
 
     /**
@@ -62,6 +64,7 @@ public abstract class UiElement : Object{
     private void lock_item() {
         if (!locking || dock_item == null)
             return;
+        saved_behavior = dock_item.behavior;
         dock_item.behavior = Gdl.DockItemBehavior.NO_GRIP | Gdl.DockItemBehavior.LOCKED;
         /* Work arround gdl bug to not hide dockbar properly. */
         dock_item.forall_internal (true, (child) => {
@@ -76,7 +79,8 @@ public abstract class UiElement : Object{
     private void unlock_item() {
         if (!locking || dock_item == null)
             return;
-        dock_item.behavior = Gdl.DockItemBehavior.CANT_CLOSE;
+        if (saved_behavior != null)
+            dock_item.behavior = saved_behavior;
         dock_item.forall_internal (true, (child) => {
             if (child is Gdl.DockItemGrip)
                 child.show();
