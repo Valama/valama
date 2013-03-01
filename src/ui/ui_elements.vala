@@ -38,7 +38,29 @@ public abstract class UiElement : Object{
     public Gtk.Widget widget;
     public Gdl.DockItem? dock_item { get; set; default = null; }
 
+    private bool? _visible = null;
+    /**
+     * Visibility of {@link dock_item}.
+     */
+    public bool? visible {
+        get {
+            return _visible;
+        }
+        private set {
+            if (_visible != value) {
+                _visible = value;
+                visible_changed (_visible);
+            }
+        }
+    }
+
     private Gdl.DockItemBehavior? saved_behavior;
+
+    /**
+     * Emit when visibility of {@link dock_item} has changed (either iconified
+     * or closed).
+     */
+    public signal void visible_changed (bool status);
 
     /**
      * Share the project ({@link ValamaProject}) between all elements.
@@ -56,6 +78,14 @@ public abstract class UiElement : Object{
             error_msg (_("Could not connect locking signals.\n"));
         locking = true;
         saved_behavior = null;
+
+        this.notify["dock-item"].connect (() => {
+            if (dock_item != null) {
+                dock_item.notify["visible"].connect (() => {
+                    visible = dock_item.visible;
+                });
+            }
+        });
     }
 
     /**

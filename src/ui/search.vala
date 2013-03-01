@@ -23,6 +23,14 @@ using Gtk;
  * Search widget
  */
 public class UiSearch : UiElement {
+    TreeView tree_view;
+    ToggleToolButton btn_all_files;
+#if GTK_3_6
+    SearchEntry entry_search;
+#else
+    Entry entry_search;
+#endif
+
     /**
      * Status of dock_item. True if shown, false if hidden and null if
      * undefined.
@@ -71,7 +79,7 @@ public class UiSearch : UiElement {
         toolbar_title.add (separator_stretch);
 
         btn_all_files = new ToggleToolButton ();
-        btn_all_files.clicked.connect (()=>{
+        btn_all_files.clicked.connect (() => {
             search (entry_search.text);
         });
         btn_all_files.label = _("All files");
@@ -96,6 +104,11 @@ public class UiSearch : UiElement {
 
         build();
 
+        this.visible_changed.connect ((status) => {
+            show = status;
+            show_search (status);
+        });
+
         this.show_search.connect ((show) => {
             if (this.show == null || show != this.show) {
                 this.show = show;
@@ -108,27 +121,24 @@ public class UiSearch : UiElement {
                         entry_search.text = source_viewer.current_srcbuffer.get_text (sel_start, sel_end, true);
                     }
                     focus_entry_search();
-                } else
+                } else {
+// #if GDL_3_6_2 && VALAC_0_20
+//                     /* Hide also iconified item by making it visible first. */
+//                     if (dock_item.is_iconified())
+//                         dock_item.show_item();
+// #endif
                     dock_item.hide_item();
+                }
             }
         });
 
-        source_viewer.current_sourceview_changed.connect(()=>{
+        source_viewer.current_sourceview_changed.connect (() => {
             if (!btn_all_files.active)
                 search (entry_search.text);
         });
 
-
         widget = box_main;
     }
-
-    TreeView tree_view;
-    ToggleToolButton btn_all_files;
-#if GTK_3_6
-    SearchEntry entry_search;
-#else
-    Entry entry_search;
-#endif
 
     public void focus_entry_search() {
         entry_search.grab_focus();
