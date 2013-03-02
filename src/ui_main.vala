@@ -271,7 +271,10 @@ public class MainWidget : Box {
 
         var item_file_quit = new ImageMenuItem.from_stock (Stock.QUIT, null);
         menu_file.append (item_file_quit);
-        item_file_quit.activate.connect (main_quit);
+        item_file_quit.activate.connect (() => {
+            on_destroy();
+            main_quit();
+        });
         add_accel_activate (item_file_quit, Gdk.Key.q);
 
         /* Edit */

@@ -96,6 +96,7 @@ public abstract class UiElement : Object{
 
         this.notify["dock-item"].connect (() => {
             if (dock_item != null) {
+                saved_behavior = null;
                 visible = dock_item.visible;
                 dock_item.notify["visible"].connect (() => {
                     visible = dock_item.visible;
@@ -142,7 +143,7 @@ public abstract class UiElement : Object{
      * Hide dock item grip and lock it.
      */
     private void lock_item() {
-        if (!locking || dock_item == null)
+        if (!locking || dock_item == null || saved_behavior != null)
             return;
         saved_behavior = dock_item.behavior;
         dock_item.behavior = Gdl.DockItemBehavior.NO_GRIP | Gdl.DockItemBehavior.LOCKED;
@@ -161,6 +162,7 @@ public abstract class UiElement : Object{
             return;
         if (saved_behavior != null)
             dock_item.behavior = saved_behavior;
+        saved_behavior = null;
         dock_item.forall_internal (true, (child) => {
             if (child is Gdl.DockItemGrip)
                 child.show();
