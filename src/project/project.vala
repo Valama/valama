@@ -91,7 +91,6 @@ public enum IdeModes {
      */
     public static IdeModes[] values() {
         var ret = new IdeModes[0];
-        var ec = (EnumClass) typeof (IdeModes).class_ref();
         for (int i = 0; i < size; ++i)
             ret += IdeModes.int_to_mode (i);
         return ret;
