@@ -41,13 +41,11 @@ public class BuildOutput : UiElement {
         vbox.pack_start (scrw, true, true);
 
         progressbar = new ProgressBar();
-        vbox.pack_start (progressbar, false, false);
+        vbox.pack_start (progressbar, false, true);
 
         widget = vbox;
         widget.show_all();
         progressbar.visible = false;
-        progressbar.halign = Align.START;
-        progressbar.set_size_request (200, 0);
 
         project_builder.build_started.connect (()=> {
             textview.buffer.text = "";

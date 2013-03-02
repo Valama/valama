@@ -192,6 +192,8 @@ public class MainWidget : Box {
 
         /* Keep this before layout loading. */
         dock.show_all();
+        //FIXME: Dirty workarround to hide progressbar on startup.
+        project_builder.build_finished();
 
         /* Load default layout. Either local one or system wide. */
         bool err = false;
