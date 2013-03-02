@@ -41,17 +41,23 @@ public class UiTemplateSelector {
                                                  "markup",
                                                  0);
 
-        available_templates = load_templates ("en");
+        available_templates = load_templates();
 
         bool first_entry = true;
         string[] available_packages = new string[0];
         foreach (string av_pkg in Guanako.get_available_packages())
             available_packages += av_pkg;
-        foreach (ProjectTemplate template in available_templates) {
+        foreach (var template in available_templates) {
             TreeIter iter;
             listmodel.append (out iter);
 
-            var unmet = template.get_unmet_dependencies (available_packages);
+            string[] unmet;
+            try {
+                unmet = template.get_unmet_dependencies (available_packages);
+            } catch (LoadingError e) {
+                warning_msg (_("Could not load project template: %s\n"), e.message);
+                continue;
+            }
 
             string template_label = "";
             if (unmet.length > 0)
@@ -60,8 +66,9 @@ public class UiTemplateSelector {
 
             if (unmet.length > 0) {
                 template_label += "\n" + _("Missing packages: ");
-                foreach (string pkg in unmet)
-                    template_label += pkg + " ";
+                template_label += unmet[0];
+                for (var i = 1; i < unmet.length; ++i)
+                    template_label += @", $(unmet[i])";
                 template_label += "</span>";
             }
             listmodel.set (iter, 0, template_label, 1, template.icon);

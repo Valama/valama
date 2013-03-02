@@ -82,7 +82,6 @@ public static int main (string[] args) {
     vscreen = new WelcomeScreen();
     vscreen.project_loaded.connect ((project) => {
         window_main.remove (vscreen);
-        project.initial_update();
         show_main_screen (project);
     });
     if (project != null)
@@ -257,7 +256,7 @@ static bool on_file_selected (string filename) {
 }
 
 
-class TestProvider : Gtk.SourceCompletionProvider, Object {
+class GuanakoCompletion : Gtk.SourceCompletionProvider, Object {
     Gdk.Pixbuf icon;
     public string name;
     public int priority;

@@ -191,7 +191,7 @@ public class ValamaProject : Object {
     /**
      * Completion provider.
      */
-    private TestProvider comp_provider;
+    private GuanakoCompletion comp_provider;
 
     /**
      * The project's buildsystem (valama/cmake/...).
@@ -223,54 +223,60 @@ public class ValamaProject : Object {
      *
      * @param project_file Load project from this file.
      * @param syntaxfile Load Guanako syntax definitions from this file.
+     * @param fully If false only load project file information.
      * @throws LoadingError Throw on error while loading project file.
      */
-    public ValamaProject (string project_file, string? syntaxfile = null) throws LoadingError {
+    public ValamaProject (string project_file,
+                          string? syntaxfile = null,
+                          bool fully = true) throws LoadingError {
         var proj_file = File.new_for_path (project_file);
         this.project_file = proj_file.get_path();
         project_path = proj_file.get_parent().get_path(); //TODO: Check valid path?
 
-        recentmgr.add_item (get_absolute_path(this.project_file));
-
-        try {
-            guanako_project = new Guanako.Project (syntaxfile);
-        } catch (GLib.IOError e) {
-            errmsg (_("Could not read syntax file: %s"), e.message);
-            Gtk.main_quit();
-        } catch (GLib.Error e) {
-            errmsg (_("An error occured: %s"), e.message);
-            Gtk.main_quit();
-        }
-
-        files = new Gee.TreeSet<string>();
-        b_files = new Gee.TreeSet<string>();
+        if (fully)
+            try {
+                guanako_project = new Guanako.Project (syntaxfile);
+            } catch (GLib.IOError e) {
+                throw new LoadingError.COMPLETION_NOT_AVAILABLE (
+                                        _("Could not read syntax file: %s\n"), e.message);
+            } catch (GLib.Error e) {
+                throw new LoadingError.COMPLETION_NOT_AVAILABLE (
+                                        _("An error occured while loading new Guanako project: %s\n"),
+                                        e.message);
+            }
 
         msg (_("Load project file: %s\n"), this.project_file);
         load_project_file();  // can throw LoadingError
 
+        if (!fully)
+            return;
+
+        recentmgr.add_item (get_absolute_path(this.project_file));
+
+        files = new Gee.TreeSet<string>();
         generate_file_list (source_dirs.to_array(),
                             source_files.to_array(),
                             add_source_file);
+
+        b_files = new Gee.TreeSet<string>();
         generate_file_list (buildsystem_dirs.to_array(),
                             buildsystem_files.to_array(),
                             add_buildsystem_file);
 
         vieworder = new Gee.LinkedList<ViewMap?>();
 
-        /* Completion provider. */
-        this.comp_provider = new TestProvider();
-        this.comp_provider.priority = 1;
-        this.comp_provider.name = _("Test Provider 1");
-    }
-
-    /**
-     * Run initial Guanako update (Call after loading the project if autocompletion is used)
-     */
-    public void initial_update () {
         string[] missing_packages = guanako_project.add_packages (packages.to_array(), false);
 
         if (missing_packages.length > 0)
             ui_missing_packages_dialog (missing_packages);
+
+        /* Completion provider. */
+        this.comp_provider = new GuanakoCompletion();
+        this.comp_provider.priority = 1;
+        this.comp_provider.name = _("%s - Vala").printf (project_name);
+        this.notify["project-name"].connect (() => {
+            comp_provider.name = _("%s - Vala").printf (project_name);
+        });
 
         parsing = true;
         new Thread<void*> (_("Initial buffer update"), () => {
@@ -345,33 +351,31 @@ public class ValamaProject : Object {
     private void generate_file_list (string[] dirlist,
                                      string[] filelist,
                                      FileCallback? action = null) {
-        try {
-            File directory;
-            FileEnumerator enumerator;
-            FileInfo file_info;
+        File directory;
+        FileEnumerator enumerator;
+        FileInfo file_info;
 
-            foreach (string dir in dirlist) {
+        foreach (string dir in dirlist) {
+            try {
                 directory = File.new_for_path (dir);
                 enumerator = directory.enumerate_children (FileAttribute.STANDARD_NAME, 0);
 
-                while ((file_info = enumerator.next_file()) != null) {
+                while ((file_info = enumerator.next_file()) != null)
                     action (Path.build_path (Path.DIR_SEPARATOR_S,
                                              dir,
                                              file_info.get_name()));
-                }
+            } catch (GLib.Error e) {
+                errmsg (_("Could not open file in '%s': %s\n"), dir, e.message);
             }
+        }
 
-            foreach (string filename in filelist) {
+        foreach (string filename in filelist) {
                 var file = File.new_for_path (filename);
                 if (file.query_exists())
                     action (filename);
                 else
                     warning_msg (_("File not found: %s\n"), filename);
-            }
-        } catch (GLib.Error e) {
-            errmsg (_("Could not open file: %s\n"), e.message);
         }
-
     }
 
     /**
@@ -398,10 +402,13 @@ public class ValamaProject : Object {
         if (root_node->has_prop ("version") != null)
             project_file_version = root_node->get_prop ("version");
         if (comp_proj_version (project_file_version, VLP_VERSION_MIN) < 0) {
-            delete doc;
-            throw new LoadingError.FILE_IS_OLD (_("Project file to old: %s < %s"),
-                                                project_file_version,
-                                                VLP_VERSION_MIN);
+            var errstr = _("Project file too old: %s < %s").printf (project_file_version,
+                                                                    VLP_VERSION_MIN);
+            if (!Args.forceold) {
+                throw new LoadingError.FILE_IS_OLD (errstr);
+                delete doc;
+            } else
+                warning_msg (_("Ignore project file loading error: %s\n"), errstr);
         }
 
         package_choices = new Gee.ArrayList<PkgChoice?>();
@@ -991,7 +998,7 @@ public class SourceBuffer : Gtk.SourceBuffer {
 /**
  * Throw on project file loading errors.
  */
-errordomain LoadingError {
+public errordomain LoadingError {
     /**
      * File content probably too old.
      */
@@ -1003,7 +1010,12 @@ errordomain LoadingError {
     /**
      * Unable to load file.
      */
-    FILE_IS_GARBAGE
+    FILE_IS_GARBAGE,
+    /**
+     * Could not load Guanako completion.
+     */
+    //TODO: Disable completion instead.
+    COMPLETION_NOT_AVAILABLE
 }
 
 // vim: set ai ts=4 sts=4 et sw=4
