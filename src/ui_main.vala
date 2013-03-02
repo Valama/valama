@@ -488,7 +488,7 @@ public class MainWidget : Box {
     }
 
     /**
-     * Add {@link UiElement} toggle item to view submenu.
+     * Add {@link UiElement} toggle item to menu.
      *
      * @param menu_view View (sub)menu.
      * @param element {@link UiElement} to connect toggle signals with.
@@ -527,6 +527,14 @@ public class MainWidget : Box {
             add_accel_activate (item_view_element, key, modtype, "activate");
     }
 
+    /**
+     * Add {@link UiElement} toggle item to toolbar.
+     *
+     * @param toolbar Toolbar to add button.
+     * @param element {@link UiElement} to connect toggle signals with.
+     * @param stock_id Stock item.
+     * @param icon_name Icon from theme.
+     */
     public void add_view_toolbar_item (Toolbar toolbar,
                                        UiElement element,
                                        string? stock_id,
