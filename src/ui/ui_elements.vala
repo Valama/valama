@@ -63,6 +63,20 @@ public abstract class UiElement : Object{
     public signal void visible_changed (bool status);
 
     /**
+     * Status of dock_item. True if shown, false if hidden and null if
+     * undefined.
+     */
+    private bool? show;
+
+    /**
+     * Emit to show search.
+     *
+     * @param show True to show, false to hide.
+     */
+    public signal void show_element (bool show);
+
+
+    /**
      * Share the project ({@link ValamaProject}) between all elements.
      */
     public static ValamaProject project { get; set; }
@@ -78,15 +92,51 @@ public abstract class UiElement : Object{
             error_msg (_("Could not connect locking signals.\n"));
         locking = true;
         saved_behavior = null;
+        show = null;
 
         this.notify["dock-item"].connect (() => {
             if (dock_item != null) {
+                visible = dock_item.visible;
                 dock_item.notify["visible"].connect (() => {
                     visible = dock_item.visible;
                 });
             }
         });
+
+        this.visible_changed.connect ((status) => {
+            show = status;
+            show_element (status);
+        });
+
+        this.show_element.connect ((show) => {
+            if (this.show == null || show != this.show) {
+                this.show = show;
+                if (show) {
+                    dock_item.show_item();
+                    widget_main.focus_dock_item (dock_item);
+                    on_element_show();
+                } else {
+// #if GDL_3_6_2 && VALAC_0_20
+//                     /* Hide also iconified item by making it visible first. */
+//                     if (dock_item.is_iconified())
+//                         dock_item.show_item();
+// #endif
+                    on_element_hide();
+                    dock_item.hide_item();
+                }
+            }
+        });
     }
+
+    /**
+     * Run after show and focus {@link dock_item}.
+     */
+    protected virtual void on_element_show() {}
+
+    /**
+     * Run after hide {@link dock_item}.
+     */
+    protected virtual void on_element_hide() {}
 
     /**
      * Hide dock item grip and lock it.

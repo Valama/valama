@@ -138,7 +138,6 @@ class UiBreakpoints : UiElement {
         /* Make sure current_srcfocus != null. */
         var focus_file = project.guanako_project.get_source_file_by_name (
                                                         source_viewer.current_srcfocus);
-        int line_start, line_end;
         if (!source_viewer.current_srcbuffer.get_selection_bounds (out iter_start, out iter_end)) {
             var mark_insert = source_viewer.current_srcbuffer.get_insert();
             source_viewer.current_srcbuffer.get_iter_at_mark (out iter_start, mark_insert);

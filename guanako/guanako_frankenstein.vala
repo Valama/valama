@@ -71,13 +71,17 @@ namespace Guanako {
             string[] lines = file.content.split ("\n");
             int cnt = 0;
             foreach (FrankenTimer ftime in frankentimers) {
-                lines[ftime.start_line - 1] = @"var frankentimer_$(cnt.to_string()) = new GLib.Timer(); frankentimer_$(cnt.to_string()).start(); " + lines[ftime.start_line - 1];
-                lines[ftime.end_line - 1] = @"frankentimer_callback($(cnt.to_string()), frankentimer_$(cnt.to_string()).elapsed());" + lines[ftime.end_line - 1];
+                lines[ftime.start_line - 1] = @"var frankentimer_$(cnt.to_string()) = new GLib.Timer();\n"
+                                                + "frankentimer_$(cnt.to_string()).start();\n"
+                                                + lines[ftime.start_line - 1];
+                lines[ftime.end_line - 1] = "frankentimer_callback ($(cnt.to_string()),\n"
+                                            + "                       frankentimer_$(cnt.to_string()).elapsed());\n"
+                                            + lines[ftime.end_line - 1];
                 cnt++;
             }
             cnt = 0;
             foreach (FrankenStop fstop in frankenstops) {
-                lines[fstop.line - 1] = @"frankenstop_callback($(cnt.to_string()));" + lines[fstop.line - 1];
+                lines[fstop.line - 1] = @"frankenstop_callback($(cnt.to_string()));\n" + lines[fstop.line - 1];
                 cnt++;
             }
             string ret = "";
@@ -86,22 +90,27 @@ namespace Guanako {
             return ret;
         }
         public string get_frankenstein_mainblock() {
-            return """[DBus (name = "app.valama.frankenstein")]""" + "\n"
-                + "interface FrankenDBUS : Object {\n"
-                + "    public abstract void timer_finished (int timer_id, double time) throws IOError;\n"
-                + "    public abstract void stop_reached (int stop_id) throws IOError;\n"
-                + "}\n"
-                + "static FrankenDBUS frankenstein_client = null;\n"
-                + "static void frankentimer_callback (int timer_id, double time) {\n"
-                + "    if (frankenstein_client == null)\n"
-                + """        frankenstein_client = Bus.get_proxy_sync (BusType.SESSION, "app.valama.frankenstein", "/app/valama/frankenstein");""" + "\n"
-                + "    frankenstein_client.timer_finished (timer_id, time);\n"
-                + "}\n"
-                + "static void frankenstop_callback (int stop_id) {\n"
-                + "    if (frankenstein_client == null)\n"
-                + """        frankenstein_client = Bus.get_proxy_sync (BusType.SESSION, "app.valama.frankenstein", "/app/valama/frankenstein");""" + "\n"
-                + "    frankenstein_client.stop_reached (stop_id);\n"
-                + "}\n";
+            return """[DBus (name = "app.valama.frankenstein")]
+interface FrankenDBUS : Object {
+    public abstract void timer_finished (int timer_id, double time) throws IOError;
+    public abstract void stop_reached (int stop_id) throws IOError;
+}
+static FrankenDBUS frankenstein_client = null;
+static void frankentimer_callback (int timer_id, double time) {
+    if (frankenstein_client == null)
+    frankenstein_client = Bus.get_proxy_sync (BusType.SESSION,
+                                              "app.valama.frankenstein",
+                                              "/app/valama/frankenstein");
+    frankenstein_client.timer_finished (timer_id, time);
+}
+static void frankenstop_callback (int stop_id) {
+    if (frankenstein_client == null)
+        frankenstein_client = Bus.get_proxy_sync (BusType.SESSION,
+                                                  "app.valama.frankenstein",
+                                                  "/app/valama/frankenstein");
+    frankenstein_client.stop_reached (stop_id);
+}
+""";
         }
     }
 

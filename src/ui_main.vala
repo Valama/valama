@@ -38,6 +38,8 @@ static AppOutput wdg_app_output;
 static UiCurrentFileStructure wdg_current_file_structure;
 static UiBreakpoints wdg_breakpoints;
 static UiSearch wdg_search;
+static SymbolBrowser wdg_smb_browser;
+static UiStyleChecker wdg_stylechecker;
 static Gee.HashMap<string, Gdk.Pixbuf> map_icons;
 
 
@@ -129,7 +131,7 @@ public class MainWidget : Box {
             on_file_selected(filename);
         });
 
-        var wdg_smb_browser = new SymbolBrowser();
+        wdg_smb_browser = new SymbolBrowser();
         wdg_pbrw.connect (wdg_smb_browser);
 
         var report_wrapper = new ReportWrapper();
@@ -144,7 +146,7 @@ public class MainWidget : Box {
         wdg_app_output = new AppOutput();
         wdg_current_file_structure = new UiCurrentFileStructure();
         wdg_search = new UiSearch();
-        var wdg_stylechecker = new UiStyleChecker();
+        wdg_stylechecker = new UiStyleChecker();
 
         /* Gdl elements. */
         add_item ("SourceView", _("Source view"), source_viewer,
@@ -298,22 +300,15 @@ public class MainWidget : Box {
         var menu_view = new Gtk.Menu();
         item_view.set_submenu (menu_view);
 
-        var item_view_search = new CheckMenuItem.with_mnemonic ("_" + _("Show search"));
-#if GDL_3_6_2 && VALAC_0_20
-        item_view_search.active = !wdg_search.dock_item.is_closed();
-#elif !GDL_3_6_2
-        item_view_search.active = ((wdg_search.dock_item.flags & DockObjectFlags.ATTACHED) != 0);
-#endif
-        menu_view.append (item_view_search);
-        item_view_search.toggled.connect (() => {
-            wdg_search.show_search (item_view_search.active);
-        });
-        wdg_search.show_search.connect ((show) => {
-            if (show != item_view_search.active)
-                item_view_search.active = show;
-        });
-        add_accel_activate (item_view_search, Gdk.Key.f);
-
+        add_view_menu_item (menu_view, wdg_search, _("Show search"), true, Gdk.Key.f);
+        add_view_menu_item (menu_view, wdg_report, _("Show reports"));
+        add_view_menu_item (menu_view, wdg_pbrw, _("Show project browser"));
+        add_view_menu_item (menu_view, wdg_build_output, _("Show build output"));
+        add_view_menu_item (menu_view, wdg_app_output, _("Show application output"));
+        add_view_menu_item (menu_view, wdg_breakpoints, _("Show breakpoints"));
+        add_view_menu_item (menu_view, wdg_current_file_structure, _("Show current file structure"));
+        add_view_menu_item (menu_view, wdg_stylechecker, _("Show stylechecker"));
+        add_view_menu_item (menu_view, wdg_smb_browser, _("Show symbol browser"));
 
         var item_view_lockhide = new CheckMenuItem.with_mnemonic ("_" + _("Lock elements"));
         menu_view.append (item_view_lockhide);
@@ -445,21 +440,7 @@ public class MainWidget : Box {
         separator_expand.draw = false;
         toolbar.add (separator_expand);
 
-        var btn_search = new ToggleToolButton();
-        btn_search.icon_name = "edit-find-symbolic";
-#if GDL_3_6_2 && VALAC_0_20
-        btn_search.active = !wdg_search.dock_item.is_closed();
-#elif !GDL_3_6_2
-        btn_search.active = ((wdg_search.dock_item.flags & DockObjectFlags.ATTACHED) != 0);
-#endif
-        btn_search.toggled.connect (() => {
-            wdg_search.show_search (btn_search.active);
-        });
-        wdg_search.show_search.connect ((show) => {
-            if (show != btn_search.active)
-                btn_search.active = show;
-        });
-        toolbar.add (btn_search);
+        add_view_toolbar_item (toolbar, wdg_search, null, "edit-find-symbolic");
 
         var btn_lock = new ToggleToolButton();
         btn_lock.icon_name = "changes-prevent-symbolic";
@@ -496,16 +477,90 @@ public class MainWidget : Box {
                           DockItemBehavior behavior = DockItemBehavior.NORMAL,
                           DockPlacement placement = DockPlacement.LEFT) {
         DockItem item;
-        //FIXME: Temporarely prevent closing of items until they can be added.
         if (stock ==  null)
-            item = new DockItem (item_name, item_long_name, behavior | DockItemBehavior.CANT_CLOSE);
+            item = new DockItem (item_name, item_long_name, behavior);
         else
-            item = new DockItem.with_stock (item_name, item_long_name, stock, behavior
-                                                            | DockItemBehavior.CANT_CLOSE);
+            item = new DockItem.with_stock (item_name, item_long_name, stock, behavior);
         item.add (element.widget);
         element.dock_item = item;
         this.dock.add_item (item, placement);
         item.show();
+    }
+
+    /**
+     * Add {@link UiElement} toggle item to menu.
+     *
+     * @param menu_view View (sub)menu.
+     * @param element {@link UiElement} to connect toggle signals with.
+     * @param label Description to show in menu.
+     * @param with_mnemonic If true enable mnemonic.
+     * @param key Accelerator {@linkGdl.Key} or null if none.
+     * @param modtype Modifier type e.g. {@link Gdk.ModifierType.CONTROL_MASK} for ctrl.
+     */
+    public void add_view_menu_item (Gtk.Menu menu_view,
+                                    UiElement element,
+                                    string label,
+                                    bool with_mnemonic = false,
+                                    int? key = null,
+                                    Gdk.ModifierType modtype = Gdk.ModifierType.CONTROL_MASK) {
+        CheckMenuItem item_view_element;
+        if (with_mnemonic)
+            item_view_element = new CheckMenuItem.with_mnemonic (@"_$label");
+        else
+            item_view_element = new CheckMenuItem.with_label (label);
+#if GDL_3_6_2 && VALAC_0_20
+        item_view_element.active = !element.dock_item.is_closed();
+#elif !GDL_3_6_2
+        item_view_element.active = ((element.dock_item.flags & DockObjectFlags.ATTACHED) != 0);
+#endif
+        menu_view.append (item_view_element);
+
+        item_view_element.toggled.connect (() => {
+            element.show_element (item_view_element.active);
+        });
+        element.show_element.connect ((show) => {
+            if (show != item_view_element.active)
+                item_view_element.active = show;
+        });
+
+        if (key != null)
+            add_accel_activate (item_view_element, key, modtype, "activate");
+    }
+
+    /**
+     * Add {@link UiElement} toggle item to toolbar.
+     *
+     * @param toolbar Toolbar to add button.
+     * @param element {@link UiElement} to connect toggle signals with.
+     * @param stock_id Stock item.
+     * @param icon_name Icon from theme.
+     */
+    public void add_view_toolbar_item (Toolbar toolbar,
+                                       UiElement element,
+                                       string? stock_id,
+                                       string? icon_name)
+                    requires (stock_id != null || icon_name != null) {
+        ToggleToolButton btn_element;
+        if (stock_id != null)
+            btn_element = new ToggleToolButton.from_stock (stock_id);
+        else {
+            btn_element = new ToggleToolButton();
+            btn_element.icon_name = icon_name;
+        }
+        toolbar.add (btn_element);
+
+#if GDL_3_6_2 && VALAC_0_20
+        btn_element.active = !element.dock_item.is_closed();
+#elif !GDL_3_6_2
+        btn_element.active = ((element.dock_item.flags & DockObjectFlags.ATTACHED) != 0);
+#endif
+        btn_element.toggled.connect (() => {
+            element.show_element (btn_element.active);
+        });
+        element.show_element.connect ((show) => {
+            if (show != btn_element.active)
+                btn_element.active = show;
+        });
     }
 
     /**

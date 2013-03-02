@@ -31,21 +31,7 @@ public class UiSearch : UiElement {
     Entry entry_search;
 #endif
 
-    /**
-     * Status of dock_item. True if shown, false if hidden and null if
-     * undefined.
-     */
-    private bool? show;
-
-    /**
-     * Emit to show search.
-     *
-     * @param show True to show, false to hide.
-     */
-    public signal void show_search (bool show);
-
     public UiSearch () {
-        show = null;
         tree_view = new TreeView();
         var line_renderer = new CellRendererText();
         line_renderer.yalign = 0;
@@ -104,34 +90,6 @@ public class UiSearch : UiElement {
 
         build();
 
-        this.visible_changed.connect ((status) => {
-            show = status;
-            show_search (status);
-        });
-
-        this.show_search.connect ((show) => {
-            if (this.show == null || show != this.show) {
-                this.show = show;
-                if (show) {
-                    dock_item.show_item();
-                    widget_main.focus_dock_item (dock_item);
-                    if (source_viewer.current_srcbuffer != null) {
-                        TextIter sel_start, sel_end;
-                        source_viewer.current_srcbuffer.get_selection_bounds (out sel_start, out sel_end);
-                        entry_search.text = source_viewer.current_srcbuffer.get_text (sel_start, sel_end, true);
-                    }
-                    focus_entry_search();
-                } else {
-// #if GDL_3_6_2 && VALAC_0_20
-//                     /* Hide also iconified item by making it visible first. */
-//                     if (dock_item.is_iconified())
-//                         dock_item.show_item();
-// #endif
-                    dock_item.hide_item();
-                }
-            }
-        });
-
         source_viewer.current_sourceview_changed.connect (() => {
             if (!btn_all_files.active)
                 search (entry_search.text);
@@ -139,6 +97,17 @@ public class UiSearch : UiElement {
 
         widget = box_main;
     }
+
+    protected override void on_element_show() {
+        if (source_viewer.current_srcbuffer != null) {
+            TextIter sel_start, sel_end;
+            source_viewer.current_srcbuffer.get_selection_bounds (out sel_start, out sel_end);
+            entry_search.text = source_viewer.current_srcbuffer.get_text (sel_start, sel_end, true);
+        }
+        focus_entry_search();
+    }
+
+    protected override void on_element_hide() {}
 
     public void focus_entry_search() {
         entry_search.grab_focus();
