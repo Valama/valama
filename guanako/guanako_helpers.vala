@@ -22,6 +22,31 @@ using Vala;
 
 namespace Guanako {
 
+    /**
+     * Get Vala packages from filenames and sort them.
+     */
+    public static GLib.List<string>? get_available_packages() {
+        GLib.List<string> list = null;
+        string[] paths = new string[] {Path.build_path (Path.DIR_SEPARATOR_S, Config.VALA_DATA_DIR + "-" + Config.VALA_VERSION, "vapi"),
+                                       Path.build_path (Path.DIR_SEPARATOR_S, Config.VALA_DATA_DIR, "vapi")};
+        try {
+            foreach (string path in paths) {
+                stdout.printf ("checking dir " + path + "n");
+                var enumerator = File.new_for_path (path).enumerate_children (FileAttribute.STANDARD_NAME, 0);
+                FileInfo file_info;
+                while ((file_info = enumerator.next_file()) != null) {
+                    var filename = file_info.get_name();
+                    if (filename.has_suffix (".vapi"))
+                        list.insert_sorted (filename.substring (0, filename.length - 5), strcmp);
+                }
+            }
+        } catch (GLib.Error e) {
+            stdout.printf (_("Could not update vapi files: %s\n"), e.message);
+            return null;
+        }
+        return list;
+    }
+
      //Helper function for checking whether a given source location is inside a SourceReference
     public static bool before_source_ref (SourceFile source_file,
                                           int source_line,

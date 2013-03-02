@@ -44,10 +44,27 @@ public class UiTemplateSelector {
         available_templates = load_templates ("en");
 
         bool first_entry = true;
+        string[] available_packages = new string[0];
+        foreach (string av_pkg in Guanako.get_available_packages())
+            available_packages += av_pkg;
         foreach (ProjectTemplate template in available_templates) {
             TreeIter iter;
             listmodel.append (out iter);
-            listmodel.set (iter, 0, "<b>" + template.name + "</b>\n" + template.description, 1, template.icon);
+
+            var unmet = template.get_unmet_dependencies (available_packages);
+
+            string template_label = "";
+            if (unmet.length > 0)
+                template_label = """<span foreground="grey">""";
+            template_label += "<b>" + template.name + "</b>\n" + template.description;
+
+            if (unmet.length > 0) {
+                template_label += "\n" + _("Missing packages: ");
+                foreach (string pkg in unmet)
+                    template_label += pkg + " ";
+                template_label += "</span>";
+            }
+            listmodel.set (iter, 0, template_label, 1, template.icon);
             /* Select first entry */
             if (first_entry) {
                 tree_view.get_selection().select_iter(iter);

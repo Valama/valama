@@ -214,6 +214,10 @@ public class ValamaProject : Object {
         Gee.ArrayList<string> packages;
     }
 
+    /**
+     * Required packages.
+     */
+    public Gee.TreeSet<string> packages = new Gee.TreeSet<string>();
 
     /**
      * Create {@link ValamaProject} and load it from project file.
@@ -252,6 +256,23 @@ public class ValamaProject : Object {
                             buildsystem_files.to_array(),
                             add_buildsystem_file);
 
+        vieworder = new Gee.LinkedList<ViewMap?>();
+
+        /* Completion provider. */
+        this.comp_provider = new TestProvider();
+        this.comp_provider.priority = 1;
+        this.comp_provider.name = _("Test Provider 1");
+    }
+
+    /**
+     * Run initial Guanako update (Call after loading the project if autocompletion is used)
+     */
+    public void initial_update () {
+        string[] missing_packages = guanako_project.add_packages (packages.to_array(), false);
+
+        if (missing_packages.length > 0)
+            ui_missing_packages_dialog (missing_packages);
+
         parsing = true;
         new Thread<void*> (_("Initial buffer update"), () => {
             guanako_project.update();
@@ -262,13 +283,6 @@ public class ValamaProject : Object {
             });
             return null;
         });
-
-        vieworder = new Gee.LinkedList<ViewMap?>();
-
-        /* Completion provider. */
-        this.comp_provider = new TestProvider();
-        this.comp_provider.priority = 1;
-        this.comp_provider.name = _("Test Provider 1");
     }
 
     /**
@@ -391,7 +405,6 @@ public class ValamaProject : Object {
                                                 VLP_VERSION_MIN);
         }
 
-        var packages = new Gee.TreeSet<string>();
         package_choices = new Gee.ArrayList<PkgChoice?>();
         source_dirs = new Gee.TreeSet<string>();
         source_files = new Gee.TreeSet<string>();
@@ -548,12 +561,6 @@ public class ValamaProject : Object {
                 packages.add (choice.packages[0]);
             }
         }
-
-        string[] missing_packages = guanako_project.add_packages (packages.to_array(), false);
-
-        if (missing_packages.length > 0)
-            ui_missing_packages_dialog (missing_packages);
-
         delete doc;
     }
 

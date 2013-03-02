@@ -24,6 +24,26 @@ public class ProjectTemplate {
     public string name;
     public string path;
     public string description;
+    public string[] get_unmet_dependencies (string[] available_packages) {
+        //var context = new Vala.CodeContext();
+
+        var vlp_file = Path.build_path (Path.DIR_SEPARATOR_S, path, "template.vlp");
+        var vproject = new ValamaProject(vlp_file);
+        var unmet = new string[0];
+        foreach (string depend in vproject.packages)
+            if (!(depend in available_packages))
+                unmet += depend;
+        foreach (ValamaProject.PkgChoice choice in vproject.package_choices) {
+            foreach (string choice_pkg in choice.packages)
+                if (choice_pkg in available_packages)
+                    continue;
+            string unmet_string = "";
+            foreach (string choice_pkg in choice.packages)
+                unmet_string += choice_pkg + "/";
+            unmet += unmet_string;
+        }
+        return unmet;
+    }
     public Gdk.Pixbuf icon = null;
 }
 

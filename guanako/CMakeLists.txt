@@ -71,6 +71,7 @@ else()
 endif()
 set(vapishort_dir "vala-${valashort_ver}/vapi")
 set(vapidir "/usr/share/${vapishort_dir}")
+set(vala_datadir "/usr/share/vala")
 # gee-1.0 and gee-0.8
 set(gee_ver)
 set(all_pkgs)

@@ -212,30 +212,6 @@ public class ProjectBrowser : UiElement {
     }
 
     /**
-     * Get Vala packages from filenames and sort them.
-     */
-    private static GLib.List<string>? get_available_packages() {
-        GLib.List<string> list = null;
-        string[] paths = new string[] {Path.build_path (Path.DIR_SEPARATOR_S, Config.VALA_DATA_DIR + "-" + Config.VALA_VERSION, "vapi"),
-                                       Path.build_path (Path.DIR_SEPARATOR_S, Config.VALA_DATA_DIR, "vapi")};
-        try {
-            foreach (string path in paths) {
-                var enumerator = File.new_for_path (path).enumerate_children (FileAttribute.STANDARD_NAME, 0);
-                FileInfo file_info;
-                while ((file_info = enumerator.next_file()) != null) {
-                    var filename = file_info.get_name();
-                    if (filename.has_suffix (".vapi"))
-                        list.insert_sorted (filename.substring (0, filename.length - 5), strcmp);
-                }
-            }
-        } catch (GLib.Error e) {
-            errmsg (_("Could not update vapi files: %s\n"), e.message);
-            return null;
-        }
-        return list;
-    }
-
-    /**
      * Select Vala packages to add/remove to/from build system (with valac).
      */
     private static string? package_selection_dialog (ValamaProject project) {
@@ -259,7 +235,7 @@ public class ProjectBrowser : UiElement {
                                                  0);
 
         /* TODO: Implement this with checkbutton. */
-        var avail_packages = get_available_packages();
+        var avail_packages = Guanako.get_available_packages();
         var proposed_packages = new string[0];
         foreach (string pkg in avail_packages) {
             if (pkg in project.guanako_project.packages)  //Ignore packages that are already selected
