@@ -32,6 +32,10 @@ public class BuildOutput : UiElement {
         var vbox = new Box (Orientation.VERTICAL, 0);
 
         textview = new TextView();
+        textview.override_font (Pango.FontDescription.from_string ("Monospace 10"));
+        textview.editable = false;
+        textview.wrap_mode = WrapMode.NONE;
+
         var scrw = new ScrolledWindow (null, null);
         scrw.add (textview);
         vbox.pack_start (scrw, true, true);
