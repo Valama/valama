@@ -192,8 +192,6 @@ public class MainWidget : Box {
 
         /* Keep this before layout loading. */
         dock.show_all();
-        //FIXME: Dirty workarround to hide progressbar on startup.
-        project_builder.build_finished();
 
         /* Load default layout. Either local one or system wide. */
         bool err = false;
@@ -443,7 +441,7 @@ public class MainWidget : Box {
         var separator_expand = new SeparatorToolItem();
         separator_expand.set_expand (true);
         separator_expand.draw = false;
-        toolbar.add (separator_expand);
+        add_button (separator_expand);
 
         add_view_toolbar_item (toolbar, wdg_search, null, "edit-find-symbolic");
 

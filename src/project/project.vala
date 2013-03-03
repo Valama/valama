@@ -339,7 +339,7 @@ public class ValamaProject : Object {
      *
      * @param filename Absolute path to existing file.
      */
-    private delegate void FileCallback (string filename);
+    public delegate void FileCallback (string filename);
     /**
      * Iterate over directories and files and fill list.
      *
@@ -348,9 +348,9 @@ public class ValamaProject : Object {
      * @param action Method to perform on each found file in directory or
      *               file list.
      */
-    private void generate_file_list (string[] dirlist,
-                                     string[] filelist,
-                                     FileCallback? action = null) {
+    public void generate_file_list (string[] dirlist,
+                                    string[] filelist,
+                                    FileCallback? action = null) {
         File directory;
         FileEnumerator enumerator;
         FileInfo file_info;

@@ -137,7 +137,8 @@ public class UiSearch : UiElement {
                                      0);
         bfr.select_range (titer, titer);
         source_viewer.focus_src (result.filename);
-        source_viewer.get_sourceview_by_file (result.filename).scroll_to_iter (titer, 0.42, true, 0, 1.0);
+        source_viewer.get_sourceview_by_file (result.filename).scroll_to_iter (
+                                                                titer, 0.42, true, 0, 1.0);
     }
 
     void clear_search_tag() {
@@ -159,7 +160,10 @@ public class UiSearch : UiElement {
 
         var store = new TreeStore (2, typeof (string), typeof (string));
         if (!btn_all_files.active)
-            search_buffer (search, source_viewer.current_srcbuffer, store, source_viewer.current_srcfocus);
+            search_buffer (search,
+                           source_viewer.current_srcbuffer,
+                           store,
+                           source_viewer.current_srcfocus);
         else
             project.foreach_buffer ((filename, bfr) => {
                 search_buffer (search, bfr, store, filename);
@@ -179,7 +183,11 @@ public class UiSearch : UiElement {
         bfr.get_start_iter(out match_end);
         TreeIter? iter_parent = null;
 
-        while (match_end.forward_search (search, TextSearchFlags.CASE_INSENSITIVE, out match_start, out match_end, null)) {
+        while (match_end.forward_search (search,
+                                         TextSearchFlags.CASE_INSENSITIVE,
+                                         out match_start,
+                                         out match_end,
+                                         null)) {
             if (iter_parent == null && btn_all_files.active) {
                 store.append (out iter_parent, null);
                 store.set (iter_parent, 0, "", 1, project.get_relative_path (filename), -1);
@@ -199,12 +207,22 @@ public class UiSearch : UiElement {
             TextIter append = match_end;
             append.forward_line();
             append.forward_to_line_end();
-            var shown_text = """<tt><span color="#A0A0A0">""" + Markup.escape_text(bfr.get_slice (prepend, match_start, true)) + "</span>"
-                         + Markup.escape_text(bfr.get_slice(match_start, match_end, true)).replace(search, "<b>" + search + "</b>")
-                         + """<span color="#A0A0A0">""" + Markup.escape_text(bfr.get_slice (match_end, append, true)) + "</span></tt>\n";
+            var shown_text = """<tt><span color="#A0A0A0">"""
+                        + Markup.escape_text (bfr.get_slice (prepend, match_start, true))
+                        + "</span>"
+                        + Markup.escape_text (bfr.get_slice (
+                                        match_start, match_end, true)).replace (
+                                                                search, "<b>" + search + "</b>")
+                        + """<span color="#A0A0A0">"""
+                        + Markup.escape_text (bfr.get_slice (match_end, append, true))
+                        + "</span></tt>\n";
             shown_text = shown_text.strip();
             //TODO: Make <b> stuff case insensitive!
-            map_paths_results[store.get_path((TreeIter)iter_append).to_string()] = SearchResult() { line = match_end.get_line(), filename = filename, col_start = col_start, col_end = col_end };
+            map_paths_results[store.get_path ((TreeIter)iter_append).to_string()]
+                                        = SearchResult() { line = match_end.get_line(),
+                                                           filename = filename,
+                                                           col_start = col_start,
+                                                           col_end = col_end };
             store.set (iter_append, 0, (match_end.get_line() + 1).to_string(), 1, shown_text, -1);
         }
     }

@@ -42,10 +42,11 @@ public class BuildOutput : UiElement {
 
         progressbar = new ProgressBar();
         vbox.pack_start (progressbar, false, true);
+        progressbar.visible = false;
+        progressbar.no_show_all = true;
 
         widget = vbox;
         widget.show_all();
-        progressbar.visible = false;
 
         project_builder.build_started.connect (()=> {
             textview.buffer.text = "";

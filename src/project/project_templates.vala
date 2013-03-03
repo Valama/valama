@@ -23,37 +23,86 @@ using Gee;
 
 public class ProjectTemplate {
     public Gdk.Pixbuf? icon = null;
-    public ArrayList<ProjectTemplateAuthor?>? authors = null;
+    public ArrayList<TemplateAuthor?> authors;
+    public ArrayList<TemplateValaVersion?> versions;
     public string version = "0";
     public string name;
     public string path;
     public string description;
+    public string? long_description = null;
 
-    public string[] get_unmet_dependencies (string[] available_packages) throws LoadingError {
+    public string[]? packages { get; private set; default = null; }
+    public string[]? unmet_deps { get; private set; default = null; }
+    public TreeSet<string>? s_files  { get; private set; default = null; }
+    public string[]? b_files { get; private set; default = null; }
+
+    public ProjectTemplate() {
+        authors = new ArrayList<TemplateAuthor?>();
+        versions = new ArrayList<TemplateValaVersion?>();
+    }
+
+    /**
+     * Initialize package and file list and get unmet dependencies.
+     *
+     * @param available_packages List of all available_packages on system.
+     */
+    public void init (string[] available_packages) throws LoadingError
+                                                   requires (path != null) {
         var vlp_file = Path.build_path (Path.DIR_SEPARATOR_S, path, "template.vlp");
         var vproject = new ValamaProject (vlp_file, null, false);
+
+        packages = vproject.packages.to_array();
+
+        s_files = new TreeSet<string>();
+        vproject.generate_file_list (vproject.source_dirs.to_array(),
+                                     vproject.source_files.to_array(),
+                                     (filename) => {
+            if (!(filename.has_suffix (".vala") || filename.has_suffix (".vapi")))
+                return;
+            s_files.add (vproject.get_relative_path (filename));
+        });
+
+        switch (vproject.buildsystem) {
+            default:
+                debug_msg (_("Buildsystem '%s' currently not supported by template selector.\n"),
+                           vproject.buildsystem);
+                break;
+        }
+
         var unmet = new string[0];
-        foreach (string depend in vproject.packages)
+        foreach (var depend in vproject.packages)
             if (!(depend in available_packages))
                 unmet += depend;
         foreach (ValamaProject.PkgChoice choice in vproject.package_choices) {
-            foreach (string choice_pkg in choice.packages)
+            foreach (var choice_pkg in choice.packages)
                 if (choice_pkg in available_packages)
                     continue;
-            string unmet_string = "";
-            foreach (string choice_pkg in choice.packages)
+            var unmet_string = "";
+            foreach (var choice_pkg in choice.packages)
                 unmet_string += choice_pkg + "/";
             unmet += unmet_string;
         }
-        return unmet;
+        unmet_deps = unmet;
     }
 }
 
-public class ProjectTemplateAuthor {
+public class TemplateAuthor {
     public string? name = null;
     public string? mail = null;
     public string? date = null;
     public string? comment = null;
+}
+
+public class TemplateValaVersion {
+    public VersionRelation rel = VersionRelation.ONLY;
+    public string? version = null;
+}
+
+public enum VersionRelation {
+    SINCE,  // >=
+    UNTIL,  // <=
+    ONLY,   // ==
+    EXCLUDE // !=
 }
 
 /**
@@ -151,13 +200,35 @@ public ProjectTemplate[] load_templates() {
                 continue;
             }
 
-            new_template.authors = new ArrayList<ProjectTemplateAuthor?>();
             for (Xml.Node* i = root_node->children; i != null; i = i->next) {
                 if (i->type != ElementType.ELEMENT_NODE)
                     continue;
                 switch (i->name) {
+                    case "vala-version":
+                        var version = new TemplateValaVersion();
+                        version.version = i->get_content();
+                        if (i->has_prop ("rel") != null)
+                            switch (i->get_prop ("rel")) {
+                                case "since":
+                                    version.rel = VersionRelation.SINCE;
+                                    break;
+                                case "until":
+                                    version.rel = VersionRelation.UNTIL;
+                                    break;
+                                case "only":
+                                    version.rel = VersionRelation.ONLY;
+                                    break;
+                                case "exclude":
+                                    version.rel = VersionRelation.EXCLUDE;
+                                    break;
+                                default:
+                                    warning_msg (_("Unknown property for 'vala-version' line %hu: %s\n"), i->line, i->get_prop ("rel"));
+                                    break;
+                            }
+                        new_template.versions.add (version);
+                        break;
                     case "author":
-                        var author = new ProjectTemplateAuthor();
+                        var author = new TemplateAuthor();
                         for (Xml.Node* p = i->children; p != null; p = p->next) {
                             if (p->type != ElementType.ELEMENT_NODE)
                                 continue;
@@ -179,6 +250,7 @@ public ProjectTemplate[] load_templates() {
                                     break;
                             }
                         }
+                        new_template.authors.add (author);
                         break;
                     case "name":
                         new_template.name = get_lang_content (i, locales);
@@ -193,6 +265,9 @@ public ProjectTemplate[] load_templates() {
                             debug_msg (_("Template has no description: line %hu"), i->line);
                             new_template.description = "";
                         }
+                        break;
+                    case "long-description":
+                        new_template.long_description = get_lang_content (i, locales);
                         break;
                     default:
                         warning_msg (_("Unknown configuration file value line %hu: %s\n"), i->line, i->name);
@@ -219,8 +294,8 @@ public ProjectTemplate[] load_templates() {
  */
 private string? get_lang_content (Xml.Node* node, ArrayList<string?> locales) {
     int locid = locales.size;
-    string desc_start = null;
-    string desc = null;
+    string? desc_start = null;
+    string? desc = null;
     for (Xml.Node* p = node->children; p != null; p = p->next) {
         if (p->type != ElementType.ELEMENT_NODE)
             continue;
