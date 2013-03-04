@@ -30,6 +30,34 @@ using Pango;
 const string VLP_VERSION_MIN = "0.1";
 
 /**
+ * Version relations. Can be used e.g. for package or valac versions.
+ */
+public enum VersionRelation {
+    SINCE,  // >=
+    UNTIL,  // <=
+    ONLY,   // ==
+    EXCLUDE;// !=
+
+    public string? to_string() {
+        switch (this) {
+            case SINCE:
+                return _("since");
+            case UNTIL:
+                return _("until");
+            case ONLY:
+                return _("only");
+            case EXCLUDE:
+                return _("exclude");
+            default:
+                error_msg (_("Could not convert '%s' to string: %u\n"),
+                           "VersionRelation",
+                           (int) this);
+                return null;
+        }
+    }
+}
+
+/**
  * IDE modes on which plugins can decide how to do some tasks.
  */
 [Flags]
@@ -55,7 +83,9 @@ public enum IdeModes {
             case RELEASE:
                 return _("Release");
             default:
-                error_msg (_("Could not convert IdeModes to string: %u\n"), (int) this);
+                error_msg (_("Could not convert '%s' to string: %u\n"),
+                           "IdeModes",
+                           (int) this);
                 return null;
         }
     }
@@ -94,6 +124,73 @@ public enum IdeModes {
         for (int i = 0; i < size; ++i)
             ret += IdeModes.int_to_mode (i);
         return ret;
+    }
+}
+
+public class PackageInfo {
+    public VersionRelation? rel = null;
+    public string name;
+    public string? version = null;
+
+    /**
+     * Convert class object to string.
+     */
+    public string? to_string() {
+        var relation = "";
+        if (rel != null)
+            switch (rel) {
+                case VersionRelation.SINCE:
+                    relation = " >= ";
+                    break;
+                case VersionRelation.UNTIL:
+                    relation = " <= ";
+                    break;
+                case VersionRelation.ONLY:
+                    relation = " = ";
+                    break;
+                case VersionRelation.EXCLUDE:
+                    relation = " != ";
+                    break;
+                default:
+                    bug_msg (_("Unexpected enum value: %s: %d\n"),
+                             "PackageInfo - to_string", rel);
+                    break;
+            }
+        if (version != null) {
+            if (relation != "")
+                relation += version;
+            else
+                relation = @" >= $version";
+        }
+        return name + relation;
+    }
+
+    /**
+     * Compare {@link PackageInfo} objects.
+     *
+     * @param pkg1 First package.
+     * @param pkg2 Second package.
+     * @return Return > 0 if pkg1 > pkg2, < 0 if pkg1 < pkg2 or 0 if pkg1 == pkg2.
+     */
+    public static int compare_func (PackageInfo pkg1, PackageInfo pkg2) {
+        int namerel = strcmp (pkg1.name, pkg2.name);
+        if (namerel != 0)
+            return namerel;
+
+        int verrel = strcmp (pkg1.version, pkg2.version);
+        if (verrel != 0)
+            return verrel;
+
+        if (pkg1.rel != null && pkg2.rel != null) {
+            int relrel = pkg1.rel - pkg2.rel;
+            if (relrel != 0)
+                return relrel;
+        } else if (pkg1.rel != null)
+            return 1;
+        else if (pkg2.rel != null)
+            return -1;
+
+        return 0;
     }
 }
 
@@ -207,16 +304,27 @@ public class ValamaProject : Object {
          */
         bool all;
         /**
-         * Ordered list of packages. Priority of packages in the front is
-         * higher.
+         * Ordered list of packages. Packages in the front have higher
+         * priority.
          */
-        Gee.ArrayList<string> packages;
+        Gee.ArrayList<PackageInfo?> packages;
     }
 
     /**
-     * Required packages.
+     * Required packages with version information.
+     *
+     * Use {@link add_package} or {@link add_package_by_name} to add a new
+     * package.
      */
-    public Gee.TreeSet<string> packages = new Gee.TreeSet<string>();
+    public Gee.TreeSet<PackageInfo?> packages { get; private set; }
+
+    /**
+     * List of packages without version information.
+     *
+     * Use {@link add_package} or {@link add_package_by_name} to add a new
+     * package.
+     */
+    public Gee.TreeSet<string> package_list { get; private set; }
 
     /**
      * Create {@link ValamaProject} and load it from project file.
@@ -265,7 +373,7 @@ public class ValamaProject : Object {
 
         vieworder = new Gee.LinkedList<ViewMap?>();
 
-        string[] missing_packages = guanako_project.add_packages (packages.to_array(), false);
+        string[] missing_packages = guanako_project.add_packages (package_list.to_array(), false);
 
         if (missing_packages.length > 0)
             ui_missing_packages_dialog (missing_packages);
@@ -288,6 +396,28 @@ public class ValamaProject : Object {
             });
             return null;
         });
+    }
+
+    /**
+     * Add package to project.
+     *
+     * @param pkg Package.
+     */
+    public void add_package (PackageInfo pkg) {
+        packages.add (pkg);
+        package_list.add (pkg.name);
+    }
+
+    /**
+     * Add package to project by package name.
+     *
+     * @param pkg Package.
+     */
+    public void add_package_by_name (string pkg) {
+        var pkginfo = new PackageInfo();
+        pkginfo.name = pkg;
+        packages.add (pkginfo);
+        package_list.add (pkg);
     }
 
     /**
@@ -411,6 +541,8 @@ public class ValamaProject : Object {
                 warning_msg (_("Ignore project file loading error: %s\n"), errstr);
         }
 
+        packages = new Gee.TreeSet<PackageInfo?>();
+        package_list = new Gee.TreeSet<string>();
         package_choices = new Gee.ArrayList<PkgChoice?>();
         source_dirs = new Gee.TreeSet<string>();
         source_files = new Gee.TreeSet<string>();
@@ -441,7 +573,8 @@ public class ValamaProject : Object {
                                 version_patch = int.parse (p->get_content());
                                 break;
                             default:
-                                warning_msg (_("Unknown configuration file value line %hu: %s\n"), p->line, p->name);
+                                warning_msg (_("Unknown configuration file value line %hu: %s\n"),
+                                             p->line, p->name);
                                 break;
                         }
                     }
@@ -453,7 +586,7 @@ public class ValamaProject : Object {
                         switch (p->name) {
                             case "choice":
                                 var choice = PkgChoice();
-                                choice.packages = new Gee.ArrayList<string>();
+                                choice.packages = new Gee.ArrayList<PackageInfo?>();
                                 if (p->has_prop ("all") != null)
                                     switch (p->get_prop ("all")) {
                                         case "yes":
@@ -463,8 +596,9 @@ public class ValamaProject : Object {
                                             choice.all = false;
                                             break;
                                         default:
-                                            warning_msg (_("Unknown property for 'choice' line %hu: %s\n" +
-                                                           "Will choose 'no'\n"), p->line, p->get_prop ("all"));
+                                            warning_msg (_("Unknown property for '%s' line %hu: %s\n"
+                                                                + "Will choose '%s'\n"),
+                                                         "rel", p->line, p->get_prop ("all"), "no");
                                             choice.all = false;
                                             break;
                                     }
@@ -475,7 +609,9 @@ public class ValamaProject : Object {
                                         continue;
                                     switch (pp->name) {
                                         case "package":
-                                            choice.packages.add (pp->get_content());
+                                            var pkg = get_package_info (pp);
+                                            if (pkg != null)
+                                                choice.packages.add (pkg);
                                             break;
                                         default:
                                             warning_msg (_("Unknown configuration file value line %hu: %s\n"), pp->line, pp->name);
@@ -488,7 +624,9 @@ public class ValamaProject : Object {
                                     warning_msg (_("No packages to choose between: line %hu\n"), p->line);
                                 break;
                             case "package":
-                                packages.add (p->get_content());
+                                var pkg = get_package_info (p);
+                                if (pkg != null)
+                                    add_package (pkg);
                                 break;
                             default:
                                 warning_msg (_("Unknown configuration file value line %hu: %s\n"), p->line, p->name);
@@ -561,10 +699,10 @@ public class ValamaProject : Object {
         foreach (var choice in package_choices) {
             var pkg = get_choice (choice);
             if (pkg != null)
-                packages.add (pkg);
+                add_package (pkg);
             else {
                 warning_msg (_("Could not select a package from choice.\n"));
-                packages.add (choice.packages[0]);
+                add_package (choice.packages[0]);
             }
         }
         delete doc;
@@ -574,6 +712,8 @@ public class ValamaProject : Object {
      * Save project to {@link project_file}.
      */
     public void save() {
+        debug_msg (_("Save project file.\n"));
+
         var writer = new TextWriter.filename (project_file);
         writer.set_indent (true);
         writer.set_indent_string ("\t");
@@ -590,19 +730,35 @@ public class ValamaProject : Object {
         writer.end_element();
 
         writer.start_element ("packages");
-        var chpkgs = new TreeSet<string>();
         foreach (var choice in package_choices) {
             writer.start_element ("choice");
             writer.write_attribute ("all", (choice.all) ? "yes" : "no");
             foreach (var pkg in choice.packages) {
-                writer.write_element ("package", pkg);
-                chpkgs.add (pkg);
+                writer.write_element ("package", pkg.name);
+                if (pkg.version != null)
+                    writer.write_attribute ("version", pkg.version);
+                if (pkg.rel != null)
+                    writer.write_attribute ("rel", pkg.rel.to_string());
             }
             writer.end_element();
         }
-        foreach (string pkg in guanako_project.packages)
-            if (!(pkg in chpkgs))
-                writer.write_element ("package", pkg);
+        foreach (var pkg in packages) {
+            var contained = false;
+            foreach (var choice in package_choices)
+                if (pkg in choice.packages) {
+                    contained = true;
+                    break;
+                }
+            if (!contained) {
+                writer.start_element ("package");
+                if (pkg.version != null)
+                    writer.write_attribute ("version", pkg.version);
+                if (pkg.rel != null)
+                    writer.write_attribute ("rel", pkg.rel.to_string());
+                writer.write_string (pkg.name);
+                writer.end_element();
+            }
+        }
         writer.end_element();
 
         writer.start_element ("source-directories");
@@ -629,19 +785,20 @@ public class ValamaProject : Object {
     }
 
     /**
-     * Select first available package of {@link PkgChoice}. Does check for
+     * Select first available package of {@link PkgChoice}. Does not check for
      * conflicts.
      *
      * @param choide {@link PkgChoice} to search for available packages.
      * @return Return available package name or null.
      */
-    private string? get_choice (PkgChoice choice) {
+    //TODO: Check version.
+    private PackageInfo? get_choice (PkgChoice choice) {
         foreach (var pkg in choice.packages)
-            if (guanako_project.context.get_vapi_path (pkg) != null) {
-                debug_msg (_("Choose '%s' package.\n"), pkg);
+            if (guanako_project.context.get_vapi_path (pkg.name) != null) {
+                debug_msg (_("Choose '%s' package.\n"), pkg.name);
                 return pkg;
             } else
-                debug_msg (_("Skip '%s' choice.\n"), pkg);
+                debug_msg (_("Skip '%s' choice.\n"), pkg.name);
         return null;
     }
 
@@ -979,6 +1136,49 @@ public class ValamaProject : Object {
             return project_path_file.get_relative_path (File.new_for_path (path));
         return path;
     }
+
+    /**
+     * Load package information from {@link Xml.Node}.
+     *
+     * @param node Package {@link Xml.Node} to search for infos.
+     * @return Return {@link PackageInfo} or null if no package found.
+     */
+    private PackageInfo? get_package_info (Xml.Node* node) {
+        var package = new PackageInfo();
+        package.name = node->get_content();
+        if (package.name == null)
+            return null;
+        if (node->has_prop ("version") != null) {
+            package.version = node->get_prop ("version");
+            if (node->has_prop ("rel") != null)
+                switch (node->get_prop ("rel")) {
+                    case "since":
+                        package.rel = VersionRelation.SINCE;
+                        break;
+                    case "until":
+                        package.rel = VersionRelation.UNTIL;
+                        break;
+                    case "only":
+                        package.rel = VersionRelation.ONLY;
+                        break;
+                    case "exclude":
+                        package.rel = VersionRelation.EXCLUDE;
+                        break;
+                    default:
+                        warning_msg (_("Unknown property for '%s' line %hu: %s\n"
+                                            + "Will choose '%s'\n"),
+                                     "rel", node->line, node->get_prop ("rel"), "since");
+                        package.rel = VersionRelation.SINCE;
+                        break;
+                }
+            else
+                package.rel = VersionRelation.SINCE;
+        } else if (node->has_prop ("rel") != null)
+            warning_msg (_("Package '%s' has relation information but no version: "
+                                + "line: %hu: %s\n"),
+                         package.name, node->line, node->get_prop ("rel"));
+        return package;
+    }
 }
 
 /**
@@ -988,6 +1188,7 @@ public class SourceBuffer : Gtk.SourceBuffer {
     /**
      * Manually indicate if buffer has unsaved changes.
      */
+    //TODO: Look at is_modified.
     public bool dirty { get; set; default = false; }
     public int last_active_line = -1;
     public bool needs_guanako_update = false;

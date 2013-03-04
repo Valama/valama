@@ -67,8 +67,10 @@ namespace Args {
     }
 
     internal bool debuglevel_parse (string name, string? val, ref OptionError error) throws OptionError {
-        if (val == null)
+        if (val == null) {
+            debuglevel = 1;
             return true;
+        }
         var re = /^[+]?[0-9]+$/;
         if (!re.match (val, 0, null))
             throw new OptionError.BAD_VALUE (_("'%s' not a positive number"), val);

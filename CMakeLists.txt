@@ -92,7 +92,7 @@ if(NOT("3.6.2" STRGREATER GDL3.0_VERSION))
     message(STATUS "Use gdl-3.0 vapi from valac 0.20 to support new "
                    "features with gdl-3.0 >= 3.6.2.")
     list(APPEND vapifiles "cmake/vapi/gdl-3.0.vapi")
-    list(REMOVE_ITEM required_pkgs "gdl-3.0")
+    list(REMOVE_ITEM required_pkgs "gdl-3.0 >= 3.4")
     set(gdl_workarround ON)
   endif()
 elseif("3.5.5" STRGREATER GDL3.0_VERSION)

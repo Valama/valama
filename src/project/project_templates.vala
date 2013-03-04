@@ -51,7 +51,7 @@ public class ProjectTemplate {
         var vlp_file = Path.build_path (Path.DIR_SEPARATOR_S, path, "template.vlp");
         var vproject = new ValamaProject (vlp_file, null, false);
 
-        packages = vproject.packages.to_array();
+        packages = vproject.package_list.to_array();
 
         s_files = new TreeSet<string>();
         vproject.generate_file_list (vproject.source_dirs.to_array(),
@@ -70,17 +70,22 @@ public class ProjectTemplate {
         }
 
         var unmet = new string[0];
-        foreach (var depend in vproject.packages)
+        foreach (var depend in vproject.package_list)
             if (!(depend in available_packages))
                 unmet += depend;
-        foreach (ValamaProject.PkgChoice choice in vproject.package_choices) {
+        foreach (var choice in vproject.package_choices) {
+            var contained = false;
             foreach (var choice_pkg in choice.packages)
-                if (choice_pkg in available_packages)
-                    continue;
-            var unmet_string = "";
-            foreach (var choice_pkg in choice.packages)
-                unmet_string += choice_pkg + "/";
-            unmet += unmet_string;
+                if (choice_pkg.name in available_packages) {
+                    contained = true;
+                    break;
+                }
+            if (!contained) {
+                var unmet_string = "";
+                foreach (var choice_pkg in choice.packages)
+                    unmet_string += choice_pkg.name + "/";
+                unmet += unmet_string;
+            }
         }
         unmet_deps = unmet;
     }
@@ -94,15 +99,8 @@ public class TemplateAuthor {
 }
 
 public class TemplateValaVersion {
-    public VersionRelation rel = VersionRelation.ONLY;
+    public VersionRelation? rel = null;
     public string? version = null;
-}
-
-public enum VersionRelation {
-    SINCE,  // >=
-    UNTIL,  // <=
-    ONLY,   // ==
-    EXCLUDE // !=
 }
 
 /**
@@ -222,7 +220,10 @@ public ProjectTemplate[] load_templates() {
                                     version.rel = VersionRelation.EXCLUDE;
                                     break;
                                 default:
-                                    warning_msg (_("Unknown property for 'vala-version' line %hu: %s\n"), i->line, i->get_prop ("rel"));
+                                    warning_msg (_("Unknown property for '%s' line %hu: %s\n"
+                                                            + "Will choose '%s'\n"),
+                                                 "rel", i->line, i->get_prop ("rel"), "only");
+                                    version.rel = VersionRelation.ONLY;
                                     break;
                             }
                         new_template.versions.add (version);
