@@ -585,6 +585,7 @@ public bool save_file (string filename, string text) {
 /*
  * Currently no real difference to strcmp.
  */
+#if DO_NOT_COMPILE
 public int comp_proj_version (string ver_a, string ver_b) {
     //TODO: Epoch and ~ checks.
     string[] a_parts = ver_a.split (".");
@@ -601,6 +602,11 @@ public int comp_proj_version (string ver_a, string ver_b) {
     }
     return 0;
 }
+#else
+public inline int comp_proj_version (string ver_a, string ver_b) {
+    return strcmp (ver_a, ver_b);
+}
+#endif
 
 
 /* Message methods. */
@@ -610,33 +616,32 @@ public int comp_proj_version (string ver_a, string ver_b) {
  * @param format Printf string.
  * @param ... Printf variables.
  */
-public void debug_msg (string format, ...) {
-    if (Args.debug)
-        stdout.printf (format.vprintf (va_list()));
+public inline void debug_msg (string format, ...) {
+    debug_msg_level (1, format.vprintf (va_list()));
 }
 
-public void debug_msg_level (int level, string format, ...) {
+public inline void debug_msg_level (int level, string format, ...) {
     if (Args.debuglevel >= level)
         stdout.printf (format.vprintf (va_list()));
 }
 
-public void warning_msg (string format, ...) {
+public inline void warning_msg (string format, ...) {
     stdout.printf (_("Warning: ") + format.vprintf (va_list()));
 }
 
-public void error_msg (string format, ...) {
+public inline void error_msg (string format, ...) {
     stderr.printf (_("Error: ") + format.vprintf (va_list()));
 }
 
-public void bug_msg (string format, ...) {
+public inline void bug_msg (string format, ...) {
     stderr.printf (format.vprintf (va_list()) + _("Please report a bug!\n"));
 }
 
-public void msg (string format, ...) {
+public inline void msg (string format, ...) {
     stdout.printf (format.vprintf (va_list()));
 }
 
-public void errmsg (string format, ...) {
+public inline void errmsg (string format, ...) {
     stderr.printf (format.vprintf (va_list()));
 }
 

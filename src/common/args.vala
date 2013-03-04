@@ -24,7 +24,6 @@ namespace Args {
     public string? syntaxfile = null;
     public string? templatesdir = null;
     public string? buildsystemsdir = null;
-    public bool debug = false;
     public int debuglevel = 0;
     public bool forceold = false;
     public string? layoutfile = null;
@@ -37,8 +36,7 @@ namespace Args {
         {"syntax", 0, 0, OptionArg.FILENAME, ref syntaxfile, N_("Guanako syntax file."), N_("FILE")},
         {"templates", 0, 0, OptionArg.FILENAME, ref templatesdir, N_("Templates directory."), N_("DIRECTORY")},
         {"buildsystems", 0, 0, OptionArg.FILENAME, ref buildsystemsdir, N_("Buildsystems directory."), N_("DIRECTORY")},
-        {"debug", 'd', 0, OptionArg.NONE, ref debug, N_("Output debug information."), null},
-        {"debuglevel", 0, 0, OptionArg.INT, ref debuglevel, N_("Output verbose debug information."), N_("LEVEL")},
+        {"debug", 'd', OptionFlags.OPTIONAL_ARG, OptionArg.CALLBACK, (void*) debuglevel_parse, N_("Output debug information."), N_("[DEBUGLEVEL]")},
         {"force-old", 0, 0, OptionArg.NONE, ref forceold, N_("Force loading of possibly incompatible template or project files."), null},
         {"layout", 0, 0, OptionArg.FILENAME, ref layoutfile, N_("Path to layout file."), N_("FILE")},
         {"reset-layout", 0, 0, OptionArg.NONE, ref reset_layout, N_("Load default layout."), null},
@@ -66,6 +64,16 @@ namespace Args {
         }
 
         return ret;
+    }
+
+    internal bool debuglevel_parse (string name, string? val, ref OptionError error) throws OptionError {
+        if (val == null)
+            return true;
+        var re = /^[+]?[0-9]+$/;
+        if (!re.match (val, 0, null))
+            throw new OptionError.BAD_VALUE (_("'%s' not a positive number"), val);
+        debuglevel = int.parse (val);
+        return true;
     }
 }
 

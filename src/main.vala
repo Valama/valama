@@ -56,7 +56,8 @@ public static int main (string[] args) {
     else if (ret < 0)
         return 0;
 
-    Guanako.debug = Args.debug;
+    if (Args.debuglevel >= 1)
+        Guanako.debug = true;
 
     loop_update = new MainLoop();
 

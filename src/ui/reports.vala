@@ -30,6 +30,24 @@ public enum ReportType {
     NOTE;
 
     public const ReportType ALL = ERROR | WARNING | DEPRECATED | EXPERIMENTAL | NOTE;
+
+    public string? to_string() {
+        switch (this) {
+            case ERROR:
+                return _("Error");
+            case WARNING:
+                return _("Warning");
+            case DEPRECATED:
+                return _("Deprecated");
+            case EXPERIMENTAL:
+                return _("Experimental");
+            case NOTE:
+                return _("Note");
+            default:
+                bug_msg (_("Unexpected enum value: %s: %d\n"), "ReportType - to_string", (int) this);
+                return null;
+        }
+    }
 }
 
 /**
@@ -308,10 +326,10 @@ public class ReportWrapper : Vala.Report {
         errlist_int = new ArrayList<Error?>();
     }
 
-    private void dbg_ref_msg (ReportType type, Vala.SourceReference? source, string message) {
+    private inline void dbg_ref_msg (ReportType type, Vala.SourceReference? source, string message) {
         if (source != null)
             debug_msg_level (2, _("%s found: %s: %d(%d)-%d(%d): %s\n"),
-                             (int) type,
+                             type.to_string(),
                              project.get_relative_path (source.file.filename),
                              source.begin.line,
                              source.end.column,
