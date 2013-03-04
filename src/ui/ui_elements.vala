@@ -117,7 +117,7 @@ public abstract class UiElement : Object{
                     widget_main.focus_dock_item (dock_item);
                     on_element_show();
                 } else {
-// #if GDL_3_6_2 && VALAC_0_20
+// #if GDL_3_6_2
 //                     /* Hide also iconified item by making it visible first. */
 //                     if (dock_item.is_iconified())
 //                         dock_item.show_item();

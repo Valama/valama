@@ -84,14 +84,16 @@ if(NOT("3.6" STRGREATER GTK3.0_VERSION))
   list(APPEND valac_cond "-D;GTK_3_6")
 endif()
 # gdl-3.0
+set(gdl_workarround OFF)
 pkg_check_modules(GDL3.0 REQUIRED "gdl-3.0")
 if(NOT("3.6.2" STRGREATER GDL3.0_VERSION))
   list(APPEND valac_cond "-D;GDL_3_6_2")
   if("0.20" STRGREATER "${valashort_ver}")
-    message(WARNING "With gdl-3.0 ${GDL3.0_VERSION} >= 3.6.2 and valac "
-                    "${valashort_ver} < 0.20 checks for dock item state "
-                    "(is closed, attached etc.) are disabled.\n"
-                    "Please upgrade your valac version or live with it.")
+    message(STATUS "Use gdl-3.0 vapi from valac 0.20 to support new "
+                   "features with gdl-3.0 >= 3.6.2.")
+    list(APPEND vapifiles "cmake/vapi/gdl-3.0.vapi")
+    list(REMOVE_ITEM required_pkgs "gdl-3.0")
+    set(gdl_workarround ON)
   endif()
 elseif("3.5.5" STRGREATER GDL3.0_VERSION)
   message(WARNING "With gdl-3.0 ${GDL3.0_VERSION} < 3.5.5 dock item "
@@ -182,6 +184,11 @@ add_executable("${project_name_lower}" ${VALA_C})
 target_link_libraries("${project_name_lower}" ${PROJECT_LDFLAGS})
 add_definitions(${PROJECT_C_FLAGS})
 target_link_libraries("${project_name_lower}" "guanako")
+
+if(gdl_workarround)
+  target_link_libraries("${project_name_lower}" ${GDL3.0_LDFLAGS})
+  add_definitions(${GDL3.0_CFLAGS})
+endif()
 
 
 # Create the docs.
