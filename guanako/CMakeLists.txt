@@ -114,6 +114,8 @@ if(gee0.8_contains STRGREATER "-1")
     endif()
   endif()
 endif()
+# glib-2.0
+pkg_check_modules(GLIB2.0 REQUIRED "glib-2.0")
 
 
 # Configure template files.
@@ -135,7 +137,7 @@ set(default_vala_flags
   "-H" "${project_name_lower}.h"
   "--gir" "${project_name}-${${project_name}_VERSION}.gir"
   "--library" "${project_name_lower}"
-  "--target-glib" "2.32"  # enable this to use new(tm) thread syntax
+  "--target-glib" "${GLIB2.0_VERSION}"
   ${valac_cond}
 )
 include(ValaPkgs)

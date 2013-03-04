@@ -143,11 +143,13 @@ if(gee0.8_contains STRGREATER "-1")
     endif()
   endif()
 endif()
+# glib-2.0
+pkg_check_modules(GLIB2.0 REQUIRED "glib-2.0")
 
 
 set(default_vala_flags
   "--thread"
-  "--target-glib" "2.32"
+  "--target-glib" "${GLIB2.0_VERSION}"
   ${valac_cond}
 )
 
@@ -302,6 +304,7 @@ if("${vala_flags}" STREQUAL "")
   set(vala_flags "(none)")
 endif()
 message("Vala flags:             ${vala_flags}")
+message("GLib version:           ${GLIB2.0_VERSION}")
 if(gee_ver)
   message("Gee version:            ${gee_ver}")
 endif()
