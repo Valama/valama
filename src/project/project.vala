@@ -50,8 +50,7 @@ public enum VersionRelation {
                 return _("exclude");
             default:
                 error_msg (_("Could not convert '%s' to string: %u\n"),
-                           "VersionRelation",
-                           (int) this);
+                           "VersionRelation", this);
                 return null;
         }
     }
@@ -84,8 +83,7 @@ public enum IdeModes {
                 return _("Release");
             default:
                 error_msg (_("Could not convert '%s' to string: %u\n"),
-                           "IdeModes",
-                           (int) this);
+                           "IdeModes", this);
                 return null;
         }
     }

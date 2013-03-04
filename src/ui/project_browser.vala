@@ -129,7 +129,8 @@ public class ProjectBrowser : UiElement {
                 case StoreType.PACKAGE:
                     break;
                 default:
-                    bug_msg (_("Unexpected enum value: %s: %d\n"), "ui_project_browser - row_activated", store_type);
+                    bug_msg (_("Unexpected enum value: %s: %u\n"),
+                             "ui_project_browser - row_activated", store_type);
                     break;
             }
         });
@@ -166,7 +167,8 @@ public class ProjectBrowser : UiElement {
                     btn_rem.sensitive = true;
                     break;
                 default:
-                    bug_msg (_("Unexpected enum value: %s: %d\n"), "ui_project_browser - cursor_changed", store_type);
+                    bug_msg (_("Unexpected enum value: %s: %u\n"),
+                             "ui_project_browser - cursor_changed", store_type);
                     btn_add.sensitive = false;
                     btn_rem.sensitive = false;
                     break;
@@ -327,7 +329,8 @@ public class ProjectBrowser : UiElement {
                 }
                 break;
             default:
-                bug_msg (_("Unexpected enum value: %s: %d\n"), "ui_project_browser - add_button", store_type);
+                bug_msg (_("Unexpected enum value: %s: %u\n"),
+                         "ui_project_browser - add_button", store_type);
                 break;
         }
     }
@@ -395,7 +398,8 @@ public class ProjectBrowser : UiElement {
                 update();
                 break;
             default:
-                bug_msg (_("Unexpected enum value: %s: %d\n"), "ui_project_browser - cursor_changed", store_type);
+                bug_msg (_("Unexpected enum value: %s: %u\n"),
+                         "ui_project_browser - cursor_changed", store_type);
                 break;
         }
     }

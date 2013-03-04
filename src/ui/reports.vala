@@ -44,7 +44,8 @@ public enum ReportType {
             case NOTE:
                 return _("Note");
             default:
-                bug_msg (_("Unexpected enum value: %s: %d\n"), "ReportType - to_string", (int) this);
+                bug_msg (_("Unexpected enum value: %s: %u\n"),
+                         "ReportType - to_string", this);
                 return null;
         }
     }

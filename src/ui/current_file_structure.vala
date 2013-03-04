@@ -156,7 +156,8 @@ public class UiCurrentFileStructure : UiElement {
                             typename += "-protected";
                             break;
                         default:
-                            bug_msg (_("Unknown SymbolAccessibility type: %d\n"), smb.access);
+                            bug_msg (_("Unexpected enum value: %s: %u\n"),
+                                     "curfilestruct - SymbolAccessibility", smb.access);
                             break;
                     }
 

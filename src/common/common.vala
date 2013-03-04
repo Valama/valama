@@ -497,7 +497,7 @@ public class FileTransfer : Object {
             case RecursiveAction.COUNT:
                 break;
             default:
-                bug_msg (_("Unexpected enum value: %s: %d\n"), "common - RecursiveAction", action);
+                bug_msg (_("Unexpected enum value: %s: %u\n"), "common - RecursiveAction", action);
                 break;
         }
     }
