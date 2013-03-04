@@ -22,6 +22,7 @@ using GLib;
 /**
  * Flags to control FileTransfer class.
  */
+[Flags]
 public enum CopyRecursiveFlags {
     /**
      * Do not count and do not skip or warn on existing files.
@@ -36,13 +37,9 @@ public enum CopyRecursiveFlags {
      */
     WARN_OVERWRITE,
     /**
-     * Skip if file already exists.
+     * Don't count.
      */
-    NO_COUNT_SKIP_EXISTENT, //FIXME: Is it possible to pass multiple enum vars to method arguments?
-    /**
-     * Warn if file already exists.
-     */
-    NO_COUNT_WARN_OVERWRITE
+    NO_COUNT
 }
 
 /**
@@ -309,9 +306,9 @@ public class FileTransfer : Object {
             num_count_changed (count_current, count_total);
         }
         /* Check if enough free space is available on filesystem. */
-        if (!same_fs && fs_free <= size_to_trans) {
-            throw new GLib.IOError.NO_SPACE (_("Not enough space available."));
-        }
+        if (!same_fs && fs_free <= size_to_trans)
+            throw new GLib.IOError.NO_SPACE (_("Not enough space available: %lld < %lld"),
+                                             fs_free, (uint64) size_to_trans);
     }
 
     /**
@@ -391,17 +388,17 @@ public class FileTransfer : Object {
                 var new_dest = dest.resolve_relative_path (info.get_name());
 
                 /* Create directory if it does not exist already. */
-                if (!new_dest.query_exists() && action != RecursiveAction.COUNT) {
-                    new_dest.make_directory (cancellable);
-                    /* Only count if needed. */
-                    //TODO: Is this faster when we just count or when we check
-                    //      the flags?
-                    if (counter_on) {
-                        current_size += size;
-                        byte_count_changed (current_size / total_size);
-                    }
-                } else if (action == RecursiveAction.COUNT)
+                if (action == RecursiveAction.COUNT)
                     size_to_trans += size;
+                else if (!new_dest.query_exists())
+                    new_dest.make_directory (cancellable);
+                /* Only count if needed. */
+                //TODO: Is this faster when we just count or when we check
+                //      the flags?
+                if (counter_on) {
+                    current_size += size;
+                    byte_count_changed (current_size / total_size);
+                }
 
                 do_recursively (new_from, new_dest);
 
@@ -441,7 +438,7 @@ public class FileTransfer : Object {
         if (dest.query_exists() && action != RecursiveAction.COUNT) {
             /* SKIP_EXISTENT */
             if (rec_flag == CopyRecursiveFlags.SKIP_EXISTENT ||
-                    rec_flag == CopyRecursiveFlags.NO_COUNT_SKIP_EXISTENT) {
+                    rec_flag == (CopyRecursiveFlags.SKIP_EXISTENT | CopyRecursiveFlags.NO_COUNT)) {
                 if (action != RecursiveAction.COUNT)
                     debug_msg (_("Skip %s\n"), dest.get_path());
                 if (counter_on) {
@@ -453,7 +450,7 @@ public class FileTransfer : Object {
                 return;
             /* WARN_OVERWRITE */
             } else if ((rec_flag == CopyRecursiveFlags.WARN_OVERWRITE ||
-                    rec_flag == CopyRecursiveFlags.NO_COUNT_WARN_OVERWRITE) &&
+                    rec_flag == (CopyRecursiveFlags.WARN_OVERWRITE | CopyRecursiveFlags.NO_COUNT)) &&
                     !warn_overwrite (from.get_path(), dest.get_path())) {
                 debug_msg (_("Skip overwrite from '%s' to '%s'.\n"), from.get_path(),
                                                                      dest.get_path());
