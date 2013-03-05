@@ -23,11 +23,8 @@ using Vala;
 /**
  * Browser symbols.
  */
-public class SymbolBrowser : UiElement {
-    public SymbolBrowser (ValamaProject? vproject=null) {
-        if (vproject != null)
-            project = vproject;
-
+public class SymbolBrowser : UiElementExt {
+    public SymbolBrowser() {
         tree_view = new TreeView();
         tree_view.insert_column_with_attributes (-1,
                                                  null,
@@ -67,7 +64,7 @@ public class SymbolBrowser : UiElement {
 
         TreeIter[] iters = new TreeIter[0];
 
-        Guanako.iter_symbol (project.guanako_project.root_symbol, (smb, depth, typename) => {
+        Guanako.iter_symbol (vproject.guanako_project.root_symbol, (smb, depth, typename) => {
             if (smb.name != null) {
                 string tpe = "";
                 foreach (var part in typename.split ("_"))

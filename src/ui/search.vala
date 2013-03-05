@@ -22,7 +22,7 @@ using Gtk;
 /**
  * Search widget
  */
-public class UiSearch : UiElement {
+public class UiSearch : UiElementExt {
     TreeView tree_view;
     ToggleToolButton btn_all_files;
 #if GTK_3_6
@@ -131,7 +131,7 @@ public class UiSearch : UiElement {
         if (result == null)
             return;
         TextIter titer;
-        var bfr = project.get_buffer_by_file (result.filename);
+        var bfr = vproject.get_buffer_by_file (result.filename);
         bfr.get_iter_at_line_offset (out titer,
                                      result.line,
                                      0);
@@ -142,7 +142,7 @@ public class UiSearch : UiElement {
     }
 
     void clear_search_tag() {
-        project.foreach_buffer ((filename, bfr) => {
+        vproject.foreach_buffer ((filename, bfr) => {
             TextIter first_iter;
             TextIter end_iter;
             bfr.get_start_iter (out first_iter);
@@ -165,7 +165,7 @@ public class UiSearch : UiElement {
                            store,
                            source_viewer.current_srcfocus);
         else
-            project.foreach_buffer ((filename, bfr) => {
+            vproject.foreach_buffer ((filename, bfr) => {
                 search_buffer (search, bfr, store, filename);
             });
         tree_view.set_model (store);
@@ -190,7 +190,7 @@ public class UiSearch : UiElement {
                                          null)) {
             if (iter_parent == null && btn_all_files.active) {
                 store.append (out iter_parent, null);
-                store.set (iter_parent, 0, "", 1, project.get_relative_path (filename), -1);
+                store.set (iter_parent, 0, "", 1, vproject.get_relative_path (filename), -1);
             }
             TreeIter iter_append;
             store.append (out iter_append, iter_parent);

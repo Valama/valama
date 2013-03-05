@@ -584,7 +584,7 @@ public static ValamaProject? create_project_from_template (ProjectTemplate templ
         new FileTransfer (buildsystem_path,
                           target_folder,
                           CopyRecursiveFlags.SKIP_EXISTENT).copy();
-        project.save();
+        save_project_file (project);
     } catch (GLib.Error e) {
         errmsg (_("Could not copy templates for new project: %s\n"), e.message);
     }

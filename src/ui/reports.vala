@@ -54,7 +54,7 @@ public enum ReportType {
 /**
  * Report build status and code warnings/errors.
  */
-class UiReport : UiElement {
+class UiReport : UiElementExt {
     ReportWrapper report;
     TreeView tree_view = null;
     ScrolledWindow scrw;
@@ -163,10 +163,10 @@ class UiReport : UiElement {
         var w_note = new Invisible();
         pixmap_note = w_note.render_icon (Stock.DIALOG_INFO, IconSize.MENU, null);
 
-        project.guanako_update_started.connect (() => {
+        vproject.guanako_update_started.connect (() => {
             report.init();
         });
-        project.guanako_update_finished.connect (build);
+        vproject.guanako_update_finished.connect (build);
         source_viewer.notify["current-srcbuffer"].connect (() => {
             if (!this.showall)
                 build();
@@ -194,7 +194,7 @@ class UiReport : UiElement {
         }
 
         if (showall) {
-            project.foreach_buffer ((s, bfr) => {
+            vproject.foreach_buffer ((s, bfr) => {
                 TextIter first_iter;
                 TextIter end_iter;
                 bfr.get_start_iter (out first_iter);
@@ -203,7 +203,7 @@ class UiReport : UiElement {
                 bfr.remove_tag_by_name ("warning_bg", first_iter, end_iter);
             });
         } else {
-            bfr = project.get_buffer_by_file (source_viewer.current_srcfocus);
+            bfr = vproject.get_buffer_by_file (source_viewer.current_srcfocus);
             if (bfr != null) {
                 TextIter first_iter;
                 TextIter end_iter;
@@ -227,7 +227,7 @@ class UiReport : UiElement {
                 continue;
 
             if (showall)
-                bfr = project.get_buffer_by_file (err.source.file.filename);
+                bfr = vproject.get_buffer_by_file (err.source.file.filename);
 
             Gdk.Pixbuf? pixbuf = null;
             TextIter? iter_start = null;
@@ -274,7 +274,7 @@ class UiReport : UiElement {
             if (showall)
                 store.set (next,
                            0, pixbuf,
-                           1, project.get_relative_path (err.source.file.filename),
+                           1, vproject.get_relative_path (err.source.file.filename),
                            2, err.source.begin.line.to_string(),
                            3, err.message,
                            -1);

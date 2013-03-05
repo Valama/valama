@@ -24,15 +24,11 @@ using GLib;
 /**
  * Browse source code.
  */
-public class ProjectBrowser : UiElement {
+public class ProjectBrowser : UiElementExt {
     private TreeView tree_view;
-
     private Gee.ArrayList<TreePath> tree_view_expanded;
 
-    public ProjectBrowser (ValamaProject? vproject = null) {
-        if (vproject != null)
-            project = vproject;
-
+    public ProjectBrowser() {
         tree_view = new TreeView();
         tree_view.headers_visible = false;
         tree_view.insert_column_with_attributes (-1,
@@ -65,13 +61,13 @@ public class ProjectBrowser : UiElement {
         var toolbar_title = new Toolbar ();
         toolbar_title.get_style_context().add_class (STYLE_CLASS_PRIMARY_TOOLBAR);
         var ti_title = new ToolItem();
-        var plabel = new Label (project.project_name);
+        var plabel = new Label (vproject.project_name);
         ti_title.add (plabel);
         toolbar_title.add(ti_title);
 
-        project.notify["project-name"].connect (() => {
+        vproject.notify["project-name"].connect (() => {
             ti_title.remove (plabel);
-            plabel = new Label (project.project_name);
+            plabel = new Label (vproject.project_name);
             ti_title.add (plabel);
             ti_title.show_all();
         });
@@ -86,7 +82,7 @@ public class ProjectBrowser : UiElement {
         toolbar_title.add (btnSettings);
         btnSettings.set_tooltip_text (_("Settings"));
         btnSettings.clicked.connect (() => {
-            ui_project_dialog (project);
+            ui_project_dialog (vproject);
         });
 
         var vbox = new Box (Orientation.VERTICAL, 0);
@@ -119,7 +115,7 @@ public class ProjectBrowser : UiElement {
                             break;
                         filepath = Path.build_path (Path.DIR_SEPARATOR_S, val, filepath);
                     }
-                    file_selected (project.get_absolute_path (filepath));
+                    file_selected (vproject.get_absolute_path (filepath));
                     break;
                 case StoreType.FILE_TREE:
                 case StoreType.DIRECTORY:
@@ -195,9 +191,9 @@ public class ProjectBrowser : UiElement {
 
         pathmap = new Gee.HashMap<string, TreeIter?>();
         b_pathmap = new Gee.HashMap<string, TreeIter?>();
-        build_file_treestore (_("Sources"), project.files.to_array(), ref store, ref pathmap);
-        build_file_treestore (_("Buildsystem files"), project.b_files.to_array(), ref store, ref b_pathmap);
-        build_plain_treestore (_("Packages"), project.guanako_project.packages.to_array(), ref store);
+        build_file_treestore (_("Sources"), vproject.files.to_array(), ref store, ref pathmap);
+        build_file_treestore (_("Buildsystem files"), vproject.b_files.to_array(), ref store, ref b_pathmap);
+        build_plain_treestore (_("Packages"), vproject.guanako_project.packages.to_array(), ref store);
 
         tree_view.row_collapsed.connect ((iter, path) => {
             if (path in tree_view_expanded)
@@ -216,7 +212,7 @@ public class ProjectBrowser : UiElement {
     /**
      * Select Vala packages to add/remove to/from build system (with valac).
      */
-    private static string? package_selection_dialog (ValamaProject project) {
+    private static string? package_selection_dialog (ValamaProject vproject) {
 
         Dialog dlg = new Dialog.with_buttons (_("Select new packages"),
                                               window_main,
@@ -240,7 +236,7 @@ public class ProjectBrowser : UiElement {
         var avail_packages = Guanako.get_available_packages();
         var proposed_packages = new string[0];
         foreach (string pkg in avail_packages) {
-            if (pkg in project.guanako_project.packages)  //Ignore packages that are already selected
+            if (pkg in vproject.guanako_project.packages)  //Ignore packages that are already selected
                 continue;
             proposed_packages += pkg;
             TreeIter iter;
@@ -285,10 +281,10 @@ public class ProjectBrowser : UiElement {
 
         switch (store_type) {
             case StoreType.FILE_TREE:
-                var source_file = ui_create_file_dialog (project);
+                var source_file = ui_create_file_dialog (vproject);
                 if (source_file != null) {
                     //TODO: Check if already loaded.
-                    project.guanako_project.add_source_file (source_file);
+                    vproject.guanako_project.add_source_file (source_file);
                     on_file_selected (source_file.filename);
                     update();
                 }
@@ -310,19 +306,19 @@ public class ProjectBrowser : UiElement {
                 if (store_type == StoreType.FILE)
                     filepath = Path.get_dirname (filepath);
 
-                var source_file = ui_create_file_dialog (project, filepath);
+                var source_file = ui_create_file_dialog (vproject, filepath);
                 if (source_file != null) {
                     //TODO: Check if already loaded.
-                    project.guanako_project.add_source_file (source_file);
+                    vproject.guanako_project.add_source_file (source_file);
                     on_file_selected (source_file.filename);
                     update();
                 }
                 break;
             case StoreType.PACKAGE_TREE:
             case StoreType.PACKAGE:
-                var pkg = package_selection_dialog (project);
+                var pkg = package_selection_dialog (vproject);
                 if (pkg != null) {
-                    string[] missing_packages = project.guanako_project.add_packages (new string[] {pkg}, true);
+                    string[] missing_packages = vproject.guanako_project.add_packages (new string[] {pkg}, true);
                     if (missing_packages.length > 0)
                         ui_missing_packages_dialog (missing_packages);
                     update();
@@ -371,16 +367,16 @@ public class ProjectBrowser : UiElement {
                         break;
                     filepath = Path.build_path (Path.DIR_SEPARATOR_S, val, filepath);
                 }
-                var abs_filepath = project.get_absolute_path (filepath);
+                var abs_filepath = vproject.get_absolute_path (filepath);
 
                 if (ui_ask_warning (_("Do you want to delete this file?")) == ResponseType.YES) {
                     var file = File.new_for_path (abs_filepath);
-                    var fname = project.get_relative_path (filepath);
+                    var fname = vproject.get_relative_path (filepath);
                     source_viewer.close_srcitem (fname);
                     try {
                         file.delete();
-                        project.remove_source_file (abs_filepath);
-                        //FIXME: Remove file from project (project.files project.b_files).
+                        vproject.remove_source_file (abs_filepath);
+                        //FIXME: Remove file from project (vproject.files vproject.b_files).
                         /*
                          * Not necessary here because pathmap will completely
                          * rebuild. But remove it for future better
@@ -394,7 +390,11 @@ public class ProjectBrowser : UiElement {
                 }
                 break;
             case StoreType.PACKAGE:
-                project.guanako_project.remove_package (val);
+                /*
+                 * TODO: Do not show an error when package not available:
+                 * CRITICAL **: guanako_project_get_source_file: assertion `filename != NULL' failed
+                 */
+                vproject.guanako_project.remove_package (val);
                 update();
                 break;
             default:

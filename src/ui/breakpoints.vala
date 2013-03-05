@@ -24,7 +24,7 @@ using Guanako;
 /**
  * Setting break points etc.
  */
-class UiBreakpoints : UiElement {
+class UiBreakpoints : UiElementExt {
     TreeView tree_view;
     Guanako.FrankenStein frankenstein;
     ListStore? store = null;
@@ -96,7 +96,7 @@ class UiBreakpoints : UiElement {
         source_viewer.notify["current-srcbuffer"].connect (() => {
             /* Don't enable button on non-source files. */
             if (source_viewer.current_srcfocus != null &&
-                        project.guanako_project.get_source_file (
+                        vproject.guanako_project.get_source_file (
                                     source_viewer.current_srcfocus) != null)
                 btn_add.sensitive = true;
             else
@@ -136,7 +136,7 @@ class UiBreakpoints : UiElement {
         TextIter iter_start;
         TextIter iter_end;
         /* Make sure current_srcfocus != null. */
-        var focus_file = project.guanako_project.get_source_file_by_name (
+        var focus_file = vproject.guanako_project.get_source_file_by_name (
                                                         source_viewer.current_srcfocus);
         if (!source_viewer.current_srcbuffer.get_selection_bounds (out iter_start, out iter_end)) {
             var mark_insert = source_viewer.current_srcbuffer.get_insert();
@@ -182,7 +182,7 @@ class UiBreakpoints : UiElement {
         store = new ListStore (3, typeof (string), typeof (string), typeof (string));
         tree_view.set_model (store);
 
-        project.foreach_buffer((s, bfr)=>{
+        vproject.foreach_buffer((s, bfr)=>{
             TextIter first_iter;
             TextIter end_iter;
             bfr.get_start_iter (out first_iter);
@@ -198,10 +198,10 @@ class UiBreakpoints : UiElement {
                        0,
                        timer.start_line.to_string() + " - " + timer.end_line.to_string(),
                        1,
-                       project.get_relative_path (timer.file.filename),
+                       vproject.get_relative_path (timer.file.filename),
                        -1);
 
-            var bfr = project.get_buffer_by_file (timer.file.filename);
+            var bfr = vproject.get_buffer_by_file (timer.file.filename);
             TextIter iter_start;
             TextIter iter_end;
             bfr.get_iter_at_line (out iter_start, timer.start_line - 1);
@@ -217,10 +217,10 @@ class UiBreakpoints : UiElement {
                        0,
                        stop.line.to_string(),
                        1,
-                       project.get_relative_path (stop.file.filename),
+                       vproject.get_relative_path (stop.file.filename),
                        -1);
 
-            var bfr = project.get_buffer_by_file (stop.file.filename);
+            var bfr = vproject.get_buffer_by_file (stop.file.filename);
             TextIter iter;
             bfr.get_iter_at_line (out iter, stop.line - 1);
             bfr.create_source_mark (null, "stop", iter);

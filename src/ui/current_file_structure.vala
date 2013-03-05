@@ -24,7 +24,7 @@ using GLib;
 /**
  * Show current file's basic structure
  */
-public class UiCurrentFileStructure : UiElement {
+public class UiCurrentFileStructure : UiElementExt {
     TreeView tree_view;
     ToggleToolButton btn_show_private;
     Gee.HashMap<string, Symbol> map_iter_symbols = new Gee.HashMap<string, Symbol>();
@@ -73,7 +73,7 @@ public class UiCurrentFileStructure : UiElement {
         vbox.pack_start (scrw, true, true);
 
         source_viewer.current_sourceview_changed.connect(build);
-        project.guanako_update_finished.connect (build);
+        vproject.guanako_update_finished.connect (build);
 
         widget = vbox;
 
@@ -102,7 +102,7 @@ public class UiCurrentFileStructure : UiElement {
         map_iter_symbols = new Gee.HashMap<string, Symbol>();
         store = new TreeStore (2, typeof (string), typeof (Gdk.Pixbuf));
         tree_view.set_model (store);
-        var focus_file = project.guanako_project.get_source_file_by_name (source_viewer.current_srcfocus);
+        var focus_file = vproject.guanako_project.get_source_file_by_name (source_viewer.current_srcfocus);
         if (focus_file == null) {
             debug_msg (_("%s update finished (not a valid source buffer)!\n"), get_name());
             return;
@@ -111,7 +111,7 @@ public class UiCurrentFileStructure : UiElement {
         TextIter iter;
         source_viewer.current_srcbuffer.get_iter_at_mark (out iter, mark_insert);
 
-        var current_symbol = project.guanako_project.get_symbol_at_pos (focus_file,
+        var current_symbol = vproject.guanako_project.get_symbol_at_pos (focus_file,
                                                                         iter.get_line(),
                                                                         iter.get_line_offset());
         TreeIter? current_iter = null;

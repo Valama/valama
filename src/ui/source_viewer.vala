@@ -25,7 +25,7 @@ using Gee;
 /**
  * Report build status and code warnings/errors.
  */
-class UiSourceViewer : UiElement {
+class UiSourceViewer : UiElementExt {
     /**
      * Source code dock.
      */
@@ -327,7 +327,7 @@ class UiSourceViewer : UiElement {
      */
     public void jump_to_position (string filename, int line, int col, bool setcursor = true) {
         on_file_selected (filename);
-        var srcbuffer = project.get_buffer_by_file (filename);
+        var srcbuffer = ((ValamaProject) project).get_buffer_by_file (filename);
         if (srcbuffer == null)
             return;
         TextIter titer;

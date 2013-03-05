@@ -29,7 +29,7 @@ using Gee;
  * (e.g. an instance field ui_connections).
  * Depencency interface is implented (update calls).
  */
-public abstract class UiElement : Object{
+public abstract class UiElement : Object {
     /**
      * Possibility to lock gdl items (lock and hide grip).
      */
@@ -77,9 +77,11 @@ public abstract class UiElement : Object{
 
 
     /**
-     * Share the project ({@link ValamaProject}) between all elements.
+     * Share the project ({@link RawValamaProject}) between all elements.
      */
-    public static ValamaProject project { get; set; }
+    public static RawValamaProject project { get; set; }
+
+    public static MainWidget widget_main { get; set; }
 
     /**
      * Connect locking and unlocking signals.
@@ -179,22 +181,6 @@ public abstract class UiElement : Object{
     }
 
     /**
-     * Show item in some {@link IdeModes} modes.
-     */
-    //TODO: Add workaround for gdl < 3.5.5 to dock gdl item after hiding.
-    public void mode_to_show (IdeModes mode) {
-        project.notify["idemode"].connect(() => {
-            if (dock_item != null) {
-                if ((project.idemode & mode) != 0) {
-                    dock_item.show_item();
-                    dock_item.show_all();
-                } else
-                    dock_item.hide_item();
-            }
-        });
-    }
-
-    /**
       * Update and generate this {@link UiElement}.
       *
       * This build method is not called directly by others. Instead
@@ -210,7 +196,7 @@ public abstract class UiElement : Object{
      * Dependencies can be added with {@link add_deps}. They are invoked in
      * parallel with {@link GLib.Thread} instances.
      */
-    public void update (ValamaProject? vproject=null) {
+    public void update (RawValamaProject? vproject=null) {
         if (vproject != null)
             project = vproject;
         /* Already start first update. */
