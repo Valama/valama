@@ -151,16 +151,13 @@ public class ProjectBuilder : Object{
         /* Write project.cmake */
         try {
             var pkg_list = "set(required_pkgs\n";
-            var pkgs = new TreeSet<string>();
-            foreach (var choice in project.package_choices)
-                if (choice.all)
-                    foreach (var pkg in choice.packages)
-                        pkgs.add (pkg.to_string());
-            foreach (var pkg in project.packages)
-                pkgs.add (pkg.to_string());
-
-            foreach (var pkgstr in pkgs)
-                pkg_list += @"\"$pkgstr\"\n";
+            foreach (var pkg in project.packages) {
+                pkg_list += @"\"$(pkg.to_string())\"\n";
+                if (pkg.choice != null && pkg.choice.all)
+                    foreach (var pkg_choice in pkg.choice.packages)
+                        if (pkg != pkg_choice)
+                            pkg_list += @"\"$(pkg_choice.to_string())\"\n";
+            }
             pkg_list += ")\n";
 
             var srcfiles = "set(srcfiles\n";

@@ -31,10 +31,11 @@ public class ProjectTemplate {
     public string description;
     public string? long_description = null;
 
-    public string[]? packages { get; private set; default = null; }
-    public string[]? unmet_deps { get; private set; default = null; }
+    public ArrayList<PackageInfo?>? unmet_deps { get; private set; default = null; }
     public TreeSet<string>? s_files  { get; private set; default = null; }
     public string[]? b_files { get; private set; default = null; }
+
+    public ValamaProject? vproject { get; private set; default = null; }
 
     public ProjectTemplate() {
         authors = new ArrayList<TemplateAuthor?>();
@@ -42,16 +43,16 @@ public class ProjectTemplate {
     }
 
     /**
-     * Initialize package and file list and get unmet dependencies.
+     *
+     * Partly load {@link ValamaProject} and initialize package and file list
+     * and get unmet dependencies.
      *
      * @param available_packages List of all available_packages on system.
      */
     public void init (string[] available_packages) throws LoadingError
                                                    requires (path != null) {
         var vlp_file = Path.build_path (Path.DIR_SEPARATOR_S, path, "template.vlp");
-        var vproject = new ValamaProject (vlp_file, null, false);
-
-        packages = vproject.package_list.to_array();
+        vproject = new ValamaProject (vlp_file, null, false);
 
         s_files = new TreeSet<string>();
         vproject.generate_file_list (vproject.source_dirs.to_array(),
@@ -62,6 +63,7 @@ public class ProjectTemplate {
             s_files.add (vproject.get_relative_path (filename));
         });
 
+        //TODO: Get buildsystem files.
         switch (vproject.buildsystem) {
             default:
                 debug_msg (_("Buildsystem '%s' currently not supported by template selector.\n"),
@@ -69,25 +71,10 @@ public class ProjectTemplate {
                 break;
         }
 
-        var unmet = new string[0];
-        foreach (var depend in vproject.package_list)
-            if (!(depend in available_packages))
-                unmet += depend;
-        foreach (var choice in vproject.package_choices) {
-            var contained = false;
-            foreach (var choice_pkg in choice.packages)
-                if (choice_pkg.name in available_packages) {
-                    contained = true;
-                    break;
-                }
-            if (!contained) {
-                var unmet_string = "";
-                foreach (var choice_pkg in choice.packages)
-                    unmet_string += choice_pkg.name + "/";
-                unmet += unmet_string;
-            }
-        }
-        unmet_deps = unmet;
+        unmet_deps = new ArrayList<PackageInfo?>();
+        foreach (var pkg in vproject.packages)
+            if (!(pkg.name in available_packages))
+                unmet_deps.add (pkg);
     }
 }
 

@@ -125,9 +125,61 @@ public enum IdeModes {
     }
 }
 
+/**
+ * Vala package alternatives.
+ */
+public class PkgChoice {
+    /**
+     * Indicate if all packages should go to buildsystem package list.
+     */
+    public bool all = false;
+    /**
+     * Ordered list of packages. Packages in the front have higher
+     * priority.
+     */
+    public Gee.ArrayList<PackageInfo?> packages { get; private set; }
+    /**
+     * Optional description.
+     */
+    public string? description = null;
+
+    public PkgChoice() {
+        packages = new Gee.ArrayList<PackageInfo?>();
+    }
+
+    /**
+     * Automatically add {@link PkgChoice} reference to each
+     * {@link PackageInfo} object.
+     *
+     * @param pkg Package to add to package choices list.
+     */
+    public void add_package (PackageInfo pkg) {
+        pkg.choice = this;
+        packages.add (pkg);
+    }
+}
+
+/**
+ * Vala package information.
+ */
 public class PackageInfo {
+    /**
+     * Reference to {@link PkgChoice} if any.
+     *
+     * Do not modify this value manually. It will result in undefined behaviour.
+     */
+    public PkgChoice? choice = null;
+    /**
+     * Version relation.
+     */
     public VersionRelation? rel = null;
+    /**
+     * Package name.
+     */
     public string name;
+    /**
+     * Version (meaning differs with {@link rel}).
+     */
     public string? version = null;
 
     /**
@@ -200,7 +252,7 @@ public class ValamaProject : Object {
     /**
      * Attached Guanako project to provide code completion.
      */
-    public Guanako.Project guanako_project { get; private set; }
+    public Guanako.Project? guanako_project { get; private set; default = null; }
 
     private string _project_path;
     /**
@@ -294,21 +346,6 @@ public class ValamaProject : Object {
     public string buildsystem = "cmake";
 
     /**
-     * Vala package alternatives.
-     */
-    public struct PkgChoice {
-        /**
-         * Indicate if all packages should go to buildsystem package list.
-         */
-        bool all;
-        /**
-         * Ordered list of packages. Packages in the front have higher
-         * priority.
-         */
-        Gee.ArrayList<PackageInfo?> packages;
-    }
-
-    /**
      * Required packages with version information.
      *
      * Use {@link add_package} or {@link add_package_by_name} to add a new
@@ -326,6 +363,8 @@ public class ValamaProject : Object {
 
     /**
      * Create {@link ValamaProject} and load it from project file.
+     *
+     * It is possible to fully load a partial loaded project with {@link init}.
      *
      * @param project_file Load project from this file.
      * @param syntaxfile Load Guanako syntax definitions from this file.
@@ -354,10 +393,30 @@ public class ValamaProject : Object {
         msg (_("Load project file: %s\n"), this.project_file);
         load_project_file();  // can throw LoadingError
 
-        if (!fully)
-            return;
+        if (fully)
+            init (syntaxfile);
+    }
 
-        recentmgr.add_item (get_absolute_path(this.project_file));
+    /**
+     * Fully load project or do nothing when already fully loaded.
+     *
+     * @param syntaxfile Load Guanako syntax definitions from this file.
+     * @throws LoadingError Throw if Guanako completion fails to load.
+     */
+    public void init (string? syntaxfile = null) throws LoadingError {
+        if (guanako_project == null)
+            try {
+                guanako_project = new Guanako.Project (syntaxfile);
+            } catch (GLib.IOError e) {
+                throw new LoadingError.COMPLETION_NOT_AVAILABLE (
+                                        _("Could not read syntax file: %s\n"), e.message);
+            } catch (GLib.Error e) {
+                throw new LoadingError.COMPLETION_NOT_AVAILABLE (
+                                        _("An error occured while loading new Guanako project: %s\n"),
+                                        e.message);
+            }
+
+        recentmgr.add_item (get_absolute_path (this.project_file));
 
         files = new Gee.TreeSet<string>();
         generate_file_list (source_dirs.to_array(),
@@ -539,7 +598,7 @@ public class ValamaProject : Object {
                 warning_msg (_("Ignore project file loading error: %s\n"), errstr);
         }
 
-        packages = new Gee.TreeSet<PackageInfo?>();
+        packages = new Gee.TreeSet<PackageInfo?> ((CompareDataFunc<PackageInfo?>?) PackageInfo.compare_func);
         package_list = new Gee.TreeSet<string>();
         package_choices = new Gee.ArrayList<PkgChoice?>();
         source_dirs = new Gee.TreeSet<string>();
@@ -583,8 +642,7 @@ public class ValamaProject : Object {
                             continue;
                         switch (p->name) {
                             case "choice":
-                                var choice = PkgChoice();
-                                choice.packages = new Gee.ArrayList<PackageInfo?>();
+                                var choice = new PkgChoice();
                                 if (p->has_prop ("all") != null)
                                     switch (p->get_prop ("all")) {
                                         case "yes":
@@ -600,16 +658,17 @@ public class ValamaProject : Object {
                                             choice.all = false;
                                             break;
                                     }
-                                else
-                                    choice.all = false;
                                 for (Xml.Node* pp = p->children; pp != null; pp = pp->next) {
                                     if (pp->type != ElementType.ELEMENT_NODE)
                                         continue;
                                     switch (pp->name) {
+                                        case "description":
+                                            choice.description = pp->get_content();
+                                            break;
                                         case "package":
                                             var pkg = get_package_info (pp);
                                             if (pkg != null)
-                                                choice.packages.add (pkg);
+                                                choice.add_package (pkg);
                                             break;
                                         default:
                                             warning_msg (_("Unknown configuration file value line %hu: %s\n"), pp->line, pp->name);
@@ -731,6 +790,8 @@ public class ValamaProject : Object {
         foreach (var choice in package_choices) {
             writer.start_element ("choice");
             writer.write_attribute ("all", (choice.all) ? "yes" : "no");
+            if (choice.description != null)
+                writer.write_element ("description", choice.description);
             foreach (var pkg in choice.packages) {
                 writer.write_element ("package", pkg.name);
                 if (pkg.version != null)
@@ -741,21 +802,15 @@ public class ValamaProject : Object {
             writer.end_element();
         }
         foreach (var pkg in packages) {
-            var contained = false;
-            foreach (var choice in package_choices)
-                if (pkg in choice.packages) {
-                    contained = true;
-                    break;
-                }
-            if (!contained) {
-                writer.start_element ("package");
-                if (pkg.version != null)
-                    writer.write_attribute ("version", pkg.version);
-                if (pkg.rel != null)
-                    writer.write_attribute ("rel", pkg.rel.to_string());
-                writer.write_string (pkg.name);
-                writer.end_element();
-            }
+            if (pkg.choice != null)
+                continue;
+            writer.start_element ("package");
+            if (pkg.version != null)
+                writer.write_attribute ("version", pkg.version);
+            if (pkg.rel != null)
+                writer.write_attribute ("rel", pkg.rel.to_string());
+            writer.write_string (pkg.name);
+            writer.end_element();
         }
         writer.end_element();
 
@@ -791,8 +846,20 @@ public class ValamaProject : Object {
      */
     //TODO: Check version.
     private PackageInfo? get_choice (PkgChoice choice) {
+        Vala.CodeContext context;
+        if (guanako_project != null)
+            context = guanako_project.context;
+        else {
+            context = new Vala.CodeContext();
+            context.target_glib_major = 2;  //TODO: Use Guanako.context_prep.
+            context.target_glib_minor = 32;
+            for (int i = 16; i <= context.target_glib_minor; i += 2)
+                context.add_define (@"GLIB_$(context.target_glib_major)_$i");
+            context.profile = Profile.GOBJECT;
+        }
+        //TODO: Do this like init method in ProjectTemplate (check against all vapis).
         foreach (var pkg in choice.packages)
-            if (guanako_project.context.get_vapi_path (pkg.name) != null) {
+            if (context.get_vapi_path (pkg.name) != null) {
                 debug_msg (_("Choose '%s' package.\n"), pkg.name);
                 return pkg;
             } else

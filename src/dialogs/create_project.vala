@@ -150,15 +150,24 @@ public class UiTemplateSelector : Object {
             btn_info.sensitive = true;
 
             var template_label = "";
-            if (template.unmet_deps.length > 0)
+            if (template.unmet_deps.size > 0)
                 template_label = """<span foreground="grey">""";
             template_label += "<b>" + template.name + "</b>\n" + template.description;
 
-            if (template.unmet_deps.length > 0) {
+            if (template.unmet_deps.size > 0) {
                 template_label += "\n" + _("Missing packages: ");
-                template_label += template.unmet_deps[0];
-                for (var i = 1; i < template.unmet_deps.length; ++i)
-                    template_label += @", $(template.unmet_deps[i])";
+                template_label += template.unmet_deps[0].name;
+                if (template.unmet_deps[0].choice != null)
+                    foreach (var pkg in template.unmet_deps[0].choice.packages)
+                        if (pkg != template.unmet_deps[0])
+                            template_label += @"/$(pkg.name)";
+                for (var i = 1; i < template.unmet_deps.size; ++i) {
+                    template_label += @", $(template.unmet_deps[i].name)";
+                    if (template.unmet_deps[i].choice != null)
+                        foreach (var pkg in template.unmet_deps[i].choice.packages)
+                            if (pkg != template.unmet_deps[i])
+                                template_label += @"/$(pkg.name)";
+                }
                 template_label += "</span>";
             }
             store.set (iter, 0, template_label, 1, template.icon, -1);
@@ -385,14 +394,39 @@ public class UiTemplateSelector : Object {
         detailed_pkg_info.halign = Align.START;
         detailed_grid.attach (detailed_pkg_info, 0, detailed_line++, 2, 1);
 
-        if (template.packages.length > 0)
-            foreach (var pkg in template.packages) {
+        if (template.vproject.packages.size > 0)
+            foreach (var pkg in template.vproject.packages) {
                 Label pkg_lbl;
+                string pkgstr;
                 if (pkg in template.unmet_deps) {
-                    pkg_lbl = new Label ("<i>" + pkg + "</i> (" + _("not available") + ")");
-                    pkg_lbl.use_markup = true;
-                } else
-                    pkg_lbl = new Label (pkg);
+                    if (pkg.choice == null)
+                        pkgstr = pkg.name;
+                    else {
+                        pkgstr = pkg.choice.packages[0].name;
+                        for (int i = 1; i < pkg.choice.packages.size; ++i)
+                            pkgstr += @"/$(pkg.choice.packages[i])";
+                    }
+                    pkg_lbl = new Label ("<i>" + pkgstr + "</i> (" + _("not available") + ")");
+                } else {
+                    if (pkg.choice == null || pkg.choice.packages.size == 1)
+                        pkgstr = pkg.name;
+                    else {
+                        pkgstr = pkg.name + " <i>(";
+                        var first = true;
+                        foreach (var pkg_choice in pkg.choice.packages)
+                            if (pkg != pkg_choice) {
+                                if (!first)
+                                    pkgstr += @"/$(pkg_choice.name)";
+                                else {
+                                    pkgstr += pkg_choice.name;
+                                    first = false;
+                                }
+                            }
+                        pkgstr += ")</i>";
+                    }
+                    pkg_lbl = new Label (pkgstr);
+                }
+                pkg_lbl.use_markup = true;
                 pkg_lbl.halign = Align.START;
                 detailed_grid.attach (pkg_lbl, 1, detailed_line++, 1, 1);
             }
