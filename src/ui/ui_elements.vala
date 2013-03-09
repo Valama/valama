@@ -101,6 +101,16 @@ public abstract class UiElement : Object{
                 dock_item.notify["visible"].connect (() => {
                     visible = dock_item.visible;
                 });
+                dock_item.notify["master"].connect (() => {
+                    if (dock_item.master != null)
+                        dock_item.master.layout_changed.connect (() => {
+#if GDL_3_6_2
+                            show = dock_item.is_closed();
+#else
+                            show = ((dock_item.flags & Gdl.DockObjectFlags.ATTACHED) != 0);
+#endif
+                        });
+                });
             }
         });
 

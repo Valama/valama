@@ -612,6 +612,7 @@ public class MainWidget : Box {
     public bool load_layout (string filename,
                              string? section = null,
                              bool error = true) {
+        debug_msg (_("Load layout...\n"));
         string lsection = (section != null) ? section : "__default__";
         bool ret = this.layout.load_from_file (filename);
         if (ret)
