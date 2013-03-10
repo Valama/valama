@@ -87,6 +87,11 @@ public abstract class UiElement : Object{
     private bool? show;
 
     /**
+     * Indicate if dock_item is/should be hidden cause of it's {@link IdeModes}.
+     */
+    private bool modehide = false;
+
+    /**
      * Emit to show search.
      *
      * @param show True to show, false to hide.
@@ -145,6 +150,7 @@ public abstract class UiElement : Object{
             if (this.show == null || show != this.show) {
                 this.show = show;
                 if (show) {
+                    modehide = true;
 #if !GDL_LESS_3_5_5
                     dock_item.show_item();
 #else
@@ -166,6 +172,7 @@ public abstract class UiElement : Object{
 //                     if (dock_item.is_iconified())
 //                         dock_item.show_item();
 // #endif
+                    modehide = false;
                     on_element_hide();
                     dock_item.hide_item();
                 }
@@ -229,17 +236,18 @@ public abstract class UiElement : Object{
         project.notify["idemode"].connect(() => {
             if (dock_item != null) {
                 if ((project.idemode & mode) != 0) {
+                    if (modehide) {
 #if !GDL_LESS_3_5_5
-                    dock_item.show_item();
-                    dock_item.show_all();
+                        if (initialized) {
+                            dock_item.show_item();
+                            dock_item.show_all();
+                        }
 #else
-                    if (initialized) {
-                        dock_item.show_item();
-                        dock_item.show_all();
-                    } else if ((latest_item != dock_item) &&
-                                ((dock_item.flags & Gdl.DockObjectFlags.ATTACHED) == 0))
-                        dock_item.dock_to (latest_item, Gdl.DockPlacement.CENTER, -1);
+                        if (initialized && (latest_item != dock_item) &&
+                                    ((dock_item.flags & Gdl.DockObjectFlags.ATTACHED) == 0))
+                            dock_item.dock_to (latest_item, Gdl.DockPlacement.CENTER, -1);
 #endif
+                    }
                 } else
                     dock_item.hide_item();
             }
