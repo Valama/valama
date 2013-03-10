@@ -152,9 +152,9 @@ public class UiSearch : UiElement {
     }
 
 
-    void search(string search) {
+    void search (string search) {
         clear_search_tag();
-        if (search == "")
+        if (search == "" || source_viewer.current_srcbuffer == null)
             return;
         map_paths_results = new Gee.HashMap<string, SearchResult?>();
 
@@ -171,7 +171,7 @@ public class UiSearch : UiElement {
         tree_view.set_model (store);
     }
 
-    void search_buffer(string search, SourceBuffer bfr, TreeStore store, string filename) {
+    void search_buffer (string search, SourceBuffer bfr, TreeStore store, string filename) {
         TextIter first_iter;
         TextIter end_iter;
         bfr.get_start_iter (out first_iter);
