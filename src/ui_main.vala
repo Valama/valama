@@ -84,6 +84,12 @@ public class MainWidget : Box {
     public signal void unlock_items();
 
     /**
+     * Emit when all {@link UiElement}s, menuobjects and toolobjects are
+     * initialized.
+     */
+    public signal void initialized();
+
+    /**
      * Create MainWindow. Initialize menubar, toolbar, master dock and source
      * dock.
      */
@@ -217,6 +223,7 @@ public class MainWidget : Box {
         build_menu();
 
         show();
+        initialized();
     }
 
     /**

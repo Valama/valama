@@ -71,7 +71,7 @@ find_package(PkgConfig)
 if(VALA_VERSION STRGREATER "0.19.0")
   list(REMOVE_ITEM required_pkgs "libvala-0.18")
   set(valashort_ver "0.20")
-  set(valac_cond "-D;VALAC_0_20")
+  list(APPEND valac_cond "-D;VALAC_0_20")
 else()
   list(REMOVE_ITEM required_pkgs "libvala-0.20")
   set(valashort_ver "0.18")
@@ -100,6 +100,7 @@ elseif("3.5.5" STRGREATER GDL3.0_VERSION)
                   "behaviour is poor: Hidden docks aren't saved in layout "
                   "and will open detached.\n"
                   "Please upgrade your gdl version or live with it.")
+  list(APPEND valac_cond "-D;GDL_LESS_3_5_5")
 endif()
 # gee-1.0 and gee-0.8
 set(gee_ver)

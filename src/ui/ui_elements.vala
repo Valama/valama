@@ -35,7 +35,13 @@ public abstract class UiElement : Object{
      */
     protected bool locking;
 
+    /**
+     * Containing {@link Gtk.Widget}.
+     */
     public Gtk.Widget widget;
+    /**
+     * Associated {@link Gdl.DockItem}.
+     */
     public Gdl.DockItem? dock_item { get; set; default = null; }
 
     private bool? _visible = null;
@@ -54,6 +60,18 @@ public abstract class UiElement : Object{
         }
     }
 
+    /**
+     * Indicate if UI is initialized.
+     */
+    private static bool initialized = false;
+
+    /**
+     * Last opened {@link Gdl.DockItem} ({@link UiElement}).
+     */
+    private static Gdl.DockItem? latest_item = null;
+    /**
+     * Saved {@link Gdl.DockItemBehavior} after hiding/locking.
+     */
     private Gdl.DockItemBehavior? saved_behavior;
 
     /**
@@ -88,6 +106,9 @@ public abstract class UiElement : Object{
         if (widget_main is Object) {
             widget_main.lock_items.connect (lock_item);
             widget_main.unlock_items.connect (unlock_item);
+            widget_main.initialized.connect (() => {
+                initialized = true;
+            });
         } else
             error_msg (_("Could not connect locking signals.\n"));
         locking = true;
@@ -96,6 +117,7 @@ public abstract class UiElement : Object{
 
         this.notify["dock-item"].connect (() => {
             if (dock_item != null) {
+                latest_item = dock_item;
                 saved_behavior = null;
                 visible = dock_item.visible;
                 dock_item.notify["visible"].connect (() => {
@@ -123,7 +145,19 @@ public abstract class UiElement : Object{
             if (this.show == null || show != this.show) {
                 this.show = show;
                 if (show) {
+#if !GDL_LESS_3_5_5
                     dock_item.show_item();
+#else
+                    /*
+                     * TODO: Avoid latest_item and instead use solution with
+                     *       focussed element. Perhaps use Dock.toplevel_docks
+                     *       or Dock.dock_objects.
+                     */
+                    if (dock_item != latest_item)
+                        dock_item.dock_to (latest_item, Gdl.DockPlacement.CENTER, -1);
+                    else
+                        dock_item.show_item();
+#endif
                     widget_main.focus_dock_item (dock_item);
                     on_element_show();
                 } else {
@@ -191,13 +225,21 @@ public abstract class UiElement : Object{
     /**
      * Show item in some {@link IdeModes} modes.
      */
-    //TODO: Add workaround for gdl < 3.5.5 to dock gdl item after hiding.
     public void mode_to_show (IdeModes mode) {
         project.notify["idemode"].connect(() => {
             if (dock_item != null) {
                 if ((project.idemode & mode) != 0) {
+#if !GDL_LESS_3_5_5
                     dock_item.show_item();
                     dock_item.show_all();
+#else
+                    if (initialized) {
+                        dock_item.show_item();
+                        dock_item.show_all();
+                    } else if ((latest_item != dock_item) &&
+                                ((dock_item.flags & Gdl.DockObjectFlags.ATTACHED) == 0))
+                        dock_item.dock_to (latest_item, Gdl.DockPlacement.CENTER, -1);
+#endif
                 } else
                     dock_item.hide_item();
             }
