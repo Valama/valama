@@ -456,25 +456,73 @@ public class ValamaProject : Object {
     }
 
     /**
-     * Add package to project.
+     * Add package to project. Remember to add it later to Guanako project.
      *
-     * @param pkg Package.
+     * @param pkg Package to add.
      */
     public void add_package (PackageInfo pkg) {
+        var info = pkg.to_string();
+        if (pkg.choice != null)
+            info += " (%s)".printf (_("choice"));
+        debug_msg_level (2, _("Add package: %s\n"), info);
         packages.add (pkg);
         package_list.add (pkg.name);
     }
 
     /**
-     * Add package to project by package name.
+     * Add package to project by package name and update Guanako project.
      *
-     * @param pkg Package.
+     * @param pkg Package to add.
+     * @return Not available packages.
      */
-    public void add_package_by_name (string pkg) {
+    public string[] add_package_by_name (string pkg) {
+        debug_msg_level (2, _("Add package: %s\n"), pkg);
         var pkginfo = new PackageInfo();
         pkginfo.name = pkg;
         packages.add (pkginfo);
         package_list.add (pkg);
+        return guanako_project.add_packages (new string[] {pkg}, true);
+    }
+
+    /**
+     * Remove package from project. Remember to update Guanako project.
+     *
+     * @param pkg Package to remove.
+     * @return `false` if package not in project else `true`.
+     */
+    public bool remove_package (PackageInfo pkg) {
+        debug_msg_level (2, _("Remove package: %s\n"), pkg.name);
+        if (!package_list.remove (pkg.name)) {
+            debug_msg (_("Package '%s' not in list, skip it.\n"), pkg.name);
+            return false;
+        }
+        packages.remove (pkg);
+        return true;
+    }
+
+    /**
+     * Remove package from project and update Guanako project.
+     *
+     * @param pkg Package name.
+     * @return `false` if package not in project else `true`.
+     */
+    public bool remove_package_by_name (string pkg) {
+        debug_msg_level (2, _("Remove package: %s\n"), pkg);
+        if (!(pkg in package_list)) {
+            debug_msg (_("Package '%s' not in list, skip it.\n"), pkg);
+            return false;
+        }
+
+        PackageInfo[] rem_packages = new PackageInfo[0];
+        foreach (var pkginfo in packages)
+            if (pkginfo.name == pkg)
+                rem_packages += pkginfo;
+        foreach (var pkginfo in rem_packages)
+            packages.remove (pkginfo);
+
+        package_list.remove (pkg);
+        guanako_project.remove_package (pkg);
+        return true;
     }
 
     /**

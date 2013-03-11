@@ -239,8 +239,8 @@ public class ProjectBrowser : UiElement {
         /* TODO: Implement this with checkbutton. */
         var avail_packages = Guanako.get_available_packages();
         var proposed_packages = new string[0];
-        foreach (string pkg in avail_packages) {
-            if (pkg in project.guanako_project.packages)  //Ignore packages that are already selected
+        foreach (var pkg in avail_packages) {
+            if (pkg in project.package_list)  //Ignore packages that are already selected
                 continue;
             proposed_packages += pkg;
             TreeIter iter;
@@ -254,7 +254,7 @@ public class ProjectBrowser : UiElement {
         dlg.get_content_area().pack_start (scrw);
         dlg.set_default_size (400, 600);
 
-        string ret = null;
+        string? ret = null;
         if (dlg.run() == ResponseType.ACCEPT) {
             TreeModel mdl;
             var selected_rows = tree_view.get_selection().get_selected_rows (out mdl);
@@ -322,7 +322,7 @@ public class ProjectBrowser : UiElement {
             case StoreType.PACKAGE:
                 var pkg = package_selection_dialog (project);
                 if (pkg != null) {
-                    string[] missing_packages = project.guanako_project.add_packages (new string[] {pkg}, true);
+                    string[] missing_packages = project.add_package_by_name (pkg);
                     if (missing_packages.length > 0)
                         ui_missing_packages_dialog (missing_packages);
                     update();
@@ -394,7 +394,7 @@ public class ProjectBrowser : UiElement {
                 }
                 break;
             case StoreType.PACKAGE:
-                project.guanako_project.remove_package (val);
+                project.remove_package_by_name (val);
                 update();
                 break;
             default:
