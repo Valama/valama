@@ -203,7 +203,7 @@ public void build_file_treestore (string storename,
                 return;
             }
             for (int depth = 0; depth < pathparts.length; ++depth) {
-                if (pathparts[depth] in pathmap)
+                if (pathmap.has_key (pathparts[depth]))
                     continue;
 
                 TreeIter iter;

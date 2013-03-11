@@ -198,7 +198,7 @@ static Gdk.Pixbuf? get_pixbuf_for_symbol (Symbol symbol) {
 }
 
 static Gdk.Pixbuf? get_pixbuf_by_name (string typename) {
-    if (typename in map_icons)
+    if (map_icons.has_key (typename ))
         return map_icons[typename];
     return null;
 }
