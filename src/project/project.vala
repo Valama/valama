@@ -297,6 +297,14 @@ public class ValamaProject : Object {
      */
     public Gee.TreeSet<string> buildsystem_files { get; private set; }
     /**
+     * Project directories for extra files (absolute paths).
+     */
+    public Gee.TreeSet<string> data_dirs { get; private set; }
+    /**
+     * Project extra files (absolute paths).
+     */
+    public Gee.TreeSet<string> data_files { get; private set; }
+    /**
      * Project version first part.
      */
     public int version_major { get; set; default = 0; }
@@ -329,6 +337,15 @@ public class ValamaProject : Object {
      * List of buildsystem files.
      */
     public Gee.TreeSet<string> b_files { get; private set; }
+    /**
+     * List of extra files.
+     */
+    public Gee.TreeSet<string> d_files { get; private set; }
+    /**
+     * Flag to show multiple files are added and an update on each new file
+     * is not necessary. Set this manually.
+     */
+    public bool add_multiple_files { get; set; default = false; }
 
     /**
      * Ordered list of all opened Buffers mapped with filenames.
@@ -360,6 +377,19 @@ public class ValamaProject : Object {
      * package.
      */
     public Gee.TreeSet<string> package_list { get; private set; }
+
+    /**
+     * Emit signal when source file was added or removed.
+     */
+    public signal void source_files_changed();
+    /**
+     * Emit signal when buildsystem file was added or removed.
+     */
+    public signal void buildsystem_files_changed();
+    /**
+     * Emit signal when data file was added or removed.
+     */
+    public signal void data_files_changed();
 
     /**
      * Create {@link ValamaProject} and load it from project file.
@@ -419,14 +449,20 @@ public class ValamaProject : Object {
         recentmgr.add_item (get_absolute_path (this.project_file));
 
         files = new Gee.TreeSet<string>();
+        b_files = new Gee.TreeSet<string>();
+        d_files = new Gee.TreeSet<string>();
+
         generate_file_list (source_dirs.to_array(),
                             source_files.to_array(),
                             add_source_file);
 
-        b_files = new Gee.TreeSet<string>();
         generate_file_list (buildsystem_dirs.to_array(),
                             buildsystem_files.to_array(),
                             add_buildsystem_file);
+
+        generate_file_list (data_dirs.to_array(),
+                            data_files.to_array(),
+                            add_data_file);
 
         vieworder = new Gee.LinkedList<ViewMap?>();
 
@@ -528,16 +564,37 @@ public class ValamaProject : Object {
     /**
      * Add sourcefile and register with Guanako.
      *
-     * @param filename Absolute path to file.
+     * @param filename Path to file.
      */
-    private void add_source_file (string filename) {
+    public void add_source_file (string filename) {
         if (!(filename.has_suffix (".vala") || filename.has_suffix (".vapi")))
             return;
-        msg (_("Found file %s\n"), filename);
-        if (this.files.add (filename))
-            guanako_project.add_source_file_by_name (filename, filename.has_suffix (".vapi"));
+        var filename_abs = get_absolute_path (filename);
+
+        var f = File.new_for_path (filename_abs);
+        if (!f.query_exists()) {
+            warning_msg (_("Source file does not exist: %s\n"), filename_abs);
+            return;
+        }
+
+        msg (_("Found source file: %s\n"), filename_abs);
+
+        if (b_files.contains (filename_abs)) {
+            warning_msg (_("File already registered for build system. Skip it.\n"), filename_abs);
+            return;
+        } else if (d_files.contains (filename_abs)) {
+            warning_msg (_("File already a data file. Skip it.\n"), filename_abs);
+            return;
+        }
+        if (!files.contains (filename_abs))
+            if (guanako_project.add_source_file_by_name (
+                                filename_abs, filename_abs.has_suffix (".vapi")) != null) {
+                files.add (filename_abs);
+                source_files_changed();
+            } else
+                warning_msg (_("Could not load Vala source file: %s\n"), filename_abs);
         else
-            debug_msg (_("Skip already added file: %s"), filename);
+            debug_msg (_("Skip already added file: %s\n"), filename_abs);
     }
 
     /**
@@ -545,14 +602,16 @@ public class ValamaProject : Object {
      * file from disk. Keep track to not include it with source directories
      * next time.
      *
-     * @param filename Absolute path to file to unregister.
-     * @return Return true on success else false (e.g. if file was not found).
+     * @param filename Path to file to unregister.
+     * @return `true` on success else `false` (e.g. if file was not found).
      */
     //TODO: Remove it also from .vlp file.
     public bool remove_source_file (string filename) {
-        if (!files.remove (filename))
+        var filename_abs = get_absolute_path (filename);
+        if (!files.remove (filename_abs))
             return false;
-        guanako_project.remove_file (guanako_project.get_source_file_by_name (filename));
+        guanako_project.remove_file (guanako_project.get_source_file_by_name (filename_abs));
+        source_files_changed();
         return true;
     }
 
@@ -561,12 +620,85 @@ public class ValamaProject : Object {
      *
      * @param filename Path to file.
      */
-    private void add_buildsystem_file (string filename) {
+    public void add_buildsystem_file (string filename) {
         if (!(filename.has_suffix (".cmake") || Path.get_basename (filename) == ("CMakeLists.txt")))
             return;
-        msg (_("Found file %s\n"), filename);
-        if (!this.b_files.add (filename))
-            debug_msg (_("Skip already added file: %s"), filename);
+        var filename_abs = get_absolute_path (filename);
+
+        var f = File.new_for_path (filename_abs);
+        if (!f.query_exists()) {
+            warning_msg (_("Buildsystem file does not exist: %s\n"), filename_abs);
+            return;
+        }
+
+        msg (_("Found buildsystem file: %s\n"), filename_abs);
+        if (files.contains (filename_abs)) {
+            warning_msg (_("File already a source file. Skip it.\n"), filename_abs);
+            return;
+        } else if (d_files.contains (filename_abs)) {
+            warning_msg (_("File already a data file. Skip it.\n"), filename_abs);
+            return;
+        }
+        if (!this.b_files.add (filename_abs))
+            debug_msg (_("Skip already added file: %s\n"), filename_abs);
+        else
+            buildsystem_files_changed();
+    }
+
+    /**
+     * Remove build system file from project.
+     *
+     * @param filename Path to file to unregister.
+     * @return `true` on success else `false` (e.g. if file was not found).
+     */
+    public bool remove_buildsystem_file (string filename) {
+        var filename_abs = get_absolute_path (filename);
+        if (!b_files.remove (filename_abs))
+            return false;
+        buildsystem_files_changed();
+        return true;
+    }
+
+    /**
+     * Add file to extra file list.
+     *
+     * @param filename Path to file.
+     */
+    public void add_data_file (string filename) {
+        var filename_abs = get_absolute_path (filename);
+
+        var f = File.new_for_path (filename_abs);
+        if (!f.query_exists()) {
+            warning_msg (_("Data file does not exist: %s\n"), filename_abs);
+            return;
+        }
+
+        msg (_("Found data file: %s\n"), filename_abs);
+        if (files.contains (filename_abs)) {
+            warning_msg (_("File already a source file. Skip it.\n"), filename_abs);
+            return;
+        } else if (b_files.contains (filename_abs)) {
+            warning_msg (_("File already registered for build system. Skip it.\n"), filename_abs);
+            return;
+        }
+        if (!this.d_files.add (filename_abs))
+            debug_msg (_("Skip already added file: %s\n"), filename_abs);
+        else
+            data_files_changed();
+    }
+
+    /**
+     * Remove data file from project.
+     *
+     * @param filename Path to file to unregister.
+     * @return `true` on success else `false` (e.g. if file was not found).
+     */
+    public bool remove_data_file (string filename) {
+        var filename_abs = get_absolute_path (filename);
+        if (!d_files.remove (filename_abs))
+            return false;
+        data_files_changed();
+        return true;
     }
 
     /**
@@ -590,7 +722,7 @@ public class ValamaProject : Object {
         FileEnumerator enumerator;
         FileInfo file_info;
 
-        foreach (string dir in dirlist) {
+        foreach (var dir in dirlist) {
             try {
                 directory = File.new_for_path (dir);
                 enumerator = directory.enumerate_children (FileAttribute.STANDARD_NAME, 0);
@@ -604,13 +736,8 @@ public class ValamaProject : Object {
             }
         }
 
-        foreach (string filename in filelist) {
-                var file = File.new_for_path (filename);
-                if (file.query_exists())
-                    action (filename);
-                else
-                    warning_msg (_("File not found: %s\n"), filename);
-        }
+        foreach (var filename in filelist)
+            action (filename);
     }
 
     /**
@@ -653,6 +780,9 @@ public class ValamaProject : Object {
         source_files = new Gee.TreeSet<string>();
         buildsystem_dirs = new Gee.TreeSet<string>();
         buildsystem_files = new Gee.TreeSet<string>();
+        data_dirs = new Gee.TreeSet<string>();
+        data_files = new Gee.TreeSet<string>();
+
         for (Xml.Node* i = root_node->children; i != null; i = i->next) {
             if (i->type != ElementType.ELEMENT_NODE)
                 continue;
@@ -795,6 +925,34 @@ public class ValamaProject : Object {
                         }
                     }
                     break;
+                case "data-directories":
+                    for (Xml.Node* p = i-> children; p != null; p = p->next) {
+                        if (p->type != ElementType.ELEMENT_NODE)
+                            continue;
+                        switch (p->name) {
+                            case "directory":
+                                data_dirs.add (get_absolute_path (p->get_content()));
+                                break;
+                            default:
+                                warning_msg (_("Unknown configuration file value line %hu: %s\n"), p->line, p->name);
+                                break;
+                        }
+                    }
+                    break;
+                case "data-files":
+                    for (Xml.Node* p = i-> children; p != null; p = p->next) {
+                        if (p->type != ElementType.ELEMENT_NODE)
+                            continue;
+                        switch (p->name) {
+                            case "file":
+                                data_files.add (get_absolute_path (p->get_content()));
+                                break;
+                            default:
+                                warning_msg (_("Unknown configuration file value line %hu: %s\n"), p->line, p->name);
+                                break;
+                        }
+                    }
+                    break;
                 default:
                     warning_msg (_("Unknown configuration file value line %hu: %s\n"), i->line, i->name);
                     break;
@@ -834,53 +992,77 @@ public class ValamaProject : Object {
         writer.write_element ("patch", version_patch.to_string());
         writer.end_element();
 
-        writer.start_element ("packages");
-        foreach (var choice in package_choices) {
-            writer.start_element ("choice");
-            writer.write_attribute ("all", (choice.all) ? "yes" : "no");
-            if (choice.description != null)
-                writer.write_element ("description", choice.description);
-            foreach (var pkg in choice.packages) {
-                writer.write_element ("package", pkg.name);
+        if (packages.size > 0 || package_choices.size > 0) {
+            writer.start_element ("packages");
+            foreach (var choice in package_choices) {
+                writer.start_element ("choice");
+                writer.write_attribute ("all", (choice.all) ? "yes" : "no");
+                if (choice.description != null)
+                    writer.write_element ("description", choice.description);
+                foreach (var pkg in choice.packages) {
+                    writer.write_element ("package", pkg.name);
+                    if (pkg.version != null)
+                        writer.write_attribute ("version", pkg.version);
+                    if (pkg.rel != null)
+                        writer.write_attribute ("rel", pkg.rel.to_string());
+                }
+                writer.end_element();
+            }
+            foreach (var pkg in packages) {
+                if (pkg.choice != null)
+                    continue;
+                writer.start_element ("package");
                 if (pkg.version != null)
                     writer.write_attribute ("version", pkg.version);
                 if (pkg.rel != null)
                     writer.write_attribute ("rel", pkg.rel.to_string());
+                writer.write_string (pkg.name);
+                writer.end_element();
             }
             writer.end_element();
         }
-        foreach (var pkg in packages) {
-            if (pkg.choice != null)
-                continue;
-            writer.start_element ("package");
-            if (pkg.version != null)
-                writer.write_attribute ("version", pkg.version);
-            if (pkg.rel != null)
-                writer.write_attribute ("rel", pkg.rel.to_string());
-            writer.write_string (pkg.name);
+
+        if (source_dirs.size > 0) {
+            writer.start_element ("source-directories");
+            foreach (string directory in source_dirs)
+                writer.write_element ("directory", get_relative_path (directory));
             writer.end_element();
         }
-        writer.end_element();
 
-        writer.start_element ("source-directories");
-        foreach (string directory in source_dirs)
-            writer.write_element ("directory", get_relative_path (directory));
-        writer.end_element();
+        if (source_files.size > 0) {
+            writer.start_element ("source-files");
+            foreach (string directory in source_files)
+                writer.write_element ("file", get_relative_path (directory));
+            writer.end_element();
+        }
 
-        writer.start_element ("source-files");
-        foreach (string directory in source_files)
-            writer.write_element ("file", get_relative_path (directory));
-        writer.end_element();
+        if (buildsystem_dirs.size > 0) {
+            writer.start_element ("buildsystem-directories");
+            foreach (string directory in buildsystem_dirs)
+                writer.write_element ("directory", get_relative_path (directory));
+            writer.end_element();
+        }
 
-        writer.start_element ("buildsystem-directories");
-        foreach (string directory in buildsystem_dirs)
-            writer.write_element ("directory", get_relative_path (directory));
-        writer.end_element();
+        if (buildsystem_files.size > 0) {
+            writer.start_element ("buildsystem-files");
+            foreach (string directory in buildsystem_files)
+                writer.write_element ("file", get_relative_path (directory));
+            writer.end_element();
+        }
 
-        writer.start_element ("buildsystem-files");
-        foreach (string directory in buildsystem_files)
-            writer.write_element ("file", get_relative_path (directory));
-        writer.end_element();
+        if (data_dirs.size > 0) {
+            writer.start_element ("data-directories");
+            foreach (string directory in data_dirs)
+                writer.write_element ("directory", get_relative_path (directory));
+            writer.end_element();
+        }
+
+        if (data_files.size > 0) {
+            writer.start_element ("data-files");
+            foreach (string directory in data_files)
+                writer.write_element ("file", get_relative_path (directory));
+            writer.end_element();
+        }
 
         writer.end_element();
     }

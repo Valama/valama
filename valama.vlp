@@ -33,7 +33,6 @@
 		<directory>src/ui</directory>
 		<directory>vapi</directory>
 	</source-directories>
-	<source-files/>
 	<buildsystem-directories>
 		<directory>cmake</directory>
 	</buildsystem-directories>

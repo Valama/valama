@@ -204,11 +204,10 @@ static Gdk.Pixbuf? get_pixbuf_by_name (string typename) {
 }
 
 static void create_new_file() {
-    var source_file = ui_create_file_dialog (project);
-    if (source_file != null) {
-        project.guanako_project.add_source_file (source_file);
-        source_viewer.focus_src (source_file.filename);
-        wdg_pbrw.update();
+    var filename = ui_create_file_dialog (null, "vala");
+    if (filename != null) {
+        project.add_source_file (filename);
+        source_viewer.focus_src (filename);
     }
 }
 

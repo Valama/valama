@@ -22,14 +22,13 @@ using GLib;
 using Vala;
 
 /**
- * Create new file and add it to project. If file already exists, open it.
+ * Create new file (you need to add it to project manually). If file already
+ * exists, open it.
  *
- * Pass second parameter to create and or open file at path + filename.
- *
- * @param project {@link ValamaProject} to register file to.
  * @param path Rootpath of new file.
+ * @param extension File extension.
  */
-public SourceFile? ui_create_file_dialog (ValamaProject project, string path = "") {
+public string? ui_create_file_dialog (string? path = null, string? extension = null) {
     var dlg = new Dialog.with_buttons (_("Choose filename"),
                                        window_main,
                                        DialogFlags.MODAL,
@@ -60,19 +59,25 @@ public SourceFile? ui_create_file_dialog (ValamaProject project, string path = "
     box_main.show_all();
     dlg.get_content_area().pack_start (box_main);
 
-    SourceFile source_file = null;
+    string basepath;
+    if (path == null)
+        basepath = project.project_path;
+    else
+        basepath = project.get_absolute_path (path);
+
+    string? filename = null;
     dlg.response.connect ((response_id) => {
         if (response_id == ResponseType.ACCEPT) {
             if (ent_filename.text == "") {
                 ent_filename.set_label_timer (_("Don't let this field empty. Name a file."), 10);
                 return;
             }
-            string filename = Path.build_path (Path.DIR_SEPARATOR_S,
-                                               project.project_path,
-                                               path,
-                                               ent_filename.text);
-            if (!filename.has_suffix (".vala"))
-                filename += ".vala";
+            filename = Path.build_path (Path.DIR_SEPARATOR_S,
+                                        basepath,
+                                        ent_filename.text);
+            if (extension != null)
+                if (!filename.has_suffix (@".$extension"))
+                    filename += @".$extension";
             var f = File.new_for_path (filename);
             if (!f.query_exists()) {
                 try {
@@ -83,13 +88,12 @@ public SourceFile? ui_create_file_dialog (ValamaProject project, string path = "
                     errmsg (_("Could not create new file: %s"), e.message);
                 }
             }
-            source_file = project.guanako_project.add_source_file_by_name (filename);
         }
         dlg.destroy();
     });
     dlg.run();
 
-    return source_file;
+    return filename;
 }
 
 // vim: set ai ts=4 sts=4 et sw=4

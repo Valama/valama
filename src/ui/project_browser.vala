@@ -29,6 +29,8 @@ public class ProjectBrowser : UiElement {
 
     private Gee.ArrayList<TreePath> tree_view_expanded;
 
+    private bool update_needed = true;
+
     public ProjectBrowser (ValamaProject? vproject = null) {
         if (vproject != null)
             project = vproject;
@@ -174,6 +176,34 @@ public class ProjectBrowser : UiElement {
                     break;
             }
         });
+
+        this.notify["project"].connect (init);
+        init();
+    }
+
+    private void init() {
+        project.source_files_changed.connect (() => {
+            if (!project.add_multiple_files)
+                build();
+            else
+                update_needed = true;;
+        });
+        project.buildsystem_files_changed.connect (() => {
+            if (!project.add_multiple_files)
+                build();
+            else
+                update_needed = true;;
+        });
+        project.data_files_changed.connect (() => {
+            if (!project.add_multiple_files)
+                build();
+            else
+                update_needed = true;;
+        });
+        project.notify["add-multiple-files"].connect (() => {
+            if (!project.add_multiple_files && update_needed)
+                build();
+        });
     }
 
     public signal void file_selected (string filename);
@@ -187,17 +217,27 @@ public class ProjectBrowser : UiElement {
      * Same as {@link pathmap} for build system files.
      */
     private Gee.HashMap<string, TreeIter?> b_pathmap;
+    /**
+     * Same as {@link pathmap} for data files.
+     */
+    private Gee.HashMap<string, TreeIter?> d_pathmap;
 
+    //TODO: Don't rebuild complete store on update.
     protected override void build() {
         debug_msg (_("Run %s update!\n"), get_name());
+        update_needed = false;
+
         var store = new TreeStore (2, typeof (string), typeof (int));
         tree_view.set_model (store);
 
         pathmap = new Gee.HashMap<string, TreeIter?>();
         b_pathmap = new Gee.HashMap<string, TreeIter?>();
+        d_pathmap = new Gee.HashMap<string, TreeIter?>();
+
         build_file_treestore (_("Sources"), project.files.to_array(), ref store, ref pathmap);
         build_file_treestore (_("Buildsystem files"), project.b_files.to_array(), ref store, ref b_pathmap);
-        build_plain_treestore (_("Packages"), project.guanako_project.packages.to_array(), ref store);
+        build_file_treestore (_("Data files"), project.d_files.to_array(), ref store, ref d_pathmap);
+        build_plain_treestore (_("Packages"), project.package_list.to_array(), ref store);
 
         tree_view.row_collapsed.connect ((iter, path) => {
             if (path in tree_view_expanded)
@@ -210,6 +250,7 @@ public class ProjectBrowser : UiElement {
 
         foreach (var path in tree_view_expanded)
             tree_view.expand_to_path (path);
+
         debug_msg (_("%s update finished!\n"), get_name());
     }
 
@@ -285,13 +326,26 @@ public class ProjectBrowser : UiElement {
 
         switch (store_type) {
             case StoreType.FILE_TREE:
-                var source_file = ui_create_file_dialog (project);
-                if (source_file != null) {
-                    //TODO: Check if already loaded.
-                    project.guanako_project.add_source_file (source_file);
-                    on_file_selected (source_file.filename);
-                    update();
+                string? filename = null;
+                switch (path.get_indices()[0]) {
+                    case 0:
+                        filename = ui_create_file_dialog (null, "vala");
+                        project.add_source_file (filename);
+                        break;
+                    case 1:
+                        filename = ui_create_file_dialog();
+                        project.add_buildsystem_file (filename);
+                        break;
+                    case 2:
+                        filename = ui_create_file_dialog();
+                        project.add_data_file (filename);
+                        break;
+                    default:
+                        bug_msg (_("Unknown treepath start to add a new file: %s\n"), path.to_string());
+                        break;
                 }
+                if (filename != null)
+                    on_file_selected (filename);
                 break;
             case StoreType.FILE:
             case StoreType.DIRECTORY:
@@ -310,13 +364,26 @@ public class ProjectBrowser : UiElement {
                 if (store_type == StoreType.FILE)
                     filepath = Path.get_dirname (filepath);
 
-                var source_file = ui_create_file_dialog (project, filepath);
-                if (source_file != null) {
-                    //TODO: Check if already loaded.
-                    project.guanako_project.add_source_file (source_file);
-                    on_file_selected (source_file.filename);
-                    update();
+                string? filename = null;
+                switch (path.get_indices()[0]) {
+                    case 0:
+                        filename = ui_create_file_dialog (filepath, "vala");
+                        project.add_source_file (filename);
+                        break;
+                    case 1:
+                        filename = ui_create_file_dialog (filepath);
+                        project.add_buildsystem_file (filename);
+                        break;
+                    case 2:
+                        filename = ui_create_file_dialog (filepath);
+                        project.add_data_file (filename);
+                        break;
+                    default:
+                        bug_msg (_("Unknown treepath start to add a new file: %s\n"), path.to_string());
+                        break;
                 }
+                if (filename != null)
+                    on_file_selected (filename);
                 break;
             case StoreType.PACKAGE_TREE:
             case StoreType.PACKAGE:
@@ -325,7 +392,6 @@ public class ProjectBrowser : UiElement {
                     string[] missing_packages = project.add_package_by_name (pkg);
                     if (missing_packages.length > 0)
                         ui_missing_packages_dialog (missing_packages);
-                    update();
                 }
                 break;
             default:
