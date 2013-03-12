@@ -2,7 +2,10 @@
 set(project_name "Valama")
 set(Valama_VERSION "0.1.2")
 set(required_pkgs
+"atk {nolink}"
+"cairo {nolink}"
 "gdk-3.0"
+"gdk-pixbuf-2.0 {nolink}"
 "gdl-3.0 >= 3.4"
 "gee-0.8"
 "gee-1.0"
@@ -15,6 +18,9 @@ set(required_pkgs
 "libvala-0.18"
 "libvala-0.20"
 "libxml-2.0"
+"pango {nolink}"
+"pangocairo {nolink}"
+"x11 {nolink}"
 )
 set(srcfiles
 "src/common/args.vala"

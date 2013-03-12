@@ -148,16 +148,67 @@ public class ProjectBuilder : Object{
             return true;
         }
 
-        /* Write project.cmake */
+        /* Write cmake/project.cmake. */
         try {
             var pkg_list = "set(required_pkgs\n";
+
+            /*
+             * Use ordered list to keep choices in order to give them the same
+             * extra options.
+             */
+            var pkg_list_names = new ArrayList<string>();
+            foreach (var pkg in project.guanako_project.context.get_packages())
+                pkg_list_names.add (pkg);
+
             foreach (var pkg in project.packages) {
-                pkg_list += @"\"$(pkg.to_string())\"\n";
+                pkg_list_names.remove (pkg.name);
+                var pkgcfg_disable = "";
+                pkg_list_names.add (pkg.to_string() + pkgcfg_disable);
                 if (pkg.choice != null && pkg.choice.all)
                     foreach (var pkg_choice in pkg.choice.packages)
                         if (pkg != pkg_choice)
-                            pkg_list += @"\"$(pkg_choice.to_string())\"\n";
+                            pkg_list_names.add (pkg_choice.to_string() + " {choice}");
             }
+
+            /* Use sorted list to output it nicely. */
+            var pkg_list_sorted = new TreeSet<string>();
+            /* Use same options for choices. */
+            string extraopts = "";
+            foreach (var pkgstr_tmp in pkg_list_names) {
+                var pkg = pkgstr_tmp.split (" ")[0];
+                var openb = true;
+                var closeb = false;
+
+                string pkgstr;
+                if (!is_choice (pkgstr_tmp, out pkgstr)) {
+                    extraopts = "";
+                    if (!package_exists (pkg)) {
+                        if (openb) {
+                            openb = false;
+                            extraopts += " {";
+                        } else
+                            extraopts += ",";
+                        extraopts += "nocheck";
+                        closeb = true;
+                    }
+                    if (!(pkg in project.package_list)) {
+                        if (openb) {
+                            openb = false;
+                            extraopts += " {";
+                        } else
+                            extraopts += ",";
+                        extraopts += "nolink";
+                        closeb = true;
+                    }
+                    if (closeb)
+                        extraopts += "}";
+                }
+
+                pkg_list_sorted.add (pkgstr + extraopts);
+            }
+
+            foreach (var pkg_str in pkg_list_sorted)
+                pkg_list += @"\"$pkg_str\"\n";
             pkg_list += ")\n";
 
             var srcfiles = "set(srcfiles\n";
@@ -387,6 +438,44 @@ public class ProjectBuilder : Object{
         Process.close_pid (app_pid);
         app_running = false;
         app_state_changed (false);
+    }
+
+    /* Copy from Vala.CCodeCompiler (valac). */
+    static bool package_exists(string package_name) {
+        string pc = "pkg-config --exists " + package_name;
+        int exit_status;
+
+        try {
+            Process.spawn_command_line_sync (pc, null, null, out exit_status);
+            return (0 == exit_status);
+        } catch (SpawnError e) {
+            warning_msg (_("Could not spawn pkg-config package existence check: %s\n"), e.message);
+            return false;
+        }
+    }
+
+    static bool is_choice (string pkg_str, out string? pkg_str_stripped = null) {
+        var r = /([^{]*)\{([^}]+,|)[ \t]*choice[ \t]*(|,[^}]+)\}[ \t]*$/;
+
+        MatchInfo info;
+        if (!r.match (pkg_str, 0, out info)) {
+            pkg_str_stripped = pkg_str.strip();
+            return false;
+        }
+
+        var pkg_str_plain = info.fetch (1).strip();  //TODO: Is it needed to check for null?
+        var start = info.fetch (2);
+        var end = info.fetch (3);
+
+        if (start == "" && end == "")
+            pkg_str_stripped = pkg_str_plain;
+        else if (start == "")
+            pkg_str_stripped = pkg_str_plain + " {" + end.slice (1, -1) + "}";
+        else if (end == "")
+            pkg_str_stripped = pkg_str_plain + " {" + start.slice (0, -2) + "}";
+        else
+            pkg_str_stripped = pkg_str_plain + " {" + start + end.slice (0, -1) + "}";
+        return true;
     }
 }
 

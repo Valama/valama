@@ -23,7 +23,10 @@
 # Supported sections:
 #
 # PACKAGES
-#   A list of vala packages that are required to build the target.
+#   A list of vala packages that are required to build the target. Versioned
+#   dependencies are supported. There is also a possibility to suppress
+#   checking with pkg-config or to suppress --cflags and --libs of pkg-config.
+#   To use those options append {option,option,...}.
 #
 # OPTIONAL
 #   A list of vala packages that are optional to build the target. (optional)
@@ -43,9 +46,11 @@
 #   SET(packages "foo >= 1.4.2" "bla <= 9")
 #   vala_pkgs(VALA_C
 #     PACKAGES
-#       gtk+-3.0
+#       "gtk+-3.0 >= 3.8"
 #       gee-1.0
 #       ${packages}
+#       "sdl-image {nocheck,nolink}"
+#       "sdl"
 #     OPTIONAL
 #       libxml-2.0
 #     SRCFILES
@@ -72,46 +77,69 @@ function(vala_pkgs output)
     # Package list without versions to pass to vala_precompile.
     set(pkglist)
 
-    set(required_pkgs)
+    set(definitions)
+    set(libraries)
+
     if(ARGS_PACKAGES)
       foreach(pkg ${ARGS_PACKAGES})
-        string(TOUPPER ${pkg} pkgdesctmp)
-        string(REGEX REPLACE "([A-Z0-9-])[-+]*([0-9.]*)$" "\\1\\2" pkgdesc ${pkgdesctmp})
-        pkg_check_modules(${pkgdesc} REQUIRED ${pkg})
-        if (${${pkgdesc}_FOUND})
-          list(APPEND required_pkgs ${pkgdesc})
-          string(STRIP ${pkg} tmppkgname)
-          string(REGEX REPLACE "[ ].*$" "" pkgname ${tmppkgname})
-          list(APPEND pkglist ${pkgname})
+        set(matchit)
+        string(REGEX MATCH "([^{ \t]*)[ \t]*{([^}]+,|)[ \t]*nocheck[ \t]*(|,[^}]+)}[ \t]*$" matchit ${pkg})
+        string(REGEX REPLACE "^([^{ \t]*)[ \t]*{[^{}]*}[ \t]*$" "\\1" pkgstripped ${pkg})
+
+        if(NOT matchit)
+          string(TOUPPER ${pkgstripped} pkgdesctmp)
+          string(REGEX REPLACE "([A-Z0-9-])[-+]*([0-9.]*)$" "\\1\\2" pkgdesc ${pkgdesctmp})
+          pkg_check_modules(${pkgdesc} REQUIRED ${pkgstripped})
+          if (${${pkgdesc}_FOUND})
+            set(matchit)
+            string(REGEX MATCH "([^{ \t]*)[ \t]*{([^}]+,|)[ \t]*nolink[ \t]*(|,[^}]+)}[ \t]*$" matchit ${pkg})
+            if(NOT matchit)
+              string(REGEX REPLACE "^([^{ \t]*)[ \t]*{[^{}]*}[ \t]*$" "\\1" pkgstripped ${pkg})
+              list(APPEND definitions ${${pkgdesc}_CFLAGS})
+              list(APPEND libraries ${${pkgdesc}_LDFLAGS})
+            endif()
+          endif()
         endif()
+
+        string(STRIP ${pkgstripped} tmppkgname)
+        string(REGEX REPLACE "[ ].*$" "" pkgname ${tmppkgname})
+        list(APPEND pkglist ${pkgname})
       endforeach()
     endif()
 
     set(optional_pkgs)
     if(ARGS_OPTIONAL)
       foreach(pkg ${ARGS_OPTIONAL})
-        string(TOUPPER ${pkg} pkgdesctmp)
-        string(REGEX REPLACE "([A-Z0-9-])[-+]*([0-9.]*)$" "\\1\\2" pkgdesc ${pkgdesctmp})
-        pkg_check_modules(${pkgdesc} ${pkg})
-        if(${${pkgdesc}_FOUND})
-          list(APPEND optional_pkgs ${pkgdesc})
-          string(REGEX REPLACE "([^ ]+)" "\\1" pkgname ${pkg})
-          list(APPEND pkglist ${pkgname})
+        set(matchit)
+        string(REGEX MATCH "([^{ \t]*)[ \t]*{([^}]+,|)[ \t]*nocheck[ \t]*(|,[^}]+)}[ \t]*$" matchit ${pkg})
+        string(REGEX REPLACE "^([^{ \t]*)[ \t]*{[^{}]*}[ \t]*$" "\\1" pkgstripped ${pkg})
+
+        if(NOT matchit)
+          string(TOUPPER ${pkgstripped} pkgdesctmp)
+          string(REGEX REPLACE "([A-Z0-9-])[-+]*([0-9.]*)$" "\\1\\2" pkgdesc ${pkgdesctmp})
+          pkg_check_modules(${pkgdesc} ${pkgstripped})
+          if(${${pkgdesc}_FOUND})
+            set(matchit)
+            string(REGEX MATCH "([^{ \t]*)[ \t]*{([^}]+,|)[ \t]*nolink[ \t]*(|,[^}]+)}[ \t]*$" matchit ${pkg})
+            if(NOT matchit)
+              string(REGEX REPLACE "^([^{ \t]*)[ \t]*{[^{}]*}[ \t]*$" "\\1" pkgstripped ${pkg})
+              list(APPEND definitions ${${pkgdesc}_CFLAGS})
+              list(APPEND libraries ${${pkgdesc}_LDFLAGS})
+            endif()
+          endif()
         endif()
+
+        string(STRIP ${pkgstripped} tmppkgname)
+        string(REGEX REPLACE "([^ ]+)" "\\1" pkgname ${tmppkgname})
+        list(APPEND pkglist ${pkgname})
       endforeach()
     endif()
 
-    set(definitions)
-    set(libraries)
     pkg_check_modules(GTHREAD REQUIRED "gthread-2.0")
-    foreach(pkg ${required_pkgs} "GTHREAD" ${optional_pkgs})
-      list(APPEND definitions ${${pkg}_CFLAGS})
-      list(APPEND libraries ${${pkg}_LDFLAGS})
-    endforeach()
-    foreach(pkg ${optional_pkgs})
-      list(APPEND definitions ${${pkg}_CFLAGS})
-      list(APPEND libraries ${${pkg}_LDFLAGS})
-    endforeach()
+    if(GTHREAD_FOUND)
+      list(APPEND definitions ${GTHREAD_CFLAGS})
+      list(APPEND libraries ${GTHREAD_LDFLAGS})
+    endif()
 
     set(srcfiles)
     foreach(globexpr ${ARGS_SRCFILES})
