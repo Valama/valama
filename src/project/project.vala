@@ -280,30 +280,43 @@ public class ValamaProject : Object {
      * List of package choices.
      */
     public Gee.ArrayList<PkgChoice?> package_choices { get; private set; }
+
+    private Gee.TreeSet<string> _source_dirs;
     /**
      * Project source directories (absolute paths).
      */
-    public Gee.TreeSet<string> source_dirs { get; private set; }
+    public Gee.TreeSet<string> source_dirs { get { return _source_dirs; } }
+
+    private Gee.TreeSet<string> _source_files;
     /**
      * Project extra source files (absolute paths).
      */
-    public Gee.TreeSet<string> source_files { get; private set; }
+    public Gee.TreeSet<string> source_files { get { return _source_files; } }
+
+    private Gee.TreeSet<string> _buildsystem_dirs;
     /**
      * Project buildsystem directories (absolute paths).
      */
-    public Gee.TreeSet<string> buildsystem_dirs { get; private set; }
+    public Gee.TreeSet<string> buildsystem_dirs { get { return _buildsystem_dirs; } }
+
+    private Gee.TreeSet<string> _buildsystem_files;
     /**
      * Project extra buildsystem files (absolute paths).
      */
-    public Gee.TreeSet<string> buildsystem_files { get; private set; }
+    public Gee.TreeSet<string> buildsystem_files { get { return _buildsystem_files; } }
+
+    private Gee.TreeSet<string> _data_dirs;
     /**
      * Project directories for extra files (absolute paths).
      */
-    public Gee.TreeSet<string> data_dirs { get; private set; }
+    public Gee.TreeSet<string> data_dirs { get { return _data_dirs; } }
+
+    private Gee.TreeSet<string> _data_files;
     /**
      * Project extra files (absolute paths).
      */
-    public Gee.TreeSet<string> data_files { get; private set; }
+    public Gee.TreeSet<string> data_files { get { return _data_files; } }
+
     /**
      * Project version first part.
      */
@@ -456,16 +469,22 @@ public class ValamaProject : Object {
         b_files = new Gee.TreeSet<string>();
         d_files = new Gee.TreeSet<string>();
 
-        generate_file_list (source_dirs.to_array(),
-                            source_files.to_array(),
+        balance_dir_file_sets (ref _source_dirs, ref _source_files,
+                               new string[]{".vala", ".vapi"});
+        balance_dir_file_sets (ref _buildsystem_dirs, ref _buildsystem_files,
+                               new string[]{".cmake"}, new string[]{"CMakeLists.txt"});
+        balance_dir_file_sets (ref _data_dirs, ref _data_files);
+
+        generate_file_list (_source_dirs.to_array(),
+                            _source_files.to_array(),
                             add_source_file);
 
-        generate_file_list (buildsystem_dirs.to_array(),
-                            buildsystem_files.to_array(),
+        generate_file_list (_buildsystem_dirs.to_array(),
+                            _buildsystem_files.to_array(),
                             add_buildsystem_file);
 
-        generate_file_list (data_dirs.to_array(),
-                            data_files.to_array(),
+        generate_file_list (_data_dirs.to_array(),
+                            _data_files.to_array(),
                             add_data_file);
 
         vieworder = new Gee.LinkedList<ViewMap?>();
@@ -494,6 +513,127 @@ public class ValamaProject : Object {
             });
             return null;
         });
+    }
+
+    /**
+     * Reduce length of file list: Prefer directories and remove directories
+     * without content.
+     *
+     * @param c_dirs Directories.
+     * @param c_files Files.
+     ( @param extensions Valid file extensions.
+     */
+    private void balance_dir_file_sets (ref TreeSet<string> c_dirs,
+                                        ref TreeSet<string> c_files,
+                                        string[]? extensions = null,
+                                        string[]? filenames = null) {
+        var new_c_dirs = new TreeSet<string>();
+        var visited_bad = new TreeSet<string>();
+        var new_c_files = new TreeSet<string>();
+
+        foreach (var filename in c_files) {
+            var dirname = Path.get_dirname (filename);
+
+            if (c_dirs.contains (dirname)) {
+                new_c_dirs.add (dirname);
+                continue;
+            }
+
+            if (visited_bad.contains (dirname)) {
+                new_c_files.add (filename);
+                continue;
+            }
+
+            try {
+                var enumerator = File.new_for_path (dirname).enumerate_children (
+                                                                "standard::*",
+                                                                FileQueryInfoFlags.NONE,
+                                                                null);
+                FileInfo info = null;
+                var matching = false;
+                while (!matching && (info = enumerator.next_file()) != null) {
+                    if (info.get_file_type() != FileType.REGULAR ||  //TODO: Other FileTypes?
+                                            c_files.contains (Path.build_path (Path.DIR_SEPARATOR_S,
+                                                                               dirname,
+                                                                               info.get_name())))
+                        continue;
+
+                    if (filenames != null) {
+                        foreach (var name in filenames)
+                            if (Path.get_basename (info.get_name()) == name) {
+                                matching = true;
+                                break;
+                            }
+                        if (matching)
+                            break;
+                    }
+
+                    if (extensions != null)
+                        foreach (var ext in extensions) {
+                            if (info.get_name().has_suffix (ext)) {
+                                matching = true;
+                                break;
+                            }
+                        }
+                    else
+                        matching = true;
+                }
+                if (matching) {
+                    visited_bad.add (dirname);
+                    new_c_files.add (filename);
+                } else {
+                    c_dirs.add (dirname);
+                    new_c_dirs.add (dirname);
+                }
+            } catch (GLib.Error e) {
+                warning_msg (_("Could not list or iterate through directory content of '%s': %s\n"),
+                             dirname, e.message);
+            }
+        }
+        c_files = new_c_files;
+
+        foreach (var dirname in c_dirs) {
+            if (new_c_dirs.contains (dirname))
+                continue;
+            try {
+                var enumerator = File.new_for_path (dirname).enumerate_children (
+                                                                "standard::*",
+                                                                FileQueryInfoFlags.NONE,
+                                                                null);
+                FileInfo info = null;
+                var matching = false;
+                while (!matching && (info = enumerator.next_file()) != null) {
+                    if (info.get_file_type() != FileType.REGULAR)  //TODO: Other FileTypes?
+                        continue;
+
+                    if (filenames != null) {
+                        foreach (var name in filenames)
+                            if (Path.get_basename (info.get_name()) == name) {
+                                matching = true;
+                                break;
+                            }
+                        if (matching)
+                            break;
+                    }
+
+                    if (extensions != null)
+                        foreach (var ext in extensions) {
+                            if (info.get_name().has_suffix (ext)) {
+                                matching = true;
+                                break;
+                            }
+                        }
+                    else
+                        matching = true;
+                }
+                if (matching)
+                    new_c_dirs.add (dirname);
+            } catch (GLib.Error e) {
+                warning_msg (_("Could not list or iterate through directory content of '%s': %s\n"),
+                             dirname, e.message);
+            }
+        }
+        c_dirs = new_c_dirs;
     }
 
     /**
@@ -784,13 +924,13 @@ public class ValamaProject : Object {
 
         packages = new Gee.TreeSet<PackageInfo?> ((CompareDataFunc<PackageInfo?>?) PackageInfo.compare_func);
         package_list = new Gee.TreeSet<string>();
-        package_choices = new Gee.ArrayList<PkgChoice?>();
-        source_dirs = new Gee.TreeSet<string>();
-        source_files = new Gee.TreeSet<string>();
-        buildsystem_dirs = new Gee.TreeSet<string>();
-        buildsystem_files = new Gee.TreeSet<string>();
-        data_dirs = new Gee.TreeSet<string>();
-        data_files = new Gee.TreeSet<string>();
+        _package_choices = new Gee.ArrayList<PkgChoice?>();
+        _source_dirs = new Gee.TreeSet<string>();
+        _source_files = new Gee.TreeSet<string>();
+        _buildsystem_dirs = new Gee.TreeSet<string>();
+        _buildsystem_files = new Gee.TreeSet<string>();
+        _data_dirs = new Gee.TreeSet<string>();
+        _data_files = new Gee.TreeSet<string>();
 
         for (Xml.Node* i = root_node->children; i != null; i = i->next) {
             if (i->type != ElementType.ELEMENT_NODE)
@@ -884,7 +1024,7 @@ public class ValamaProject : Object {
                             continue;
                         switch (p->name) {
                             case "directory":
-                                source_dirs.add (get_absolute_path (p->get_content()));
+                                _source_dirs.add (get_absolute_path (p->get_content()));
                                 break;
                             default:
                                 warning_msg (_("Unknown configuration file value line %hu: %s\n"), p->line, p->name);
@@ -898,7 +1038,7 @@ public class ValamaProject : Object {
                             continue;
                         switch (p->name) {
                             case "file":
-                                source_files.add (get_absolute_path (p->get_content()));
+                                _source_files.add (get_absolute_path (p->get_content()));
                                 break;
                             default:
                                 warning_msg (_("Unknown configuration file value line %hu: %s\n"), p->line, p->name);
@@ -912,7 +1052,7 @@ public class ValamaProject : Object {
                             continue;
                         switch (p->name) {
                             case "directory":
-                                buildsystem_dirs.add (get_absolute_path (p->get_content()));
+                                _buildsystem_dirs.add (get_absolute_path (p->get_content()));
                                 break;
                             default:
                                 warning_msg (_("Unknown configuration file value line %hu: %s\n"), p->line, p->name);
@@ -926,7 +1066,7 @@ public class ValamaProject : Object {
                             continue;
                         switch (p->name) {
                             case "file":
-                                buildsystem_files.add (get_absolute_path (p->get_content()));
+                                _buildsystem_files.add (get_absolute_path (p->get_content()));
                                 break;
                             default:
                                 warning_msg (_("Unknown configuration file value line %hu: %s\n"), p->line, p->name);
@@ -940,7 +1080,7 @@ public class ValamaProject : Object {
                             continue;
                         switch (p->name) {
                             case "directory":
-                                data_dirs.add (get_absolute_path (p->get_content()));
+                                _data_dirs.add (get_absolute_path (p->get_content()));
                                 break;
                             default:
                                 warning_msg (_("Unknown configuration file value line %hu: %s\n"), p->line, p->name);
@@ -954,7 +1094,7 @@ public class ValamaProject : Object {
                             continue;
                         switch (p->name) {
                             case "file":
-                                data_files.add (get_absolute_path (p->get_content()));
+                                _data_files.add (get_absolute_path (p->get_content()));
                                 break;
                             default:
                                 warning_msg (_("Unknown configuration file value line %hu: %s\n"), p->line, p->name);
@@ -979,6 +1119,7 @@ public class ValamaProject : Object {
             }
         }
         add_multiple_files = false;
+
         delete doc;
     }
 
@@ -1035,43 +1176,43 @@ public class ValamaProject : Object {
 
         if (source_dirs.size > 0) {
             writer.start_element ("source-directories");
-            foreach (string directory in source_dirs)
+            foreach (var directory in source_dirs)
                 writer.write_element ("directory", get_relative_path (directory));
             writer.end_element();
         }
 
         if (source_files.size > 0) {
             writer.start_element ("source-files");
-            foreach (string directory in source_files)
-                writer.write_element ("file", get_relative_path (directory));
+            foreach (var filename in source_files)
+                writer.write_element ("file", get_relative_path (filename));
             writer.end_element();
         }
 
         if (buildsystem_dirs.size > 0) {
             writer.start_element ("buildsystem-directories");
-            foreach (string directory in buildsystem_dirs)
+            foreach (var directory in buildsystem_dirs)
                 writer.write_element ("directory", get_relative_path (directory));
             writer.end_element();
         }
 
         if (buildsystem_files.size > 0) {
             writer.start_element ("buildsystem-files");
-            foreach (string directory in buildsystem_files)
-                writer.write_element ("file", get_relative_path (directory));
+            foreach (var filename in buildsystem_files)
+                writer.write_element ("file", get_relative_path (filename));
             writer.end_element();
         }
 
         if (data_dirs.size > 0) {
             writer.start_element ("data-directories");
-            foreach (string directory in data_dirs)
+            foreach (var directory in data_dirs)
                 writer.write_element ("directory", get_relative_path (directory));
             writer.end_element();
         }
 
         if (data_files.size > 0) {
             writer.start_element ("data-files");
-            foreach (string directory in data_files)
-                writer.write_element ("file", get_relative_path (directory));
+            foreach (var filename in data_files)
+                writer.write_element ("file", get_relative_path (filename));
             writer.end_element();
         }
 
@@ -1438,8 +1579,12 @@ public class ValamaProject : Object {
     public string get_relative_path (string path) {
         if (!Path.is_absolute (path))
             return path;
-        if (path.has_prefix (project_path))  // only simple string comparison
-            return project_path_file.get_relative_path (File.new_for_path (path));
+        if (path.has_prefix (project_path)) {  // only simple string comparison
+            var rel = project_path_file.get_relative_path (File.new_for_path (path));
+            if (rel == null)
+                return "";
+            return rel;
+        }
         return path;
     }
 

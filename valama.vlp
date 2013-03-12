@@ -34,10 +34,8 @@
 		<directory>vapi</directory>
 	</source-directories>
 	<buildsystem-directories>
+		<directory></directory>
 		<directory>cmake</directory>
+		<directory>po</directory>
 	</buildsystem-directories>
-	<buildsystem-files>
-		<file>CMakeLists.txt</file>
-		<file>po/CMakeLists.txt</file>
-	</buildsystem-files>
 </project>
