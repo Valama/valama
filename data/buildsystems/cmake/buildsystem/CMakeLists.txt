@@ -42,33 +42,36 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 find_package(Vala "0.16" REQUIRED)
 
+# Custom library version checks.
+set(valac_cond)
+find_package(PkgConfig)
+# libvala-X.Y
 if(VALA_VERSION STRGREATER "0.19.0")
-  list(REMOVE_ITEM required_pkgs "libvala-0.18" )
-  list(REMOVE_ITEM required_pkgs "libvala-0.16" )
+  list(REMOVE_ITEM required_pkgs "libvala-0.18")
+  list(REMOVE_ITEM required_pkgs "libvala-0.16")
   set(valashort_ver "0.20")
-  set(valac_cond)
 elseif(VALA_VERSION STRGREATER "0.17.0")
-  list(REMOVE_ITEM required_pkgs "libvala-0.20" )
-  list(REMOVE_ITEM required_pkgs "libvala-0.16" )
+  list(REMOVE_ITEM required_pkgs "libvala-0.20")
+  list(REMOVE_ITEM required_pkgs "libvala-0.16")
   set(valashort_ver "0.18")
-  set(valac_cond)
 else()
-  list(REMOVE_ITEM required_pkgs "libvala-0.20" )
-  list(REMOVE_ITEM required_pkgs "libvala-0.18" )
+  list(REMOVE_ITEM required_pkgs "libvala-0.20")
+  list(REMOVE_ITEM required_pkgs "libvala-0.18")
   set(valashort_ver "0.16")
-  set(valac_cond "-D;VALA_LESS_0_18")
 endif()
 set(vala_datadir "/usr/share/vala")
 set(vapidir "${vala_datadir}-${valashort_ver}/vapi")
 
+# glib-2.0
+pkg_check_modules(GLIB2.0 REQUIRED "glib-2.0")
 
 
 set(default_vala_flags
   "--thread"
-  "--target-glib" "2.32"
-  ${debug_opt}
+  "--target-glib" "${GLIB2.0_VERSION}"
   ${valac_cond}
 )
+
 include(ValaPkgs)
 vala_pkgs(VALA_C
   PACKAGES
@@ -120,7 +123,6 @@ else()
 endif()
 message("")
 message("Installation prefix:    ${CMAKE_INSTALL_PREFIX}")
-message("Gettext package:        ${project_name_lower}")
 base_list_to_delimited_string(vala_flags
   DELIM " "
   BASE_LIST "${default_vala_flags}")
@@ -136,28 +138,12 @@ if("${vala_flags}" STREQUAL "")
   set(vala_flags "(none)")
 endif()
 message("Vala flags:             ${vala_flags}")
+message("GLib version:           ${GLIB2.0_VERSION}")
 message("")
-# if(DOCS)
-#   message("Build documentation:    enabled")
-# else()
-#   message("Build documentation:    enabled")
-# endif()
-# if(TRANSLATION_BUILD)
-#   message("Build translations:     enabled")
-# else()
-#   message("Build translations:     disabled")
-# endif()
-# if(GETTEXT_PACKAGE_NAME)
-#   if(GETTEXT_PACKAGE_VERSION)
-#     message("Gettext package:        ${GETTEXT_PACKAGE_NAME} (${GETTEXT_PACKAGE_VERSION})")
-#   else()
-#     message("Gettext package:        ${GETTEXT_PACKAGE_NAME}")
-#   endif()
-# endif()
 if(CMAKE_VERBOSE_MAKEFILE)
-  message("Verbose build:          enabled")
+  message("Verbose build:          yes")
 else()
-  message("Verbose build:          disabled")
+  message("Verbose build:          no")
 endif()
 message("")
 message("---------------------------------------------")
