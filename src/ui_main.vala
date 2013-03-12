@@ -138,7 +138,6 @@ public class MainWidget : Box {
         });
 
         wdg_smb_browser = new SymbolBrowser();
-        wdg_pbrw.connect (wdg_smb_browser);
 
         var report_wrapper = new ReportWrapper();
         project.guanako_project.set_report_wrapper (report_wrapper);

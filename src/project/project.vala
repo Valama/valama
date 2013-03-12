@@ -390,6 +390,10 @@ public class ValamaProject : Object {
      * Emit signal when data file was added or removed.
      */
     public signal void data_files_changed();
+    /**
+     * Emit signal when package was added or removed.
+     */
+    public signal void packages_changed();
 
     /**
      * Create {@link ValamaProject} and load it from project file.
@@ -467,6 +471,7 @@ public class ValamaProject : Object {
         vieworder = new Gee.LinkedList<ViewMap?>();
 
         string[] missing_packages = guanako_project.add_packages (package_list.to_array(), false);
+        packages_changed();
 
         if (missing_packages.length > 0)
             ui_missing_packages_dialog (missing_packages);
@@ -492,7 +497,8 @@ public class ValamaProject : Object {
     }
 
     /**
-     * Add package to project. Remember to add it later to Guanako project.
+     * Add package to project. Remember to add it later to Guanako project and
+     * emit packages_changed signal.
      *
      * @param pkg Package to add.
      */
@@ -516,12 +522,14 @@ public class ValamaProject : Object {
         var pkginfo = new PackageInfo();
         pkginfo.name = pkg;
         packages.add (pkginfo);
-        package_list.add (pkg);
+        if (package_list.add (pkg))
+            packages_changed();
         return guanako_project.add_packages (new string[] {pkg}, true);
     }
 
     /**
-     * Remove package from project. Remember to update Guanako project.
+     * Remove package from project. Remember to update Guanako project and
+     * emit packages_changed signal.
      *
      * @param pkg Package to remove.
      * @return `false` if package not in project else `true`.
@@ -558,6 +566,7 @@ public class ValamaProject : Object {
 
         package_list.remove (pkg);
         guanako_project.remove_package (pkg);
+        packages_changed();
         return true;
     }
 
@@ -959,6 +968,7 @@ public class ValamaProject : Object {
             }
         }
 
+        add_multiple_files = true;
         foreach (var choice in package_choices) {
             var pkg = get_choice (choice);
             if (pkg != null)
@@ -968,6 +978,7 @@ public class ValamaProject : Object {
                 add_package (choice.packages[0]);
             }
         }
+        add_multiple_files = false;
         delete doc;
     }
 

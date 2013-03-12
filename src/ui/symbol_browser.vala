@@ -24,6 +24,9 @@ using Vala;
  * Browser symbols.
  */
 public class SymbolBrowser : UiElement {
+    TreeView tree_view;
+    private bool update_needed = true;
+
     public SymbolBrowser (ValamaProject? vproject=null) {
         if (vproject != null)
             project = vproject;
@@ -51,16 +54,38 @@ public class SymbolBrowser : UiElement {
                                                  null);
 
         build();
+        //TODO: Is there a better solution to get all symbols?
+        project.guanako_update_finished.connect (build_init);
 
         var scrw = new ScrolledWindow (null, null);
         scrw.add (tree_view);
 
+        this.notify["project"].connect (init);
+        init();
+
         widget = scrw;
     }
 
-    TreeView tree_view;
+    private void init() {
+        project.packages_changed.connect (() => {
+            if (!project.add_multiple_files)
+                build();
+            else
+                update_needed = true;;
+        });
+        project.notify["add-multiple-files"].connect (() => {
+            if (!project.add_multiple_files && update_needed)
+                build();
+        });
+    }
+
+    private void build_init() {
+        project.guanako_update_finished.disconnect (build_init);
+        build();
+    }
 
     public override void build() {
+        update_needed = false;
         debug_msg (_("Run %s update!\n"), get_name());
         var store = new TreeStore (3, typeof (string), typeof (string), typeof (Gdk.Pixbuf));
         tree_view.set_model (store);

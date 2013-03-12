@@ -200,6 +200,12 @@ public class ProjectBrowser : UiElement {
             else
                 update_needed = true;;
         });
+        project.packages_changed.connect (() => {
+            if (!project.add_multiple_files)
+                build();
+            else
+                update_needed = true;;
+        });
         project.notify["add-multiple-files"].connect (() => {
             if (!project.add_multiple_files && update_needed)
                 build();
@@ -461,7 +467,6 @@ public class ProjectBrowser : UiElement {
                 break;
             case StoreType.PACKAGE:
                 project.remove_package_by_name (val);
-                update();
                 break;
             default:
                 bug_msg (_("Unexpected enum value: %s: %u\n"),
