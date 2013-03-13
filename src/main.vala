@@ -107,7 +107,7 @@ static void show_main_screen (ValamaProject load_project) {
     /* Application signals. */
     source_viewer.buffer_close.connect (project.close_buffer);
 
-    source_viewer.notify["current-srcbuffer"].connect (() => {
+    source_viewer.current_sourceview_changed.connect (() => {
         var srcbuf = source_viewer.current_srcbuffer;
         project.undo_changed (srcbuf.can_undo);
         project.redo_changed (srcbuf.can_redo);

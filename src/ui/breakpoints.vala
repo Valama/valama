@@ -93,7 +93,7 @@ class UiBreakpoints : UiElement {
 
         mode_to_show (IdeModes.DEBUG);
 
-        source_viewer.notify["current-srcbuffer"].connect (() => {
+        source_viewer.current_sourceview_changed.connect (() => {
             /* Don't enable button on non-source files. */
             if (source_viewer.current_srcfocus != null &&
                         project.guanako_project.get_source_file (

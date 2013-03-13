@@ -167,7 +167,7 @@ class UiReport : UiElement {
             report.init();
         });
         project.guanako_update_finished.connect (build);
-        source_viewer.notify["current-srcbuffer"].connect (() => {
+        source_viewer.current_sourceview_changed.connect (() => {
             if (!this.showall)
                 build();
         });
@@ -176,22 +176,20 @@ class UiReport : UiElement {
     }
 
     public override void build() {
-        debug_msg (_("Run %s update!\n"), get_name());
-        report.swap();
         ListStore store;
-        TextBuffer bfr = null;
-
         if (showall)
             store = new ListStore (4, typeof (Gdk.Pixbuf),typeof (string), typeof (string), typeof (string));
         else
             store = new ListStore (3, typeof (Gdk.Pixbuf), typeof (string), typeof (string));
         tree_view.set_model (store);
-        storelist = new ArrayList<ReportWrapper.Error?>();
 
-        if (!showall && source_viewer.current_srcbuffer == null) {
-            debug_msg (_("%s update finished (not a valid buffer)!\n"), get_name());
+        if (!showall && !(source_viewer.current_srcfocus in project.files))
             return;
-        }
+
+        debug_msg (_("Run %s update!\n"), get_name());
+        report.swap();
+        TextBuffer bfr = null;
+        storelist = new ArrayList<ReportWrapper.Error?>();
 
         if (showall) {
             project.foreach_buffer ((s, bfr) => {
