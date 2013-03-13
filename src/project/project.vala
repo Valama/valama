@@ -280,43 +280,30 @@ public class ValamaProject : Object {
      * List of package choices.
      */
     public Gee.ArrayList<PkgChoice?> package_choices { get; private set; }
-
-    private Gee.TreeSet<string> _source_dirs;
     /**
      * Project source directories (absolute paths).
      */
-    public Gee.TreeSet<string> source_dirs { get { return _source_dirs; } }
-
-    private Gee.TreeSet<string> _source_files;
+    public Gee.TreeSet<string> source_dirs { get; private set; }
     /**
      * Project extra source files (absolute paths).
      */
-    public Gee.TreeSet<string> source_files { get { return _source_files; } }
-
-    private Gee.TreeSet<string> _buildsystem_dirs;
+    public Gee.TreeSet<string> source_files { get; private set; }
     /**
      * Project buildsystem directories (absolute paths).
      */
-    public Gee.TreeSet<string> buildsystem_dirs { get { return _buildsystem_dirs; } }
-
-    private Gee.TreeSet<string> _buildsystem_files;
+    public Gee.TreeSet<string> buildsystem_dirs { get; private set; }
     /**
      * Project extra buildsystem files (absolute paths).
      */
-    public Gee.TreeSet<string> buildsystem_files { get { return _buildsystem_files; } }
-
-    private Gee.TreeSet<string> _data_dirs;
+    public Gee.TreeSet<string> buildsystem_files { get; private set; }
     /**
      * Project directories for extra files (absolute paths).
      */
-    public Gee.TreeSet<string> data_dirs { get { return _data_dirs; } }
-
-    private Gee.TreeSet<string> _data_files;
+    public Gee.TreeSet<string> data_dirs { get; private set; }
     /**
      * Project extra files (absolute paths).
      */
-    public Gee.TreeSet<string> data_files { get { return _data_files; } }
-
+    public Gee.TreeSet<string> data_files { get; private set; }
     /**
      * Project version first part.
      */
@@ -469,12 +456,6 @@ public class ValamaProject : Object {
         b_files = new Gee.TreeSet<string>();
         d_files = new Gee.TreeSet<string>();
 
-        balance_dir_file_sets (ref _source_dirs, ref _source_files,
-                               new string[]{".vala", ".vapi"});
-        balance_dir_file_sets (ref _buildsystem_dirs, ref _buildsystem_files,
-                               new string[]{".cmake"}, new string[]{"CMakeLists.txt"});
-        balance_dir_file_sets (ref _data_dirs, ref _data_files);
-
         generate_file_list (_source_dirs.to_array(),
                             _source_files.to_array(),
                             add_source_file);
@@ -552,7 +533,7 @@ public class ValamaProject : Object {
                 FileInfo info = null;
                 var matching = false;
                 while (!matching && (info = enumerator.next_file()) != null) {
-                    if (info.get_file_type() != FileType.REGULAR ||  //TODO: Other FileTypes?
+                    if (info.get_file_type() != FileType.REGULAR ||  //TODO: Follow symlinks.
                                             c_files.contains (Path.build_path (Path.DIR_SEPARATOR_S,
                                                                                dirname,
                                                                                info.get_name())))
@@ -634,6 +615,27 @@ public class ValamaProject : Object {
             }
         }
         c_dirs = new_c_dirs;
+    }
+
+    public void balance_pfile_dirs() {
+        var s_dirs_tmp = new TreeSet<string>();
+        var s_files_tmp = files;
+        var b_dirs_tmp = new TreeSet<string>();
+        var b_files_tmp = b_files;
+        var d_dirs_tmp = new TreeSet<string>();
+        var d_files_tmp = d_files;
+        balance_dir_file_sets (ref s_dirs_tmp, ref s_files_tmp,
+                               new string[]{".vala", ".vapi"});
+        balance_dir_file_sets (ref b_dirs_tmp, ref b_files_tmp,
+                               new string[]{".cmake"}, new string[]{"CMakeLists.txt"});
+        balance_dir_file_sets (ref d_dirs_tmp, ref d_files_tmp);
+
+        source_dirs = s_dirs_tmp;
+        source_files = s_files_tmp;
+        buildsystem_dirs = b_dirs_tmp;
+        buildsystem_files = b_files_tmp;
+        data_dirs = d_dirs_tmp;
+        data_files = d_files_tmp;
     }
 
     /**
@@ -754,7 +756,6 @@ public class ValamaProject : Object {
      * @param filename Path to file to unregister.
      * @return `true` on success else `false` (e.g. if file was not found).
      */
-    //TODO: Remove it also from .vlp file.
     public bool remove_source_file (string filename) {
         var filename_abs = get_absolute_path (filename);
         if (!files.remove (filename_abs))
@@ -876,10 +877,13 @@ public class ValamaProject : Object {
                 directory = File.new_for_path (dir);
                 enumerator = directory.enumerate_children (FileAttribute.STANDARD_NAME, 0);
 
-                while ((file_info = enumerator.next_file()) != null)
+                while ((file_info = enumerator.next_file()) != null) {
+                    if (file_info.get_file_type() != FileType.REGULAR)  //TODO: Follow symlinks.
+                        continue;
                     action (Path.build_path (Path.DIR_SEPARATOR_S,
                                              dir,
                                              file_info.get_name()));
+                }
             } catch (GLib.Error e) {
                 errmsg (_("Could not open file in '%s': %s\n"), dir, e.message);
             }
@@ -924,13 +928,13 @@ public class ValamaProject : Object {
 
         packages = new Gee.TreeSet<PackageInfo?> ((CompareDataFunc<PackageInfo?>?) PackageInfo.compare_func);
         package_list = new Gee.TreeSet<string>();
-        _package_choices = new Gee.ArrayList<PkgChoice?>();
-        _source_dirs = new Gee.TreeSet<string>();
-        _source_files = new Gee.TreeSet<string>();
-        _buildsystem_dirs = new Gee.TreeSet<string>();
-        _buildsystem_files = new Gee.TreeSet<string>();
-        _data_dirs = new Gee.TreeSet<string>();
-        _data_files = new Gee.TreeSet<string>();
+        package_choices = new Gee.ArrayList<PkgChoice?>();
+        source_dirs = new Gee.TreeSet<string>();
+        source_files = new Gee.TreeSet<string>();
+        buildsystem_dirs = new Gee.TreeSet<string>();
+        buildsystem_files = new Gee.TreeSet<string>();
+        data_dirs = new Gee.TreeSet<string>();
+        data_files = new Gee.TreeSet<string>();
 
         for (Xml.Node* i = root_node->children; i != null; i = i->next) {
             if (i->type != ElementType.ELEMENT_NODE)
@@ -1024,7 +1028,7 @@ public class ValamaProject : Object {
                             continue;
                         switch (p->name) {
                             case "directory":
-                                _source_dirs.add (get_absolute_path (p->get_content()));
+                                source_dirs.add (get_absolute_path (p->get_content()));
                                 break;
                             default:
                                 warning_msg (_("Unknown configuration file value line %hu: %s\n"), p->line, p->name);
@@ -1038,7 +1042,7 @@ public class ValamaProject : Object {
                             continue;
                         switch (p->name) {
                             case "file":
-                                _source_files.add (get_absolute_path (p->get_content()));
+                                source_files.add (get_absolute_path (p->get_content()));
                                 break;
                             default:
                                 warning_msg (_("Unknown configuration file value line %hu: %s\n"), p->line, p->name);
@@ -1052,7 +1056,7 @@ public class ValamaProject : Object {
                             continue;
                         switch (p->name) {
                             case "directory":
-                                _buildsystem_dirs.add (get_absolute_path (p->get_content()));
+                                buildsystem_dirs.add (get_absolute_path (p->get_content()));
                                 break;
                             default:
                                 warning_msg (_("Unknown configuration file value line %hu: %s\n"), p->line, p->name);
@@ -1066,7 +1070,7 @@ public class ValamaProject : Object {
                             continue;
                         switch (p->name) {
                             case "file":
-                                _buildsystem_files.add (get_absolute_path (p->get_content()));
+                                buildsystem_files.add (get_absolute_path (p->get_content()));
                                 break;
                             default:
                                 warning_msg (_("Unknown configuration file value line %hu: %s\n"), p->line, p->name);
@@ -1080,7 +1084,7 @@ public class ValamaProject : Object {
                             continue;
                         switch (p->name) {
                             case "directory":
-                                _data_dirs.add (get_absolute_path (p->get_content()));
+                                data_dirs.add (get_absolute_path (p->get_content()));
                                 break;
                             default:
                                 warning_msg (_("Unknown configuration file value line %hu: %s\n"), p->line, p->name);
@@ -1094,7 +1098,7 @@ public class ValamaProject : Object {
                             continue;
                         switch (p->name) {
                             case "file":
-                                _data_files.add (get_absolute_path (p->get_content()));
+                                data_files.add (get_absolute_path (p->get_content()));
                                 break;
                             default:
                                 warning_msg (_("Unknown configuration file value line %hu: %s\n"), p->line, p->name);
@@ -1128,6 +1132,8 @@ public class ValamaProject : Object {
      */
     public void save() {
         debug_msg (_("Save project file.\n"));
+
+        balance_pfile_dirs();
 
         var writer = new TextWriter.filename (project_file);
         writer.set_indent (true);

@@ -36,6 +36,36 @@
 	<buildsystem-directories>
 		<directory></directory>
 		<directory>cmake</directory>
+		<directory>cmake/vala</directory>
 		<directory>po</directory>
 	</buildsystem-directories>
+	<data-directories>
+		<directory>data</directory>
+		<directory>data/buildsystems/cmake</directory>
+		<directory>data/buildsystems/cmake/buildsystem</directory>
+		<directory>data/buildsystems/cmake/buildsystem/cmake</directory>
+		<directory>data/buildsystems/cmake/buildsystem/cmake/vala</directory>
+		<directory>data/templates/clutter</directory>
+		<directory>data/templates/clutter/template</directory>
+		<directory>data/templates/clutter/template/src</directory>
+		<directory>data/templates/clutter/template/vapi</directory>
+		<directory>data/templates/plain_vala</directory>
+		<directory>data/templates/plain_vala/template</directory>
+		<directory>data/templates/plain_vala/template/src</directory>
+		<directory>data/templates/plain_vala/template/vapi</directory>
+		<directory>data/templates/simple_gtk</directory>
+		<directory>data/templates/simple_gtk/template</directory>
+		<directory>data/templates/simple_gtk/template/src</directory>
+		<directory>data/templates/simple_gtk/template/vapi</directory>
+		<directory>guanako</directory>
+		<directory>guanako/data</directory>
+		<directory>icons</directory>
+	</data-directories>
+	<data-files>
+		<file>AUTHORS</file>
+		<file>COPYING</file>
+		<file>README.md</file>
+		<file>po/de.po</file>
+		<file>po/fr.po</file>
+	</data-files>
 </project>
