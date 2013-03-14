@@ -84,8 +84,10 @@ public static int main (string[] args) {
 
     vscreen = new WelcomeScreen();
     vscreen.project_loaded.connect ((project) => {
-        window_main.remove (vscreen);
-        show_main_screen (project);
+        if (project != null) {
+            window_main.remove (vscreen);
+            show_main_screen (project);
+        }
     });
     if (project != null)
         show_main_screen (project);

@@ -134,6 +134,15 @@ public class WelcomeScreen : Alignment {
         btn_quit.clicked.connect(Gtk.main_quit);
         grid_main.attach (btn_quit, 1, 5, 1, 1);
 
+        project_loaded.connect ((project) => {
+            if (project != null) {
+                this.forall_internal (false, (child) => {
+                    this.remove (child);
+                });
+                this.add (grid_main);
+            }
+        });
+
 
         /* Project templates. */
         grid_create_project_template = new Grid();
@@ -320,7 +329,7 @@ public class WelcomeScreen : Alignment {
         this.show_all();
     }
 
-    public signal void project_loaded (ValamaProject project);
+    public signal void project_loaded (ValamaProject? project);
 }
 
 // vim: set ai ts=4 sts=4 et sw=4
