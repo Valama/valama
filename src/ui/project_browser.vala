@@ -449,17 +449,29 @@ public class ProjectBrowser : UiElement {
                     var file = File.new_for_path (abs_filepath);
                     var fname = project.get_relative_path (filepath);
                     source_viewer.close_srcitem (fname);
+
+                    switch (path.get_indices()[0]) {
+                        case 0:
+                            project.remove_source_file (abs_filepath);
+                            break;
+                        case 1:
+                            project.remove_buildsystem_file (abs_filepath);
+                            break;
+                        case 2:
+                            project.remove_data_file (abs_filepath);
+                            break;
+                        default:
+                            bug_msg (_("Unknown treepath start to add a new file: %s\n"), path.to_string());
+                            break;
+                    }
+                    /*
+                     * Not necessary here because pathmap will completely
+                     * rebuild. But remove it for future better
+                     * implementations.
+                     */
+                    //pathmap.unset (filepath);
                     try {
                         file.delete();
-                        project.remove_source_file (abs_filepath);
-                        //FIXME: Remove file from project (project.files project.b_files).
-                        /*
-                         * Not necessary here because pathmap will completely
-                         * rebuild. But remove it for future better
-                         * implementations.
-                         */
-                        pathmap.unset (filepath);
-                        update();
                     } catch (GLib.Error e) {
                         errmsg (_("Unable to delete source file '%s': %s\n"), filepath, e.message);
                     }
