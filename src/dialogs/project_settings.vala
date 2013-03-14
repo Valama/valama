@@ -49,7 +49,7 @@ public void ui_load_project() {
     if (dlg.run() == ResponseType.ACCEPT) {
         var new_filename = dlg.get_filename();
         /*
-         * On unixoide systems compare inodes. On others only compare file names.
+         * On Unix-like systems compare inodes. On others only compare file names.
          */
 #if NOT_UNIX
         if (project.project_file != new_filename) {
@@ -62,7 +62,7 @@ public void ui_load_project() {
                     File.new_for_path (project.project_file).query_info (FileAttribute.UNIX_INODE,
                     FileQueryInfoFlags.NONE).get_attribute_as_string (FileAttribute.UNIX_INODE));
         } catch (GLib.Error e) {
-            errmsg (_("Couln't compare project files inodes: %s\n"), e.message);
+            errmsg (_("Couldn't compare project files inodes: %s\n"), e.message);
             comp = false;
         }
         if (comp) {
@@ -88,7 +88,7 @@ public void ui_load_project() {
 
 
 /**
- * Show project wettings window.
+ * Show project settings window.
  *
  * @param project {@link ValamaProject} to edit settings.
  */

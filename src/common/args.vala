@@ -35,7 +35,7 @@ namespace Args {
         {"version", 'v', 0, OptionArg.NONE, ref version, N_("Display version number."), null},
         {"syntax", 0, 0, OptionArg.FILENAME, ref syntaxfile, N_("Guanako syntax file."), N_("FILE")},
         {"templates", 0, 0, OptionArg.FILENAME, ref templatesdir, N_("Templates directory."), N_("DIRECTORY")},
-        {"buildsystems", 0, 0, OptionArg.FILENAME, ref buildsystemsdir, N_("Buildsystems directory."), N_("DIRECTORY")},
+        {"buildsystems", 0, 0, OptionArg.FILENAME, ref buildsystemsdir, N_("Build systems directory."), N_("DIRECTORY")},
         {"debug", 'd', OptionFlags.OPTIONAL_ARG, OptionArg.CALLBACK, (void*) debuglevel_parse, N_("Output debug information."), N_("[DEBUGLEVEL]")},
         {"force-old", 0, 0, OptionArg.NONE, ref forceold, N_("Force loading of possibly incompatible template or project files."), null},
         {"layout", 0, 0, OptionArg.FILENAME, ref layoutfile, N_("Path to layout file."), N_("FILE")},

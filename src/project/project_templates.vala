@@ -65,10 +65,10 @@ public class ProjectTemplate {
             s_files.add (vproject.get_relative_path (filename));
         });
 
-        //TODO: Get buildsystem files.
+        //TODO: Get build system files.
         switch (vproject.buildsystem) {
             default:
-                debug_msg (_("Buildsystem '%s' currently not supported by template selector.\n"),
+                debug_msg (_("Build system '%s' currently not supported by template selector.\n"),
                            vproject.buildsystem);
                 break;
         }

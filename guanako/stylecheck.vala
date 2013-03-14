@@ -62,8 +62,8 @@ namespace Guanako {
         public string stylefile_version { get; private set; default = "0"; }
 
         /**
-         * Regex check object. Associate regex with matchgroup (which is the
-         * style error).
+         * Regex check object. Associate regex with capturing group (which is
+         * the style error).
          */
         public class RegexCheck {
             public Regex regex;
@@ -73,7 +73,7 @@ namespace Guanako {
              * Construct regex check object.
              *
              * @param regex {@link Regex} to check.
-             * @param match_num Number of matchgroup.
+             * @param match_num Number of capturing group.
              */
             public RegexCheck (Regex regex, int match_num = 0) {
                 this.regex = regex;
@@ -84,7 +84,7 @@ namespace Guanako {
              * Construct regex object from pattern.
              *
              * @param pattern Pattern to build regex from.
-             * @param match_num Number of matchgroup.
+             * @param match_num Number of capturing group.
              */
             public RegexCheck.str (string pattern, int match_num = 0) throws GLib.RegexError {
                 regex = new Regex (pattern);
@@ -232,7 +232,7 @@ namespace Guanako {
              * @param result Resulting {@link CheckType} or
              *               {@link CheckType.GLOBAL} if no matching type was
              *               found.
-             * @return Return true on success else false.
+             * @return Return `true` on success else `false`.
              */
             public static bool parse_name (string name, out CheckType result = null) {
                 var ec = (EnumClass) typeof (CheckType).class_ref();
@@ -266,7 +266,7 @@ namespace Guanako {
          *
          * @param description Description of check.
          * @param regex {@link Regex} to check.
-         * @param match_num Number of relevant matchgroup.
+         * @param match_num Number of relevant capturing group.
          * @param type {@link CheckType} of check.
          */
         public void add_check (string description,
@@ -303,7 +303,7 @@ namespace Guanako {
          * Add new check (regex) to existing check ({@link CheckMap}.
          *
          * @param regex {@link Regex} to check.
-         * @param match_num Number of relevant matchgroup.
+         * @param match_num Number of relevant capturing group.
          */
         public void insert_check (CheckMap checkmap,
                                   Regex regex,
@@ -448,7 +448,7 @@ namespace Guanako {
                                     }
                                     if (match_num == null) {
                                         match_num = 0;
-                                        debug_msg (_("No default matchgroup. Set it to 0: %s\n"), regex);
+                                        debug_msg (_("No default capturing group ('matchgroup'). Set it to 0: %s\n"), regex);
                                     }
                                     rchecks.add (new RegexCheck.str (regex, match_num));
                                     break;
@@ -514,7 +514,7 @@ namespace Guanako {
          * @param sf {@link Vala.SourceFile} of locations.
          * @param begin {@link Vala.SourceLocation} starting point.
          * @param end {@link Vala.SourceLocation} ending point.
-         * @return Return included code region. Can be a multiline string.
+         * @return Return included code region. Can be a multi line string.
          */
         private string get_code_region (SourceFile sf, SourceLocation begin, SourceLocation end) {
             string region;
@@ -531,14 +531,14 @@ namespace Guanako {
         }
 
         /**
-         * Get selected code region with code arround.
+         * Get selected code region with code around.
          *
          * Region will include full lines.
          *
          * @param sf {@link Vala.SourceFile} of locations.
          * @param begin {@link Vala.SourceLocation} starting point.
          * @param end {@link Vala.SourceLocation} ending point.
-         * @return Return included code region. Can be a multiline string.
+         * @return Return included code region. Can be a multi line string.
          */
         private string get_code_region_line (SourceFile sf, SourceLocation begin, SourceLocation end) {
             string region = "";
@@ -550,8 +550,8 @@ namespace Guanako {
 
         /**
          * Run a single check with all checks (regexes). Add found errors to
-         * internal error list. Init this list with {@link init_errors} and
-         * swap with {@link swap_errors}.
+         * internal error list. Initialize this list with {@link init_errors}
+         * and swap with {@link swap_errors}.
          *
          * @param checkmap Check.
          * @param file Source file to check.
@@ -695,7 +695,7 @@ namespace Guanako {
         }
 
         /**
-         * Init internal list of errors.
+         * Initialize internal list of errors.
          */
         public void init_errors() {
             new_errors = new Gee.ArrayList<StyleError?>();

@@ -37,13 +37,15 @@ public static int main (string[] args) {
                                        "valama",
                                        "recent_projects"));
 
-    // /* Command line parsing. */
-    // /* Copied from Yorba application. */
+    /* Command line parsing. */
+    /* Copied from Yorba application. */
     unowned string[] a = args;
     Gtk.init (ref a);
-    // Sanitize the args.  Gtk's init function will leave null elements
-    // in the array, which then causes OptionContext to crash.
-    // See ticket: https://bugzilla.gnome.org/show_bug.cgi?id=674837
+    /*
+     * Sanitize the command line arguments. Gtk's init function will leave
+     * null elements in the array, which then causes OptionContext to crash.
+     * See ticket: https://bugzilla.gnome.org/show_bug.cgi?id=674837
+     */
     string[] fixed_args = new string[0];
     for (int i = 0; i < args.length; ++i)
         if (args[i] != null)
@@ -233,7 +235,7 @@ static void redo_change() {
  * Load file and change focus.
  *
  * @param filename Name of file.
- * @return Return true on success else false.
+ * @return Return `true` on success else `false`.
  */
 //TODO: Grab focus.
 static bool on_file_selected (string filename) {

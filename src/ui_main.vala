@@ -48,7 +48,7 @@ static Gee.HashMap<string, Gdk.Pixbuf> map_icons;
  */
 public class MainWidget : Box {
     /**
-     * Master dock for all items except tool and menubar.
+     * Master dock for all items except {@link toolbar} and {@link menubar}.
      */
     private Dock dock;
     /**
@@ -84,14 +84,14 @@ public class MainWidget : Box {
     public signal void unlock_items();
 
     /**
-     * Emit when all {@link UiElement}s, menuobjects and toolobjects are
+     * Emit when all {@link UiElement}s, menu objects and tool objects are
      * initialized.
      */
     public signal void initialized();
 
     /**
-     * Create MainWindow. Initialize menubar, toolbar, master dock and source
-     * dock.
+     * Create MainWindow. Initialize {@link menubar}, {@link toolbar}, master
+     * dock and source dock.
      */
     public MainWidget() {
         this.destroy.connect (on_destroy);
@@ -126,7 +126,7 @@ public class MainWidget : Box {
     }
 
     /**
-     * Initialize Ui elements, menu and toolbar.
+     * Initialize ui_elements, menu and toolbar.
      */
     public void init() {
         source_viewer = new UiSourceViewer();
@@ -170,7 +170,7 @@ public class MainWidget : Box {
                               Stock.FILE,
                               DockItemBehavior.NORMAL,
                               DockPlacement.LEFT);
-        add_item ("AppOutput", _("App output"), wdg_app_output,
+        add_item ("AppOutput", _("Application output"), wdg_app_output,
                               Stock.FILE,
                               DockItemBehavior.NORMAL,
                               DockPlacement.LEFT);
@@ -316,7 +316,7 @@ public class MainWidget : Box {
         add_view_menu_item (menu_view, wdg_app_output, _("Show application output"));
         add_view_menu_item (menu_view, wdg_breakpoints, _("Show breakpoints"));
         add_view_menu_item (menu_view, wdg_current_file_structure, _("Show current file structure"));
-        add_view_menu_item (menu_view, wdg_stylechecker, _("Show stylechecker"));
+        add_view_menu_item (menu_view, wdg_stylechecker, _("Show style checker"));
         add_view_menu_item (menu_view, wdg_smb_browser, _("Show symbol browser"));
 
         var item_view_lockhide = new CheckMenuItem.with_mnemonic ("_" + _("Lock elements"));
@@ -502,7 +502,7 @@ public class MainWidget : Box {
      * @param menu_view View (sub)menu.
      * @param element {@link UiElement} to connect toggle signals with.
      * @param label Description to show in menu.
-     * @param with_mnemonic If true enable mnemonic.
+     * @param with_mnemonic If `true` enable mnemonic.
      * @param key Accelerator {@linkGdl.Key} or null if none.
      * @param modtype Modifier type e.g. {@link Gdk.ModifierType.CONTROL_MASK} for ctrl.
      */
@@ -595,7 +595,7 @@ public class MainWidget : Box {
      *
      * @param  filename Name of file to save layout to.
      * @param section Save specific layout section.
-     * @return Return true on success else false.
+     * @return Return `true` on success else `false`.
      */
     public bool save_layout (string filename, string section = "__default__") {
         this.layout.save_layout (section);
@@ -613,7 +613,7 @@ public class MainWidget : Box {
      * @param filename Name of file to load layout from.
      * @param section Name of default section to load settings from.
      * @param error Display error if layout file loading failed.
-     * @return Return true on success else false.
+     * @return Return `true` on success else `false`.
      */
     public bool load_layout (string filename,
                              string? section = null,
@@ -632,7 +632,7 @@ public class MainWidget : Box {
      * Reload current {@link Gdl.DockLayout}. May be helpful on window resize.
      *
      * @param section Name of default section to load settings from.
-     * @return Return true on success else false.
+     * @return Return `true` on success else `false`.
      */
     public bool layout_reload (string section = "__default__") {
         bool ret = this.layout.load_layout (section);
@@ -646,10 +646,10 @@ public class MainWidget : Box {
     /**
      * Focus a {@link Gdl.DockItem}.
      *
-     * @param item The item to recveive focus.
+     * @param item The item to receive focus.
      */
     public void focus_dock_item (DockItem item) {
-        /* Hack arround gdl_dock_notebook with gtk_notebook. */
+        /* Hack around gdl_dock_notebook with gtk_notebook. */
         var pa = item.parent;
         /* If something strange happens (pa == null) break the loop. */
         while (!(pa is Dock) && (pa != null)) {
@@ -668,7 +668,7 @@ public class MainWidget : Box {
      * @param item {@link Gtk.Widget} to connect.
      * @param keyname Name of key to connect to signal (with modtype).
      * @param modtype {@link Gdk.ModifierType} to connect to signal together
-     *                with keyname. Default modifier key is "ctrl".
+     *                with key name. Default modifier key is "ctrl".
      */
     public void add_accel_activate (Widget item,
                                     int key,

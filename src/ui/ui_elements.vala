@@ -27,7 +27,7 @@ using Gee;
 /*
  * Do not use an interface because we already have some precise definitions
  * (e.g. an instance field ui_connections).
- * Depencency interface is implented (update calls).
+ * Dependency interface is implemented (update calls).
  */
 public abstract class UiElement : Object{
     /**
@@ -81,7 +81,7 @@ public abstract class UiElement : Object{
     public signal void visible_changed (bool status);
 
     /**
-     * Status of dock_item. True if shown, false if hidden and null if
+     * Status of dock_item. `true` if shown, `false` if hidden and `null` if
      * undefined.
      */
     private bool? show;
@@ -94,7 +94,7 @@ public abstract class UiElement : Object{
     /**
      * Emit to show search.
      *
-     * @param show True to show, false to hide.
+     * @param show `true` to show, `false` to hide.
      */
     public signal void show_element (bool show);
 
@@ -285,7 +285,7 @@ public abstract class UiElement : Object{
     private static Gee.PriorityQueue<UiElement> q = new Gee.PriorityQueue<UiElement>();
     /**
       * Queue of dependencies which have different priorities (resolve
-      * sequencially).
+      * sequentially).
       */
     //TODO: Not implemented.
     //private static Gee.PriorityQueue<UiElement> s_q = new Gee.PriorityQueue<UiElement>();

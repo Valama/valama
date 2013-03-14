@@ -52,7 +52,7 @@ public class Entry : Gtk.Entry {
      */
     private uint delay_sec;
     /**
-     * Label can be resetted when valid input is provided.
+     * Label can be reseted when valid input is provided.
      */
     private bool label_resettable;
 
@@ -119,11 +119,11 @@ public class Entry : Gtk.Entry {
     public signal void invalid_input();
 
     /**
-     * If resettable is true. Label will be resettet with next user input.
+     * If resettable is true. Label will be reseted with next user input.
      *
      * @param error_msg Error message to show in {@link err_label}.
      * @param delay Delay in seconds to show error in {@link err_label}.
-     * @param resettable {@link err_label} will be resetted with valid input.
+     * @param resettable {@link err_label} will be reseted with valid input.
      */
     public void set_label_timer (string error_msg, uint delay, bool resettable = true) {
         this.err_label.set_label (error_msg);
@@ -184,7 +184,7 @@ public enum StoreType {
  * @param storename Name of store.
  * @param files List of files to add to store.
  * @param store {@link Gtk.TreeStore} to initialize.
- * @param pathmap Map from filepaths to {@link Gtk.TreeIter} to build up tree
+ * @param pathmap Map from file paths to {@link Gtk.TreeIter} to build up tree
  *                correctly.
  */
 public void build_file_treestore (string storename,

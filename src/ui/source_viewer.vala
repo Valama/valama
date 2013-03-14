@@ -76,7 +76,7 @@ class UiSourceViewer : UiElement {
      */
     public SourceBuffer? current_srcbuffer { get; private set; default = null; }
     /**
-     * Gets emitted when another sourceview is selected
+     * Gets emitted when another {@link Gtk.Sourceview} is selected
      */
     public signal void current_sourceview_changed();
 
@@ -119,7 +119,7 @@ class UiSourceViewer : UiElement {
      * {@link Gdl.DockItem} with {@link Gtk.SourceView}.
      *
      * @param view {@link Gtk.SourceView} to close.
-     * @return Return false to interrupt or return true proceed.
+     * @return Return `false` to interrupt or return `true` to proceed.
      */
     public signal bool buffer_close (SourceView view);
 
@@ -222,7 +222,7 @@ class UiSourceViewer : UiElement {
              * Hide default source view if it is empty.
              * Dock new items to focused dock item.
              *
-             * NOTE: Custom unsafed views are ignored (even if empty).
+             * NOTE: Custom unsaved views are ignored (even if empty).
              */
             int id = 0;
             if (this.current_srcfocus != null)
@@ -322,7 +322,7 @@ class UiSourceViewer : UiElement {
      *
      * @param filename Name of file to switch to.
      * @param line Line where to jump.
-     * @param setcursor If true set cursor to position.
+     * @param setcursor If `true` set cursor to position.
      * @param col Column where to jump.
      */
     public void jump_to_position (string filename, int line, int col, bool setcursor = true) {

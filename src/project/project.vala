@@ -57,7 +57,7 @@ public enum VersionRelation {
 }
 
 /**
- * IDE modes on which plugins can decide how to do some tasks.
+ * IDE modes on which plug-ins can decide how to do some tasks.
  */
 [Flags]
 public enum IdeModes {
@@ -130,7 +130,7 @@ public enum IdeModes {
  */
 public class PkgChoice {
     /**
-     * Indicate if all packages should go to buildsystem package list.
+     * Indicate if all packages should go to build system package list.
      */
     public bool all = false;
     /**
@@ -289,11 +289,11 @@ public class ValamaProject : Object {
      */
     public TreeSet<string> source_files { get; private set; }
     /**
-     * Project buildsystem directories (absolute paths).
+     * Project build system directories (absolute paths).
      */
     public TreeSet<string> buildsystem_dirs { get; private set; }
     /**
-     * Project extra buildsystem files (absolute paths).
+     * Project extra build system files (absolute paths).
      */
     public TreeSet<string> buildsystem_files { get; private set; }
     /**
@@ -325,7 +325,7 @@ public class ValamaProject : Object {
      */
     public string project_file_version { get; private set; default = "0"; }
     /**
-     * Identifier to provide context state to plugins.
+     * Identifier to provide context state to plug-ins.
      */
     public IdeModes idemode { get; set; default = IdeModes.DEBUG; }
 
@@ -334,7 +334,7 @@ public class ValamaProject : Object {
      */
     public TreeSet<string> files { get; private set; }
     /**
-     * List of buildsystem files.
+     * List of build system files.
      */
     public TreeSet<string> b_files { get; private set; }
     /**
@@ -358,7 +358,7 @@ public class ValamaProject : Object {
     private GuanakoCompletion comp_provider;
 
     /**
-     * The project's buildsystem (valama/cmake/...).
+     * The project's build system (valama/cmake/...).
      */
     public string buildsystem = "cmake";
 
@@ -383,7 +383,7 @@ public class ValamaProject : Object {
      */
     public signal void source_files_changed();
     /**
-     * Emit signal when buildsystem file was added or removed.
+     * Emit signal when build system file was added or removed.
      */
     public signal void buildsystem_files_changed();
     /**
@@ -402,7 +402,7 @@ public class ValamaProject : Object {
      *
      * @param project_file Load project from this file.
      * @param syntaxfile Load Guanako syntax definitions from this file.
-     * @param fully If false only load project file information.
+     * @param fully If `false` only load project file information.
      * @throws LoadingError Throw on error while loading project file.
      */
     public ValamaProject (string project_file,
@@ -420,7 +420,7 @@ public class ValamaProject : Object {
                                         _("Could not read syntax file: %s\n"), e.message);
             } catch (GLib.Error e) {
                 throw new LoadingError.COMPLETION_NOT_AVAILABLE (
-                                        _("An error occured while loading new Guanako project: %s\n"),
+                                        _("An error occurred while loading new Guanako project: %s\n"),
                                         e.message);
             }
 
@@ -460,7 +460,7 @@ public class ValamaProject : Object {
                                         _("Could not read syntax file: %s\n"), e.message);
             } catch (GLib.Error e) {
                 throw new LoadingError.COMPLETION_NOT_AVAILABLE (
-                                        _("An error occured while loading new Guanako project: %s\n"),
+                                        _("An error occurred while loading new Guanako project: %s\n"),
                                         e.message);
             }
 
@@ -723,7 +723,7 @@ public class ValamaProject : Object {
     }
 
     /**
-     * Add sourcefile and register with Guanako.
+     * Add source file and register with Guanako.
      *
      * @param filename Path to file.
      */
@@ -759,7 +759,7 @@ public class ValamaProject : Object {
     }
 
     /**
-     * Remove sourcefile from project and unlink from Guanako. Don't remove
+     * Remove source file from project and unlink from Guanako. Don't remove
      * file from disk. Keep track to not include it with source directories
      * next time.
      *
@@ -776,7 +776,7 @@ public class ValamaProject : Object {
     }
 
     /**
-     * Add file to buildsystem list.
+     * Add file to build system list.
      *
      * @param filename Path to file.
      */
@@ -787,11 +787,11 @@ public class ValamaProject : Object {
 
         var f = File.new_for_path (filename_abs);
         if (!f.query_exists()) {
-            warning_msg (_("Buildsystem file does not exist: %s\n"), filename_abs);
+            warning_msg (_("Build system file does not exist: %s\n"), filename_abs);
             return;
         }
 
-        msg (_("Found buildsystem file: %s\n"), filename_abs);
+        msg (_("Found build system file: %s\n"), filename_abs);
         if (files.contains (filename_abs)) {
             warning_msg (_("File already a source file. Skip it.\n"), filename_abs);
             return;
@@ -1263,13 +1263,13 @@ public class ValamaProject : Object {
     /**
      * Emit when undo flag of current {@link SourceBuffer} has changed.
      *
-     * @param undo_possibility True if undo is possible.
+     * @param undo_possibility `true` if undo is possible.
      */
     public signal void undo_changed (bool undo_possibility);
     /**
      * Emit when redo flag of current {@link SourceBuffer} has changed.
      *
-     * @param redo_possibility True if redo is possible.
+     * @param redo_possibility `true` if redo is possible.
      */
     public signal void redo_changed (bool redo_possibility);
 
@@ -1280,7 +1280,7 @@ public class ValamaProject : Object {
      *
      * @param txt Containing text. Default is empty.
      * @param filename Filename to identify buffer. Default is empty.
-     * @param dirty Flag if buffer is dirty. Default is false.
+     * @param dirty Flag if buffer is dirty. Default is `false`.
      * @return Return {@link Gtk.SourceView} if new buffer was created else null.
      */
     public SourceView? open_new_buffer (string txt = "", string filename = "", bool dirty = false) {
@@ -1391,7 +1391,7 @@ public class ValamaProject : Object {
 
     /**
      * Update Guanako completion proposals for buffer and run update for
-     * current sourcefocus.
+     * current source file focus.
      *
      * @param buffer {@link Gtk.SourceBuffer} to look for completions.
      */
@@ -1425,7 +1425,7 @@ public class ValamaProject : Object {
     /**
      * Emit signal if buffer has changed.
      *
-     * @param has_changes True if buffer is dirty else false.
+     * @param has_changes `true` if buffer is dirty else `false`.
      */
     public signal void buffer_changed (bool has_changes);
 
@@ -1442,7 +1442,7 @@ public class ValamaProject : Object {
     /**
      * Save all opened project files.
      *
-     * @return Return true on success else false.
+     * @return Return `true` on success else `false`.
      */
     public bool buffer_save_all() {
         bool ret = true;
@@ -1461,12 +1461,12 @@ public class ValamaProject : Object {
      * Save specific project file and update dirty flag.
      *
      * @param filename Filename of buffer to save. If empty current buffer is
-     *                 choosed. If filename is relative project path is
+     *                 chosen. If filename is relative project path is
      *                 prepended.
-     * @return Return true on success else false.
+     * @return Return `true` on success else `false`.
      */
     public bool buffer_save (string filename = "") {
-        /* Use temporary variable to work arround unowned var issue. */
+        /* Use temporary variable to work around unowned var issue. */
         string filepath = filename;
         if (filepath == "") {
             if (source_viewer.current_srcfocus == null) {
@@ -1490,8 +1490,8 @@ public class ValamaProject : Object {
      * Check if buffer is dirty.
      *
      * @param filename Buffer by filename to check.
-     * @return Return negated dirty flag of buffer or false if buffer doesn't
-     *         exist in project file context.
+     * @return Return negated dirty flag of buffer or `false` if buffer does
+     *         not exist in project file context.
      */
     public bool buffer_is_dirty (string filename) {
         foreach (var map in vieworder)
@@ -1507,7 +1507,7 @@ public class ValamaProject : Object {
      * Show dialog if {@link Gtk.SourceView} wasn't saved yet.
      *
      * @param view {@link Gtk.SourceView} to check if closing is ok.
-     * @return Return true to indicate buffer can now closed safely.
+     * @return Return `true` to indicate buffer can now closed safely.
      */
     public bool close_buffer (SourceView view) {
         /*

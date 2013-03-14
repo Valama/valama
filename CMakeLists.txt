@@ -253,7 +253,7 @@ else(CMAKE_BUILD_TYPE STREQUAL "Debug")
 endif()
 
 
-# Compress and install manpage.
+# Compress and install manual page.
 #if(NOT MANPAGE_DISABLED)
 #  add_custom_command(COMMAND gzip -cf9 "${PROJECT_SOURCE_DIR}/man/${project_name_lower}.1" >
 #                      "${PROJECT_SOURCE_DIR}/man/${project_name_lower}.1.gz"

@@ -241,7 +241,7 @@ public class ProjectBrowser : UiElement {
         d_pathmap = new Gee.HashMap<string, TreeIter?>();
 
         build_file_treestore (_("Sources"), project.files.to_array(), ref store, ref pathmap);
-        build_file_treestore (_("Buildsystem files"), project.b_files.to_array(), ref store, ref b_pathmap);
+        build_file_treestore (_("Build system files"), project.b_files.to_array(), ref store, ref b_pathmap);
         build_file_treestore (_("Data files"), project.d_files.to_array(), ref store, ref d_pathmap);
         build_plain_treestore (_("Packages"), project.package_list.to_array(), ref store);
 

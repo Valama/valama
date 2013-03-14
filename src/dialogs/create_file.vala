@@ -25,7 +25,7 @@ using Vala;
  * Create new file (you need to add it to project manually). If file already
  * exists, open it.
  *
- * @param path Rootpath of new file.
+ * @param path Root path of new file.
  * @param extension File extension.
  */
 public string? ui_create_file_dialog (string? path = null, string? extension = null) {
@@ -51,7 +51,7 @@ public string? ui_create_file_dialog (string? path = null, string? extension = n
 
     Regex valid_chars = /^[a-z0-9.:_\\\/-]+$/i;  // keep "-" at the end!
     var ent_filename = new Entry.with_inputcheck (ent_filename_err, valid_chars);
-    ent_filename.set_placeholder_text (_("filename"));  // this is i.g. not visible
+    ent_filename.set_placeholder_text (_("filename"));  // this is e.g. not visible
 
     box_filename.pack_start (ent_filename, false, false);
     box_filename.pack_start (ent_filename_err, false, false);

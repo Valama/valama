@@ -36,7 +36,7 @@ public void ui_missing_packages_dialog (string[] missing_packages) {
     string dlg = _("The following vala packages are not available on your system:\n");
     foreach (string pkg in missing_packages)
         dlg += pkg + "\n";
-    dlg += _("Compiling and autocompletion might fail!");
+    dlg += _("Compiling and auto completion might fail!");
     var lbl_packages = new Label (dlg);
     box_main.pack_start (lbl_packages, true, true);
     box_main.show_all();

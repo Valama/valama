@@ -205,7 +205,7 @@ public class FileTransfer : Object {
      * @param query_flag Follow symlinks or not.
      * @param cancellable Is cancellable.
      * @throws GLib.Error Throw on file query errors.
-     * @throws GLib.IOError Throw on failed io operations.
+     * @throws GLib.IOError Throw on failed I/O operations.
      */
     public FileTransfer (string from, string to,
                               CopyRecursiveFlags rec_flag = CopyRecursiveFlags.NONE,
@@ -247,7 +247,7 @@ public class FileTransfer : Object {
                 query_flag == FileQueryInfoFlags.NOFOLLOW_SYMLINKS)) {
             is_file = true;
             /*
-             * If destination object already exists and is a diretory, make
+             * If destination object already exists and is a directory, make
              * f_to to a child of it.
              */
             if (f_to.query_exists()) {
@@ -274,7 +274,7 @@ public class FileTransfer : Object {
 
     /**
      * Signal with both file names to indicate if file should be overwritten.
-     * Return true to overwrite file. To skip return false.
+     * Return `true` to overwrite file. To skip return `false`.
      *
      * Emit on change.
      *
@@ -287,7 +287,7 @@ public class FileTransfer : Object {
      * Calculate total size of transfers.
      *
      * @throws GLib.Error Throw on file query errors.
-     * @throws GLib.IOError Throw on failed io operations.
+     * @throws GLib.IOError Throw on failed I/O operations.
      */
     //TODO: Provide public interface to provide information without doing
     //      anything?
@@ -312,13 +312,13 @@ public class FileTransfer : Object {
     }
 
     /**
-     * Call the transfer methods properly, calulcate before transfer and create
-     * destination directory if needed.
+     * Call the transfer methods properly, calculate before transfer and
+     * create destination directory if needed.
      *
      * @param action Flag to control action to do.
      *
      * @throws GLib.Error Throw on file query errors.
-     * @throws GLib.IOError Throw on failed io operations.
+     * @throws GLib.IOError Throw on failed I/O operations.
      */
     private void transfer (RecursiveAction action) throws GLib.Error, GLib.IOError {
         calc_size();
@@ -341,7 +341,7 @@ public class FileTransfer : Object {
      * Wrapper to call recursive copy method (and avoid file names here).
      *
      * @throws GLib.Error Throw on file query errors.
-     * @throws GLib.IOError Throw on failed io operations.
+     * @throws GLib.IOError Throw on failed I/O operations.
      */
     public void copy() throws GLib.Error, GLib.IOError {
         transfer (RecursiveAction.COPY);
@@ -352,7 +352,7 @@ public class FileTransfer : Object {
      * Wrapper to call recursive move method (and avoid file names here).
      *
      * @throws GLib.Error Throw on file query errors.
-     * @throws GLib.IOError Throw on failed io operations.
+     * @throws GLib.IOError Throw on failed I/O operations.
      */
     public void move() throws GLib.Error, GLib.IOError {
         transfer (RecursiveAction.MOVE);
@@ -365,7 +365,7 @@ public class FileTransfer : Object {
      * @param from {@link GLib.File} to do action from.
      * @param dest {@link GLib.File} to do action to.
      * @throws GLib.Error Throw on file query errors.
-     * @throws GLib.IOError Throw on failed io operations.
+     * @throws GLib.IOError Throw on failed I/O operations.
      */
     private void do_recursively (File from, File dest) throws Error, IOError {
         FileEnumerator enumerator = from.enumerate_children ("standard::*",
@@ -505,11 +505,11 @@ public class FileTransfer : Object {
 
 
 /**
- * Generate list of filename parts splitted on {@link GLib.Path.DIR_SEPARATOR}.
+ * Generate list of filename parts spited on {@link GLib.Path.DIR_SEPARATOR}.
  *
  * @param path Pathname to split.
  * @param basename Control return of absolute or relative parts of path.
- * @return If basename is false, return list of full paths. Else return
+ * @return If basename is `false`, return list of full paths. Else return
  *         absolute paths.
  */
 public string[] split_path (string path, bool basename = true) {
@@ -547,7 +547,7 @@ public string[] split_path (string path, bool basename = true) {
  *
  * @param filename Filename where to save buffer.
  * @param text Content to save.
- * @return On success return true else false.
+ * @return On success return `true` else `false`.
  */
 public bool save_file (string filename, string text) {
     var file = File.new_for_path (filename);

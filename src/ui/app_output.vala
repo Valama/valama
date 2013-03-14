@@ -33,7 +33,7 @@ public class AppOutput : UiElement {
         var toolbar_title = new Toolbar ();
         toolbar_title.get_style_context().add_class (STYLE_CLASS_PRIMARY_TOOLBAR);
         var ti_title = new ToolItem();
-        var plabel = new Label (_("App output"));
+        var plabel = new Label (_("Application output"));
         ti_title.add (plabel);
         toolbar_title.add(ti_title);
 
