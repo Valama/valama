@@ -283,27 +283,27 @@ public class ValamaProject : Object {
     /**
      * Project source directories (absolute paths).
      */
-    public Gee.TreeSet<string> source_dirs { get; private set; }
+    public TreeSet<string> source_dirs { get; private set; }
     /**
      * Project extra source files (absolute paths).
      */
-    public Gee.TreeSet<string> source_files { get; private set; }
+    public TreeSet<string> source_files { get; private set; }
     /**
      * Project buildsystem directories (absolute paths).
      */
-    public Gee.TreeSet<string> buildsystem_dirs { get; private set; }
+    public TreeSet<string> buildsystem_dirs { get; private set; }
     /**
      * Project extra buildsystem files (absolute paths).
      */
-    public Gee.TreeSet<string> buildsystem_files { get; private set; }
+    public TreeSet<string> buildsystem_files { get; private set; }
     /**
      * Project directories for extra files (absolute paths).
      */
-    public Gee.TreeSet<string> data_dirs { get; private set; }
+    public TreeSet<string> data_dirs { get; private set; }
     /**
      * Project extra files (absolute paths).
      */
-    public Gee.TreeSet<string> data_files { get; private set; }
+    public TreeSet<string> data_files { get; private set; }
     /**
      * Project version first part.
      */
@@ -332,15 +332,15 @@ public class ValamaProject : Object {
     /**
      * List of source files.
      */
-    public Gee.TreeSet<string> files { get; private set; }
+    public TreeSet<string> files { get; private set; }
     /**
      * List of buildsystem files.
      */
-    public Gee.TreeSet<string> b_files { get; private set; }
+    public TreeSet<string> b_files { get; private set; }
     /**
      * List of extra files.
      */
-    public Gee.TreeSet<string> d_files { get; private set; }
+    public TreeSet<string> d_files { get; private set; }
     /**
      * Flag to show multiple files are added and an update on each new file
      * is not necessary. Set this manually.
@@ -368,7 +368,7 @@ public class ValamaProject : Object {
      * Use {@link add_package} or {@link add_package_by_name} to add a new
      * package.
      */
-    public Gee.TreeSet<PackageInfo?> packages { get; private set; }
+    public TreeSet<PackageInfo?> packages { get; private set; }
 
     /**
      * List of packages without version information.
@@ -376,7 +376,7 @@ public class ValamaProject : Object {
      * Use {@link add_package} or {@link add_package_by_name} to add a new
      * package.
      */
-    public Gee.TreeSet<string> package_list { get; private set; }
+    public TreeSet<string> package_list { get; private set; }
 
     /**
      * Emit signal when source file was added or removed.
@@ -424,6 +424,20 @@ public class ValamaProject : Object {
                                         e.message);
             }
 
+        packages = new TreeSet<PackageInfo?> ((CompareDataFunc<PackageInfo?>?) PackageInfo.compare_func);
+        package_list = new TreeSet<string>();
+        package_choices = new Gee.ArrayList<PkgChoice?>();
+        source_dirs = new TreeSet<string>();
+        source_files = new TreeSet<string>();
+        buildsystem_dirs = new TreeSet<string>();
+        buildsystem_files = new TreeSet<string>();
+        data_dirs = new TreeSet<string>();
+        data_files = new TreeSet<string>();
+
+        files = new TreeSet<string>();
+        b_files = new TreeSet<string>();
+        d_files = new TreeSet<string>();
+
         msg (_("Load project file: %s\n"), this.project_file);
         load_project_file();  // can throw LoadingError
 
@@ -451,10 +465,6 @@ public class ValamaProject : Object {
             }
 
         recentmgr.add_item (get_absolute_path (this.project_file));
-
-        files = new Gee.TreeSet<string>();
-        b_files = new Gee.TreeSet<string>();
-        d_files = new Gee.TreeSet<string>();
 
         generate_file_list (_source_dirs.to_array(),
                             _source_files.to_array(),
@@ -717,8 +727,8 @@ public class ValamaProject : Object {
      *
      * @param filename Path to file.
      */
-    public void add_source_file (string filename) {
-        if (!(filename.has_suffix (".vala") || filename.has_suffix (".vapi")))
+    public void add_source_file (string? filename) {
+        if (filename == null || !(filename.has_suffix (".vala") || filename.has_suffix (".vapi")))
             return;
         var filename_abs = get_absolute_path (filename);
 
@@ -756,7 +766,7 @@ public class ValamaProject : Object {
      * @param filename Path to file to unregister.
      * @return `true` on success else `false` (e.g. if file was not found).
      */
-    public bool remove_source_file (string filename) {
+    public bool remove_source_file (string? filename) {
         var filename_abs = get_absolute_path (filename);
         if (!files.remove (filename_abs))
             return false;
@@ -770,8 +780,8 @@ public class ValamaProject : Object {
      *
      * @param filename Path to file.
      */
-    public void add_buildsystem_file (string filename) {
-        if (!(filename.has_suffix (".cmake") || Path.get_basename (filename) == ("CMakeLists.txt")))
+    public void add_buildsystem_file (string? filename) {
+        if (filename == null || !(filename.has_suffix (".cmake") || Path.get_basename (filename) == ("CMakeLists.txt")))
             return;
         var filename_abs = get_absolute_path (filename);
 
@@ -814,7 +824,9 @@ public class ValamaProject : Object {
      *
      * @param filename Path to file.
      */
-    public void add_data_file (string filename) {
+    public void add_data_file (string? filename) {
+        if (filename == null)
+            return;
         var filename_abs = get_absolute_path (filename);
 
         var f = File.new_for_path (filename_abs);
@@ -925,16 +937,6 @@ public class ValamaProject : Object {
             } else
                 warning_msg (_("Ignore project file loading error: %s\n"), errstr);
         }
-
-        packages = new Gee.TreeSet<PackageInfo?> ((CompareDataFunc<PackageInfo?>?) PackageInfo.compare_func);
-        package_list = new Gee.TreeSet<string>();
-        package_choices = new Gee.ArrayList<PkgChoice?>();
-        source_dirs = new Gee.TreeSet<string>();
-        source_files = new Gee.TreeSet<string>();
-        buildsystem_dirs = new Gee.TreeSet<string>();
-        buildsystem_files = new Gee.TreeSet<string>();
-        data_dirs = new Gee.TreeSet<string>();
-        data_files = new Gee.TreeSet<string>();
 
         for (Xml.Node* i = root_node->children; i != null; i = i->next) {
             if (i->type != ElementType.ELEMENT_NODE)
@@ -1129,11 +1131,14 @@ public class ValamaProject : Object {
 
     /**
      * Save project to {@link project_file}.
+     *
+     * @param balance If `true` balance file and directory lists.
      */
-    public void save() {
+    public void save (bool balance = true) {
         debug_msg (_("Save project file.\n"));
 
-        balance_pfile_dirs();
+        if (balance)
+            balance_pfile_dirs();
 
         var writer = new TextWriter.filename (project_file);
         writer.set_indent (true);

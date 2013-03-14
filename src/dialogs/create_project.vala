@@ -584,22 +584,128 @@ public static ValamaProject? create_project_from_template (ProjectTemplate templ
         new FileTransfer (buildsystem_path,
                           target_folder,
                           CopyRecursiveFlags.SKIP_EXISTENT).copy();
-        project.save();
+
+        /* Substitutions. */
+        foreach (var sub in template.substitutions) {
+            var target = Path.build_path (Path.DIR_SEPARATOR_S,
+                                          target_folder,
+                                          sub.file);
+            var f = File.new_for_path (target);
+            if (!f.query_exists()) {
+                warning_msg (_("Cannot apply substitution '@%s@'%s -> '%s': %s does not exist\n"),
+                             sub.match, (sub.line) ? _(" (line)") : "", sub.replace, target);
+                continue;
+            }
+
+            temp_substitute (sub, f);
+        }
     } catch (GLib.Error e) {
         errmsg (_("Could not copy templates for new project: %s\n"), e.message);
     }
 
 
-    ValamaProject new_proj = null;
+    ValamaProject? new_proj = null;
     try {
         new_proj = new ValamaProject (Path.build_path (Path.DIR_SEPARATOR_S,
                                                        target_folder,
                                                        project_name + ".vlp"));
         new_proj.project_name = project_name;
+        new_proj.save();
     } catch (LoadingError e) {
         errmsg (_("Couln't load new project: %s\n"), e.message);
     }
     return new_proj;
+}
+
+
+/**
+ * Apply substitutions to template code.
+ *
+ * @param sub Information what to substitute.
+ * @param f {@link GLib.File} object to apply substitution to.
+ */
+private void temp_substitute (TemplateSubstition sub, File f) {
+    if (f.query_file_type (FileQueryInfoFlags.NONE) == FileType.DIRECTORY) {
+        /* Recursion. */
+        try {
+            var enumerator = f.enumerate_children ("standard::*", FileQueryInfoFlags.NONE);
+            FileInfo info = null;
+            while ((info = enumerator.next_file()) != null)
+                temp_substitute (sub, f.resolve_relative_path (info.get_name()));
+        } catch (GLib.Error e) {
+            warning_msg (_("Could not list or iterate through directory content of '%s': %s\n"),
+                         f.get_path(), e.message);
+        }
+    } else {
+        /* Replace action */
+        //FIXME: Accumulate all substitutions for one file to only seek one time.
+        debug_msg (_("Substitute: '@%s@'%s -> '%s': %s\n"),
+                   sub.match, (sub.line) ? _(" (line)") : "", sub.replace, sub.file);
+
+        string filename = f.get_path();
+
+        FileInputStream fis;
+        try {
+            fis = f.read();
+        } catch (GLib.Error e) {
+            warning_msg (_("Cannot read file '%s': %s\n"), filename, e.message);
+            return;
+        }
+
+        /*
+         * FIXME: Make sure file not already exists! But a normal tmpfile is
+         *        not sufficient because it can be on an other file system.
+         */
+        string filename_new = @"$(filename)-new";
+        var fo = File.new_for_path (filename_new);
+        FileOutputStream fos;
+        try {
+            fos = fo.create (FileCreateFlags.PRIVATE);
+        } catch (GLib.Error e) {
+            warning_msg (_("Cannot create temporary file '%s' to apply substitutions: %s\n"),
+                         filename_new, e.message);
+            try {
+                fis.close();
+            } catch (GLib.IOError e) {
+                warning_msg (_("Could not close file descriptor for '%s': %s\n"),
+                             filename, e.message);
+            }
+            return;
+        }
+
+        var dis = new DataInputStream (fis);
+        var dos = new DataOutputStream (fos);
+
+        string? line = null;
+        try {
+            while ((line = dis.read_line()) != null) {
+                try {
+                    if (!sub.line)
+                        dos.put_string (line.replace (@"@$(sub.match)@", sub.replace) + "\n");
+                    else if (line.index_of (@"@$(sub.match)@") > -1)
+                        dos.put_string (sub.replace + "\n");
+                    else
+                        dos.put_string (line + "\n");
+                } catch (GLib.IOError e) {
+                    warning_msg (_("Could not write to temporary file '%s': %s\n"),
+                                 filename_new, e.message);
+                }
+             }
+        } catch (GLib.IOError e) {
+            warning_msg (_("Could not read file '%s' properly: %s\n"), filename, e.message);
+        }
+        try {
+            dos.close();
+            fo.move (f, FileCopyFlags.OVERWRITE);  //TODO: Are timestamps an issue?
+        } catch (GLib.IOError e) {
+            warning_msg (_("Could not close file descriptor for '%s': %s\n"),
+                         filename_new, e.message);
+            return;
+        } catch (GLib.Error e) {
+            warning_msg (_("Could not update file '%s' with '%s' (temporary file may still exist): %s\n"),
+                         filename, filename_new, e.message);
+        }
+    }
 }
 
 // vim: set ai ts=4 sts=4 et sw=4

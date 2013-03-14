@@ -25,6 +25,7 @@ public class ProjectTemplate {
     public Gdk.Pixbuf? icon = null;
     public ArrayList<TemplateAuthor?> authors;
     public ArrayList<TemplateValaVersion?> versions;
+    public ArrayList<TemplateSubstition?> substitutions;
     public string version = "0";
     public string name;
     public string path;
@@ -40,6 +41,7 @@ public class ProjectTemplate {
     public ProjectTemplate() {
         authors = new ArrayList<TemplateAuthor?>();
         versions = new ArrayList<TemplateValaVersion?>();
+        substitutions = new ArrayList<TemplateSubstition?>();
     }
 
     /**
@@ -88,6 +90,13 @@ public class TemplateAuthor {
 public class TemplateValaVersion {
     public VersionRelation? rel = null;
     public string? version = null;
+}
+
+public class TemplateSubstition {
+    public string? file = null;
+    public string? match = null;
+    public string? replace = null;
+    public bool line = false;
 }
 
 /**
@@ -256,6 +265,50 @@ public ProjectTemplate[] load_templates() {
                         break;
                     case "long-description":
                         new_template.long_description = get_lang_content (i, locales);
+                        break;
+                    case "substitutions":
+                        for (Xml.Node* p = i->children; p != null; p = p->next) {
+                            if (p->type != ElementType.ELEMENT_NODE)
+                                continue;
+                            switch (p->name) {
+                                case "sub":
+                                    var substitution = new TemplateSubstition();
+                                    substitution.file = p->get_content();
+                                    if (p->has_prop ("match") != null)
+                                        substitution.match = p->get_prop ("match");
+                                    else {
+                                        warning_msg (_("Ignore substitution with missing '%s' property line %hu."),
+                                                     "match", p->line);
+                                        break;
+                                    }
+                                    if (p->has_prop ("replace") != null)
+                                        substitution.replace = p->get_prop ("replace");
+                                    else {
+                                        warning_msg (_("Ignore substitution with missing '%s' property line %hu."),
+                                                     "replace", p->line);
+                                        break;
+                                    }
+                                    if (p->has_prop ("line") != null) {
+                                        switch (p->get_prop ("line")) {
+                                            case "yes":
+                                                substitution.line = true;
+                                                break;
+                                            case "no":
+                                                substitution.line = false;
+                                                break;
+                                            default:
+                                                warning_msg (_("Unknown value for substitution property '%s' line %hu (assume '%s'): %s"),
+                                                             "line", p->line, "no", p->get_prop ("line"));
+                                                break;
+                                        }
+                                    }
+                                    new_template.substitutions.add (substitution);
+                                    break;
+                                default:
+                                    warning_msg (_("Unknown configuration file value line %hu: %s\n"), p->line, p->name);
+                                    break;
+                            }
+                        }
                         break;
                     default:
                         warning_msg (_("Unknown configuration file value line %hu: %s\n"), i->line, i->name);
