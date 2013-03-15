@@ -448,7 +448,6 @@ public class ProjectBrowser : UiElement {
                 //TODO: Add possibility to only remove file from project.
                 if (ui_ask_warning (_("Do you want to delete this file?")) == ResponseType.YES) {
                     var file = File.new_for_path (abs_filepath);
-                    var fname = project.get_relative_path (filepath);
                     source_viewer.close_srcitem (abs_filepath);
 
                     switch (path.get_indices()[0]) {

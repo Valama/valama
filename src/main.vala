@@ -115,7 +115,7 @@ static void show_main_screen (ValamaProject load_project) {
         var srcbuf = source_viewer.current_srcbuffer;
         project.undo_changed (srcbuf.can_undo);
         project.redo_changed (srcbuf.can_redo);
-        if (source_viewer.current_srcfocus != _("New document"))
+        if (!is_new_document (source_viewer.current_srcfocus))
             project.buffer_changed (project.buffer_is_dirty (
                                             source_viewer.current_srcfocus));
         else
@@ -286,7 +286,7 @@ class GuanakoCompletion : Gtk.SourceCompletionProvider, Object {
 
     public void populate (Gtk.SourceCompletionContext context) {
         //TODO: Provide way to get completion for not saved content.
-        if (source_viewer.current_srcfocus == _("New document"))
+        if (is_new_document (source_viewer.current_srcfocus))
             return;
 
         /* Get current line */

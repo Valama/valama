@@ -874,7 +874,7 @@ public class ValamaProject : Object {
      *
      * @param filename Name of file to close view object.
      */
-    private void close_viewbuffer (string filename) {
+    public void close_viewbuffer (string filename) {
         ViewMap? vmap = null;
         foreach (var map in vieworder) {
             if (map.filename == get_absolute_path (filename)) {
@@ -1535,11 +1535,17 @@ public class ValamaProject : Object {
      * @return Return `true` to indicate buffer can now closed safely.
      */
     public bool close_buffer (SourceView view) {
-        /*
-         * TODO: Not Implemented.
-         *       Check if view.buffer is dirty. If so -> dialog
-         */
-        return false;
+        var bfr = (SourceBuffer) view.buffer;
+        if (bfr.dirty) {
+            stdout.printf ("Buffer is dirty!\n");
+            /*
+             * TODO: Not Implemented.
+             *       Check if view.buffer is dirty. If so -> dialog
+             */
+            return false;
+        }
+        debug_msg (_("Close buffer.\n"));
+        return true;
     }
 
     /**

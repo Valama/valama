@@ -131,20 +131,37 @@ class UiSourceViewer : UiElement {
      */
     public void close_srcitem (string filename) {
         DockItem? item = null;
-        foreach (var srcitem in srcitems)
-            if (project.get_absolute_path (srcitem.long_name) == filename) {
-                item = srcitem;
-                break;
-            }
+        if (!is_new_document (filename)) {
+            foreach (var srcitem in srcitems)
+                if (project.get_absolute_path (srcitem.long_name) == filename) {
+                    item = srcitem;
+                    break;
+                }
+        } else {
+            foreach (var srcitem in srcitems)
+                if (srcitem.long_name == filename) {
+                    item = srcitem;
+                    break;
+                }
+        }
         if (item != null) {
-            debug_msg (_("Close view: %s\n"), filename);
-            srcitems.remove (item);
-            item.unbind();
-            if (srcitems.size == 1)
-                srcitems[0].show_item();
-            current_srcfocus = project.get_absolute_path (srcitems[srcitems.size - 1].long_name);
+            close_srcitem_pr (item, filename);
+            project.close_viewbuffer (filename);
         } else
             warning_msg (_("Could not close view: %s\n"), filename);
+    }
+
+    private inline void close_srcitem_pr (DockItem item, string filename) {
+        debug_msg (_("Close view and buffer: %s\n"), filename);
+        srcitems.remove (item);
+        item.unbind();
+        if (srcitems.size == 1)
+            srcitems[0].show_item();
+        var fname = srcitems[srcitems.size - 1].long_name;
+        if (is_new_document (fname))
+            current_srcfocus = fname;
+        else
+            current_srcfocus = project.get_absolute_path (fname);
     }
 
     /**
@@ -220,9 +237,8 @@ class UiSourceViewer : UiElement {
                     set_notebook_tabs (item);
                     return;
                 }
-                srcitems.remove (item);
-                if (srcitems.size == 1)
-                    srcitems[0].show_item();
+                close_srcitem_pr (item, filename);
+                project.close_viewbuffer (filename);
             });
 
             item.behavior = DockItemBehavior.CANT_ICONIFY;
@@ -311,7 +327,7 @@ class UiSourceViewer : UiElement {
      *         {@link srcitems}. Else -1.
      */
     private int get_sourceview_id (string filename) {
-        if (!filename.has_prefix (_("New document"))) {
+        if (!is_new_document (filename)) {
             for (int i = 0; i < srcitems.size; ++i)
                 if (project.get_absolute_path (srcitems[i].long_name) == filename)
                     return i;
@@ -369,4 +385,8 @@ class UiSourceViewer : UiElement {
         debug_msg (_("Run %s update!\n"), get_name());
         debug_msg (_("%s update finished!\n"), get_name());
     }
+}
+
+public static inline bool is_new_document (string filename) {
+    return filename.has_prefix (_("New document"));
 }
