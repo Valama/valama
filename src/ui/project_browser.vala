@@ -445,10 +445,11 @@ public class ProjectBrowser : UiElement {
                 }
                 var abs_filepath = project.get_absolute_path (filepath);
 
+                //TODO: Add possibility to only remove file from project.
                 if (ui_ask_warning (_("Do you want to delete this file?")) == ResponseType.YES) {
                     var file = File.new_for_path (abs_filepath);
                     var fname = project.get_relative_path (filepath);
-                    source_viewer.close_srcitem (fname);
+                    source_viewer.close_srcitem (abs_filepath);
 
                     switch (path.get_indices()[0]) {
                         case 0:
@@ -471,6 +472,7 @@ public class ProjectBrowser : UiElement {
                      */
                     //pathmap.unset (filepath);
                     try {
+                        //TODO: Backup file?
                         file.delete();
                     } catch (GLib.Error e) {
                         errmsg (_("Unable to delete source file '%s': %s\n"), filepath, e.message);

@@ -105,7 +105,7 @@ class UiSourceViewer : UiElement {
             if (project.get_absolute_path (srcitem.long_name) == filename) {
                 widget_main.focus_dock_item (srcitem);
                 Idle.add (() => {
-                    get_sourceview(srcitem).grab_focus();
+                    get_sourceview (srcitem).grab_focus();
                     return false;
                 });
                 return;
@@ -124,17 +124,27 @@ class UiSourceViewer : UiElement {
     public signal bool buffer_close (SourceView view);
 
     /**
-     * Hide (close) {@link Gdl.DockItem} with {@link Gtk.SourceView} by
+     * Close {@link Gdl.DockItem} with {@link Gtk.SourceView} by
      * filename.
      *
      * @param filename Absolute name of source file to close.
      */
     public void close_srcitem (string filename) {
+        DockItem? item = null;
         foreach (var srcitem in srcitems)
             if (project.get_absolute_path (srcitem.long_name) == filename) {
-                srcitems.remove (srcitem);
-                srcitem.hide_item();
+                item = srcitem;
+                break;
             }
+        if (item != null) {
+            debug_msg (_("Close view: %s\n"), filename);
+            srcitems.remove (item);
+            item.unbind();
+            if (srcitems.size == 1)
+                srcitems[0].show_item();
+            current_srcfocus = project.get_absolute_path (srcitems[srcitems.size - 1].long_name);
+        } else
+            warning_msg (_("Could not close view: %s\n"), filename);
     }
 
     /**
@@ -145,10 +155,9 @@ class UiSourceViewer : UiElement {
      */
     public void add_srcitem (SourceView view, string filepath = "") {
         string displayname, filename = filepath;
-        if (filename == "") {
+        if (filename == "")
             displayname = filename = _("New document");
-
-        } else {
+        else {
             filename = project.get_absolute_path (filename);
             displayname = project.get_relative_path (filename);
         }
@@ -192,7 +201,6 @@ class UiSourceViewer : UiElement {
         view.grab_focus.connect (() => {
             this.current_srcfocus = filename;
         });
-
 
         if (srcitems.size == 0) {
             this.srcdock.add_item (item, DockPlacement.RIGHT);
@@ -249,7 +257,6 @@ class UiSourceViewer : UiElement {
         item.dock.connect (() => {
             set_notebook_tabs (item);
         });
-
     }
 
     /**
@@ -303,7 +310,7 @@ class UiSourceViewer : UiElement {
      *         {@link srcitems}. Else -1.
      */
     private int get_sourceview_id (string filename) {
-        if (filename != _("New document")) {
+        if (!filename.has_prefix (_("New document"))) {
             for (int i = 0; i < srcitems.size; ++i)
                 if (project.get_absolute_path (srcitems[i].long_name) == filename)
                     return i;

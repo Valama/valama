@@ -227,6 +227,7 @@ static void redo_change() {
     manager.redo();
 }
 
+//NOTE: Disabled due to #4.
 // static void on_auto_indent_button_clicked() {
 //     string indented = Guanako.auto_indent_buffer (project.guanako_project, current_source_file);
 //     current_source_file.content = indented;
@@ -239,7 +240,6 @@ static void redo_change() {
  * @param filename Name of file.
  * @return Return `true` on success else `false`.
  */
-//TODO: Grab focus.
 static bool on_file_selected (string filename) {
     if (source_viewer.current_srcfocus == filename)
         return true;

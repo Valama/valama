@@ -768,9 +768,11 @@ public class ValamaProject : Object {
      */
     public bool remove_source_file (string? filename) {
         var filename_abs = get_absolute_path (filename);
+        debug_msg (_("Remove source file: %s\n"), filename_abs);
         if (!files.remove (filename_abs))
             return false;
         guanako_project.remove_file (guanako_project.get_source_file_by_name (filename_abs));
+        close_viewbuffer (filename_abs);
         source_files_changed();
         return true;
     }
@@ -813,8 +815,10 @@ public class ValamaProject : Object {
      */
     public bool remove_buildsystem_file (string filename) {
         var filename_abs = get_absolute_path (filename);
+        debug_msg (_("Remove build system file: %s\n"), filename_abs);
         if (!b_files.remove (filename_abs))
             return false;
+        close_viewbuffer (filename_abs);
         buildsystem_files_changed();
         return true;
     }
@@ -857,10 +861,31 @@ public class ValamaProject : Object {
      */
     public bool remove_data_file (string filename) {
         var filename_abs = get_absolute_path (filename);
+        debug_msg (_("Remove data file: %s\n"), filename_abs);
         if (!d_files.remove (filename_abs))
             return false;
+        close_viewbuffer (filename_abs);
         data_files_changed();
         return true;
+    }
+
+    /**
+     * Close buffer by file name.
+     *
+     * @param filename Name of file to close view object.
+     */
+    private void close_viewbuffer (string filename) {
+        ViewMap? vmap = null;
+        foreach (var map in vieworder) {
+            if (map.filename == get_absolute_path (filename)) {
+                vmap = map;
+                break;
+            }
+        }
+        if (vmap != null)
+            vieworder.remove (vmap);
+        else
+            warning_msg (_("Could not close ViewMap for: %s\n"), filename);
     }
 
     /**

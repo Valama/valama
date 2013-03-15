@@ -649,6 +649,7 @@ public class MainWidget : Box {
      * @param item The item to receive focus.
      */
     public void focus_dock_item (DockItem item) {
+        debug_msg (_("Focus dock item: %s (%s)\n"), item.long_name, item.name);
         /* Hack around gdl_dock_notebook with gtk_notebook. */
         var pa = item.parent;
         /* If something strange happens (pa == null) break the loop. */
