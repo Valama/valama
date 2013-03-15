@@ -203,6 +203,7 @@ class UiSourceViewer : UiElement {
         });
 
         if (srcitems.size == 0) {
+            item.behavior |= DockItemBehavior.CANT_CLOSE;
             this.srcdock.add_item (item, DockPlacement.RIGHT);
         } else {
             /* Handle dock item closing. */
