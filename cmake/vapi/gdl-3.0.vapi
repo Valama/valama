@@ -216,6 +216,7 @@ namespace Gdl {
 		public string name { get; construct; }
 		[NoAccessorMethod]
 		public void* pixbuf_icon { get; set; }
+		[NoAccessorMethod]
 		public string stock_id { get; set construct; }
 		[HasEmitter]
 		public virtual signal void detach (bool recursive);

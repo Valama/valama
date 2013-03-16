@@ -197,8 +197,9 @@ public abstract class UiElement : Object{
         if (!locking || dock_item == null || saved_behavior != null)
             return;
         saved_behavior = dock_item.behavior;
+        /* Work arround gdl bug #515755 to not hide dockbar properly. */
+        //dock_item.hide_grip();
         dock_item.behavior = Gdl.DockItemBehavior.NO_GRIP;
-        /* Work arround gdl bug to not hide dockbar properly. */
         dock_item.forall_internal (true, (child) => {
             if (child is Gdl.DockItemGrip)
                 child.hide();
@@ -214,6 +215,8 @@ public abstract class UiElement : Object{
         if (saved_behavior != null)
             dock_item.behavior = saved_behavior;
         saved_behavior = null;
+        /* See note above. */
+        //dock_item.show_grip();
         dock_item.forall_internal (true, (child) => {
             if (child is Gdl.DockItemGrip)
                 child.show();

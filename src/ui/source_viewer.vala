@@ -205,7 +205,7 @@ class UiSourceViewer : UiElement {
                                             displayname,
                                             (srcbuf.dirty) ? Stock.NEW : Stock.EDIT,
                                             DockItemBehavior.LOCKED);
-        srcbuf.notify["dirty"].connect ((sender, property) => {
+        srcbuf.notify["dirty"].connect (() => {
             item.stock_id = (srcbuf.dirty) ? Stock.NEW : Stock.EDIT;
         });
         item.add (src_view);
