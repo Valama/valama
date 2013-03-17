@@ -32,30 +32,63 @@ public class SymbolBrowser : UiElement {
             project = vproject;
 
         tree_view = new TreeView();
+
         tree_view.insert_column_with_attributes (-1,
                                                  null,
                                                  new CellRendererPixbuf(),
                                                  "pixbuf",
                                                  2,
                                                  null);
-
-        tree_view.insert_column_with_attributes (-1,
-                                                 _("Symbol"),
-                                                 new CellRendererText(),
-                                                 "text",
-                                                 0,
-                                                 null);
-
+        var tmrenderer = new CellRendererText();
+        var tmcolumn = new TreeViewColumn.with_attributes (_("Symbol"), tmrenderer, "markup");
+        tree_view.append_column (tmcolumn);
         tree_view.insert_column_with_attributes (-1,
                                                  _("Type"),
                                                  new CellRendererText(),
                                                  "text",
                                                  1,
                                                  null);
+        var store = new TreeStore (3, typeof (string), typeof (string), typeof (Gdk.Pixbuf));
+        tree_view.set_model (store);
+        TreeIter iter;
+        store.append (out iter, null);
 
-        build();
-        //TODO: Is there a better solution to get all symbols?
-        project.guanako_update_finished.connect (build_init);
+        tree_view.sensitive = false;
+
+        int state = -1;
+        var timer_id = Timeout.add (800, () => {
+            switch (state) {
+                case 0:
+                    store.set (iter, 0, "<i>" + Markup.escape_text (_("Loading")) + ".  </i>", -1);
+                    ++state;
+                    break;
+                case 1:
+                    store.set (iter, 0, "<i>" + Markup.escape_text (_("Loading")) + ".. </i>", -1);
+                    ++state;
+                    break;
+                case 2:
+                    store.set (iter, 0, "<i>" + Markup.escape_text (_("Loading")) + "...</i>", -1);
+                    ++state;
+                    break;
+                default:
+                    store.set (iter, 0, "<i>" + Markup.escape_text (_("Loading")) + "   </i>", -1);
+                    state = 0;
+                    break;
+            }
+            return true;
+        });
+
+        /*
+         * NOTE: Build symbol table after threaded Guanako update has
+         *       finished. This might be later than this point, so connect
+         *       a single time to this signal.
+         */
+        project.guanako_update_finished.connect (() => {
+            Source.remove (timer_id);
+            tree_view.sensitive = true;
+            tmcolumn.set_attributes (tmrenderer, "text", 0);
+            build_init();
+        });
 
         var scrw = new ScrolledWindow (null, null);
         scrw.add (tree_view);
@@ -71,7 +104,7 @@ public class SymbolBrowser : UiElement {
             if (!project.add_multiple_files)
                 build();
             else
-                update_needed = true;;
+                update_needed = true;
         });
         project.notify["add-multiple-files"].connect (() => {
             if (!project.add_multiple_files && update_needed)
