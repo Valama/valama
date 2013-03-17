@@ -139,25 +139,30 @@ static void load_icons() {
     }
     var type_regex = /^element-[a-zA-Z_-]+-16\.png$/;
 
-    var enumerator = imagedir.enumerate_children ("standard::*", FileQueryInfoFlags.NONE, null);
-    FileInfo? info = null;
-    while ((info = enumerator.next_file()) != null) {
-        if (info.get_file_type() == FileType.DIRECTORY)
-            continue;
-        if (type_regex.match (info.get_name()))
-            try {
-                    var pixmappath = Path.build_path (Path.DIR_SEPARATOR_S,
-                                                      Config.PIXMAP_DIR,
-                                                      info.get_name());
-                    map_icons[info.get_name()] = new Gdk.Pixbuf.from_file (pixmappath);
-                    debug_msg_level (3, _("Load pixmap: %s\n"), pixmappath);
-            } catch (Gdk.PixbufError e) {
-                errmsg (_("Could not load pixmap: %s\n"), e.message);
-            } catch (GLib.FileError e) {
-                errmsg (_("Could not open pixmaps file: %s\n"), e.message);
-            } catch (GLib.Error e) {
-                errmsg (_("Pixmap loading failed: %s\n"), e.message);
-            }
+    try {
+        var enumerator = imagedir.enumerate_children ("standard::*", FileQueryInfoFlags.NONE, null);
+        FileInfo? info = null;
+        while ((info = enumerator.next_file()) != null) {
+            if (info.get_file_type() == FileType.DIRECTORY)
+                continue;
+            if (type_regex.match (info.get_name()))
+                try {
+                        var pixmappath = Path.build_path (Path.DIR_SEPARATOR_S,
+                                                          Config.PIXMAP_DIR,
+                                                          info.get_name());
+                        map_icons[info.get_name()] = new Gdk.Pixbuf.from_file (pixmappath);
+                        debug_msg_level (3, _("Load pixmap: %s\n"), pixmappath);
+                } catch (Gdk.PixbufError e) {
+                    errmsg (_("Could not load pixmap: %s\n"), e.message);
+                } catch (GLib.FileError e) {
+                    errmsg (_("Could not open pixmaps file: %s\n"), e.message);
+                } catch (GLib.Error e) {
+                    errmsg (_("Pixmap loading failed: %s\n"), e.message);
+                }
+        }
+    } catch (GLib.Error e) {
+        warning_msg (_("Could not list or iterate through directory content of '%s': %s\n"),
+                     imagedir.get_path(), e.message);
     }
 }
 
