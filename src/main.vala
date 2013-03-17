@@ -121,8 +121,9 @@ static void show_main_screen (ValamaProject load_project) {
         else
             project.buffer_changed (true);
     });
-    widget_main.request_close.connect(()=>{
+    widget_main.request_close.connect (() => {
         window_main.remove (widget_main);
+        project = null;
         window_main.add (vscreen);
     });
 }
