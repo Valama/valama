@@ -146,19 +146,59 @@ public class Entry : Gtk.Entry {
 
 
 /**
- * Simple warning dialog. Check {@link Gtk.ResponseType.YES} or
- * {@link Gtk.ResponseType.NO}.
+ * Simple warning dialog with 'yes' and 'no' buttons.
+ *
+ * Remeber to properly escape extra_text if needed.
  *
  * @param warn_msg Text of warning.
- * @return Return {@link Gtk.ResponseType}.
+ * @param extra_text Additional information with markdown formatting.
+ * @return Return {@link Gtk.ResponseType}, either {@link Gtk.ResponseType.YES}
+ *         or {@link Gtk.ResponseType.YES}.
  */
-public int ui_ask_warning (string warn_msg) {
+public int ui_ask_warning (string warn_msg, string? extra_text = null) {
     var dlg = new MessageDialog (window_main,
                                  DialogFlags.MODAL,
                                  MessageType.WARNING,
                                  ButtonsType.YES_NO,
                                  warn_msg,
                                  null);
+    if (extra_text != null) {
+        dlg.secondary_use_markup = true;
+        dlg.secondary_text = extra_text;
+    }
+
+    int ret = dlg.run();
+    dlg.destroy();
+    return ret;
+}
+
+
+/**
+ * Simple warning dialog with 'discard' 'save' and 'cancel' buttons.
+ *
+ * Remeber to properly escape extra_text if needed.
+ *
+ * @param warn_msg Text of warning.
+ * @param extra_text Additional information with markdown formatting.
+ * @return Return {@link Gtk.ResponseType}.
+ */
+public int ui_ask_file (string warn_msg, string? extra_text = null) {
+    var dlg = new MessageDialog (window_main,
+                                 DialogFlags.MODAL,
+                                 MessageType.WARNING,
+                                 ButtonsType.NONE,
+                                 warn_msg,
+                                 null);
+
+    if (extra_text != null) {
+        dlg.secondary_use_markup = true;
+        dlg.secondary_text = extra_text;
+    }
+
+    dlg.add_button (Stock.DISCARD, ResponseType.REJECT);
+    dlg.add_button (Stock.SAVE, ResponseType.ACCEPT);
+    dlg.add_button (Stock.CANCEL, ResponseType.CANCEL);
+
     int ret = dlg.run();
     dlg.destroy();
     return ret;

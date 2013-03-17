@@ -1532,17 +1532,26 @@ public class ValamaProject : Object {
      * Show dialog if {@link Gtk.SourceView} wasn't saved yet.
      *
      * @param view {@link Gtk.SourceView} to check if closing is ok.
+     * @param filename Name of file to close.
      * @return Return `true` to indicate buffer can now closed safely.
      */
-    public bool close_buffer (SourceView view) {
+    public bool close_buffer (SourceView view, string? filename) {
         var bfr = (SourceBuffer) view.buffer;
         if (bfr.dirty) {
-            stdout.printf ("Buffer is dirty!\n");
-            /*
-             * TODO: Not Implemented.
-             *       Check if view.buffer is dirty. If so -> dialog
-             */
-            return false;
+            var ret = ui_ask_file (_("File is modified. Do you want to save it?"),
+                                   Markup.escape_text (filename));
+            switch (ret) {
+                case ResponseType.REJECT:
+                    return true;
+                case ResponseType.ACCEPT:
+                    return buffer_save (filename);
+                case ResponseType.CANCEL:
+                    return false;
+                default:
+                    bug_msg (_("Unexpected response value: %s - %u"),
+                             "close_buffer - ValamaProject", ret);
+                    return false;
+            }
         }
         debug_msg (_("Close buffer.\n"));
         return true;

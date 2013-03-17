@@ -119,9 +119,10 @@ class UiSourceViewer : UiElement {
      * {@link Gdl.DockItem} with {@link Gtk.SourceView}.
      *
      * @param view {@link Gtk.SourceView} to close.
+     * @param filename Name of file to close.
      * @return Return `false` to interrupt or return `true` to proceed.
      */
-    public signal bool buffer_close (SourceView view);
+    public signal bool buffer_close (SourceView view, string? filename);
 
     /**
      * Close {@link Gdl.DockItem} with {@link Gtk.SourceView} by
@@ -207,6 +208,7 @@ class UiSourceViewer : UiElement {
                                             DockItemBehavior.LOCKED);
         srcbuf.notify["dirty"].connect (() => {
             /* Work around #695972 to update icon. */
+            //item.stock_id = (srcbuf.dirty) ? Stock.NEW : Stock.EDIT;
             item.set ("stock-id", (srcbuf.dirty) ? Stock.NEW : Stock.EDIT);
         });
         item.add (src_view);
@@ -229,17 +231,20 @@ class UiSourceViewer : UiElement {
                 /* Suppress dialog by removing item at first from srcitems list. */
                 if (!(item in srcitems))
                     return;
+                /*
+                 * TODO: Better solution to prevent emission of hiding? We
+                 *       want hide it at a later point after confirm dialog.
+                 */
+                /*
+                 * This will work properly with gdl-3.0 >= 3.5.5
+                 */
+                item.show_item();
+                set_notebook_tabs (item);
 
-                if (!buffer_close (get_sourceview (item))) {
-                    /*
-                     * This will work properly with gdl-3.0 >= 3.5.5
-                     */
-                    item.show_item();
-                    set_notebook_tabs (item);
-                    return;
+                if (buffer_close (get_sourceview (item), displayname)) {
+                    close_srcitem_pr (item, filename);  // closes the item
+                    project.close_viewbuffer (filename);
                 }
-                close_srcitem_pr (item, filename);
-                project.close_viewbuffer (filename);
             });
 
             item.behavior = DockItemBehavior.CANT_ICONIFY;
