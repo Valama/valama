@@ -206,7 +206,8 @@ class UiSourceViewer : UiElement {
                                             (srcbuf.dirty) ? Stock.NEW : Stock.EDIT,
                                             DockItemBehavior.LOCKED);
         srcbuf.notify["dirty"].connect (() => {
-            item.stock_id = (srcbuf.dirty) ? Stock.NEW : Stock.EDIT;
+            /* Work around #695972 to update icon. */
+            item.set ("stock-id", (srcbuf.dirty) ? Stock.NEW : Stock.EDIT);
         });
         item.add (src_view);
 
