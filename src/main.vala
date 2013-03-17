@@ -97,7 +97,7 @@ public static int main (string[] args) {
     Gtk.main();
 
     if (project != null)
-        project.save();
+        project.close (true);
     return 0;
 }
 

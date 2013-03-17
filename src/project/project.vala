@@ -1255,6 +1255,43 @@ public class ValamaProject : Object {
         writer.end_element();
     }
 
+
+    public bool close (bool save_all = false) {
+        save();
+
+        if (save_all)
+            return buffer_save_all();
+
+        var changed_files = new TreeSet<string>();
+        foreach (var map in vieworder) {
+            //TOOD: Ask here too if dirty.
+            if (map.filename == "")
+                continue;
+            if (((SourceBuffer) map.view.buffer).dirty)
+                changed_files.add (map.filename);
+        }
+        if (changed_files.size > 0) {
+            var fstr = "";
+            foreach (var file in changed_files)
+                fstr += @"$file\n";
+            var ret = ui_ask_file (_("Following files are modified. Do you want to save them?"),
+                                   Markup.escape_text (fstr));
+            switch (ret) {
+                case ResponseType.REJECT:
+                    return true;
+                case ResponseType.ACCEPT:
+                    return buffer_save_all();
+                case ResponseType.CANCEL:
+                    return false;
+                default:
+                    bug_msg (_("Unexpected response value: %s - %u"),
+                             "close - ValamaProject", ret);
+                    return false;
+            }
+        } else
+            return true;
+    }
+
     /**
      * Select first available package of {@link PkgChoice}. Does not check for
      * conflicts.
@@ -1472,6 +1509,7 @@ public class ValamaProject : Object {
     public bool buffer_save_all() {
         bool ret = true;
         foreach (var map in vieworder) {
+            //TOOD: Ask here too if dirty.
             if (map.filename == "")
                 continue;
             var srcbuf = (SourceBuffer) map.view.buffer;

@@ -278,6 +278,8 @@ public class MainWidget : Box {
         var item_file_quit = new ImageMenuItem.from_stock (Stock.QUIT, null);
         menu_file.append (item_file_quit);
         item_file_quit.activate.connect (() => {
+            if (!project.close())
+                return;
             on_destroy();
             main_quit();
         });
@@ -363,7 +365,8 @@ public class MainWidget : Box {
         add_button (btnReturn);
         btnReturn.set_tooltip_text (_("Close project"));
         btnReturn.clicked.connect (() => {
-            request_close();
+            if (project.close())
+                request_close();
         });
 
         add_button (new SeparatorToolItem());
