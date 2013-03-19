@@ -72,10 +72,10 @@ namespace Guanako {
             int cnt = 0;
             foreach (FrankenTimer ftime in frankentimers) {
                 lines[ftime.start_line - 1] = @"var frankentimer_$(cnt.to_string()) = new GLib.Timer();\n"
-                                                + "frankentimer_$(cnt.to_string()).start();\n"
+                                                + @"frankentimer_$(cnt.to_string()).start();\n"
                                                 + lines[ftime.start_line - 1];
-                lines[ftime.end_line - 1] = "frankentimer_callback ($(cnt.to_string()),\n"
-                                            + "                       frankentimer_$(cnt.to_string()).elapsed());\n"
+                lines[ftime.end_line - 1] = @"frankentimer_callback ($(cnt.to_string()),\n"
+                                            + @"                       frankentimer_$(cnt.to_string()).elapsed());\n"
                                             + lines[ftime.end_line - 1];
                 cnt++;
             }

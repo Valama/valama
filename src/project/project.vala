@@ -817,6 +817,8 @@ public class ValamaProject : Object {
      */
     public signal void guanako_update_started();
 
+    public signal void completion_finished (Vala.Symbol? current_symbol);
+
     /**
      * Save all opened project files.
      *

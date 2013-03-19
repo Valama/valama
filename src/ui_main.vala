@@ -41,7 +41,7 @@ static UiSearch wdg_search;
 static SymbolBrowser wdg_smb_browser;
 static UiStyleChecker wdg_stylechecker;
 static Gee.HashMap<string, Gdk.Pixbuf> map_icons;
-
+static UiCurrentSymbol wdg_current_symbol;
 
 /**
  * Main window class. Setup {@link Gdl.Dock} and {@link Gdl.DockBar} stuff.
@@ -147,6 +147,7 @@ public class MainWidget : Box {
         wdg_current_file_structure = new UiCurrentFileStructure();
         wdg_search = new UiSearch();
         wdg_stylechecker = new UiStyleChecker();
+        wdg_current_symbol = new UiCurrentSymbol();
 
         /* Gdl elements. */
         add_item ("SourceView", _("Source view"), source_viewer,
@@ -186,6 +187,10 @@ public class MainWidget : Box {
                               DockItemBehavior.NORMAL,
                               DockPlacement.LEFT);
         add_item ("SymbolBrowser", _("Symbol browser"), wdg_smb_browser,
+                              Stock.CONVERT,
+                              DockItemBehavior.NORMAL,
+                              DockPlacement.RIGHT);
+        add_item ("CurrentSymbol", _("Current symbol"), wdg_current_symbol,
                               Stock.CONVERT,
                               DockItemBehavior.NORMAL,
                               DockPlacement.RIGHT);

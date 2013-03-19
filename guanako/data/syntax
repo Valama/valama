@@ -105,7 +105,7 @@ TemplateBracketsIter
 
 
 SignalConnect
-$Value>{parent} . {parent}>Signal{a} .connect ?_ ( ?_ ?$MethodName ?_ ) ?_ ;
+$Value>{parent} . {parent}>Signal{a} .connect push_cur>{a} ?_ ( ?_ ?$MethodName ?_ ) pop_cur>{a} ?_ ;
 
 
 
@@ -152,7 +152,7 @@ MethodChildVariablesStat : parent
 {parent}>Variable<static>{a}|{parent}>Property<static>{a} $MethodIterInst{a}
 
 MethodChildMethodStat : parent
-{parent}>Method<static>{a} ?_ $MethodCallBrackets ?$MethodIterStat{a}
+{parent}>Method<static>{a} push_cur>{a} ?_ $MethodCallBrackets pop_cur>{a} ?$MethodIterStat{a}
 
 
 MethodChildMethodInst : parent
@@ -166,13 +166,13 @@ MethodInstCall : parent
 $MethodInstCallSingle{parent}>{ret}|$MethodInstCallArrayEl{parent}>{ret}|$MethodInstCallArray{parent}>{ret}
 
 MethodInstCallSingle : parent
-{parent}>Method<instance,single>{ret} ?_ $MethodCallBrackets
+{parent}>Method<instance,single>{ret} ?_ push_cur>{ret} $MethodCallBrackets pop_cur>{ret}
 
 MethodInstCallArray : parent
-{parent}>Method<instance,array>{ret} ?_ $MethodCallBrackets
+{parent}>Method<instance,array>{ret} ?_ push_cur>{ret} $MethodCallBrackets pop_cur>{ret}
 
 MethodInstCallArrayEl : parent
-{parent}>Method<instance,arr_el>{ret} ?_ $MethodCallBrackets ?_ [ ?_ $Value ?_ ]
+{parent}>Method<instance,arr_el>{ret} ?_ push_cur>{ret} $MethodCallBrackets pop_cur>{ret} ?_ [ ?_ $Value ?_ ]
 
 
 Value
@@ -195,7 +195,7 @@ ValueChildStuffSt : parent
 {parent}>Namespace{a}|{parent}>Class{a} $ValueIterSt{a}>{ret}
 
 ValueChildMethodSt : parent
-{parent}>Method<static>{ret} ?_ $MethodCallBrackets ?$ValueIterSt{ret}>{ret}
+{parent}>Method<static>{ret} ?_ push_cur>{ret} $MethodCallBrackets pop_cur>{ret} ?$ValueIterSt{ret}>{ret}
 
 
 ValueChildVariables : parent

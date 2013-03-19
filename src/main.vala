@@ -303,11 +303,16 @@ class TestProvider : Gtk.SourceCompletionProvider, Object {
         try {
             new Thread<void*>.try (_("Completion"), () => {
                 /* Get completion proposals from Guanako */
+                Symbol current_symbol = null;
                 var guanako_proposals = project.guanako_project.propose_symbols (
                             project.guanako_project.get_source_file_by_name (source_viewer.current_srcfocus),
                             line,
                             col,
-                            current_line);
+                            current_line, out current_symbol);
+                GLib.Idle.add (() => {
+                    project.completion_finished (current_symbol);
+                    return false;
+                });
 
                 /* Assign icons and pass the proposals on to Gtk.SourceView */
                 var props = new GLib.List<Gtk.SourceCompletionItem>();

@@ -13,6 +13,7 @@
             <paned orientation="vertical" locked="no" iconified="no" closed="no" position="408">
               <item name="CurrentFileStructure" orientation="vertical" locked="no" iconified="no" closed="no"/>
               <notebook orientation="vertical" locked="no" iconified="no" closed="no" page="1">
+                <item name="CurrentSymbol" orientation="vertical" locked="no" iconified="no" closed="no"/>
                 <item name="BuildOutput" orientation="vertical" locked="no" iconified="no" closed="no"/>
                 <item name="AppOutput" orientation="vertical" locked="no" iconified="no" closed="no"/>
                 <item name="Breakpoints" orientation="vertical" locked="no" iconified="no" closed="no"/>
