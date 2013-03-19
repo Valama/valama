@@ -116,10 +116,10 @@ public class UiSearch : UiElement {
 
     Gee.HashMap<string, SearchResult?> map_paths_results;
     struct SearchResult {
-        public int line;
-        public int col_start;
-        public int col_end;
         public string filename;
+        public int line;
+        // public int col_start;
+        // public int col_end;
     }
 
     void on_tree_view_cursor_changed() {
@@ -196,7 +196,7 @@ public class UiSearch : UiElement {
             store.append (out iter_append, iter_parent);
 
             var col_start = match_start.get_line();
-            var col_end = match_end.get_line();
+            // var col_end = match_end.get_line();
 
             string lines_before = "";
             string matchline_before = "";
@@ -242,9 +242,9 @@ public class UiSearch : UiElement {
             //TODO: Make <b> stuff case insensitive!
             map_paths_results[store.get_path ((TreeIter)iter_append).to_string()]
                                         = SearchResult() { line = match_end.get_line(),
-                                                           filename = filename,
-                                                           col_start = col_start,
-                                                           col_end = col_end };
+                                                           filename = filename };
+                                                           // col_start = col_start,
+                                                           // col_end = col_end };
             store.set (iter_append, 0, (match_end.get_line() + 1).to_string(), 1, shown_text, -1);
         }
     }
