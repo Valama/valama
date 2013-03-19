@@ -71,7 +71,7 @@ find_package(PkgConfig)
 if(VALA_VERSION STRGREATER "0.19.0")
   list(REMOVE_ITEM required_pkgs "libvala-0.18")
   set(valashort_ver "0.20")
-  set(valac_cond "-D;VALAC_0_20")
+  list(APPEND valac_cond "-D;VALAC_0_20")
 else()
   list(REMOVE_ITEM required_pkgs "libvala-0.20")
   set(valashort_ver "0.18")
@@ -84,20 +84,24 @@ if(NOT("3.6" STRGREATER GTK3.0_VERSION))
   list(APPEND valac_cond "-D;GTK_3_6")
 endif()
 # gdl-3.0
+set(gdl_workarround OFF)
 pkg_check_modules(GDL3.0 REQUIRED "gdl-3.0")
 if(NOT("3.6.2" STRGREATER GDL3.0_VERSION))
   list(APPEND valac_cond "-D;GDL_3_6_2")
   if("0.20" STRGREATER "${valashort_ver}")
-    message(WARNING "With gdl-3.0 ${GDL3.0_VERSION} >= 3.6.2 and valac "
-                    "${valashort_ver} < 0.20 checks for dock item state "
-                    "(is closed, attached etc.) are disabled.\n"
-                    "Please upgrade your valac version or live with it.")
+    # Fixes #693127 (upstream fix).
+    message(STATUS "Use gdl-3.0 vapi from valac 0.20 to support new "
+                   "features with gdl-3.0 >= 3.6.2.")
+    list(APPEND vapifiles "cmake/vapi/gdl-3.0.vapi")
+    list(REMOVE_ITEM required_pkgs "gdl-3.0 >= 3.4")
+    set(gdl_workarround ON)
   endif()
 elseif("3.5.5" STRGREATER GDL3.0_VERSION)
   message(WARNING "With gdl-3.0 ${GDL3.0_VERSION} < 3.5.5 dock item "
                   "behaviour is poor: Hidden docks aren't saved in layout "
                   "and will open detached.\n"
                   "Please upgrade your gdl version or live with it.")
+  list(APPEND valac_cond "-D;GDL_LESS_3_5_5")
 endif()
 # gee-1.0 and gee-0.8
 set(gee_ver)
@@ -141,11 +145,13 @@ if(gee0.8_contains STRGREATER "-1")
     endif()
   endif()
 endif()
+# glib-2.0
+pkg_check_modules(GLIB2.0 REQUIRED "glib-2.0")
 
 
 set(default_vala_flags
   "--thread"
-  "--target-glib" "2.32"
+  "--target-glib" "${GLIB2.0_VERSION}"
   ${valac_cond}
 )
 
@@ -182,6 +188,11 @@ add_executable("${project_name_lower}" ${VALA_C})
 target_link_libraries("${project_name_lower}" ${PROJECT_LDFLAGS})
 add_definitions(${PROJECT_C_FLAGS})
 target_link_libraries("${project_name_lower}" "guanako")
+
+if(gdl_workarround)
+  target_link_libraries("${project_name_lower}" ${GDL3.0_LDFLAGS})
+  add_definitions(${GDL3.0_CFLAGS})
+endif()
 
 
 # Create the docs.
@@ -243,7 +254,7 @@ else(CMAKE_BUILD_TYPE STREQUAL "Debug")
 endif()
 
 
-# Compress and install manpage.
+# Compress and install manual page.
 #if(NOT MANPAGE_DISABLED)
 #  add_custom_command(COMMAND gzip -cf9 "${PROJECT_SOURCE_DIR}/man/${project_name_lower}.1" >
 #                      "${PROJECT_SOURCE_DIR}/man/${project_name_lower}.1.gz"
@@ -295,6 +306,7 @@ if("${vala_flags}" STREQUAL "")
   set(vala_flags "(none)")
 endif()
 message("Vala flags:             ${vala_flags}")
+message("GLib version:           ${GLIB2.0_VERSION}")
 if(gee_ver)
   message("Gee version:            ${gee_ver}")
 endif()

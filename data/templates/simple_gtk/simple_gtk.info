@@ -1,12 +1,14 @@
-<template>
+<template version="0.1">
     <author>
         <name>Linus Seelinger</name>
         <mail>S.Linus@quantentunnel.de</mail>
     </author>
     <name>
-        <en>Simple GTK</en>
+        <en>Simple GTK+ 3</en>
+        <de>GTK+ 3 Beispiel</de>
     </name>
     <description>
         <en>Simple GTK+ 3 project</en>
+        <de>Einfaches GTK+ 3-Projekt</de>
     </description>
 </template>

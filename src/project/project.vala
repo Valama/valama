@@ -30,7 +30,34 @@ using Pango;
 const string VLP_VERSION_MIN = "0.1";
 
 /**
- * IDE modes on which plugins can decide how to do some tasks.
+ * Version relations. Can be used e.g. for package or valac versions.
+ */
+public enum VersionRelation {
+    SINCE,  // >=
+    UNTIL,  // <=
+    ONLY,   // ==
+    EXCLUDE;// !=
+
+    public string? to_string() {
+        switch (this) {
+            case SINCE:
+                return _("since");
+            case UNTIL:
+                return _("until");
+            case ONLY:
+                return _("only");
+            case EXCLUDE:
+                return _("exclude");
+            default:
+                error_msg (_("Could not convert '%s' to string: %u\n"),
+                           "VersionRelation", this);
+                return null;
+        }
+    }
+}
+
+/**
+ * IDE modes on which plug-ins can decide how to do some tasks.
  */
 [Flags]
 public enum IdeModes {
@@ -55,7 +82,8 @@ public enum IdeModes {
             case RELEASE:
                 return _("Release");
             default:
-                error_msg (_("Could not convert IdeModes to string: %u\n"), (int) this);
+                error_msg (_("Could not convert '%s' to string: %u\n"),
+                           "IdeModes", this);
                 return null;
         }
     }
@@ -97,6 +125,125 @@ public enum IdeModes {
     }
 }
 
+/**
+ * Vala package alternatives.
+ */
+public class PkgChoice {
+    /**
+     * Indicate if all packages should go to build system package list.
+     */
+    public bool all = false;
+    /**
+     * Ordered list of packages. Packages in the front have higher
+     * priority.
+     */
+    public Gee.ArrayList<PackageInfo?> packages { get; private set; }
+    /**
+     * Optional description.
+     */
+    public string? description = null;
+
+    public PkgChoice() {
+        packages = new Gee.ArrayList<PackageInfo?>();
+    }
+
+    /**
+     * Automatically add {@link PkgChoice} reference to each
+     * {@link PackageInfo} object.
+     *
+     * @param pkg Package to add to package choices list.
+     */
+    public void add_package (PackageInfo pkg) {
+        pkg.choice = this;
+        packages.add (pkg);
+    }
+}
+
+/**
+ * Vala package information.
+ */
+public class PackageInfo {
+    /**
+     * Reference to {@link PkgChoice} if any.
+     *
+     * Do not modify this value manually. It will result in undefined behaviour.
+     */
+    public PkgChoice? choice = null;
+    /**
+     * Version relation.
+     */
+    public VersionRelation? rel = null;
+    /**
+     * Package name.
+     */
+    public string name;
+    /**
+     * Version (meaning differs with {@link rel}).
+     */
+    public string? version = null;
+
+    /**
+     * Convert class object to string.
+     */
+    public string? to_string() {
+        var relation = "";
+        if (rel != null)
+            switch (rel) {
+                case VersionRelation.SINCE:
+                    relation = " >= ";
+                    break;
+                case VersionRelation.UNTIL:
+                    relation = " <= ";
+                    break;
+                case VersionRelation.ONLY:
+                    relation = " = ";
+                    break;
+                case VersionRelation.EXCLUDE:
+                    relation = " != ";
+                    break;
+                default:
+                    bug_msg (_("Unexpected enum value: %s: %d\n"),
+                             "PackageInfo - to_string", rel);
+                    break;
+            }
+        if (version != null) {
+            if (relation != "")
+                relation += version;
+            else
+                relation = @" >= $version";
+        }
+        return name + relation;
+    }
+
+    /**
+     * Compare {@link PackageInfo} objects.
+     *
+     * @param pkg1 First package.
+     * @param pkg2 Second package.
+     * @return Return > 0 if pkg1 > pkg2, < 0 if pkg1 < pkg2 or 0 if pkg1 == pkg2.
+     */
+    public static int compare_func (PackageInfo pkg1, PackageInfo pkg2) {
+        int namerel = strcmp (pkg1.name, pkg2.name);
+        if (namerel != 0)
+            return namerel;
+
+        int verrel = strcmp (pkg1.version, pkg2.version);
+        if (verrel != 0)
+            return verrel;
+
+        if (pkg1.rel != null && pkg2.rel != null) {
+            int relrel = pkg1.rel - pkg2.rel;
+            if (relrel != 0)
+                return relrel;
+        } else if (pkg1.rel != null)
+            return 1;
+        else if (pkg2.rel != null)
+            return -1;
+
+        return 0;
+    }
+}
+
 
 /**
  * Valama project application.
@@ -105,7 +252,7 @@ public class ValamaProject : Object {
     /**
      * Attached Guanako project to provide code completion.
      */
-    public Guanako.Project guanako_project { get; private set; }
+    public Guanako.Project? guanako_project { get; private set; default = null; }
 
     private string _project_path;
     /**
@@ -136,19 +283,27 @@ public class ValamaProject : Object {
     /**
      * Project source directories (absolute paths).
      */
-    public Gee.TreeSet<string> source_dirs { get; private set; }
+    public TreeSet<string> source_dirs { get; private set; }
     /**
      * Project extra source files (absolute paths).
      */
-    public Gee.TreeSet<string> source_files { get; private set; }
+    public TreeSet<string> source_files { get; private set; }
     /**
-     * Project buildsystem directories (absolute paths).
+     * Project build system directories (absolute paths).
      */
-    public Gee.TreeSet<string> buildsystem_dirs { get; private set; }
+    public TreeSet<string> buildsystem_dirs { get; private set; }
     /**
-     * Project extra buildsystem files (absolute paths).
+     * Project extra build system files (absolute paths).
      */
-    public Gee.TreeSet<string> buildsystem_files { get; private set; }
+    public TreeSet<string> buildsystem_files { get; private set; }
+    /**
+     * Project directories for extra files (absolute paths).
+     */
+    public TreeSet<string> data_dirs { get; private set; }
+    /**
+     * Project extra files (absolute paths).
+     */
+    public TreeSet<string> data_files { get; private set; }
     /**
      * Project version first part.
      */
@@ -170,18 +325,27 @@ public class ValamaProject : Object {
      */
     public string project_file_version { get; private set; default = "0"; }
     /**
-     * Identifier to provide context state to plugins.
+     * Identifier to provide context state to plug-ins.
      */
     public IdeModes idemode { get; set; default = IdeModes.DEBUG; }
 
     /**
      * List of source files.
      */
-    public Gee.TreeSet<string> files { get; private set; }
+    public TreeSet<string> files { get; private set; }
     /**
-     * List of buildsystem files.
+     * List of build system files.
      */
-    public Gee.TreeSet<string> b_files { get; private set; }
+    public TreeSet<string> b_files { get; private set; }
+    /**
+     * List of extra files.
+     */
+    public TreeSet<string> d_files { get; private set; }
+    /**
+     * Flag to show multiple files are added and an update on each new file
+     * is not necessary. Set this manually.
+     */
+    public bool add_multiple_files { get; set; default = false; }
 
     /**
      * Ordered list of all opened Buffers mapped with filenames.
@@ -191,86 +355,144 @@ public class ValamaProject : Object {
     /**
      * Completion provider.
      */
-    private TestProvider comp_provider;
+    private GuanakoCompletion comp_provider;
 
     /**
-     * The project's buildsystem (valama/cmake/...).
+     * The project's build system (valama/cmake/...).
      */
     public string buildsystem = "cmake";
 
     /**
-     * Vala package alternatives.
+     * Required packages with version information.
+     *
+     * Use {@link add_package} or {@link add_package_by_name} to add a new
+     * package.
      */
-    public struct PkgChoice {
-        /**
-         * Indicate if all packages should go to buildsystem package list.
-         */
-        bool all;
-        /**
-         * Ordered list of packages. Priority of packages in the front is
-         * higher.
-         */
-        Gee.ArrayList<string> packages;
-    }
+    public TreeSet<PackageInfo?> packages { get; private set; }
 
     /**
-     * Required packages.
+     * List of packages without version information.
+     *
+     * Use {@link add_package} or {@link add_package_by_name} to add a new
+     * package.
      */
-    public Gee.TreeSet<string> packages = new Gee.TreeSet<string>();
+    public TreeSet<string> package_list { get; private set; }
+
+    /**
+     * Emit signal when source file was added or removed.
+     */
+    public signal void source_files_changed();
+    /**
+     * Emit signal when build system file was added or removed.
+     */
+    public signal void buildsystem_files_changed();
+    /**
+     * Emit signal when data file was added or removed.
+     */
+    public signal void data_files_changed();
+    /**
+     * Emit signal when package was added or removed.
+     */
+    public signal void packages_changed();
 
     /**
      * Create {@link ValamaProject} and load it from project file.
      *
+     * It is possible to fully load a partial loaded project with {@link init}.
+     *
      * @param project_file Load project from this file.
      * @param syntaxfile Load Guanako syntax definitions from this file.
+     * @param fully If `false` only load project file information.
      * @throws LoadingError Throw on error while loading project file.
      */
-    public ValamaProject (string project_file, string? syntaxfile = null) throws LoadingError {
+    public ValamaProject (string project_file,
+                          string? syntaxfile = null,
+                          bool fully = true) throws LoadingError {
         var proj_file = File.new_for_path (project_file);
         this.project_file = proj_file.get_path();
         project_path = proj_file.get_parent().get_path(); //TODO: Check valid path?
 
-        recentmgr.add_item (get_absolute_path(this.project_file));
+        if (fully)
+            try {
+                guanako_project = new Guanako.Project (syntaxfile);
+            } catch (GLib.IOError e) {
+                throw new LoadingError.COMPLETION_NOT_AVAILABLE (
+                                        _("Could not read syntax file: %s\n"), e.message);
+            } catch (GLib.Error e) {
+                throw new LoadingError.COMPLETION_NOT_AVAILABLE (
+                                        _("An error occurred while loading new Guanako project: %s\n"),
+                                        e.message);
+            }
 
-        try {
-            guanako_project = new Guanako.Project (syntaxfile);
-        } catch (GLib.IOError e) {
-            errmsg (_("Could not read syntax file: %s"), e.message);
-            Gtk.main_quit();
-        } catch (GLib.Error e) {
-            errmsg (_("An error occured: %s"), e.message);
-            Gtk.main_quit();
-        }
+        packages = new TreeSet<PackageInfo?> ((CompareDataFunc<PackageInfo?>?) PackageInfo.compare_func);
+        package_list = new TreeSet<string>();
+        package_choices = new Gee.ArrayList<PkgChoice?>();
+        source_dirs = new TreeSet<string>();
+        source_files = new TreeSet<string>();
+        buildsystem_dirs = new TreeSet<string>();
+        buildsystem_files = new TreeSet<string>();
+        data_dirs = new TreeSet<string>();
+        data_files = new TreeSet<string>();
 
-        files = new Gee.TreeSet<string>();
-        b_files = new Gee.TreeSet<string>();
+        files = new TreeSet<string>();
+        b_files = new TreeSet<string>();
+        d_files = new TreeSet<string>();
 
         msg (_("Load project file: %s\n"), this.project_file);
         load_project_file();  // can throw LoadingError
 
-        generate_file_list (source_dirs.to_array(),
-                            source_files.to_array(),
-                            add_source_file);
-        generate_file_list (buildsystem_dirs.to_array(),
-                            buildsystem_files.to_array(),
-                            add_buildsystem_file);
-
-        vieworder = new Gee.LinkedList<ViewMap?>();
-
-        /* Completion provider. */
-        this.comp_provider = new TestProvider();
-        this.comp_provider.priority = 1;
-        this.comp_provider.name = _("Test Provider 1");
+        if (fully)
+            init (syntaxfile);
     }
 
     /**
-     * Run initial Guanako update (Call after loading the project if autocompletion is used)
+     * Fully load project or do nothing when already fully loaded.
+     *
+     * @param syntaxfile Load Guanako syntax definitions from this file.
+     * @throws LoadingError Throw if Guanako completion fails to load.
      */
-    public void initial_update () {
-        string[] missing_packages = guanako_project.add_packages (packages.to_array(), false);
+    public void init (string? syntaxfile = null) throws LoadingError {
+        if (guanako_project == null)
+            try {
+                guanako_project = new Guanako.Project (syntaxfile);
+            } catch (GLib.IOError e) {
+                throw new LoadingError.COMPLETION_NOT_AVAILABLE (
+                                        _("Could not read syntax file: %s\n"), e.message);
+            } catch (GLib.Error e) {
+                throw new LoadingError.COMPLETION_NOT_AVAILABLE (
+                                        _("An error occurred while loading new Guanako project: %s\n"),
+                                        e.message);
+            }
+
+        recentmgr.add_item (get_absolute_path (this.project_file));
+
+        generate_file_list (_source_dirs.to_array(),
+                            _source_files.to_array(),
+                            add_source_file);
+
+        generate_file_list (_buildsystem_dirs.to_array(),
+                            _buildsystem_files.to_array(),
+                            add_buildsystem_file);
+
+        generate_file_list (_data_dirs.to_array(),
+                            _data_files.to_array(),
+                            add_data_file);
+
+        vieworder = new Gee.LinkedList<ViewMap?>();
+
+        string[] missing_packages = guanako_project.add_packages (package_list.to_array(), false);
+        packages_changed();
 
         if (missing_packages.length > 0)
             ui_missing_packages_dialog (missing_packages);
+
+        /* Completion provider. */
+        this.comp_provider = new GuanakoCompletion();
+        this.comp_provider.priority = 1;
+        this.comp_provider.name = _("%s - Vala").printf (project_name);
+        this.notify["project-name"].connect (() => {
+            comp_provider.name = _("%s - Vala").printf (project_name);
+        });
 
         parsing = true;
         new Thread<void*> (_("Initial buffer update"), () => {
@@ -285,47 +507,385 @@ public class ValamaProject : Object {
     }
 
     /**
-     * Add sourcefile and register with Guanako.
+     * Reduce length of file list: Prefer directories and remove directories
+     * without content.
      *
-     * @param filename Absolute path to file.
+     * @param c_dirs Directories.
+     * @param c_files Files.
+     ( @param extensions Valid file extensions.
      */
-    private void add_source_file (string filename) {
-        if (!(filename.has_suffix (".vala") || filename.has_suffix (".vapi")))
-            return;
-        msg (_("Found file %s\n"), filename);
-        if (this.files.add (filename))
-            guanako_project.add_source_file_by_name (filename, filename.has_suffix (".vapi"));
-        else
-            debug_msg (_("Skip already added file: %s"), filename);
+    private void balance_dir_file_sets (ref TreeSet<string> c_dirs,
+                                        ref TreeSet<string> c_files,
+                                        string[]? extensions = null,
+                                        string[]? filenames = null) {
+        var new_c_dirs = new TreeSet<string>();
+        var visited_bad = new TreeSet<string>();
+        var new_c_files = new TreeSet<string>();
+
+        foreach (var filename in c_files) {
+            var dirname = Path.get_dirname (filename);
+
+            if (c_dirs.contains (dirname)) {
+                new_c_dirs.add (dirname);
+                continue;
+            }
+
+            if (visited_bad.contains (dirname)) {
+                new_c_files.add (filename);
+                continue;
+            }
+
+            try {
+                var enumerator = File.new_for_path (dirname).enumerate_children (
+                                                                "standard::*",
+                                                                FileQueryInfoFlags.NONE,
+                                                                null);
+                FileInfo info = null;
+                var matching = false;
+                while (!matching && (info = enumerator.next_file()) != null) {
+                    if (info.get_file_type() != FileType.REGULAR ||  //TODO: Follow symlinks.
+                                            c_files.contains (Path.build_path (Path.DIR_SEPARATOR_S,
+                                                                               dirname,
+                                                                               info.get_name())))
+                        continue;
+
+                    if (filenames != null) {
+                        foreach (var name in filenames)
+                            if (Path.get_basename (info.get_name()) == name) {
+                                matching = true;
+                                break;
+                            }
+                        if (matching)
+                            break;
+                    }
+
+                    if (extensions != null)
+                        foreach (var ext in extensions) {
+                            if (info.get_name().has_suffix (ext)) {
+                                matching = true;
+                                break;
+                            }
+                        }
+                    else
+                        matching = true;
+                }
+                if (matching) {
+                    visited_bad.add (dirname);
+                    new_c_files.add (filename);
+                } else {
+                    c_dirs.add (dirname);
+                    new_c_dirs.add (dirname);
+                }
+            } catch (GLib.Error e) {
+                warning_msg (_("Could not list or iterate through directory content of '%s': %s\n"),
+                             dirname, e.message);
+            }
+        }
+        c_files = new_c_files;
+
+        foreach (var dirname in c_dirs) {
+            if (new_c_dirs.contains (dirname))
+                continue;
+            try {
+                var enumerator = File.new_for_path (dirname).enumerate_children (
+                                                                "standard::*",
+                                                                FileQueryInfoFlags.NONE,
+                                                                null);
+                FileInfo info = null;
+                var matching = false;
+                while (!matching && (info = enumerator.next_file()) != null) {
+                    if (info.get_file_type() != FileType.REGULAR)  //TODO: Other FileTypes?
+                        continue;
+
+                    if (filenames != null) {
+                        foreach (var name in filenames)
+                            if (Path.get_basename (info.get_name()) == name) {
+                                matching = true;
+                                break;
+                            }
+                        if (matching)
+                            break;
+                    }
+
+                    if (extensions != null)
+                        foreach (var ext in extensions) {
+                            if (info.get_name().has_suffix (ext)) {
+                                matching = true;
+                                break;
+                            }
+                        }
+                    else
+                        matching = true;
+                }
+                if (matching)
+                    new_c_dirs.add (dirname);
+            } catch (GLib.Error e) {
+                warning_msg (_("Could not list or iterate through directory content of '%s': %s\n"),
+                             dirname, e.message);
+            }
+        }
+        c_dirs = new_c_dirs;
+    }
+
+    public void balance_pfile_dirs() {
+        var s_dirs_tmp = new TreeSet<string>();
+        var s_files_tmp = files;
+        var b_dirs_tmp = new TreeSet<string>();
+        var b_files_tmp = b_files;
+        var d_dirs_tmp = new TreeSet<string>();
+        var d_files_tmp = d_files;
+        balance_dir_file_sets (ref s_dirs_tmp, ref s_files_tmp,
+                               new string[]{".vala", ".vapi"});
+        balance_dir_file_sets (ref b_dirs_tmp, ref b_files_tmp,
+                               new string[]{".cmake"}, new string[]{"CMakeLists.txt"});
+        balance_dir_file_sets (ref d_dirs_tmp, ref d_files_tmp);
+
+        source_dirs = s_dirs_tmp;
+        source_files = s_files_tmp;
+        buildsystem_dirs = b_dirs_tmp;
+        buildsystem_files = b_files_tmp;
+        data_dirs = d_dirs_tmp;
+        data_files = d_files_tmp;
     }
 
     /**
-     * Remove sourcefile from project and unlink from Guanako. Don't remove
-     * file from disk. Keep track to not include it with source directories
-     * next time.
+     * Add package to project. Remember to add it later to Guanako project and
+     * emit packages_changed signal.
      *
-     * @param filename Absolute path to file to unregister.
-     * @return Return true on success else false (e.g. if file was not found).
+     * @param pkg Package to add.
      */
-    //TODO: Remove it also from .vlp file.
-    public bool remove_source_file (string filename) {
-        if (!files.remove (filename))
+    public void add_package (PackageInfo pkg) {
+        var info = pkg.to_string();
+        if (pkg.choice != null)
+            info += " (%s)".printf (_("choice"));
+        debug_msg_level (2, _("Add package: %s\n"), info);
+        packages.add (pkg);
+        package_list.add (pkg.name);
+    }
+
+    /**
+     * Add package to project by package name and update Guanako project.
+     *
+     * @param pkg Package to add.
+     * @return Not available packages.
+     */
+    public string[] add_package_by_name (string pkg) {
+        debug_msg_level (2, _("Add package: %s\n"), pkg);
+        var pkginfo = new PackageInfo();
+        pkginfo.name = pkg;
+        packages.add (pkginfo);
+        if (package_list.add (pkg))
+            packages_changed();
+        return guanako_project.add_packages (new string[] {pkg}, true);
+    }
+
+    /**
+     * Remove package from project. Remember to update Guanako project and
+     * emit packages_changed signal.
+     *
+     * @param pkg Package to remove.
+     * @return `false` if package not in project else `true`.
+     */
+    public bool remove_package (PackageInfo pkg) {
+        debug_msg_level (2, _("Remove package: %s\n"), pkg.name);
+        if (!package_list.remove (pkg.name)) {
+            debug_msg (_("Package '%s' not in list, skip it.\n"), pkg.name);
             return false;
-        guanako_project.remove_file (guanako_project.get_source_file_by_name (filename));
+        }
+        packages.remove (pkg);
         return true;
     }
 
     /**
-     * Add file to buildsystem list.
+     * Remove package from project and update Guanako project.
+     *
+     * @param pkg Package name.
+     * @return `false` if package not in project else `true`.
+     */
+    public bool remove_package_by_name (string pkg) {
+        debug_msg_level (2, _("Remove package: %s\n"), pkg);
+        if (!(pkg in package_list)) {
+            debug_msg (_("Package '%s' not in list, skip it.\n"), pkg);
+            return false;
+        }
+
+        PackageInfo[] rem_packages = new PackageInfo[0];
+        foreach (var pkginfo in packages)
+            if (pkginfo.name == pkg)
+                rem_packages += pkginfo;
+        foreach (var pkginfo in rem_packages)
+            packages.remove (pkginfo);
+
+        package_list.remove (pkg);
+        guanako_project.remove_package (pkg);
+        packages_changed();
+        return true;
+    }
+
+    /**
+     * Add source file and register with Guanako.
      *
      * @param filename Path to file.
      */
-    private void add_buildsystem_file (string filename) {
-        if (!(filename.has_suffix (".cmake") || Path.get_basename (filename) == ("CMakeLists.txt")))
+    public void add_source_file (string? filename) {
+        if (filename == null || !(filename.has_suffix (".vala") || filename.has_suffix (".vapi")))
             return;
-        msg (_("Found file %s\n"), filename);
-        if (!this.b_files.add (filename))
-            debug_msg (_("Skip already added file: %s"), filename);
+        var filename_abs = get_absolute_path (filename);
+
+        var f = File.new_for_path (filename_abs);
+        if (!f.query_exists()) {
+            warning_msg (_("Source file does not exist: %s\n"), filename_abs);
+            return;
+        }
+
+        msg (_("Found source file: %s\n"), filename_abs);
+
+        if (b_files.contains (filename_abs)) {
+            warning_msg (_("File already registered for build system. Skip it.\n"), filename_abs);
+            return;
+        } else if (d_files.contains (filename_abs)) {
+            warning_msg (_("File already a data file. Skip it.\n"), filename_abs);
+            return;
+        }
+        if (!files.contains (filename_abs))
+            if (guanako_project.add_source_file_by_name (
+                                filename_abs, filename_abs.has_suffix (".vapi")) != null) {
+                files.add (filename_abs);
+                source_files_changed();
+            } else
+                warning_msg (_("Could not load Vala source file: %s\n"), filename_abs);
+        else
+            debug_msg (_("Skip already added file: %s\n"), filename_abs);
+    }
+
+    /**
+     * Remove source file from project and unlink from Guanako. Don't remove
+     * file from disk. Keep track to not include it with source directories
+     * next time.
+     *
+     * @param filename Path to file to unregister.
+     * @return `true` on success else `false` (e.g. if file was not found).
+     */
+    public bool remove_source_file (string? filename) {
+        var filename_abs = get_absolute_path (filename);
+        debug_msg (_("Remove source file: %s\n"), filename_abs);
+        if (!files.remove (filename_abs))
+            return false;
+        guanako_project.remove_file (guanako_project.get_source_file_by_name (filename_abs));
+        close_viewbuffer (filename_abs);
+        source_files_changed();
+        return true;
+    }
+
+    /**
+     * Add file to build system list.
+     *
+     * @param filename Path to file.
+     */
+    public void add_buildsystem_file (string? filename) {
+        if (filename == null || !(filename.has_suffix (".cmake") || Path.get_basename (filename) == ("CMakeLists.txt")))
+            return;
+        var filename_abs = get_absolute_path (filename);
+
+        var f = File.new_for_path (filename_abs);
+        if (!f.query_exists()) {
+            warning_msg (_("Build system file does not exist: %s\n"), filename_abs);
+            return;
+        }
+
+        msg (_("Found build system file: %s\n"), filename_abs);
+        if (files.contains (filename_abs)) {
+            warning_msg (_("File already a source file. Skip it.\n"), filename_abs);
+            return;
+        } else if (d_files.contains (filename_abs)) {
+            warning_msg (_("File already a data file. Skip it.\n"), filename_abs);
+            return;
+        }
+        if (!this.b_files.add (filename_abs))
+            debug_msg (_("Skip already added file: %s\n"), filename_abs);
+        else
+            buildsystem_files_changed();
+    }
+
+    /**
+     * Remove build system file from project.
+     *
+     * @param filename Path to file to unregister.
+     * @return `true` on success else `false` (e.g. if file was not found).
+     */
+    public bool remove_buildsystem_file (string filename) {
+        var filename_abs = get_absolute_path (filename);
+        debug_msg (_("Remove build system file: %s\n"), filename_abs);
+        if (!b_files.remove (filename_abs))
+            return false;
+        close_viewbuffer (filename_abs);
+        buildsystem_files_changed();
+        return true;
+    }
+
+    /**
+     * Add file to extra file list.
+     *
+     * @param filename Path to file.
+     */
+    public void add_data_file (string? filename) {
+        if (filename == null)
+            return;
+        var filename_abs = get_absolute_path (filename);
+
+        var f = File.new_for_path (filename_abs);
+        if (!f.query_exists()) {
+            warning_msg (_("Data file does not exist: %s\n"), filename_abs);
+            return;
+        }
+
+        msg (_("Found data file: %s\n"), filename_abs);
+        if (files.contains (filename_abs)) {
+            warning_msg (_("File already a source file. Skip it.\n"), filename_abs);
+            return;
+        } else if (b_files.contains (filename_abs)) {
+            warning_msg (_("File already registered for build system. Skip it.\n"), filename_abs);
+            return;
+        }
+        if (!this.d_files.add (filename_abs))
+            debug_msg (_("Skip already added file: %s\n"), filename_abs);
+        else
+            data_files_changed();
+    }
+
+    /**
+     * Remove data file from project.
+     *
+     * @param filename Path to file to unregister.
+     * @return `true` on success else `false` (e.g. if file was not found).
+     */
+    public bool remove_data_file (string filename) {
+        var filename_abs = get_absolute_path (filename);
+        debug_msg (_("Remove data file: %s\n"), filename_abs);
+        if (!d_files.remove (filename_abs))
+            return false;
+        close_viewbuffer (filename_abs);
+        data_files_changed();
+        return true;
+    }
+
+    /**
+     * Close buffer by file name.
+     *
+     * @param filename Name of file to close view object.
+     */
+    public void close_viewbuffer (string filename) {
+        ViewMap? vmap = null;
+        foreach (var map in vieworder) {
+            if (map.filename == get_absolute_path (filename)) {
+                vmap = map;
+                break;
+            }
+        }
+        if (vmap != null)
+            vieworder.remove (vmap);
+        else
+            warning_msg (_("Could not close ViewMap for: %s\n"), filename);
     }
 
     /**
@@ -333,7 +893,7 @@ public class ValamaProject : Object {
      *
      * @param filename Absolute path to existing file.
      */
-    private delegate void FileCallback (string filename);
+    public delegate void FileCallback (string filename);
     /**
      * Iterate over directories and files and fill list.
      *
@@ -342,36 +902,32 @@ public class ValamaProject : Object {
      * @param action Method to perform on each found file in directory or
      *               file list.
      */
-    private void generate_file_list (string[] dirlist,
-                                     string[] filelist,
-                                     FileCallback? action = null) {
-        try {
-            File directory;
-            FileEnumerator enumerator;
-            FileInfo file_info;
+    public void generate_file_list (string[] dirlist,
+                                    string[] filelist,
+                                    FileCallback? action = null) {
+        File directory;
+        FileEnumerator enumerator;
+        FileInfo file_info;
 
-            foreach (string dir in dirlist) {
+        foreach (var dir in dirlist) {
+            try {
                 directory = File.new_for_path (dir);
                 enumerator = directory.enumerate_children (FileAttribute.STANDARD_NAME, 0);
 
                 while ((file_info = enumerator.next_file()) != null) {
+                    if (file_info.get_file_type() != FileType.REGULAR)  //TODO: Follow symlinks.
+                        continue;
                     action (Path.build_path (Path.DIR_SEPARATOR_S,
                                              dir,
                                              file_info.get_name()));
                 }
+            } catch (GLib.Error e) {
+                errmsg (_("Could not open file in '%s': %s\n"), dir, e.message);
             }
-
-            foreach (string filename in filelist) {
-                var file = File.new_for_path (filename);
-                if (file.query_exists())
-                    action (filename);
-                else
-                    warning_msg (_("File not found: %s\n"), filename);
-            }
-        } catch (GLib.Error e) {
-            errmsg (_("Could not open file: %s\n"), e.message);
         }
 
+        foreach (var filename in filelist)
+            action (filename);
     }
 
     /**
@@ -398,17 +954,15 @@ public class ValamaProject : Object {
         if (root_node->has_prop ("version") != null)
             project_file_version = root_node->get_prop ("version");
         if (comp_proj_version (project_file_version, VLP_VERSION_MIN) < 0) {
-            delete doc;
-            throw new LoadingError.FILE_IS_OLD (_("Project file to old: %s < %s"),
-                                                project_file_version,
-                                                VLP_VERSION_MIN);
+            var errstr = _("Project file too old: %s < %s").printf (project_file_version,
+                                                                    VLP_VERSION_MIN);
+            if (!Args.forceold) {
+                throw new LoadingError.FILE_IS_OLD (errstr);
+                delete doc;
+            } else
+                warning_msg (_("Ignore project file loading error: %s\n"), errstr);
         }
 
-        package_choices = new Gee.ArrayList<PkgChoice?>();
-        source_dirs = new Gee.TreeSet<string>();
-        source_files = new Gee.TreeSet<string>();
-        buildsystem_dirs = new Gee.TreeSet<string>();
-        buildsystem_files = new Gee.TreeSet<string>();
         for (Xml.Node* i = root_node->children; i != null; i = i->next) {
             if (i->type != ElementType.ELEMENT_NODE)
                 continue;
@@ -434,7 +988,8 @@ public class ValamaProject : Object {
                                 version_patch = int.parse (p->get_content());
                                 break;
                             default:
-                                warning_msg (_("Unknown configuration file value line %hu: %s\n"), p->line, p->name);
+                                warning_msg (_("Unknown configuration file value line %hu: %s\n"),
+                                             p->line, p->name);
                                 break;
                         }
                     }
@@ -445,8 +1000,7 @@ public class ValamaProject : Object {
                             continue;
                         switch (p->name) {
                             case "choice":
-                                var choice = PkgChoice();
-                                choice.packages = new Gee.ArrayList<string>();
+                                var choice = new PkgChoice();
                                 if (p->has_prop ("all") != null)
                                     switch (p->get_prop ("all")) {
                                         case "yes":
@@ -456,19 +1010,23 @@ public class ValamaProject : Object {
                                             choice.all = false;
                                             break;
                                         default:
-                                            warning_msg (_("Unknown property for 'choice' line %hu: %s\n" +
-                                                           "Will choose 'no'\n"), p->line, p->get_prop ("all"));
+                                            warning_msg (_("Unknown property for '%s' line %hu: %s\n"
+                                                                + "Will choose '%s'\n"),
+                                                         "rel", p->line, p->get_prop ("all"), "no");
                                             choice.all = false;
                                             break;
                                     }
-                                else
-                                    choice.all = false;
                                 for (Xml.Node* pp = p->children; pp != null; pp = pp->next) {
                                     if (pp->type != ElementType.ELEMENT_NODE)
                                         continue;
                                     switch (pp->name) {
+                                        case "description":
+                                            choice.description = pp->get_content();
+                                            break;
                                         case "package":
-                                            choice.packages.add (pp->get_content());
+                                            var pkg = get_package_info (pp);
+                                            if (pkg != null)
+                                                choice.add_package (pkg);
                                             break;
                                         default:
                                             warning_msg (_("Unknown configuration file value line %hu: %s\n"), pp->line, pp->name);
@@ -481,7 +1039,9 @@ public class ValamaProject : Object {
                                     warning_msg (_("No packages to choose between: line %hu\n"), p->line);
                                 break;
                             case "package":
-                                packages.add (p->get_content());
+                                var pkg = get_package_info (p);
+                                if (pkg != null)
+                                    add_package (pkg);
                                 break;
                             default:
                                 warning_msg (_("Unknown configuration file value line %hu: %s\n"), p->line, p->name);
@@ -545,28 +1105,66 @@ public class ValamaProject : Object {
                         }
                     }
                     break;
+                case "data-directories":
+                    for (Xml.Node* p = i-> children; p != null; p = p->next) {
+                        if (p->type != ElementType.ELEMENT_NODE)
+                            continue;
+                        switch (p->name) {
+                            case "directory":
+                                data_dirs.add (get_absolute_path (p->get_content()));
+                                break;
+                            default:
+                                warning_msg (_("Unknown configuration file value line %hu: %s\n"), p->line, p->name);
+                                break;
+                        }
+                    }
+                    break;
+                case "data-files":
+                    for (Xml.Node* p = i-> children; p != null; p = p->next) {
+                        if (p->type != ElementType.ELEMENT_NODE)
+                            continue;
+                        switch (p->name) {
+                            case "file":
+                                data_files.add (get_absolute_path (p->get_content()));
+                                break;
+                            default:
+                                warning_msg (_("Unknown configuration file value line %hu: %s\n"), p->line, p->name);
+                                break;
+                        }
+                    }
+                    break;
                 default:
                     warning_msg (_("Unknown configuration file value line %hu: %s\n"), i->line, i->name);
                     break;
             }
         }
 
+        add_multiple_files = true;
         foreach (var choice in package_choices) {
             var pkg = get_choice (choice);
             if (pkg != null)
-                packages.add (pkg);
+                add_package (pkg);
             else {
                 warning_msg (_("Could not select a package from choice.\n"));
-                packages.add (choice.packages[0]);
+                add_package (choice.packages[0]);
             }
         }
+        add_multiple_files = false;
+
         delete doc;
     }
 
     /**
      * Save project to {@link project_file}.
+     *
+     * @param balance If `true` balance file and directory lists.
      */
-    public void save() {
+    public void save (bool balance = true) {
+        debug_msg (_("Save project file.\n"));
+
+        if (balance)
+            balance_pfile_dirs();
+
         var writer = new TextWriter.filename (project_file);
         writer.set_indent (true);
         writer.set_indent_string ("\t");
@@ -582,72 +1180,158 @@ public class ValamaProject : Object {
         writer.write_element ("patch", version_patch.to_string());
         writer.end_element();
 
-        writer.start_element ("packages");
-        var chpkgs = new TreeSet<string>();
-        foreach (var choice in package_choices) {
-            writer.start_element ("choice");
-            writer.write_attribute ("all", (choice.all) ? "yes" : "no");
-            foreach (var pkg in choice.packages) {
-                writer.write_element ("package", pkg);
-                chpkgs.add (pkg);
+        if (packages.size > 0 || package_choices.size > 0) {
+            writer.start_element ("packages");
+            foreach (var choice in package_choices) {
+                writer.start_element ("choice");
+                writer.write_attribute ("all", (choice.all) ? "yes" : "no");
+                if (choice.description != null)
+                    writer.write_element ("description", choice.description);
+                foreach (var pkg in choice.packages) {
+                    writer.write_element ("package", pkg.name);
+                    if (pkg.version != null)
+                        writer.write_attribute ("version", pkg.version);
+                    if (pkg.rel != null)
+                        writer.write_attribute ("rel", pkg.rel.to_string());
+                }
+                writer.end_element();
+            }
+            foreach (var pkg in packages) {
+                if (pkg.choice != null)
+                    continue;
+                writer.start_element ("package");
+                if (pkg.version != null)
+                    writer.write_attribute ("version", pkg.version);
+                if (pkg.rel != null)
+                    writer.write_attribute ("rel", pkg.rel.to_string());
+                writer.write_string (pkg.name);
+                writer.end_element();
             }
             writer.end_element();
         }
-        foreach (string pkg in guanako_project.packages)
-            if (!(pkg in chpkgs))
-                writer.write_element ("package", pkg);
-        writer.end_element();
 
-        writer.start_element ("source-directories");
-        foreach (string directory in source_dirs)
-            writer.write_element ("directory", get_relative_path (directory));
-        writer.end_element();
+        if (source_dirs.size > 0) {
+            writer.start_element ("source-directories");
+            foreach (var directory in source_dirs)
+                writer.write_element ("directory", get_relative_path (directory));
+            writer.end_element();
+        }
 
-        writer.start_element ("source-files");
-        foreach (string directory in source_files)
-            writer.write_element ("file", get_relative_path (directory));
-        writer.end_element();
+        if (source_files.size > 0) {
+            writer.start_element ("source-files");
+            foreach (var filename in source_files)
+                writer.write_element ("file", get_relative_path (filename));
+            writer.end_element();
+        }
 
-        writer.start_element ("buildsystem-directories");
-        foreach (string directory in buildsystem_dirs)
-            writer.write_element ("directory", get_relative_path (directory));
-        writer.end_element();
+        if (buildsystem_dirs.size > 0) {
+            writer.start_element ("buildsystem-directories");
+            foreach (var directory in buildsystem_dirs)
+                writer.write_element ("directory", get_relative_path (directory));
+            writer.end_element();
+        }
 
-        writer.start_element ("buildsystem-files");
-        foreach (string directory in buildsystem_files)
-            writer.write_element ("file", get_relative_path (directory));
-        writer.end_element();
+        if (buildsystem_files.size > 0) {
+            writer.start_element ("buildsystem-files");
+            foreach (var filename in buildsystem_files)
+                writer.write_element ("file", get_relative_path (filename));
+            writer.end_element();
+        }
+
+        if (data_dirs.size > 0) {
+            writer.start_element ("data-directories");
+            foreach (var directory in data_dirs)
+                writer.write_element ("directory", get_relative_path (directory));
+            writer.end_element();
+        }
+
+        if (data_files.size > 0) {
+            writer.start_element ("data-files");
+            foreach (var filename in data_files)
+                writer.write_element ("file", get_relative_path (filename));
+            writer.end_element();
+        }
 
         writer.end_element();
     }
 
+
+    public bool close (bool save_all = false) {
+        save();
+
+        if (save_all)
+            return buffer_save_all();
+
+        var changed_files = new TreeSet<string>();
+        foreach (var map in vieworder) {
+            //TOOD: Ask here too if dirty.
+            if (map.filename == "")
+                continue;
+            if (((SourceBuffer) map.view.buffer).dirty)
+                changed_files.add (map.filename);
+        }
+        if (changed_files.size > 0) {
+            var fstr = "";
+            foreach (var file in changed_files)
+                fstr += @"$file\n";
+            var ret = ui_ask_file (_("Following files are modified. Do you want to save them?"),
+                                   Markup.escape_text (fstr));
+            switch (ret) {
+                case ResponseType.REJECT:
+                    return true;
+                case ResponseType.ACCEPT:
+                    return buffer_save_all();
+                case ResponseType.CANCEL:
+                    return false;
+                default:
+                    bug_msg (_("Unexpected response value: %s - %u"),
+                             "close - ValamaProject", ret);
+                    return false;
+            }
+        } else
+            return true;
+    }
+
     /**
-     * Select first available package of {@link PkgChoice}. Does check for
+     * Select first available package of {@link PkgChoice}. Does not check for
      * conflicts.
      *
      * @param choide {@link PkgChoice} to search for available packages.
      * @return Return available package name or null.
      */
-    private string? get_choice (PkgChoice choice) {
+    //TODO: Check version.
+    private PackageInfo? get_choice (PkgChoice choice) {
+        Vala.CodeContext context;
+        if (guanako_project != null)
+            context = guanako_project.context;
+        else {
+            context = new Vala.CodeContext();
+            context.target_glib_major = 2;  //TODO: Use Guanako.context_prep.
+            context.target_glib_minor = 32;
+            for (int i = 16; i <= context.target_glib_minor; i += 2)
+                context.add_define (@"GLIB_$(context.target_glib_major)_$i");
+            context.profile = Profile.GOBJECT;
+        }
+        //TODO: Do this like init method in ProjectTemplate (check against all vapis).
         foreach (var pkg in choice.packages)
-            if (guanako_project.context.get_vapi_path (pkg) != null) {
-                debug_msg (_("Choose '%s' package.\n"), pkg);
+            if (context.get_vapi_path (pkg.name) != null) {
+                debug_msg (_("Choose '%s' package.\n"), pkg.name);
                 return pkg;
             } else
-                debug_msg (_("Skip '%s' choice.\n"), pkg);
+                debug_msg (_("Skip '%s' choice.\n"), pkg.name);
         return null;
     }
 
     /**
      * Emit when undo flag of current {@link SourceBuffer} has changed.
      *
-     * @param undo_possibility True if undo is possible.
+     * @param undo_possibility `true` if undo is possible.
      */
     public signal void undo_changed (bool undo_possibility);
     /**
      * Emit when redo flag of current {@link SourceBuffer} has changed.
      *
-     * @param redo_possibility True if redo is possible.
+     * @param redo_possibility `true` if redo is possible.
      */
     public signal void redo_changed (bool redo_possibility);
 
@@ -658,7 +1342,7 @@ public class ValamaProject : Object {
      *
      * @param txt Containing text. Default is empty.
      * @param filename Filename to identify buffer. Default is empty.
-     * @param dirty Flag if buffer is dirty. Default is false.
+     * @param dirty Flag if buffer is dirty. Default is `false`.
      * @return Return {@link Gtk.SourceView} if new buffer was created else null.
      */
     public SourceView? open_new_buffer (string txt = "", string filename = "", bool dirty = false) {
@@ -769,7 +1453,7 @@ public class ValamaProject : Object {
 
     /**
      * Update Guanako completion proposals for buffer and run update for
-     * current sourcefocus.
+     * current source file focus.
      *
      * @param buffer {@link Gtk.SourceBuffer} to look for completions.
      */
@@ -803,7 +1487,7 @@ public class ValamaProject : Object {
     /**
      * Emit signal if buffer has changed.
      *
-     * @param has_changes True if buffer is dirty else false.
+     * @param has_changes `true` if buffer is dirty else `false`.
      */
     public signal void buffer_changed (bool has_changes);
 
@@ -822,11 +1506,12 @@ public class ValamaProject : Object {
     /**
      * Save all opened project files.
      *
-     * @return Return true on success else false.
+     * @return Return `true` on success else `false`.
      */
     public bool buffer_save_all() {
         bool ret = true;
         foreach (var map in vieworder) {
+            //TOOD: Ask here too if dirty.
             if (map.filename == "")
                 continue;
             var srcbuf = (SourceBuffer) map.view.buffer;
@@ -841,12 +1526,12 @@ public class ValamaProject : Object {
      * Save specific project file and update dirty flag.
      *
      * @param filename Filename of buffer to save. If empty current buffer is
-     *                 choosed. If filename is relative project path is
+     *                 chosen. If filename is relative project path is
      *                 prepended.
-     * @return Return true on success else false.
+     * @return Return `true` on success else `false`.
      */
     public bool buffer_save (string filename = "") {
-        /* Use temporary variable to work arround unowned var issue. */
+        /* Use temporary variable to work around unowned var issue. */
         string filepath = filename;
         if (filepath == "") {
             if (source_viewer.current_srcfocus == null) {
@@ -870,8 +1555,8 @@ public class ValamaProject : Object {
      * Check if buffer is dirty.
      *
      * @param filename Buffer by filename to check.
-     * @return Return negated dirty flag of buffer or false if buffer doesn't
-     *         exist in project file context.
+     * @return Return negated dirty flag of buffer or `false` if buffer does
+     *         not exist in project file context.
      */
     public bool buffer_is_dirty (string filename) {
         foreach (var map in vieworder)
@@ -887,14 +1572,29 @@ public class ValamaProject : Object {
      * Show dialog if {@link Gtk.SourceView} wasn't saved yet.
      *
      * @param view {@link Gtk.SourceView} to check if closing is ok.
-     * @return Return true to indicate buffer can now closed safely.
+     * @param filename Name of file to close.
+     * @return Return `true` to indicate buffer can now closed safely.
      */
-    public bool close_buffer (SourceView view) {
-        /*
-         * TODO: Not Implemented.
-         *       Check if view.buffer is dirty. If so -> dialog
-         */
-        return false;
+    public bool close_buffer (SourceView view, string? filename) {
+        var bfr = (SourceBuffer) view.buffer;
+        if (bfr.dirty) {
+            var ret = ui_ask_file (_("File is modified. Do you want to save it?"),
+                                   Markup.escape_text (filename));
+            switch (ret) {
+                case ResponseType.REJECT:
+                    return true;
+                case ResponseType.ACCEPT:
+                    return buffer_save (filename);
+                case ResponseType.CANCEL:
+                    return false;
+                default:
+                    bug_msg (_("Unexpected response value: %s - %u"),
+                             "close_buffer - ValamaProject", ret);
+                    return false;
+            }
+        }
+        debug_msg (_("Close buffer.\n"));
+        return true;
     }
 
     /**
@@ -970,9 +1670,56 @@ public class ValamaProject : Object {
     public string get_relative_path (string path) {
         if (!Path.is_absolute (path))
             return path;
-        if (path.has_prefix (project_path))  // only simple string comparison
-            return project_path_file.get_relative_path (File.new_for_path (path));
+        if (path.has_prefix (project_path)) {  // only simple string comparison
+            var rel = project_path_file.get_relative_path (File.new_for_path (path));
+            if (rel == null)
+                return "";
+            return rel;
+        }
         return path;
+    }
+
+    /**
+     * Load package information from {@link Xml.Node}.
+     *
+     * @param node Package {@link Xml.Node} to search for infos.
+     * @return Return {@link PackageInfo} or null if no package found.
+     */
+    private PackageInfo? get_package_info (Xml.Node* node) {
+        var package = new PackageInfo();
+        package.name = node->get_content();
+        if (package.name == null)
+            return null;
+        if (node->has_prop ("version") != null) {
+            package.version = node->get_prop ("version");
+            if (node->has_prop ("rel") != null)
+                switch (node->get_prop ("rel")) {
+                    case "since":
+                        package.rel = VersionRelation.SINCE;
+                        break;
+                    case "until":
+                        package.rel = VersionRelation.UNTIL;
+                        break;
+                    case "only":
+                        package.rel = VersionRelation.ONLY;
+                        break;
+                    case "exclude":
+                        package.rel = VersionRelation.EXCLUDE;
+                        break;
+                    default:
+                        warning_msg (_("Unknown property for '%s' line %hu: %s\n"
+                                            + "Will choose '%s'\n"),
+                                     "rel", node->line, node->get_prop ("rel"), "since");
+                        package.rel = VersionRelation.SINCE;
+                        break;
+                }
+            else
+                package.rel = VersionRelation.SINCE;
+        } else if (node->has_prop ("rel") != null)
+            warning_msg (_("Package '%s' has relation information but no version: "
+                                + "line: %hu: %s\n"),
+                         package.name, node->line, node->get_prop ("rel"));
+        return package;
     }
 }
 
@@ -983,6 +1730,7 @@ public class SourceBuffer : Gtk.SourceBuffer {
     /**
      * Manually indicate if buffer has unsaved changes.
      */
+    //TODO: Look at is_modified.
     public bool dirty { get; set; default = false; }
     public int last_active_line = -1;
     public bool needs_guanako_update = false;
@@ -993,7 +1741,7 @@ public class SourceBuffer : Gtk.SourceBuffer {
 /**
  * Throw on project file loading errors.
  */
-errordomain LoadingError {
+public errordomain LoadingError {
     /**
      * File content probably too old.
      */
@@ -1005,7 +1753,12 @@ errordomain LoadingError {
     /**
      * Unable to load file.
      */
-    FILE_IS_GARBAGE
+    FILE_IS_GARBAGE,
+    /**
+     * Could not load Guanako completion.
+     */
+    //TODO: Disable completion instead.
+    COMPLETION_NOT_AVAILABLE
 }
 
 // vim: set ai ts=4 sts=4 et sw=4

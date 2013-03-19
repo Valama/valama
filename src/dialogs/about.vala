@@ -63,7 +63,8 @@ public void ui_about_dialog() {
                 dlg.destroy();
                 break;
             default:
-                bug_msg (_("Unexpected enum value: %s: %d\n"), "about_dialog - dlg.response.connect", response_id);
+                bug_msg (_("Unexpected enum value: %s: %u\n"),
+                         "about_dialog - dlg.response.connect", response_id);
                 break;
         }
     });

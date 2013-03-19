@@ -29,6 +29,8 @@ public class ProjectBrowser : UiElement {
 
     private Gee.ArrayList<TreePath> tree_view_expanded;
 
+    private bool update_needed = true;
+
     public ProjectBrowser (ValamaProject? vproject = null) {
         if (vproject != null)
             project = vproject;
@@ -129,7 +131,8 @@ public class ProjectBrowser : UiElement {
                 case StoreType.PACKAGE:
                     break;
                 default:
-                    bug_msg (_("Unexpected enum value: %s: %d\n"), "ui_project_browser - row_activated", store_type);
+                    bug_msg (_("Unexpected enum value: %s: %u\n"),
+                             "ui_project_browser - row_activated", store_type);
                     break;
             }
         });
@@ -166,11 +169,46 @@ public class ProjectBrowser : UiElement {
                     btn_rem.sensitive = true;
                     break;
                 default:
-                    bug_msg (_("Unexpected enum value: %s: %d\n"), "ui_project_browser - cursor_changed", store_type);
+                    bug_msg (_("Unexpected enum value: %s: %u\n"),
+                             "ui_project_browser - cursor_changed", store_type);
                     btn_add.sensitive = false;
                     btn_rem.sensitive = false;
                     break;
             }
+        });
+
+        this.notify["project"].connect (init);
+        init();
+    }
+
+    private void init() {
+        project.source_files_changed.connect (() => {
+            if (!project.add_multiple_files)
+                build();
+            else
+                update_needed = true;;
+        });
+        project.buildsystem_files_changed.connect (() => {
+            if (!project.add_multiple_files)
+                build();
+            else
+                update_needed = true;;
+        });
+        project.data_files_changed.connect (() => {
+            if (!project.add_multiple_files)
+                build();
+            else
+                update_needed = true;;
+        });
+        project.packages_changed.connect (() => {
+            if (!project.add_multiple_files)
+                build();
+            else
+                update_needed = true;;
+        });
+        project.notify["add-multiple-files"].connect (() => {
+            if (!project.add_multiple_files && update_needed)
+                build();
         });
     }
 
@@ -185,17 +223,27 @@ public class ProjectBrowser : UiElement {
      * Same as {@link pathmap} for build system files.
      */
     private Gee.HashMap<string, TreeIter?> b_pathmap;
+    /**
+     * Same as {@link pathmap} for data files.
+     */
+    private Gee.HashMap<string, TreeIter?> d_pathmap;
 
+    //TODO: Don't rebuild complete store on update.
     protected override void build() {
         debug_msg (_("Run %s update!\n"), get_name());
+        update_needed = false;
+
         var store = new TreeStore (2, typeof (string), typeof (int));
         tree_view.set_model (store);
 
         pathmap = new Gee.HashMap<string, TreeIter?>();
         b_pathmap = new Gee.HashMap<string, TreeIter?>();
+        d_pathmap = new Gee.HashMap<string, TreeIter?>();
+
         build_file_treestore (_("Sources"), project.files.to_array(), ref store, ref pathmap);
-        build_file_treestore (_("Buildsystem files"), project.b_files.to_array(), ref store, ref b_pathmap);
-        build_plain_treestore (_("Packages"), project.guanako_project.packages.to_array(), ref store);
+        build_file_treestore (_("Build system files"), project.b_files.to_array(), ref store, ref b_pathmap);
+        build_file_treestore (_("Data files"), project.d_files.to_array(), ref store, ref d_pathmap);
+        build_plain_treestore (_("Packages"), project.package_list.to_array(), ref store);
 
         tree_view.row_collapsed.connect ((iter, path) => {
             if (path in tree_view_expanded)
@@ -208,6 +256,7 @@ public class ProjectBrowser : UiElement {
 
         foreach (var path in tree_view_expanded)
             tree_view.expand_to_path (path);
+
         debug_msg (_("%s update finished!\n"), get_name());
     }
 
@@ -237,8 +286,8 @@ public class ProjectBrowser : UiElement {
         /* TODO: Implement this with checkbutton. */
         var avail_packages = Guanako.get_available_packages();
         var proposed_packages = new string[0];
-        foreach (string pkg in avail_packages) {
-            if (pkg in project.guanako_project.packages)  //Ignore packages that are already selected
+        foreach (var pkg in avail_packages) {
+            if (pkg in project.package_list)  //Ignore packages that are already selected
                 continue;
             proposed_packages += pkg;
             TreeIter iter;
@@ -252,7 +301,7 @@ public class ProjectBrowser : UiElement {
         dlg.get_content_area().pack_start (scrw);
         dlg.set_default_size (400, 600);
 
-        string ret = null;
+        string? ret = null;
         if (dlg.run() == ResponseType.ACCEPT) {
             TreeModel mdl;
             var selected_rows = tree_view.get_selection().get_selected_rows (out mdl);
@@ -283,13 +332,26 @@ public class ProjectBrowser : UiElement {
 
         switch (store_type) {
             case StoreType.FILE_TREE:
-                var source_file = ui_create_file_dialog (project);
-                if (source_file != null) {
-                    //TODO: Check if already loaded.
-                    project.guanako_project.add_source_file (source_file);
-                    on_file_selected (source_file.filename);
-                    update();
+                string? filename = null;
+                switch (path.get_indices()[0]) {
+                    case 0:
+                        filename = ui_create_file_dialog (null, "vala");
+                        project.add_source_file (filename);
+                        break;
+                    case 1:
+                        filename = ui_create_file_dialog();
+                        project.add_buildsystem_file (filename);
+                        break;
+                    case 2:
+                        filename = ui_create_file_dialog();
+                        project.add_data_file (filename);
+                        break;
+                    default:
+                        bug_msg (_("Unknown treepath start to add a new file: %s\n"), path.to_string());
+                        break;
                 }
+                if (filename != null)
+                    on_file_selected (filename);
                 break;
             case StoreType.FILE:
             case StoreType.DIRECTORY:
@@ -308,26 +370,39 @@ public class ProjectBrowser : UiElement {
                 if (store_type == StoreType.FILE)
                     filepath = Path.get_dirname (filepath);
 
-                var source_file = ui_create_file_dialog (project, filepath);
-                if (source_file != null) {
-                    //TODO: Check if already loaded.
-                    project.guanako_project.add_source_file (source_file);
-                    on_file_selected (source_file.filename);
-                    update();
+                string? filename = null;
+                switch (path.get_indices()[0]) {
+                    case 0:
+                        filename = ui_create_file_dialog (filepath, "vala");
+                        project.add_source_file (filename);
+                        break;
+                    case 1:
+                        filename = ui_create_file_dialog (filepath);
+                        project.add_buildsystem_file (filename);
+                        break;
+                    case 2:
+                        filename = ui_create_file_dialog (filepath);
+                        project.add_data_file (filename);
+                        break;
+                    default:
+                        bug_msg (_("Unknown treepath start to add a new file: %s\n"), path.to_string());
+                        break;
                 }
+                if (filename != null)
+                    on_file_selected (filename);
                 break;
             case StoreType.PACKAGE_TREE:
             case StoreType.PACKAGE:
                 var pkg = package_selection_dialog (project);
                 if (pkg != null) {
-                    string[] missing_packages = project.guanako_project.add_packages (new string[] {pkg}, true);
+                    string[] missing_packages = project.add_package_by_name (pkg);
                     if (missing_packages.length > 0)
                         ui_missing_packages_dialog (missing_packages);
-                    update();
                 }
                 break;
             default:
-                bug_msg (_("Unexpected enum value: %s: %d\n"), "ui_project_browser - add_button", store_type);
+                bug_msg (_("Unexpected enum value: %s: %u\n"),
+                         "ui_project_browser - add_button", store_type);
                 break;
         }
     }
@@ -369,33 +444,48 @@ public class ProjectBrowser : UiElement {
                     filepath = Path.build_path (Path.DIR_SEPARATOR_S, val, filepath);
                 }
                 var abs_filepath = project.get_absolute_path (filepath);
+                var rel_filepath = project.get_relative_path (filepath);
 
-                if (ui_ask_warning (_("Do you want to delete this file?")) == ResponseType.YES) {
+                //TODO: Add possibility to only remove file from project.
+                if (ui_ask_warning (_("Do you want to delete this file?"),
+                                    Markup.escape_text (rel_filepath)) == ResponseType.YES) {
                     var file = File.new_for_path (abs_filepath);
-                    var fname = project.get_relative_path (filepath);
-                    source_viewer.close_srcitem (fname);
+                    source_viewer.close_srcitem (abs_filepath);
+
+                    switch (path.get_indices()[0]) {
+                        case 0:
+                            project.remove_source_file (abs_filepath);
+                            break;
+                        case 1:
+                            project.remove_buildsystem_file (abs_filepath);
+                            break;
+                        case 2:
+                            project.remove_data_file (abs_filepath);
+                            break;
+                        default:
+                            bug_msg (_("Unknown treepath start to add a new file: %s\n"), path.to_string());
+                            break;
+                    }
+                    /*
+                     * Not necessary here because pathmap will completely
+                     * rebuild. But remove it for future better
+                     * implementations.
+                     */
+                    //pathmap.unset (filepath);
                     try {
+                        //TODO: Backup file?
                         file.delete();
-                        project.remove_source_file (abs_filepath);
-                        //FIXME: Remove file from project (project.files project.b_files).
-                        /*
-                         * Not necessary here because pathmap will completely
-                         * rebuild. But remove it for future better
-                         * implementations.
-                         */
-                        pathmap.unset (filepath);
-                        update();
                     } catch (GLib.Error e) {
                         errmsg (_("Unable to delete source file '%s': %s\n"), filepath, e.message);
                     }
                 }
                 break;
             case StoreType.PACKAGE:
-                project.guanako_project.remove_package (val);
-                update();
+                project.remove_package_by_name (val);
                 break;
             default:
-                bug_msg (_("Unexpected enum value: %s: %d\n"), "ui_project_browser - cursor_changed", store_type);
+                bug_msg (_("Unexpected enum value: %s: %u\n"),
+                         "ui_project_browser - cursor_changed", store_type);
                 break;
         }
     }

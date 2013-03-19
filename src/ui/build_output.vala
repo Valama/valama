@@ -32,18 +32,21 @@ public class BuildOutput : UiElement {
         var vbox = new Box (Orientation.VERTICAL, 0);
 
         textview = new TextView();
+        textview.override_font (Pango.FontDescription.from_string ("Monospace 10"));
+        textview.editable = false;
+        textview.wrap_mode = WrapMode.NONE;
+
         var scrw = new ScrolledWindow (null, null);
         scrw.add (textview);
         vbox.pack_start (scrw, true, true);
 
         progressbar = new ProgressBar();
-        vbox.pack_start (progressbar, false, false);
+        vbox.pack_start (progressbar, false, true);
+        progressbar.visible = false;
+        progressbar.no_show_all = true;
 
         widget = vbox;
         widget.show_all();
-        progressbar.visible = false;
-        progressbar.halign = Align.START;
-        progressbar.set_size_request (200, 0);
 
         project_builder.build_started.connect (()=> {
             textview.buffer.text = "";

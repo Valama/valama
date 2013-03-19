@@ -1061,7 +1061,7 @@ namespace Guanako {
             lock (context) {
                 /*
                  * Removing nodes in the same loop causes problems (probably
-                 * due to ReadOnlyList).
+                 * due to read-only list).
                  */
                 debug_msg ("Update source file: %s\n", file.filename);
 
@@ -1088,7 +1088,7 @@ namespace Guanako {
      }
 
     /**
-     * Print debug information if {@link debug} is true.
+     * Print debug information if {@link debug} is `true`.
      *
      * @param format Format string.
      * @param ... Arguments for format string.

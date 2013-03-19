@@ -16,11 +16,11 @@
 			<package>gee-1.0</package>
 		</choice>
 		<package>gdk-3.0</package>
-		<package>gdl-3.0</package>
+		<package version="3.4" rel="since">gdl-3.0</package>
 		<package>gio-2.0</package>
-		<package>glib-2.0</package>
+		<package version="2.32" rel="since">glib-2.0</package>
 		<package>gobject-2.0</package>
-		<package>gtk+-3.0</package>
+		<package version="3.4" rel="since">gtk+-3.0</package>
 		<package>gtksourceview-3.0</package>
 		<package>guanako</package>
 		<package>libxml-2.0</package>
@@ -33,12 +33,39 @@
 		<directory>src/ui</directory>
 		<directory>vapi</directory>
 	</source-directories>
-	<source-files/>
 	<buildsystem-directories>
+		<directory></directory>
 		<directory>cmake</directory>
+		<directory>cmake/vala</directory>
+		<directory>po</directory>
 	</buildsystem-directories>
-	<buildsystem-files>
-		<file>CMakeLists.txt</file>
-		<file>po/CMakeLists.txt</file>
-	</buildsystem-files>
+	<data-directories>
+		<directory>data</directory>
+		<directory>data/buildsystems/cmake</directory>
+		<directory>data/buildsystems/cmake/buildsystem</directory>
+		<directory>data/buildsystems/cmake/buildsystem/cmake</directory>
+		<directory>data/buildsystems/cmake/buildsystem/cmake/vala</directory>
+		<directory>data/templates/clutter</directory>
+		<directory>data/templates/clutter/template</directory>
+		<directory>data/templates/clutter/template/src</directory>
+		<directory>data/templates/clutter/template/vapi</directory>
+		<directory>data/templates/plain_vala</directory>
+		<directory>data/templates/plain_vala/template</directory>
+		<directory>data/templates/plain_vala/template/src</directory>
+		<directory>data/templates/plain_vala/template/vapi</directory>
+		<directory>data/templates/simple_gtk</directory>
+		<directory>data/templates/simple_gtk/template</directory>
+		<directory>data/templates/simple_gtk/template/src</directory>
+		<directory>data/templates/simple_gtk/template/vapi</directory>
+		<directory>guanako</directory>
+		<directory>guanako/data</directory>
+		<directory>icons</directory>
+	</data-directories>
+	<data-files>
+		<file>AUTHORS</file>
+		<file>COPYING</file>
+		<file>README.md</file>
+		<file>po/de.po</file>
+		<file>po/fr.po</file>
+	</data-files>
 </project>

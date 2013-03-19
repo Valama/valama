@@ -47,8 +47,8 @@ namespace Guanako {
         return ret;
     }
 
-    /*
-     * Find smb's namespace.
+    /**
+     * Find {@link Vala.Symbol}'s {@link Vala.Namespace}.
      */
     public Namespace? get_parent_namespace (Symbol smb) {
         for (var iter = smb; iter != null; iter = iter.parent_symbol)

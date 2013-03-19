@@ -30,6 +30,25 @@ public enum ReportType {
     NOTE;
 
     public const ReportType ALL = ERROR | WARNING | DEPRECATED | EXPERIMENTAL | NOTE;
+
+    public string? to_string() {
+        switch (this) {
+            case ERROR:
+                return _("Error");
+            case WARNING:
+                return _("Warning");
+            case DEPRECATED:
+                return _("Deprecated");
+            case EXPERIMENTAL:
+                return _("Experimental");
+            case NOTE:
+                return _("Note");
+            default:
+                bug_msg (_("Unexpected enum value: %s: %u\n"),
+                         "ReportType - to_string", this);
+                return null;
+        }
+    }
 }
 
 /**
@@ -148,7 +167,7 @@ class UiReport : UiElement {
             report.init();
         });
         project.guanako_update_finished.connect (build);
-        source_viewer.notify["current-srcbuffer"].connect (() => {
+        source_viewer.current_sourceview_changed.connect (() => {
             if (!this.showall)
                 build();
         });
@@ -157,22 +176,20 @@ class UiReport : UiElement {
     }
 
     public override void build() {
-        debug_msg (_("Run %s update!\n"), get_name());
-        report.swap();
         ListStore store;
-        TextBuffer bfr = null;
-
         if (showall)
             store = new ListStore (4, typeof (Gdk.Pixbuf),typeof (string), typeof (string), typeof (string));
         else
             store = new ListStore (3, typeof (Gdk.Pixbuf), typeof (string), typeof (string));
         tree_view.set_model (store);
-        storelist = new ArrayList<ReportWrapper.Error?>();
 
-        if (!showall && source_viewer.current_srcbuffer == null) {
-            debug_msg (_("%s update finished (not a valid buffer)!\n"), get_name());
+        if (!showall && !(source_viewer.current_srcfocus in project.files))
             return;
-        }
+
+        debug_msg (_("Run %s update!\n"), get_name());
+        report.swap();
+        TextBuffer bfr = null;
+        storelist = new ArrayList<ReportWrapper.Error?>();
 
         if (showall) {
             project.foreach_buffer ((s, bfr) => {
@@ -308,10 +325,10 @@ public class ReportWrapper : Vala.Report {
         errlist_int = new ArrayList<Error?>();
     }
 
-    private void dbg_ref_msg (ReportType type, Vala.SourceReference? source, string message) {
+    private inline void dbg_ref_msg (ReportType type, Vala.SourceReference? source, string message) {
         if (source != null)
             debug_msg_level (2, _("%s found: %s: %d(%d)-%d(%d): %s\n"),
-                             (int) type,
+                             type.to_string(),
                              project.get_relative_path (source.file.filename),
                              source.begin.line,
                              source.end.column,

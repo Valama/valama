@@ -72,12 +72,12 @@ public class UiCurrentFileStructure : UiElement {
         scrw.add (tree_view);
         vbox.pack_start (scrw, true, true);
 
-        source_viewer.current_sourceview_changed.connect(build);
+        source_viewer.current_sourceview_changed.connect (build);
         project.guanako_update_finished.connect (build);
 
         widget = vbox;
 
-        lock(store)
+        lock (store)
             build();
     }
 
@@ -93,20 +93,21 @@ public class UiCurrentFileStructure : UiElement {
     }
 
     protected override void build() {
-        debug_msg (_("Run %s update!\n"), get_name());
-        if (source_viewer.current_srcfocus == null) {
-            debug_msg (_("%s update finished (not a valid buffer)!\n"), get_name());
-            return;
-        }
-
-        map_iter_symbols = new Gee.HashMap<string, Symbol>();
         store = new TreeStore (2, typeof (string), typeof (Gdk.Pixbuf));
         tree_view.set_model (store);
+
+        if (!(source_viewer.current_srcfocus in project.files))
+            return;
+        debug_msg (_("Run %s update!\n"), get_name());
+
         var focus_file = project.guanako_project.get_source_file_by_name (source_viewer.current_srcfocus);
         if (focus_file == null) {
             debug_msg (_("%s update finished (not a valid source buffer)!\n"), get_name());
             return;
         }
+
+        map_iter_symbols = new Gee.HashMap<string, Symbol>();
+
         var mark_insert = source_viewer.current_srcbuffer.get_insert();
         TextIter iter;
         source_viewer.current_srcbuffer.get_iter_at_mark (out iter, mark_insert);
@@ -156,7 +157,8 @@ public class UiCurrentFileStructure : UiElement {
                             typename += "-protected";
                             break;
                         default:
-                            bug_msg (_("Unknown SymbolAccessibility type: %d\n"), smb.access);
+                            bug_msg (_("Unexpected enum value: %s: %u\n"),
+                                     "curfilestruct - SymbolAccessibility", smb.access);
                             break;
                     }
 

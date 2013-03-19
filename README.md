@@ -5,7 +5,7 @@ The next gen Vala IDE.
 ## Manual installation ##
 
 ### Requirements
- * cmake (>= 2.8.5)
+ * cmake (>= 2.8.4)
  * valac (>= 0.17)
  * pkg-config
  * gobject-2.0

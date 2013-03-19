@@ -50,7 +50,7 @@ public class ProjectBuilder : Object{
     /**
      * Build project.
      *
-     * @return Return true on success else false.
+     * @return Return `true` on success else `false`.
      */
     //FIXME: Currently no check if build was successful.
     public bool build_project () {
@@ -73,7 +73,7 @@ public class ProjectBuilder : Object{
             string[] valacargs = new string[] {"valac"};
             valacargs += "--thread";
             valacargs += "--output=" + project.project_name.casefold();
-            foreach (string pkg in project.guanako_project.packages)
+            foreach (var pkg in project.guanako_project.packages)
                 valacargs += "--pkg=" + pkg;
             if (project.idemode != IdeModes.DEBUG){
                 foreach (Vala.SourceFile file in project.guanako_project.get_source_files())
@@ -95,7 +95,9 @@ public class ProjectBuilder : Object{
                     var tmpfile = File.new_for_path (tmppath);
 
                     try {
-                        var dos = new DataOutputStream (tmpfile.replace (null, false, FileCreateFlags.REPLACE_DESTINATION));
+                        var dos = new DataOutputStream (tmpfile.replace (null,
+                                                                         false,
+                                                                         FileCreateFlags.REPLACE_DESTINATION));
                         dos.put_string (frankenstein.frankensteinify_sourcefile(srcfile));
                         if (cnt == 0)
                             dos.put_string (frankenstein.get_frankenstein_mainblock());
@@ -123,6 +125,7 @@ public class ProjectBuilder : Object{
                                                 out valac_error);
             } catch (GLib.SpawnError e) {
                 errmsg (_("Could not spawn subprocess: %s\n"), e.message);
+                return false;
             }
             var chn = new IOChannel.unix_new (valac_stdout);
             chn.add_watch (IOCondition.IN | IOCondition.HUP, (source, condition)=>{
@@ -145,21 +148,71 @@ public class ProjectBuilder : Object{
             return true;
         }
 
-        /* Write project.cmake */
+        /* Write cmake/project.cmake. */
         try {
-            string pkg_list = "set(required_pkgs\n";
-            var chpkgs = new TreeSet<string>();
-            foreach (var choice in project.package_choices)
-                if (choice.all)
-                    foreach (var pkg in choice.packages)
-                        chpkgs.add (pkg);
-            chpkgs.add_all (project.guanako_project.packages);
-            foreach (string pkg in chpkgs)
-                pkg_list += @"\"$pkg\"\n";
+            var pkg_list = "set(required_pkgs\n";
+
+            /*
+             * Use ordered list to keep choices in order to give them the same
+             * extra options.
+             */
+            var pkg_list_names = new ArrayList<string>();
+            foreach (var pkg in project.guanako_project.context.get_packages())
+                pkg_list_names.add (pkg);
+
+            foreach (var pkg in project.packages) {
+                pkg_list_names.remove (pkg.name);
+                var pkgcfg_disable = "";
+                pkg_list_names.add (pkg.to_string() + pkgcfg_disable);
+                if (pkg.choice != null && pkg.choice.all)
+                    foreach (var pkg_choice in pkg.choice.packages)
+                        if (pkg != pkg_choice)
+                            pkg_list_names.add (pkg_choice.to_string() + " {choice}");
+            }
+
+            /* Use sorted list to output it nicely. */
+            var pkg_list_sorted = new TreeSet<string>();
+            /* Use same options for choices. */
+            string extraopts = "";
+            foreach (var pkgstr_tmp in pkg_list_names) {
+                var pkg = pkgstr_tmp.split (" ")[0];
+                var openb = true;
+                var closeb = false;
+
+                string pkgstr;
+                if (!is_choice (pkgstr_tmp, out pkgstr)) {
+                    extraopts = "";
+                    if (!package_exists (pkg)) {
+                        if (openb) {
+                            openb = false;
+                            extraopts += " {";
+                        } else
+                            extraopts += ",";
+                        extraopts += "nocheck";
+                        closeb = true;
+                    }
+                    if (!(pkg in project.package_list)) {
+                        if (openb) {
+                            openb = false;
+                            extraopts += " {";
+                        } else
+                            extraopts += ",";
+                        extraopts += "nolink";
+                        closeb = true;
+                    }
+                    if (closeb)
+                        extraopts += "}";
+                }
+
+                pkg_list_sorted.add (pkgstr + extraopts);
+            }
+
+            foreach (var pkg_str in pkg_list_sorted)
+                pkg_list += @"\"$pkg_str\"\n";
             pkg_list += ")\n";
 
-            string srcfiles = "set(srcfiles\n";
-            string vapifiles = "set(vapifiles\n";
+            var srcfiles = "set(srcfiles\n";
+            var vapifiles = "set(vapifiles\n";
             foreach (var filepath in project.files) {
                 var fname = project.get_relative_path (filepath);
                 if (filepath.has_suffix (".vapi")) {
@@ -181,10 +234,11 @@ public class ProjectBuilder : Object{
                                                             FileCreateFlags.REPLACE_DESTINATION);
             var data_stream = new DataOutputStream (file_stream);
             /*
-             * Don't translate this part to make collaboration with vcs and
+             * Don't translate this part to make collaboration with VCS and
              * multiple locales easier.
              */
             data_stream.put_string ("# This file was auto generated by Valama %s. Do not modify it.\n".printf (Config.PACKAGE_VERSION));
+            //TODO: Check if file needs changes and set date accordingly.
             // var time = new DateTime.now_local();
             // data_stream.put_string ("# Last change: %s\n".printf (time.format ("%F %T")));
             data_stream.put_string (@"set(project_name \"$(project.project_name)\")\n");
@@ -280,6 +334,7 @@ public class ProjectBuilder : Object{
             return true;
         return false;
     }
+
     private string channel_output_read_line (IOChannel source, IOCondition condition, out bool return_value) {
         if (condition == IOCondition.HUP) {
             return_value = false;
@@ -383,6 +438,44 @@ public class ProjectBuilder : Object{
         Process.close_pid (app_pid);
         app_running = false;
         app_state_changed (false);
+    }
+
+    /* Copy from Vala.CCodeCompiler (valac). */
+    static bool package_exists(string package_name) {
+        string pc = "pkg-config --exists " + package_name;
+        int exit_status;
+
+        try {
+            Process.spawn_command_line_sync (pc, null, null, out exit_status);
+            return (0 == exit_status);
+        } catch (SpawnError e) {
+            warning_msg (_("Could not spawn pkg-config package existence check: %s\n"), e.message);
+            return false;
+        }
+    }
+
+    static bool is_choice (string pkg_str, out string? pkg_str_stripped = null) {
+        var r = /([^{]*)\{([^}]+,|)[ \t]*choice[ \t]*(|,[^}]+)\}[ \t]*$/;
+
+        MatchInfo info;
+        if (!r.match (pkg_str, 0, out info)) {
+            pkg_str_stripped = pkg_str.strip();
+            return false;
+        }
+
+        var pkg_str_plain = info.fetch (1).strip();  //TODO: Is it needed to check for null?
+        var start = info.fetch (2);
+        var end = info.fetch (3);
+
+        if (start == "" && end == "")
+            pkg_str_stripped = pkg_str_plain;
+        else if (start == "")
+            pkg_str_stripped = pkg_str_plain + " {" + end.slice (1, -1) + "}";
+        else if (end == "")
+            pkg_str_stripped = pkg_str_plain + " {" + start.slice (0, -2) + "}";
+        else
+            pkg_str_stripped = pkg_str_plain + " {" + start + end.slice (0, -1) + "}";
+        return true;
     }
 }
 

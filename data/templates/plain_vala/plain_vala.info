@@ -1,12 +1,14 @@
-<template>
+<template version="0.1">
     <author>
         <name>Linus Seelinger</name>
         <mail>S.Linus@quantentunnel.de</mail>
     </author>
     <name>
         <en>Plain vala</en>
+        <de>Vala-Hello-World</de>>
     </name>
     <description>
         <en>Simple vala project</en>
+        <de>Einfaches Vala-Projekt.</de>>
     </description>
 </template>

@@ -27,11 +27,15 @@ namespace Guanako {
      */
     public static GLib.List<string>? get_available_packages() {
         GLib.List<string> list = null;
-        string[] paths = new string[] {Path.build_path (Path.DIR_SEPARATOR_S, Config.VALA_DATA_DIR + "-" + Config.VALA_VERSION, "vapi"),
-                                       Path.build_path (Path.DIR_SEPARATOR_S, Config.VALA_DATA_DIR, "vapi")};
-        try {
-            foreach (string path in paths) {
-                stdout.printf ("checking dir " + path + "n");
+        string[] paths = new string[] {Path.build_path (Path.DIR_SEPARATOR_S,
+                                                        Config.VALA_DATA_DIR + "-" + Config.VALA_VERSION,
+                                                        "vapi"),
+                                       Path.build_path (Path.DIR_SEPARATOR_S,
+                                                        Config.VALA_DATA_DIR,
+                                                        "vapi")};
+        foreach (string path in paths) {
+            debug_msg ("Checking vapi dir: %s\n", path);
+            try {
                 var enumerator = File.new_for_path (path).enumerate_children (FileAttribute.STANDARD_NAME, 0);
                 FileInfo file_info;
                 while ((file_info = enumerator.next_file()) != null) {
@@ -39,10 +43,10 @@ namespace Guanako {
                     if (filename.has_suffix (".vapi"))
                         list.insert_sorted (filename.substring (0, filename.length - 5), strcmp);
                 }
+            } catch (GLib.Error e) {
+                stdout.printf (_("Could not update vapi files: %s\n"), e.message);
+                return null;
             }
-        } catch (GLib.Error e) {
-            stdout.printf (_("Could not update vapi files: %s\n"), e.message);
-            return null;
         }
         return list;
     }

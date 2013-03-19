@@ -24,14 +24,14 @@ namespace Guanako {
             Bus.own_name (BusType.SESSION, "app.valama.frankenstein", BusNameOwnerFlags.NONE,
                   on_bus_aquired,
                   () => {},
-                  () => stderr.printf ("Could not aquire name\n"));
+                  () => stderr.printf (_("Could not acquire name\n")));
         }
 
         void on_bus_aquired (DBusConnection conn) {
             try {
                 conn.register_object ("/app/valama/frankenstein", new FrankenDBUS (this));
             } catch (IOError e) {
-                stderr.printf ("Could not register service\n");
+                stderr.printf (_("Could not register service\n"));
             }
         }
 

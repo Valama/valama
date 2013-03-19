@@ -33,7 +33,7 @@ public class AppOutput : UiElement {
         var toolbar_title = new Toolbar ();
         toolbar_title.get_style_context().add_class (STYLE_CLASS_PRIMARY_TOOLBAR);
         var ti_title = new ToolItem();
-        var plabel = new Label (_("App output"));
+        var plabel = new Label (_("Application output"));
         ti_title.add (plabel);
         toolbar_title.add(ti_title);
 
@@ -52,7 +52,10 @@ public class AppOutput : UiElement {
         vbox.pack_start (toolbar_title, false, true);
 
         textview = new TextView();
+        textview.override_font (Pango.FontDescription.from_string ("Monospace 10"));
         textview.editable = false;
+        textview.wrap_mode = WrapMode.NONE;
+
         var scrw = new ScrolledWindow (null, null);
         scrw.add (textview);
         vbox.pack_start (scrw, true, true);

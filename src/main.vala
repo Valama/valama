@@ -37,13 +37,15 @@ public static int main (string[] args) {
                                        "valama",
                                        "recent_projects"));
 
-    // /* Command line parsing. */
-    // /* Copied from Yorba application. */
+    /* Command line parsing. */
+    /* Copied from Yorba application. */
     unowned string[] a = args;
     Gtk.init (ref a);
-    // Sanitize the args.  Gtk's init function will leave null elements
-    // in the array, which then causes OptionContext to crash.
-    // See ticket: https://bugzilla.gnome.org/show_bug.cgi?id=674837
+    /*
+     * Sanitize the command line arguments. Gtk's init function will leave
+     * null elements in the array, which then causes OptionContext to crash.
+     * See ticket: https://bugzilla.gnome.org/show_bug.cgi?id=674837
+     */
     string[] fixed_args = new string[0];
     for (int i = 0; i < args.length; ++i)
         if (args[i] != null)
@@ -56,7 +58,8 @@ public static int main (string[] args) {
     else if (ret < 0)
         return 0;
 
-    Guanako.debug = Args.debug;
+    if (Args.debuglevel >= 1)
+        Guanako.debug = true;
 
     loop_update = new MainLoop();
 
@@ -81,9 +84,10 @@ public static int main (string[] args) {
 
     vscreen = new WelcomeScreen();
     vscreen.project_loaded.connect ((project) => {
-        window_main.remove (vscreen);
-        project.initial_update();
-        show_main_screen (project);
+        if (project != null) {
+            window_main.remove (vscreen);
+            show_main_screen (project);
+        }
     });
     if (project != null)
         show_main_screen (project);
@@ -93,7 +97,7 @@ public static int main (string[] args) {
     Gtk.main();
 
     if (project != null)
-        project.save();
+        project.close (true);
     return 0;
 }
 
@@ -107,75 +111,58 @@ static void show_main_screen (ValamaProject load_project) {
     /* Application signals. */
     source_viewer.buffer_close.connect (project.close_buffer);
 
-    source_viewer.notify["current-srcbuffer"].connect (() => {
+    source_viewer.current_sourceview_changed.connect (() => {
         var srcbuf = source_viewer.current_srcbuffer;
         project.undo_changed (srcbuf.can_undo);
         project.redo_changed (srcbuf.can_redo);
-        if (source_viewer.current_srcfocus != _("New document"))
+        if (!is_new_document (source_viewer.current_srcfocus))
             project.buffer_changed (project.buffer_is_dirty (
                                             source_viewer.current_srcfocus));
         else
             project.buffer_changed (true);
     });
-    widget_main.request_close.connect(()=>{
+    widget_main.request_close.connect (() => {
         window_main.remove (widget_main);
+        project = null;
         window_main.add (vscreen);
     });
 }
 
 static void load_icons() {
     map_icons = new Gee.HashMap<string, Gdk.Pixbuf>();
-    foreach (string type in new string[] {"class",
-                                          "class-private",
-                                          "class-public",
-                                          "constant",
-                                          "constant-private",
-                                          "constant-public",
-                                          "delegate",
-                                          "delegate-private",
-                                          "delegate-protected",
-                                          "delegate-public",
-                                          "enum",
-                                          "enum-private",
-                                          "enum-public",
-                                          "enum_value",
-                                          "error_code",
-                                          "error_code-private",
-                                          "error_code-public",
-                                          "error_domain",
-                                          "error_domain-private",
-                                          "error_domain-public",
-                                          "field",
-                                          "field-private",
-                                          "field-public",
-                                          "interface",
-                                          "interface-private",
-                                          "interface-protected",
-                                          "interface-public",
-                                          "method",
-                                          "method-private",
-                                          "method-protected",
-                                          "method-public",
-                                          "namespace",
-                                          "property",
-                                          "property-private",
-                                          "property-protected",
-                                          "property-public",
-                                          "signal",
-                                          "struct",
-                                          "struct-private",
-                                          "struct-public"})
+
+    var imagedir = File.new_for_path (Path.build_path (Path.DIR_SEPARATOR_S,
+                                                       Config.PIXMAP_DIR));
+    if (!imagedir.query_exists()) {
+        warning_msg (_("Pixmap directory does not exist. No application icons can be used.\n"));
+        return;
+    }
+    var type_regex = /^element-[a-zA-Z_-]+-16\.png$/;
+
     try {
-            map_icons[type] = new Gdk.Pixbuf.from_file (Path.build_path (
-                                            Path.DIR_SEPARATOR_S,
-                                            Config.PIXMAP_DIR,
-                                            "element-" + type + "-16.png"));
-    } catch (Gdk.PixbufError e) {
-        errmsg (_("Could not load pixmap: %s\n"), e.message);
-    } catch (GLib.FileError e) {
-        errmsg (_("Could not open pixmaps file: %s\n"), e.message);
+        var enumerator = imagedir.enumerate_children ("standard::*", FileQueryInfoFlags.NONE, null);
+        FileInfo? info = null;
+        while ((info = enumerator.next_file()) != null) {
+            if (info.get_file_type() == FileType.DIRECTORY)
+                continue;
+            if (type_regex.match (info.get_name()))
+                try {
+                        var pixmappath = Path.build_path (Path.DIR_SEPARATOR_S,
+                                                          Config.PIXMAP_DIR,
+                                                          info.get_name());
+                        map_icons[info.get_name()] = new Gdk.Pixbuf.from_file (pixmappath);
+                        debug_msg_level (3, _("Load pixmap: %s\n"), pixmappath);
+                } catch (Gdk.PixbufError e) {
+                    errmsg (_("Could not load pixmap: %s\n"), e.message);
+                } catch (GLib.FileError e) {
+                    errmsg (_("Could not open pixmaps file: %s\n"), e.message);
+                } catch (GLib.Error e) {
+                    errmsg (_("Pixmap loading failed: %s\n"), e.message);
+                }
+        }
     } catch (GLib.Error e) {
-        errmsg (_("Pixmap loading failed: %s\n"), e.message);
+        warning_msg (_("Could not list or iterate through directory content of '%s': %s\n"),
+                     imagedir.get_path(), e.message);
     }
 }
 
@@ -198,17 +185,16 @@ static Gdk.Pixbuf? get_pixbuf_for_symbol (Symbol symbol) {
 }
 
 static Gdk.Pixbuf? get_pixbuf_by_name (string typename) {
-    if (typename in map_icons)
+    if (map_icons.has_key (typename ))
         return map_icons[typename];
     return null;
 }
 
 static void create_new_file() {
-    var source_file = ui_create_file_dialog (project);
-    if (source_file != null) {
-        project.guanako_project.add_source_file (source_file);
-        source_viewer.focus_src (source_file.filename);
-        wdg_pbrw.update();
+    var filename = ui_create_file_dialog (null, "vala");
+    if (filename != null) {
+        project.add_source_file (filename);
+        source_viewer.focus_src (filename);
     }
 }
 
@@ -224,6 +210,7 @@ static void redo_change() {
     manager.redo();
 }
 
+//NOTE: Disabled due to #4.
 // static void on_auto_indent_button_clicked() {
 //     string indented = Guanako.auto_indent_buffer (project.guanako_project, current_source_file);
 //     current_source_file.content = indented;
@@ -234,9 +221,8 @@ static void redo_change() {
  * Load file and change focus.
  *
  * @param filename Name of file.
- * @return Return true on success else false.
+ * @return Return `true` on success else `false`.
  */
-//TODO: Grab focus.
 static bool on_file_selected (string filename) {
     if (source_viewer.current_srcfocus == filename)
         return true;
@@ -257,7 +243,7 @@ static bool on_file_selected (string filename) {
 }
 
 
-class TestProvider : Gtk.SourceCompletionProvider, Object {
+class GuanakoCompletion : Gtk.SourceCompletionProvider, Object {
     Gdk.Pixbuf icon;
     public string name;
     public int priority;
@@ -283,7 +269,7 @@ class TestProvider : Gtk.SourceCompletionProvider, Object {
 
     public void populate (Gtk.SourceCompletionContext context) {
         //TODO: Provide way to get completion for not saved content.
-        if (source_viewer.current_srcfocus == _("New document"))
+        if (is_new_document (source_viewer.current_srcfocus))
             return;
 
         /* Get current line */

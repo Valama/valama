@@ -48,19 +48,19 @@ class UiSourceViewer : UiElement {
             return _current_srcfocus;
         }
         private set {
-            debug_msg (_("Change current focus: %s\n"), value);
-            bool emit_sourceview_changed = this._current_srcfocus != value;
+            if (this._current_srcfocus != value) {
+                debug_msg (_("Change current focus: %s\n"), value);
 
-            this._current_srcfocus = value;
-            this.current_srcid = get_sourceview_id (value);
-            if (0 <= this.current_srcid < this.srcitems.size) {
-                this.current_srcview = get_sourceview (this.srcitems[this.current_srcid]);
-                this.current_srcbuffer = (SourceBuffer) this.current_srcview.buffer;
-            } else
-                warning_msg (_("Could not select current source view: %s\n" +
-                             "Expected behavior may change.\n"), this._current_srcfocus);
-            if (emit_sourceview_changed)
+                this._current_srcfocus = value;
+                this.current_srcid = get_sourceview_id (value);
+                if (0 <= this.current_srcid < this.srcitems.size) {
+                    this.current_srcview = get_sourceview (this.srcitems[this.current_srcid]);
+                    this.current_srcbuffer = (SourceBuffer) this.current_srcview.buffer;
+                } else
+                    warning_msg (_("Could not select current source view: %s\n" +
+                                 "Expected behavior may change.\n"), this._current_srcfocus);
                 current_sourceview_changed();
+            }
         }
     }
     /**
@@ -76,7 +76,7 @@ class UiSourceViewer : UiElement {
      */
     public SourceBuffer? current_srcbuffer { get; private set; default = null; }
     /**
-     * Gets emitted when another sourceview is selected
+     * Gets emitted when another {@link Gtk.Sourceview} is selected
      */
     public signal void current_sourceview_changed();
 
@@ -105,7 +105,7 @@ class UiSourceViewer : UiElement {
             if (project.get_absolute_path (srcitem.long_name) == filename) {
                 widget_main.focus_dock_item (srcitem);
                 Idle.add (() => {
-                    get_sourceview(srcitem).grab_focus();
+                    get_sourceview (srcitem).grab_focus();
                     return false;
                 });
                 return;
@@ -119,22 +119,50 @@ class UiSourceViewer : UiElement {
      * {@link Gdl.DockItem} with {@link Gtk.SourceView}.
      *
      * @param view {@link Gtk.SourceView} to close.
-     * @return Return false to interrupt or return true proceed.
+     * @param filename Name of file to close.
+     * @return Return `false` to interrupt or return `true` to proceed.
      */
-    public signal bool buffer_close (SourceView view);
+    public signal bool buffer_close (SourceView view, string? filename);
 
     /**
-     * Hide (close) {@link Gdl.DockItem} with {@link Gtk.SourceView} by
+     * Close {@link Gdl.DockItem} with {@link Gtk.SourceView} by
      * filename.
      *
      * @param filename Absolute name of source file to close.
      */
     public void close_srcitem (string filename) {
-        foreach (var srcitem in srcitems)
-            if (project.get_absolute_path (srcitem.long_name) == filename) {
-                srcitems.remove (srcitem);
-                srcitem.hide_item();
-            }
+        DockItem? item = null;
+        if (!is_new_document (filename)) {
+            foreach (var srcitem in srcitems)
+                if (project.get_absolute_path (srcitem.long_name) == filename) {
+                    item = srcitem;
+                    break;
+                }
+        } else {
+            foreach (var srcitem in srcitems)
+                if (srcitem.long_name == filename) {
+                    item = srcitem;
+                    break;
+                }
+        }
+        if (item != null) {
+            close_srcitem_pr (item, filename);
+            project.close_viewbuffer (filename);
+        } else
+            warning_msg (_("Could not close view: %s\n"), filename);
+    }
+
+    private inline void close_srcitem_pr (DockItem item, string filename) {
+        debug_msg (_("Close view and buffer: %s\n"), filename);
+        srcitems.remove (item);
+        item.unbind();
+        if (srcitems.size == 1)
+            srcitems[0].show_item();
+        var fname = srcitems[srcitems.size - 1].long_name;
+        if (is_new_document (fname))
+            current_srcfocus = fname;
+        else
+            current_srcfocus = project.get_absolute_path (fname);
     }
 
     /**
@@ -145,10 +173,9 @@ class UiSourceViewer : UiElement {
      */
     public void add_srcitem (SourceView view, string filepath = "") {
         string displayname, filename = filepath;
-        if (filename == "") {
+        if (filename == "")
             displayname = filename = _("New document");
-
-        } else {
+        else {
             filename = project.get_absolute_path (filename);
             displayname = project.get_relative_path (filename);
         }
@@ -179,8 +206,10 @@ class UiSourceViewer : UiElement {
                                             displayname,
                                             (srcbuf.dirty) ? Stock.NEW : Stock.EDIT,
                                             DockItemBehavior.LOCKED);
-        srcbuf.notify["dirty"].connect ((sender, property) => {
-            item.stock_id = (srcbuf.dirty) ? Stock.NEW : Stock.EDIT;
+        srcbuf.notify["dirty"].connect (() => {
+            /* Work around #695972 to update icon. */
+            //item.stock_id = (srcbuf.dirty) ? Stock.NEW : Stock.EDIT;
+            item.set ("stock-id", (srcbuf.dirty) ? Stock.NEW : Stock.EDIT);
         });
         item.add (src_view);
 
@@ -193,8 +222,8 @@ class UiSourceViewer : UiElement {
             this.current_srcfocus = filename;
         });
 
-
         if (srcitems.size == 0) {
+            item.behavior |= DockItemBehavior.CANT_CLOSE;
             this.srcdock.add_item (item, DockPlacement.RIGHT);
         } else {
             /* Handle dock item closing. */
@@ -202,18 +231,20 @@ class UiSourceViewer : UiElement {
                 /* Suppress dialog by removing item at first from srcitems list. */
                 if (!(item in srcitems))
                     return;
+                /*
+                 * TODO: Better solution to prevent emission of hiding? We
+                 *       want hide it at a later point after confirm dialog.
+                 */
+                /*
+                 * This will work properly with gdl-3.0 >= 3.5.5
+                 */
+                item.show_item();
+                set_notebook_tabs (item);
 
-                if (!buffer_close (get_sourceview (item))) {
-                    /*
-                     * This will work properly with gdl-3.0 >= 3.5.5
-                     */
-                    item.show_item();
-                    set_notebook_tabs (item);
-                    return;
+                if (buffer_close (get_sourceview (item), displayname)) {
+                    close_srcitem_pr (item, filename);  // closes the item
+                    project.close_viewbuffer (filename);
                 }
-                srcitems.remove (item);
-                if (srcitems.size == 1)
-                    srcitems[0].show_item();
             });
 
             item.behavior = DockItemBehavior.CANT_ICONIFY;
@@ -222,7 +253,7 @@ class UiSourceViewer : UiElement {
              * Hide default source view if it is empty.
              * Dock new items to focused dock item.
              *
-             * NOTE: Custom unsafed views are ignored (even if empty).
+             * NOTE: Custom unsaved views are ignored (even if empty).
              */
             int id = 0;
             if (this.current_srcfocus != null)
@@ -249,7 +280,6 @@ class UiSourceViewer : UiElement {
         item.dock.connect (() => {
             set_notebook_tabs (item);
         });
-
     }
 
     /**
@@ -303,7 +333,7 @@ class UiSourceViewer : UiElement {
      *         {@link srcitems}. Else -1.
      */
     private int get_sourceview_id (string filename) {
-        if (filename != _("New document")) {
+        if (!is_new_document (filename)) {
             for (int i = 0; i < srcitems.size; ++i)
                 if (project.get_absolute_path (srcitems[i].long_name) == filename)
                     return i;
@@ -322,7 +352,7 @@ class UiSourceViewer : UiElement {
      *
      * @param filename Name of file to switch to.
      * @param line Line where to jump.
-     * @param setcursor If true set cursor to position.
+     * @param setcursor If `true` set cursor to position.
      * @param col Column where to jump.
      */
     public void jump_to_position (string filename, int line, int col, bool setcursor = true) {
@@ -361,4 +391,8 @@ class UiSourceViewer : UiElement {
         debug_msg (_("Run %s update!\n"), get_name());
         debug_msg (_("%s update finished!\n"), get_name());
     }
+}
+
+public static inline bool is_new_document (string filename) {
+    return filename.has_prefix (_("New document"));
 }

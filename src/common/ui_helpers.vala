@@ -52,7 +52,7 @@ public class Entry : Gtk.Entry {
      */
     private uint delay_sec;
     /**
-     * Label can be resetted when valid input is provided.
+     * Label can be reseted when valid input is provided.
      */
     private bool label_resettable;
 
@@ -119,11 +119,11 @@ public class Entry : Gtk.Entry {
     public signal void invalid_input();
 
     /**
-     * If resettable is true. Label will be resettet with next user input.
+     * If resettable is true. Label will be reseted with next user input.
      *
      * @param error_msg Error message to show in {@link err_label}.
      * @param delay Delay in seconds to show error in {@link err_label}.
-     * @param resettable {@link err_label} will be resetted with valid input.
+     * @param resettable {@link err_label} will be reseted with valid input.
      */
     public void set_label_timer (string error_msg, uint delay, bool resettable = true) {
         this.err_label.set_label (error_msg);
@@ -146,19 +146,59 @@ public class Entry : Gtk.Entry {
 
 
 /**
- * Simple warning dialog. Check {@link Gtk.ResponseType.YES} or
- * {@link Gtk.ResponseType.NO}.
+ * Simple warning dialog with 'yes' and 'no' buttons.
+ *
+ * Remeber to properly escape extra_text if needed.
  *
  * @param warn_msg Text of warning.
- * @return Return {@link Gtk.ResponseType}.
+ * @param extra_text Additional information with markdown formatting.
+ * @return Return {@link Gtk.ResponseType}, either {@link Gtk.ResponseType.YES}
+ *         or {@link Gtk.ResponseType.YES}.
  */
-public int ui_ask_warning (string warn_msg) {
+public int ui_ask_warning (string warn_msg, string? extra_text = null) {
     var dlg = new MessageDialog (window_main,
                                  DialogFlags.MODAL,
                                  MessageType.WARNING,
                                  ButtonsType.YES_NO,
                                  warn_msg,
                                  null);
+    if (extra_text != null) {
+        dlg.secondary_use_markup = true;
+        dlg.secondary_text = extra_text;
+    }
+
+    int ret = dlg.run();
+    dlg.destroy();
+    return ret;
+}
+
+
+/**
+ * Simple warning dialog with 'discard' 'save' and 'cancel' buttons.
+ *
+ * Remeber to properly escape extra_text if needed.
+ *
+ * @param warn_msg Text of warning.
+ * @param extra_text Additional information with markdown formatting.
+ * @return Return {@link Gtk.ResponseType}.
+ */
+public int ui_ask_file (string warn_msg, string? extra_text = null) {
+    var dlg = new MessageDialog (window_main,
+                                 DialogFlags.MODAL,
+                                 MessageType.WARNING,
+                                 ButtonsType.NONE,
+                                 warn_msg,
+                                 null);
+
+    if (extra_text != null) {
+        dlg.secondary_use_markup = true;
+        dlg.secondary_text = extra_text;
+    }
+
+    dlg.add_button (Stock.DISCARD, ResponseType.REJECT);
+    dlg.add_button (Stock.SAVE, ResponseType.ACCEPT);
+    dlg.add_button (Stock.CANCEL, ResponseType.CANCEL);
+
     int ret = dlg.run();
     dlg.destroy();
     return ret;
@@ -184,7 +224,7 @@ public enum StoreType {
  * @param storename Name of store.
  * @param files List of files to add to store.
  * @param store {@link Gtk.TreeStore} to initialize.
- * @param pathmap Map from filepaths to {@link Gtk.TreeIter} to build up tree
+ * @param pathmap Map from file paths to {@link Gtk.TreeIter} to build up tree
  *                correctly.
  */
 public void build_file_treestore (string storename,
@@ -203,7 +243,7 @@ public void build_file_treestore (string storename,
                 return;
             }
             for (int depth = 0; depth < pathparts.length; ++depth) {
-                if (pathparts[depth] in pathmap)
+                if (pathmap.has_key (pathparts[depth]))
                     continue;
 
                 TreeIter iter;

@@ -22,6 +22,7 @@ using GLib;
 /**
  * Flags to control FileTransfer class.
  */
+[Flags]
 public enum CopyRecursiveFlags {
     /**
      * Do not count and do not skip or warn on existing files.
@@ -36,13 +37,9 @@ public enum CopyRecursiveFlags {
      */
     WARN_OVERWRITE,
     /**
-     * Skip if file already exists.
+     * Don't count.
      */
-    NO_COUNT_SKIP_EXISTENT, //FIXME: Is it possible to pass multiple enum vars to method arguments?
-    /**
-     * Warn if file already exists.
-     */
-    NO_COUNT_WARN_OVERWRITE
+    NO_COUNT
 }
 
 /**
@@ -208,7 +205,7 @@ public class FileTransfer : Object {
      * @param query_flag Follow symlinks or not.
      * @param cancellable Is cancellable.
      * @throws GLib.Error Throw on file query errors.
-     * @throws GLib.IOError Throw on failed io operations.
+     * @throws GLib.IOError Throw on failed I/O operations.
      */
     public FileTransfer (string from, string to,
                               CopyRecursiveFlags rec_flag = CopyRecursiveFlags.NONE,
@@ -250,7 +247,7 @@ public class FileTransfer : Object {
                 query_flag == FileQueryInfoFlags.NOFOLLOW_SYMLINKS)) {
             is_file = true;
             /*
-             * If destination object already exists and is a diretory, make
+             * If destination object already exists and is a directory, make
              * f_to to a child of it.
              */
             if (f_to.query_exists()) {
@@ -277,7 +274,7 @@ public class FileTransfer : Object {
 
     /**
      * Signal with both file names to indicate if file should be overwritten.
-     * Return true to overwrite file. To skip return false.
+     * Return `true` to overwrite file. To skip return `false`.
      *
      * Emit on change.
      *
@@ -290,7 +287,7 @@ public class FileTransfer : Object {
      * Calculate total size of transfers.
      *
      * @throws GLib.Error Throw on file query errors.
-     * @throws GLib.IOError Throw on failed io operations.
+     * @throws GLib.IOError Throw on failed I/O operations.
      */
     //TODO: Provide public interface to provide information without doing
     //      anything?
@@ -309,19 +306,19 @@ public class FileTransfer : Object {
             num_count_changed (count_current, count_total);
         }
         /* Check if enough free space is available on filesystem. */
-        if (!same_fs && fs_free <= size_to_trans) {
-            throw new GLib.IOError.NO_SPACE (_("Not enough space available."));
-        }
+        if (!same_fs && fs_free <= size_to_trans)
+            throw new GLib.IOError.NO_SPACE (_("Not enough space available: %lld < %lld"),
+                                             fs_free, (uint64) size_to_trans);
     }
 
     /**
-     * Call the transfer methods properly, calulcate before transfer and create
-     * destination directory if needed.
+     * Call the transfer methods properly, calculate before transfer and
+     * create destination directory if needed.
      *
      * @param action Flag to control action to do.
      *
      * @throws GLib.Error Throw on file query errors.
-     * @throws GLib.IOError Throw on failed io operations.
+     * @throws GLib.IOError Throw on failed I/O operations.
      */
     private void transfer (RecursiveAction action) throws GLib.Error, GLib.IOError {
         calc_size();
@@ -344,7 +341,7 @@ public class FileTransfer : Object {
      * Wrapper to call recursive copy method (and avoid file names here).
      *
      * @throws GLib.Error Throw on file query errors.
-     * @throws GLib.IOError Throw on failed io operations.
+     * @throws GLib.IOError Throw on failed I/O operations.
      */
     public void copy() throws GLib.Error, GLib.IOError {
         transfer (RecursiveAction.COPY);
@@ -355,7 +352,7 @@ public class FileTransfer : Object {
      * Wrapper to call recursive move method (and avoid file names here).
      *
      * @throws GLib.Error Throw on file query errors.
-     * @throws GLib.IOError Throw on failed io operations.
+     * @throws GLib.IOError Throw on failed I/O operations.
      */
     public void move() throws GLib.Error, GLib.IOError {
         transfer (RecursiveAction.MOVE);
@@ -368,7 +365,7 @@ public class FileTransfer : Object {
      * @param from {@link GLib.File} to do action from.
      * @param dest {@link GLib.File} to do action to.
      * @throws GLib.Error Throw on file query errors.
-     * @throws GLib.IOError Throw on failed io operations.
+     * @throws GLib.IOError Throw on failed I/O operations.
      */
     private void do_recursively (File from, File dest) throws Error, IOError {
         FileEnumerator enumerator = from.enumerate_children ("standard::*",
@@ -391,17 +388,17 @@ public class FileTransfer : Object {
                 var new_dest = dest.resolve_relative_path (info.get_name());
 
                 /* Create directory if it does not exist already. */
-                if (!new_dest.query_exists() && action != RecursiveAction.COUNT) {
-                    new_dest.make_directory (cancellable);
-                    /* Only count if needed. */
-                    //TODO: Is this faster when we just count or when we check
-                    //      the flags?
-                    if (counter_on) {
-                        current_size += size;
-                        byte_count_changed (current_size / total_size);
-                    }
-                } else if (action == RecursiveAction.COUNT)
+                if (action == RecursiveAction.COUNT)
                     size_to_trans += size;
+                else if (!new_dest.query_exists())
+                    new_dest.make_directory (cancellable);
+                /* Only count if needed. */
+                //TODO: Is this faster when we just count or when we check
+                //      the flags?
+                if (counter_on) {
+                    current_size += size;
+                    byte_count_changed (current_size / total_size);
+                }
 
                 do_recursively (new_from, new_dest);
 
@@ -441,7 +438,7 @@ public class FileTransfer : Object {
         if (dest.query_exists() && action != RecursiveAction.COUNT) {
             /* SKIP_EXISTENT */
             if (rec_flag == CopyRecursiveFlags.SKIP_EXISTENT ||
-                    rec_flag == CopyRecursiveFlags.NO_COUNT_SKIP_EXISTENT) {
+                    rec_flag == (CopyRecursiveFlags.SKIP_EXISTENT | CopyRecursiveFlags.NO_COUNT)) {
                 if (action != RecursiveAction.COUNT)
                     debug_msg (_("Skip %s\n"), dest.get_path());
                 if (counter_on) {
@@ -453,7 +450,7 @@ public class FileTransfer : Object {
                 return;
             /* WARN_OVERWRITE */
             } else if ((rec_flag == CopyRecursiveFlags.WARN_OVERWRITE ||
-                    rec_flag == CopyRecursiveFlags.NO_COUNT_WARN_OVERWRITE) &&
+                    rec_flag == (CopyRecursiveFlags.WARN_OVERWRITE | CopyRecursiveFlags.NO_COUNT)) &&
                     !warn_overwrite (from.get_path(), dest.get_path())) {
                 debug_msg (_("Skip overwrite from '%s' to '%s'.\n"), from.get_path(),
                                                                      dest.get_path());
@@ -500,7 +497,7 @@ public class FileTransfer : Object {
             case RecursiveAction.COUNT:
                 break;
             default:
-                bug_msg (_("Unexpected enum value: %s: %d\n"), "common - RecursiveAction", action);
+                bug_msg (_("Unexpected enum value: %s: %u\n"), "common - RecursiveAction", action);
                 break;
         }
     }
@@ -508,11 +505,11 @@ public class FileTransfer : Object {
 
 
 /**
- * Generate list of filename parts splitted on {@link GLib.Path.DIR_SEPARATOR}.
+ * Generate list of filename parts spited on {@link GLib.Path.DIR_SEPARATOR}.
  *
  * @param path Pathname to split.
  * @param basename Control return of absolute or relative parts of path.
- * @return If basename is false, return list of full paths. Else return
+ * @return If basename is `false`, return list of full paths. Else return
  *         absolute paths.
  */
 public string[] split_path (string path, bool basename = true) {
@@ -550,7 +547,7 @@ public string[] split_path (string path, bool basename = true) {
  *
  * @param filename Filename where to save buffer.
  * @param text Content to save.
- * @return On success return true else false.
+ * @return On success return `true` else `false`.
  */
 public bool save_file (string filename, string text) {
     var file = File.new_for_path (filename);
@@ -585,6 +582,7 @@ public bool save_file (string filename, string text) {
 /*
  * Currently no real difference to strcmp.
  */
+#if DO_NOT_COMPILE
 public int comp_proj_version (string ver_a, string ver_b) {
     //TODO: Epoch and ~ checks.
     string[] a_parts = ver_a.split (".");
@@ -601,6 +599,11 @@ public int comp_proj_version (string ver_a, string ver_b) {
     }
     return 0;
 }
+#else
+public inline int comp_proj_version (string ver_a, string ver_b) {
+    return strcmp (ver_a, ver_b);
+}
+#endif
 
 
 /* Message methods. */
@@ -610,33 +613,32 @@ public int comp_proj_version (string ver_a, string ver_b) {
  * @param format Printf string.
  * @param ... Printf variables.
  */
-public void debug_msg (string format, ...) {
-    if (Args.debug)
-        stdout.printf (format.vprintf (va_list()));
+public inline void debug_msg (string format, ...) {
+    debug_msg_level (1, format.vprintf (va_list()));
 }
 
-public void debug_msg_level (int level, string format, ...) {
+public inline void debug_msg_level (int level, string format, ...) {
     if (Args.debuglevel >= level)
         stdout.printf (format.vprintf (va_list()));
 }
 
-public void warning_msg (string format, ...) {
+public inline void warning_msg (string format, ...) {
     stdout.printf (_("Warning: ") + format.vprintf (va_list()));
 }
 
-public void error_msg (string format, ...) {
+public inline void error_msg (string format, ...) {
     stderr.printf (_("Error: ") + format.vprintf (va_list()));
 }
 
-public void bug_msg (string format, ...) {
+public inline void bug_msg (string format, ...) {
     stderr.printf (format.vprintf (va_list()) + _("Please report a bug!\n"));
 }
 
-public void msg (string format, ...) {
+public inline void msg (string format, ...) {
     stdout.printf (format.vprintf (va_list()));
 }
 
-public void errmsg (string format, ...) {
+public inline void errmsg (string format, ...) {
     stderr.printf (format.vprintf (va_list()));
 }
 

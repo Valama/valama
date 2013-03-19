@@ -27,7 +27,7 @@ using Gee;
 /*
  * Do not use an interface because we already have some precise definitions
  * (e.g. an instance field ui_connections).
- * Depencency interface is implented (update calls).
+ * Dependency interface is implemented (update calls).
  */
 public abstract class UiElement : Object{
     /**
@@ -35,7 +35,13 @@ public abstract class UiElement : Object{
      */
     protected bool locking;
 
+    /**
+     * Containing {@link Gtk.Widget}.
+     */
     public Gtk.Widget widget;
+    /**
+     * Associated {@link Gdl.DockItem}.
+     */
     public Gdl.DockItem? dock_item { get; set; default = null; }
 
     private bool? _visible = null;
@@ -54,6 +60,18 @@ public abstract class UiElement : Object{
         }
     }
 
+    /**
+     * Indicate if UI is initialized.
+     */
+    private static bool initialized = false;
+
+    /**
+     * Last opened {@link Gdl.DockItem} ({@link UiElement}).
+     */
+    private static Gdl.DockItem? latest_item = null;
+    /**
+     * Saved {@link Gdl.DockItemBehavior} after hiding/locking.
+     */
     private Gdl.DockItemBehavior? saved_behavior;
 
     /**
@@ -63,15 +81,20 @@ public abstract class UiElement : Object{
     public signal void visible_changed (bool status);
 
     /**
-     * Status of dock_item. True if shown, false if hidden and null if
+     * Status of dock_item. `true` if shown, `false` if hidden and `null` if
      * undefined.
      */
     private bool? show;
 
     /**
+     * Indicate if dock_item is/should be hidden cause of it's {@link IdeModes}.
+     */
+    private bool modehide = false;
+
+    /**
      * Emit to show search.
      *
-     * @param show True to show, false to hide.
+     * @param show `true` to show, `false` to hide.
      */
     public signal void show_element (bool show);
 
@@ -88,6 +111,9 @@ public abstract class UiElement : Object{
         if (widget_main is Object) {
             widget_main.lock_items.connect (lock_item);
             widget_main.unlock_items.connect (unlock_item);
+            widget_main.initialized.connect (() => {
+                initialized = true;
+            });
         } else
             error_msg (_("Could not connect locking signals.\n"));
         locking = true;
@@ -96,9 +122,21 @@ public abstract class UiElement : Object{
 
         this.notify["dock-item"].connect (() => {
             if (dock_item != null) {
+                latest_item = dock_item;
+                saved_behavior = null;
                 visible = dock_item.visible;
                 dock_item.notify["visible"].connect (() => {
                     visible = dock_item.visible;
+                });
+                dock_item.notify["master"].connect (() => {
+                    if (dock_item.master != null)
+                        dock_item.master.layout_changed.connect (() => {
+#if GDL_3_6_2
+                            show = !dock_item.is_closed();
+#else
+                            show = ((dock_item.flags & Gdl.DockObjectFlags.ATTACHED) != 0);
+#endif
+                        });
                 });
             }
         });
@@ -112,15 +150,29 @@ public abstract class UiElement : Object{
             if (this.show == null || show != this.show) {
                 this.show = show;
                 if (show) {
+                    modehide = true;
+#if !GDL_LESS_3_5_5
                     dock_item.show_item();
+#else
+                    /*
+                     * TODO: Avoid latest_item and instead use solution with
+                     *       focussed element. Perhaps use Dock.toplevel_docks
+                     *       or Dock.dock_objects.
+                     */
+                    if (dock_item != latest_item)
+                        dock_item.dock_to (latest_item, Gdl.DockPlacement.CENTER, -1);
+                    else
+                        dock_item.show_item();
+#endif
                     widget_main.focus_dock_item (dock_item);
                     on_element_show();
                 } else {
-// #if GDL_3_6_2 && VALAC_0_20
+// #if GDL_3_6_2
 //                     /* Hide also iconified item by making it visible first. */
 //                     if (dock_item.is_iconified())
 //                         dock_item.show_item();
 // #endif
+                    modehide = false;
                     on_element_hide();
                     dock_item.hide_item();
                 }
@@ -142,11 +194,12 @@ public abstract class UiElement : Object{
      * Hide dock item grip and lock it.
      */
     private void lock_item() {
-        if (!locking || dock_item == null)
+        if (!locking || dock_item == null || saved_behavior != null)
             return;
         saved_behavior = dock_item.behavior;
-        dock_item.behavior = Gdl.DockItemBehavior.NO_GRIP | Gdl.DockItemBehavior.LOCKED;
-        /* Work arround gdl bug to not hide dockbar properly. */
+        /* Work arround gdl bug #515755 to not hide dockbar properly. */
+        //dock_item.hide_grip();
+        dock_item.behavior = Gdl.DockItemBehavior.NO_GRIP;
         dock_item.forall_internal (true, (child) => {
             if (child is Gdl.DockItemGrip)
                 child.hide();
@@ -161,6 +214,9 @@ public abstract class UiElement : Object{
             return;
         if (saved_behavior != null)
             dock_item.behavior = saved_behavior;
+        saved_behavior = null;
+        /* See note above. */
+        //dock_item.show_grip();
         dock_item.forall_internal (true, (child) => {
             if (child is Gdl.DockItemGrip)
                 child.show();
@@ -179,13 +235,22 @@ public abstract class UiElement : Object{
     /**
      * Show item in some {@link IdeModes} modes.
      */
-    //TODO: Add workaround for gdl < 3.5.5 to dock gdl item after hiding.
     public void mode_to_show (IdeModes mode) {
         project.notify["idemode"].connect(() => {
             if (dock_item != null) {
                 if ((project.idemode & mode) != 0) {
-                    dock_item.show_item();
-                    dock_item.show_all();
+                    if (modehide) {
+#if !GDL_LESS_3_5_5
+                        if (initialized) {
+                            dock_item.show_item();
+                            dock_item.show_all();
+                        }
+#else
+                        if (initialized && (latest_item != dock_item) &&
+                                    ((dock_item.flags & Gdl.DockObjectFlags.ATTACHED) == 0))
+                            dock_item.dock_to (latest_item, Gdl.DockPlacement.CENTER, -1);
+#endif
+                    }
                 } else
                     dock_item.hide_item();
             }
@@ -223,7 +288,7 @@ public abstract class UiElement : Object{
     private static Gee.PriorityQueue<UiElement> q = new Gee.PriorityQueue<UiElement>();
     /**
       * Queue of dependencies which have different priorities (resolve
-      * sequencially).
+      * sequentially).
       */
     //TODO: Not implemented.
     //private static Gee.PriorityQueue<UiElement> s_q = new Gee.PriorityQueue<UiElement>();

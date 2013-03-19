@@ -40,7 +40,7 @@
 #   List of all Vala packages the project depends on.
 #
 # SRCFILES
-#   List of all project files. GLobbing is supported.
+#   List of all project files. Globbing is supported.
 #
 # OPTIONS (optional)
 #   List of additional valadoc options.
