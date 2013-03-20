@@ -384,6 +384,16 @@ namespace Guanako {
             public int for_rule_id;
             public string name;
 
+            bool _resolve_array = false;
+            public bool resolve_array{
+                get {return _resolve_array;}
+                set {
+                    _resolve_array = value;
+                    if (return_to_param != null)
+                        return_to_param.resolve_array = value;
+                }
+            }
+
             Symbol _symbol = null;
             public Symbol symbol{
                 get {return _symbol;}
@@ -430,6 +440,7 @@ namespace Guanako {
                 new_param.for_rule_id = p.for_rule_id;
                 new_param.symbol = p.symbol;
                 new_param.name = p.name;
+                new_param.resolve_array = p.resolve_array;
                 new_param.return_to_param = p.return_to_param;
                 ret.add (new_param);
             }
@@ -659,17 +670,16 @@ namespace Guanako {
                     return;
                 }
                 Symbol[] children = new Symbol[0];
-                if (parent_param.name == "@")
-                    children = accessible;
-                else if (parent_param.symbol == null) {
-                    stdout.printf ("Parent param NULL!\n");
+                if (parent_param.symbol == null) {
                     children = accessible;
                 } else {
-                    bool resolve_array = false;
+                    //bool resolve_array = false;
                     //if (binding != null)
                     //    resolve_array = binding.contains ("arr_el");
                     //children = get_child_symbols (get_type_of_symbol (parent_param.symbol, resolve_array));
-                    children = get_child_symbols (parent_param.symbol);
+                    //children = get_child_symbols (parent_param.symbol);
+                    stdout.printf ("Getting children of " + parent_param.symbol.name + ", resolve: " + parent_param.resolve_array.to_string() + "\n");
+                    children = get_child_symbols (get_type_of_symbol (parent_param.symbol, parent_param.resolve_array));
                 }
 
                 Regex r2 = /^(?P<word>\w*)(?P<rest>.*)$/;
@@ -694,10 +704,18 @@ namespace Guanako {
                                     child_param.for_rule_id = current_rule.rule_id;
                                     call_params.add (child_param);
                                 }
-                                if (binding != null && binding.contains ("arr_el")) {
+                                /*if (binding != null && binding.contains ("arr_el")) {
                                     child_param.symbol = get_type_of_symbol (child, true);
-                                } else {
+                                } else
                                     child_param.symbol = get_type_of_symbol (child, false);
+                                */
+                                child_param.symbol = child;
+                                if (binding != null && binding.contains ("arr_el")) {
+                                    stdout.printf ("Mark as resolve: " + child.name + "\n");
+                                    child_param.resolve_array = true;
+                                } else {
+                                    child_param.resolve_array = false;
+                                    stdout.printf ("Mark as no resolve: " + child.name + "\n");
                                 }
                             }
                             compare (rule[1:rule.length], accessible, rest, call_params, depth + 1, ref ret, ref private_cur_stack, cur_stack);
