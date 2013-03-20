@@ -41,6 +41,12 @@ public class UiCurrentSymbol : UiElement {
         toolbar_title.add (separator_stretch);
         vbox.pack_start (toolbar_title, false, true);
 
+        internal_widget = new Box (Orientation.VERTICAL, 0);
+        var lbl_no_sym = new Label (_("No current symbol"));
+        lbl_no_sym.sensitive = false;
+        internal_widget.pack_start (lbl_no_sym, true, true);
+        container.pack_start (internal_widget, true, true);
+
         project.completion_finished.connect ((smb)=>{
             current_symbol = smb;
             build();
@@ -59,10 +65,8 @@ public class UiCurrentSymbol : UiElement {
 
     protected override void build() {
         debug_msg (_("Run %s update!\n"), get_name());
-        if (internal_widget != null)
-            container.remove (internal_widget);
+        var replace = (internal_widget != null) ? true : false;
         internal_widget = new Box (Orientation.VERTICAL, 0);
-        container.pack_start (internal_widget, true, true);
 
         if (current_symbol == null) {
             var lbl_no_sym = new Label (_("No current symbol"));
@@ -136,6 +140,11 @@ public class UiCurrentSymbol : UiElement {
                 internal_widget.pack_start (lbl_params, true, true);
             }
         }
+
+        if (replace)
+            container.remove (internal_widget);
+        container.pack_start (internal_widget, true, true);
+
         internal_widget.show_all();
         debug_msg (_("%s update finished!\n"), get_name());
     }
