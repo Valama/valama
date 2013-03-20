@@ -152,6 +152,8 @@ pkg_check_modules(GLIB2.0 REQUIRED "glib-2.0")
 set(default_vala_flags
   "--thread"
   "--target-glib" "${GLIB2.0_VERSION}"
+  "--enable-experimental"
+  "--fatal-warnings"
   ${valac_cond}
 )
 

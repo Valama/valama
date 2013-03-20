@@ -55,17 +55,23 @@ public class Entry : Gtk.Entry {
      * Label can be reseted when valid input is provided.
      */
     private bool label_resettable;
+    /**
+     * Reset label to this string.
+     */
+    private string reset_string;
 
     /**
      * Create Entry and connect signals to input.
      */
     public Entry.with_inputcheck (Label err_label,
                                   Regex valid_chars,
-                                  uint delay_sec = 5) {
+                                  uint delay_sec = 5,
+                                  string reset_string = "") {
         this.err_label = err_label;
         this.valid_chars = valid_chars;
         this.delay_sec = delay_sec;
         this.label_resettable = false;
+        this.reset_string = reset_string;
 
         insert_text.connect ((new_text) => {
             this.ui_check_input (new_text);
@@ -99,13 +105,13 @@ public class Entry : Gtk.Entry {
             this.label_resettable = false;
             this.disable_timer();  // reset timer to let it start again
             this.timer_id = Timeout.add_seconds (this.delay_sec, (() => {
-                this.err_label.set_label ("");
+                this.err_label.set_label (reset_string);
                 return true;
             }));
             Signal.stop_emission_by_name (this, _("insert_text"));
         } else if (this.label_resettable) {
             this.label_resettable = false;
-            this.err_label.set_label ("");
+            this.err_label.set_label (reset_string);
         }
     }
 
@@ -130,7 +136,7 @@ public class Entry : Gtk.Entry {
         this.label_resettable = resettable;
         this.disable_timer();
         this.timer_id = Timeout.add_seconds (delay, (() => {
-            this.err_label.set_label ("");
+            this.err_label.set_label (reset_string);
             return true;
         }));
     }

@@ -111,7 +111,7 @@ public const string TEMPLATE_VERSION_MIN = "0.1";
  */
 public ProjectTemplate[] load_templates() {
     FileInfo file_info;
-    ProjectTemplate[] ret = new ProjectTemplate[0];
+    var templates = new TreeMap<string, ProjectTemplate?>();  // sorted map
 
     var locales = new ArrayList<string>();
     foreach (var lang in Intl.get_language_names())
@@ -154,7 +154,8 @@ public ProjectTemplate[] load_templates() {
                                                  new_template.name + "." + filetype);
                 if (FileUtils.test (icon_path, FileTest.EXISTS)) {
                     try {
-                        new_template.icon = new Gdk.Pixbuf.from_file (icon_path);
+                        var pbuf = new Gdk.Pixbuf.from_file (icon_path);
+                        new_template.icon = pbuf.scale_simple (33, 33, Gdk.InterpType.BILINEAR);
                         break;
                     } catch (GLib.Error e) {
                         warning_msg (_("Could not load template image: %s\n"), e.message);
@@ -316,13 +317,13 @@ public ProjectTemplate[] load_templates() {
                 }
             }
             delete doc;
-            ret += new_template;
+            templates.set (new_template.name, new_template);
         }
     } catch (GLib.Error e) {
         errmsg (_("Could not get template directory files: %s\n"), e.message);
     }
 
-    return ret;
+    return templates.values.to_array();
 }
 
 
