@@ -66,16 +66,16 @@ public class UiCurrentSymbol : UiElement {
     protected override void build() {
         debug_msg (_("Run %s update!\n"), get_name());
         var replace = (internal_widget != null) ? true : false;
-        internal_widget = new Box (Orientation.VERTICAL, 0);
+        var internal_widget_new = new Box (Orientation.VERTICAL, 0);
 
         if (current_symbol == null) {
             var lbl_no_sym = new Label (_("No current symbol"));
             lbl_no_sym.sensitive = false;
-            internal_widget.pack_start (lbl_no_sym, true, true);
+            internal_widget_new.pack_start (lbl_no_sym, true, true);
         } else {
             /*var lbl_heading = new Label (current_symbol.name);
             lbl_heading.halign = Align.START;
-            internal_widget.pack_start (lbl_heading, false, true);*/
+            internal_widget_new.pack_start (lbl_heading, false, true);*/
             if (current_symbol is Vala.Signal) {
                 var sgn = current_symbol as Vala.Signal;
                 var lbl_params = new Label ("");
@@ -101,7 +101,7 @@ public class UiCurrentSymbol : UiElement {
                 }
                 lbl_params.label += ")</span>";
 
-                internal_widget.pack_start (lbl_params, true, true);
+                internal_widget_new.pack_start (lbl_params, true, true);
             }
             if (current_symbol is Method) {
                 var mth = current_symbol as Method;
@@ -137,13 +137,14 @@ public class UiCurrentSymbol : UiElement {
                 lbl_params.label += ")</span>";
                 if (mth.comment != null)
                     lbl_params.label += "\n\n" + Markup.escape_text (mth.comment.content);
-                internal_widget.pack_start (lbl_params, true, true);
+                internal_widget_new.pack_start (lbl_params, true, true);
             }
         }
 
         if (replace)
             container.remove (internal_widget);
-        container.pack_start (internal_widget, true, true);
+        container.pack_start (internal_widget_new, true, true);
+        internal_widget = internal_widget_new;
 
         internal_widget.show_all();
         debug_msg (_("%s update finished!\n"), get_name());
