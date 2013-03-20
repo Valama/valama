@@ -279,7 +279,6 @@ public class WelcomeScreen : Alignment {
         grid_main.attach (btn_create, 1, 2, 1, 1);
 
         var btn_open = new Button.with_label (_("Open project"));
-        btn_open.sensitive = (current_recent != null) ? true : false;
         btn_open.vexpand = false;
         btn_open.clicked.connect (() => {
             this.remove (main_screen);
