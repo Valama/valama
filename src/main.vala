@@ -287,6 +287,8 @@ class GuanakoCompletion : Gtk.SourceCompletionProvider, Object {
         return true;
     }
 
+    Project.CompletionRun completion_run = null;
+    bool completion_run_queued = false;
     public void populate (Gtk.SourceCompletionContext context) {
         //TODO: Provide way to get completion for not saved content.
         if (is_new_document (source_viewer.current_srcfocus))
@@ -309,38 +311,52 @@ class GuanakoCompletion : Gtk.SourceCompletionProvider, Object {
         try {
             new Thread<void*>.try (_("Completion"), () => {
                 /* Get completion proposals from Guanako */
-                Symbol current_symbol = null;
-                var guanako_proposals = project.guanako_project.propose_symbols (
-                            project.guanako_project.get_source_file_by_name (source_viewer.current_srcfocus),
-                            line,
-                            col,
-                            current_line, out current_symbol);
-                GLib.Idle.add (() => {
-                    project.completion_finished (current_symbol);
-                    return false;
-                });
-
-                /* Assign icons and pass the proposals on to Gtk.SourceView */
-                var props = new GLib.List<Gtk.SourceCompletionItem>();
-                foreach (Gee.TreeSet<CompletionProposal> list in guanako_proposals)
-                foreach (CompletionProposal guanako_proposal in list) {
-                    if (guanako_proposal.symbol.name != null) {
-
-                        Gdk.Pixbuf pixbuf = get_pixbuf_for_symbol (guanako_proposal.symbol);
-
-                        var item = new ComplItem (guanako_proposal.symbol.name,
-                                                  guanako_proposal.symbol.name,
-                                                  pixbuf,
-                                                  null,
-                                                  guanako_proposal);
-                        props.append (item);
-                    }
+                completion_run_queued = true;
+                if (completion_run != null) {
+                    completion_run.abort_run();
+                    return null;
                 }
-                GLib.Idle.add (() => {
-                    if (context is SourceCompletionContext)
-                        context.add_proposals (this, props, true);
-                    return false;
-                });
+                while (completion_run_queued) {
+                    completion_run = new Project.CompletionRun (project.guanako_project);
+                    completion_run_queued = false;
+                    var guanako_proposals = completion_run.run (project.guanako_project.get_source_file_by_name (source_viewer.current_srcfocus),
+                                        line, col, current_line);
+                    if (guanako_proposals == null)
+                        continue;
+                    Symbol current_symbol = null;
+                    if (completion_run.cur_stack.size > 0)
+                        current_symbol = completion_run.cur_stack.last();
+                    else
+                        current_symbol = null;
+
+                    GLib.Idle.add (() => {
+                        project.completion_finished (current_symbol);
+                        return false;
+                    });
+
+                    /* Assign icons and pass the proposals on to Gtk.SourceView */
+                    var props = new GLib.List<Gtk.SourceCompletionItem>();
+                    foreach (Gee.TreeSet<CompletionProposal> list in guanako_proposals)
+                    foreach (CompletionProposal guanako_proposal in list) {
+                        if (guanako_proposal.symbol.name != null) {
+
+                            Gdk.Pixbuf pixbuf = get_pixbuf_for_symbol (guanako_proposal.symbol);
+
+                            var item = new ComplItem (guanako_proposal.symbol.name,
+                                                    guanako_proposal.symbol.name,
+                                                    pixbuf,
+                                                    null,
+                                                    guanako_proposal);
+                            props.append (item);
+                        }
+                    }
+                    GLib.Idle.add (() => {
+                        if (context is SourceCompletionContext)
+                            context.add_proposals (this, props, true);
+                        return false;
+                    });
+                }
+                completion_run = null;
                 return null;
             });
         } catch (GLib.Error e) {

@@ -279,41 +279,6 @@ namespace Guanako {
         }
         Gee.HashMap<string, SyntaxRule> map_syntax = new Gee.HashMap<string, SyntaxRule>();
 
-        public Gee.TreeSet<CompletionProposal>[] propose_symbols (SourceFile file,
-                                                                 int line,
-                                                                 int col,
-                                                                 string written, out Symbol? current_symbol) {
-            var accessible = get_accessible_symbols (file, line, col);
-            var inside_symbol = get_symbol_at_pos (file, line, col);
-
-            var ret = new ProposalSet();
-
-            var comprun = new CompareRun(this);
-
-            string initial_rule_name = "";
-            Symbol[] accessible_symbols;
-            if (inside_symbol == null) {
-                initial_rule_name = "init_deep_space";
-                accessible_symbols = get_child_symbols (context.root);
-            } else {
-                initial_rule_name = "init_method";
-                accessible_symbols = accessible;
-            }
-            if (!map_syntax.contains (initial_rule_name)) {
-                stdout.printf (@"Entry point $initial_rule_name not found in syntax file. Trying to segfault me, huh??");
-                return ret.comp_sets;
-            }
-            comprun.run (map_syntax[initial_rule_name].rule,
-                            accessible_symbols,
-                            written, ref ret);
-            ret.wait_for_finish();
-            if (comprun.cur_stack.size > 0)
-                current_symbol = comprun.cur_stack.last();
-            else
-                current_symbol = null;
-            return ret.comp_sets;
-        }
-
         internal class RuleExpression {
             public string expr;
             public int rule_id;
@@ -404,8 +369,8 @@ namespace Guanako {
             public Gee.TreeSet<CompletionProposal>[] comp_sets;
         }
 
-        class CompareRun {
-            public CompareRun(Project parent_project) {
+        public class CompletionRun {
+            public CompletionRun(Project parent_project) {
                 this.parent_project = parent_project;
                 universal_parameter = new CallParameter();
                 universal_parameter.name = "@";
@@ -414,6 +379,7 @@ namespace Guanako {
             Project parent_project;
             int rule_id_count = 0;
             Symbol[] accessible;
+            bool abort_flag = false;
 
             private class CallParameter {
                 public int for_rule_id;
@@ -483,21 +449,40 @@ namespace Guanako {
                         return param;
                 return null;
             }
-
-            public void run (RuleExpression[] compare_rule,
-                                Symbol[] accessible,
-                                string written,
-                                ref ProposalSet ret) {
-                this.accessible = accessible;
+            public void abort_run () {
+                abort_flag = true;
+            }
+            public Gee.TreeSet<CompletionProposal>[]? run (SourceFile file, int line, int col, string written) {
+                var inside_symbol = parent_project.get_symbol_at_pos (file, line, col);
+                string initial_rule_name = "";
+                Symbol[] accessible_symbols;
+                if (inside_symbol == null) {
+                    initial_rule_name = "init_deep_space";
+                    accessible = get_child_symbols (parent_project.context.root);
+                } else {
+                    initial_rule_name = "init_method";
+                    accessible = parent_project.get_accessible_symbols (file, line, col);
+                }
+                if (!parent_project.map_syntax.contains (initial_rule_name)) {
+                    stdout.printf (@"Entry point $initial_rule_name not found in syntax file. Trying to segfault me, huh??");
+                    return null;
+                }
                 Gee.ArrayList<Symbol> init_private_cur_stack = new Gee.ArrayList<Symbol>();
-                compare (compare_rule, written, new Gee.ArrayList<CallParameter>(), 0, ref ret, ref init_private_cur_stack);
+
+                var ret = new ProposalSet();
+                compare (parent_project.map_syntax[initial_rule_name].rule, written, new Gee.ArrayList<CallParameter>(), 0, ref ret, ref init_private_cur_stack);
+                ret.wait_for_finish();
+                if (abort_flag)
+                    return null;
+                return ret.comp_sets;
             }
             private void compare (RuleExpression[] compare_rule,
                                 string written2,
                                 Gee.ArrayList<CallParameter> call_params,
                                 int depth, ref ProposalSet ret,
                                 ref Gee.ArrayList<Symbol> private_cur_stack) {
-
+                if (abort_flag)
+                    return;
                 /*
                 * For some reason need to create a copy... otherwise assigning new
                 * values to written doesn't work
@@ -853,7 +838,7 @@ namespace Guanako {
                 return MatchRes.UNEQUAL;
             }
 
-            Thread<void*> compare_threaded (CompareRun comp_run,
+            Thread<void*> compare_threaded (CompletionRun comp_run,
                                             RuleExpression[] compare_rule,
                                             string written,
                                             Gee.ArrayList<CallParameter> call_params,
@@ -864,7 +849,7 @@ namespace Guanako {
             }
 
             class CompareThread {
-                public CompareThread (CompareRun comp_run,
+                public CompareThread (CompletionRun comp_run,
                                     RuleExpression[] compare_rule,
                                     string written,
                                     Gee.ArrayList<CallParameter> call_params,
@@ -878,7 +863,7 @@ namespace Guanako {
                     this.private_cur_stack = private_cur_stack;
                     this.ret = ret;
                 }
-                CompareRun comp_run;
+                CompletionRun comp_run;
                 RuleExpression[] compare_rule;
                 Gee.ArrayList<CallParameter> call_params;
                 ProposalSet ret;
