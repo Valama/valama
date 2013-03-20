@@ -107,8 +107,6 @@ public class UiCurrentSymbol : UiElement {
             if (current_symbol is Method) {
                 var mth = current_symbol as Method;
 
-                //TODO: Fix strange Pango markup warnings
-
                 var lbl_params = new Label ("");
                 lbl_params.use_markup = true;
                 lbl_params.halign = Align.START;

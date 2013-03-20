@@ -167,6 +167,13 @@ public class WelcomeScreen : Alignment {
      */
     public signal void project_loaded (ValamaProject? project);
 
+    /**
+     * Emitted when project was opened over recent projects list.
+     *
+     * @param btn {@link Gtk.Button} which was clicked.
+     */
+    private signal void recent_btn_selected (Button btn);
+
 
     /**
      * Initialize all main elements (start page and creator).
@@ -245,17 +252,28 @@ public class WelcomeScreen : Alignment {
         scrw.vexpand = true;
 
         Grid grid_recent_projects;
+        var move_grid_elements = false;
         recent_build (out grid_recent_projects);
         scrw.add_with_viewport (grid_recent_projects);
         /* Update added project files immediately. */
         recentmgr.changed.connect (() => {
-            //TODO: Find a better solution. scrw.remove (grid_...) won't work.
-            scrw.forall_internal (false, (child) => {
-                scrw.remove (child);
-            });
-            recent_build (out grid_recent_projects);
-            scrw.add_with_viewport (grid_recent_projects);
-            grid_recent_projects.show_all();
+            if (!move_grid_elements) {
+                //TODO: Find a better solution. scrw.remove (grid_...) won't work.
+                scrw.forall_internal (false, (child) => {
+                    scrw.remove (child);
+                });
+                recent_build (out grid_recent_projects);
+                scrw.add_with_viewport (grid_recent_projects);
+                grid_recent_projects.show_all();
+            }
+        });
+        recent_btn_selected.connect ((btn) => {
+            move_grid_elements = true;
+            /* Move selected element to top. */
+            grid_recent_projects.remove (btn);
+            grid_recent_projects.insert_row (0);
+            grid_recent_projects.attach (btn, 0, 0, 1, 1);
+            move_grid_elements = false;
         });
 
         var lbl_recent_projects = new Label ("<b>" + Markup.escape_text (_("Recent projects")) + "</b>");
@@ -342,6 +360,8 @@ public class WelcomeScreen : Alignment {
                             btn_proj.activate();
                             try {
                                 project_loaded (new ValamaProject (info.get_uri(), Args.syntaxfile));
+                                /* Move element to top. */
+                                recent_btn_selected (btn_proj);
                             } catch (LoadingError e) {
                                 error_msg (_("Could not load new project: %s\n"), e.message);
                             }
