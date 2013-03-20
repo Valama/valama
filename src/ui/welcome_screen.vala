@@ -300,6 +300,19 @@ public class WelcomeScreen : Alignment {
     }
 
     /**
+     * Newer elements ({@link Gtk.RecentInfo.get_modified} come ealier.
+     *
+     * @param a First info.
+     * @param b Second info.
+     * @return 0 if equal, 1 if a < b, else -1.
+     */
+    private int cmp_recent_info (RecentInfo a, RecentInfo b) {
+        if (a.get_modified() == b.get_modified())
+            return 0;
+        return (a.get_modified() < b.get_modified()) ? 1 : -1;
+    }
+
+    /**
      * Build recent loaded project list.
      *
      * @param grid_recent_projects {@link Gtk.Grid} to fill with projects (as
@@ -307,9 +320,13 @@ public class WelcomeScreen : Alignment {
      */
     private void recent_build (out Grid grid_recent_projects) {
         grid_recent_projects = new Grid();
-        int cnt = 0;
         if (recentmgr.get_items().length() > 0) {
-            foreach (RecentInfo info in recentmgr.get_items()) {
+            /* Sort elements before. */
+            var recent_items = new Gee.TreeSet<RecentInfo> (cmp_recent_info);
+            foreach (var info in recentmgr.get_items())
+                recent_items.add (info);
+            int cnt = 0;
+            foreach (var info in recent_items) {
                 var btn_proj = new Button();
                 grid_recent_projects.attach (btn_proj, 0, cnt++, 1, 1);
                 btn_proj.hexpand = true;
@@ -605,12 +622,7 @@ public class WelcomeScreen : Alignment {
         lbl_pname.halign = Align.END;
 
         var valid_chars = /^[a-z0-9.:_-]+$/i;  // keep "-" at the end!
-        var lbl_pname_err = new Label ("\n");
-        grid_pinfo.attach (lbl_pname_err, 1, 3, 1, 1);
-        lbl_pname_err.max_width_chars = 20;
-        lbl_pname_err.wrap  = true;
-        lbl_pname_err.sensitive = false;
-        var ent_pname = new Entry.with_inputcheck (lbl_pname_err, valid_chars, 5, "\n");
+        var ent_pname = new Entry.with_inputcheck (null, valid_chars);
         grid_pinfo.attach (ent_pname, 1, 2, 1, 1);
         ent_pname.set_placeholder_text (_("Project name"));
 
@@ -631,7 +643,7 @@ public class WelcomeScreen : Alignment {
         //TODO: Use in place dialog (FileChooserWidget).
         var chooser_location = new FileChooserButton (_("New project location"),
                                                       Gtk.FileChooserAction.SELECT_FOLDER);
-        grid_pinfo.attach (chooser_location, 1, 6, 1, 1);
+        grid_pinfo.attach (chooser_location, 1, 5, 1, 1);
 
         nbook.switch_page.connect ((page) => {
             if (initialized) {

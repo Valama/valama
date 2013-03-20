@@ -42,7 +42,7 @@ public class Entry : Gtk.Entry {
     /**
      * Label to show error message.
      */
-    private Label err_label;
+    private Label? err_label;
     /**
      * Regex of valid characters.
      */
@@ -62,8 +62,13 @@ public class Entry : Gtk.Entry {
 
     /**
      * Create Entry and connect signals to input.
+     *
+     * @param err_label {@link Gtk.Label} to show error message.
+     * @param valid_chars {@link Regex} with valid characters.
+     * @param delay_sec Time to show error message.
+     * @param reset_string Reset {@link Gtk.Label} to this string.
      */
-    public Entry.with_inputcheck (Label err_label,
+    public Entry.with_inputcheck (Label? err_label,
                                   Regex valid_chars,
                                   uint delay_sec = 5,
                                   string reset_string = "") {
@@ -100,16 +105,19 @@ public class Entry : Gtk.Entry {
     public void ui_check_input (string input_text) {
         MatchInfo match_info = null;  // init to null to make valac happy
         if (!this.valid_chars.match (input_text, 0, out match_info)) {
-            this.err_label.set_label (_("Invalid character: '") + match_info.get_string() +
-                                    _("' Please choose one from: ") + this.valid_chars.get_pattern());
-            this.label_resettable = false;
+            if (err_label != null) {
+                this.err_label.set_label (_("Invalid character: '") + match_info.get_string() +
+                                        _("' Please choose one from: ") + this.valid_chars.get_pattern());
+                this.label_resettable = false;
+            }
             this.disable_timer();  // reset timer to let it start again
             this.timer_id = Timeout.add_seconds (this.delay_sec, (() => {
-                this.err_label.set_label (reset_string);
+                if (err_label != null)
+                    this.err_label.set_label (reset_string);
                 return true;
             }));
             Signal.stop_emission_by_name (this, _("insert_text"));
-        } else if (this.label_resettable) {
+        } else if (err_label != null && this.label_resettable) {
             this.label_resettable = false;
             this.err_label.set_label (reset_string);
         }
