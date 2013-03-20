@@ -325,6 +325,7 @@ public class MainWidget : Box {
         add_view_menu_item (menu_view, wdg_current_file_structure, _("Show current file structure"));
         add_view_menu_item (menu_view, wdg_stylechecker, _("Show style checker"));
         add_view_menu_item (menu_view, wdg_smb_browser, _("Show symbol browser"));
+        add_view_menu_item (menu_view, wdg_current_symbol, _("Show current symbol"));
 
         var item_view_lockhide = new CheckMenuItem.with_mnemonic ("_" + _("Lock elements"));
         menu_view.append (item_view_lockhide);
