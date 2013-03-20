@@ -134,8 +134,7 @@ public class UiCurrentFileStructure : UiElement {
                 current_iter = parent;
 
             TreeIter[] iters = new TreeIter[0];
-            Guanako.iter_symbol ((Symbol)node, (smb, depth, tmptypename) => {
-                var typename = tmptypename;
+            Guanako.iter_symbol ((Symbol)node, (smb, depth) => {
                 if (smb.name != null && (smb is Constant ||
                                          smb is Namespace ||
                                          smb is Property ||
@@ -143,31 +142,16 @@ public class UiCurrentFileStructure : UiElement {
                                          smb is Subroutine ||
                                          smb is Variable ||
                                          smb is TypeSymbol)) {
-                    switch (smb.access) {
-                        case SymbolAccessibility.INTERNAL:  //TODO: Add internal icons
-                        case SymbolAccessibility.PRIVATE:
-                            if (!btn_show_private.active)
-                                return Guanako.IterCallbackReturns.ABORT_BRANCH;
-                            typename += "-private";
-                            break;
-                        case SymbolAccessibility.PUBLIC:
-                            // typename += "-public";
-                            break;
-                        case SymbolAccessibility.PROTECTED:
-                            typename += "-protected";
-                            break;
-                        default:
-                            bug_msg (_("Unexpected enum value: %s: %u\n"),
-                                     "curfilestruct - SymbolAccessibility", smb.access);
-                            break;
-                    }
+                    if (smb.access == SymbolAccessibility.PRIVATE)
+                        if (!btn_show_private.active)
+                            return Guanako.IterCallbackReturns.ABORT_BRANCH;
 
                     TreeIter next;
                     if (depth == 1)
                         store.append (out next, parent);
                     else
                         store.append (out next, iters[depth - 2]);
-                    store.set (next, 0, smb.name, 1, get_pixbuf_by_name (typename), -1);
+                    store.set (next, 0, smb.name, 1, get_pixbuf_for_symbol(smb), -1);
                     if (smb == current_symbol)
                         current_iter = next;
                     map_iter_symbols[store.get_path(next).to_string()] = smb;

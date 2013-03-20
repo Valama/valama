@@ -620,8 +620,8 @@ namespace Guanako {
                                                     node.source_reference.end);
                 stdout.printf ("line:|%s|\n", exact_region);
 
-                iter_symbol ((Symbol) node, (smb, depth, typename) => {
-                    stdout.printf ("Symbol: %s - %s\n", smb.name, typename);
+                iter_symbol ((Symbol) node, (smb, depth) => {
+                    stdout.printf ("Symbol: %s\n", smb.name);
                     exact_region = get_code_region (smb.source_reference.file,
                                                     smb.source_reference.begin,
                                                     smb.source_reference.end);

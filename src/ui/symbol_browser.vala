@@ -125,27 +125,15 @@ public class SymbolBrowser : UiElement {
 
         TreeIter[] iters = new TreeIter[0];
 
-        Guanako.iter_symbol (project.guanako_project.root_symbol, (smb, depth, typename) => {
+        Guanako.iter_symbol (project.guanako_project.root_symbol, (smb, depth) => {
             if (smb.name != null) {
-                string tpe = "";
-                foreach (var part in typename.split ("_"))
-                    switch (part.length) {
-                        case 0:
-                            break;
-                        case 1:
-                            tpe += part.up (1);
-                            break;
-                        default:
-                            tpe += part.up (1) + part.slice (1, part.length);
-                            break;
-                    }
-
                 TreeIter next;
                 if (depth == 1)
                     store.append (out next, null);
                 else
                     store.append (out next, iters[depth - 2]);
-                store.set (next, 0, smb.name, 1, tpe, 2, get_pixbuf_by_name (typename), -1);
+                string typename = get_symbol_type_name(smb);
+                store.set (next, 0, smb.name, 1, typename.up(1) + typename.substring(1), 2, get_pixbuf_for_symbol (smb), -1);
                 if (iters.length < depth)
                     iters += next;
                 else

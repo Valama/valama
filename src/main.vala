@@ -166,27 +166,47 @@ static void load_icons() {
     }
 }
 
-static Gdk.Pixbuf? get_pixbuf_for_symbol (Symbol symbol) {
-    if (symbol is Class)        return map_icons["class"];
-    if (symbol is Constant)     return map_icons["constant"];
-    if (symbol is Delegate)     return map_icons["delegate"];
-    if (symbol is Enum)         return map_icons["enum"];
-    if (symbol is Vala.EnumValue) return map_icons["enum_value"];
-    if (symbol is ErrorCode)    return map_icons["error_code"];
-    if (symbol is ErrorDomain)  return map_icons["error_domain"];
-    if (symbol is Variable)     return map_icons["field"];
-    if (symbol is Interface)    return map_icons["interface"];
-    if (symbol is Method)       return map_icons["method"];
-    if (symbol is Namespace)    return map_icons["namespace"];
-    if (symbol is Property)     return map_icons["property"];
-    if (symbol is Vala.Signal)  return map_icons["signal"];
-    if (symbol is Struct)       return map_icons["struct"];
+static string? get_symbol_type_name (Symbol symbol) {
+    if (symbol is Class)        return "class";
+    if (symbol is Constant)     return "constant";
+    if (symbol is Delegate)     return "delegate";
+    if (symbol is Enum)         return "enum";
+    if (symbol is Vala.EnumValue) return "enum_value";
+    if (symbol is ErrorCode)    return "error_code";
+    if (symbol is ErrorDomain)  return "error_domain";
+    if (symbol is Variable)     return "field";
+    if (symbol is Interface)    return "interface";
+    if (symbol is Method)       return "method";
+    if (symbol is Namespace)    return "namespace";
+    if (symbol is Property)     return "property";
+    if (symbol is Vala.Signal)  return "signal";
+    if (symbol is Struct)       return "struct";
     return null;
 }
 
-static Gdk.Pixbuf? get_pixbuf_by_name (string typename) {
-    if (map_icons.has_key (typename ))
-        return map_icons[typename];
+static Gdk.Pixbuf? get_pixbuf_for_symbol (Symbol symbol) {
+    var complete_typename = "element-" + get_symbol_type_name(symbol);
+
+    if (!(symbol is Vala.Signal))
+        switch (symbol.access) {
+            case SymbolAccessibility.INTERNAL:  //TODO: Add internal icons
+            case SymbolAccessibility.PRIVATE:
+                complete_typename += "-private";
+                break;
+            case SymbolAccessibility.PUBLIC:
+                if (!(symbol is Namespace))
+                    complete_typename += "-public";
+                break;
+            case SymbolAccessibility.PROTECTED:
+                if (!(symbol is Field))
+                    complete_typename += "-protected";
+                break;
+        }
+
+    complete_typename += "-16.png";
+    if (map_icons.has_key (complete_typename))
+        return map_icons[complete_typename];
+    stdout.printf ("Symbol pixbuf not found: " + complete_typename + "\n");
     return null;
 }
 
