@@ -403,11 +403,13 @@ public class ValamaProject : Object {
      * @param project_file Load project from this file.
      * @param syntaxfile Load Guanako syntax definitions from this file.
      * @param fully If `false` only load project file information.
+     * @param save_recent Update recent project files catalogue.
      * @throws LoadingError Throw on error while loading project file.
      */
     public ValamaProject (string project_file,
                           string? syntaxfile = null,
-                          bool fully = true) throws LoadingError {
+                          bool fully = true,
+                          bool save_recent = true) throws LoadingError {
         var proj_file = File.new_for_path (project_file);
         this.project_file = proj_file.get_path();
         project_path = proj_file.get_parent().get_path(); //TODO: Check valid path?
@@ -442,16 +444,17 @@ public class ValamaProject : Object {
         load_project_file();  // can throw LoadingError
 
         if (fully)
-            init (syntaxfile);
+            init (syntaxfile, save_recent);
     }
 
     /**
      * Fully load project or do nothing when already fully loaded.
      *
      * @param syntaxfile Load Guanako syntax definitions from this file.
+     * @param save_recent Update recent project files catalogue.
      * @throws LoadingError Throw if Guanako completion fails to load.
      */
-    public void init (string? syntaxfile = null) throws LoadingError {
+    public void init (string? syntaxfile = null, bool save_recent = true) throws LoadingError {
         if (guanako_project == null)
             try {
                 guanako_project = new Guanako.Project (syntaxfile);
@@ -464,7 +467,8 @@ public class ValamaProject : Object {
                                         e.message);
             }
 
-        recentmgr.add_item (get_absolute_path (this.project_file));
+        if (save_recent)
+            save_to_recent();
 
         generate_file_list (_source_dirs.to_array(),
                             _source_files.to_array(),
@@ -504,6 +508,19 @@ public class ValamaProject : Object {
             });
             return null;
         });
+    }
+
+    /**
+     * Update list of recent projects.
+     */
+    public inline void save_to_recent() {
+        debug_msg_level (3, _("Add project to recent manager: %s - %s\n"), project_name, project_file);
+        if (!recentmgr.add_full (project_file,
+                                 RecentData() { display_name = project_name,
+                                                mime_type = "application/octet-stream",
+                                                app_name = "Valama",  //TODO: Translatable?
+                                                app_exec = "valama %u"}))
+            warning_msg (_("Could not add project to recent manager.\n"));
     }
 
     /**

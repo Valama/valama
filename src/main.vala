@@ -35,7 +35,7 @@ public static int main (string[] args) {
             filename: Path.build_path (Path.DIR_SEPARATOR_S,
                                        Environment.get_user_cache_dir(),
                                        "valama",
-                                       "recent_projects"));
+                                       "recent_projects.xml"));
 
     /* Command line parsing. */
     /* Copied from Yorba application. */

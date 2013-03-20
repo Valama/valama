@@ -24,29 +24,23 @@ using Gee;
 /**
  * Template selection widget; Can return selected item
  */
-public class UiTemplateSelector : Object {
+public class UiTemplateSelector : TemplatePage {
     private TreeView tree_view;
     private ProjectTemplate[] available_templates;
     private ToggleToolButton btn_credits;
     private ToggleToolButton btn_vlpinfo;
 
+    private bool accel_added;
+
     private Widget tinfo;
-
-    public Widget widget { get; private set; }
-
-    /**
-     * (De)activate signal if template selector is selected by parent widget
-     * to activate accelerators.
-     *
-     * @param status If `true` accelerators will be added to
-     *               {@link window_main}, if `false` disconnect them.
-     */
-    public signal void selected (bool status);
 
     public UiTemplateSelector() {
         var accel_group = new AccelGroup();
+        accel_added = false;
 
         var vbox = new Box (Orientation.VERTICAL, 0);
+        vbox.expand = true;
+
         var infobox = new Box (Orientation.HORIZONTAL, 0);
         vbox.pack_start (infobox, true, true);
 
@@ -114,6 +108,7 @@ public class UiTemplateSelector : Object {
                 btn_vlpinfo.visible = false;
                 btn_credits.visible = false;
                 infobox.pack_start (scrw, true, true);
+                tree_view.grab_focus();
             }
 
         });
@@ -185,11 +180,25 @@ public class UiTemplateSelector : Object {
         });
 
         /* Take care not to make those global accelerators permanent. */
-        this.selected.connect ((status) => {
-            if (status)
+        this.selected.connect (() => {
+            if (!accel_added) {
                 window_main.add_accel_group (accel_group);
-            else
+                accel_added = true;
+            }
+            Idle.add (() => {
+                tree_view.grab_focus();
+                return false;
+            });
+            return _("Select template");
+        });
+        this.deselected.connect ((status) => {
+            if (accel_added) {
                 window_main.remove_accel_group (accel_group);
+                accel_added = false;
+            }
+            btn_info.active = false;
+            if (status)
+                TemplatePage.template = get_selected_template();
         });
 
         this.widget = vbox;
@@ -598,8 +607,12 @@ public static ValamaProject? create_project_from_template (ProjectTemplate templ
     try {
         new_proj = new ValamaProject (Path.build_path (Path.DIR_SEPARATOR_S,
                                                        target_folder,
-                                                       project_name + ".vlp"));
+                                                       project_name + ".vlp"),
+                                      null,
+                                      true,
+                                      false);
         new_proj.project_name = project_name;
+        new_proj.save_to_recent();
         new_proj.save();
     } catch (LoadingError e) {
         errmsg (_("Couldn't load new project: %s\n"), e.message);

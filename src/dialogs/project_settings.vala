@@ -175,7 +175,10 @@ public void ui_project_dialog (ValamaProject? project) {
     dlg.response.connect ((response_id) => {
         switch (response_id) {
             case ResponseType.OK:
-                project.project_name = ent_proj_name.text;
+                if (project.project_name != ent_proj_name.text) {
+                    project.project_name = ent_proj_name.text;
+                    project.save_to_recent();  // update recent list immediately
+                }
                 project.version_major = (int) ent_major.value;
                 project.version_minor = (int) ent_minor.value;
                 project.version_patch = (int) ent_patch.value;
