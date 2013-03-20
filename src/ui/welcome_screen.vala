@@ -21,15 +21,25 @@ using GLib;
 using Gtk;
 using Gdk;
 
+
+/**
+ * Helper class to add a new page to {@link WelcomeScreen} creation steps.
+ */
 public abstract class TemplatePage : Object {
+    /**
+     * {@link Gtk.Widget} with the page to be displayed.
+     */
     public Widget widget { get; protected set; }
 
+    /**
+     * Share template over all instances.
+     */
     public static ProjectTemplate? template = null;
 
     /**
      * Emit signal to initialize object (e.g. add accelerators).
      *
-     * @return Sensitivity of buttons and description.
+     * @return Page description.
      */
     public signal string? selected();
 
@@ -40,40 +50,133 @@ public abstract class TemplatePage : Object {
      */
     public signal void deselected (bool status);
 
+    /**
+     * Emit to change previous-button sensitivity.
+     */
     public signal void prev (bool status);
+    /**
+     * Emit to change next-button sensitivity.
+     */
     public signal void next (bool status);
 }
 
 
+/**
+ * Show start screen with last opened projects and allow creation of new
+ * project from templates.
+ */
 public class WelcomeScreen : Alignment {
+    /**
+     * Fixed width of all {@link Gtk.Grid}s (@link main_screen} and
+     * {@link creator}.
+     */
     const int WIDTH = 600;
+    /**
+     * Fixed height of all {@link Gtk.Grid}s (@link main_screen} and
+     * {@link creator}.
+     */
     const int HEIGHT = 400;
 
+    /**
+     * {@link Gtk.ToolButton} to go back in creation procedure.
+     */
     private ToolButton btn_prev;
+    /**
+     * {@link Gtk.ToolButton} to continue with creation procedure.
+     */
     private ToolButton btn_next;
 
+    /**
+     * Holds all creation steps.
+     */
     private Notebook nbook;
+    /**
+     * Steps (pages) to go backward with previous-button. If negative, reset
+     * to start page.
+     */
     private int nbook_prev_n;
+    /**
+     * Steps (pages) to go forward with next-button. If negative, reset to
+     * start page.
+     */
     private int nbook_next_n;
 
+    /**
+     * Current selected recent project.
+     */
     private RecentInfo? current_recent;
+    /**
+     * Current page of creation step.
+     */
     private Widget? current_page;
 
+    /**
+     * Start page.
+     */
     private Widget main_screen;
+    /**
+     * Selector/creator main widget. Provides previous- and next-buttons. To
+     * switch between creation steps.
+     */
     private Widget creator;
+    /**
+     * File chooser widget.
+     */
     private Widget opener;
 
+    /**
+     * Initialization state. Signal emissions will be tracked after
+     * initialized. Activate with {@link initialize}.
+     */
     private bool initialized;
+    /**
+     * Last clicked creator button. `true` if {@link btn_next} else if
+     * {@link btn_prev} `false`.
+     */
     private bool is_next;
 
+    /**
+     * Emitted when a item in recent project list is selected.
+     *
+     * @param btn {@link Gtk.Button} associated to selected (!= loaded) project.
+     */
     private signal void recent_selected (Button btn);
+
+    /**
+     * Emitted when start page is shown (e.g. creation steps are canceled).
+     */
     private signal void main_screen_selected();
+
+    /**
+     * Change heading text of creation step.
+     *
+     * @param desc Text.
+     */
     private signal void selector_heading (string desc);
+    /**
+     * Change description text of creation step.
+     *
+     * @param desc Text.
+     */
     private signal void selector_description (string desc);
 
+    /**
+     * Emit when new {@link ValamaProject} is loaded.
+     *
+     * @param project Loaded project.
+     */
     public signal void project_loaded (ValamaProject? project);
 
 
+    /**
+     * Initialize all main elements (start page and creator).
+     *
+     * Note: Entry point for project open button is first creation step
+     *       (notebook page). Entry point of new project button is second
+     *       creation step.
+     *
+     * @param build_default Setup default creation steps.
+     */
     public WelcomeScreen (bool build_default = true) {
         this.xalign = 0.5f;
         this.yalign = 0.5f;
@@ -107,10 +210,17 @@ public class WelcomeScreen : Alignment {
         this.show_all();
     }
 
+    /**
+     * Mark class initialized. Only after initialization all signals are
+     * tracked.
+     */
     public inline void initialize() {
         initialized = true;
     }
 
+    /**
+     * Build up main {@link Gtk.Grid} with recent information.
+     */
     private void build_main() {
         var grid_main = new Grid();
         grid_main.column_spacing = 30;
@@ -190,6 +300,12 @@ public class WelcomeScreen : Alignment {
         main_screen = grid_main;
     }
 
+    /**
+     * Build recent loaded project list.
+     *
+     * @param grid_recent_projects {@link Gtk.Grid} to fill with projects (as
+     *                             {@link Gtk.Button} objects.
+     */
     private void recent_build (out Grid grid_recent_projects) {
         grid_recent_projects = new Grid();
         int cnt = 0;
@@ -252,6 +368,11 @@ public class WelcomeScreen : Alignment {
         }
     }
 
+    /**
+     * Build up creator {@link Gtk.Grid} with previous- and next-button.
+     *
+     * Creation steps must be added with {@link add_page} or {@link add_tpage}.
+     */
     private void build_creator() {
         var grid_creator = new Grid();
         grid_creator.set_size_request (WIDTH, HEIGHT);
@@ -273,7 +394,7 @@ public class WelcomeScreen : Alignment {
                     main_screen_selected();
                     /*
                      * TODO: Proper solution to work around half pressed button
-                     *       after swiching back again.
+                     *       after swichting back again.
                      */
                     btn_prev.forall ((child) => {
                         var btn = child as Button;
@@ -332,6 +453,16 @@ public class WelcomeScreen : Alignment {
         creator = grid_creator;
     }
 
+    /**
+     * Add new creation step.
+     *
+     * All signals have to be connected manually.
+     *
+     * @param page Add {@link Gtk.Widget} to creation steps.
+     * @param pos Insert step at position. If `null` append it.
+     * @deprecated Use {@link add_tpage} instead.
+     */
+    [Deprecated (replacement = "add_tpage()")]
     private inline void add_page (Widget page, int? pos = null) {
         if (pos == null)
             nbook.append_page (page);
@@ -339,6 +470,12 @@ public class WelcomeScreen : Alignment {
             nbook.insert_page (page, null, pos);
     }
 
+    /**
+     * Add new creation step and setup common signals.
+     *
+     * @param page Add {@link TemplatePage.widget} to creation steps.
+     * @param pos Insert step at position. If `null` append it.
+     */
     public void add_tpage (TemplatePage tpage, int? pos = null,
                                             int prev = 1, int next = 1) {
         add_page (tpage.widget, pos);
@@ -370,6 +507,13 @@ public class WelcomeScreen : Alignment {
         });
     }
 
+    /**
+     * Initialize default creation steps.
+     *
+     * Currently:   - project file open element
+     *              - template selector
+     *              - project settings element
+     */
     private void init_default_pages() {
         add_page (opener);
         add_tpage (new UiTemplateSelector(), null, 2);
@@ -379,6 +523,12 @@ public class WelcomeScreen : Alignment {
         nbook.show_all();
     }
 
+    /**
+     * Build file open element.
+     *
+     * @param prev Go n steps back with previous-button. If negative reset.
+     * @param next Go n steps forward with next-button. If negative reset.
+     */
     private void build_opener (int prev = 1, int next = -1) {
         var chooser_open = new FileChooserWidget (FileChooserAction.OPEN);
         chooser_open.expand = true;
@@ -438,6 +588,12 @@ public class WelcomeScreen : Alignment {
         opener = chooser_open;
     }
 
+    /**
+     * Build project settings element.
+     *
+     * @param prev Go n steps back with previous-button. If negative reset.
+     * @param next Go n steps forward with next-button. If negative reset.
+     */
     public Widget get_simple_setting (int prev = 1, int next = -1) {
         var grid_pinfo = new Grid();
         grid_pinfo.column_spacing = 10;
@@ -473,7 +629,7 @@ public class WelcomeScreen : Alignment {
         grid_pinfo.attach (lbl_plocation, 0, 5, 1, 1);
         lbl_plocation.halign = Align.END;
 
-        /*TODO: Use inplace dialog (FileChooserWidget). */
+        //TODO: Use in place dialog (FileChooserWidget).
         var chooser_location = new FileChooserButton (_("New project location"),
                                                       Gtk.FileChooserAction.SELECT_FOLDER);
         grid_pinfo.attach (chooser_location, 1, 6, 1, 1);
