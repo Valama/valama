@@ -605,12 +605,7 @@ public class WelcomeScreen : Alignment {
         lbl_pname.halign = Align.END;
 
         var valid_chars = /^[a-z0-9.:_-]+$/i;  // keep "-" at the end!
-        var lbl_pname_err = new Label ("\n");
-        grid_pinfo.attach (lbl_pname_err, 1, 3, 1, 1);
-        lbl_pname_err.max_width_chars = 20;
-        lbl_pname_err.wrap  = true;
-        lbl_pname_err.sensitive = false;
-        var ent_pname = new Entry.with_inputcheck (lbl_pname_err, valid_chars, 5, "\n");
+        var ent_pname = new Entry.with_inputcheck (null, valid_chars);
         grid_pinfo.attach (ent_pname, 1, 2, 1, 1);
         ent_pname.set_placeholder_text (_("Project name"));
 
