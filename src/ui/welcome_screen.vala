@@ -626,7 +626,7 @@ public class WelcomeScreen : Alignment {
         //TODO: Use in place dialog (FileChooserWidget).
         var chooser_location = new FileChooserButton (_("New project location"),
                                                       Gtk.FileChooserAction.SELECT_FOLDER);
-        grid_pinfo.attach (chooser_location, 1, 6, 1, 1);
+        grid_pinfo.attach (chooser_location, 1, 5, 1, 1);
 
         nbook.switch_page.connect ((page) => {
             if (initialized) {
