@@ -81,7 +81,7 @@ public class UiCurrentSymbol : UiElement {
                 lbl_params.wrap = true;
                 lbl_params.wrap_mode = Pango.WrapMode.WORD;
                 lbl_params.label += """<span font="Monospace">""";
-                lbl_params.label += "<b>" + sgn.name + "</b> (";
+                lbl_params.label += "<b>" + Markup.escape_text (sgn.name) + "</b> (";
 
                 var prms = sgn.get_parameters();
                 for (int q = 0; q < prms.size; q++) {
@@ -89,7 +89,9 @@ public class UiCurrentSymbol : UiElement {
                         lbl_params.label += """<span color="#A52A2A"><b>out</b></span> """;
                     else if (prms[q].direction == ParameterDirection.REF)
                         lbl_params.label += """<span color="#A52A2A"><b>ref</b></span> """;
-                    lbl_params.label += """<span color="#79b594">""" + prms[q].variable_type.data_type.name + "</span> " + prms[q].name;
+                    lbl_params.label += """<span color="#79b594">"""
+                                        + Markup.escape_text (prms[q].variable_type.data_type.name
+                                        + "</span> " + Markup.escape_text (prms[q].name));
                     if (q < prms.size - 1)
                         lbl_params.label += ", ";
                 }
@@ -110,10 +112,10 @@ public class UiCurrentSymbol : UiElement {
                 lbl_params.wrap_mode = Pango.WrapMode.WORD;
                 lbl_params.label += """<span font="Monospace"><span color="#79b594">""";
                 if (mth.return_type.data_type != null)
-                    lbl_params.label += mth.return_type.data_type.name;
+                    lbl_params.label += Markup.escape_text (mth.return_type.data_type.name);
                 else
                     lbl_params.label += "void";
-                lbl_params.label += "</span> <b>" + mth.name + "</b> (";
+                lbl_params.label += "</span> <b>" + Markup.escape_text (mth.name) + "</b> (";
 
                 var prms = mth.get_parameters();
                 for (int q = 0; q < prms.size; q++) {
@@ -121,14 +123,16 @@ public class UiCurrentSymbol : UiElement {
                         lbl_params.label += """<span color="#A52A2A"><b>out</b></span> """;
                     else if (prms[q].direction == ParameterDirection.REF)
                         lbl_params.label += """<span color="#A52A2A"><b>ref</b></span> """;
-                    lbl_params.label += """<span color="#79b594">""" + prms[q].variable_type.data_type.name + "</span> " + prms[q].name;
+                    lbl_params.label += """<span color="#79b594">"""
+                                        + Markup.escape_text (prms[q].variable_type.data_type.name)
+                                        + "</span> " + Markup.escape_text (prms[q].name);
                     if (q < prms.size - 1)
                         lbl_params.label += ", ";
                 }
 
                 lbl_params.label += ")</span>";
                 if (mth.comment != null)
-                    lbl_params.label += "\n\n" + mth.comment.content;
+                    lbl_params.label += "\n\n" + Markup.escape_text (mth.comment.content);
                 internal_widget.pack_start (lbl_params, true, true);
             }
         }
