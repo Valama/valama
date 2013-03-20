@@ -299,7 +299,7 @@ namespace Guanako {
                 initial_rule_name = "init_method";
                 accessible_symbols = accessible;
             }
-            if (!map_syntax.contains (initial_rule_name)) {
+            if (!map_syntax.has_key (initial_rule_name)) {
                 stdout.printf (@"Entry point $initial_rule_name not found in syntax file. Trying to segfault me, huh??");
                 return ret.comp_sets;
             }
