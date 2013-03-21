@@ -340,7 +340,11 @@ public class WelcomeScreen : Alignment {
         grid_recent_projects = new Grid();
         if (recentmgr.get_items().length() > 0) {
             /* Sort elements before. */
+#if GEE_0_8
             var recent_items = new Gee.TreeSet<RecentInfo> (cmp_recent_info);
+#elif GEE_1_0
+            var recent_items = new Gee.TreeSet<RecentInfo> ((CompareFunc?) cmp_recent_info);
+#endif
             foreach (var info in recentmgr.get_items())
                 recent_items.add (info);
             int cnt = 0;

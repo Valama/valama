@@ -426,7 +426,11 @@ public class ValamaProject : Object {
                                         e.message);
             }
 
+#if GEE_0_8
         packages = new TreeSet<PackageInfo?> ((CompareDataFunc<PackageInfo?>?) PackageInfo.compare_func);
+#elif GEE_1_0
+        packages = new TreeSet<PackageInfo?> ((CompareFunc?) PackageInfo.compare_func);
+#endif
         package_list = new TreeSet<string>();
         package_choices = new Gee.ArrayList<PkgChoice?>();
         source_dirs = new TreeSet<string>();

@@ -145,6 +145,11 @@ if(gee0.8_contains STRGREATER "-1")
     endif()
   endif()
 endif()
+if(gee_ver STREQUAL "0.8")
+  list(APPEND valac_cond "-D;GEE_0_8")
+elseif(gee_ver STREQUAL "1.0")
+  list(APPEND valac_cond "-D;GEE_1_0")
+endif()
 # glib-2.0
 pkg_check_modules(GLIB2.0 REQUIRED "glib-2.0")
 
