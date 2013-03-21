@@ -157,7 +157,7 @@ public class ProjectBuilder : Object{
              * extra options.
              */
             var pkg_list_names = new ArrayList<string>();
-            foreach (var pkg in project.guanako_project.context.get_packages())
+            foreach (var pkg in project.guanako_project.get_context_packages())
                 pkg_list_names.add (pkg);
 
             foreach (var pkg in project.packages) {

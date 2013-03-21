@@ -1430,24 +1430,29 @@ public class ValamaProject : Object {
      */
     //TODO: Check version.
     private PackageInfo? get_choice (PkgChoice choice) {
-        Vala.CodeContext context;
-        if (guanako_project != null)
-            context = guanako_project.context;
-        else {
-            context = new Vala.CodeContext();
+        if (guanako_project != null) {
+            //TODO: Do this like init method in ProjectTemplate (check against all vapis).
+            foreach (var pkg in choice.packages)
+                if (guanako_project.get_context_vapi_path (pkg.name) != null) {
+                    debug_msg (_("Choose '%s' package.\n"), pkg.name);
+                    return pkg;
+                } else
+                    debug_msg (_("Skip '%s' choice.\n"), pkg.name);
+        } else {
+            var context = new Vala.CodeContext();
             context.target_glib_major = 2;  //TODO: Use Guanako.context_prep.
             context.target_glib_minor = 32;
             for (int i = 16; i <= context.target_glib_minor; i += 2)
                 context.add_define (@"GLIB_$(context.target_glib_major)_$i");
             context.profile = Profile.GOBJECT;
+            //TODO: Do this like init method in ProjectTemplate (check against all vapis).
+            foreach (var pkg in choice.packages)
+                if (context.get_vapi_path (pkg.name) != null) {
+                    debug_msg (_("Choose '%s' package.\n"), pkg.name);
+                    return pkg;
+                } else
+                    debug_msg (_("Skip '%s' choice.\n"), pkg.name);
         }
-        //TODO: Do this like init method in ProjectTemplate (check against all vapis).
-        foreach (var pkg in choice.packages)
-            if (context.get_vapi_path (pkg.name) != null) {
-                debug_msg (_("Choose '%s' package.\n"), pkg.name);
-                return pkg;
-            } else
-                debug_msg (_("Skip '%s' choice.\n"), pkg.name);
         return null;
     }
 

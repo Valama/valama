@@ -59,6 +59,7 @@
 		<directory>data/templates/simple_gtk/template/vapi</directory>
 		<directory>guanako</directory>
 		<directory>guanako/data</directory>
+		<directory>guanako/scanner</directory>
 		<directory>icons</directory>
 	</data-directories>
 	<data-files>

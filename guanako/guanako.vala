@@ -37,8 +37,8 @@ namespace Guanako {
     }
 
     public class Project {
-        public CodeContext context { get; private set; }
-        Vala.Parser parser;
+        CodeContext context;
+        ParserExt parser;
         int glib_major = 2;  //TODO: Make this an option.
         int glib_minor = 32;
 
@@ -52,7 +52,7 @@ namespace Guanako {
         public FixedTreeSet<SourceFile> sourcefiles { get; private set; }
 
         /**
-         * Enabled defines.
+         * All enabled defines.
          */
         public FixedTreeSet<string> defines { get; private set; }
         /**
@@ -63,7 +63,7 @@ namespace Guanako {
 
         public Project (string? filename = null) throws IOError, Error {
             context = new CodeContext();
-            parser = new Vala.Parser();
+            parser = new ParserExt();
             packages = new FixedTreeSet<string>();
             sourcefiles = new FixedTreeSet<SourceFile>();
             defines = new FixedTreeSet<string>();
@@ -155,9 +155,9 @@ namespace Guanako {
         }
 
         public bool add_define (string s) {
-            if (s in defines)
+            if (defines.add (s))
                 return false;
-            context.add_define (s);  //TODO; Problems with already included defines?
+            context.add_define (s);
             defines_manual.add (s);
             return true;  // also if already defined
         }
@@ -165,6 +165,7 @@ namespace Guanako {
         public bool remove_define (string s) {
             if (!(defines_manual.remove (s)))
                 return false;
+            defines.remove (s);
 
             var old_files = context.get_source_files();
             var old_packages = context.get_packages();
@@ -174,7 +175,7 @@ namespace Guanako {
             context.report = old_report;
             context_prep();
 
-            parser = new Vala.Parser();
+            parser = new ParserExt();
             foreach (var file in old_files)
                 context.add_source_file (file);
             foreach (var pkg in old_packages)
@@ -195,7 +196,7 @@ namespace Guanako {
             context.report = old_report;
             context_prep();
 
-            parser = new Vala.Parser();
+            parser = new ParserExt();
             foreach (SourceFile old_file in old_files)
                 if (old_file != file)
                     context.add_source_file (old_file);
@@ -290,12 +291,12 @@ namespace Guanako {
         }
 
         public void update() {
-            CodeContext.push (context);
+            Vala.CodeContext.push (context);
             parser.parse (context);
 
             context.resolver.resolve (context);
             context.analyzer.analyze (context);
-            CodeContext.pop();
+            Vala.CodeContext.pop();
         }
 
         void build_syntax_map (string? filename = null) throws IOError, Error {
@@ -1140,6 +1141,25 @@ namespace Guanako {
 
                 Vala.CodeContext.pop();
             }
+        }
+
+        /**
+         * Wrap {@link CodeContext.get_packages} method.
+         */
+        //NOTE: "get_packages" name causes compiler error so change the name.
+        public inline Vala.List<string> get_context_packages() {
+            return context.get_packages();
+        }
+
+        /**
+         * Wrap {@link CodeContext.get_vapi_path} method.
+         */
+        public inline string? get_context_vapi_path (string package) {
+            return context.get_vapi_path (package);
+        }
+
+        public inline Vala.Set<string> get_defines_used() {
+            return parser.used_defines;
         }
      }
 
