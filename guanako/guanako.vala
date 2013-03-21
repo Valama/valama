@@ -45,29 +45,29 @@ namespace Guanako {
         /**
          * Manually added packages.
          */
-        public Gee.TreeSet<string> packages { get; private set; }
+        public FixedTreeSet<string> packages { get; private set; }
         /**
          * Manually added source files.
          */
-        public Gee.TreeSet<SourceFile> sourcefiles { get; private set; }
+        public FixedTreeSet<SourceFile> sourcefiles { get; private set; }
 
         /**
          * Enabled defines.
          */
-        public Gee.TreeSet<string> defines { get; private set; }
+        public FixedTreeSet<string> defines { get; private set; }
         /**
          * Manually enabled defines.
          */
-        public Gee.TreeSet<string> defines_manual { get; private set; }
+        public FixedTreeSet<string> defines_manual { get; private set; }
 
 
         public Project (string? filename = null) throws IOError, Error {
             context = new CodeContext();
             parser = new Vala.Parser();
-            packages = new Gee.TreeSet<string>();
-            sourcefiles = new Gee.TreeSet<SourceFile>();
-            defines = new Gee.TreeSet<string>();
-            defines_manual = new Gee.TreeSet<string>();
+            packages = new FixedTreeSet<string>();
+            sourcefiles = new FixedTreeSet<SourceFile>();
+            defines = new FixedTreeSet<string>();
+            defines_manual = new FixedTreeSet<string>();
 
             context_prep();
 
@@ -356,9 +356,9 @@ namespace Guanako {
         public class ProposalSet {
             public ProposalSet() {
                 // TreeSet with custom sorting function
-                comp_sets = new Gee.TreeSet<CompletionProposal>[27];
+                comp_sets = new FixedTreeSet<CompletionProposal>[27];
                 for (int q = 0; q < 27; q++)
-                    comp_sets[q] = new Gee.TreeSet<CompletionProposal> ((a,b) => {
+                    comp_sets[q] = new FixedTreeSet<CompletionProposal> ((a,b) => {
                         var name_a = ((CompletionProposal)a).symbol.name;
                         var name_b = ((CompletionProposal)b).symbol.name;
                         var name_a_case = name_a.casefold();
@@ -429,7 +429,7 @@ namespace Guanako {
                 }
                 loop_thread.quit();
             }
-            public Gee.TreeSet<CompletionProposal>[] comp_sets;
+            public FixedTreeSet<CompletionProposal>[] comp_sets;
         }
 
         public class CompletionRun {
@@ -515,7 +515,7 @@ namespace Guanako {
             public void abort_run () {
                 abort_flag = true;
             }
-            public Gee.TreeSet<CompletionProposal>[]? run (SourceFile file, int line, int col, string written) {
+            public FixedTreeSet<CompletionProposal>[]? run (SourceFile file, int line, int col, string written) {
                 var inside_symbol = parent_project.get_symbol_at_pos (file, line, col);
                 string initial_rule_name = "";
                 if (inside_symbol == null) {

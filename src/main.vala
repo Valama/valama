@@ -337,7 +337,7 @@ class GuanakoCompletion : Gtk.SourceCompletionProvider, Object {
 
                     /* Assign icons and pass the proposals on to Gtk.SourceView */
                     var props = new GLib.List<Gtk.SourceCompletionItem>();
-                    foreach (Gee.TreeSet<CompletionProposal> list in guanako_proposals)
+                    foreach (FixedTreeSet<CompletionProposal> list in guanako_proposals)
                     foreach (CompletionProposal guanako_proposal in list) {
                         if (guanako_proposal.symbol.name != null) {
 

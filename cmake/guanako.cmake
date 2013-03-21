@@ -12,6 +12,7 @@ set(required_pkgs
 "libxml-2.0"
 )
 set(srcfiles
+"gee_treeset_fix.vala"
 "guanako_auto_indent.vala"
 "guanako_helpers.vala"
 "guanako_iterators.vala"
