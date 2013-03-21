@@ -692,7 +692,7 @@ public class MainWidget : Box {
      * @param path File path to load from.
      */
     private void load_meta (string path) throws LoadingError {
-        debug_msg (_("Load meta information: %s\n"), path);
+        debug_msg (_("Load Ui meta information: %s\n"), path);
 
         Xml.Doc* doc = Xml.Parser.parse_file (path);
 

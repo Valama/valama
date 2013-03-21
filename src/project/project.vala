@@ -72,8 +72,7 @@ public enum IdeModes {
     /**
      * Convert mode to string.
      *
-     * @param mode {@link IdeModes} mode.
-     * @return Return associated string or null.
+     * @return Return associated string (locale dependent) or null.
      */
     public string? to_string() {
         switch (this) {
@@ -84,6 +83,43 @@ public enum IdeModes {
             default:
                 error_msg (_("Could not convert '%s' to string: %u\n"),
                            "IdeModes", this);
+                return null;
+        }
+    }
+
+    /**
+     * Convert mode to string.
+     *
+     * @param mode {@link IdeModes} mode.
+     * @return Return associated string (locale independent) or null.
+     */
+    public static string? to_string_int (IdeModes mode) {
+        switch (mode) {
+            case DEBUG:
+                return "Debug";
+            case RELEASE:
+                return "Release";
+            default:
+                error_msg (_("Could not convert '%s' to string: %u\n"),
+                           "IdeModes", mode);
+                return null;
+        }
+    }
+
+    /**
+     * Convert string to mode.
+     *
+     * @param modename Name of mode (locale independent).
+     */
+    public static IdeModes? from_string (string modename) {
+        switch (modename) {
+            case "Debug":
+                return DEBUG;
+            case "Release":
+                return RELEASE;
+            default:
+                error_msg (_("Could not convert '%s' to %s.\n"),
+                           modename, "IdeModes");
                 return null;
         }
     }
@@ -459,6 +495,11 @@ public class ValamaProject : Object {
      * @throws LoadingError Throw if Guanako completion fails to load.
      */
     public void init (string? syntaxfile = null, bool save_recent = true) throws LoadingError {
+        try {
+            load_meta();
+        } catch (LoadingError e) {
+            warning_msg (_("Could not load meta information: %s\n"), e.message);
+        }
         if (guanako_project == null)
             try {
                 guanako_project = new Guanako.Project (syntaxfile);
@@ -1276,8 +1317,75 @@ public class ValamaProject : Object {
         writer.end_element();
     }
 
+    private void save_meta() {
+        var path = Path.build_path (Path.DIR_SEPARATOR_S,
+                                    Environment.get_user_cache_dir(),
+                                    "project_meta.xml");
+        debug_msg (_("Save project meta information: %s\n"), path);
+        var writer = new TextWriter.filename (path);
+        writer.set_indent (true);
+        writer.set_indent_string ("\t");
+
+        //TODO: Meta file version.
+        writer.start_element ("project-meta");
+        //writer.write_attribute ("version", xXx);
+        writer.write_element ("idemode", IdeModes.to_string_int (idemode));
+        writer.end_element();
+    }
+
+    private void load_meta() throws LoadingError {
+        var path = Path.build_path (Path.DIR_SEPARATOR_S,
+                                    Environment.get_user_cache_dir(),
+                                    "project_meta.xml");
+        debug_msg (_("Load project meta information: %s\n"), path);
+
+        Xml.Doc* doc = Xml.Parser.parse_file (path);
+
+        if (doc == null) {
+            delete doc;
+            throw new LoadingError.FILE_IS_GARBAGE (_("Cannot parse file."));
+        }
+
+        Xml.Node* root_node = doc->get_root_element();
+        if (root_node == null || root_node->name != "project-meta") {
+            delete doc;
+            throw new LoadingError.FILE_IS_EMPTY (_("File does not contain enough information."));
+        }
+
+        // if (root_node->has_prop ("version") != null)
+        //     xXx = root_node->get_prop ("version");
+        // if (comp_proj_version (xXx, xXx_VERSION_MIN) < 0) {
+        //     var errstr = _("Project file too old: %s < %s").printf (xXx,
+        //                                                             xXx_VERSION_MIN);
+        //     if (!Args.forceold) {
+        //         throw new LoadingError.FILE_IS_OLD (errstr);
+        //         delete doc;
+        //     } else
+        //         warning_msg (_("Ignore project file loading error: %s\n"), errstr);
+        // }
+
+        for (Xml.Node* i = root_node->children; i != null; i = i->next) {
+            if (i->type != ElementType.ELEMENT_NODE)
+                continue;
+            switch (i->name) {
+                case "idemode":
+                    var mode = IdeModes.from_string (i->get_content());
+                    if (mode != null)
+                        idemode = mode;
+                    else
+                        warning_msg (_("Unknown attribute for 's' line %hu: %s\n"),
+                                       "idemode", i->line, i->get_content());
+                    break;
+                default:
+                    warning_msg (_("Unknown configuration file value line %hu: %s\n"),
+                                 i->line, i->name);
+                    break;
+            }
+        }
+    }
 
     public bool close (bool save_all = false) {
+        save_meta();
         save();
 
         if (save_all)
