@@ -21,6 +21,7 @@ using GLib;
 using Gtk;
 using Gdl;
 using Gee;
+using Xml;
 
 static ValamaProject project;
 static Guanako.FrankenStein frankenstein;
@@ -75,13 +76,21 @@ public class MainWidget : Box {
     public signal void request_close();
 
     /**
+     * Internal state of items if {@link Gdl.DockItemGrid} is to be shown.
+     */
+    private bool locked = false;
+    /**
      * Emit to hide dock item grip (if not disabled).
      */
-    public signal void lock_items();
+    public virtual signal void lock_items() {
+        locked = true;
+    }
     /**
      * Emit to show dock item grip.
      */
-    public signal void unlock_items();
+    public virtual signal void unlock_items() {
+        locked = false;
+    }
 
     /**
      * Emit when all {@link UiElement}s, menu objects and tool objects are
@@ -94,7 +103,7 @@ public class MainWidget : Box {
      * dock and source dock.
      */
     public MainWidget() {
-        this.destroy.connect (on_destroy);
+        this.destroy.connect (close);
 
         accel_group = new AccelGroup();
 
@@ -204,27 +213,40 @@ public class MainWidget : Box {
         dock.show_all();
 
         /* Load default layout. Either local one or system wide. */
-        bool err = false;
+        var err = false;
         string local_layout_filename;
+        var cachedir = Path.build_path (Path.DIR_SEPARATOR_S,
+                                        Environment.get_user_cache_dir(),
+                                        "valama");
         if (Args.layoutfile == null)
             local_layout_filename = Path.build_path (Path.DIR_SEPARATOR_S,
-                                                     Environment.get_user_cache_dir(),
-                                                     "valama",
+                                                     cachedir,
                                                      "layout.xml");
         else {
             local_layout_filename = Args.layoutfile;
             err = true;
         }
-        string system_layout_filename = Path.build_path (Path.DIR_SEPARATOR_S,
-                                                         Config.PACKAGE_DATA_DIR,
-                                                         "layout.xml");
+        var system_layout_filename = Path.build_path (Path.DIR_SEPARATOR_S,
+                                                      Config.PACKAGE_DATA_DIR,
+                                                      "layout.xml");
         if (Args.reset_layout || (!load_layout (local_layout_filename, null, err) &&
                                                                 Args.layoutfile == null))
             load_layout (system_layout_filename);
 
+        try {
+            load_meta (Path.build_path (Path.DIR_SEPARATOR_S,
+                                        cachedir,
+                                        "ui_meta.xml"));
+        } catch (LoadingError e) {
+            warning_msg (_("Could not load meta information: %s\n"), e.message);
+        }
+
         /* Keep this after layout loading. */
         build_toolbar();
         build_menu();
+
+        if (locked)
+            lock_items();
 
         show();
         initialized();
@@ -233,10 +255,18 @@ public class MainWidget : Box {
     /**
      * Save gdl layout.
      */
-    private void on_destroy() {
+    public void close() {
+        var cachedir = Path.build_path (Path.DIR_SEPARATOR_S,
+                                        Environment.get_user_cache_dir(),
+                                        "valama");
+        /* Meta info. */
+        save_meta (Path.build_path (Path.DIR_SEPARATOR_S,
+                                    cachedir,
+                                    "ui_meta.xml"));
+
+        /* Gdl layout. */
         var local_layout_filename = Path.build_path (Path.DIR_SEPARATOR_S,
-                                                     Environment.get_user_cache_dir(),
-                                                     "valama",
+                                                     cachedir,
                                                      "layout.xml");
         var f = File.new_for_path (local_layout_filename).get_parent();
         if (!f.query_exists())
@@ -285,7 +315,7 @@ public class MainWidget : Box {
         item_file_quit.activate.connect (() => {
             if (!project.close())
                 return;
-            on_destroy();
+            close();
             main_quit();
         });
         add_accel_activate (item_file_quit, Gdk.Key.q);
@@ -635,6 +665,84 @@ public class MainWidget : Box {
         else if (error)
             errmsg (_("Couldn't load layout file: %s\n"), filename);
         return (ret && this.layout_reload (lsection));
+    }
+
+    //TODO; Move this to layout file.
+    /**
+     * Save user interface meta information.
+     *
+     * @param path File path to save to.
+     */
+    private void save_meta (string path) {
+        debug_msg (_("Save Ui meta information: %s\n"), path);
+        var writer = new TextWriter.filename (path);
+        writer.set_indent (true);
+        writer.set_indent_string ("\t");
+
+        //TODO: Meta file version.
+        writer.start_element ("ui-meta");
+        //writer.write_attribute ("version", xXx);
+        writer.write_element ("locked", (locked) ? "true" : "false");
+        writer.end_element();
+    }
+
+    /**
+     * Load meta information.
+     *
+     * @param path File path to load from.
+     */
+    private void load_meta (string path) throws LoadingError {
+        debug_msg (_("Load meta information: %s\n"), path);
+
+        Xml.Doc* doc = Xml.Parser.parse_file (path);
+
+        if (doc == null) {
+            delete doc;
+            throw new LoadingError.FILE_IS_GARBAGE (_("Cannot parse file."));
+        }
+
+        Xml.Node* root_node = doc->get_root_element();
+        if (root_node == null || root_node->name != "ui-meta") {
+            delete doc;
+            throw new LoadingError.FILE_IS_EMPTY (_("File does not contain enough information."));
+        }
+
+        // if (root_node->has_prop ("version") != null)
+        //     xXx = root_node->get_prop ("version");
+        // if (comp_proj_version (xXx, xXx_VERSION_MIN) < 0) {
+        //     var errstr = _("Project file too old: %s < %s").printf (xXx,
+        //                                                             xXx_VERSION_MIN);
+        //     if (!Args.forceold) {
+        //         throw new LoadingError.FILE_IS_OLD (errstr);
+        //         delete doc;
+        //     } else
+        //         warning_msg (_("Ignore project file loading error: %s\n"), errstr);
+        // }
+
+        for (Xml.Node* i = root_node->children; i != null; i = i->next) {
+            if (i->type != ElementType.ELEMENT_NODE)
+                continue;
+            switch (i->name) {
+                case "locked":
+                    switch (i->get_content()) {
+                        case "true":
+                            locked = true;
+                            break;
+                        case "false":
+                            locked = false;
+                            break;
+                        default:
+                            warning_msg (_("Unknown attribute for 's' line %hu: %s\n"),
+                                         "locked", i->line, i->get_content());
+                            break;
+                    }
+                    break;
+                default:
+                    warning_msg (_("Unknown configuration file value line %hu: %s\n"),
+                                 i->line, i->name);
+                    break;
+            }
+        }
     }
 
     /**
