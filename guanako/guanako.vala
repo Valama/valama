@@ -51,6 +51,55 @@ namespace Guanako {
          */
         public Gee.TreeSet<SourceFile> sourcefiles { get; private set; }
 
+        /**
+         * Enabled defines.
+         */
+        public Gee.TreeSet<string> defines { get; private set; }
+        /**
+         * Manually enabled defines.
+         */
+        public Gee.TreeSet<string> defines_manual { get; private set; }
+
+
+        public Project (string? filename = null) throws IOError, Error {
+            context = new CodeContext();
+            parser = new Vala.Parser();
+            packages = new Gee.TreeSet<string>();
+            sourcefiles = new Gee.TreeSet<SourceFile>();
+            defines = new Gee.TreeSet<string>();
+            defines_manual = new Gee.TreeSet<string>();
+
+            context_prep();
+
+            build_syntax_map (filename);
+        }
+
+        /**
+         * Set {@link Vala.CodeContext} options and flags.
+         */
+        private void context_prep() {
+            context.target_glib_major = glib_major;
+            context.target_glib_minor = glib_minor;
+            for (int i = 2; i <= glib_major; ++i)
+                for (int j = 16; j <= glib_minor; j += 2) {
+                    var define = "GLIB_%d_%d".printf (i, j);
+                    context.add_define (define);
+                    defines.add (define);
+                }
+            var vala_ver = Config.VALA_VERSION.split (".", 2);
+            if (vala_ver[0] != null && vala_ver[1] != null)
+                for (int i = 0; i <= int.parse (vala_ver[0]); ++i)
+                    for (int j = 2; j <= int.parse (vala_ver[1]); j += 2) {
+                        var define = "VALA_%d_%d".printf (i, j);
+                        context.add_define (define);
+                        defines.add (define);
+                    }
+            else
+                stderr.printf (_("Not a valid Vala version, will  not set VALA_X_Y defines: %s\n"),
+                               Config.VALA_VERSION);
+            context.profile = Profile.GOBJECT;
+        }
+
         /*
          * Not a beautiful piece of code, but necessary to convert from
          * Vala.List.
@@ -105,32 +154,43 @@ namespace Guanako {
             context.report = report_wrapper;
         }
 
-        public Project (string? filename = null) throws IOError, Error {
-            context = new CodeContext();
-            parser = new Vala.Parser();
-            packages = new Gee.TreeSet<string>();
-            sourcefiles = new Gee.TreeSet<SourceFile>();
-
-            context_prep();
-
-            build_syntax_map (filename);
+        public bool add_define (string s) {
+            if (s in defines)
+                return false;
+            context.add_define (s);  //TODO; Problems with already included defines?
+            defines_manual.add (s);
+            return true;  // also if already defined
         }
 
-        /**
-         * Set {@link Vala.CodeContext} options and flags.
-         */
-        private void context_prep() {
-            context.target_glib_major = glib_major;
-            context.target_glib_minor = glib_minor;
-            for (int i = 16; i <= glib_minor; i += 2)
-                context.add_define ("GLIB_%d_%d".printf (glib_major, i));
-            context.profile = Profile.GOBJECT;
+        public bool remove_define (string s) {
+            if (!(defines_manual.remove (s)))
+                return false;
+
+            var old_files = context.get_source_files();
+            var old_packages = context.get_packages();
+            var old_report = context.report;
+
+            context = new CodeContext();
+            context.report = old_report;
+            context_prep();
+
+            parser = new Vala.Parser();
+            foreach (var file in old_files)
+                context.add_source_file (file);
+            foreach (var pkg in old_packages)
+                context.add_package (pkg);
+            foreach (var define in defines_manual)
+                context.add_define (define);
+
+            update();
+            return true;
         }
 
         public void remove_file (SourceFile file) {
             var old_files = context.get_source_files();
             var old_packages = context.get_packages();
             var old_report = context.report;
+
             context = new CodeContext();
             context.report = old_report;
             context_prep();
@@ -141,6 +201,9 @@ namespace Guanako {
                     context.add_source_file (old_file);
             foreach (string pkg in old_packages)
                 context.add_package (pkg);
+            foreach (string define in defines_manual)
+                context.add_define (define);
+
             update();
             sourcefiles.remove (file);
         }
@@ -462,7 +525,7 @@ namespace Guanako {
                     initial_rule_name = "init_method";
                     accessible = parent_project.get_accessible_symbols (file, line, col);
                 }
-                if (!parent_project.map_syntax.contains (initial_rule_name)) {
+                if (!parent_project.map_syntax.has_key (initial_rule_name)) {
                     stdout.printf (@"Entry point $initial_rule_name not found in syntax file. Trying to segfault me, huh??");
                     return null;
                 }
