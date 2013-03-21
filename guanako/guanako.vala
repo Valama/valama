@@ -455,7 +455,6 @@ namespace Guanako {
             public Gee.TreeSet<CompletionProposal>[]? run (SourceFile file, int line, int col, string written) {
                 var inside_symbol = parent_project.get_symbol_at_pos (file, line, col);
                 string initial_rule_name = "";
-                Symbol[] accessible_symbols;
                 if (inside_symbol == null) {
                     initial_rule_name = "init_deep_space";
                     accessible = get_child_symbols (parent_project.context.root);
