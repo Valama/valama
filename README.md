@@ -38,7 +38,7 @@ If you want to use a newer version of `libvala`, change  `cmake/project.cmake` a
 #### Local installation ####
 Build Valama then run with following options directly from build directory:
 
-    ./valama --syntax ../guanako/data/syntax --templates ../data/templates --buildsystems ../data/buildsystems [FILE]
+    LD_LIBRARY_PATH=guanako ./valama --syntax ../guanako/data/syntax --templates ../data/templates --buildsystems ../data/buildsystems [FILE]
 
 Optionally use `--layout ../data/layout.xml` to use standard layout.
 
