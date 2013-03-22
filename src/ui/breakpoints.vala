@@ -103,6 +103,8 @@ class UiBreakpoints : UiElement {
                 btn_add.sensitive = false;
         });
 
+        project.guanako_update_finished.connect(update_source_marks);
+
         tree_view.cursor_changed.connect (() => {
             TreePath path;
             tree_view.get_cursor (out path, null);
@@ -182,14 +184,7 @@ class UiBreakpoints : UiElement {
         store = new ListStore (3, typeof (string), typeof (string), typeof (string));
         tree_view.set_model (store);
 
-        project.foreach_buffer((s, bfr)=>{
-            TextIter first_iter;
-            TextIter end_iter;
-            bfr.get_start_iter (out first_iter);
-            bfr.get_end_iter (out end_iter);
-            bfr.remove_source_marks(first_iter, end_iter, "timer");
-            bfr.remove_source_marks(first_iter, end_iter, "stop");
-        });
+
 
         foreach (Guanako.FrankenStein.FrankenTimer timer in frankenstein.frankentimers) {
             TreeIter next;
@@ -200,14 +195,6 @@ class UiBreakpoints : UiElement {
                        1,
                        project.get_relative_path (timer.file.filename),
                        -1);
-
-            var bfr = project.get_buffer_by_file (timer.file.filename);
-            TextIter iter_start;
-            TextIter iter_end;
-            bfr.get_iter_at_line (out iter_start, timer.start_line - 1);
-            bfr.get_iter_at_line (out iter_end, timer.end_line - 1);
-            bfr.create_source_mark (null, "timer", iter_start);
-            bfr.create_source_mark (null, "timer", iter_end);
         }
 
         foreach (Guanako.FrankenStein.FrankenStop stop in frankenstein.frankenstops) {
@@ -220,13 +207,93 @@ class UiBreakpoints : UiElement {
                        project.get_relative_path (stop.file.filename),
                        -1);
 
+        }
+
+        /* Clear existing marks */
+        project.foreach_buffer((s, bfr)=>{
+            TextIter first_iter;
+            TextIter end_iter;
+            bfr.get_start_iter (out first_iter);
+            bfr.get_end_iter (out end_iter);
+            bfr.remove_source_marks(first_iter, end_iter, "timer");
+            bfr.remove_source_marks(first_iter, end_iter, "stop");
+        });
+        map_timer_starts = new Gee.HashMap<Guanako.FrankenStein.FrankenTimer?, SourceMark>();
+        map_timer_ends = new Gee.HashMap<Guanako.FrankenStein.FrankenTimer?, SourceMark>();
+        map_breakpoints = new Gee.HashMap<Guanako.FrankenStein.FrankenStop?, SourceMark>();
+
+        /* Add marks */
+        foreach (FrankenStein.FrankenTimer timer in frankenstein.frankentimers) {
+            var bfr = project.get_buffer_by_file (timer.file.filename);
+            TextIter iter_start;
+            TextIter iter_end;
+            bfr.get_iter_at_line (out iter_start, timer.start_line - 1);
+            bfr.get_iter_at_line (out iter_end, timer.end_line - 1);
+
+            map_timer_starts[timer] = bfr.create_source_mark (null, "timer", iter_start);
+            map_timer_ends[timer] = bfr.create_source_mark (null, "timer", iter_end);
+        }
+        foreach (FrankenStein.FrankenStop stop in frankenstein.frankenstops) {
             var bfr = project.get_buffer_by_file (stop.file.filename);
             TextIter iter;
             bfr.get_iter_at_line (out iter, stop.line - 1);
-            bfr.create_source_mark (null, "stop", iter);
-        }
 
+            map_breakpoints[stop] = bfr.create_source_mark (null, "stop", iter);
+        }
         debug_msg (_("%s update finished!\n"), get_name());
+    }
+
+    Gee.HashMap<FrankenStein.FrankenTimer?, SourceMark> map_timer_starts;
+    Gee.HashMap<FrankenStein.FrankenTimer?, SourceMark> map_timer_ends;
+    Gee.HashMap<FrankenStein.FrankenStop?, SourceMark> map_breakpoints;
+    void update_source_marks() {
+        bool need_update = false;
+
+        TextIter? iter = null;
+        map_timer_starts.map_iterator().foreach ((timer, mark)=>{
+            var bfr = project.get_buffer_by_file (timer.file.filename);
+            bfr.get_iter_at_mark (out iter, mark);
+            if (iter == null) return true;
+            if (timer.start_line != iter.get_line() + 1) {
+                timer.start_line = iter.get_line() + 1;
+                need_update = true;
+            }
+            return true;
+        });
+        map_timer_ends.map_iterator().foreach ((timer, mark)=>{
+            var bfr = project.get_buffer_by_file (timer.file.filename);
+            bfr.get_iter_at_mark (out iter, mark);
+            if (iter == null) return true;
+            if (timer.end_line != iter.get_line() + 1) {
+                timer.end_line = iter.get_line() + 1;
+                need_update = true;
+            }
+            return true;
+        });
+        /*foreach (Guanako.FrankenStein.FrankenStop stop in map_breakpoints.keys) {
+            SourceMark mark = map_breakpoints[stop];
+            var bfr = project.get_buffer_by_file (stop.file.filename);
+            bfr.get_iter_at_mark (out iter, mark);
+            if (iter == null) continue;
+            if (stop.line != iter.get_line() + 1) {
+                stdout.printf ("set_line " + (iter.get_line() + 1).to_string() + "\n");
+                stop.line = iter.get_line() + 1;
+                need_update = true;
+            }
+        }*/
+        map_breakpoints.map_iterator().foreach ((stop, mark)=>{
+            var bfr = project.get_buffer_by_file (stop.file.filename);
+            bfr.get_iter_at_mark (out iter, mark);
+            if (iter == null) return true;
+            if (stop.line != iter.get_line() + 1) {
+                stdout.printf ("set_line " + (iter.get_line() + 10).to_string() + "\n");
+                stop.line = iter.get_line() + 10;
+                need_update = true;
+            }
+            return true;
+        });
+        if (need_update)
+            build();
     }
 }
 
