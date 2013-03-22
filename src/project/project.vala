@@ -204,19 +204,19 @@ public class PackageInfo {
      *
      * Do not modify this value manually. It will result in undefined behaviour.
      */
-    public PkgChoice? choice = null;
+    public virtual PkgChoice? choice { get; set; default = null; }
     /**
      * Version relation.
      */
-    public VersionRelation? rel = null;
+    public virtual VersionRelation? rel { get; set; default = null; }
     /**
      * Package name.
      */
-    public string name;
+    public virtual string name { get; set; }
     /**
      * Version (meaning differs with {@link rel}).
      */
-    public string? version = null;
+    public virtual string? version { get; set; default = null; }
 
     /**
      * Convert class object to string.

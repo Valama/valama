@@ -23,6 +23,8 @@ set(required_pkgs
 "x11 {nolink}"
 )
 set(srcfiles
+"src/buildsystem/base.vala"
+"src/buildsystem/cmake.vala"
 "src/common/args.vala"
 "src/common/common.vala"
 "src/common/ui_helpers.vala"

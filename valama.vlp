@@ -27,6 +27,7 @@
 	</packages>
 	<source-directories>
 		<directory>src</directory>
+		<directory>src/buildsystem</directory>
 		<directory>src/common</directory>
 		<directory>src/dialogs</directory>
 		<directory>src/project</directory>
