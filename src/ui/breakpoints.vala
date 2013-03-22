@@ -146,14 +146,11 @@ class UiBreakpoints : UiElement {
             iter_end = iter_start;
         }
         if (iter_start.get_line() == iter_end.get_line()){
-            var new_stop = FrankenStein.FrankenStop() { file = focus_file,
-                                                        line = iter_start.get_line() + 1};
+            var new_stop = new FrankenStein.FrankenStop(focus_file, iter_start.get_line() + 1, true);
             frankenstein.frankenstops.add (new_stop);
             btn_remove.sensitive = true;
         } else {
-            var new_timer = FrankenStein.FrankenTimer() { file = focus_file,
-                                                          start_line = iter_start.get_line() + 1,
-                                                          end_line = iter_end.get_line() + 1 };
+            var new_timer = new FrankenStein.FrankenTimer(focus_file, iter_start.get_line() + 1, iter_end.get_line() + 1, true);
             frankenstein.frankentimers.add (new_timer);
             btn_remove.sensitive = true;
         }
@@ -270,24 +267,12 @@ class UiBreakpoints : UiElement {
             }
             return true;
         });
-        /*foreach (Guanako.FrankenStein.FrankenStop stop in map_breakpoints.keys) {
-            SourceMark mark = map_breakpoints[stop];
-            var bfr = project.get_buffer_by_file (stop.file.filename);
-            bfr.get_iter_at_mark (out iter, mark);
-            if (iter == null) continue;
-            if (stop.line != iter.get_line() + 1) {
-                stdout.printf ("set_line " + (iter.get_line() + 1).to_string() + "\n");
-                stop.line = iter.get_line() + 1;
-                need_update = true;
-            }
-        }*/
         map_breakpoints.map_iterator().foreach ((stop, mark)=>{
             var bfr = project.get_buffer_by_file (stop.file.filename);
             bfr.get_iter_at_mark (out iter, mark);
             if (iter == null) return true;
             if (stop.line != iter.get_line() + 1) {
-                stdout.printf ("set_line " + (iter.get_line() + 10).to_string() + "\n");
-                stop.line = iter.get_line() + 10;
+                stop.line = iter.get_line() + 1;
                 need_update = true;
             }
             return true;

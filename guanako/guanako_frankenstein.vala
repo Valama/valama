@@ -49,14 +49,25 @@ namespace Guanako {
             }
         }
 
-        public struct FrankenTimer {
+        public class FrankenTimer {
+            public FrankenTimer(SourceFile file, int start_line, int end_line, bool active) {
+                this.file = file;
+                this.start_line = start_line;
+                this.end_line = end_line;
+                this.active = active;
+            }
             public SourceFile file;
             public int start_line;
             public int end_line;
             public bool active;
         }
 
-        public struct FrankenStop {
+        public class FrankenStop {
+            public FrankenStop(SourceFile file, int line, bool active) {
+                this.file = file;
+                this.line = line;
+                this.active = active;
+            }
             public SourceFile file;
             public int line;
             public bool active;
