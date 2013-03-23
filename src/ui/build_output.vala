@@ -28,7 +28,11 @@ public class BuildOutput : UiElement {
     private TextView textview;
     private ProgressBar progressbar;
 
+    private bool focused;
+
     public BuildOutput() {
+        focused = false;
+
         var vbox = new Box (Orientation.VERTICAL, 0);
 
         textview = new TextView();
@@ -50,9 +54,11 @@ public class BuildOutput : UiElement {
 
         project_builder.build_started.connect (()=> {
             textview.buffer.text = "";
+            focused = false;
             progressbar.visible = true;
         });
         project_builder.build_finished.connect (()=> {
+            focused = false;
             progressbar.visible = false;
         });
         project_builder.build_progress.connect (build_progress);
@@ -64,13 +70,14 @@ public class BuildOutput : UiElement {
     }
 
     private void build_output (string output) {
-        textview.buffer.text += output;
-        widget_main.focus_dock_item (this.dock_item);
+        if (!focused) {
+            widget_main.focus_dock_item (this.dock_item);
+            focused = true;
+        }
+        textview.buffer.insert_at_cursor (output, -1);
     }
 
-    protected override void build() {
-
-    }
+    protected override void build() {}
 }
 
 // vim: set ai ts=4 sts=4 et sw=4
