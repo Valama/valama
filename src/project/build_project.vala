@@ -64,6 +64,15 @@ public class ProjectBuilder : Object {
             builder.build_progress.connect ((percent) => {
                 build_progress (percent);
             });
+            builder.notify["ps"].connect (() => {
+                if (builder.ps != null) {
+                    build_output ("--------------------------------------------\n");
+                    build_output (_("Build command received signal: %s\n").printf (
+                                builder.ps.to_string()));
+                    build_output ("--------------------------------------------\n");
+                }
+            });
+
             int exit_status;
             builder.initialize (out exit_status);
             if (distclean && !builder.distclean (out exit_status)) {
@@ -155,16 +164,28 @@ public class ProjectBuilder : Object {
             launch_builder.app_output.connect ((output) => {
                 app_output (output);
             });
+            launch_builder.notify["ps"].connect (() => {
+                if (launch_builder.ps != null) {
+                    app_output ("--------------------------------------------\n");
+                    app_output (_("Application received signal: %s\n").printf (
+                                launch_builder.ps.to_string()));
+                    app_output ("--------------------------------------------\n");
+                }
+            });
 
             app_running = true;
             int? exit_status;
             launch_builder.launch (cmdparams, out exit_status);
-            app_output ("--------------------------------------------\n");
-            if (exit_status != null)
+            if (exit_status != null) {
+                app_output ("--------------------------------------------\n");
+                /*
+                 * Cast exit_status explicitly to int otherwise printf would
+                 * give use some garbage.
+                 */
                 app_output (_("Application terminated with exit status: %d\n").printf (
-                                                                        exit_status));
-            else
-                app_output ("Application terminated unexpected.\n");
+                                                                    (int) exit_status));
+                app_output ("--------------------------------------------\n");
+            }
             app_running = false;
         } catch (BuildError e) {
             warning_msg (_("Launching application failed: %s\n"), e.message);

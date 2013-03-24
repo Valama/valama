@@ -30,6 +30,7 @@ public abstract class BuildSystem : Object {
     public bool launched { get; protected set; default = false; }
 
     protected Pid? app_pid;
+    public ProcessSignal? ps { get; protected set; default = null; }
 
     public signal void initialize_started();
     public signal void initialize_finished();
@@ -126,6 +127,18 @@ public abstract class BuildSystem : Object {
         return fexe.query_exists();
     }
 
+    protected inline int? get_exit (int status) {
+        if (Process.if_exited (status)) {
+            ps = null;
+            return Process.exit_status (status);
+        } else if (Process.if_signaled (status)) {
+            ps = Process.term_sig (status);
+            return null;
+        }
+        bug_msg (_("Unknown status: %d - %s\n"), status, "BuildSystem.get_exit");
+        return null;
+    }
+
     public virtual bool launch (string[] cmdparams = {}, out int? exit_status = null)
                                         throws BuildError.INITIALIZATION_FAILED,
                                                BuildError.CONFIGURATION_FAILED,
@@ -163,8 +176,8 @@ public abstract class BuildSystem : Object {
 
         int? exit = null;
         ChildWatch.add (app_pid, (intpid, status) => {
-            exit = Process.exit_status (status);
             launched = false;
+            exit = get_exit (status);
             builder_loop.quit();
         });
 

@@ -105,7 +105,7 @@ public class BuilderPlain : BuildSystem {
 
         int? exit = null;
         ChildWatch.add (pid, (intpid, status) => {
-            exit = Process.exit_status (status);
+            exit = get_exit (status);
             Process.close_pid (intpid);
             builder_loop.quit();
         });
@@ -137,7 +137,7 @@ public class BuilderPlain : BuildSystem {
 
         int? exit = null;
         ChildWatch.add (pid, (intpid, status) => {
-            exit = Process.exit_status (status);
+            exit = get_exit (status);
             Process.close_pid (intpid);
             builder_loop.quit();
         });
