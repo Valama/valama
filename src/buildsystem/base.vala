@@ -193,12 +193,8 @@ public abstract class BuildSystem : Object {
             return;
 
         builder_loop.quit();
-        //FIXME: Make this platform independent.
-        try {
-            Process.spawn_command_line_sync ("kill " + app_pid.to_string());
-        } catch (GLib.SpawnError e) {
-            errmsg (_("Could not spawn subprocess: %s\n"), e.message);
-        }
+        //TODO: Does this work und Windows?
+        Posix.kill (app_pid, 15);
         Process.close_pid (app_pid);
     }
 

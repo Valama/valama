@@ -20,6 +20,7 @@ set(required_pkgs
 "libxml-2.0"
 "pango {nolink}"
 "pangocairo {nolink}"
+"posix {nocheck,nolink}"
 "x11 {nolink}"
 )
 set(srcfiles

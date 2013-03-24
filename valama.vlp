@@ -24,6 +24,7 @@
 		<package>gtksourceview-3.0</package>
 		<package>guanako</package>
 		<package>libxml-2.0</package>
+		<package>posix</package>
 	</packages>
 	<source-directories>
 		<directory>src</directory>
