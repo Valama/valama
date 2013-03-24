@@ -26,8 +26,11 @@ using GLib;
  */
 public class AppOutput : UiElement {
     private TextView textview;
+    private bool focused;
 
     public AppOutput() {
+        focused = false;
+
         var vbox = new Box (Orientation.VERTICAL, 0);
 
         var toolbar_title = new Toolbar ();
@@ -45,7 +48,7 @@ public class AppOutput : UiElement {
         var btn_clear = new Gtk.ToolButton (null, null);
         btn_clear.icon_name = "edit-clear-all-symbolic";
         toolbar_title.add (btn_clear);
-        btn_clear.set_tooltip_text (_("Settings"));
+        btn_clear.set_tooltip_text (_("Clear output"));
         btn_clear.clicked.connect (() => {
             textview.buffer.text = "";
         });
@@ -63,26 +66,24 @@ public class AppOutput : UiElement {
         widget = vbox;
         widget.show_all();
 
-        project_builder.app_state_changed.connect ((running)=> {
-            if (running) {
-                widget_main.focus_dock_item (this.dock_item);
+        project_builder.notify["app-running"].connect (() => {
+            if (project_builder.app_running) {
+                if (!focused) {
+                    focused = true;
+                    widget_main.focus_dock_item (this.dock_item);
+                }
                 textview.buffer.text = "";
-             }
+            } else
+                focused = false;
         });
-        project_builder.app_output_std.connect (app_output_std);
-        project_builder.app_output_err.connect (app_output_err);
+        project_builder.app_output.connect (show_output);
     }
 
-    private void app_output_std (string output) {
-        textview.buffer.text += output;
-    }
-    private void app_output_err (string output) {
-        textview.buffer.text += output;
+    private inline void show_output (string output) {
+        textview.buffer.insert_at_cursor (output, -1);
     }
 
-    protected override void build() {
-
-    }
+    protected override void build() {}
 }
 
 // vim: set ai ts=4 sts=4 et sw=4

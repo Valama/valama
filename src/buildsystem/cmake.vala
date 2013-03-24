@@ -35,7 +35,18 @@ public class BuilderCMake : BuildSystem {
         return project.project_name.down();
     }
 
-    public override bool initialize() {
+    public override inline string get_name() {
+        return get_name_static();
+    }
+
+    public static new string get_name_static() {
+        return "CMake";
+    }
+
+    public override bool initialize (out int? exit_status = null)
+                                        throws BuildError.INITIALIZATION_FAILED {
+        exit_status = null;
+        initialized = false;
         initialize_started();
 
         var strb_pkgs = new StringBuilder ("set(required_pkgs\n");
@@ -77,15 +88,101 @@ public class BuilderCMake : BuildSystem {
 
             data_stream.close();
         } catch (GLib.IOError e) {
-            errmsg (_("Could not read file: %s\n"), e.message);
-            return false;
+            throw new BuildError.INITIALIZATION_FAILED (_("Could not read file: %s\n"), e.message);
         } catch (GLib.Error e) {
-            errmsg (_("Could not open file: %s\n"), e.message);
-            return false;
+            throw new BuildError.INITIALIZATION_FAILED (_("Could not open file: %s\n"), e.message);
         }
 
+        exit_status = 0;
+        initialized = true;
         initialize_finished();
         return true;
+    }
+
+    public override bool configure(out int? exit_status = null) throws BuildError.INITIALIZATION_FAILED,
+                                            BuildError.CONFIGURATION_FAILED {
+        exit_status = null;
+        if (!initialized && !initialize (out exit_status))
+            return false;
+
+        exit_status = null;
+        configured = false;
+        configure_started();
+
+        var cmdline = new string[] {"cmake", ".."};
+
+        Pid? pid;
+        if (!call_cmd (cmdline, out pid)) {
+            configure_finished();
+            throw new BuildError.CONFIGURATION_FAILED (_("configuration failed"));
+        }
+
+        int? exit = null;
+        ChildWatch.add (pid, (intpid, status) => {
+            exit = Process.exit_status (status);
+            Process.close_pid (intpid);
+            builder_loop.quit();
+        });
+
+        builder_loop.run();
+        exit_status = exit;
+        configured = true;
+        configure_finished();
+        return exit_status == 0;
+    }
+
+    public override bool build (out int? exit_status = null) throws BuildError.INITIALIZATION_FAILED,
+                                        BuildError.CONFIGURATION_FAILED,
+                                        BuildError.BUILD_FAILED {
+        exit_status = null;
+        if (!configured && !configure (out exit_status))
+            return false;
+
+        exit_status = null;
+        built = false;
+        build_started();
+        var cmdline = new string[] {"make", "-j2"};
+
+        Pid? pid;
+        int? pstdout, pstderr;
+        if (!call_cmd (cmdline, out pid, true, out pstdout, out pstderr)) {
+            build_finished();
+            throw new BuildError.CONFIGURATION_FAILED (_("build failed"));
+        }
+
+        var chn = new IOChannel.unix_new (pstdout);
+        chn.add_watch (IOCondition.IN | IOCondition.HUP, (source, condition) => {
+            bool ret;
+            var output = channel_output_read_line (source, condition, out ret);
+            Regex r = /^\[(?P<percent>.*)\%\].*$/;
+            MatchInfo info;
+            if (r.match (output, 0, out info)) {
+                var percent_string = info.fetch_named ("percent");
+                build_progress (int.parse (percent_string));
+            }
+            build_output (output);
+            return ret;
+        });
+
+        var chnerr = new IOChannel.unix_new (pstderr);
+        chnerr.add_watch (IOCondition.IN | IOCondition.HUP, (source, condition) => {
+            bool ret;
+            build_output (channel_output_read_line (source, condition, out ret));
+            return ret;
+        });
+
+        int? exit = null;
+        ChildWatch.add (pid, (intpid, status) => {
+            exit = Process.exit_status (status);
+            Process.close_pid (intpid);
+            builder_loop.quit();
+        });
+
+        builder_loop.run();
+        exit_status = exit;
+        built = true;
+        build_finished();
+        return exit_status == 0;
     }
 }
 

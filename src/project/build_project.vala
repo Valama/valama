@@ -21,326 +21,162 @@ using GLib;
 using Guanako;
 using Gee;
 
-public class ProjectBuilder : Object{
-    private ValamaProject project;
-    public bool app_running { public get; private set; }
-    private Pid app_pid;
+public class ProjectBuilder : Object {
+    public bool app_running { get; private set; }
+    private BuildSystem? launch_builder = null;
+
     private bool project_needs_compile = false;
 
-    public ProjectBuilder (ValamaProject project) {
-        this.project = project;
-        project.buffer_changed.connect((has_changes)=>{
+    public ProjectBuilder() {
+        project.buffer_changed.connect ((has_changes) => {
             if (has_changes)
                 project_needs_compile = true;
         });
-        project.notify["idemode"].connect(() => {
+        project.notify["idemode"].connect (() => {
             project_needs_compile = true;
         });
     }
 
-    public signal void app_output_std (string output);
-    public signal void app_output_err (string output);
-
     public signal void build_started ();
-    public signal void build_output (string output);
-    public signal void build_progress (int percent);
     public signal void build_finished ();
-    public signal void app_state_changed (bool app_running);
+    public signal void build_progress (int percent);
+    public signal void build_output (string output);
+
+    public signal void app_output (string output);
 
     /**
      * Build project.
      *
      * @return Return `true` on success else `false`.
      */
-    //FIXME: Currently no check if build was successful.
-    public bool build_project () {
-        var buildpath = Path.build_path (Path.DIR_SEPARATOR_S,
-                                         project.project_path,
-                                         "build");
-        var builddir = File.new_for_path (buildpath);
-        try {
-            if (!builddir.query_exists() && !builddir.make_directory())
-                return false;
-        } catch (GLib.Error e) {
-            errmsg (_("Could not create directory '%s': %s\n"), buildpath, e.message);
-        }
-
+    public bool build_project (bool clean = false, bool tests = false,
+                                bool distclean = false, bool cont = true) {
         build_started();
 
-        int exitstatus = 0;
-
-        if (project.buildsystem == "valama") {
-            string[] valacargs = new string[] {"valac"};
-            valacargs += "--thread";
-            valacargs += "--output=" + project.project_name.casefold();
-            foreach (var pkg in project.guanako_project.packages)
-                valacargs += "--pkg=" + pkg;
-            if (project.idemode != IdeModes.DEBUG){
-                foreach (Vala.SourceFile file in project.guanako_project.get_source_files())
-                    valacargs += file.filename;
-            } else {
-                int cnt = 0;
-                foreach (string src_file_path in project.files){
-                    if (src_file_path.has_suffix (".vapi"))
-                        continue;
-                    string content = "";
-                    try {
-                        FileUtils.get_contents (src_file_path, out content);
-                    } catch (GLib.FileError e) {
-                        errmsg (_("Could read file content of '%s': %s\n"), src_file_path, e.message);
-                    }
-                    var srcfile = project.guanako_project.get_source_file_by_name(src_file_path);
-                    srcfile.content = content; //TODO: Find out why SourceFile.content is empty at the beginning (??)
-                    var tmppath = Path.build_path (Path.DIR_SEPARATOR_S, buildpath, cnt.to_string() + ".vala");
-                    var tmpfile = File.new_for_path (tmppath);
-
-                    try {
-                        var dos = new DataOutputStream (tmpfile.replace (null,
-                                                                         false,
-                                                                         FileCreateFlags.REPLACE_DESTINATION));
-                        dos.put_string (frankenstein.frankensteinify_sourcefile(srcfile));
-                        if (cnt == 0)
-                            dos.put_string (frankenstein.get_frankenstein_mainblock());
-                    } catch (GLib.IOError e) {
-                        errmsg (_("Could not update file: %s\n"), e.message);
-                    } catch (GLib.Error e) {
-                        errmsg (_("Could not open file to write: %s\n"), e.message);
-                    }
-                    valacargs += tmppath;
-                    cnt++;
-                }
-            }
-            Pid valac_pid;
-            int valac_stdout;
-            int valac_error;
-            try {
-                Process.spawn_async_with_pipes (buildpath,
-                                                valacargs,
-                                                null,
-                                                SpawnFlags.SEARCH_PATH | SpawnFlags.DO_NOT_REAP_CHILD,
-                                                null,
-                                                out valac_pid,
-                                                null,
-                                                out valac_stdout,
-                                                out valac_error);
-            } catch (GLib.SpawnError e) {
-                errmsg (_("Could not spawn subprocess: %s\n"), e.message);
+        string systemstr;
+        try {
+            var builder = get_builder (out systemstr);
+            if (builder == null)
+                return false;
+            builder.build_output.connect ((output) => {
+                build_output (output);
+            });
+            builder.build_progress.connect ((percent) => {
+                build_progress (percent);
+            });
+            int exit_status;
+            builder.initialize (out exit_status);
+            if (distclean && !builder.distclean (out exit_status)) {
+                warning_msg (_("'Distclean' failed with exit status: %d\n"), exit_status);
+                return false;
+            } else if (clean && !builder.clean (out exit_status)) {
+                warning_msg (_("'Clean' failed with exit status: %d\n"), exit_status);
                 return false;
             }
-            var chn = new IOChannel.unix_new (valac_stdout);
-            chn.add_watch (IOCondition.IN | IOCondition.HUP, (source, condition)=>{
-                bool ret;
-                build_output(channel_output_read_line (source, condition, out ret));
-                return ret;
-            });
-            var chnerr = new IOChannel.unix_new (valac_error);
-            chnerr.add_watch (IOCondition.IN | IOCondition.HUP, (source, condition)=>{
-                bool ret;
-                build_output(channel_output_read_line (source, condition, out ret));
-                return ret;
-            });
-            build_output (_("Adding valac watch\n"));
-            ChildWatch.add (valac_pid, (pid, status) => {
-                Process.close_pid (pid);
-                build_finished();
-                project_needs_compile = false;
-            });
-            return true;
-        }
-
-        //else if (project.buildsystem == "cmake")...
-        try {
-            var cmakeb = new BuilderCMake();
-            cmakeb.initialize();
-        } catch (BuildError e) {
-            warning_msg (_("Cmake initialization failed: %s\n"), e.message);
-            return false;
-        }
-
-        build_output (_("Launching cmake...\n"));
-        Pid cmake_pid;
-        int cmake_stdout;
-        int cmake_error;
-        try {
-            Process.spawn_async_with_pipes (buildpath,
-                                            new string[]{ "cmake", ".." },
-                                            null,
-                                            SpawnFlags.SEARCH_PATH | SpawnFlags.DO_NOT_REAP_CHILD,
-                                            null,
-                                            out cmake_pid,
-                                            null,
-                                            out cmake_stdout,
-                                            out cmake_error);
-        } catch (GLib.SpawnError e) {
-            errmsg (_("Could not spawn subprocess: %s\n"), e.message);
-        }
-        var chn = new IOChannel.unix_new (cmake_stdout);
-        chn.add_watch (IOCondition.IN | IOCondition.HUP, (source, condition)=>{
-            bool ret;
-            build_output(channel_output_read_line (source, condition, out ret));
-            return ret;
-        });
-        var chn_err = new IOChannel.unix_new (cmake_error);
-        chn_err.add_watch (IOCondition.IN | IOCondition.HUP, (source, condition)=>{
-            bool ret;
-            build_output(channel_output_read_line (source, condition, out ret));
-            return ret;
-        });
-
-        build_output (_("Adding cmake watch\n"));
-        ChildWatch.add (cmake_pid, (pid, status) => {
-            Process.close_pid (pid);
-            build_output (_("Launching make...\n"));
-            Pid make_pid;
-            int make_stdout;
-            int make_error;
-            try {
-                Process.spawn_async_with_pipes (buildpath,
-                                                new string[]{ "make", "-j4" },
-                                                null,
-                                                SpawnFlags.SEARCH_PATH | SpawnFlags.DO_NOT_REAP_CHILD,
-                                                null,
-                                                out make_pid,
-                                                null,
-                                                out make_stdout,
-                                                out make_error);
-            } catch (GLib.SpawnError e) {
-                errmsg (_("Could not spawn subprocess: %s\n"), e.message);
-            }
-            var chn_make = new IOChannel.unix_new (make_stdout);
-            chn_make.add_watch (IOCondition.IN | IOCondition.HUP, (source, condition)=>{
-                bool ret;
-                var output = channel_output_read_line (source, condition, out ret);
-                Regex r = /^\[(?P<percent>.*)\%\].*$/;
-                MatchInfo info;
-                if (r.match (output, 0, out info)) {
-                    var percent_string = info.fetch_named ("percent");
-                    build_progress (int.parse (percent_string));
+            if (cont) {
+                if (builder.configure (out exit_status)) {
+                    if (builder.build (out exit_status)) {
+                        project_needs_compile = false;
+                        if (tests && !builder.runtests (out exit_status)) {
+                            warning_msg (_("'Tests' failed with exit status: %d\n"), exit_status);
+                            return false;
+                        }
+                    } else {
+                        warning_msg (_("'Build' failed with exit status: %d\n"), exit_status);
+                        return false;
+                    }
+                } else {
+                    warning_msg (_("'Configure' failed with exit status: %d\n"), exit_status);
+                    return false;
                 }
-                build_output (output);
-                return ret;
-            });
-            var chn_make_err = new IOChannel.unix_new (make_error);
-            chn_make_err.add_watch (IOCondition.IN | IOCondition.HUP, (source, condition)=>{
-                bool ret;
-                build_output(channel_output_read_line (source, condition, out ret));
-                return ret;
-            });
-            ChildWatch.add (make_pid, (pid, status) => {
-                Process.close_pid (pid);
-                build_finished();
-                project_needs_compile = false;
-            });
-        });
-
-        if (exitstatus == 0)
-            return true;
-        return false;
+            }
+        } catch (BuildError.INITIALIZATION_FAILED e) {
+            warning_msg (_("%s initialization failed: %s\n"), systemstr, e.message);
+            return false;
+        } catch (BuildError.CLEAN_FAILED e) {
+            warning_msg (_("%s cleaning failed: %s\n"), systemstr, e.message);
+            return false;
+        } catch (BuildError.CONFIGURATION_FAILED e) {
+            warning_msg (_("%s configuration failed: %s\n"), systemstr, e.message);
+            return false;
+        } catch (BuildError.BUILD_FAILED e) {
+            warning_msg (_("%s build failed: %s\n"), systemstr, e.message);
+            return false;
+        } catch (BuildError.TEST_FAILED e) {
+            warning_msg (_("%s tests failed: %s\n"), systemstr, e.message);
+            return false;
+        } finally {
+            build_finished();
+        }
+        return true;
     }
 
-    private string channel_output_read_line (IOChannel source, IOCondition condition, out bool return_value) {
-        if (condition == IOCondition.HUP) {
-            return_value = false;
-            return "";
+    private BuildSystem? get_builder (out string? systemstr = null)
+                                                throws BuildError.INITIALIZATION_FAILED {
+        BuildSystem? builder;
+        switch (project.buildsystem) {
+            case "valama":
+                systemstr = BuilderPlain.get_name_static();
+                builder = new BuilderPlain();
+                break;
+            case "cmake":
+                systemstr = BuilderCMake.get_name_static();
+                builder = new BuilderCMake();
+                break;
+            default:
+                warning_msg (_("Build system '%s' not supported.\n"), project.buildsystem);
+                systemstr = null;
+                return null;
         }
-        string output = "";
-        try {
-            source.read_line (out output, null, null);
-        } catch (GLib.ConvertError e) {
-            errmsg (_("Could not convert all characters: %s\n"), e.message);
-        } catch (GLib.IOChannelError e) {
-            errmsg (_("IOChannel operation failed: %s\n"), e.message);
-        }
-        return_value = true;
-        return output;
+        return builder;
     }
 
     /**
      * Launch application (and build if necessary).
      */
-    ulong handler_id;
-    public void launch() {
-        if (app_running)
+    public void launch (string[] cmdparams = {}) {
+        if (app_running) {
+            warning_msg (_("Application still running. Quit it manually.\n"));
             return;
+        }
 
-        if (project_needs_compile) {
-            build_project();
-            handler_id = build_finished.connect (()=>{
-                internal_launch();
-                this.disconnect (handler_id);
-            });
-        } else
-            internal_launch();
+        if (!project_needs_compile || build_project())
+            internal_launch (cmdparams);
     }
 
-    private void internal_launch() {
-        var buildpath = Path.build_path (Path.DIR_SEPARATOR_S,
-                                         project.project_path,
-                                         "build");
-        var filename = project.project_name.casefold();
-        var filename_abs = Path.build_path (Path.DIR_SEPARATOR_S,
-                                            buildpath,
-                                            filename);
-        var exefile = File.new_for_path (filename_abs);
-        if (!exefile.query_exists()) {
-            if (build_project()) {
-                exefile = File.new_for_path (filename_abs);
-                if (!exefile.query_exists()) {
-                    bug_msg (_("Could not launch application: %s\n"), filename_abs);
-                    return;
-                }
-            } else
-                return;
-        }
-
-        int app_stdout;
-        int app_stderr;
+    private void internal_launch (string[] cmdparams = {}) {
         try {
-            Process.spawn_async_with_pipes (buildpath,
-                                            new string[]{ filename },
-                                            null,
-                                            SpawnFlags.DO_NOT_REAP_CHILD,
-                                            null,
-                                            out app_pid,
-                                            null,
-                                            out app_stdout,
-                                            out app_stderr);
-        } catch (GLib.SpawnError e) {
-            errmsg (_("Could not spawn subprocess: %s\n"), e.message);
-        }
-        _app_running = true;
-        app_state_changed (true);
+            launch_builder = get_builder();
+            if (launch_builder == null)
+                return;
+            launch_builder.build_output.connect ((output) => {
+                build_output (output);
+            });
+            launch_builder.app_output.connect ((output) => {
+                app_output (output);
+            });
 
-        var chn = new IOChannel.unix_new (app_stdout);
-        chn.add_watch (IOCondition.IN | IOCondition.HUP, (source, condition) => {
-            bool ret;
-            app_output_std(channel_output_read_line (source, condition, out ret));
-            return ret;
-        });
-        var chnerr = new IOChannel.unix_new (app_stderr);
-        chnerr.add_watch (IOCondition.IN | IOCondition.HUP, (source, condition) => {
-            bool ret;
-            app_output_err(channel_output_read_line (source, condition, out ret));
-            return ret;
-        });
-        ChildWatch.add (app_pid, (pid, status) => {
-            Process.close_pid (pid);
+            app_running = true;
+            int? exit_status;
+            launch_builder.launch (cmdparams, out exit_status);
+            app_output ("--------------------------------------------\n");
+            if (exit_status != null)
+                app_output (_("Application terminated with exit status: %d\n").printf (
+                                                                        exit_status));
+            else
+                app_output ("Application terminated unexpected.\n");
             app_running = false;
-            app_state_changed (false);
-        });
+        } catch (BuildError e) {
+            warning_msg (_("Launching application failed: %s\n"), e.message);
+            return;
+        }
     }
 
     public void quit() {
-        if (!_app_running)
+        if (!app_running)
             return;
-        try {
-            Process.spawn_command_line_sync ("kill " + app_pid.to_string());
-        } catch (GLib.SpawnError e) {
-            errmsg (_("Could not spawn subprocess: %s\n"), e.message);
-        }
-        Process.close_pid (app_pid);
         app_running = false;
-        app_state_changed (false);
+        launch_builder.launch_kill();
     }
 }
 

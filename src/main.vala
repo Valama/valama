@@ -80,8 +80,8 @@ public static int main (string[] args) {
     window_main.set_default_size (1200, 600);
     window_main.maximize();
 
-    window_main.show();
 
+    window_main.show();
     vscreen = new WelcomeScreen();
     vscreen.project_loaded.connect ((project) => {
         if (project != null) {

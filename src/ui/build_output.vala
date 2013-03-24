@@ -27,7 +27,6 @@ using GLib;
 public class BuildOutput : UiElement {
     private TextView textview;
     private ProgressBar progressbar;
-
     private bool focused;
 
     public BuildOutput() {
@@ -61,18 +60,18 @@ public class BuildOutput : UiElement {
             focused = false;
             progressbar.visible = false;
         });
-        project_builder.build_progress.connect (build_progress);
-        project_builder.build_output.connect (build_output);
+        project_builder.build_progress.connect (show_progress);
+        project_builder.build_output.connect (show_output);
     }
 
-    private void build_progress (int percent) {
+    private inline void show_progress (int percent) {
         progressbar.fraction = percent / 100f;
     }
 
-    private void build_output (string output) {
+    private void show_output (string output) {
         if (!focused) {
-            widget_main.focus_dock_item (this.dock_item);
             focused = true;
+            widget_main.focus_dock_item (this.dock_item);
         }
         textview.buffer.insert_at_cursor (output, -1);
     }

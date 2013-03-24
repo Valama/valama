@@ -155,7 +155,7 @@ public class MainWidget : Box {
         frankenstein = new Guanako.FrankenStein();
         wdg_breakpoints = new UiBreakpoints (frankenstein);
 
-        project_builder = new ProjectBuilder (project);
+        project_builder = new ProjectBuilder();
         wdg_build_output = new BuildOutput();
         wdg_app_output = new AppOutput();
         wdg_current_file_structure = new UiCurrentFileStructure();
@@ -256,6 +256,8 @@ public class MainWidget : Box {
      * Save gdl layout.
      */
     public void close() {
+        project_builder.quit();
+
         var cachedir = Path.build_path (Path.DIR_SEPARATOR_S,
                                         Environment.get_user_cache_dir(),
                                         "valama");
@@ -476,11 +478,9 @@ public class MainWidget : Box {
             else
                 project_builder.launch();
         });
-        project_builder.app_state_changed.connect ((running) => {
-            if (running)
-                btnRun.stock_id = Stock.MEDIA_STOP;
-            else
-                btnRun.stock_id = Stock.MEDIA_PLAY;
+        project_builder.notify["app-running"].connect (() => {
+            btnRun.stock_id = (project_builder.app_running) ? Stock.MEDIA_STOP
+                                                            : Stock.MEDIA_PLAY;
         });
 
         var separator_expand = new SeparatorToolItem();
