@@ -141,19 +141,7 @@ public class UiSearch : UiElement {
                                                                 titer, 0.42, true, 0, 1.0);
     }
 
-    void clear_search_tag() {
-        project.foreach_buffer ((filename, bfr) => {
-            TextIter first_iter;
-            TextIter end_iter;
-            bfr.get_start_iter (out first_iter);
-            bfr.get_end_iter (out end_iter);
-            bfr.remove_tag_by_name ("search", first_iter, end_iter);
-        });
-    }
-
-
     void search (string search) {
-        clear_search_tag();
         if (search == "" || source_viewer.current_srcbuffer == null)
             return;
         map_paths_results = new Gee.HashMap<string, SearchResult?>();
@@ -188,6 +176,9 @@ public class UiSearch : UiElement {
                                          out match_start,
                                          out match_end,
                                          null)) {
+
+            bfr.apply_tag_by_name ("search", match_start, match_end);
+
             if (iter_parent == null && btn_all_files.active) {
                 store.append (out iter_parent, null);
                 store.set (iter_parent, 0, "", 1, project.get_relative_path (filename), -1);

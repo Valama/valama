@@ -50,8 +50,12 @@ public class BuilderCMake : BuildSystem {
         initialize_started();
 
         var strb_pkgs = new StringBuilder ("set(required_pkgs\n");
-        foreach (var pkgmap in get_pkgmaps().values)
-            strb_pkgs.append (@"\"$pkgmap\"\n");
+        foreach (var pkgmap in get_pkgmaps().values) {
+            if (pkgmap.choice_pkg != null && !pkgmap.check)
+                strb_pkgs.append (@"\"$((pkgmap as PackageInfo))\"\n");
+            else
+                strb_pkgs.append (@"\"$pkgmap\"\n");
+        }
         strb_pkgs.append (")\n");
 
         var strb_files = new StringBuilder ("set(srcfiles\n");
