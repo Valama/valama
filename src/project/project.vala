@@ -544,7 +544,7 @@ public class ValamaProject : Object {
         });
 
         parsing = true;
-        new Thread<void*> (_("Initial buffer update"), () => {
+        var thd = new Thread<void*> (_("Initial buffer update"), () => {
             guanako_project.update();
             Idle.add (() => {
                 guanako_update_finished();
@@ -553,6 +553,7 @@ public class ValamaProject : Object {
             });
             return null;
         });
+        thd.set_priority (ThreadPriority.LOW);
     }
 
     /**
@@ -1599,7 +1600,7 @@ public class ValamaProject : Object {
              * Otherwise, the thread might crash accessing it
              */
             string buffer_content =  buffer.text;
-            new Thread<void*>.try (_("Buffer update"), () => {
+            var thd = new Thread<void*>.try (_("Buffer update"), () => {
                 guanako_update_started();
                 var source_file = this.guanako_project.get_source_file_by_name (
                                                 source_viewer.current_srcfocus);
@@ -1613,6 +1614,7 @@ public class ValamaProject : Object {
                 });
                 return null;
             });
+            thd.set_priority (ThreadPriority.LOW);
         } catch (GLib.Error e) {
             errmsg (_("Could not create thread to update buffer completion: %s\n"), e.message);
         }
