@@ -40,7 +40,7 @@ public class Vala.ParserExt : CodeVisitor {
 	Comment comment;
 
 	/*GUANAKO_EXT_START*/
-	public Set<string> used_defines { get; private set; }
+	public HashMap<string, HashSet<string>> used_defines { get; private set; }
 	/*GUANAKO_EXT_END*/
 
 	const int BUFFER_SIZE = 32;
@@ -70,7 +70,7 @@ public class Vala.ParserExt : CodeVisitor {
 	public ParserExt () {
 		tokens = new TokenInfo[BUFFER_SIZE];
 		/*GUANAKO_EXT_START*/
-		used_defines = new HashSet<string> (str_hash, str_equal);
+		used_defines = new HashMap <string, HashSet<string>> (str_hash, str_equal);
 		/*GUANAKO_EXT_END*/
 	}
 
@@ -351,8 +351,10 @@ public class Vala.ParserExt : CodeVisitor {
 		}
 		
 		/*GUANAKO_EXT_START*/
+		HashSet<string> used_defines_file = new HashSet<string>();
 		foreach (string define in scanner.used_defines)
-			used_defines.add (define);
+			used_defines_file.add (define);
+		used_defines.set (source_file.filename, used_defines_file);
 		/*GUANAKO_EXT_END*/
 		scanner = null;
 	}

@@ -561,7 +561,11 @@ public class ValamaProject : Object {
         });
 
         guanako_update_finished.connect (() => {
-            var used = guanako_project.get_defines_used();
+            var used = new TreeSet<string>();
+            foreach (var defines in guanako_project.get_defines_used().get_values())
+                foreach (var define in defines)
+                    used.add (define);
+
             var removals = new TreeSet<string>();
             foreach (var define in defines)
                 if (!(define in used))

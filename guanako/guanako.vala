@@ -1158,7 +1158,7 @@ namespace Guanako {
             return context.get_vapi_path (package);
         }
 
-        public inline Vala.Set<string> get_defines_used() {
+        public inline Vala.Map<string, Vala.Set<string>> get_defines_used() {
             return parser.used_defines;
         }
      }
