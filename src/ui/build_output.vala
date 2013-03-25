@@ -38,6 +38,7 @@ public class BuildOutput : UiElement {
         var vbox = new Box (Orientation.VERTICAL, 0);
 
         info_bar = new InfoBar();
+        info_bar.no_show_all = true;
         var content_area = (Container)info_bar.get_content_area();
         var info_box = new Box(Orientation.HORIZONTAL, 5);
         info_label = new Label("");
@@ -64,10 +65,10 @@ public class BuildOutput : UiElement {
 
         widget = vbox;
         widget.show_all();
-        //FIXME: Why isn't this invisible??
-        info_bar.visible = false;
 
         project_builder.build_started.connect (()=> {
+            info_bar.no_show_all = false;
+            info_bar.show_all();
             info_label.label = _("Building...");
             info_icon.stock = Stock.EXECUTE;
             info_bar.set_message_type (MessageType.INFO);
@@ -77,7 +78,8 @@ public class BuildOutput : UiElement {
             progressbar.visible = true;
         });
         project_builder.build_finished.connect ((success)=> {
-            info_bar.visible = true;
+            info_bar.no_show_all = false;
+            info_bar.show_all();
             focused = false;
             progressbar.visible = false;
 
