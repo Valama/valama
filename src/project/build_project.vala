@@ -38,7 +38,7 @@ public class ProjectBuilder : Object {
     }
 
     public signal void build_started ();
-    public signal void build_finished ();
+    public signal void build_finished (bool success);
     public signal void build_progress (int percent);
     public signal void build_output (string output);
 
@@ -56,8 +56,10 @@ public class ProjectBuilder : Object {
         string systemstr;
         try {
             var builder = get_builder (out systemstr);
-            if (builder == null)
+            if (builder == null) {
+                build_finished(false);
                 return false;
+            }
             builder.build_output.connect ((output) => {
                 build_output (output);
             });
@@ -77,9 +79,11 @@ public class ProjectBuilder : Object {
             builder.initialize (out exit_status);
             if (distclean && !builder.distclean (out exit_status)) {
                 warning_msg (_("'Distclean' failed with exit status: %d\n"), exit_status);
+                build_finished(false);
                 return false;
             } else if (clean && !builder.clean (out exit_status)) {
                 warning_msg (_("'Clean' failed with exit status: %d\n"), exit_status);
+                build_finished(false);
                 return false;
             }
             if (cont) {
@@ -88,35 +92,42 @@ public class ProjectBuilder : Object {
                         project_needs_compile = false;
                         if (tests && !builder.runtests (out exit_status)) {
                             warning_msg (_("'Tests' failed with exit status: %d\n"), exit_status);
+                            build_finished(false);
                             return false;
                         }
                     } else {
                         warning_msg (_("'Build' failed with exit status: %d\n"), exit_status);
+                        build_finished(false);
                         return false;
                     }
                 } else {
                     warning_msg (_("'Configure' failed with exit status: %d\n"), exit_status);
+                    build_finished(false);
                     return false;
                 }
             }
         } catch (BuildError.INITIALIZATION_FAILED e) {
             warning_msg (_("%s initialization failed: %s\n"), systemstr, e.message);
+            build_finished(false);
             return false;
         } catch (BuildError.CLEAN_FAILED e) {
             warning_msg (_("%s cleaning failed: %s\n"), systemstr, e.message);
+            build_finished(false);
             return false;
         } catch (BuildError.CONFIGURATION_FAILED e) {
             warning_msg (_("%s configuration failed: %s\n"), systemstr, e.message);
+            build_finished(false);
             return false;
         } catch (BuildError.BUILD_FAILED e) {
             warning_msg (_("%s build failed: %s\n"), systemstr, e.message);
+            build_finished(false);
             return false;
         } catch (BuildError.TEST_FAILED e) {
             warning_msg (_("%s tests failed: %s\n"), systemstr, e.message);
+            build_finished(false);
             return false;
-        } finally {
-            build_finished();
         }
+        build_finished(true);
         return true;
     }
 

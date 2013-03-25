@@ -28,11 +28,25 @@ public class BuildOutput : UiElement {
     private TextView textview;
     private ProgressBar progressbar;
     private bool focused;
+    private InfoBar info_bar;
+    private Label info_label;
+    private Image info_icon;
 
     public BuildOutput() {
         focused = false;
 
         var vbox = new Box (Orientation.VERTICAL, 0);
+
+        info_bar = new InfoBar();
+        var content_area = (Container)info_bar.get_content_area();
+        var info_box = new Box(Orientation.HORIZONTAL, 5);
+        info_label = new Label("");
+        info_icon = new Image();
+        info_icon.icon_size = Gtk.IconSize.LARGE_TOOLBAR;
+        info_box.pack_start (info_icon, false, true);
+        info_box.pack_start (info_label, true, true);
+        content_area.add (info_box);
+        vbox.pack_start (info_bar, false, true);
 
         textview = new TextView();
         textview.override_font (Pango.FontDescription.from_string ("Monospace 10"));
@@ -50,15 +64,32 @@ public class BuildOutput : UiElement {
 
         widget = vbox;
         widget.show_all();
+        //FIXME: Why isn't this invisible??
+        info_bar.visible = false;
 
         project_builder.build_started.connect (()=> {
+            info_label.label = _("Building...");
+            info_icon.stock = Stock.EXECUTE;
+            info_bar.set_message_type (MessageType.INFO);
+
             textview.buffer.text = "";
             focused = false;
             progressbar.visible = true;
         });
-        project_builder.build_finished.connect (()=> {
+        project_builder.build_finished.connect ((success)=> {
+            info_bar.visible = true;
             focused = false;
             progressbar.visible = false;
+
+            if (success) {
+                info_label.label = _("Build complete");
+                info_icon.stock = Stock.OK;
+                info_bar.set_message_type (MessageType.INFO);
+            } else {
+                info_label.label = _("Build failed");
+                info_icon.stock = Stock.DIALOG_ERROR;
+                info_bar.set_message_type (MessageType.ERROR);
+            }
         });
         project_builder.build_progress.connect (show_progress);
         project_builder.build_output.connect (show_output);
