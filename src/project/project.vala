@@ -415,6 +415,13 @@ public class ValamaProject : Object {
     public TreeSet<string> package_list { get; private set; }
 
     /**
+     * All used defines in project.
+     *
+     * Use {@link set_define} or {@link unset_define} to add or remove define.
+     */
+    public TreeSet<string> defines { get; private set; }
+
+    /**
      * Emit signal when source file was added or removed.
      */
     public signal void source_files_changed();
@@ -430,6 +437,14 @@ public class ValamaProject : Object {
      * Emit signal when package was added or removed.
      */
     public signal void packages_changed();
+    /**
+     * Emit signal when define was added or removed.
+     *
+     * @param added `true` if define was added, `false` if removed and `null`
+     *              to don't give exact information.
+     * @param define Name of changed define, `null` when added is `null`.
+     */
+    public signal void defines_changed (bool? added, string? define);
 
     /**
      * Create {@link ValamaProject} and load it from project file.
@@ -475,6 +490,8 @@ public class ValamaProject : Object {
         buildsystem_files = new TreeSet<string>();
         data_dirs = new TreeSet<string>();
         data_files = new TreeSet<string>();
+
+        defines = new TreeSet<string>();
 
         files = new TreeSet<string>();
         b_files = new TreeSet<string>();
@@ -541,6 +558,21 @@ public class ValamaProject : Object {
         this.comp_provider.name = _("%s - Vala").printf (project_name);
         this.notify["project-name"].connect (() => {
             comp_provider.name = _("%s - Vala").printf (project_name);
+        });
+
+        guanako_update_finished.connect (() => {
+            var used = guanako_project.get_defines_used();
+            var removals = new TreeSet<string>();
+            foreach (var define in defines)
+                if (!(define in used))
+                    removals.add (define);
+            foreach (var define in removals) {
+                defines.remove (define);
+                defines_changed (false, define);
+            }
+            foreach (var define in used)
+                if (defines.add (define))
+                    defines_changed (true, define);
         });
 
         parsing = true;
@@ -1455,6 +1487,28 @@ public class ValamaProject : Object {
                     debug_msg (_("Skip '%s' choice.\n"), pkg.name);
         }
         return null;
+    }
+
+    /**
+     * Enable define.
+     *
+     * @param define Define to enable.
+     * @return `true` on success.
+     */
+    public inline bool set_define (string define) {
+        if (define in guanako_project.get_defines_used())
+            return guanako_project.add_define (define);
+        return false;
+    }
+
+    /**
+     * Disable define.
+     *
+     * @param define Define to enable.
+     * @return `true` on success.
+     */
+    public inline bool unset_define (string define) {
+        return guanako_project.remove_define (define);
     }
 
     /**
