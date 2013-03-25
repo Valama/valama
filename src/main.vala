@@ -27,6 +27,7 @@ static Window window_main;
 static MainWidget widget_main;
 static RecentManager recentmgr;
 static WelcomeScreen? vscreen = null;
+static Valama gtk_app;
 
 public static int main (string[] args) {
     Intl.textdomain (Config.GETTEXT_PACKAGE);
@@ -73,32 +74,42 @@ public static int main (string[] args) {
 
     load_icons();
 
-    window_main = new Window();
-    window_main.destroy.connect (main_quit);
-    window_main.title = _("Valama");
-    window_main.hide_titlebar_when_maximized = true;
-    window_main.set_default_size (1200, 600);
-    window_main.maximize();
+    gtk_app = new Valama ();
+    return gtk_app.run();
+}
+
+public class Valama : Gtk.Application {
+    public Valama () {
+        Object (application_id: "app.valama", flags: GLib.ApplicationFlags.FLAGS_NONE);
+    }
+
+    public override void activate () {
+        window_main = new ApplicationWindow(gtk_app);
+        window_main.destroy.connect (main_quit);
+        window_main.title = _("Valama");
+        window_main.hide_titlebar_when_maximized = true;
+        window_main.set_default_size (1200, 600);
+        window_main.maximize();
 
 
-    window_main.show();
-    vscreen = new WelcomeScreen();
-    vscreen.project_loaded.connect ((project) => {
-        if (project != null) {
-            window_main.remove (vscreen);
+        window_main.show();
+        vscreen = new WelcomeScreen();
+        vscreen.project_loaded.connect ((project) => {
+            if (project != null) {
+                window_main.remove (vscreen);
+                show_main_screen (project);
+            }
+        });
+        if (project != null)
             show_main_screen (project);
-        }
-    });
-    if (project != null)
-        show_main_screen (project);
-    else
-        window_main.add (vscreen);
+        else
+            window_main.add (vscreen);
 
-    Gtk.main();
+        Gtk.main();
 
-    if (project != null)
-        project.close (true);
-    return 0;
+        if (project != null)
+            project.close (true);
+    }
 }
 
 static void show_main_screen (ValamaProject load_project) {
