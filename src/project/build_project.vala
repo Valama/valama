@@ -23,9 +23,17 @@ using Gee;
 
 public class ProjectBuilder : Object {
     public bool app_running { get; private set; }
-    private BuildSystem? launch_builder = null;
 
     private bool project_needs_compile = false;
+    private bool initialized = false;
+
+    public signal void build_started ();
+    public signal void build_finished (bool success);
+    public signal void build_progress (int percent);
+    public signal void build_output (string output);
+
+    public signal void app_output (string output);
+
 
     public ProjectBuilder() {
         project.buffer_changed.connect ((has_changes) => {
@@ -35,14 +43,34 @@ public class ProjectBuilder : Object {
         project.notify["idemode"].connect (() => {
             project_needs_compile = true;
         });
+        init();
     }
 
-    public signal void build_started ();
-    public signal void build_finished (bool success);
-    public signal void build_progress (int percent);
-    public signal void build_output (string output);
-
-    public signal void app_output (string output);
+    private bool init() {
+        if (initialized)
+            return true;
+        if (project.builder == null)
+            return false;
+        project.builder.build_output.connect ((output) => {
+            build_output (output);
+        });
+        project.builder.build_progress.connect ((percent) => {
+            build_progress (percent);
+        });
+        project.builder.app_output.connect ((output) => {
+            app_output (output);
+        });
+        project.builder.notify["ps"].connect (() => {
+            if (project.builder.ps != null) {
+                build_output ("--------------------------------------------\n");
+                build_output (_("Build command received signal: %s\n").printf (
+                            project.builder.ps.to_string()));
+                build_output ("--------------------------------------------\n");
+            }
+        });
+        initialized = true;
+        return true;
+    }
 
     /**
      * Build project.
@@ -53,102 +81,70 @@ public class ProjectBuilder : Object {
                                 bool distclean = false, bool cont = true) {
         build_started();
 
-        string systemstr;
+        if (!init()) {
+            build_finished(false);
+            return false;
+        }
+
         try {
-            var builder = get_builder (out systemstr);
-            if (builder == null) {
-                build_finished(false);
+            int? exit_status;
+            if (!project.builder.initialize (out exit_status)) {
+                warning_msg (_("'Initialization' failed with exit status: %d\n"), exit_status);
+                build_finished (false);
                 return false;
             }
-            builder.build_output.connect ((output) => {
-                build_output (output);
-            });
-            builder.build_progress.connect ((percent) => {
-                build_progress (percent);
-            });
-            builder.notify["ps"].connect (() => {
-                if (builder.ps != null) {
-                    build_output ("--------------------------------------------\n");
-                    build_output (_("Build command received signal: %s\n").printf (
-                                builder.ps.to_string()));
-                    build_output ("--------------------------------------------\n");
-                }
-            });
-
-            int exit_status;
-            builder.initialize (out exit_status);
-            if (distclean && !builder.distclean (out exit_status)) {
+            if (distclean && !project.builder.distclean (out exit_status)) {
                 warning_msg (_("'Distclean' failed with exit status: %d\n"), exit_status);
-                build_finished(false);
+                build_finished (false);
                 return false;
-            } else if (clean && !builder.clean (out exit_status)) {
+            } else if (clean && !project.builder.clean (out exit_status)) {
                 warning_msg (_("'Clean' failed with exit status: %d\n"), exit_status);
-                build_finished(false);
+                build_finished (false);
                 return false;
             }
             if (cont) {
-                if (builder.configure (out exit_status)) {
-                    if (builder.build (out exit_status)) {
+                if (project.builder.configure (out exit_status)) {
+                    if (project.builder.build (out exit_status)) {
                         project_needs_compile = false;
-                        if (tests && !builder.runtests (out exit_status)) {
+                        if (tests && !project.builder.runtests (out exit_status)) {
                             warning_msg (_("'Tests' failed with exit status: %d\n"), exit_status);
-                            build_finished(false);
+                            build_finished (false);
                             return false;
                         }
                     } else {
                         warning_msg (_("'Build' failed with exit status: %d\n"), exit_status);
-                        build_finished(false);
+                        build_finished (false);
                         return false;
                     }
                 } else {
                     warning_msg (_("'Configure' failed with exit status: %d\n"), exit_status);
-                    build_finished(false);
+                    build_finished (false);
                     return false;
                 }
             }
         } catch (BuildError.INITIALIZATION_FAILED e) {
-            warning_msg (_("%s initialization failed: %s\n"), systemstr, e.message);
-            build_finished(false);
+            warning_msg (_("'%s' initialization failed: %s\n"), project.builder.get_name(), e.message);
+            build_finished (false);
             return false;
         } catch (BuildError.CLEAN_FAILED e) {
-            warning_msg (_("%s cleaning failed: %s\n"), systemstr, e.message);
-            build_finished(false);
+            warning_msg (_("'%s' cleaning failed: %s\n"), project.builder.get_name(), e.message);
+            build_finished (false);
             return false;
         } catch (BuildError.CONFIGURATION_FAILED e) {
-            warning_msg (_("%s configuration failed: %s\n"), systemstr, e.message);
-            build_finished(false);
+            warning_msg (_("'%s' configuration failed: %s\n"), project.builder.get_name(), e.message);
+            build_finished (false);
             return false;
         } catch (BuildError.BUILD_FAILED e) {
-            warning_msg (_("%s build failed: %s\n"), systemstr, e.message);
-            build_finished(false);
+            warning_msg (_("'%s' build failed: %s\n"), project.builder.get_name(), e.message);
+            build_finished (false);
             return false;
         } catch (BuildError.TEST_FAILED e) {
-            warning_msg (_("%s tests failed: %s\n"), systemstr, e.message);
-            build_finished(false);
+            warning_msg (_("'%s' tests failed: %s\n"), project.builder.get_name(), e.message);
+            build_finished (false);
             return false;
         }
-        build_finished(true);
+        build_finished (true);
         return true;
-    }
-
-    private BuildSystem? get_builder (out string? systemstr = null)
-                                                throws BuildError.INITIALIZATION_FAILED {
-        BuildSystem? builder;
-        switch (project.buildsystem) {
-            case "valama":
-                systemstr = BuilderPlain.get_name_static();
-                builder = new BuilderPlain();
-                break;
-            case "cmake":
-                systemstr = BuilderCMake.get_name_static();
-                builder = new BuilderCMake();
-                break;
-            default:
-                warning_msg (_("Build system '%s' not supported.\n"), project.buildsystem);
-                systemstr = null;
-                return null;
-        }
-        return builder;
     }
 
     /**
@@ -165,28 +161,22 @@ public class ProjectBuilder : Object {
     }
 
     private void internal_launch (string[] cmdparams = {}) {
-        try {
-            launch_builder = get_builder();
-            if (launch_builder == null)
-                return;
-            launch_builder.build_output.connect ((output) => {
-                build_output (output);
-            });
-            launch_builder.app_output.connect ((output) => {
-                app_output (output);
-            });
-            launch_builder.notify["ps"].connect (() => {
-                if (launch_builder.ps != null) {
-                    app_output ("--------------------------------------------\n");
-                    app_output (_("Application received signal: %s\n").printf (
-                                launch_builder.ps.to_string()));
-                    app_output ("--------------------------------------------\n");
-                }
-            });
+        if (!init())
+            return;
 
+        project.builder.notify["ps"].connect (() => {
+            if (project.builder.ps != null) {
+                app_output ("--------------------------------------------\n");
+                app_output (_("Application received signal: %s\n").printf (
+                            project.builder.ps.to_string()));
+                app_output ("--------------------------------------------\n");
+            }
+        });
+
+        try {
             app_running = true;
             int? exit_status;
-            launch_builder.launch (cmdparams, out exit_status);
+            project.builder.launch (cmdparams, out exit_status);
             if (exit_status != null) {
                 app_output ("--------------------------------------------\n");
                 /*
@@ -208,7 +198,7 @@ public class ProjectBuilder : Object {
         if (!app_running)
             return;
         app_running = false;
-        launch_builder.launch_kill();
+        project.builder.launch_kill();
     }
 }
 

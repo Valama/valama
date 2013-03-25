@@ -22,31 +22,43 @@ using GLib;
 public class BuilderCMake : BuildSystem {
     string projectinfo;
 
-    public BuilderCMake() throws BuildError.INITIALIZATION_FAILED {
-        init_dir (buildpath);
-        projectinfo = Path.build_path (Path.DIR_SEPARATOR_S,
-                                       project.project_path,
-                                       "cmake",
-                                       "project.cmake");
-        init_dir (Path.get_dirname (projectinfo));
-    }
-
     public override string get_executable() {
         return project.project_name.down();
     }
 
     public override inline string get_name() {
-        return get_name_static();
+        return "CMake";
     }
 
-    public static new string get_name_static() {
-        return "CMake";
+    public override inline string get_name_id() {
+        return "cmake";
+    }
+
+    public override bool check_buildsystem_file (string filename) {
+        return (filename.has_suffix (".cmake") ||
+                Path.get_basename (filename) == ("CMakeLists.txt"));
+    }
+
+    public override bool preparate() throws BuildError.INITIALIZATION_FAILED {
+        if (buildpath == null)
+            throw new BuildError.INITIALIZATION_FAILED (_("Build directory not set."));
+        if (project == null)
+            throw new BuildError.INITIALIZATION_FAILED (_("Valama project not initialized."));
+        projectinfo = Path.build_path (Path.DIR_SEPARATOR_S,
+                                       project.project_path,
+                                       "cmake",
+                                       "project.cmake");
+        init_dir (buildpath);
+        init_dir (Path.get_dirname (projectinfo));
+        return true;
     }
 
     public override bool initialize (out int? exit_status = null)
                                         throws BuildError.INITIALIZATION_FAILED {
         exit_status = null;
         initialized = false;
+        if (!preparate())
+            return false;
         initialize_started();
 
         var strb_pkgs = new StringBuilder ("set(required_pkgs\n");
@@ -118,7 +130,7 @@ public class BuilderCMake : BuildSystem {
         Pid? pid;
         if (!call_cmd (cmdline, out pid)) {
             configure_finished();
-            throw new BuildError.CONFIGURATION_FAILED (_("configuration failed"));
+            throw new BuildError.CONFIGURATION_FAILED (_("configure command failed"));
         }
 
         int? exit = null;
@@ -151,7 +163,7 @@ public class BuilderCMake : BuildSystem {
         int? pstdout, pstderr;
         if (!call_cmd (cmdline, out pid, true, out pstdout, out pstderr)) {
             build_finished();
-            throw new BuildError.CONFIGURATION_FAILED (_("build failed"));
+            throw new BuildError.CONFIGURATION_FAILED (_("build command failed"));
         }
 
         var chn = new IOChannel.unix_new (pstdout);

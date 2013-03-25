@@ -290,6 +290,11 @@ public class ValamaProject : Object {
      */
     public Guanako.Project? guanako_project { get; private set; default = null; }
 
+    /**
+     * Attached build system.
+     */
+    public BuildSystem? builder { get; private set; default = null; }
+
     private string _project_path;
     /**
      * Absolute path to project root.
@@ -394,11 +399,6 @@ public class ValamaProject : Object {
     private GuanakoCompletion comp_provider;
 
     /**
-     * The project's build system (valama/cmake/...).
-     */
-    public string buildsystem = "cmake";
-
-    /**
      * Required packages with version information.
      *
      * Use {@link add_package} or {@link add_package_by_name} to add a new
@@ -440,11 +440,10 @@ public class ValamaProject : Object {
     /**
      * Emit signal when define was added or removed.
      *
-     * @param added `true` if define was added, `false` if removed and `null`
-     *              to don't give exact information.
-     * @param define Name of changed define, `null` when added is `null`.
+     * @param added `true` if define was added, `false` if removed.
+     * @param define Name of changed define.
      */
-    public signal void defines_changed (bool? added, string? define);
+    public signal void defines_changed (bool added, string define);
 
     /**
      * Create {@link ValamaProject} and load it from project file.
@@ -531,6 +530,12 @@ public class ValamaProject : Object {
 
         if (save_recent)
             save_to_recent();
+        if (builder != null)
+            try {
+                builder.init (this);
+            } catch (BuildError e) {
+                bug_msg (_("Could not initialize build system: %s\n"), e.message);
+            }
 
         generate_file_list (_source_dirs.to_array(),
                             _source_files.to_array(),
@@ -882,7 +887,7 @@ public class ValamaProject : Object {
      * @param filename Path to file.
      */
     public void add_buildsystem_file (string? filename) {
-        if (filename == null || !(filename.has_suffix (".cmake") || Path.get_basename (filename) == ("CMakeLists.txt")))
+        if (builder == null || filename == null || !builder.check_buildsystem_file (filename))
             return;
         var filename_abs = get_absolute_path (filename);
 
@@ -1070,7 +1075,7 @@ public class ValamaProject : Object {
                     project_name = i->get_content();
                     break;
                 case "buildsystem":
-                    buildsystem = i->get_content();
+                    add_builder (i->get_content());
                     break;
                 case "version":
                     for (Xml.Node* p = i->children; p != null; p = p->next) {
@@ -1271,7 +1276,8 @@ public class ValamaProject : Object {
         writer.start_element ("project");
         writer.write_attribute ("version", project_file_version);
         writer.write_element ("name", project_name);
-        writer.write_element ("buildsystem", buildsystem);
+        if (builder != null)
+            writer.write_element ("buildsystem", builder.get_name_id());
 
         writer.start_element ("version");
         writer.write_element ("major", version_major.to_string());
@@ -1456,6 +1462,28 @@ public class ValamaProject : Object {
             }
         } else
             return true;
+    }
+
+    /**
+     * Load build system.
+     */
+    public bool add_builder (string? buildsystem) {
+        if (buildsystem == null) {
+            builder = null;
+            return true;
+        }
+        switch (buildsystem) {
+            case "valama":
+                builder = new BuilderPlain();
+                break;
+            case "cmake":
+                builder = new BuilderCMake();
+                break;
+            default:
+                warning_msg (_("Build system '%s' not supported.\n"), buildsystem);
+                return false;
+        }
+        return  true;
     }
 
     /**

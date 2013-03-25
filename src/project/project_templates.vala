@@ -66,12 +66,13 @@ public class ProjectTemplate {
         });
 
         //TODO: Get build system files.
-        switch (vproject.buildsystem) {
-            default:
-                debug_msg (_("Build system '%s' currently not supported by template selector.\n"),
-                           vproject.buildsystem);
-                break;
-        }
+        if (vproject.builder != null)
+            switch (vproject.builder.get_name_id()) {
+                default:
+                    debug_msg (_("Build system '%s' currently not supported by template selector.\n"),
+                               vproject.builder.get_name());
+                    break;
+            }
 
         unmet_deps = new ArrayList<PackageInfo?>();
         foreach (var pkg in vproject.packages)

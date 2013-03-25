@@ -21,7 +21,7 @@ using GLib;
 using Gee;
 
 public abstract class BuildSystem : Object {
-    public string buildpath { get; protected set; }
+    public string? buildpath { get; protected set; default = null; }
 
     public bool initialized { get; protected set; default = false; }
     public bool configured { get; protected set; default = false; }
@@ -55,9 +55,6 @@ public abstract class BuildSystem : Object {
 
     public BuildSystem() {
         builder_loop = new MainLoop();
-        buildpath = Path.build_path (Path.DIR_SEPARATOR_S,
-                                     project.project_path,
-                                     "build");
 
         initialize_started.connect (() => {
             debug_msg (_("Buildsystem initialization started: %s\n"), this.get_name());
@@ -97,6 +94,22 @@ public abstract class BuildSystem : Object {
         });
     }
 
+    public void init (ValamaProject? vproject = null) throws BuildError.INITIALIZATION_FAILED {
+        var tmp_project = (vproject != null) ? vproject : project;
+        if (tmp_project == null)
+                throw new BuildError.INITIALIZATION_FAILED (_("Valama project not initialized"));
+        if (buildpath == null)
+            buildpath = Path.build_path (Path.DIR_SEPARATOR_S,
+                                         tmp_project.project_path,
+                                         "build");
+        tmp_project.defines_changed.connect ((added, define) => {
+            if (added)
+                register_define (define);
+            else
+                unregister_define (define);
+        });
+    }
+
     public static void init_dir (string path) throws BuildError.INITIALIZATION_FAILED {
         var f = File.new_for_path (path);
         try {
@@ -111,16 +124,17 @@ public abstract class BuildSystem : Object {
     public abstract string get_executable();
 
     public virtual inline string get_executable_abs() {
+        if (buildpath == null)
+            return "";
         return Path.build_path (Path.DIR_SEPARATOR_S,
                                 buildpath,
                                 get_executable());
     }
 
     public abstract string get_name();
+    public abstract string get_name_id();
 
-    public static string? get_name_static() {
-        return null;
-    }
+    public abstract bool check_buildsystem_file (string filename);
 
     public bool executable_exists() {
         var fexe = File.new_for_path (get_executable_abs());
@@ -138,6 +152,10 @@ public abstract class BuildSystem : Object {
         bug_msg (_("Unknown status: %d - %s\n"), status, "BuildSystem.get_exit");
         return null;
     }
+
+    protected virtual void register_define (string define) {}
+
+    protected virtual void unregister_define (string define) {}
 
     public virtual bool launch (string[] cmdparams = {}, out int? exit_status = null)
                                         throws BuildError.INITIALIZATION_FAILED,
@@ -193,13 +211,24 @@ public abstract class BuildSystem : Object {
             return;
 
         builder_loop.quit();
-        //TODO: Does this work und Windows?
+        //TODO: Does this work on Windows?
         Posix.kill (app_pid, 15);
         Process.close_pid (app_pid);
     }
 
+    public virtual bool preparate() throws BuildError.INITIALIZATION_FAILED {
+        if (buildpath == null)
+            throw new BuildError.INITIALIZATION_FAILED (_("Build directory not set."));
+        init_dir (buildpath);
+        return true;
+    }
+
     public virtual bool initialize (out int? exit_status = null)
                                         throws BuildError.INITIALIZATION_FAILED {
+        exit_status = null;
+        if (!preparate())
+            return false;
+
         exit_status = 0;
         initialized = true;
         return true;

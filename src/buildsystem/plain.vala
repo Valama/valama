@@ -20,29 +20,30 @@
 using GLib;
 
 public class BuilderPlain : BuildSystem {
-    private string[]? cmdline;
-
-    public BuilderPlain() throws BuildError.INITIALIZATION_FAILED {
-        init_dir (buildpath);
-        cmdline = null;
-    }
+    private string[]? cmdline = null;
 
     public override string get_executable() {
         return project.project_name.casefold();
     }
 
     public override inline string get_name() {
-        return get_name_static();
+        return "Plain build system";
     }
 
-    public static new string get_name_static() {
-        return "Plain build system";
+    public override inline string get_name_id() {
+        return "valama";
+    }
+
+    public override bool check_buildsystem_file (string filename) {
+        return false;
     }
 
     public override bool initialize (out int? exit_status = null)
                                         throws BuildError.INITIALIZATION_FAILED {
         exit_status = null;
         initialized = false;
+        if (!preparate())
+            return false;
         initialize_started();
         cmdline = null;
 
@@ -97,24 +98,10 @@ public class BuilderPlain : BuildSystem {
 
         cmdline = valacargs;
 
-        Pid? pid;
-        if (!call_cmd (cmdline, out pid)) {
-            initialize_finished();
-            throw new BuildError.INITIALIZATION_FAILED (_("initialization failed"));
-        }
-
-        int? exit = null;
-        ChildWatch.add (pid, (intpid, status) => {
-            exit = get_exit (status);
-            Process.close_pid (intpid);
-            builder_loop.quit();
-        });
-
-        builder_loop.run();
-        exit_status = exit;
+        exit_status = 0;
         initialized = true;
         initialize_finished();
-        return exit_status == 0;
+        return true;
     }
 
     public override bool build (out int? exit_status = null)
@@ -132,7 +119,7 @@ public class BuilderPlain : BuildSystem {
         Pid? pid;
         if (!call_cmd (cmdline, out pid)) {
             build_finished();
-            throw new BuildError.BUILD_FAILED ("build failed");
+            throw new BuildError.BUILD_FAILED ("build command failed");
         }
 
         int? exit = null;
