@@ -78,6 +78,14 @@ public static int main (string[] args) {
     return gtk_app.run();
 }
 
+static bool quit_valama() {
+    if (project != null)
+        if (!project.close())
+            return false;
+    window_main.destroy();
+    return true;
+}
+
 public class Valama : Gtk.Application {
     public Valama () {
         Object (application_id: "app.valama", flags: GLib.ApplicationFlags.FLAGS_NONE);
@@ -85,12 +93,14 @@ public class Valama : Gtk.Application {
 
     public override void activate () {
         window_main = new ApplicationWindow(gtk_app);
-        window_main.destroy.connect (main_quit);
         window_main.title = _("Valama");
         window_main.hide_titlebar_when_maximized = true;
         window_main.set_default_size (1200, 600);
         window_main.maximize();
 
+        window_main.delete_event.connect (()=>{
+            return !quit_valama();
+        });
 
         window_main.show();
         vscreen = new WelcomeScreen();
@@ -104,11 +114,6 @@ public class Valama : Gtk.Application {
             show_main_screen (project);
         else
             window_main.add (vscreen);
-
-        Gtk.main();
-
-        if (project != null)
-            project.close (true);
     }
 }
 

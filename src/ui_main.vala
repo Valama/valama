@@ -103,8 +103,6 @@ public class MainWidget : Box {
      * dock and source dock.
      */
     public MainWidget() {
-        this.destroy.connect (close);
-
         accel_group = new AccelGroup();
 
         this.orientation = Orientation.VERTICAL;
@@ -255,7 +253,7 @@ public class MainWidget : Box {
     /**
      * Save gdl layout.
      */
-    public void close() {
+    public bool close() {
         project_builder.quit();
 
         var cachedir = Path.build_path (Path.DIR_SEPARATOR_S,
@@ -278,6 +276,7 @@ public class MainWidget : Box {
                 errmsg (_("Couldn't create cache directory: %s\n"), e.message);
             }
         save_layout (local_layout_filename);
+        return true;
     }
 
     /**
@@ -315,10 +314,7 @@ public class MainWidget : Box {
         var item_file_quit = new ImageMenuItem.from_stock (Stock.QUIT, null);
         menu_file.append (item_file_quit);
         item_file_quit.activate.connect (() => {
-            if (!project.close())
-                return;
-            close();
-            main_quit();
+            quit_valama();
         });
         add_accel_activate (item_file_quit, Gdk.Key.q);
 

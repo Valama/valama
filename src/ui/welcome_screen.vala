@@ -310,7 +310,9 @@ public class WelcomeScreen : Alignment {
         grid_main.attach (btn_open, 1, 3, 1, 1);
 
         var btn_quit = new Button.with_label (_("Quit"));
-        btn_quit.clicked.connect (Gtk.main_quit);
+        btn_quit.clicked.connect (()=>{
+            quit_valama();
+        });
         grid_main.attach (btn_quit, 1, 20, 1, 1);
 
 
