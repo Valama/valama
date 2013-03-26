@@ -155,7 +155,7 @@ namespace Guanako {
         }
 
         public bool add_define (string s) {
-            if (defines.add (s))
+            if (!defines.add (s))
                 return false;
             context.add_define (s);
             defines_manual.add (s);
@@ -163,7 +163,7 @@ namespace Guanako {
         }
 
         public bool remove_define (string s) {
-            if (!(defines_manual.remove (s)))
+            if (!defines_manual.remove (s))
                 return false;
             defines.remove (s);
 

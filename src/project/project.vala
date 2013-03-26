@@ -827,6 +827,15 @@ public class ValamaProject : Object {
     }
 
     /**
+     * Get list of all used packages (not only manually added ones).
+     *
+     * @return Package list.
+     */
+    public inline Vala.List<string> get_all_packages() {
+        return guanako_project.get_context_packages();
+    }
+
+    /**
      * Add source file and register with Guanako.
      *
      * @param filename Path to file.
@@ -1528,7 +1537,7 @@ public class ValamaProject : Object {
      * @return `true` on success.
      */
     public inline bool set_define (string define) {
-        if (define in guanako_project.get_defines_used())
+        if (define in defines)
             return guanako_project.add_define (define);
         return false;
     }

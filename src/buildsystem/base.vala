@@ -153,9 +153,82 @@ public abstract class BuildSystem : Object {
         return null;
     }
 
-    protected virtual void register_define (string define) {}
+    protected virtual void register_define (string define) {
+        string package;
+        if (guess_pkg_by_define (define, out package) && project.set_define (define))
+                debug_msg (_("Enable define for package '%s': %s\n"), package, define);
+    }
 
-    protected virtual void unregister_define (string define) {}
+    protected virtual void unregister_define (string define) {
+        if (project.unset_define (define))
+            debug_msg (_("Disable define: %s\n"), define);
+    }
+
+    protected bool guess_pkg_by_define (string define, out string? package = null) {
+        package = null;
+
+        var digits = /^\d+$/;
+        var alpha = /^[a-z]+$/;
+
+        var defparts = define.split ("_");
+        string[] pkg_name = {""};
+        string[] pkg_ver = {""};
+        VersionRelation? pkg_rel = null;
+        for (int i = 0; i < defparts.length; ++i) {
+            var check = defparts[i].down();
+
+            if (digits.match (check)) {
+                if (i == 0)
+                    return false;
+                var pkg_ver_tmp = pkg_ver;
+                for (int j = 0; j < pkg_ver_tmp.length; ++j) {
+                    if (i != 0) {
+                        pkg_ver += @"$(pkg_ver[j])-$check";
+                        pkg_ver += @"$(pkg_ver[j]).$check";
+                    }
+                    pkg_ver[j] = pkg_ver[j] + check;
+                }
+                if (pkg_rel == null) {
+                    var pkg_name_tmp = pkg_name;
+                    for (int j = 0; j < pkg_name_tmp.length; ++j) {
+                        pkg_name += @"$(pkg_name[j])-$check";
+                        if ((pkg_name[j][pkg_name[j].length-1]).isdigit())
+                            pkg_name += @"$(pkg_name[j]).$check";
+                        pkg_name += @"$(pkg_name[j])$check";
+                    }
+                }
+            } else if (alpha.match (check)) {
+                var pkg_name_tmp = pkg_name;
+                for (int j = 0; j < pkg_name_tmp.length; ++j) {
+                    if (check == "gtk")
+                        pkg_name += @"$(pkg_name[j])gtk+";
+                    if (check == "valac") {
+                        pkg_name += @"$(pkg_name[j])vala";
+                        if (i == 0)
+                            pkg_name += @"lib$(pkg_name[j])vala";
+                    }
+                    if (i == 0)
+                        pkg_name += @"lib$check";
+                    else
+                        pkg_name += @"$(pkg_name[j])-$check";
+                    pkg_name[j] = @"$(pkg_name[j])$check";
+                }
+            }
+        }
+
+        foreach (var name in pkg_name) {
+            string[] checks = {name};
+            if ((name[name.length-1]).isdigit())
+                checks += @"$name.0";
+            foreach (var check in checks)
+                if (check in project.package_list) {
+                    package = check;
+                    return true;
+                }
+        }
+
+        return false;
+    }
 
     public virtual bool launch (string[] cmdparams = {}, out int? exit_status = null)
                                         throws BuildError.INITIALIZATION_FAILED,
@@ -300,7 +373,7 @@ public abstract class BuildSystem : Object {
                                                        pkg.name));
         }
 
-        foreach (var pkgname in project.guanako_project.get_context_packages())
+        foreach (var pkgname in project.get_all_packages())
             if (!pkgmaps.has_key (pkgname))
                 pkgmaps.set (pkgname, new PkgBuildInfo (pkgname, null, null,
                                                         null, false));
