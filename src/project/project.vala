@@ -1590,6 +1590,12 @@ public class ValamaProject : Object {
 
         var bfr = new SourceBuffer();
         var view = new SourceView.with_buffer (bfr);
+        view.key_press_event.connect ((key)=>{
+            bfr.last_key_valid = !(key.keyval == Gdk.Key.space || key.keyval == Gdk.Key.Delete
+                                   || key.keyval == Gdk.Key.Tab || key.keyval == Gdk.Key.BackSpace
+                                   || key.keyval == 65293); // That's Enter
+            return false;
+        });
 
         view.show_line_numbers = true;
         view.insert_spaces_instead_of_tabs = true;
@@ -1966,6 +1972,7 @@ public class SourceBuffer : Gtk.SourceBuffer {
     public int last_active_line = -1;
     public bool needs_guanako_update = false;
     public uint timeout_id = -1;
+    public bool last_key_valid = false;
 }
 
 
