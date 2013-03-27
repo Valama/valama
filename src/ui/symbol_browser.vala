@@ -85,10 +85,11 @@ public class SymbolBrowser : UiElement {
          *       a single time to this signal.
          */
         build_init_id = project.guanako_update_finished.connect (() => {
+            project.disconnect (build_init_id);
             Source.remove (timer_id);
             tree_view.sensitive = true;
             tmcolumn.set_attributes (tmrenderer, "text", 0);
-            build_init();
+            build();
         });
 
         var scrw = new ScrolledWindow (null, null);
@@ -111,11 +112,6 @@ public class SymbolBrowser : UiElement {
             if (!project.add_multiple_files && update_needed)
                 build();
         });
-    }
-
-    private void build_init() {
-        project.disconnect (build_init_id);
-        build();
     }
 
     public override void build() {
