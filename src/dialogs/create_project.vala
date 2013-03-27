@@ -145,28 +145,29 @@ public class UiTemplateSelector : TemplatePage {
             }
             btn_info.sensitive = true;
 
-            var template_label = "";
+            var strb_tlabel = new StringBuilder();
             if (template.unmet_deps.size > 0)
-                template_label = """<span foreground="grey">""";
-            template_label += "<b>" + template.name + "</b>\n" + template.description;
+                strb_tlabel.append ("""<span foreground="grey">""");
+            strb_tlabel.append ("<b>" + Markup.escape_text (template.name) + "</b>\n"
+                                + Markup.escape_text (template.description));
 
             if (template.unmet_deps.size > 0) {
-                template_label += "\n" + _("Missing packages: ");
-                template_label += template.unmet_deps[0].name;
+                strb_tlabel.append ("\n" + Markup.escape_text (_("Missing packages: ")));
+                strb_tlabel.append (Markup.escape_text (template.unmet_deps[0].to_string()));
                 if (template.unmet_deps[0].choice != null)
                     foreach (var pkg in template.unmet_deps[0].choice.packages)
                         if (pkg != template.unmet_deps[0])
-                            template_label += @"/$(pkg.name)";
+                            strb_tlabel.append (Markup.escape_text (@", $pkg"));
                 for (var i = 1; i < template.unmet_deps.size; ++i) {
-                    template_label += @", $(template.unmet_deps[i].name)";
+                    strb_tlabel.append (Markup.escape_text (@", $(template.unmet_deps[i])"));
                     if (template.unmet_deps[i].choice != null)
                         foreach (var pkg in template.unmet_deps[i].choice.packages)
                             if (pkg != template.unmet_deps[i])
-                                template_label += @"/$(pkg.name)";
+                                strb_tlabel.append (Markup.escape_text (@"/$pkg"));
                 }
-                template_label += "</span>";
+                strb_tlabel.append ("</span>");
             }
-            store.set (iter, 0, template_label, 1, template.icon, -1);
+            store.set (iter, 0, strb_tlabel.str, 1, template.icon, -1);
 
             /* Select first entry */
             if (first_entry) {
@@ -235,13 +236,13 @@ public class UiTemplateSelector : TemplatePage {
 
         /* Name. */
         var name_lbl = new Label ("""<span size="xx-large" font_weight="bold">"""
-                                  + template.name + "</span>");
+                                  + Markup.escape_text (template.name) + "</span>");
         name_lbl.use_markup = true;
         hbox.pack_start (name_lbl, true, true);
 
         /* Description. */
         var desc_lbl = new Label ("""<span size="large">"""
-                                  + template.description + "</span>");
+                                  + Markup.escape_text (template.description) + "</span>");
         desc_lbl.use_markup = true;
         vbox.pack_start (desc_lbl, false, false);
 
@@ -280,7 +281,7 @@ public class UiTemplateSelector : TemplatePage {
             longdesc_lbl.selectable = true;
             longdesc_lbl.wrap = true;
         } else
-            longdesc_lbl = new Label ("<i>" + _("no long description") + "</i>");
+            longdesc_lbl = new Label ("<i>" + Markup.escape_text (_("no long description")) + "</i>");
         longdesc_lbl.use_markup = true;
         longdesc_grid.attach (longdesc_lbl, 0, 0, 1, 1);
 
@@ -306,7 +307,7 @@ public class UiTemplateSelector : TemplatePage {
             else
                 auth_str = _("Authors");
             var credits_heading = new Label ("""<span font_weight="bold" font_size="large">"""
-                                            + auth_str + "</span>");
+                                            + Markup.escape_text (auth_str) + "</span>");
             credits_heading.use_markup = true;
             credits_grid.attach (credits_heading, 0, 0, 2, 1);
             credits_heading.halign = Align.START;
@@ -319,16 +320,18 @@ public class UiTemplateSelector : TemplatePage {
                     credits_author_date_lbl.halign = Align.START;
                 }
 
-                string author_string = "";
+                var strb_author = new StringBuilder();
                 if (author.name != null && author.mail != null)
-                    author_string = @"<a href=\"mailto:$(author.mail)\">$(author.name)</a>";
+                    strb_author.append ("<a href=\"mailto:" + Markup.escape_text (author.mail)
+                                        + "\">" + Markup.escape_text (author.name) + "</a>");
                 else if (author.name != null)
-                    author_string = author.name;
+                    strb_author.append (author.name);
                 else if (author.mail != null)
-                    author_string = @"<a href=\"mailto:$(author.mail)\">$(author.mail)</a>";
+                    strb_author.append ("<a href=\"mailto:" + Markup.escape_text (author.mail)
+                                        + "\">" + Markup.escape_text (author.mail) + "</a>");
                 if (author.comment != null)
-                    author_string += @" ($(author.comment))";
-                var credits_author_lbl = new Label (author_string);
+                    strb_author.append (Markup.escape_text (@" ($(author.comment))"));
+                var credits_author_lbl = new Label (strb_author.str);
                 credits_author_lbl.use_markup = true;
                 credits_grid.attach (credits_author_lbl, 2, i+1, 1, 1);
                 credits_author_lbl.halign = Align.START;
@@ -357,7 +360,8 @@ public class UiTemplateSelector : TemplatePage {
         /* Vala version. */
         if (template.versions.size > 0) {
             var detailed_vala_info = new Label ("""<span font_size="large">"""
-                                                + _("Supported Vala versions") + "</span>");
+                                                + Markup.escape_text (_("Supported Vala versions"))
+                                                + "</span>");
             detailed_vala_info.use_markup = true;
             detailed_vala_info.halign = Align.START;
             detailed_grid.attach (detailed_vala_info, 0, detailed_line++, 2, 1);
@@ -387,7 +391,8 @@ public class UiTemplateSelector : TemplatePage {
                     ver_rel_lbl.halign = Align.END;
                     detailed_grid.attach (ver_rel_lbl, 1, detailed_line, 1, 1);
                 }
-                var ver_lbl = new Label ("<b>" + ver.version + "</b>" + relation_after);
+                var ver_lbl = new Label ("<b>" + Markup.escape_text (ver.version)
+                                        + "</b>" + Markup.escape_text (relation_after));
                 ver_lbl.use_markup = true;
                 ver_lbl.halign = Align.START;
                 detailed_grid.attach (ver_lbl, 2, detailed_line++, 1, 1);
@@ -399,49 +404,51 @@ public class UiTemplateSelector : TemplatePage {
             detailed_grid.attach (new Label (""), 0, detailed_line++, 2, 1);
 
         var detailed_pkg_info = new Label ("""<span font_size="large">"""
-                                            + _("Packages") + "</span>");
+                                            + Markup.escape_text (_("Packages")) + "</span>");
         detailed_pkg_info.use_markup = true;
         detailed_pkg_info.halign = Align.START;
         detailed_grid.attach (detailed_pkg_info, 0, detailed_line++, 2, 1);
 
         if (template.vproject.packages.size > 0)
-            foreach (var pkg in template.vproject.packages) {
+            foreach (var pkg in template.vproject.packages.get_values()) {
                 Label pkg_lbl;
-                string pkgstr;
+                var strb_pkgstr = new StringBuilder();
                 if (pkg in template.unmet_deps) {
+                    strb_pkgstr.append ("<i>");
                     if (pkg.choice == null)
-                        pkgstr = pkg.name;
+                        strb_pkgstr.append (Markup.escape_text (pkg.to_string()));
                     else {
-                        pkgstr = pkg.choice.packages[0].name;
+                        strb_pkgstr.append (pkg.choice.packages[0].to_string());
                         for (int i = 1; i < pkg.choice.packages.size; ++i)
-                            pkgstr += @"/$(pkg.choice.packages[i])";
+                            strb_pkgstr.append (Markup.escape_text (@"/$(pkg.choice.packages[i])"));
                     }
-                    pkg_lbl = new Label ("<i>" + pkgstr + "</i> (" + _("not available") + ")");
+                    strb_pkgstr.append ("</i> (" + Markup.escape_text (_("not available")) + ")");
+                    pkg_lbl = new Label (strb_pkgstr.str);
                 } else {
                     if (pkg.choice == null || pkg.choice.packages.size == 1)
-                        pkgstr = pkg.name;
+                        strb_pkgstr.append (Markup.escape_text (pkg.to_string()));
                     else {
-                        pkgstr = pkg.name + " <i>(";
+                        strb_pkgstr.append (Markup.escape_text (pkg.to_string()) + " <i>(");
                         var first = true;
                         foreach (var pkg_choice in pkg.choice.packages)
                             if (pkg != pkg_choice) {
                                 if (!first)
-                                    pkgstr += @"/$(pkg_choice.name)";
+                                    strb_pkgstr.append (Markup.escape_text (@"/$pkg_choice"));
                                 else {
-                                    pkgstr += pkg_choice.name;
+                                    strb_pkgstr.append (Markup.escape_text (pkg_choice.to_string()));
                                     first = false;
                                 }
                             }
-                        pkgstr += ")</i>";
+                        strb_pkgstr.append (")</i>");
                     }
-                    pkg_lbl = new Label (pkgstr);
+                    pkg_lbl = new Label (strb_pkgstr.str);
                 }
                 pkg_lbl.use_markup = true;
                 pkg_lbl.halign = Align.START;
                 detailed_grid.attach (pkg_lbl, 1, detailed_line++, 1, 1);
             }
         else {
-            var pkg_lbl = new Label ("<i>" + _("no package required") + "</i>");
+            var pkg_lbl = new Label ("<i>" + Markup.escape_text (_("no package required")) + "</i>");
             pkg_lbl.use_markup = true;
             pkg_lbl.halign = Align.START;
             detailed_grid.attach (pkg_lbl, 1, detailed_line++, 1, 1);
@@ -451,7 +458,7 @@ public class UiTemplateSelector : TemplatePage {
         detailed_grid.attach (new Label (""), 0, detailed_line++, 2, 1);
 
         var detailed_file_info = new Label ("""<span font_size="large">"""
-                                            + _("Source files") + "</span>");
+                                            + Markup.escape_text (_("Source files")) + "</span>");
         detailed_file_info.use_markup = true;
         detailed_file_info.halign = Align.START;
         detailed_grid.attach (detailed_file_info, 0, detailed_line++, 2, 1);
@@ -463,7 +470,7 @@ public class UiTemplateSelector : TemplatePage {
                 detailed_grid.attach (s_file_lbl, 1, detailed_line++, 1, 1);
             }
         else {
-            var s_file_lbl = new Label ("<i>" + _("no source files") + "</i>");
+            var s_file_lbl = new Label ("<i>" + Markup.escape_text (_("no source files")) + "</i>");
             s_file_lbl.use_markup = true;
             s_file_lbl.halign = Align.START;
             detailed_grid.attach (s_file_lbl, 1, detailed_line++, 1, 1);

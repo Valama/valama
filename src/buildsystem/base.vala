@@ -359,7 +359,7 @@ public abstract class BuildSystem : Object {
     protected static TreeMap<string, PkgBuildInfo> get_pkgmaps() {
         var pkgmaps = new TreeMap<string, PkgBuildInfo> (null, PkgBuildInfo.compare_name);
 
-        foreach (var pkg in project.packages) {
+        foreach (var pkg in project.packages.get_values()) {
             pkgmaps.set (pkg.name, new PkgBuildInfo (pkg.name,
                                                      pkg.version,
                                                      pkg.rel));
@@ -512,13 +512,14 @@ public class PkgBuildInfo : PackageInfo {
 }
 
 
-/* Copy from Vala.CCodeCompiler (valac). */
-public static bool package_exists (string package_name) {
-    var pc = @"pkg-config --exists $package_name";
+public static bool package_exists (string package_name,
+                                   out string? package_version = null) {
+    var pc = @"pkg-config --modversion $package_name";
     int exit_status;
 
     try {
-        Process.spawn_command_line_sync (pc, null, null, out exit_status);
+        string err;  // don't print error to console output
+        Process.spawn_command_line_sync (pc, out package_version, out err, out exit_status);
         return (0 == exit_status);
     } catch (SpawnError e) {
         warning_msg (_("Could not spawn pkg-config package existence check: %s\n"), e.message);
