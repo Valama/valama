@@ -280,7 +280,7 @@ static bool on_file_selected (string filename) {
 }
 
 
-class GuanakoCompletion : Gtk.SourceCompletionProvider, Object {
+public class GuanakoCompletion : Gtk.SourceCompletionProvider, Object {
     Gdk.Pixbuf icon;
     public string name;
     public int priority;

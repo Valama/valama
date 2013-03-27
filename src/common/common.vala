@@ -642,4 +642,16 @@ public inline void errmsg (string format, ...) {
     stderr.printf (format.vprintf (va_list()));
 }
 
+
+public class Pair<K,V> : Entry {
+    private K _key;
+    public K key { get { return _key; } }
+    public V value { get; set; }
+
+    public Pair (K key, V value) {
+        _key = key;
+        this.value = value;
+    }
+}
+
 // vim: set ai ts=4 sts=4 et sw=4

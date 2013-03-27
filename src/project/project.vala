@@ -409,7 +409,7 @@ public class ValamaProject : Object {
     /**
      * Completion provider.
      */
-    private GuanakoCompletion comp_provider;
+    public GuanakoCompletion comp_provider { get; private set; }
 
     /**
      * Required packages with version information.
@@ -1647,41 +1647,43 @@ public class ValamaProject : Object {
             this.buffer_changed (bfr.dirty);
         });
         bfr.dirty = dirty;
-
         bfr.changed.connect (() => {
             bfr.dirty = true;
+        });
 
-            /* Don't try to update non-source files. */
-            if (!(filename in files))
-                return;
+        /*
+         * NOTE: Remember to connect completion proposals when file was added
+         *       later to project source files.
+         */
+        if (/*bfr.language.id == "vala" &&*/ filename in files)
+            bfr.changed.connect (() => {
+                bfr.needs_guanako_update = true;
 
-            bfr.needs_guanako_update = true;
+                /* Update after timeout */
+                if (bfr.timeout_id != -1)
+                    Source.remove (bfr.timeout_id);
+                bfr.timeout_id = Timeout.add (1000, () => {
+                    if (bfr.needs_guanako_update) {
+                        if (parsing) //If we are already parsing, try again next time
+                            return true;
+                        update_guanako (bfr);
+                    }
+                    bfr.timeout_id = -1;
+                    return false;
+                });
 
-            /* Update after timeout */
-            if (bfr.timeout_id != -1)
-                Source.remove (bfr.timeout_id);
-            bfr.timeout_id = Timeout.add (1000, () => {
-                if (bfr.needs_guanako_update) {
-                    if (parsing) //If we are already parsing, try again next time
-                        return true;
+                /* Immediate update after switching to a new line */
+                if (!parsing) {
+                    var mark = source_viewer.current_srcbuffer.get_insert();
+                    TextIter iter;
+                    source_viewer.current_srcbuffer.get_iter_at_mark (out iter, mark);
+                    var line = iter.get_line() + 1;
+                    if (bfr.last_active_line == line)
+                        return;
+                    bfr.last_active_line = line;
                     update_guanako (bfr);
                 }
-                bfr.timeout_id = -1;
-                return false;
             });
-
-            /* Immediate update after switching to a new line */
-            if (!parsing) {
-                var mark = source_viewer.current_srcbuffer.get_insert();
-                TextIter iter;
-                source_viewer.current_srcbuffer.get_iter_at_mark (out iter, mark);
-                var line = iter.get_line() + 1;
-                if (bfr.last_active_line == line)
-                    return;
-                bfr.last_active_line = line;
-                update_guanako (bfr);
-            }
-        });
 
         var vmap = new ViewMap (view, filename);
         vieworder.offer_head (vmap);

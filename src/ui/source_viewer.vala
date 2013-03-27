@@ -39,6 +39,19 @@ class UiSourceViewer : UiElement {
      */
     private ArrayList<DockItem> srcitems = new ArrayList<DockItem>();
 
+    /**
+     * Share map of language mapping across all source elements.
+     */
+    private TreeMap<string, Pair<string, int>> langmap;
+    /**
+     * Share {@link SourceLanguageManager} across all source elements.
+     */
+    private SourceLanguageManager langman;
+    /**
+     * Fallback language string.
+     */
+    private const string lang_fallback = N_("Plain text");
+
     private string? _current_srcfocus = null;
     /**
      * Relative path to current selected {@link SourceBuffer}.
@@ -86,12 +99,24 @@ class UiSourceViewer : UiElement {
     public UiSourceViewer() {
         locking = false;
 
+        var vbox = new Box (Orientation.VERTICAL, 0);
+
         srcdock = new Dock();
+        vbox.pack_start (this.srcdock, true, true);
         this.srcdock.master.switcher_style = SwitcherStyle.TABS;
         this.srclayout = new DockLayout (this.srcdock);
 
-        widget = new Box (Orientation.HORIZONTAL, 0);
-        ((Box)widget).pack_end (this.srcdock);
+        langmap = new TreeMap<string, Pair<string, int>>();
+        int num = 0;
+        langmap[lang_fallback] = new Pair<string, int> (lang_fallback, num);
+
+        langman = new SourceLanguageManager();
+        foreach (var lang_id in langman.get_language_ids()) {
+            var language = langman.get_language (lang_id).name;
+            langmap[language] = new Pair<string, int> (lang_id, ++num);
+        }
+
+        widget = vbox;
     }
 
     /**
@@ -180,7 +205,10 @@ class UiSourceViewer : UiElement {
             displayname = project.get_relative_path (filename);
         }
 
+        var vbox = new Box (Orientation.VERTICAL, 0);
+
         var src_view = new ScrolledWindow (null, null);
+        vbox.pack_start (src_view, true, true);
         src_view.add (view);
 
         var srcbuf = (SourceBuffer) view.buffer;
@@ -199,6 +227,61 @@ class UiSourceViewer : UiElement {
         tag.background_rgba = Gdk.RGBA() { red = 1.0, green = 1.0, blue = 0.8, alpha = 1.0 };
 
         //"left-margin", "1", "left-margin-set", "true",
+
+        /* Statusbar */
+        var statusbar = new Statusbar();
+        vbox.pack_start (statusbar, false);
+
+        var lbl = new Label (_("Language: "));
+        statusbar.pack_start (lbl, false);
+
+        var cbox = new ComboBoxText();
+        statusbar.pack_start (cbox, false);
+        cbox.append_text (lang_fallback);
+
+        foreach (var lang_id in langman.get_language_ids())
+            cbox.append_text (langman.get_language (lang_id).name);
+
+        string? lang_selected;
+        var lang = ((SourceBuffer) view.buffer).language;
+        if (lang != null) {
+            lang_selected = langman.get_language (lang.id).name;
+            cbox.active = langmap[lang_selected].value;
+        } else {
+            cbox.active = 0;
+            lang_selected = lang_fallback;
+        }
+
+        cbox.changed.connect (() => {
+            var new_lang = cbox.get_active_text();
+
+            if (new_lang == null)
+                cbox.active = 0;
+
+            if (new_lang != lang_selected) {
+                if (langmap[lang_selected].key == "vala")
+                    try {
+                        view.completion.remove_provider (project.comp_provider);
+                    } catch (GLib.Error e) {
+                        errmsg (_("Could not unload completion: %s\n"), e.message);
+                    }
+                lang_selected = new_lang;
+                if (lang_selected == null || langmap[lang_selected].key == "vala")
+                    try {
+                        view.completion.add_provider (project.comp_provider);
+                    } catch (GLib.Error e) {
+                        errmsg (_("Could not load completion: %s\n"), e.message);
+                    }
+
+                lang = (lang_selected != null) ? langman.get_language (langmap[lang_selected].key)
+                                               : null;
+                ((SourceBuffer) view.buffer).set_language (lang);
+            }
+        });
+
+        var sepu = new Separator (Orientation.HORIZONTAL);
+        vbox.pack_start (sepu, false);
+
         /*
          * NOTE: Keep this in sync with get_sourceview method.
          */
@@ -211,7 +294,7 @@ class UiSourceViewer : UiElement {
             //item.stock_id = (srcbuf.dirty) ? Stock.NEW : Stock.EDIT;
             item.set ("stock-id", (srcbuf.dirty) ? Stock.NEW : Stock.EDIT);
         });
-        item.add (src_view);
+        item.add (vbox);
 
         /* Set focus on tab change. */
         item.selected.connect (() => {
@@ -307,22 +390,22 @@ class UiSourceViewer : UiElement {
      * NOTE: Be careful. This have to be exactly the same objects as the
      *       objects at creation of new source views.
      */
-    private SourceView get_sourceview (DockItem item) {
+    private inline SourceView get_sourceview (DockItem item) {
 #if VALAC_0_20
-        var scroll_widget = (ScrolledWindow) item.get_child();
+        return (SourceView) ((ScrolledWindow) ((Box) item.get_child()).get_children().nth_data (0)).get_child();
 #else
         /*
          * Work arround GNOME #693127.
          */
-        ScrolledWindow scroll_widget = null;
+        ScrolledWindow? scroll_widget = null;
         item.forall ((child) => {
-            if (child is ScrolledWindow)
-                scroll_widget = (ScrolledWindow) child;
+            if (child is Box && ((Box) child).get_children().nth_data (0) is ScrolledWindow)
+                scroll_widget = ((Box) child).get_children().nth_data (0) as ScrolledWindow;
         });
         if (scroll_widget == null)
             bug_msg (_("Could not find ScrolledWindow widget: %s\n"), item.name);
+        return (SourceView) scroll_widget.get_child();
 #endif
-        return (SourceView) scroll_widget.get_children().nth_data (0);
     }
 
     /**
