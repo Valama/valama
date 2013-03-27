@@ -243,7 +243,7 @@ public class ProjectBrowser : UiElement {
         build_file_treestore (_("Sources"), project.files.to_array(), ref store, ref pathmap);
         build_file_treestore (_("Build system files"), project.b_files.to_array(), ref store, ref b_pathmap);
         build_file_treestore (_("Data files"), project.d_files.to_array(), ref store, ref d_pathmap);
-        build_plain_treestore (_("Packages"), project.package_list.to_array(), ref store);
+        build_plain_treestore (_("Packages"), project.packages.get_keys().to_array(), ref store);
 
         tree_view.row_collapsed.connect ((iter, path) => {
             if (path in tree_view_expanded)
@@ -287,7 +287,7 @@ public class ProjectBrowser : UiElement {
         var avail_packages = Guanako.get_available_packages();
         var proposed_packages = new string[0];
         foreach (var pkg in avail_packages) {
-            if (pkg in project.package_list)  //Ignore packages that are already selected
+            if (pkg in project.packages.get_keys())  //Ignore packages that are already selected
                 continue;
             proposed_packages += pkg;
             TreeIter iter;

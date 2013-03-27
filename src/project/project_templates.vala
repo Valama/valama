@@ -75,9 +75,37 @@ public class ProjectTemplate {
             }
 
         unmet_deps = new ArrayList<PackageInfo?>();
-        foreach (var pkg in vproject.packages)
+        foreach (var pkg in vproject.packages.get_values())
             if (!(pkg.name in available_packages))
                 unmet_deps.add (pkg);
+            else {
+                string pkg_ver;
+                if (package_exists (pkg.name, out pkg_ver) && pkg.version != null) {
+                    var pkg_rel = (pkg.rel != null) ? pkg.rel : VersionRelation.SINCE;
+                    bool unmet;
+                    switch (pkg_rel) {
+                        case VersionRelation.SINCE:
+                            unmet = comp_proj_version (pkg_ver, pkg.version) < 0;
+                            break;
+                        case VersionRelation.UNTIL:
+                            unmet = comp_proj_version (pkg_ver, pkg.version) > 0;
+                            break;
+                        case VersionRelation.ONLY:
+                            unmet = comp_proj_version (pkg_ver, pkg.version) != 0;
+                            break;
+                        case VersionRelation.EXCLUDE:
+                            unmet = comp_proj_version (pkg_ver, pkg.version) == 0;
+                            break;
+                        default:
+                            bug_msg (_("Unexpected enum value: %s: %u\n"),
+                                     "ProjectTemplate - init", pkg_rel);
+                            unmet = true;
+                            break;
+                    }
+                    if (unmet)
+                        unmet_deps.add (pkg);
+                }
+            }
     }
 }
 

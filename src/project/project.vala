@@ -193,6 +193,19 @@ public class PkgChoice {
         pkg.choice = this;
         packages.add (pkg);
     }
+
+    /**
+     * Remove {@link PackageInfo} object from choices list.
+     *
+     * @param pkg Package choice.
+     * @return `false` if choices list is empty after operation, else `true`.
+     */
+    public bool remove_package (PackageInfo pkg) {
+        packages.remove (pkg);
+        if (packages.size == 0)
+            return false;
+        return true;
+    }
 }
 
 /**
@@ -238,7 +251,7 @@ public class PackageInfo {
                     relation = " != ";
                     break;
                 default:
-                    bug_msg (_("Unexpected enum value: %s: %d\n"),
+                    bug_msg (_("Unexpected enum value: %s: %u\n"),
                              "PackageInfo - to_string", rel);
                     break;
             }
@@ -404,15 +417,7 @@ public class ValamaProject : Object {
      * Use {@link add_package} or {@link add_package_by_name} to add a new
      * package.
      */
-    public TreeSet<PackageInfo?> packages { get; private set; }
-
-    /**
-     * List of packages without version information.
-     *
-     * Use {@link add_package} or {@link add_package_by_name} to add a new
-     * package.
-     */
-    public TreeSet<string> package_list { get; private set; }
+    public TreeMultiMap<string, PackageInfo?> packages { get; private set; }
 
     /**
      * All used defines in project.
@@ -477,11 +482,10 @@ public class ValamaProject : Object {
             }
 
 #if GEE_0_8
-        packages = new TreeSet<PackageInfo?> ((CompareDataFunc<PackageInfo?>?) PackageInfo.compare_func);
+        packages = new TreeMultiMap<string, PackageInfo?> (null, (CompareDataFunc<PackageInfo?>?) PackageInfo.compare_func);
 #elif GEE_1_0
-        packages = new TreeSet<PackageInfo?> ((CompareFunc?) PackageInfo.compare_func);
+        packages = new TreeMultiMap<string, PackageInfo?> (null, (CompareFunc?) PackageInfo.compare_func);
 #endif
-        package_list = new TreeSet<string>();
         package_choices = new Gee.ArrayList<PkgChoice?>();
         source_dirs = new TreeSet<string>();
         source_files = new TreeSet<string>();
@@ -551,7 +555,7 @@ public class ValamaProject : Object {
 
         vieworder = new Gee.LinkedList<ViewMap?>();
 
-        string[] missing_packages = guanako_project.add_packages (package_list.to_array(), false);
+        string[] missing_packages = guanako_project.add_packages (packages.get_keys().to_array(), false);
         packages_changed();
 
         if (missing_packages.length > 0)
@@ -763,8 +767,7 @@ public class ValamaProject : Object {
         if (pkg.choice != null)
             info += " (%s)".printf (_("choice"));
         debug_msg_level (2, _("Add package: %s\n"), info);
-        packages.add (pkg);
-        package_list.add (pkg.name);
+        packages[pkg.name] = pkg;
     }
 
     /**
@@ -777,9 +780,10 @@ public class ValamaProject : Object {
         debug_msg_level (2, _("Add package: %s\n"), pkg);
         var pkginfo = new PackageInfo();
         pkginfo.name = pkg;
-        packages.add (pkginfo);
-        if (package_list.add (pkg))
+        if (!(pkginfo in packages[pkg])) {
+            packages[pkg] = pkginfo;
             packages_changed();
+        }
         return guanako_project.add_packages (new string[] {pkg}, true);
     }
 
@@ -791,12 +795,13 @@ public class ValamaProject : Object {
      * @return `false` if package not in project else `true`.
      */
     public bool remove_package (PackageInfo pkg) {
-        debug_msg_level (2, _("Remove package: %s\n"), pkg.name);
-        if (!package_list.remove (pkg.name)) {
+        debug_msg_level (2, _("Remove package: %s\n"), pkg.to_string());
+        if (!packages.remove (pkg.name, pkg)) {
             debug_msg (_("Package '%s' not in list, skip it.\n"), pkg.name);
             return false;
         }
-        packages.remove (pkg);
+        if (pkg.choice != null && !pkg.choice.remove_package (pkg))
+            package_choices.remove (pkg.choice);
         return true;
     }
 
@@ -808,19 +813,16 @@ public class ValamaProject : Object {
      */
     public bool remove_package_by_name (string pkg) {
         debug_msg_level (2, _("Remove package: %s\n"), pkg);
-        if (!(pkg in package_list)) {
+        if (!(pkg in packages.get_keys())) {
             debug_msg (_("Package '%s' not in list, skip it.\n"), pkg);
             return false;
         }
 
-        PackageInfo[] rem_packages = new PackageInfo[0];
-        foreach (var pkginfo in packages)
-            if (pkginfo.name == pkg)
-                rem_packages += pkginfo;
-        foreach (var pkginfo in rem_packages)
-            packages.remove (pkginfo);
+        foreach (var pkginfo in packages[pkg])
+            if (pkginfo.choice != null && !pkginfo.choice.remove_package (pkginfo))
+                package_choices.remove (pkginfo.choice);
+        packages.remove_all (pkg);
 
-        package_list.remove (pkg);
         guanako_project.remove_package (pkg);
         packages_changed();
         return true;
@@ -1310,7 +1312,7 @@ public class ValamaProject : Object {
                 }
                 writer.end_element();
             }
-            foreach (var pkg in packages) {
+            foreach (var pkg in packages.get_values()) {
                 if (pkg.choice != null)
                     continue;
                 writer.start_element ("package");
