@@ -1140,6 +1140,7 @@ namespace Guanako {
                 context.check();
 
                 Vala.CodeContext.pop();
+                debug_msg ("Source file update finished.\n");
             }
         }
 

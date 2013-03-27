@@ -412,10 +412,11 @@ class UiSourceViewer : UiElement {
      * Get id of {@link Gtk.SourceView} by filename.
      *
      * @param filename Name of source file to search for in {@link srcitems}.
+     * @param warn `true` to warn if no such view.
      * @return If file was found return id of {@link Gtk.SourceView} in
      *         {@link srcitems}. Else -1.
      */
-    private int get_sourceview_id (string filename) {
+    private int get_sourceview_id (string filename, bool warn = true) {
         if (!is_new_document (filename)) {
             for (int i = 0; i < srcitems.size; ++i)
                 if (project.get_absolute_path (srcitems[i].long_name) == filename)
@@ -425,7 +426,8 @@ class UiSourceViewer : UiElement {
                 if (srcitems[i].long_name == filename)
                     return i;
         }
-        warning_msg (_("No such file found in opened buffers: %s\n"), filename);
+        if (warn)
+            warning_msg (_("No such file found in opened buffers: %s\n"), filename);
         return -1;
     }
 
@@ -460,11 +462,12 @@ class UiSourceViewer : UiElement {
      * Get {@link Gtk.SourceView} by filename.
      *
      * @param filename Name of source file.
+     * @param warn `true` to warn if no such view.
      * @return If file was found return {@link Gtk.SourceView} object else
      *         null.
      */
-    public SourceView? get_sourceview_by_file (string filename) {
-        var id = get_sourceview_id (filename);
+    public SourceView? get_sourceview_by_file (string filename, bool warn = true) {
+        var id = get_sourceview_id (filename, warn);
         if (id == -1)
             return null;
         return get_sourceview (this.srcitems[id]);

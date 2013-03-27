@@ -427,6 +427,11 @@ public class ValamaProject : Object {
     public TreeSet<string> defines { get; private set; }
 
     /**
+     * List of available defines with file names where defines occur.
+     */
+    public TreeMap<string, TreeSet<string>> used_defines { get; private set; }
+
+    /**
      * Emit signal when source file was added or removed.
      */
     public signal void source_files_changed();
@@ -495,6 +500,7 @@ public class ValamaProject : Object {
         data_files = new TreeSet<string>();
 
         defines = new TreeSet<string>();
+        used_defines = new TreeMap<string, TreeSet<string>>();
 
         files = new TreeSet<string>();
         b_files = new TreeSet<string>();
@@ -570,20 +576,29 @@ public class ValamaProject : Object {
         });
 
         guanako_update_finished.connect (() => {
-            var used = new TreeSet<string>();
-            foreach (var defines in guanako_project.get_defines_used().get_values())
-                foreach (var define in defines)
-                    used.add (define);
+            var used_defines_new = new TreeMap<string, TreeSet<string>>();
+            var mit = guanako_project.get_defines_used().map_iterator();
+            while (mit.next()) {
+                foreach (var define in mit.get_value())
+                    if (define in used_defines_new.keys)
+                        used_defines_new[define].add (mit.get_key());
+                    else {
+                        var tset = new TreeSet<string>();
+                        tset.add (mit.get_key());
+                        used_defines_new[define] = tset;
+                    }
+            }
+            used_defines = used_defines_new;
 
             var removals = new TreeSet<string>();
             foreach (var define in defines)
-                if (!(define in used))
+                if (!(define in used_defines.keys))
                     removals.add (define);
             foreach (var define in removals) {
                 defines.remove (define);
                 defines_changed (false, define);
             }
-            foreach (var define in used)
+            foreach (var define in used_defines.keys)
                 if (defines.add (define))
                     defines_changed (true, define);
         });
@@ -1539,8 +1554,31 @@ public class ValamaProject : Object {
      * @return `true` on success.
      */
     public inline bool set_define (string define) {
-        if (define in defines)
-            return guanako_project.add_define (define);
+        if ((define in defines) && guanako_project.add_define (define)) {
+            foreach (var file in used_defines[define]) {
+                var view = source_viewer.get_sourceview_by_file (file, false);
+                if (view != null)
+                    ((SourceBuffer) view.buffer).needs_guanako_update = true;
+                else
+                    try {
+                        var thd = new Thread<void*>.try (_("Source file update"), () => {
+                            guanako_project.update_file (guanako_project.get_source_file_by_name (file));
+                            Idle.add (() => {
+                                guanako_update_finished();
+                                parsing = false;
+                                if (loop_update.is_running())
+                                    loop_update.quit();
+                                return false;
+                            });
+                            return null;
+                        });
+                        thd.set_priority (ThreadPriority.LOW);
+                    } catch (GLib.Error e) {
+                        errmsg (_("Could not create thread to update source file: %s\n"), e.message);
+                    }
+            }
+            return true;
+        }
         return false;
     }
 
@@ -1721,7 +1759,7 @@ public class ValamaProject : Object {
             });
             thd.set_priority (ThreadPriority.LOW);
         } catch (GLib.Error e) {
-            errmsg (_("Could not create thread to update buffer completion: %s\n"), e.message);
+            errmsg (_("Could not create thread to update buffer: %s\n"), e.message);
         }
     }
 
