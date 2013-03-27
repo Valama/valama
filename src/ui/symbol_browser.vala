@@ -26,6 +26,7 @@ using Vala;
 public class SymbolBrowser : UiElement {
     TreeView tree_view;
     private bool update_needed = true;
+    private ulong build_init_id;
 
     public SymbolBrowser (ValamaProject? vproject=null) {
         if (vproject != null)
@@ -83,7 +84,7 @@ public class SymbolBrowser : UiElement {
          *       finished. This might be later than this point, so connect
          *       a single time to this signal.
          */
-        project.guanako_update_finished.connect (() => {
+        build_init_id = project.guanako_update_finished.connect (() => {
             Source.remove (timer_id);
             tree_view.sensitive = true;
             tmcolumn.set_attributes (tmrenderer, "text", 0);
@@ -113,7 +114,7 @@ public class SymbolBrowser : UiElement {
     }
 
     private void build_init() {
-        project.guanako_update_finished.disconnect (build_init);
+        project.disconnect (build_init_id);
         build();
     }
 
