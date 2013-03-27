@@ -221,7 +221,7 @@ public abstract class BuildSystem : Object {
             if ((name[name.length-1]).isdigit())
                 checks += @"$name.0";
             foreach (var check in checks)
-                if (check in project.package_list) {
+                if (check in project.packages.get_keys()) {
                     package = check;
                     return true;
                 }
