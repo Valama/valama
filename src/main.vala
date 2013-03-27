@@ -311,8 +311,11 @@ class GuanakoCompletion : Gtk.SourceCompletionProvider, Object {
         if (is_new_document (source_viewer.current_srcfocus))
             return;
 
-        if (!source_viewer.current_srcbuffer.last_key_valid)
+        if (!source_viewer.current_srcbuffer.last_key_valid) {
+            if (context is SourceCompletionContext)
+                context.add_proposals (this, new GLib.List<Gtk.SourceCompletionItem>(), true);
             return;
+        }
 
         /* Get current line */
         var mark = source_viewer.current_srcbuffer.get_insert();
