@@ -68,6 +68,7 @@ namespace Guanako {
             sourcefiles = new FixedTreeSet<SourceFile>();
             defines = new FixedTreeSet<string>();
             defines_manual = new FixedTreeSet<string>();
+            context.report = new Report();
 
             context_prep();
 

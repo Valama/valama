@@ -307,8 +307,7 @@ public class ReportWrapper : Vala.Report {
         public ReportType type;
     }
 
-    public ReportWrapper (bool verbose = true) {
-        set_verbose_errors (verbose);
+    public ReportWrapper() {
         clear();
     }
 
@@ -358,7 +357,10 @@ public class ReportWrapper : Vala.Report {
     }
 
     public override void warn (Vala.SourceReference? source, string message) {
-        dbg_ref_msg (ReportType.WARNING, source, message);
+        if (message.has_suffix ("are experimental"))
+            dbg_ref_msg (ReportType.EXPERIMENTAL, source, message);
+        else
+            dbg_ref_msg (ReportType.WARNING, source, message);
         if (source == null)
             return;
 
