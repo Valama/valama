@@ -357,16 +357,24 @@ public class ReportWrapper : Vala.Report {
     }
 
     public override void warn (Vala.SourceReference? source, string message) {
-        if (message.has_suffix ("are experimental"))
+        bool exp = false;;
+        if (message.has_suffix ("are experimental")) {
             dbg_ref_msg (ReportType.EXPERIMENTAL, source, message);
-        else
+            exp = true;
+        } else
             dbg_ref_msg (ReportType.WARNING, source, message);
         if (source == null)
             return;
 
-        errlist_int.add (Error() {source = source,
-                                  message = message,
-                                  type = ReportType.WARNING});
+        /* Work around #603056 */
+        if (!exp)
+            errlist_int.add (Error() {source = source,
+                                      message = message,
+                                      type = ReportType.WARNING});
+        else
+            errlist_int.add (Error() {source = source,
+                                      message = message,
+                                      type = ReportType.EXPERIMENTAL});
      }
 
      public override void err (Vala.SourceReference? source, string message) {
