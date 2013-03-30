@@ -24,7 +24,7 @@ using GLib;
 using Guanako;
 
 static Window window_main;
-static MainWidget widget_main;
+static MainWidget? widget_main = null;
 static RecentManager recentmgr;
 static WelcomeScreen? vscreen = null;
 static Valama gtk_app;
@@ -82,6 +82,8 @@ static bool quit_valama() {
     if (project != null)
         if (!project.close())
             return false;
+    if (widget_main != null)
+        widget_main.close();
     window_main.destroy();
     return true;
 }
@@ -142,6 +144,7 @@ static void show_main_screen (ValamaProject load_project) {
         window_main.remove (widget_main);
         project = null;
         window_main.add (vscreen);
+        widget_main = null;
     });
 }
 

@@ -1389,6 +1389,7 @@ public class ValamaProject : Object {
     private void save_meta() {
         var path = Path.build_path (Path.DIR_SEPARATOR_S,
                                     Environment.get_user_cache_dir(),
+                                    "valama",
                                     "project_meta.xml");
         debug_msg (_("Save project meta information: %s\n"), path);
         var writer = new TextWriter.filename (path);
@@ -1405,6 +1406,7 @@ public class ValamaProject : Object {
     private void load_meta() throws LoadingError {
         var path = Path.build_path (Path.DIR_SEPARATOR_S,
                                     Environment.get_user_cache_dir(),
+                                    "valama",
                                     "project_meta.xml");
         debug_msg (_("Load project meta information: %s\n"), path);
 
