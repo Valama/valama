@@ -475,8 +475,8 @@ public class ValamaProject : Object {
         project_path = proj_file.get_parent().get_path(); //TODO: Check valid path?
 
         if (fully)
-            try {
-                guanako_project = new Guanako.Project (syntaxfile);
+            try {                       //TODO: allow changing glib version
+                guanako_project = new Guanako.Project (syntaxfile, 2, 32);
             } catch (GLib.IOError e) {
                 throw new LoadingError.COMPLETION_NOT_AVAILABLE (
                                         _("Could not read syntax file: %s\n"), e.message);

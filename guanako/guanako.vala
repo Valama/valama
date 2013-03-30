@@ -39,8 +39,8 @@ namespace Guanako {
     public class Project {
         CodeContext context;
         ParserExt parser;
-        int glib_major = 2;  //TODO: Make this an option.
-        int glib_minor = 32;
+        int glib_major;
+        int glib_minor;
 
         /**
          * Manually added packages.
@@ -61,7 +61,8 @@ namespace Guanako {
         public FixedTreeSet<string> defines_manual { get; private set; }
 
 
-        public Project (string? filename = null) throws IOError, Error {
+        public Project (string? filename = null,
+                        int glib_major = 2, int glib_minor = 18) throws IOError, Error {
             context = new CodeContext();
             parser = new ParserExt();
             packages = new FixedTreeSet<string>();
@@ -69,6 +70,10 @@ namespace Guanako {
             defines = new FixedTreeSet<string>();
             defines_manual = new FixedTreeSet<string>();
             context.report = new Report();
+
+            //TODO; Allow to change these values later.
+            this.glib_major = glib_major;
+            this.glib_minor = glib_minor;
 
             context_prep();
 

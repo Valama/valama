@@ -227,6 +227,7 @@ public abstract class BuildSystem : Object {
                 }
         }
 
+        debug_msg (_("Unable to guess package for define: %s\n"), define);
         return false;
     }
 
