@@ -809,17 +809,10 @@ namespace Guanako {
                         return;
                     }
                     Symbol[] children = new Symbol[0];
-                    if (parent_param.symbol == null) {
+                    if (parent_param.symbol == null)
                         children = accessible;
-                    } else {
-                        //bool resolve_array = false;
-                        //if (binding != null)
-                        //    resolve_array = binding.contains ("arr_el");
-                        //children = get_child_symbols (get_type_of_symbol (parent_param.symbol, resolve_array));
-                        //children = get_child_symbols (parent_param.symbol);
-                        //stdout.printf ("Getting children of " + parent_param.symbol.name + ", resolve: " + parent_param.resolve_array.to_string() + "\n");
+                    else
                         children = get_child_symbols (get_type_of_symbol (parent_param.symbol, parent_param.resolve_array));
-                    }
 
                     Regex r2 = /^(?P<word>\w*)(?P<rest>.*)$/;
                     MatchInfo info2;
@@ -836,26 +829,15 @@ namespace Guanako {
                                     continue;
                             if (word == child.name) {
                                 if (write_to_param != null) {
-                                    var child_param = find_param (call_params, write_to_param, current_rule.rule_id);
-                                    if (child_param == null) {
-                                        child_param = new CallParameter();
-                                        child_param.name = write_to_param;
-                                        child_param.for_rule_id = current_rule.rule_id;
-                                        call_params.add (child_param);
+                                    var target_param = find_param (call_params, write_to_param, current_rule.rule_id);
+                                    if (target_param == null) {
+                                        target_param = new CallParameter();
+                                        target_param.name = write_to_param;
+                                        target_param.for_rule_id = current_rule.rule_id;
+                                        call_params.add (target_param);
                                     }
-                                    /*if (binding != null && binding.contains ("arr_el")) {
-                                        child_param.symbol = get_type_of_symbol (child, true);
-                                    } else
-                                        child_param.symbol = get_type_of_symbol (child, false);
-                                    */
-                                    child_param.symbol = child;
-                                    if (binding != null && binding.contains ("arr_el")) {
-                                        //stdout.printf ("Mark as resolve: " + child.name + "\n");
-                                        child_param.resolve_array = true;
-                                    } else {
-                                        //stdout.printf ("Mark as no resolve: " + child.name + "\n");
-                                        child_param.resolve_array = false;
-                                    }
+                                    target_param.symbol = child;
+                                    target_param.resolve_array = binding != null && binding.contains ("arr_el");
                                 }
                                 compare (rule[1:rule.length], rest, call_params, depth + 1, ref ret, ref private_cur_stack);
                             }
@@ -910,6 +892,7 @@ namespace Guanako {
                             return;
                         }
                         child_param.symbol = param.symbol;
+                        child_param.resolve_array = param.resolve_array;
                         call_params.add (child_param);
 
                     }
