@@ -96,7 +96,7 @@ class UiBreakpoints : UiElement {
         source_viewer.current_sourceview_changed.connect (() => {
             /* Don't enable button on non-source files. */
             if (source_viewer.current_srcfocus != null &&
-                        project.guanako_project.get_source_file (
+                        project.guanako_project.get_source_file_by_name (
                                     source_viewer.current_srcfocus) != null)
                 btn_add.sensitive = true;
             else

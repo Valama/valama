@@ -41,6 +41,8 @@ namespace Guanako {
         ParserExt parser;
         int glib_major;
         int glib_minor;
+        Type? manual_report;
+        bool initialized = false;
 
         /**
          * Manually added packages.
@@ -69,28 +71,38 @@ namespace Guanako {
             sourcefiles = new FixedTreeSet<SourceFile>();
             defines = new FixedTreeSet<string>();
             defines_manual = new FixedTreeSet<string>();
-            context.report = new Report();
+            context.report = new Reporter();
+            manual_report = null;
 
-            //TODO; Allow to change these values later.
             this.glib_major = glib_major;
             this.glib_minor = glib_minor;
 
-            context_prep();
+            context_prep (ref context, glib_major, glib_minor, define_action_int);
 
             build_syntax_map (filename);
+        }
+
+        public delegate void DefineAction (string define);
+
+        private inline void define_action_int (string define) {
+            defines.add (define);
         }
 
         /**
          * Set {@link Vala.CodeContext} options and flags.
          */
-        private void context_prep() {
-            context.target_glib_major = glib_major;
-            context.target_glib_minor = glib_minor;
-            for (int i = 2; i <= glib_major; ++i)
-                for (int j = 16; j <= glib_minor; j += 2) {
+        public static void context_prep (ref CodeContext context,
+                                         int? glib_major = null,
+                                         int? glib_minor = null,
+                                         DefineAction? action = null) {
+            context.target_glib_major = (glib_major != null) ? glib_major : 2;
+            context.target_glib_minor = (glib_minor != null) ? glib_minor : 18;
+            for (int i = 2; i <= context.target_glib_major; ++i)
+                for (int j = 16; j <= context.target_glib_minor; j += 2) {
                     var define = "GLIB_%d_%d".printf (i, j);
                     context.add_define (define);
-                    defines.add (define);
+                    if (action != null)
+                        action (define);
                 }
             var vala_ver = Config.VALA_VERSION.split (".", 2);
             if (vala_ver[0] != null && vala_ver[1] != null)
@@ -98,12 +110,25 @@ namespace Guanako {
                     for (int j = 2; j <= int.parse (vala_ver[1]); j += 2) {
                         var define = "VALA_%d_%d".printf (i, j);
                         context.add_define (define);
-                        defines.add (define);
+                        if (action != null)
+                            action (define);
                     }
             else
                 stderr.printf (_("Not a valid Vala version, will  not set VALA_X_Y defines: %s\n"),
                                Config.VALA_VERSION);
             context.profile = Profile.GOBJECT;
+            context.add_define ("GOBJECT");
+            if (action != null)
+                action ("GOBJECT");
+        }
+
+        public void set_glib_version (int glib_major, int glib_minor) {
+            this.glib_major = glib_major;
+            this.glib_minor = glib_minor;
+        }
+
+        public int[] get_glib_version() {
+            return new int[] {glib_major, glib_minor};
         }
 
         /*
@@ -156,63 +181,60 @@ namespace Guanako {
             return source_file;
         }
 
-        public void set_report_wrapper (Report report_wrapper) {
-            context.report = report_wrapper;
+        public inline void set_reporter (Type reptype) {
+            //TODO: Will segfault. Lookup GNOME bug number.
+            // if (reptype is Reporter)
+                manual_report = reptype;
+                context.report = Object.new (reptype) as Reporter;
+            // else
+            //     manual_report = null;
         }
 
-        public bool add_define (string s) {
-            if (!defines.add (s))
+        public inline Gee.ArrayList<Reporter.Error> get_errorlist() {
+            return Reporter.errlist;
+        }
+
+        /*
+         * Update context manually.
+         */
+        public inline bool add_define (string define) {
+            if (!defines.add (define))
                 return false;
-            context.add_define (s);
-            defines_manual.add (s);
+            defines_manual.add (define);
             return true;  // also if already defined
         }
 
-        public bool remove_define (string s) {
-            if (!defines_manual.remove (s))
+        public inline bool remove_define (string define) {
+            return remove_defines (new string[] {define});
+        }
+
+        public inline bool remove_defines (string[] defines) {
+            bool found = false;
+            foreach (var define in defines)
+                if (define in defines_manual) {
+                    found = true;
+                    break;
+                }
+            if (!found)
                 return false;
-            defines.remove (s);
-
-            var old_files = context.get_source_files();
-            var old_packages = context.get_packages();
-            var old_report = context.report;
-
-            context = new CodeContext();
-            context.report = old_report;
-            context_prep();
-
-            parser = new ParserExt();
-            foreach (var file in old_files)
-                context.add_source_file (file);
-            foreach (var pkg in old_packages)
-                context.add_package (pkg);
-            foreach (var define in defines_manual)
-                context.add_define (define);
-
-            update();
+            update_complete ({}, {}, defines);
             return true;
         }
 
-        public void remove_file (SourceFile file) {
-            var old_files = context.get_source_files();
-            var old_packages = context.get_packages();
-            var old_report = context.report;
+        public inline bool remove_file (SourceFile file) {
+            return remove_files (new SourceFile[] {file});
+        }
 
-            context = new CodeContext();
-            context.report = old_report;
-            context_prep();
-
-            parser = new ParserExt();
-            foreach (SourceFile old_file in old_files)
-                if (old_file != file)
-                    context.add_source_file (old_file);
-            foreach (string pkg in old_packages)
-                context.add_package (pkg);
-            foreach (string define in defines_manual)
-                context.add_define (define);
-
-            update();
-            sourcefiles.remove (file);
+        public inline bool remove_files (SourceFile[] files) {
+            var flist = new string[0];
+            foreach (var file in files)
+                foreach (var sf in sourcefiles)
+                    if (file.filename == sf.filename)
+                        flist += file.filename;
+            if (flist.length == 0)
+                return false;
+            update_complete (flist);
+            return true;
         }
 
         public Symbol root_symbol {
@@ -296,13 +318,127 @@ namespace Guanako {
             }
         }
 
-        public void update() {
+        public inline void update() {
+            update_complete();
+        }
+
+        private void update_complete (string[] rm_files = {},
+                                      string[] rm_pkgs = {},
+                                      string[] rm_defines = {}) {
+            lock (context) {
+                var old_sourcefiles = sourcefiles;
+                var old_packages = context.get_packages();
+                sourcefiles = new FixedTreeSet<SourceFile>();
+                foreach (var define in rm_defines)
+                    if (defines_manual.remove (define))
+                        defines.remove (define);
+
+                context = new CodeContext();
+                context_prep (ref context, glib_major, glib_minor, define_action_int);
+
+                parser = new ParserExt();
+                foreach (var sf in old_sourcefiles) {
+                    if (sf.filename in rm_files)
+                        continue;
+                    var sf_new = new SourceFile (context,
+                                                 sf.file_type,
+                                                 sf.filename,
+                                                 sf.content,
+                                                 sf.from_commandline);
+                    if (sf.file_type == SourceFileType.SOURCE) {
+                        var ns_ref = new UsingDirective (new UnresolvedSymbol (null, "GLib"));
+                        sf_new.add_using_directive (ns_ref);
+                        context.root.add_using_directive (ns_ref);
+                    }
+                    context.add_source_file (sf_new);
+                    sourcefiles.add (sf_new);
+                }
+                //TODO: Use packages from context.get_source_files directly.
+                foreach (var pkg in old_packages) {
+                    if (pkg in rm_pkgs)
+                        continue;
+                    context.add_external_package (pkg);
+                }
+                foreach (var define in defines_manual)
+                    context.add_define (define);
+
+                update_int();
+            }
+        }
+
+        public inline void init() {
+            if (!initialized)
+                lock (context) {
+                    initialized = true;
+                    update_int();
+                }
+        }
+
+        private void update_int() {
+            if (manual_report == null)
+                context.report = new Reporter();
+            else
+                context.report = Object.new (manual_report) as Reporter;
+
             Vala.CodeContext.push (context);
             parser.parse (context);
 
             context.resolver.resolve (context);
             context.analyzer.analyze (context);
             Vala.CodeContext.pop();
+        }
+
+        void vanish_file (SourceFile file) {
+            var nodes = new Vala.ArrayList<Vala.CodeNode>();
+            foreach (var node in file.get_nodes())
+                nodes.add (node);
+            foreach (var node in nodes) {
+                file.remove_node (node);
+                if (node is Vala.Symbol) {
+                    var sym = (Vala.Symbol) node;
+                    if (sym.owner != null)
+                        /*
+                         * We need to remove it from the scope.
+                         */
+                        sym.owner.remove (sym.name);
+                    if (context.entry_point == sym)
+                        context.entry_point = null;
+                    sym.name = "";  //TODO: Find a less stupid solution...
+                }
+            }
+        }
+
+        public void update_file (Vala.SourceFile file, string? new_content = null) {
+            if (new_content != null)
+                file.content = new_content;
+            lock (context) {
+                /*
+                 * Removing nodes in the same loop causes problems (probably
+                 * due to read-only list).
+                 */
+                debug_msg ("Update source file: %s\n", file.filename);
+                ((Reporter) context.report).reset_file (file.filename);
+
+                Vala.CodeContext.push (context);
+
+                vanish_file (file);
+
+                file.current_using_directives = new Vala.ArrayList<Vala.UsingDirective>();
+                if (file.file_type == SourceFileType.SOURCE) {
+                    var ns_ref = new Vala.UsingDirective (new Vala.UnresolvedSymbol (null, "GLib"));
+                    file.add_using_directive (ns_ref);
+                    context.root.add_using_directive (ns_ref);
+                }
+
+                parser.visit_source_file (file);
+
+                context.resolver.resolve (context);
+                context.analyzer.visit_source_file (file);
+                context.check();
+
+                Vala.CodeContext.pop();
+                debug_msg ("Source file update finished.\n");
+            }
         }
 
         void build_syntax_map (string? filename = null) throws IOError, Error {
@@ -503,12 +639,14 @@ namespace Guanako {
                 ret.add_all(list);
                 return ret;
             }
+
             private RuleExpression[] clone_rules (RuleExpression[] rules) {
                 RuleExpression[] rule = new RuleExpression[rules.length];
                 for (int q = 0; q < rule.length; q++)
                     rule[q] = rules[q].clone();
                 return rule;
             }
+
             private CallParameter? find_param (Gee.ArrayList<CallParameter> array,
                                     string name,
                                     int rule_id) {
@@ -519,9 +657,11 @@ namespace Guanako {
                         return param;
                 return null;
             }
+
             public void abort_run () {
                 abort_flag = true;
             }
+
             public FixedTreeSet<CompletionProposal>[]? run (SourceFile file, int line, int col, string written) {
                 var inside_symbol = parent_project.get_symbol_at_pos (file, line, col);
                 string initial_rule_name = "";
@@ -533,7 +673,7 @@ namespace Guanako {
                     accessible = parent_project.get_accessible_symbols (file, line, col);
                 }
                 if (!parent_project.map_syntax.has_key (initial_rule_name)) {
-                    stdout.printf (@"Entry point $initial_rule_name not found in syntax file. Trying to segfault me, huh??");
+                    stdout.printf (_("Entry point %s not found in syntax file. Trying to segfault me, huh??"), initial_rule_name);
                     return null;
                 }
                 Gee.ArrayList<Symbol> init_private_cur_stack = new Gee.ArrayList<Symbol>();
@@ -1096,58 +1236,6 @@ namespace Guanako {
                     ret += dep;
             }
             return ret;
-        }
-
-        void vanish_file (SourceFile file) {
-            var nodes = new Vala.ArrayList<Vala.CodeNode>();
-            foreach (var node in file.get_nodes())
-                nodes.add (node);
-            foreach (var node in nodes) {
-                file.remove_node (node);
-                if (node is Vala.Symbol) {
-                    var sym = (Vala.Symbol) node;
-                    if (sym.owner != null)
-                        /*
-                         * We need to remove it from the scope.
-                         */
-                        sym.owner.remove (sym.name);
-                    if (context.entry_point == sym)
-                        context.entry_point = null;
-                    sym.name = "";  //TODO: Find a less stupid solution...
-                }
-            }
-        }
-
-        public void update_file (Vala.SourceFile file, string? new_content = null) {
-            if (new_content != null)
-                file.content = new_content;
-            lock (context) {
-                /*
-                 * Removing nodes in the same loop causes problems (probably
-                 * due to read-only list).
-                 */
-                debug_msg ("Update source file: %s\n", file.filename);
-
-                Vala.CodeContext.push (context);
-
-                vanish_file (file);
-
-                file.current_using_directives = new Vala.ArrayList<Vala.UsingDirective>();
-                if (file.file_type == SourceFileType.SOURCE) {
-                    var ns_ref = new Vala.UsingDirective (new Vala.UnresolvedSymbol (null, "GLib"));
-                    file.add_using_directive (ns_ref);
-                    context.root.add_using_directive (ns_ref);
-                }
-
-                parser.visit_source_file (file);
-
-                context.resolver.resolve (context);
-                context.analyzer.visit_source_file (file);
-                context.check();
-
-                Vala.CodeContext.pop();
-                debug_msg ("Source file update finished.\n");
-            }
         }
 
         /**

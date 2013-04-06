@@ -454,6 +454,23 @@ public class ValamaProject : Object {
      * @param define Name of changed define.
      */
     public signal void defines_changed (bool added, string define);
+    /**
+     * Handler id for initial define update signal.
+     */
+    private ulong define_handler_id;
+    /**
+     * Emit to run update for changed defines.
+     */
+    private signal void defines_update();
+    /**
+     * Emit to set define (if found is `true`).
+     *
+     * @param define Processed define.
+     * @param found `true` to set define (`false` to don't set it).
+     * @return `true` on success else `false`.
+     */
+    public signal bool define_set (string define, bool found = true);
+
 
     /**
      * Create {@link ValamaProject} and load it from project file.
@@ -475,7 +492,7 @@ public class ValamaProject : Object {
         project_path = proj_file.get_parent().get_path(); //TODO: Check valid path?
 
         if (fully)
-            try {                       //TODO: allow changing glib version
+            try {                       //TODO: Allow changing glib version.
                 guanako_project = new Guanako.Project (syntaxfile, 2, 32);
             } catch (GLib.IOError e) {
                 throw new LoadingError.COMPLETION_NOT_AVAILABLE (
@@ -598,6 +615,51 @@ public class ValamaProject : Object {
                 defines.remove (define);
                 defines_changed (false, define);
             }
+
+            VoidDelegate init_define_signals = () => {
+                define_set.connect ((define, found) => {
+                    if (found)
+                        return set_define (define);
+                    return false;
+                });
+                defines_update.connect (() => {
+                    parsing = true;
+                    try {
+                        var thd = new Thread<void*>.try (_("Source file update"), () => {
+                            guanako_update_started();
+                            guanako_project.update();
+                            Idle.add (() => {
+                                guanako_update_finished();
+                                parsing = false;
+                                if (loop_update.is_running())
+                                    loop_update.quit();
+                                return false;
+                            });
+                            return null;
+                        });
+                        thd.set_priority (ThreadPriority.LOW);
+                    } catch (GLib.Error e) {
+                        errmsg (_("Could not create thread to update source files: %s\n"), e.message);
+                        parsing = false;
+                    }
+                });
+            };
+
+            var initial_defines = new TreeSet<string>();
+            initial_defines.add_all (used_defines.keys);
+            if (initial_defines.size > 0)
+                define_handler_id = define_set.connect ((define) => {
+                    var ret = initial_defines.remove (define);
+                    if (initial_defines.size == 0) {
+                        this.disconnect (define_handler_id);
+                        init_define_signals();
+                        defines_update();
+                    }
+                    return ret;
+                });
+            else
+                init_define_signals();
+
             foreach (var define in used_defines.keys)
                 if (defines.add (define))
                     defines_changed (true, define);
@@ -605,7 +667,7 @@ public class ValamaProject : Object {
 
         parsing = true;
         var thd = new Thread<void*> (_("Initial buffer update"), () => {
-            guanako_project.update();
+            guanako_project.init();
             Idle.add (() => {
                 guanako_update_finished();
                 parsing = false;
@@ -615,6 +677,8 @@ public class ValamaProject : Object {
         });
         thd.set_priority (ThreadPriority.LOW);
     }
+
+    private delegate void VoidDelegate();
 
     /**
      * Update list of recent projects.
@@ -850,6 +914,15 @@ public class ValamaProject : Object {
      */
     public inline Vala.List<string> get_all_packages() {
         return guanako_project.get_context_packages();
+    }
+
+    /**
+     * Get list of all errors after Guanako update.
+     *
+     * @return Return error list.
+     */
+    public inline Gee.ArrayList<Guanako.Reporter.Error?> get_errorlist() {
+        return guanako_project.get_errorlist();
     }
 
     /**
@@ -1533,11 +1606,7 @@ public class ValamaProject : Object {
                     debug_msg (_("Skip '%s' choice.\n"), pkg.name);
         } else {
             var context = new Vala.CodeContext();
-            context.target_glib_major = 2;  //TODO: Use Guanako.context_prep.
-            context.target_glib_minor = 32;
-            for (int i = 16; i <= context.target_glib_minor; i += 2)
-                context.add_define (@"GLIB_$(context.target_glib_major)_$i");
-            context.profile = Profile.GOBJECT;
+            Guanako.Project.context_prep (ref context, 2, 32);  //TODO: Dynamic version.
             //TODO: Do this like init method in ProjectTemplate (check against all vapis).
             foreach (var pkg in choice.packages)
                 if (context.get_vapi_path (pkg.name) != null) {
@@ -1557,28 +1626,7 @@ public class ValamaProject : Object {
      */
     public inline bool set_define (string define) {
         if ((define in defines) && guanako_project.add_define (define)) {
-            foreach (var file in used_defines[define]) {
-                var view = source_viewer.get_sourceview_by_file (file, false);
-                if (view != null)
-                    ((SourceBuffer) view.buffer).needs_guanako_update = true;
-                else
-                    try {
-                        var thd = new Thread<void*>.try (_("Source file update"), () => {
-                            guanako_project.update_file (guanako_project.get_source_file_by_name (file));
-                            Idle.add (() => {
-                                guanako_update_finished();
-                                parsing = false;
-                                if (loop_update.is_running())
-                                    loop_update.quit();
-                                return false;
-                            });
-                            return null;
-                        });
-                        thd.set_priority (ThreadPriority.LOW);
-                    } catch (GLib.Error e) {
-                        errmsg (_("Could not create thread to update source file: %s\n"), e.message);
-                    }
-            }
+            defines_update();
             return true;
         }
         return false;
@@ -1762,6 +1810,7 @@ public class ValamaProject : Object {
             thd.set_priority (ThreadPriority.LOW);
         } catch (GLib.Error e) {
             errmsg (_("Could not create thread to update buffer: %s\n"), e.message);
+            parsing = false;
         }
     }
 

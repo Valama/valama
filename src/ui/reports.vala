@@ -20,42 +20,12 @@
 using GLib;
 using Gtk;
 using Gee;
-
-[Flags]
-public enum ReportType {
-    ERROR,
-    WARNING,
-    DEPRECATED,
-    EXPERIMENTAL,
-    NOTE;
-
-    public const ReportType ALL = ERROR | WARNING | DEPRECATED | EXPERIMENTAL | NOTE;
-
-    public string? to_string() {
-        switch (this) {
-            case ERROR:
-                return _("Error");
-            case WARNING:
-                return _("Warning");
-            case DEPRECATED:
-                return _("Deprecated");
-            case EXPERIMENTAL:
-                return _("Experimental");
-            case NOTE:
-                return _("Note");
-            default:
-                bug_msg (_("Unexpected enum value: %s: %u\n"),
-                         "ReportType - to_string", this);
-                return null;
-        }
-    }
-}
+using Guanako;
 
 /**
  * Report build status and code warnings/errors.
  */
 class UiReport : UiElement {
-    ReportWrapper report;
     TreeView tree_view = null;
     ScrolledWindow scrw;
     Gdk.Pixbuf pixmap_err;
@@ -131,17 +101,14 @@ class UiReport : UiElement {
         }
     }
 
-    ArrayList<ReportWrapper.Error?> storelist;
+    ArrayList<Reporter.Error> storelist;
 
-    public UiReport (ReportWrapper report,
-                     ReportType reptype = ReportType.ALL,
-                     bool showall = false) {
+    public UiReport (ReportType reptype = ReportType.ALL, bool showall = false) {
         var vbox = new Box (Orientation.VERTICAL, 0);
 
         scrw = new ScrolledWindow (null, null);
         vbox.pack_start (scrw, true, true);
 
-        this.report = report;
         this.reptype = reptype;
         this.showall = showall;
 
@@ -163,9 +130,6 @@ class UiReport : UiElement {
         var w_note = new Invisible();
         pixmap_note = w_note.render_icon (Stock.DIALOG_INFO, IconSize.MENU, null);
 
-        project.guanako_update_started.connect (() => {
-            report.init();
-        });
         project.guanako_update_finished.connect (build);
         source_viewer.current_sourceview_changed.connect (() => {
             if (!this.showall)
@@ -187,9 +151,8 @@ class UiReport : UiElement {
             return;
 
         debug_msg (_("Run %s update!\n"), get_name());
-        report.swap();
         TextBuffer bfr = null;
-        storelist = new ArrayList<ReportWrapper.Error?>();
+        storelist = new ArrayList<Reporter.Error>();
 
         if (showall) {
             project.foreach_buffer ((s, bfr) => {
@@ -218,7 +181,7 @@ class UiReport : UiElement {
         int exp = 0;
         int note = 0;
 
-        foreach (var err in report.errlist) {
+        foreach (var err in project.get_errorlist()) {
             if ((err.type & reptype) == 0 ||
                     (!showall &&
                      err.source.file.filename != source_viewer.current_srcfocus))
@@ -291,39 +254,12 @@ class UiReport : UiElement {
                    depr,
                    exp,
                    note,
-                   report.errlist.size);
+                   project.get_errorlist().size);
         debug_msg (_("%s update finished!\n"), get_name());
     }
 }
 
-public class ReportWrapper : Vala.Report {
-    public ArrayList<Error?> errlist { get; private set; }
-    private ArrayList<Error?> errlist_int;
-    private bool general_error = false;
-
-    public struct Error {
-        public Vala.SourceReference source;
-        public string message;
-        public ReportType type;
-    }
-
-    public ReportWrapper() {
-        clear();
-    }
-
-    public void init() {
-        errlist_int = new ArrayList<Error?>();
-    }
-
-    public void swap() {
-        errlist = errlist_int;
-    }
-
-    public void clear() {
-        errlist = new ArrayList<Error?>();
-        errlist_int = new ArrayList<Error?>();
-    }
-
+public class ReportWrapper : Guanako.Reporter {
     private inline void dbg_ref_msg (ReportType type, Vala.SourceReference? source, string message) {
         if (source != null)
             debug_msg_level (2, _("%s found: %s: %d(%d)-%d(%d): %s\n"),
@@ -336,57 +272,24 @@ public class ReportWrapper : Vala.Report {
                              message);
     }
 
-    public override void note (Vala.SourceReference? source, string message) {
+    protected override inline void show_note (Vala.SourceReference? source, string message) {
         dbg_ref_msg (ReportType.NOTE, source, message);
-        if (source == null)
-            return;
-
-        errlist_int.add (Error() {source = source,
-                                  message = message,
-                                  type = ReportType.NOTE});
     }
 
-    public override void depr (Vala.SourceReference? source, string message) {
+    protected override inline void show_deprecated (Vala.SourceReference? source, string message) {
         dbg_ref_msg (ReportType.DEPRECATED, source, message);
-        if (source == null)
-            return;
-
-        errlist_int.add (Error() {source = source,
-                                  message = message,
-                                  type = ReportType.DEPRECATED});
     }
 
-    public override void warn (Vala.SourceReference? source, string message) {
-        bool exp = false;;
-        if (message.has_suffix ("are experimental")) {
-            dbg_ref_msg (ReportType.EXPERIMENTAL, source, message);
-            exp = true;
-        } else
-            dbg_ref_msg (ReportType.WARNING, source, message);
-        if (source == null)
-            return;
-
-        /* Work around #603056 */
-        if (!exp)
-            errlist_int.add (Error() {source = source,
-                                      message = message,
-                                      type = ReportType.WARNING});
-        else
-            errlist_int.add (Error() {source = source,
-                                      message = message,
-                                      type = ReportType.EXPERIMENTAL});
+    protected override inline void show_experimental (Vala.SourceReference? source, string message) {
+        dbg_ref_msg (ReportType.EXPERIMENTAL, source, message);
      }
 
-     public override void err (Vala.SourceReference? source, string message) {
-        dbg_ref_msg (ReportType.ERROR, source, message);
-        if (source == null) {
-            general_error = true;
-            return;
-        }
+    protected override inline void show_warning (Vala.SourceReference? source, string message) {
+        dbg_ref_msg (ReportType.WARNING, source, message);
+     }
 
-        errlist_int.add (Error() {source = source,
-                                  message = message,
-                                  type = ReportType.ERROR});
+    protected override inline void show_error (Vala.SourceReference? source, string message) {
+        dbg_ref_msg (ReportType.ERROR, source, message);
     }
 }
 

@@ -155,8 +155,11 @@ public abstract class BuildSystem : Object {
 
     protected virtual void register_define (string define) {
         string package;
-        if (guess_pkg_by_define (define, out package) && project.set_define (define))
+        if (guess_pkg_by_define (define, out package)) {
+            if (project.define_set (define))
                 debug_msg (_("Enable define for package '%s': %s\n"), package, define);
+        } else
+            project.define_set (define, false);
     }
 
     protected virtual void unregister_define (string define) {

@@ -19,6 +19,7 @@ set(srcfiles
 "guanako.vala"
 "guanako_vapi_discoverer.vala"
 "guanako_frankenstein.vala"
+"reporter.vala"
 "scanner/valascanner.vala"
 "scanner/valaparser.vala"
 "stylecheck.vala"

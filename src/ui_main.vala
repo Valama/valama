@@ -29,7 +29,7 @@ static Guanako.FrankenStein frankenstein;
 static bool parsing = false;
 static MainLoop loop_update;
 
-//FIXME: Avoid those globals with signals.
+//TODO: Use plugins.
 static ProjectBrowser wdg_pbrw;
 static UiReport wdg_report;
 static ProjectBuilder project_builder;
@@ -41,8 +41,10 @@ static UiBreakpoints wdg_breakpoints;
 static UiSearch wdg_search;
 static SymbolBrowser wdg_smb_browser;
 static UiStyleChecker wdg_stylechecker;
-static Gee.HashMap<string, Gdk.Pixbuf> map_icons;
 static UiCurrentSymbol wdg_current_symbol;
+
+static Gee.HashMap<string, Gdk.Pixbuf> map_icons;
+
 
 /**
  * Main window class. Setup {@link Gdl.Dock} and {@link Gdl.DockBar} stuff.
@@ -144,15 +146,14 @@ public class MainWidget : Box {
             on_file_selected(filename);
         });
 
-        wdg_smb_browser = new SymbolBrowser();
 
-        var report_wrapper = new ReportWrapper();
-        project.guanako_project.set_report_wrapper (report_wrapper);
-        wdg_report = new UiReport (report_wrapper);
+        project.guanako_project.set_reporter (typeof (ReportWrapper));
 
         frankenstein = new Guanako.FrankenStein();
         wdg_breakpoints = new UiBreakpoints (frankenstein);
 
+        wdg_report = new UiReport();
+        wdg_smb_browser = new SymbolBrowser();
         project_builder = new ProjectBuilder();
         wdg_build_output = new BuildOutput();
         wdg_app_output = new AppOutput();

@@ -138,6 +138,7 @@ set(default_vala_flags
   "--gir" "${project_name}-${${project_name}_VERSION}.gir"
   "--library" "${project_name_lower}"
   "--target-glib" "${GLIB2.0_VERSION}"
+  "--enable-experimental"
   ${valac_cond}
 )
 include(ValaPkgs)
