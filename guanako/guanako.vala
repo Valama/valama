@@ -131,11 +131,16 @@ namespace Guanako {
             return new int[] {glib_major, glib_minor};
         }
 
+        public inline SourceFile[] get_source_files() {
+            lock (context)
+                return get_source_files_int();
+        }
+
         /*
          * Not a beautiful piece of code, but necessary to convert from
          * Vala.List.
          */
-        public SourceFile[] get_source_files() {
+        private SourceFile[] get_source_files_int() {
             SourceFile[] files = new SourceFile[0];
             foreach (SourceFile file in context.get_source_files())
                 if (file.file_type == SourceFileType.SOURCE)
@@ -143,8 +148,8 @@ namespace Guanako {
             return files;
         }
 
-        public bool add_source_file (SourceFile source_file) {
-            foreach (SourceFile file in get_source_files())
+        private bool add_source_file (SourceFile source_file) {
+            foreach (SourceFile file in get_source_files_int())
                 if (file.filename == source_file.filename)
                     return false;
 
@@ -160,34 +165,39 @@ namespace Guanako {
         }
 
         public SourceFile? get_source_file_by_name (string filename) {
-            foreach (SourceFile file in context.get_source_files())
-                if (file.filename == filename)
-                    return file;
+            lock (context)
+                foreach (SourceFile file in context.get_source_files())
+                    if (file.filename == filename)
+                        return file;
             return null;
         }
 
         public SourceFile? add_source_file_by_name (string filename, bool is_vapi = false) {
-            SourceFile source_file;
-            if (is_vapi)
-                source_file = new SourceFile (context,
-                                              SourceFileType.PACKAGE,
-                                              filename);
-            else
-                source_file = new SourceFile (context,
-                                              SourceFileType.SOURCE,
-                                              filename);
-            if (!add_source_file (source_file))
-                return null;
-            return source_file;
+            lock (context) {
+                SourceFile source_file;
+                if (is_vapi)
+                    source_file = new SourceFile (context,
+                                                  SourceFileType.PACKAGE,
+                                                  filename);
+                else
+                    source_file = new SourceFile (context,
+                                                  SourceFileType.SOURCE,
+                                                  filename);
+                if (!add_source_file (source_file))
+                    return null;
+                return source_file;
+            }
         }
 
         public inline void set_reporter (Type reptype) {
-            //TODO: Will segfault. Lookup GNOME bug number.
-            // if (reptype is Reporter)
-                manual_report = reptype;
-                context.report = Object.new (reptype) as Reporter;
-            // else
-            //     manual_report = null;
+            lock (context) {
+                //TODO: Will segfault. Lookup GNOME bug number.
+                // if (reptype is Reporter)
+                    manual_report = reptype;
+                    context.report = Object.new (reptype) as Reporter;
+                // else
+                //     manual_report = null;
+            }
         }
 
         public inline Gee.ArrayList<Reporter.Error> get_errorlist() {
@@ -238,58 +248,68 @@ namespace Guanako {
         }
 
         public Symbol root_symbol {
-            get { return context.root; }
+            get {
+                lock (context)
+                    return context.root;
+            }
         }
 
         public string[] add_packages (string[] package_names, bool auto_update) {
-            string[] missing_packages = new string[0];
+            lock (context) {
+                string[] missing_packages = new string[0];
 
-            var old_deps = get_package_dependencies (packages.to_array());
+                var old_deps = get_package_dependencies (packages.to_array());
 
-            var new_deps = package_names;
-            /* Collect all new dependencies coming with the new packages */
-            foreach (string pkg in get_package_dependencies (package_names))
-                if (!(pkg in old_deps) && !(pkg in new_deps)) {
-                    var vapi_path = context.get_vapi_path (pkg);
+                var new_deps = package_names;
+                /* Collect all new dependencies coming with the new packages */
+                foreach (string pkg in get_package_dependencies (package_names))
+                    if (!(pkg in old_deps) && !(pkg in new_deps)) {
+                        var vapi_path = context.get_vapi_path (pkg);
+                        if (vapi_path == null) {
+                            stderr.printf (_("Warning: Vapi for package %s not found.\n"), pkg);
+                            missing_packages += pkg;
+                            continue;
+                        }
+                        debug_msg (_("Vapi found: %s\n"), vapi_path);
+                        new_deps += pkg;
+                    }
+
+                foreach (string package_name in package_names) {
+                    /* Add the new packages */
+                    packages.add (package_name);
+                    var vapi_path = context.get_vapi_path (package_name);
                     if (vapi_path == null) {
-                        stderr.printf (_("Warning: Vapi for package %s not found.\n"), pkg);
-                        missing_packages += pkg;
+                        stderr.printf (_("Warning: Vapi for package %s not found.\n"), package_name);
+                        missing_packages += package_name;
                         continue;
                     }
                     debug_msg (_("Vapi found: %s\n"), vapi_path);
-                    new_deps += pkg;
+                    context.add_external_package (package_name);
                 }
 
-            foreach (string package_name in package_names) {
-                /* Add the new packages */
-                packages.add (package_name);
-                var vapi_path = context.get_vapi_path (package_name);
-                if (vapi_path == null) {
-                    stderr.printf (_("Warning: Vapi for package %s not found.\n"), package_name);
-                    missing_packages += package_name;
-                    continue;
-                }
-                debug_msg (_("Vapi found: %s\n"), vapi_path);
-                context.add_external_package (package_name);
-            }
-
-            /* Update completion info of all the new packages */
-            if (auto_update)
-                foreach (string pkg in new_deps) {
-                    var vapi_path = context.get_vapi_path (pkg);
-                    var pkg_file = get_source_file (vapi_path);
-                    if (pkg_file == null) {
-                        stderr.printf (_("Could not load vapi: %s\n"), vapi_path);
-                        missing_packages += pkg;
-                        continue;
+                /* Update completion info of all the new packages */
+                if (auto_update)
+                    foreach (string pkg in new_deps) {
+                        var vapi_path = context.get_vapi_path (pkg);
+                        var pkg_file = get_source_file_int (vapi_path);
+                        if (pkg_file == null) {
+                            stderr.printf (_("Could not load vapi: %s\n"), vapi_path);
+                            missing_packages += pkg;
+                            continue;
+                        }
+                        update_file (pkg_file);
                     }
-                    update_file (pkg_file);
-                }
 
-            return missing_packages;
+                return missing_packages;
+            }
         }
 
-        public SourceFile? get_source_file (string filename) {
+        public inline SourceFile? get_source_file (string filename) {
+            lock (context)
+                return get_source_file_int (filename);
+        }
+
+        private SourceFile? get_source_file_int (string filename) {
             foreach (SourceFile file in context.get_source_files())
                 if (file.filename == filename)
                     return file;
@@ -297,24 +317,26 @@ namespace Guanako {
         }
 
         public void remove_package (string package_name) {
-            packages.remove (package_name);
-            var deps = get_package_dependencies (packages.to_array());
+            lock (context) {
+                packages.remove (package_name);
+                var deps = get_package_dependencies (packages.to_array());
 
-            var remove_candidates = get_package_dependencies (new string[] {package_name});
-            remove_candidates += package_name;
+                var remove_candidates = get_package_dependencies (new string[] {package_name});
+                remove_candidates += package_name;
 
-            /* Collect all dependencies of package_name that are not required any more */
-            var unused = new string[0];
-            foreach (string pkg in remove_candidates)
-                if (!(pkg in deps) && !(pkg in packages))
-                    unused += pkg;
+                /* Collect all dependencies of package_name that are not required any more */
+                var unused = new string[0];
+                foreach (string pkg in remove_candidates)
+                    if (!(pkg in deps) && !(pkg in packages))
+                        unused += pkg;
 
-            foreach (string pkg in unused) {
-                packages.remove (pkg);
-                var pkg_file = get_source_file (context.get_vapi_path (pkg));
-                if (pkg_file == null)
-                    continue;
-                vanish_file (pkg_file);
+                foreach (string pkg in unused) {
+                    packages.remove (pkg);
+                    var pkg_file = get_source_file_int (context.get_vapi_path (pkg));
+                    if (pkg_file == null)
+                        continue;
+                    vanish_file (pkg_file);
+                }
             }
         }
 
@@ -667,7 +689,7 @@ namespace Guanako {
                 string initial_rule_name = "";
                 if (inside_symbol == null) {
                     initial_rule_name = "init_deep_space";
-                    accessible = get_child_symbols (parent_project.context.root);
+                    accessible = get_child_symbols (parent_project.root_symbol);
                 } else {
                     initial_rule_name = "init_method";
                     accessible = parent_project.get_accessible_symbols (file, line, col);
@@ -1152,39 +1174,40 @@ namespace Guanako {
         public Symbol? get_symbol_at_pos (SourceFile source_file, int line, int col) {
             Symbol ret = null;
             int last_depth = -1;
-            iter_symbol (context.root,
-                         (smb, depth) => {
-                            if (smb.name != null) {
-                                SourceReference sref = smb.source_reference;
-                                if (sref == null)
-                                    return IterCallbackReturns.CONTINUE;
+            lock (context)
+                iter_symbol (context.root,
+                             (smb, depth) => {
+                                if (smb.name != null) {
+                                    SourceReference sref = smb.source_reference;
+                                    if (sref == null)
+                                        return IterCallbackReturns.CONTINUE;
 
-                                /*
-                                 * Check symbol's own source reference.
-                                 */
-                                if (inside_source_ref (source_file, line, col, sref)) {
-                                    if (depth > last_depth) {  //Get symbol deepest in the tree
-                                        ret = smb;
-                                        last_depth = depth;
+                                    /*
+                                     * Check symbol's own source reference.
+                                     */
+                                    if (inside_source_ref (source_file, line, col, sref)) {
+                                        if (depth > last_depth) {  //Get symbol deepest in the tree
+                                            ret = smb;
+                                            last_depth = depth;
+                                        }
+                                    }
+
+                                    /*
+                                     * If the symbol is a subroutine, check its body's source
+                                     * reference.
+                                     */
+                                    if (smb is Subroutine) {
+                                        var sr = (Subroutine) smb;
+                                        if (sr.body != null)
+                                            if (inside_source_ref (source_file, line, col, sr.body.source_reference))
+                                                if (depth > last_depth) {  //Get symbol deepest in the tree
+                                                    ret = smb;
+                                                    last_depth = depth;
+                                                }
                                     }
                                 }
-
-                                /*
-                                 * If the symbol is a subroutine, check its body's source
-                                 * reference.
-                                 */
-                                if (smb is Subroutine) {
-                                    var sr = (Subroutine) smb;
-                                    if (sr.body != null)
-                                        if (inside_source_ref (source_file, line, col, sr.body.source_reference))
-                                            if (depth > last_depth) {  //Get symbol deepest in the tree
-                                                ret = smb;
-                                                last_depth = depth;
-                                            }
-                                }
-                            }
-                            return IterCallbackReturns.CONTINUE;
-                         });
+                                return IterCallbackReturns.CONTINUE;
+                             });
             return ret;
         }
 
@@ -1226,14 +1249,16 @@ namespace Guanako {
          */
         //NOTE: "get_packages" name causes compiler error so change the name.
         public inline Vala.List<string> get_context_packages() {
-            return context.get_packages();
+            lock (context)
+                return context.get_packages();
         }
 
         /**
          * Wrap {@link CodeContext.get_vapi_path} method.
          */
         public inline string? get_context_vapi_path (string package) {
-            return context.get_vapi_path (package);
+            lock (context)
+                return context.get_vapi_path (package);
         }
 
         public inline Vala.Map<string, Vala.Set<string>> get_defines_used() {

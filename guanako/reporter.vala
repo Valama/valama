@@ -84,7 +84,7 @@ namespace Guanako {
                         case ReportType.ERROR:
                             --errors;
                             break;
-                        case ReportType.NOTE:  //TODO: Check if this belongs to warnings counter.
+                        case ReportType.NOTE:
                             break;
                         default:
                             assert_not_reached();
