@@ -9,6 +9,4 @@ namespace Config {
     public const string PIXMAP_DIR;
 
     public const string VALA_VERSION;
-
-    public const string VALA_DATA_DIR;
 }

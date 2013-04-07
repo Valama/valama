@@ -68,16 +68,12 @@ endif()
 set(valac_cond)
 find_package(PkgConfig)
 # libvala-X.Y
-if(VALA_VERSION STRGREATER "0.19.0")
+if(VALA_SHORTVER STREQUAL "0.20")
   list(REMOVE_ITEM required_pkgs "libvala-0.18")
-  set(valashort_ver "0.20")
   list(APPEND valac_cond "-D;VALAC_0_20")
 else()
   list(REMOVE_ITEM required_pkgs "libvala-0.20")
-  set(valashort_ver "0.18")
 endif()
-set(vala_datadir "/usr/share/vala")
-set(vapidir "${vala_datadir}-${valashort_ver}/vapi")
 # gtk+-3.0
 pkg_check_modules(GTK3.0 REQUIRED "gtk+-3.0")
 if(NOT("3.6" STRGREATER GTK3.0_VERSION))
@@ -88,7 +84,7 @@ set(gdl_workarround OFF)
 pkg_check_modules(GDL3.0 REQUIRED "gdl-3.0")
 if(NOT("3.6.2" STRGREATER GDL3.0_VERSION))
   list(APPEND valac_cond "-D;GDL_3_6_2")
-  if("0.20" STRGREATER "${valashort_ver}")
+  if("0.20" STRGREATER "${VALA_SHORTVER}")
     # Fixes #693127 (upstream fix).
     message(STATUS "Use gdl-3.0 vapi from valac 0.20 to support new "
                    "features with gdl-3.0 >= 3.6.2.")
@@ -184,10 +180,7 @@ add_definitions(-DGETTEXT_PACKAGE="${project_name_lower}")
 add_definitions(-DPACKAGE_DATA_DIR="${CMAKE_INSTALL_PREFIX}/${datadir}")
 add_definitions(-DLOCALE_DIR="${CMAKE_INSTALL_PREFIX}/${localedir}")
 add_definitions(-DPIXMAP_DIR="${CMAKE_INSTALL_PREFIX}/${pixdir}")
-add_definitions(-DVALA_VERSION="${valashort_ver}")
-
-# Set custom C-macros.
-add_definitions(-DVALA_DATA_DIR="${vala_datadir}")
+add_definitions(-DVALA_VERSION="${VALA_SHORTVER}")
 
 include_directories("${PROJECT_BINARY_DIR}/guanako")
 
@@ -240,7 +233,8 @@ if(VALADOC_FOUND)
       ${vapifiles}
       "guanako/*.vala"
     OPTIONS
-      "--vapidir" "${vapidir}"
+      "--vapidir" "${VALA_VAPIDIR}"
+      #"--vapidir" "${VALA_DATADIR}/vapi"  # TODO: Support for multiple directories?
       "--target-glib" "2.32"
       ${extra_valadoc_opts}
       ${valadoc_debug}

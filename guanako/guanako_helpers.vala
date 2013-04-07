@@ -27,9 +27,7 @@ namespace Guanako {
      */
     public static GLib.List<string>? get_available_packages() {
         GLib.List<string> list = null;
-        string[] paths = new string[] {Path.build_path (Path.DIR_SEPARATOR_S,
-                                                        Config.VALA_DATA_DIR + "-" + Config.VALA_VERSION,
-                                                        "vapi"),
+        string[] paths = new string[] {Config.VALA_VAPI_DIR,
                                        Path.build_path (Path.DIR_SEPARATOR_S,
                                                         Config.VALA_DATA_DIR,
                                                         "vapi")};

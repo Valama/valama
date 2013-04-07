@@ -10,5 +10,6 @@ namespace Config {
 
     public const string VALA_VERSION;
 
+    public const string VALA_VAPI_DIR;
     public const string VALA_DATA_DIR;
 }
