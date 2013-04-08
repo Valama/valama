@@ -22,7 +22,6 @@ cmake_minimum_required(VERSION "2.8.4")
 project("${project_name}" C)
 string(TOLOWER "${project_name}" project_name_lower)
 
-set(CMAKE_INSTALL_PREFIX "/usr")
 set(bindir "bin")
 set(datarootdir "share")
 set(libdir "lib")
