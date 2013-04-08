@@ -19,8 +19,12 @@
 
 // Fixes a memory leak (copied from upstream fix)
 public class FixedTreeSet<G> : Gee.TreeSet<G> {
-    public FixedTreeSet(CompareDataFunc? comp_func = null) {
-        base(comp_func);
+#if GEE_0_8
+    public FixedTreeSet (CompareDataFunc? comp_func = null) {
+#elif GEE_1_0
+    public FixedTreeSet (CompareFunc? comp_func = null) {
+#endif
+        base (comp_func);
     }
 
     ~FixedTreeSet() {
