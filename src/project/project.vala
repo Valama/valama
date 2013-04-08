@@ -625,7 +625,7 @@ public class ValamaProject : Object {
                 defines_update.connect (() => {
                     parsing = true;
                     try {
-                        var thd = new Thread<void*>.try (_("Source file update"), () => {
+                        new Thread<void*>.try (_("Source file update"), () => {
                             guanako_update_started();
                             guanako_project.update();
                             Idle.add (() => {
@@ -637,7 +637,6 @@ public class ValamaProject : Object {
                             });
                             return null;
                         });
-                        thd.set_priority (ThreadPriority.LOW);
                     } catch (GLib.Error e) {
                         errmsg (_("Could not create thread to update source files: %s\n"), e.message);
                         parsing = false;
@@ -666,7 +665,7 @@ public class ValamaProject : Object {
         });
 
         parsing = true;
-        var thd = new Thread<void*> (_("Initial buffer update"), () => {
+        new Thread<void*> (_("Initial buffer update"), () => {
             guanako_project.init();
             Idle.add (() => {
                 guanako_update_finished();
@@ -675,7 +674,6 @@ public class ValamaProject : Object {
             });
             return null;
         });
-        thd.set_priority (ThreadPriority.LOW);
     }
 
     private delegate void VoidDelegate();
@@ -1793,7 +1791,7 @@ public class ValamaProject : Object {
              * Otherwise, the thread might crash accessing it
              */
             string buffer_content =  buffer.text;
-            var thd = new Thread<void*>.try (_("Buffer update"), () => {
+            new Thread<void*>.try (_("Buffer update"), () => {
                 guanako_update_started();
                 var source_file = this.guanako_project.get_source_file_by_name (
                                                 source_viewer.current_srcfocus);
@@ -1807,7 +1805,6 @@ public class ValamaProject : Object {
                 });
                 return null;
             });
-            thd.set_priority (ThreadPriority.LOW);
         } catch (GLib.Error e) {
             errmsg (_("Could not create thread to update buffer: %s\n"), e.message);
             parsing = false;

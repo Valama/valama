@@ -335,7 +335,7 @@ public class GuanakoCompletion : Gtk.SourceCompletionProvider, Object {
             loop_update.run();
 
         try {
-            var thd = new Thread<void*>.try (_("Completion"), () => {
+            new Thread<void*>.try (_("Completion"), () => {
                 /* Get completion proposals from Guanako */
                 completion_run_queued = true;
                 if (completion_run != null) {
@@ -385,7 +385,6 @@ public class GuanakoCompletion : Gtk.SourceCompletionProvider, Object {
                 completion_run = null;
                 return null;
             });
-            thd.set_priority (ThreadPriority.LOW);
         } catch (GLib.Error e) {
             errmsg (_("Could not launch completion thread successfully: %s\n"), e.message);
         }
