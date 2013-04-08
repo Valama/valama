@@ -28,7 +28,6 @@ if(project_root)
   set("${project_name}_VERSION" "${${project_name}_VERSION}" PARENT_SCOPE)
 endif()
 
-set(CMAKE_INSTALL_PREFIX "/usr")
 set(bindir "bin")
 set(datarootdir "share")
 set(libdir "lib")
