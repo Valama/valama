@@ -498,11 +498,11 @@ public class WelcomeScreen : Alignment {
     /**
      * Add new creation step.
      *
-     * All signals have to be connected manually.
+     * All signals have to be connected manually. Use {@link add_tpage}
+     * instead.
      *
      * @param page Add {@link Gtk.Widget} to creation steps.
      * @param pos Insert step at position. If `null` append it.
-     * @deprecated Use {@link add_tpage} instead.
      */
     [Deprecated (replacement = "add_tpage()")]
     private inline void add_page (Widget page, int? pos = null) {
@@ -515,7 +515,7 @@ public class WelcomeScreen : Alignment {
     /**
      * Add new creation step and setup common signals.
      *
-     * @param page Add {@link TemplatePage.widget} to creation steps.
+     * @param tpage Add {@link TemplatePage.widget} to creation steps.
      * @param pos Insert step at position. If `null` append it.
      */
     public void add_tpage (TemplatePage tpage, int? pos = null,
@@ -552,9 +552,11 @@ public class WelcomeScreen : Alignment {
     /**
      * Initialize default creation steps.
      *
-     * Currently:   - project file open element
-     *              - template selector
-     *              - project settings element
+     * Currently:
+     *
+     *  * project file open element
+     *  * template selector
+     *  * project settings element
      */
     private void init_default_pages() {
         add_page (opener);

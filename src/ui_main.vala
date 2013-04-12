@@ -78,7 +78,7 @@ public class MainWidget : Box {
     public signal void request_close();
 
     /**
-     * Internal state of items if {@link Gdl.DockItemGrid} is to be shown.
+     * Internal state of items if {@link Gdl.DockItemGrip} is to be shown.
      */
     private bool locked = false;
     /**
@@ -511,7 +511,8 @@ public class MainWidget : Box {
      *
      * @param item_name Unique name of new {@link Gdl.DockItem}.
      * @param item_long_name Display name of new {@link Gdl.DockItem}.
-     * @param widget {@link Gtk.Widget} to add to new {@link Gdl.DockItem}.
+     * @param element {@link UiElement} to add {@link UiElement.widget} to
+     *                new {@link Gdl.DockItem}.
      * @param stock {@link Gtk.Stock} name to add icon to {@link Gdl.DockItem}.
      * @param behavior {@link Gdl.DockItemBehavior} of new {@link Gdl.DockItem}.
      * @param placement {@link Gdl.DockPlacement} of new {@link Gdl.DockItem}.
@@ -539,7 +540,7 @@ public class MainWidget : Box {
      * @param element {@link UiElement} to connect toggle signals with.
      * @param label Description to show in menu.
      * @param with_mnemonic If `true` enable mnemonic.
-     * @param key Accelerator {@linkGdl.Key} or null if none.
+     * @param key Accelerator {@link Gdk.Key} or null if none.
      * @param modtype Modifier type e.g. {@link Gdk.ModifierType.CONTROL_MASK} for ctrl.
      */
     public void add_view_menu_item (Gtk.Menu menu_view,
@@ -781,7 +782,7 @@ public class MainWidget : Box {
      * Add accelerator for "activate" signal.
      *
      * @param item {@link Gtk.Widget} to connect.
-     * @param keyname Name of key to connect to signal (with modtype).
+     * @param key {@link Gdk.Key} number to connect to signal (with modtype).
      * @param modtype {@link Gdk.ModifierType} to connect to signal together
      *                with key name. Default modifier key is "ctrl".
      */

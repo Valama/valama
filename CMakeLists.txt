@@ -208,7 +208,8 @@ if(VALADOC_FOUND)
     set(extra_valadoc_opts)
   endif()
   if(VALADOC_EXTRA)
-    foreach(pkg ${required_pkgs})
+    foreach(pkgstr ${required_pkgs})
+      string(REGEX REPLACE "^([^ \t]+).*" "\\1"  pkg "${pkgstr}")
       list(APPEND extra_valadoc_opts "--deps=${pkg}")
     endforeach()
   endif()
@@ -223,20 +224,25 @@ if(VALADOC_FOUND)
   else()
     set(make_all)
   endif()
+  set(valadoc_pkgs)
+  foreach(pkgstr ${required_pkgs} ${optional_pkgs})
+    string(REGEX REPLACE "^([^ \t]+).*" "\\1"  pkg "${pkgstr}")
+    list(APPEND valadoc_pkgs "${pkg}")
+  endforeach()
   valadoc_gen("${project_name}"
     ${make_all}
     PACKAGES
-      ${required_pkgs}
+      ${valadoc_pkgs}
     SRCFILES
       ${srcfiles}
       ${vapifiles}
-      "guanako/*.vala"
     OPTIONS
       "--vapidir" "${VALA_VAPIDIR}"
       #"--vapidir" "${VALA_DATADIR}/vapi"  # TODO: Support for multiple directories?
-      "--target-glib" "2.32"
+      "--target-glib" "${GLIB2.0_VERSION}"
       ${extra_valadoc_opts}
       ${valadoc_debug}
+      ${valac_cond}
   )
 else()
   set(DOCS OFF)

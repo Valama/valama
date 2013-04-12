@@ -35,7 +35,7 @@ class UiSourceViewer : UiElement {
      */
     private DockLayout srclayout;
     /**
-     * List of all {@link DockItem} objects in source dock {@link srcdock}.
+     * List of all {@link Gdl.DockItem} objects in source dock {@link srcdock}.
      */
     private ArrayList<DockItem> srcitems = new ArrayList<DockItem>();
 
@@ -44,7 +44,7 @@ class UiSourceViewer : UiElement {
      */
     private TreeMap<string, Pair<string, int>> langmap;
     /**
-     * Share {@link SourceLanguageManager} across all source elements.
+     * Share {@link Gtk.SourceLanguageManager} across all source elements.
      */
     private SourceLanguageManager langman;
     /**
@@ -89,7 +89,7 @@ class UiSourceViewer : UiElement {
      */
     public SourceBuffer? current_srcbuffer { get; private set; default = null; }
     /**
-     * Gets emitted when another {@link Gtk.Sourceview} is selected
+     * Gets emitted when another {@link Gtk.SourceView} is selected
      */
     public signal void current_sourceview_changed();
 

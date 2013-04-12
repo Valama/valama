@@ -64,7 +64,7 @@ public class Entry : Gtk.Entry {
      * Create Entry and connect signals to input.
      *
      * @param err_label {@link Gtk.Label} to show error message.
-     * @param valid_chars {@link Regex} with valid characters.
+     * @param valid_chars {@link GLib.Regex} with valid characters.
      * @param delay_sec Time to show error message.
      * @param reset_string Reset {@link Gtk.Label} to this string.
      */

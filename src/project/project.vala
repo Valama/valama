@@ -1589,7 +1589,7 @@ public class ValamaProject : Object {
      * Select first available package of {@link PkgChoice}. Does not check for
      * conflicts.
      *
-     * @param choide {@link PkgChoice} to search for available packages.
+     * @param choice {@link PkgChoice} to search for available packages.
      * @return Return available package name or null.
      */
     //TODO: Check version.
@@ -1960,7 +1960,7 @@ public class ValamaProject : Object {
      * {@link foreach_buffer}.
      *
      * @param filename Filename of currently processed buffer.
-     * @param buffertext Content of currently processed buffer.
+     * @param buffer Currently processed buffer.
      */
     public delegate void ViewCallback (string filename, SourceBuffer buffer);
     /**

@@ -501,9 +501,11 @@ public class UiTemplateSelector : TemplatePage {
 /**
  * Project creation dialog.
  *
+ * No longer needed. Selection is done with {@link WelcomeScreen}.
+ *
  * @return Return a {@link ValamaProject} of the created template-based project.
- * @deprecated No longer needed. Selection is done with {@link WelcomeScreen}.
  */
+[Deprecated]
 public ValamaProject? ui_create_project_dialog() {
     var dlg = new Dialog.with_buttons (_("Choose project template"),
                                        window_main,
