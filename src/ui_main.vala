@@ -554,7 +554,7 @@ public class MainWidget : Box {
             item_view_element = new CheckMenuItem.with_mnemonic (@"_$label");
         else
             item_view_element = new CheckMenuItem.with_label (label);
-#if GDL_3_6_2 || GDL_3_8_2
+#if !GDL_LESS_3_5_5
         item_view_element.active = !element.dock_item.is_closed();
 #else
         item_view_element.active = ((element.dock_item.flags & DockObjectFlags.ATTACHED) != 0);
@@ -595,7 +595,7 @@ public class MainWidget : Box {
         }
         toolbar.add (btn_element);
 
-#if GDL_3_6_2 || GDL_3_8_2
+#if !GDL_LESS_3_5_5
         btn_element.active = !element.dock_item.is_closed();
 #else
         btn_element.active = ((element.dock_item.flags & DockObjectFlags.ATTACHED) != 0);

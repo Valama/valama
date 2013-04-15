@@ -92,16 +92,13 @@ set(gdl_workarround OFF)
 pkg_check_modules(GDL3.0 REQUIRED "gdl-3.0")
 if(GDL3.0_VERSION STRGREATER "3.8.2")
   list(APPEND valac_cond "-D;GDL_3_8_2")
-  # Support new gdl features.
   message(STATUS "Use enhanced gdl-3.0 vapi to support new "
                  "features with gdl-3.0 >= 3.8.2.")
   list(APPEND vapifiles "cmake/vapi/gdl-3.0.vapi")
   list(REMOVE_ITEM required_pkgs "gdl-3.0 >= 3.4")
   set(gdl_workarround ON)
 elseif(GDL3.0_VERSION STRGREATER "3.6.2")
-  list(APPEND valac_cond "-D;GDL_3_6_2")
   if("0.20" STRGREATER "${VALA_SHORTVER}")
-    # Fixes #693127 (upstream fix).
     message(STATUS "Use enhanced gdl-3.0 vapi from valac 0.20 to support new "
                    "features with gdl-3.0 >= 3.6.2.")
     list(APPEND vapifiles "cmake/vapi/gdl-3.0.vapi")

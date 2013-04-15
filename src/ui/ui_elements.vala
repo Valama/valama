@@ -131,7 +131,7 @@ public abstract class UiElement : Object{
                 dock_item.notify["master"].connect (() => {
                     if (dock_item.master != null)
                         dock_item.master.layout_changed.connect (() => {
-#if GDL_3_6_2 || GDL_3_8_2
+#if !GDL_LESS_3_5_5
                             show = !dock_item.is_closed();
 #else
                             show = ((dock_item.flags & Gdl.DockObjectFlags.ATTACHED) != 0);
@@ -167,7 +167,7 @@ public abstract class UiElement : Object{
                     widget_main.focus_dock_item (dock_item);
                     on_element_show();
                 } else {
-// #if GDL_3_6_2 || GDL_3_8_2
+// #if !GDL_LESS_3_5_5
 //                     /* Hide also iconified item by making it visible first. */
 //                     if (dock_item.is_iconified())
 //                         dock_item.show_item();
