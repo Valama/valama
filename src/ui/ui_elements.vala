@@ -131,7 +131,7 @@ public abstract class UiElement : Object{
                 dock_item.notify["master"].connect (() => {
                     if (dock_item.master != null)
                         dock_item.master.layout_changed.connect (() => {
-#if GDL_3_6_2
+#if GDL_3_6_2 || GDL_3_8_2
                             show = !dock_item.is_closed();
 #else
                             show = ((dock_item.flags & Gdl.DockObjectFlags.ATTACHED) != 0);
@@ -167,7 +167,7 @@ public abstract class UiElement : Object{
                     widget_main.focus_dock_item (dock_item);
                     on_element_show();
                 } else {
-// #if GDL_3_6_2
+// #if GDL_3_6_2 || GDL_3_8_2
 //                     /* Hide also iconified item by making it visible first. */
 //                     if (dock_item.is_iconified())
 //                         dock_item.show_item();
@@ -197,13 +197,16 @@ public abstract class UiElement : Object{
         if (!locking || dock_item == null || saved_behavior != null)
             return;
         saved_behavior = dock_item.behavior;
+#if GDL_3_8_2
+        dock_item.hide_grip();
+#else
         /* Work arround gdl bug #515755 to not hide dockbar properly. */
-        //dock_item.hide_grip();
         dock_item.behavior = Gdl.DockItemBehavior.NO_GRIP;
         dock_item.forall_internal (true, (child) => {
             if (child is Gdl.DockItemGrip)
                 child.hide();
         });
+#endif
     }
 
     /**
@@ -215,12 +218,15 @@ public abstract class UiElement : Object{
         if (saved_behavior != null)
             dock_item.behavior = saved_behavior;
         saved_behavior = null;
+#if GDL_3_8_2
+        dock_item.show_grip();
+#else
         /* See note above. */
-        //dock_item.show_grip();
         dock_item.forall_internal (true, (child) => {
             if (child is Gdl.DockItemGrip)
                 child.show();
         });
+#endif
     }
 
     /**

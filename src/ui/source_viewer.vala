@@ -104,6 +104,10 @@ class UiSourceViewer : UiElement {
         srcdock = new Dock();
         vbox.pack_start (this.srcdock, true, true);
         this.srcdock.master.switcher_style = SwitcherStyle.TABS;
+#if GDL_3_8_2
+        this.srcdock.master.tab_pos = PositionType.TOP;
+        this.srcdock.master.tab_reorderable = true;
+#endif
         this.srclayout = new DockLayout (this.srcdock);
 
         langmap = new TreeMap<string, Pair<string, int>>();
@@ -322,7 +326,9 @@ class UiSourceViewer : UiElement {
                  * This will work properly with gdl-3.0 >= 3.5.5
                  */
                 item.show_item();
+#if !GDL_3_8_2
                 set_notebook_tabs (item);
+#endif
 
                 if (buffer_close (get_sourceview (item), displayname)) {
                     close_srcitem_pr (item, filename);  // closes the item
@@ -360,9 +366,11 @@ class UiSourceViewer : UiElement {
         /*
          * Set notebook tab properly if needed.
          */
+#if !GDL_3_8_2
         item.dock.connect (() => {
             set_notebook_tabs (item);
         });
+#endif
     }
 
     /**
@@ -370,6 +378,7 @@ class UiSourceViewer : UiElement {
      *
      * @param item {@link Gdl.DockItem} to setup.
      */
+#if !GDL_3_8_2
     private void set_notebook_tabs (DockItem item) {
         var pa = item.parent;
         if (pa is Notebook) {
@@ -379,6 +388,7 @@ class UiSourceViewer : UiElement {
                 nbook.set_tab_reorderable (child, true);
         }
     }
+#endif
 
     /**
      * Get {@link Gtk.SourceView} from within {@link Gdl.DockItem}.
