@@ -51,7 +51,7 @@ public void ui_load_project() {
         /*
          * On Unix-like systems compare inodes. On others only compare file names.
          */
-#if NOT_UNIX
+#if !UNIX
         if (project.project_file != new_filename) {
 #else
         //TODO: Check if there is a better solution.

@@ -176,9 +176,34 @@ public abstract class BuildSystem : Object {
         var defparts = define.split ("_");
         string[] pkg_name = {""};
         string[] pkg_ver = {""};
+        var less = false;
         VersionRelation? pkg_rel = null;
         for (int i = 0; i < defparts.length; ++i) {
             var check = defparts[i].down();
+
+            if (pkg_rel == null)
+                switch (check) {
+                    case "since":
+                        pkg_rel = VersionRelation.SINCE;
+                        continue;
+                    case "less":
+                        less = true;
+                        pkg_rel = VersionRelation.UNTIL;
+                        continue;
+                    case "until":
+                        pkg_rel = VersionRelation.UNTIL;
+                        continue;
+                    case "not":
+                    case "exclude":
+                    case "except":
+                        pkg_rel = VersionRelation.EXCLUDE;
+                        continue;
+                    case "only":
+                        pkg_rel = VersionRelation.ONLY;
+                        continue;
+                    default:
+                        break;
+                }
 
             if (digits.match (check)) {
                 if (i == 0)
@@ -201,6 +226,50 @@ public abstract class BuildSystem : Object {
                     }
                 }
             } else if (alpha.match (check)) {
+                switch (check) {
+                    case "unix":
+                    case "linux":
+                    case "apple":
+                        if (pkg_rel != null)
+#if UNIX
+                            return pkg_rel != VersionRelation.EXCLUDE;
+#elif WIN32
+                            return pkg_rel == VersionRelation.EXCLUDE;
+#else
+                            return false;
+#endif
+                        else
+#if UNIX
+                            return true;
+#elif WIN32
+                            return false;
+#else
+                            return false;
+#endif
+
+                    case "win":
+                    case "win32":
+                    case "windows":
+                        if (pkg_rel != null)
+#if WIN32
+                            return pkg_rel != VersionRelation.EXCLUDE;
+#elif UNIX
+                            return pkg_rel == VersionRelation.EXCLUDE;
+#else
+                            return false;
+#endif
+                        else
+#if WIN32
+                            return true;
+#elif UNIX
+                            return false;
+#else
+                            return false;
+#endif
+                    default:
+                        break;
+                }
+
                 var pkg_name_tmp = pkg_name;
                 for (int j = 0; j < pkg_name_tmp.length; ++j) {
                     if (check == "gtk")

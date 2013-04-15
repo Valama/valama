@@ -66,6 +66,15 @@ endif()
 # Custom library version checks.
 set(valac_cond)
 find_package(PkgConfig)
+# Unix or Windows
+if(WIN32)
+  list(APPEND valac_cond "-D;WIN32")
+elseif(UNIX)
+  list(APPEND valac_cond "-D;UNIX")
+else()
+  list(APPEND valac_cond "-D;NOT_UNIX")
+  list(APPEND valac_cond "-D;NOT_WIN32")
+endif()
 # libvala-X.Y
 if(VALA_SHORTVER STREQUAL "0.20")
   list(REMOVE_ITEM required_pkgs "libvala-0.18")
