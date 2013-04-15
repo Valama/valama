@@ -171,107 +171,119 @@ public abstract class BuildSystem : Object {
         package = null;
 
         var digits = /^\d+$/;
-        var alpha = /^[a-z]+$/;
+
+        var end = false;
 
         var defparts = define.split ("_");
         string[] pkg_name = {""};
-        string[] pkg_ver = {""};
-        var less = false;
-        VersionRelation? pkg_rel = null;
+        string[] pkg_ver = {};
+        string? pkg_rel = null;
+        bool prev_alpha = false;
         for (int i = 0; i < defparts.length; ++i) {
+            if (i == defparts.length - 1)
+                end = true;
+
             var check = defparts[i].down();
 
             if (pkg_rel == null)
                 switch (check) {
                     case "since":
-                        pkg_rel = VersionRelation.SINCE;
+                        pkg_rel = ">=";
+                        prev_alpha = true;
                         continue;
                     case "less":
-                        less = true;
-                        pkg_rel = VersionRelation.UNTIL;
+                        pkg_rel = "<";
+                        prev_alpha = true;
                         continue;
                     case "until":
-                        pkg_rel = VersionRelation.UNTIL;
+                        pkg_rel = "<=";
+                        prev_alpha = true;
                         continue;
                     case "not":
                     case "exclude":
                     case "except":
-                        pkg_rel = VersionRelation.EXCLUDE;
+                        pkg_rel = "!=";
+                        prev_alpha = true;
                         continue;
                     case "only":
-                        pkg_rel = VersionRelation.ONLY;
+                        pkg_rel = "==";
+                        prev_alpha = true;
                         continue;
                     default:
                         break;
                 }
 
+            if (prev_alpha) {
+                var tmpver = string.joinv (".", defparts[i:defparts.length]);
+                if (tmpver != "")
+                    pkg_ver += tmpver;
+            }
+
+
             if (digits.match (check)) {
                 if (i == 0)
                     return false;
-                var pkg_ver_tmp = pkg_ver;
-                for (int j = 0; j < pkg_ver_tmp.length; ++j) {
-                    if (i != 0) {
-                        pkg_ver += @"$(pkg_ver[j])-$check";
-                        pkg_ver += @"$(pkg_ver[j]).$check";
-                    }
-                    pkg_ver[j] = pkg_ver[j] + check;
-                }
-                if (pkg_rel == null) {
-                    var pkg_name_tmp = pkg_name;
-                    for (int j = 0; j < pkg_name_tmp.length; ++j) {
+                prev_alpha = false;
+
+                // if (pkg_rel == null) {
+                    var length = pkg_name.length;
+                    for (int j = 0; j < length; ++j) {
                         pkg_name += @"$(pkg_name[j])-$check";
                         if ((pkg_name[j][pkg_name[j].length-1]).isdigit())
                             pkg_name += @"$(pkg_name[j]).$check";
                         pkg_name += @"$(pkg_name[j])$check";
                     }
-                }
-            } else if (alpha.match (check)) {
-                switch (check) {
-                    case "unix":
-                    case "linux":
-                    case "apple":
-                        if (pkg_rel != null)
+                // }
+            } else {
+                prev_alpha = true;
+                if (end && (defparts.length == 1 ||
+                                defparts.length == 2 && pkg_rel == "!="))
+                    switch (check) {
+                        case "unix":
+                        case "linux":
+                        case "apple":
+                            if (pkg_rel != null)
 #if UNIX
-                            return pkg_rel != VersionRelation.EXCLUDE;
+                                return false;
 #elif WIN32
-                            return pkg_rel == VersionRelation.EXCLUDE;
+                                return true;
 #else
-                            return false;
+                                return false;
 #endif
-                        else
+                            else
 #if UNIX
-                            return true;
+                                return true;
 #elif WIN32
-                            return false;
+                                return false;
 #else
-                            return false;
+                                return false;
 #endif
 
-                    case "win":
-                    case "win32":
-                    case "windows":
-                        if (pkg_rel != null)
+                        case "win":
+                        case "win32":
+                        case "windows":
+                            if (pkg_rel != null)
 #if WIN32
-                            return pkg_rel != VersionRelation.EXCLUDE;
+                                return false;
 #elif UNIX
-                            return pkg_rel == VersionRelation.EXCLUDE;
+                                return true;
 #else
-                            return false;
+                                return false;
 #endif
-                        else
+                            else
 #if WIN32
-                            return true;
+                                return true;
 #elif UNIX
-                            return false;
+                                return false;
 #else
-                            return false;
+                                return false;
 #endif
-                    default:
-                        break;
-                }
+                        default:
+                            break;
+                    }
 
-                var pkg_name_tmp = pkg_name;
-                for (int j = 0; j < pkg_name_tmp.length; ++j) {
+                var length = pkg_name.length;
+                for (int j = 0; j < length; ++j) {
                     if (check == "gtk")
                         pkg_name += @"$(pkg_name[j])gtk+";
                     if (check == "valac") {
@@ -288,15 +300,58 @@ public abstract class BuildSystem : Object {
             }
         }
 
-        foreach (var name in pkg_name) {
-            string[] checks = {name};
-            if ((name[name.length-1]).isdigit())
-                checks += @"$name.0";
-            foreach (var check in checks)
-                if (check in project.packages.get_keys()) {
-                    package = check;
-                    return true;
+        for (int i = 0; i < pkg_name.length; ++i) {
+            string[] checks = {pkg_name[i]};
+            if ((pkg_name[i][pkg_name[i].length-1]).isdigit())
+                checks += @"$(pkg_name[i]).0";
+            foreach (var check in checks) {
+                foreach (var ver in pkg_ver) {
+                    /* Does not cover choices (intended). */
+                    if (check in project.packages.get_keys()) {
+                        string? version;
+                        if (!package_exists (check, out version)) {
+                            debug_msg (_("Could not find pkg-config file for '%s'. "
+                                        + "Enable define '%s' without version check.\n"),
+                                        check, define);
+                            package = check;
+                            return true;
+                        } else {
+                            if (version == null)
+                                return false;
+                            bool ret;
+                            switch (pkg_rel) {
+                                case null:
+                                case ">=":
+                                    ret = strcmp (version, ver) >= 0;
+                                    break;
+                                case "<":
+                                    ret = strcmp (version, ver) < 0;
+                                    break;
+                                case "<=":
+                                    ret = strcmp (version, ver) <= 0;
+                                    break;
+                                case "!=":
+                                    ret = strcmp (version, ver) != 0;
+                                    break;
+                                case "==":
+                                    ret = strcmp (version, ver) == 0;
+                                    break;
+                                default:
+                                    bug_msg (_("Unknown package version relation: %s - %s\n"),
+                                               pkg_rel, "guess_pkg_by_define");
+                                    continue;
+                            }
+                            if (ret) {
+                                package = check;
+                                return true;
+                            } else
+                                debug_msg_level (2, _("Incompatible version for package %s %s %s found: %s\n"),
+                                           pkg_name[i], (pkg_rel != null) ? pkg_rel : ">=", ver,
+                                           version);
+                        }
+                    }
                 }
+            }
         }
 
         debug_msg (_("Unable to guess package for define: %s\n"), define);
@@ -594,10 +649,14 @@ public static bool package_exists (string package_name,
                                    out string? package_version = null) {
     var pc = @"pkg-config --modversion $package_name";
     int exit_status;
+    package_version = null;
 
     try {
         string err;  // don't print error to console output
-        Process.spawn_command_line_sync (pc, out package_version, out err, out exit_status);
+        string? pkg_ver;
+        Process.spawn_command_line_sync (pc, out pkg_ver, out err, out exit_status);
+        if (pkg_ver != null)
+            package_version = pkg_ver.strip();
         return (0 == exit_status);
     } catch (SpawnError e) {
         warning_msg (_("Could not spawn pkg-config package existence check: %s\n"), e.message);

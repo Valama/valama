@@ -226,7 +226,6 @@ static Gdk.Pixbuf? get_pixbuf_for_symbol (Symbol symbol) {
     complete_typename += "-16.png";
     if (map_icons.has_key (complete_typename))
         return map_icons[complete_typename];
-    stdout.printf ("Symbol pixbuf not found: " + complete_typename + "\n");
     return null;
 }
 
