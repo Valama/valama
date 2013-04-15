@@ -109,11 +109,18 @@ elseif(GDL3.0_VERSION STRGREATER "3.6.2")
     set(gdl_workarround ON)
   endif()
 elseif("3.5.5" STRGREATER GDL3.0_VERSION)
+  list(APPEND valac_cond "-D;GDL_LESS_3_5_5")
   message(WARNING "With gdl-3.0 ${GDL3.0_VERSION} < 3.5.5 dock item "
                   "behaviour is poor: Hidden docks aren't saved in layout "
                   "and will open detached.\n"
                   "Please upgrade your gdl version or live with it.")
-  list(APPEND valac_cond "-D;GDL_LESS_3_5_5")
+  if(NOT "0.20" STRGREATER "${VALA_SHORTVER}")
+    message(STATUS "Use gdl-3.0 vapi from valac 0.18 to support old "
+                   "library gdl-3.0 < 3.5.5.")
+    list(APPEND vapifiles "cmake/vapi/gdl-3.0-old.vapi")
+    list(REMOVE_ITEM required_pkgs "gdl-3.0 >= 3.4")
+    set(gdl_workarround ON)
+  endif()
 endif()
 # gee-1.0 and gee-0.8
 set(gee_ver)
