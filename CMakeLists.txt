@@ -97,15 +97,15 @@ if(GDL3.0_VERSION STRGREATER "3.8.2")
   list(APPEND vapifiles "cmake/vapi/gdl-3.0.vapi")
   list(REMOVE_ITEM required_pkgs "gdl-3.0 >= 3.4")
   set(gdl_workarround ON)
-elseif(GDL3.0_VERSION STRGREATER "3.6.2")
+elseif(NOT "3.5.5" STRGREATER GDL3.0_VERSION)
   if("0.20" STRGREATER "${VALA_SHORTVER}")
     message(STATUS "Use enhanced gdl-3.0 vapi from valac 0.20 to support new "
-                   "features with gdl-3.0 >= 3.6.2.")
+                   "features with gdl-3.0 >= 3.5.5.")
     list(APPEND vapifiles "cmake/vapi/gdl-3.0.vapi")
     list(REMOVE_ITEM required_pkgs "gdl-3.0 >= 3.4")
     set(gdl_workarround ON)
   endif()
-elseif("3.5.5" STRGREATER GDL3.0_VERSION)
+else()
   list(APPEND valac_cond "-D;GDL_LESS_3_5_5")
   message(WARNING "With gdl-3.0 ${GDL3.0_VERSION} < 3.5.5 dock item "
                   "behaviour is poor: Hidden docks aren't saved in layout "
