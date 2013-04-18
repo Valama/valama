@@ -27,7 +27,7 @@ public class SuperSourceView : SourceView {
     public SuperSourceView(SourceBuffer bfr) {
         this.buffer = bfr;
 
-        Timeout.add (1000 / 60, ()=>{
+        Timeout.add (30, ()=>{
             foreach (SuperSourceViewAnimation anim in animations)
                 anim.advance ();
             while (true) {
@@ -40,11 +40,12 @@ public class SuperSourceView : SourceView {
             }
             return true;
         });
-        this.draw.connect ((cr)=>{
-            foreach (SuperSourceViewAnimation anim in animations)
-                anim.draw (cr);
-            return false;
-        });
+    }
+    public override bool draw (Cairo.Context cr) {
+        base.draw (cr);
+        foreach (SuperSourceViewAnimation anim in animations)
+            anim.draw (cr);
+        return true;
     }
     public void highlight_line (int line) {
         var animation = new SuperSourceViewAnimation();
