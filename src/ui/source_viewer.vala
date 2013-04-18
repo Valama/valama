@@ -400,9 +400,9 @@ class UiSourceViewer : UiElement {
      * NOTE: Be careful. This have to be exactly the same objects as the
      *       objects at creation of new source views.
      */
-    private inline SourceView get_sourceview (DockItem item) {
+    private inline SuperSourceView get_sourceview (DockItem item) {
 #if VALAC_0_20 && !GDL_LESS_3_5_5
-        return (SourceView) ((ScrolledWindow) ((Box) item.get_child()).get_children().nth_data (0)).get_child();
+        return (SuperSourceView) ((ScrolledWindow) ((Box) item.get_child()).get_children().nth_data (0)).get_child();
 #else
         /*
          * Work arround GNOME #693127.
@@ -414,7 +414,7 @@ class UiSourceViewer : UiElement {
         });
         if (scroll_widget == null)
             bug_msg (_("Could not find ScrolledWindow widget: %s\n"), item.name);
-        return (SourceView) scroll_widget.get_child();
+        return (SuperSourceView) scroll_widget.get_child();
 #endif
     }
 
@@ -476,7 +476,7 @@ class UiSourceViewer : UiElement {
      * @return If file was found return {@link Gtk.SourceView} object else
      *         null.
      */
-    public SourceView? get_sourceview_by_file (string filename, bool warn = true) {
+    public SuperSourceView? get_sourceview_by_file (string filename, bool warn = true) {
         var id = get_sourceview_id (filename, warn);
         if (id == -1)
             return null;

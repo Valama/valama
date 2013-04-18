@@ -1663,7 +1663,7 @@ public class ValamaProject : Object {
      * @param dirty Flag if buffer is dirty. Default is `false`.
      * @return Return {@link Gtk.SourceView} if new buffer was created else null.
      */
-    public SourceView? open_new_buffer (string txt = "", string filename = "", bool dirty = false) {
+    public SuperSourceView? open_new_buffer (string txt = "", string filename = "", bool dirty = false) {
         debug_msg (_("Load new buffer: %s\n"),
                    (filename == "") ? _("(new file)")
                                     : get_absolute_path (filename));
@@ -1677,7 +1677,7 @@ public class ValamaProject : Object {
         }
 
         var bfr = new SourceBuffer();
-        var view = new SourceView.with_buffer (bfr);
+        var view = new SuperSourceView (bfr);
         view.key_press_event.connect ((key)=>{
             bfr.last_key_valid = !(key.keyval == Gdk.Key.space || key.keyval == Gdk.Key.Delete
                                    || key.keyval == Gdk.Key.Tab || key.keyval == Gdk.Key.BackSpace

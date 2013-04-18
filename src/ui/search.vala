@@ -137,8 +137,9 @@ public class UiSearch : UiElement {
                                      0);
         bfr.select_range (titer, titer);
         source_viewer.focus_src (result.filename);
-        source_viewer.get_sourceview_by_file (result.filename).scroll_to_iter (
-                                                                titer, 0.42, true, 0, 1.0);
+        var source_view = source_viewer.get_sourceview_by_file (result.filename);
+        source_view.scroll_to_iter (titer, 0.42, true, 0, 1.0);
+        source_view.highlight_line (result.line);
     }
 
     void search (string search) {

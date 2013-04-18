@@ -49,6 +49,7 @@ set(srcfiles
 "src/ui/search.vala"
 "src/ui/source_viewer.vala"
 "src/ui/stylechecker.vala"
+"src/ui/super_source_view.vala"
 "src/ui/symbol_browser.vala"
 "src/ui/ui_elements.vala"
 "src/ui/welcome_screen.vala"
