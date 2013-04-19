@@ -90,6 +90,7 @@ class UiReport : UiElement {
                 source_viewer.jump_to_position (err.source.file.filename,
                                                 err.source.begin.line - 1,
                                                 err.source.begin.column - 1);
+                source_viewer.current_srcview.highlight_line (err.source.begin.line - 1);
             });
 
             scrw.add (tree_view);

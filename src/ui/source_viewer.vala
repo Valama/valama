@@ -83,7 +83,7 @@ class UiSourceViewer : UiElement {
     /**
      * Currently selected {@link Gtk.SourceView}.
      */
-    public SourceView? current_srcview { get; private set; default = null; }
+    public SuperSourceView? current_srcview { get; private set; default = null; }
     /**
      * Currently selected {@link SourceBuffer}.
      */
