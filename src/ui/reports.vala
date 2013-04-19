@@ -103,6 +103,7 @@ class UiReport : UiElement {
     }
 
     ArrayList<Reporter.Error> storelist;
+    ArrayList<SuperSourceView.LineAnnotation> annotations = new ArrayList<SuperSourceView.LineAnnotation>();
 
     public UiReport (ReportType reptype = ReportType.ALL, bool showall = false) {
         var vbox = new Box (Orientation.VERTICAL, 0);
@@ -140,7 +141,6 @@ class UiReport : UiElement {
         widget = vbox;
     }
 
-    Gee.ArrayList<SuperSourceView.LineAnnotation> annotations = new Gee.ArrayList<SuperSourceView.LineAnnotation>();
     public override void build() {
         ListStore store;
         if (showall)
@@ -185,7 +185,7 @@ class UiReport : UiElement {
 
         foreach (SuperSourceView.LineAnnotation annotation in annotations)
             annotation.finished = true;
-        annotations = new Gee.ArrayList<SuperSourceView.LineAnnotation>();
+        annotations = new ArrayList<SuperSourceView.LineAnnotation>();
 
         foreach (var err in project.get_errorlist()) {
             if ((err.type & reptype) == 0 ||
@@ -196,7 +196,7 @@ class UiReport : UiElement {
             if (showall)
                 bfr = project.get_buffer_by_file (err.source.file.filename);
 
-            var view = source_viewer.get_sourceview_by_file (err.source.file.filename);
+            var view = source_viewer.get_sourceview_by_file (err.source.file.filename, false);
 
             Gdk.Pixbuf? pixbuf = null;
             TextIter? iter_start = null;
@@ -276,6 +276,10 @@ class UiReport : UiElement {
 }
 
 public class ReportWrapper : Guanako.Reporter {
+    construct {
+        errlist.clear();
+    }
+
     private inline void dbg_ref_msg (ReportType type, Vala.SourceReference? source, string message) {
         if (source != null)
             debug_msg_level (2, _("%s found: %s: %d(%d)-%d(%d): %s\n"),

@@ -50,7 +50,7 @@ namespace Guanako {
     }
 
     public class Reporter : Report {
-        public static Gee.ArrayList<Error> errlist { get; private set; }
+        public static Gee.ArrayList<Error> errlist { get; protected set; }
         private bool general_error = false;
 
         public class Error {
@@ -126,7 +126,7 @@ namespace Guanako {
                 return;
             ++warnings;
             errlist.add (new Error (source, message, type));
-         }
+        }
 
         protected virtual inline void show_error (SourceReference? source, string message) {}
         protected override void err (SourceReference? source, string message) {
