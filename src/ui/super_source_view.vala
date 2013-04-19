@@ -19,17 +19,33 @@
 
 using Gtk;
 using Vala;
-
+                                                                                                                                 
 /**
  * Enhanced GtkSourceView
  */
 public class SuperSourceView : SourceView {
     public SuperSourceView(SourceBuffer bfr) {
         this.buffer = bfr;
+        int old_line = -1;
+
+        this.motion_notify_event.connect ((event)=>{
+            int bfrx, bfry;
+            this.window_to_buffer_coords (TextWindowType.WIDGET, (int)event.x, (int)event.y, out bfrx, out bfry);
+            TextIter line_iter;
+            this.get_line_at_y (out line_iter, bfry, null);
+            int line = line_iter.get_line();
+            if (line != old_line) {
+                old_line = line;
+                foreach (Animation anim in animations)
+                    anim.mouse_move (line);
+            }
+            return false;
+        });
 
         Timeout.add (30, ()=>{
-            foreach (SuperSourceViewAnimation anim in animations)
-                anim.advance ();
+            foreach (Animation anim in animations)
+                if (anim.animated)
+                    anim.advance ();
             while (true) {
                 for (int q = 0; q < animations.size; q++)
                     if (animations[q].finished) {
@@ -43,24 +59,100 @@ public class SuperSourceView : SourceView {
     }
     public override bool draw (Cairo.Context cr) {
         base.draw (cr);
-        foreach (SuperSourceViewAnimation anim in animations)
+        foreach (Animation anim in animations)
             anim.draw (cr);
         return true;
     }
     public void highlight_line (int line) {
-        var animation = new SuperSourceViewAnimation();
+        var animation = new LineHighlight();
         animation.line = line;
         animation.view = this;
         animations.add (animation);
     }
-    Gee.ArrayList<SuperSourceViewAnimation> animations = new Gee.ArrayList<SuperSourceViewAnimation>();
+    public LineAnnotation annotate (int line, string text) {
+        var animation = new LineAnnotation();
+        animation.line = line;
+        animation.text = text;
+        animation.view = this;
+        animations.add (animation);
+        return animation;
+    }
+    internal Gee.ArrayList<Animation> animations = new Gee.ArrayList<Animation>();
 
-    class SuperSourceViewAnimation {
-        internal int line;
+    public abstract class Animation {
+        public bool finished = false;
+        public bool animated = false;
+        internal SuperSourceView view;
+        internal abstract void advance();
+        internal abstract void mouse_move (int line);
+        internal abstract void draw (Cairo.Context cr);
+    }
+    public class LineAnnotation : Animation{
+        public LineAnnotation() {
+            animated = false;
+        }
+        public int line;
+        public string text;
+        bool visible = false;
+        public override void mouse_move (int line) {
+            visible = this.line == line;
+            advance();
+        }
+        public override void advance() {
+            int y, height, wx, wy;
+            TextIter iter;
+            view.buffer.get_iter_at_line (out iter, line);
+            view.get_line_yrange (iter, out y, out height);
+            view.buffer_to_window_coords (TextWindowType.WIDGET, 0, y, out wx, out wy);
+            view.queue_draw_area (0, wy + height - 3, view.get_allocated_width(), height + 6);
+        }
+        public override void draw(Cairo.Context cr) {
+            if (!visible)
+                return;
+            int y, height, wx, wy;
+            TextIter iter;
+
+            view.buffer.get_iter_at_line (out iter, line);
+            view.get_line_yrange (iter, out y, out height);
+            view.buffer_to_window_coords (TextWindowType.WIDGET, 0, y, out wx, out wy);
+
+            cr.select_font_face ("Monospace", Cairo.FontSlant.NORMAL, Cairo.FontWeight.NORMAL);
+            cr.set_font_size (10);
+            Cairo.TextExtents extents;
+            cr.text_extents (text, out extents);
+
+            rounded_rectanlge (cr, wx, wy + height, extents.width + 6, height, 7);
+            cr.set_source_rgba (1.0, 0.0, 0.0, 1.0);
+            cr.set_line_width (1);
+            cr.stroke_preserve();
+            cr.set_source_rgba (1.0, 0.0, 0.0, 0.8);
+            cr.fill();
+
+            cr.move_to (wx + 3, wy + height * 2 - 3);
+            cr.set_source_rgba (0.0, 0.0, 0.0, 1.0);
+            cr.show_text (text);
+        }
+        void rounded_rectanlge (Cairo.Context cr, double x, double y, double width, double height, double r) {
+            cr.move_to (x, y);
+            cr.line_to (x + width - r, y);
+            cr.curve_to(x + width, y, x + width, y, x + width, y + r);
+            cr.line_to(x + width, y + height - r);
+            cr.curve_to(x + width, y + height, x + width, y + height, x + width - r, y + height);
+            cr.line_to(x + r, y + height);
+            cr.curve_to(x, y + height, x, y + height, x, y + height - r);
+            cr.line_to(x, y + r);
+            cr.curve_to(x, y, x, y, x + r, y);
+        }
+    }
+    class LineHighlight : Animation{
+        public LineHighlight() {
+            animated = true;
+        }
+        public int line;
         double proc = 0;
-        internal TextView view;
-        internal bool finished = false;
-        internal void advance() {
+        public override void mouse_move (int line) {
+        }
+        public override void advance() {
             proc += 0.3;
             finished = proc >= 10;
 
@@ -71,7 +163,7 @@ public class SuperSourceView : SourceView {
             view.buffer_to_window_coords (TextWindowType.WIDGET, 0, y, out wx, out wy);
             view.queue_draw_area (0, wy - 10, view.get_allocated_width(), height + 20);
         }
-        internal void draw(Cairo.Context cr) {
+        public override void draw(Cairo.Context cr) {
             int y, height, wx, wy;
             TextIter iter;
 

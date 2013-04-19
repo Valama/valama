@@ -139,6 +139,7 @@ class UiReport : UiElement {
         widget = vbox;
     }
 
+    Gee.ArrayList<SuperSourceView.LineAnnotation> annotations = new Gee.ArrayList<SuperSourceView.LineAnnotation>();
     public override void build() {
         ListStore store;
         if (showall)
@@ -181,6 +182,10 @@ class UiReport : UiElement {
         int exp = 0;
         int note = 0;
 
+        foreach (SuperSourceView.LineAnnotation annotation in annotations)
+            annotation.finished = true;
+        annotations = new Gee.ArrayList<SuperSourceView.LineAnnotation>();
+
         foreach (var err in project.get_errorlist()) {
             if ((err.type & reptype) == 0 ||
                     (!showall &&
@@ -189,6 +194,8 @@ class UiReport : UiElement {
 
             if (showall)
                 bfr = project.get_buffer_by_file (err.source.file.filename);
+
+            var view = source_viewer.get_sourceview_by_file (err.source.file.filename);
 
             Gdk.Pixbuf? pixbuf = null;
             TextIter? iter_start = null;
@@ -202,14 +209,18 @@ class UiReport : UiElement {
 
             switch (err.type) {
                 case ReportType.ERROR:
-                    if (bfr != null)
+                    if (bfr != null) {
                         bfr.apply_tag_by_name ("error_bg", iter_start, iter_end);
+                        annotations.add (view.annotate (err.source.begin.line - 1, err.message));
+                    }
                     pixbuf = pixmap_err;
                     ++errs;
                     break;
                 case ReportType.WARNING:
-                    if (bfr != null)
+                    if (bfr != null) {
                         bfr.apply_tag_by_name ("warning_bg", iter_start, iter_end);
+                        annotations.add (view.annotate (err.source.begin.line - 1, err.message));
+                    }
                     pixbuf = pixmap_warn;
                     ++warns;
                     break;
