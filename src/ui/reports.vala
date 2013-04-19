@@ -212,7 +212,7 @@ class UiReport : UiElement {
                 case ReportType.ERROR:
                     if (bfr != null) {
                         bfr.apply_tag_by_name ("error_bg", iter_start, iter_end);
-                        annotations.add (view.annotate (err.source.begin.line - 1, err.message));
+                        annotations.add (view.annotate (err.source.begin.line - 1, err.message, 1.0, 0.0, 0.0));
                     }
                     pixbuf = pixmap_err;
                     ++errs;
@@ -220,17 +220,21 @@ class UiReport : UiElement {
                 case ReportType.WARNING:
                     if (bfr != null) {
                         bfr.apply_tag_by_name ("warning_bg", iter_start, iter_end);
-                        annotations.add (view.annotate (err.source.begin.line - 1, err.message));
+                        annotations.add (view.annotate (err.source.begin.line - 1, err.message, 1.0, 1.0, 0.0));
                     }
                     pixbuf = pixmap_warn;
                     ++warns;
                     break;
                 case ReportType.DEPRECATED:
                     pixbuf = pixmap_depr;
+                    if (view != null)
+                        annotations.add (view.annotate (err.source.begin.line - 1, err.message, 0.0, 0.0, 1.0));
                     ++depr;
                     break;
                 case ReportType.EXPERIMENTAL:
                     pixbuf = pixmap_exp;
+                    if (view != null)
+                        annotations.add (view.annotate (err.source.begin.line - 1, err.message, 1.0, 1.0, 0.0));
                     ++exp;
                     break;
                 case ReportType.NOTE:

@@ -19,7 +19,7 @@
 
 using Gtk;
 using Vala;
-                                                                                                                                 
+
 /**
  * Enhanced GtkSourceView
  */
@@ -69,11 +69,14 @@ public class SuperSourceView : SourceView {
         animation.view = this;
         animations.add (animation);
     }
-    public LineAnnotation annotate (int line, string text) {
+    public LineAnnotation annotate (int line, string text, double r, double g, double b) {
         var animation = new LineAnnotation();
         animation.line = line;
         animation.text = text;
         animation.view = this;
+        animation.r = r;
+        animation.g = g;
+        animation.b = b;
         animations.add (animation);
         return animation;
     }
@@ -93,12 +96,26 @@ public class SuperSourceView : SourceView {
         }
         public int line;
         public string text;
+
+        public double r = 1.0;
+        public double g = 0.0;
+        public double b = 0.0;
+
         bool visible = false;
+        double proc = 0.0;
         public override void mouse_move (int line) {
-            visible = this.line == line;
-            advance();
+            if (visible != (this.line == line)) {
+                animated = true;
+                visible = this.line == line;
+            }
         }
         public override void advance() {
+            if (visible && proc < 1.0)
+                proc += 0.1;
+            else if (!visible && proc > 0.0)
+                proc -= 0.1;
+            else
+                animated = false;
             int y, height, wx, wy;
             TextIter iter;
             view.buffer.get_iter_at_line (out iter, line);
@@ -107,7 +124,7 @@ public class SuperSourceView : SourceView {
             view.queue_draw_area (0, wy + height - 3, view.get_allocated_width(), height + 6);
         }
         public override void draw(Cairo.Context cr) {
-            if (!visible)
+            if (proc == 0)
                 return;
             int y, height, wx, wy;
             TextIter iter;
@@ -122,14 +139,14 @@ public class SuperSourceView : SourceView {
             cr.text_extents (text, out extents);
 
             rounded_rectanlge (cr, wx, wy + height, extents.width + 6, height, 7);
-            cr.set_source_rgba (1.0, 0.0, 0.0, 1.0);
+            cr.set_source_rgba (r, g, b, 1.0 * proc);
             cr.set_line_width (1);
             cr.stroke_preserve();
-            cr.set_source_rgba (1.0, 0.0, 0.0, 0.8);
+            cr.set_source_rgba (r, g, b, 0.75 * proc);
             cr.fill();
 
             cr.move_to (wx + 3, wy + height * 2 - 3);
-            cr.set_source_rgba (0.0, 0.0, 0.0, 1.0);
+            cr.set_source_rgba (0.0, 0.0, 0.0, 1.0 * proc);
             cr.show_text (text);
         }
         void rounded_rectanlge (Cairo.Context cr, double x, double y, double width, double height, double r) {
