@@ -283,6 +283,24 @@ class UiSourceViewer : UiElement {
             }
         });
 
+        var lgrid = new Grid();
+        lgrid.valign = Align.CENTER;
+        statusbar.pack_start (lgrid, false);
+
+        var pos_col_lbl = new Label (get_label_row_col (view));
+        pos_col_lbl.width_request = 100;
+        lgrid.attach (pos_col_lbl, 0, 0, 1, 1);
+        view.buffer.notify["cursor-position"].connect (() => {
+            pos_col_lbl.label = get_label_row_col (view);
+        });
+
+        var insmode_lbl = new Label ((view.overwrite) ? _("OVR") : _("INS"));
+        insmode_lbl.width_request = 50;
+        lgrid.attach (insmode_lbl, 1, 0, 1, 1);
+        view.notify["overwrite"].connect (() => {
+            insmode_lbl.label = (view.overwrite) ? _("OVR") : _("INS");
+        });
+
         var sepu = new Separator (Orientation.HORIZONTAL);
         vbox.pack_start (sepu, false);
 
@@ -371,6 +389,20 @@ class UiSourceViewer : UiElement {
             set_notebook_tabs (item);
         });
 #endif
+    }
+
+    /**
+     * Update row and column statusbar string.
+     *
+     * @param view Corresponding view with {@link Gtk.TextBuffer}.
+     * @return Row and column info.
+     */
+    private inline string get_label_row_col (SourceView view) {
+        TextIter iter;
+        view.buffer.get_iter_at_mark (out iter, view.buffer.get_insert());
+        var row = iter.get_line();
+        var column = view.get_visual_column (iter);
+        return _("Ln %d, Col %d").printf (row + 1, column + 1);
     }
 
     /**
