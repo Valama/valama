@@ -308,6 +308,7 @@ public class GuanakoCompletion : Gtk.SourceCompletionProvider, Object {
 
     Project.CompletionRun completion_run = null;
     bool completion_run_queued = false;
+    SuperSourceView.LineAnnotation current_symbol_annotation = null;
     public void populate (Gtk.SourceCompletionContext context) {
         //TODO: Provide way to get completion for not saved content.
         if (is_new_document (source_viewer.current_srcfocus))
@@ -353,7 +354,33 @@ public class GuanakoCompletion : Gtk.SourceCompletionProvider, Object {
                         current_symbol = completion_run.cur_stack.last();
                     else
                         current_symbol = null;
+                    if (current_symbol_annotation != null)
+                        current_symbol_annotation.finished = true;
 
+                    string lblstr = "";
+                    if (current_symbol is Method) {
+                        var mth = current_symbol as Method;
+                        if (mth.return_type.data_type != null)
+                            lblstr += Markup.escape_text (mth.return_type.data_type.name);
+                        else
+                            lblstr += "void";
+                        lblstr += " " + mth.name + " (";
+                        var prms = mth.get_parameters();
+                        for (int q = 0; q < prms.size; q++) {
+                            if (prms[q].direction == ParameterDirection.OUT)
+                                lblstr += "out ";
+                            else if (prms[q].direction == ParameterDirection.REF)
+                                lblstr += "ref ";
+                            lblstr += prms[q].variable_type.data_type.name + " " + prms[q].name;
+                            if (q < prms.size - 1)
+                                lblstr += ", ";
+                        }
+
+                        lblstr += ")";
+                        
+                    } else
+                        lblstr = current_symbol.name;
+                    current_symbol_annotation = source_viewer.current_srcview.annotate (line - 1, lblstr, 0.5, 0.5, 0.5, true);
                     GLib.Idle.add (() => {
                         project.completion_finished (current_symbol);
                         return false;

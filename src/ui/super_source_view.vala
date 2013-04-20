@@ -69,7 +69,7 @@ public class SuperSourceView : SourceView {
         animation.view = this;
         animations.add (animation);
     }
-    public LineAnnotation annotate (int line, string text, double r, double g, double b) {
+    public LineAnnotation annotate (int line, string text, double r, double g, double b, bool always_visible) {
         var animation = new LineAnnotation();
         animation.line = line;
         animation.text = text;
@@ -77,6 +77,7 @@ public class SuperSourceView : SourceView {
         animation.r = r;
         animation.g = g;
         animation.b = b;
+        animation.always_visible = always_visible;
         animations.add (animation);
         return animation;
     }
@@ -96,6 +97,7 @@ public class SuperSourceView : SourceView {
         }
         public int line;
         public string text;
+        public bool always_visible = false;
 
         public double r = 1.0;
         public double g = 0.0;
@@ -110,12 +112,14 @@ public class SuperSourceView : SourceView {
             }
         }
         public override void advance() {
-            if (visible && proc < 1.0)
-                proc += 0.1;
-            else if (!visible && proc > 0.0)
-                proc -= 0.1;
-            else
-                animated = false;
+            if (!always_visible) {
+                if (visible && proc < 1.0)
+                    proc += 0.1;
+                else if (!visible && proc > 0.0)
+                    proc -= 0.1;
+                else
+                    animated = false;
+            }
             int y, height, wx, wy;
             TextIter iter;
             view.buffer.get_iter_at_line (out iter, line);
@@ -124,8 +128,11 @@ public class SuperSourceView : SourceView {
             view.queue_draw_area (0, wy + height - 3, view.get_allocated_width(), height + 6);
         }
         public override void draw(Cairo.Context cr) {
-            if (proc == 0)
-                return;
+            if (always_visible)
+                proc = 1.0;
+            else
+                if (proc == 0)
+                    return;
             int y, height, wx, wy;
             TextIter iter;
 

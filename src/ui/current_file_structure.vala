@@ -90,6 +90,7 @@ public class UiCurrentFileStructure : UiElement {
         source_viewer.jump_to_position (source_viewer.current_srcfocus,
                                         smb.source_reference.begin.line - 1,
                                         smb.source_reference.begin.column - 1);
+        source_viewer.current_srcview.highlight_line (smb.source_reference.begin.line - 1);
     }
 
     protected override void build() {
