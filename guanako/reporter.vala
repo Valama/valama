@@ -50,7 +50,7 @@ namespace Guanako {
     }
 
     public class Reporter : Report {
-        public static Gee.ArrayList<Error> errlist { get; protected set; }
+        public virtual Gee.ArrayList<Error> errlist { get; protected set; }
         private bool general_error = false;
 
         public class Error {
@@ -65,7 +65,7 @@ namespace Guanako {
             }
         }
 
-        public Reporter() {
+        construct {
             errlist = new Gee.ArrayList<Error>();
             errors = 0;
             warnings = 0;

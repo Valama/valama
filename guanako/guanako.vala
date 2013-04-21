@@ -201,7 +201,7 @@ namespace Guanako {
         }
 
         public inline Gee.ArrayList<Reporter.Error> get_errorlist() {
-            return Reporter.errlist;
+            return ((Reporter) context.report).errlist;
         }
 
         /*

@@ -276,10 +276,6 @@ class UiReport : UiElement {
 }
 
 public class ReportWrapper : Guanako.Reporter {
-    construct {
-        errlist.clear();
-    }
-
     private inline void dbg_ref_msg (ReportType type, Vala.SourceReference? source, string message) {
         if (source != null)
             debug_msg_level (2, _("%s found: %s: %d(%d)-%d(%d): %s\n"),
