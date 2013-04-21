@@ -191,12 +191,11 @@ namespace Guanako {
 
         public inline void set_reporter (Type reptype) {
             lock (context) {
-                //TODO: Will segfault. Lookup GNOME bug number.
-                // if (reptype is Reporter)
+                if (reptype == typeof (Reporter)) {
                     manual_report = reptype;
                     context.report = Object.new (reptype) as Reporter;
-                // else
-                //     manual_report = null;
+                } else
+                    manual_report = null;
             }
         }
 
