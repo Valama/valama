@@ -70,13 +70,8 @@ public class SuperSourceView : SourceView {
         animations.add (animation);
     }
     public LineAnnotation annotate (int line, string text, double r, double g, double b, bool always_visible) {
-        var animation = new LineAnnotation();
-        animation.line = line;
+        var animation = new LineAnnotation(this, line, r, g, b);
         animation.text = text;
-        animation.view = this;
-        animation.r = r;
-        animation.g = g;
-        animation.b = b;
         animation.always_visible = always_visible;
         animations.add (animation);
         return animation;
@@ -92,8 +87,14 @@ public class SuperSourceView : SourceView {
         internal abstract void draw (Cairo.Context cr);
     }
     public class LineAnnotation : Animation{
-        public LineAnnotation() {
+        public LineAnnotation(SuperSourceView view, int line, double r, double g, double b) {
+            this.r = r;
+            this.g = g;
+            this.b = b;
+            this.view = view;
+            this.line = line;
             animated = false;
+            advance();
         }
         public int line;
         public string text;
@@ -145,7 +146,7 @@ public class SuperSourceView : SourceView {
             Cairo.TextExtents extents;
             cr.text_extents (text, out extents);
 
-            rounded_rectanlge (cr, wx, wy + height, extents.width + 6, height, 7);
+            rounded_rectanlge (cr, wx, wy + height, extents.width + 6, extents.height + 3, 7);
             cr.set_source_rgba (r, g, b, 1.0 * proc);
             cr.set_line_width (1);
             cr.stroke_preserve();
