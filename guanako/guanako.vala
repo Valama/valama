@@ -191,7 +191,7 @@ namespace Guanako {
 
         public inline void set_reporter (Type reptype) {
             lock (context) {
-                if (reptype == typeof (Reporter)) {
+                if (reptype.is_a (typeof (Reporter))) {
                     manual_report = reptype;
                     context.report = Object.new (reptype) as Reporter;
                 } else
