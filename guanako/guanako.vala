@@ -190,17 +190,19 @@ namespace Guanako {
         }
 
         public inline void set_reporter (Type reptype) {
-            lock (context) {
-                if (reptype.is_a (typeof (Reporter))) {
+            if (reptype.is_a (typeof (Reporter))) {
+                /* Don't overwrite errorlist if reporter is set later. */
+                // lock (context) {
                     manual_report = reptype;
-                    context.report = Object.new (reptype) as Reporter;
-                } else
-                    manual_report = null;
-            }
+                //     context.report = Object.new (reptype) as Reporter;
+                // }
+            } else
+                manual_report = null;
         }
 
         public inline Gee.ArrayList<Reporter.Error> get_errorlist() {
-            return ((Reporter) context.report).errlist;
+            lock (context)
+                return (context.report as Reporter).errlist;
         }
 
         /*
@@ -211,6 +213,12 @@ namespace Guanako {
                 return false;
             defines_manual.add (define);
             return true;  // also if already defined
+        }
+
+        public inline void commit_defines() {
+            lock (context)
+                foreach (var define in defines_manual)
+                    context.add_define (define);
         }
 
         public inline bool remove_define (string define) {

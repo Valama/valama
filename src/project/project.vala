@@ -465,6 +465,9 @@ public class ValamaProject : Object {
     /**
      * Emit to set define (if found is `true`).
      *
+     * NOTE: Currently don't disable defines to avoid (unnecessary) complete
+     *       source file update.
+     *
      * @param define Processed define.
      * @param found `true` to set define (`false` to don't set it).
      * @return `true` on success else `false`.
@@ -592,6 +595,7 @@ public class ValamaProject : Object {
             comp_provider.name = _("%s - Vala").printf (project_name);
         });
 
+        VoidDelegate? init_define_signals = null;
         guanako_update_finished.connect (() => {
             var used_defines_new = new TreeMap<string, TreeSet<string>>();
             var mit = guanako_project.get_defines_used().map_iterator();
@@ -616,48 +620,59 @@ public class ValamaProject : Object {
                 defines_changed (false, define);
             }
 
-            VoidDelegate init_define_signals = () => {
-                define_set.connect ((define, found) => {
-                    if (found)
-                        return set_define (define);
-                    return false;
-                });
-                defines_update.connect (() => {
-                    parsing = true;
-                    try {
-                        new Thread<void*>.try (_("Source file update"), () => {
-                            guanako_update_started();
-                            guanako_project.update();
-                            Idle.add (() => {
-                                guanako_update_finished();
-                                parsing = false;
-                                if (loop_update.is_running())
-                                    loop_update.quit();
-                                return false;
+            if (init_define_signals == null) {
+                init_define_signals = () => {
+                    define_set.connect ((define, found) => {
+                        if (found) {
+                            if (set_define (define)) {
+                                defines_update();
+                                return true;
+                            }
+                        } /*else if (unset_define (define)) {
+                            defines_update();
+                            return true;
+                        }*/
+                        return false;
+                    });
+                    defines_update.connect (() => {
+                        parsing = true;
+                        try {
+                            new Thread<void*>.try (_("Source file update"), () => {
+                                guanako_update_started();
+                                guanako_project.update();
+                                Idle.add (() => {
+                                    guanako_update_finished();
+                                    parsing = false;
+                                    if (loop_update.is_running())
+                                        loop_update.quit();
+                                    return false;
+                                });
+                                return null;
                             });
-                            return null;
-                        });
-                    } catch (GLib.Error e) {
-                        errmsg (_("Could not create thread to update source files: %s\n"), e.message);
-                        parsing = false;
-                    }
-                });
-            };
+                        } catch (GLib.Error e) {
+                            errmsg (_("Could not create thread to update source files: %s\n"), e.message);
+                            parsing = false;
+                        }
+                    });
+                };
 
-            var initial_defines = new TreeSet<string>();
-            initial_defines.add_all (used_defines.keys);
-            if (initial_defines.size > 0)
-                define_handler_id = define_set.connect ((define) => {
-                    var ret = initial_defines.remove (define);
-                    if (initial_defines.size == 0) {
-                        this.disconnect (define_handler_id);
-                        init_define_signals();
-                        defines_update();
-                    }
-                    return ret;
-                });
-            else
-                init_define_signals();
+                var initial_defines = new TreeSet<string>();
+                initial_defines.add_all (used_defines.keys);
+                if (initial_defines.size > 0)
+                    define_handler_id = define_set.connect ((define, found) => {
+                        var ret = initial_defines.remove (define);
+                        if (found)
+                            set_define (define);
+                        if (initial_defines.size == 0) {
+                            this.disconnect (define_handler_id);
+                            init_define_signals();
+                            defines_update();
+                        }
+                        return ret;
+                    });
+                else
+                    init_define_signals();
+            }
 
             foreach (var define in used_defines.keys)
                 if (defines.add (define))

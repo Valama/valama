@@ -163,7 +163,7 @@ public abstract class BuildSystem : Object {
     }
 
     protected virtual void unregister_define (string define) {
-        if (project.unset_define (define))
+        if (project.define_set (define, false))
             debug_msg (_("Disable define: %s\n"), define);
     }
 
