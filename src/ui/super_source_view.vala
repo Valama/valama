@@ -44,8 +44,10 @@ public class SuperSourceView : SourceView {
 
         Timeout.add (30, ()=>{
             foreach (Animation anim in animations)
-                if (anim.animated)
+                if (anim.animated) {
                     anim.advance ();
+                    anim.queue_draw ();
+                }
             while (true) {
                 for (int q = 0; q < animations.size; q++)
                     if (animations[q].finished) {
@@ -83,6 +85,7 @@ public class SuperSourceView : SourceView {
         public bool animated = false;
         internal SuperSourceView view;
         internal abstract void advance();
+        internal abstract void queue_draw();
         internal abstract void mouse_move (int line);
         internal abstract void draw (Cairo.Context cr);
     }
@@ -112,6 +115,14 @@ public class SuperSourceView : SourceView {
                 visible = this.line == line;
             }
         }
+        public override void queue_draw() {
+            int y, height, wx, wy;
+            TextIter iter;
+            view.buffer.get_iter_at_line (out iter, line);
+            view.get_line_yrange (iter, out y, out height);
+            view.buffer_to_window_coords (TextWindowType.WIDGET, 0, y, out wx, out wy);
+            view.queue_draw_area (0, wy + height - 3, view.get_allocated_width(), height + 6);
+        }
         public override void advance() {
             if (!always_visible) {
                 if (visible && proc < 1.0)
@@ -121,12 +132,6 @@ public class SuperSourceView : SourceView {
                 else
                     animated = false;
             }
-            int y, height, wx, wy;
-            TextIter iter;
-            view.buffer.get_iter_at_line (out iter, line);
-            view.get_line_yrange (iter, out y, out height);
-            view.buffer_to_window_coords (TextWindowType.WIDGET, 0, y, out wx, out wy);
-            view.queue_draw_area (0, wy + height - 3, view.get_allocated_width(), height + 6);
         }
         public override void draw(Cairo.Context cr) {
             if (always_visible)
@@ -140,20 +145,21 @@ public class SuperSourceView : SourceView {
             view.buffer.get_iter_at_line (out iter, line);
             view.get_line_yrange (iter, out y, out height);
             view.buffer_to_window_coords (TextWindowType.WIDGET, 0, y, out wx, out wy);
+            var gutter_width = this.view.get_gutter (TextWindowType.LEFT).get_window().get_width();
 
             cr.select_font_face ("Monospace", Cairo.FontSlant.NORMAL, Cairo.FontWeight.NORMAL);
             cr.set_font_size (10);
             Cairo.TextExtents extents;
             cr.text_extents (text, out extents);
 
-            rounded_rectanlge (cr, wx, wy + height, extents.width + 6, extents.height + 3, 7);
+            rounded_rectanlge (cr, gutter_width, wy + height, extents.width + 6, extents.height + 3, 7);
             cr.set_source_rgba (r, g, b, 1.0 * proc);
             cr.set_line_width (1);
             cr.stroke_preserve();
             cr.set_source_rgba (r, g, b, 0.75 * proc);
             cr.fill();
 
-            cr.move_to (wx + 3, wy + height * 2 - 3);
+            cr.move_to (gutter_width + 3, wy + height * 2 - 3);
             cr.set_source_rgba (0.0, 0.0, 0.0, 1.0 * proc);
             cr.show_text (text);
         }
@@ -177,16 +183,17 @@ public class SuperSourceView : SourceView {
         double proc = 0;
         public override void mouse_move (int line) {
         }
-        public override void advance() {
-            proc += 0.3;
-            finished = proc >= 10;
-
+        public override void queue_draw() {
             int y, height, wx, wy;
             TextIter iter;
             view.buffer.get_iter_at_line (out iter, line);
             view.get_line_yrange (iter, out y, out height);
             view.buffer_to_window_coords (TextWindowType.WIDGET, 0, y, out wx, out wy);
             view.queue_draw_area (0, wy - 10, view.get_allocated_width(), height + 20);
+        }
+        public override void advance() {
+            proc += 0.3;
+            finished = proc >= 10;
         }
         public override void draw(Cairo.Context cr) {
             int y, height, wx, wy;
