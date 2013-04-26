@@ -414,6 +414,7 @@ namespace Guanako {
 
             context.resolver.resolve (context);
             context.analyzer.analyze (context);
+            context.flow_analyzer.analyze (context);
             Vala.CodeContext.pop();
         }
 
@@ -446,7 +447,7 @@ namespace Guanako {
                  * due to read-only list).
                  */
                 debug_msg ("Update source file: %s\n", file.filename);
-                ((Reporter) context.report).reset_file (file.filename);
+                (context.report as Reporter).reset_file (file.filename);
 
                 Vala.CodeContext.push (context);
 
