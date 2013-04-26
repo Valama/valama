@@ -314,13 +314,6 @@ public class GuanakoCompletion : Gtk.SourceCompletionProvider, Object {
         if (is_new_document (source_viewer.current_srcfocus))
             return;
 
-        if (!source_viewer.current_srcbuffer.last_key_valid) {
-            if (context is SourceCompletionContext)
-                context.add_proposals (this, new GLib.List<Gtk.SourceCompletionItem>(), true);
-            current_symbol_annotation = null;
-            return;
-        }
-
         lock (completion_run) {
             completion_run_queued = true;
             if (completion_run != null) {
@@ -350,6 +343,17 @@ public class GuanakoCompletion : Gtk.SourceCompletionProvider, Object {
                     var current_line = source_viewer.current_srcbuffer.get_text (iter_start, iter, false);
 
                     completion_run_queued = false;
+                    if (current_line.strip() == "" && !source_viewer.current_srcbuffer.last_key_valid) {
+                        if (context is SourceCompletionContext)
+                            context.add_proposals (this, new GLib.List<Gtk.SourceCompletionItem>(), true);
+                        current_symbol_annotation = null;
+                        if (!completion_run_queued) {
+                            completion_run = null;
+                            break;
+                        } else
+                            continue;
+                    }
+
                     var guanako_proposals = completion_run.run (project.guanako_project.get_source_file_by_name (source_viewer.current_srcfocus),
                                         line, col, current_line);
                     lock (completion_run) {
