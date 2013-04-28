@@ -309,6 +309,7 @@ public class GuanakoCompletion : Gtk.SourceCompletionProvider, Object {
     Project.CompletionRun completion_run = null;
     bool completion_run_queued = false;
     SuperSourceView.LineAnnotation current_symbol_annotation = null;
+    TextMark completion_mark; /* The mark at which the proposals were generated */
     public void populate (Gtk.SourceCompletionContext context) {
         //TODO: Provide way to get completion for not saved content.
         if (is_new_document (source_viewer.current_srcfocus))
@@ -332,9 +333,9 @@ public class GuanakoCompletion : Gtk.SourceCompletionProvider, Object {
                         loop_update.run();
 
                     /* Get current line */
-                    var mark = source_viewer.current_srcbuffer.get_insert();
+                    completion_mark = source_viewer.current_srcbuffer.get_insert();
                     TextIter iter;
-                    source_viewer.current_srcbuffer.get_iter_at_mark (out iter, mark);
+                    source_viewer.current_srcbuffer.get_iter_at_mark (out iter, completion_mark);
                     var line = iter.get_line() + 1;
                     var col = iter.get_line_offset();
 
@@ -455,7 +456,9 @@ public class GuanakoCompletion : Gtk.SourceCompletionProvider, Object {
                                    Gtk.TextIter iter) {
         var prop = ((ComplItem)proposal).guanako_proposal;
 
-        TextIter start = iter;
+        /* Count backward from completion_mark instead of iter (avoids wrong insertion if the user is typing fast) */
+        TextIter start;
+        source_viewer.current_srcbuffer.get_iter_at_mark (out start, completion_mark);
         start.backward_chars (prop.replace_length);
 
         source_viewer.current_srcbuffer.delete (ref start, ref iter);
