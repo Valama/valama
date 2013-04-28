@@ -276,7 +276,7 @@ public class PackageInfo {
         if (namerel != 0)
             return namerel;
 
-        int verrel = strcmp (pkg1.version, pkg2.version);
+        int verrel = comp_version (pkg1.version, pkg2.version);
         if (verrel != 0)
             return verrel;
 
@@ -1169,7 +1169,7 @@ public class ValamaProject : Object {
 
         if (root_node->has_prop ("version") != null)
             project_file_version = root_node->get_prop ("version");
-        if (comp_proj_version (project_file_version, VLP_VERSION_MIN) < 0) {
+        if (comp_version (project_file_version, VLP_VERSION_MIN) < 0) {
             var errstr = _("Project file too old: %s < %s").printf (project_file_version,
                                                                     VLP_VERSION_MIN);
             if (!Args.forceold) {
@@ -1511,7 +1511,7 @@ public class ValamaProject : Object {
 
         // if (root_node->has_prop ("version") != null)
         //     xXx = root_node->get_prop ("version");
-        // if (comp_proj_version (xXx, xXx_VERSION_MIN) < 0) {
+        // if (comp_version (xXx, xXx_VERSION_MIN) < 0) {
         //     var errstr = _("Project file too old: %s < %s").printf (xXx,
         //                                                             xXx_VERSION_MIN);
         //     if (!Args.forceold) {

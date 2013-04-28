@@ -576,34 +576,73 @@ public bool save_file (string filename, string text) {
  *
  * @param ver_a First version.
  * @param ver_b Second version.
- * @return If first version is smaller return 1. If second version is smaller
- *         return -1. On equality return 0.
+ * @return If first version is smaller return -1. If second version is smaller
+ *         return 1. On equality return 0.
  */
-/*
- * Currently no real difference to strcmp.
- */
-#if DO_NOT_COMPILE
-public int comp_proj_version (string ver_a, string ver_b) {
-    //TODO: Epoch and ~ checks.
-    string[] a_parts = ver_a.split (".");
-    string[] b_parts = ver_b.split (".");
-
-    int max = (a_parts.length >= b_parts.length) ? a_parts.length : b_parts.length;
-
-    for (int i = 0; i < max; ++i) {
-        var ret = strcmp (a_parts[i], b_parts[i]);
-        if (ret > 0)
-            return 1;
-        else if (ret < 0)
-            return -1;
+public int comp_version (string ver_a, string ver_b) {
+    /* Epoch check. */
+    string[] a_ep_parts = ver_a.split (":", 2);
+    string[] b_ep_parts = ver_b.split (":", 2);
+    var eps = a_ep_parts.length - b_ep_parts.length;
+    if (eps > 0)
+        return 1;
+    else if (eps < 0)
+        return -1;
+    else if (a_ep_parts.length == 2) {
+        var ret = comp_version_part (a_ep_parts[0], b_ep_parts[0]);
+        if (ret != 0)
+            return ret;
     }
+
+    string[] a_parts = a_ep_parts[a_ep_parts.length - 1].split (".");
+    string[] b_parts = b_ep_parts[b_ep_parts.length - 1].split (".");
+
+    var max = (a_parts.length < b_parts.length) ? a_parts.length : b_parts.length;
+
+    for (var i = 0; i < max; ++i) {
+        var ret = comp_version_part (a_parts[i], b_parts[i]);
+        if (ret != 0)
+            return ret;
+    }
+
+    var ret = a_parts.length - b_parts.length;
+    if (ret > 0)
+        return 1;
+    else if (ret < 0)
+        return -1;
     return 0;
 }
-#else
-public inline int comp_proj_version (string ver_a, string ver_b) {
-    return strcmp (ver_a, ver_b);
+
+
+/**
+ * Direct string comparison (leading zeros removed).
+ *
+ * @param a First version.
+ * @param a Second version.
+ * @return If first version is smaller return -1. If second version is smaller
+ *         return 1. On equality return 0.
+ */
+internal inline int comp_version_part (string a, string b) {
+    /* Ignore leading zeros. */
+    uint a_start = 0;
+    while (a_start < a.length && a[a_start] == '0')
+        ++a_start;
+    uint b_start = 0;
+    while (b_start < b.length && b[b_start] == '0')
+        ++b_start;
+    var ret = a[a_start:a.length].length - b[b_start:b.length].length;
+    if (ret > 0)
+        return 1;
+    else if (ret < 0)
+        return -1;
+
+    ret = strcmp (a[a_start:a.length], b[b_start:b.length]);
+    if (ret > 0)
+        return 1;
+    else if (ret < 0)
+        return -1;
+    return 0;
 }
-#endif
 
 
 /* Message methods. */

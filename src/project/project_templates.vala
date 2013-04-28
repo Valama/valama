@@ -85,16 +85,16 @@ public class ProjectTemplate {
                     bool unmet;
                     switch (pkg_rel) {
                         case VersionRelation.SINCE:
-                            unmet = comp_proj_version (pkg_ver, pkg.version) < 0;
+                            unmet = comp_version (pkg_ver, pkg.version) < 0;
                             break;
                         case VersionRelation.UNTIL:
-                            unmet = comp_proj_version (pkg_ver, pkg.version) > 0;
+                            unmet = comp_version (pkg_ver, pkg.version) > 0;
                             break;
                         case VersionRelation.ONLY:
-                            unmet = comp_proj_version (pkg_ver, pkg.version) != 0;
+                            unmet = comp_version (pkg_ver, pkg.version) != 0;
                             break;
                         case VersionRelation.EXCLUDE:
-                            unmet = comp_proj_version (pkg_ver, pkg.version) == 0;
+                            unmet = comp_version (pkg_ver, pkg.version) == 0;
                             break;
                         default:
                             bug_msg (_("Unexpected enum value: %s: %u\n"),
@@ -209,7 +209,7 @@ public ProjectTemplate[] load_templates() {
 
                 if (root_node->has_prop ("version") != null)
                     new_template.version = root_node->get_prop ("version");
-                if (comp_proj_version (new_template.version, TEMPLATE_VERSION_MIN) < 0) {
+                if (comp_version (new_template.version, TEMPLATE_VERSION_MIN) < 0) {
                     var errstr = _("Template file '%s' too old: %s < %s").printf (new_template.path,
                                                                                   new_template.version,
                                                                                   TEMPLATE_VERSION_MIN);

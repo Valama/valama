@@ -368,6 +368,7 @@ namespace Guanako {
 
             if (root_node->has_prop ("version") != null)
                 stylefile_version = root_node->get_prop ("version");
+            //TODO: strcmp not sufficient: 3.xx vs 15.xx
             if (strcmp (stylefile_version, STYLE_VERSION_MIN) < 0) {
                 delete doc;
                 throw new IOError.INVALID_DATA (_("Project file to old: %s < %s\n"),

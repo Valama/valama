@@ -707,7 +707,7 @@ public class MainWidget : Box {
 
         // if (root_node->has_prop ("version") != null)
         //     xXx = root_node->get_prop ("version");
-        // if (comp_proj_version (xXx, xXx_VERSION_MIN) < 0) {
+        // if (comp_version (xXx, xXx_VERSION_MIN) < 0) {
         //     var errstr = _("Project file too old: %s < %s").printf (xXx,
         //                                                             xXx_VERSION_MIN);
         //     if (!Args.forceold) {

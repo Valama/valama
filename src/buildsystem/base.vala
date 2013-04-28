@@ -322,19 +322,19 @@ public abstract class BuildSystem : Object {
                             switch (pkg_rel) {
                                 case null:
                                 case ">=":
-                                    ret = strcmp (version, ver) >= 0;
+                                    ret = comp_version (version, ver) >= 0;
                                     break;
                                 case "<":
-                                    ret = strcmp (version, ver) < 0;
+                                    ret = comp_version (version, ver) < 0;
                                     break;
                                 case "<=":
-                                    ret = strcmp (version, ver) <= 0;
+                                    ret = comp_version (version, ver) <= 0;
                                     break;
                                 case "!=":
-                                    ret = strcmp (version, ver) != 0;
+                                    ret = comp_version (version, ver) != 0;
                                     break;
                                 case "==":
-                                    ret = strcmp (version, ver) == 0;
+                                    ret = comp_version (version, ver) == 0;
                                     break;
                                 default:
                                     bug_msg (_("Unknown package version relation: %s - %s\n"),
