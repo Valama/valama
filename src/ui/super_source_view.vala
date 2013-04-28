@@ -71,8 +71,9 @@ public class SuperSourceView : SourceView {
         animation.view = this;
         animations.add (animation);
     }
-    public LineAnnotation annotate (int line, string text, double r, double g, double b, bool always_visible) {
+    public LineAnnotation annotate (int line, string text, double r, double g, double b, bool always_visible, int offset = 1) {
         var animation = new LineAnnotation(this, line, r, g, b);
+        animation.offset = offset;
         animation.text = text;
         animation.always_visible = always_visible;
         animations.add (animation);
@@ -100,6 +101,7 @@ public class SuperSourceView : SourceView {
             advance();
         }
         public int line;
+        public int offset;
         public string text;
         public bool always_visible = false;
 
@@ -121,7 +123,7 @@ public class SuperSourceView : SourceView {
             view.buffer.get_iter_at_line (out iter, line);
             view.get_line_yrange (iter, out y, out height);
             view.buffer_to_window_coords (TextWindowType.WIDGET, 0, y, out wx, out wy);
-            view.queue_draw_area (0, wy + height - 3, view.get_allocated_width(), height + 6);
+            view.queue_draw_area (0, wy + offset * height - 3, view.get_allocated_width(), height + 6);
         }
         public override void advance() {
             if (!always_visible) {
@@ -152,14 +154,14 @@ public class SuperSourceView : SourceView {
             Cairo.TextExtents extents;
             cr.text_extents (text, out extents);
 
-            rounded_rectanlge (cr, gutter_width, wy + height, extents.width + 6, extents.height + 3, 7);
+            rounded_rectanlge (cr, gutter_width, wy + offset * height, extents.width + 6, extents.height + 3, 7);
             cr.set_source_rgba (r, g, b, 1.0 * proc);
-            cr.set_line_width (1);
+            cr.set_line_width (2);
             cr.stroke_preserve();
-            cr.set_source_rgba (r, g, b, 0.75 * proc);
+            cr.set_source_rgba (r + 0.3, g + 0.3, b + 0.3, 0.75 * proc);
             cr.fill();
 
-            cr.move_to (gutter_width + 3, wy + height * 2 - 3);
+            cr.move_to (gutter_width + 3, wy + (offset + 1) * height - 5);
             cr.set_source_rgba (0.0, 0.0, 0.0, 1.0 * proc);
             cr.show_text (text);
         }

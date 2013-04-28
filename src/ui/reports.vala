@@ -208,11 +208,16 @@ class UiReport : UiElement {
                 iter_end.forward_chars (err.source.end.column);
             }
 
+            var annotation_line = err.source.begin.line - 1;
+            int offset = 1;
+            foreach (SuperSourceView.LineAnnotation annotation in annotations)
+                if (annotation.line == annotation_line)
+                    offset++;
             switch (err.type) {
                 case ReportType.ERROR:
                     if (bfr != null) {
                         bfr.apply_tag_by_name ("error_bg", iter_start, iter_end);
-                        annotations.add (view.annotate (err.source.begin.line - 1, err.message, 1.0, 0.0, 0.0, false));
+                        annotations.add (view.annotate (annotation_line, err.message, 1.0, 0.0, 0.0, false, offset));
                     }
                     pixbuf = pixmap_err;
                     ++errs;
@@ -220,7 +225,7 @@ class UiReport : UiElement {
                 case ReportType.WARNING:
                     if (bfr != null) {
                         bfr.apply_tag_by_name ("warning_bg", iter_start, iter_end);
-                        annotations.add (view.annotate (err.source.begin.line - 1, err.message, 1.0, 1.0, 0.0, false));
+                        annotations.add (view.annotate (annotation_line, err.message, 1.0, 1.0, 0.0, false, offset));
                     }
                     pixbuf = pixmap_warn;
                     ++warns;
@@ -228,13 +233,13 @@ class UiReport : UiElement {
                 case ReportType.DEPRECATED:
                     pixbuf = pixmap_depr;
                     if (view != null)
-                        annotations.add (view.annotate (err.source.begin.line - 1, err.message, 0.0, 0.0, 1.0, false));
+                        annotations.add (view.annotate (annotation_line, err.message, 0.0, 0.0, 1.0, false, offset));
                     ++depr;
                     break;
                 case ReportType.EXPERIMENTAL:
                     pixbuf = pixmap_exp;
                     if (view != null)
-                        annotations.add (view.annotate (err.source.begin.line - 1, err.message, 1.0, 1.0, 0.0, false));
+                        annotations.add (view.annotate (annotation_line, err.message, 1.0, 1.0, 0.0, false, offset));
                     ++exp;
                     break;
                 case ReportType.NOTE:
