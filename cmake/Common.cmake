@@ -111,32 +111,36 @@ function(convert_svg_to_png output)
   set(png_list)
   if(ARGS_ICON)
     if(ARGS_PNG_NAME)
-      find_program(CONVERT convert)
-      if(NOT datarootdir)
-        set(datarootdir "share")
-      endif()
-
-      foreach(size ${ARGS_SIZES})
-        set(tmppath "icons/hicolor/${size}x${size}/apps")
-        set(iconpath "${CMAKE_CURRENT_BINARY_DIR}/${tmppath}/${ARGS_PNG_NAME}.png")
-        execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/${tmppath}")
-        add_custom_command(
-          OUTPUT
-            "${iconpath}"
-          DEPENDS
-            "${ARGS_ICON}"
-          COMMAND
-            ${CONVERT}
-          ARGS
-            "-background" "none" "-resize" "${size}x${size}" "${ARGS_ICON}" "${iconpath}"
-        )
-        list(APPEND png_list "${iconpath}")
-        if(ARGS_DESTINATION)
-          install(FILES "${iconpath}" DESTINATION "${ARGS_DESTINATION}")
-        else()
-          install(FILES "${iconpath}" DESTINATION "${datarootdir}/${tmppath}")
+      find_program(CONVERT convertasdf)
+      if(CONVERT)
+        if(NOT datarootdir)
+          set(datarootdir "share")
         endif()
-      endforeach()
+
+        foreach(size ${ARGS_SIZES})
+          set(tmppath "icons/hicolor/${size}x${size}/apps")
+          set(iconpath "${CMAKE_CURRENT_BINARY_DIR}/${tmppath}/${ARGS_PNG_NAME}.png")
+          execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/${tmppath}")
+          add_custom_command(
+            OUTPUT
+              "${iconpath}"
+            DEPENDS
+              "${ARGS_ICON}"
+            COMMAND
+              ${CONVERT}
+            ARGS
+              "-background" "none" "-resize" "${size}x${size}" "${ARGS_ICON}" "${iconpath}"
+          )
+          list(APPEND png_list "${iconpath}")
+          if(ARGS_DESTINATION)
+            install(FILES "${iconpath}" DESTINATION "${ARGS_DESTINATION}")
+          else()
+            install(FILES "${iconpath}" DESTINATION "${datarootdir}/${tmppath}")
+          endif()
+        endforeach()
+      else()
+        message(WARNING "Could not find convert program. Don't generate icons.")
+      endif()
     endif()
   endif()
 

@@ -56,9 +56,11 @@ add_custom_target(icons_text
 
 
 # Install application icon.
-install(
-  FILES
-    "${CMAKE_CURRENT_BINARY_DIR}/icons/hicolor/32x32/apps/valama.png"
-  DESTINATION
-    "${pixrootdir}"
-)
+if(CONVERT)
+  install(
+    FILES
+      "${CMAKE_CURRENT_BINARY_DIR}/icons/hicolor/32x32/apps/valama.png"
+    DESTINATION
+      "${pixrootdir}"
+  )
+endif()
