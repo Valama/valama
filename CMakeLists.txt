@@ -33,6 +33,11 @@ set(pixrootdir "${datarootdir}/pixmaps")
 set(pixdir "${pixrootdir}/${project_name_lower}")
 set(docdir "${datadir}/doc")
 set(mandir "${datarootdir}/man")
+if(CMAKE_INSTALL_PREFIX)
+  set(install_prefix "${CMAKE_INSTALL_PREFIX}/")
+else()
+  set(install_prefix)
+endif()
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/vala")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
@@ -47,6 +52,7 @@ option(GUANAKO "Build guanako library." ON)
 option(DOCS "Build documentation." OFF)
 option(VALADOC_VERBOSE "Verbose (private/internal) document generation." OFF)
 option(VALADOC_EXTRA "Generate documentation also for all depending packages." OFF)
+option(COMPRESS_MANPAGE "Compress manpage" ON)
 
 if(GUANAKO)
   set(project_root "${project_name_lower}")
@@ -197,9 +203,9 @@ vala_pkgs(VALA_C
 add_definitions(-DPACKAGE_NAME="${project_name}")
 add_definitions(-DPACKAGE_VERSION="${${project_name}_VERSION}")
 add_definitions(-DGETTEXT_PACKAGE="${project_name_lower}")
-add_definitions(-DPACKAGE_DATA_DIR="${CMAKE_INSTALL_PREFIX}/${datadir}")
-add_definitions(-DLOCALE_DIR="${CMAKE_INSTALL_PREFIX}/${localedir}")
-add_definitions(-DPIXMAP_DIR="${CMAKE_INSTALL_PREFIX}/${pixdir}")
+add_definitions(-DPACKAGE_DATA_DIR="${install_prefix}${datadir}")
+add_definitions(-DLOCALE_DIR="${install_prefix}${localedir}")
+add_definitions(-DPIXMAP_DIR="${install_prefix}${pixdir}")
 add_definitions(-DVALA_VERSION="${VALA_SHORTVER}")
 
 include_directories("${PROJECT_BINARY_DIR}/guanako")
@@ -281,15 +287,36 @@ else(CMAKE_BUILD_TYPE STREQUAL "Debug")
 endif()
 
 
-# Compress and install manual page.
-#if(NOT MANPAGE_DISABLED)
-#  add_custom_command(COMMAND gzip -cf9 "${PROJECT_SOURCE_DIR}/man/${project_name_lower}.1" >
-#                      "${PROJECT_SOURCE_DIR}/man/${project_name_lower}.1.gz"
-#                    OUTPUT "${PROJECT_SOURCE_DIR}/man/${project_name_lower}.1.gz"
-#                    COMMENT "Generating manpage.")
-#  add_custom_target(manpage ALL DEPENDS "${PROJECT_SOURCE_DIR}/man/${project_name_lower}.1.gz")
-#  install(FILES "${PROJECT_SOURCE_DIR}/man/${project_name_lower}.1.gz" DESTINATION "${mandir}/man1")
-#endif()
+# Generate, compress and install manual page.
+datestring(MONTH_DATE "%B %Y")
+set(DATADIR "${install_prefix}${datadir}/")
+set(manfile "data/${project_name_lower}.1")
+configure_file("${manfile}.in" "${manfile}")
+if(COMPRESS_MANPAGE)
+  find_program(GZIP gzip)
+  if(NOT GZIP)
+    message(WARNING "Could not find gzip program. Disable manpage compression.")
+    set(COMPRESS_MANPAGE OFF)
+  else()
+    add_custom_command(
+      COMMAND
+        #TODO: Test this on Windows.
+        "${GZIP}" "-cf9" "${manfile}" > "${manfile}.gz"
+      OUTPUT
+        "${manfile}.gz"
+      COMMENT
+        "Compressing manpage." VERBATIM
+    )
+    set(manfile "${manfile}.gz")
+    add_custom_target(manpage
+      ALL
+      DEPENDS
+        "${manfile}"
+    )
+  endif()
+else()
+endif()
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${manfile}" DESTINATION "${mandir}/man1")
 
 
 install(TARGETS ${project_name_lower} DESTINATION "${bindir}")
@@ -303,9 +330,10 @@ install(DIRECTORY "data/buildsystems" DESTINATION "${datadir}")
 
 
 # Print some information about build.
+datestring(current_date "%F %T")
 message("")
 message("---------------------------------------------")
-message("")
+message("                          ${current_date}")
 message("${project_name} ${${project_name}_VERSION}  (Guanako ${Guanako_VERSION})")
 message("")
 if(CMAKE_BUILD_TYPE)
@@ -367,6 +395,11 @@ if(CMAKE_VERBOSE_MAKEFILE)
   message("Verbose build:          yes")
 else()
   message("Verbose build:          no")
+endif()
+if(COMPRESS_MANPAGE)
+  message("Compress manpage:       yes")
+else()
+  message("Compress manpage:       no")
 endif()
 message("")
 message("---------------------------------------------")

@@ -142,3 +142,53 @@ function(convert_svg_to_png output)
 
   set(${output} "${png_list}" PARENT_SCOPE)
 endfunction()
+
+
+##
+# Get formatted date string.
+#
+# Usage:
+# The first parameter is set to output date string.
+#
+# FORMAT
+#   Format string.
+#
+#
+# Simple example:
+#
+#   datestring(date
+#     FORMAT "%B %Y"
+#   )
+#   # Will print out e.g. "Date: April 2013"
+#   message("Date: ${date}")
+#
+#
+macro(datestring output)
+  include(CMakeParseArguments)
+  cmake_parse_arguments(ARGS "" "FORMAT" "" ${ARGN})
+
+  if(ARGS_FORMAT)
+    set(format "${ARGS_FORMAT}")
+  else()
+    set(format "${ARGN}")
+  endif()
+
+  if(WIN32)
+    #FIXME: Needs to be tested. Perhaps wrapping with cmd is needed.
+    execute_process(
+      COMMAND
+        "date" "${format}"
+      OUTPUT_VARIABLE
+        "${output}"
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+  else()
+    execute_process(
+      COMMAND
+      "date" "+${format}"
+      OUTPUT_VARIABLE
+        "${output}"
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+  endif()
+endmacro()
