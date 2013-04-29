@@ -409,13 +409,13 @@ namespace Guanako {
             else
                 context.report = Object.new (manual_report) as Reporter;
 
-            Vala.CodeContext.push (context);
+            CodeContext.push (context);
             parser.parse (context);
 
             context.resolver.resolve (context);
             context.analyzer.analyze (context);
             context.flow_analyzer.analyze (context);
-            Vala.CodeContext.pop();
+            CodeContext.pop();
         }
 
         void vanish_file (SourceFile file) {
@@ -449,8 +449,6 @@ namespace Guanako {
                 debug_msg ("Update source file: %s\n", file.filename);
                 (context.report as Reporter).reset_file (file.filename);
 
-                Vala.CodeContext.push (context);
-
                 vanish_file (file);
 
                 file.current_using_directives = new Vala.ArrayList<Vala.UsingDirective>();
@@ -460,13 +458,14 @@ namespace Guanako {
                     context.root.add_using_directive (ns_ref);
                 }
 
-                parser.visit_source_file (file);
+                CodeContext.push (context);
+                parser.parse_file (file);
 
                 context.resolver.resolve (context);
                 context.analyzer.visit_source_file (file);
-                context.check();
+                context.flow_analyzer.visit_source_file (file);
 
-                Vala.CodeContext.pop();
+                CodeContext.pop();
                 debug_msg ("Source file update finished.\n");
             }
         }
