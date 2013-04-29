@@ -138,9 +138,6 @@ configure_file("${project_name_lower}.deps.in" "${project_name_lower}.deps")
 
 set(default_vala_flags
   "--thread"
-  "-H" "${project_name_lower}.h"
-  "--gir" "${project_name}-${${project_name}_VERSION}.gir"
-  "--library" "${project_name_lower}"
   "--target-glib" "${GLIB2.0_VERSION}"
   "--enable-experimental"
   ${valac_cond}
@@ -155,6 +152,10 @@ vala_pkgs(VALA_C
     ${srcfiles}
   VAPIS
     ${vapifiles}
+  LIBRARY
+    "${project_name_lower}"
+  GIRFILE
+    "${project_name}-${${project_name}_VERSION}"
   OPTIONS
     ${default_vala_flags}
 )

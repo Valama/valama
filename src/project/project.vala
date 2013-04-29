@@ -466,7 +466,7 @@ public class ValamaProject : Object {
      * Emit to set define (if found is `true`).
      *
      * NOTE: Currently don't disable defines to avoid (unnecessary) complete
-     *       source file update.
+     * source file update.
      *
      * @param define Processed define.
      * @param found `true` to set define (`false` to don't set it).

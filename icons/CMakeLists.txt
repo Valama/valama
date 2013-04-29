@@ -16,6 +16,8 @@
 # with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+include("${CMAKE_SOURCE_DIR}/cmake/Common.cmake")
+
 # Generate usable application icons.
 set(sizeslist "24" "32" "48" "64" "72" "96" "128" "256")
 convert_svg_to_png(png_list
