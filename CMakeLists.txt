@@ -33,6 +33,7 @@ set(pixrootdir "${datarootdir}/pixmaps")
 set(pixdir "${pixrootdir}/${project_name_lower}")
 set(docdir "${datadir}/doc")
 set(mandir "${datarootdir}/man")
+set(mimedir "${datarootdir}/mime/packages")
 if(CMAKE_INSTALL_PREFIX)
   set(install_prefix "${CMAKE_INSTALL_PREFIX}/")
 else()
@@ -327,6 +328,7 @@ install(FILES "data/${project_name_lower}.desktop" DESTINATION "${appdir}")
 install(FILES "data/layout.xml" DESTINATION "${datadir}")
 install(DIRECTORY "data/templates" DESTINATION "${datadir}")
 install(DIRECTORY "data/buildsystems" DESTINATION "${datadir}")
+install(FILES "data/valama.xml" DESTINATION "${mimedir}")
 
 
 # Print some information about build.
