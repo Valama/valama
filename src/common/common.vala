@@ -682,14 +682,19 @@ public inline void errmsg (string format, ...) {
 }
 
 
-public class Pair<K,V> : Entry {
+public class Pair<K,V> : Gee.Map.Entry<K,V> {
     private K _key;
-    public K key { get { return _key; } }
-    public V value { get; set; }
+    private V _value;
+    public override K key { get { return _key; } }
+    public override V value {
+        get { return _value; }
+        set { _value = value; }
+    }
+    public override bool read_only { get { return false; } }
 
     public Pair (K key, V value) {
         _key = key;
-        this.value = value;
+        _value = value;
     }
 }
 
