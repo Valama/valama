@@ -548,10 +548,6 @@ namespace Guanako {
                     });
                 thread_add_items = new Thread<void*> (_("Proposal collector"), run_thread_add_items);
             }
-            ~ProposalSet() {
-                active = false;
-                loop_thread.quit();
-            }
 
             bool active = true;
             void* run_thread_add_items (){
@@ -578,10 +574,11 @@ namespace Guanako {
             }
 
             public void wait_for_finish() {
-                var tmr = new Timer();
-                tmr.start();
-                while (queue.size > 0) //TODO: Cleaner solution
+                while (queue.size > 0) { //TODO: Cleaner solution
                     Thread.usleep (1000);
+                }
+                active = false;
+                loop_thread.quit();
             }
 
             MainLoop loop_thread = new MainLoop();

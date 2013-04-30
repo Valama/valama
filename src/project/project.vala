@@ -643,8 +643,6 @@ public class ValamaProject : Object {
                                 Idle.add (() => {
                                     guanako_update_finished();
                                     parsing = false;
-                                    if (loop_update.is_running())
-                                        loop_update.quit();
                                     return false;
                                 });
                                 return null;
@@ -1814,8 +1812,6 @@ public class ValamaProject : Object {
                 Idle.add (() => {
                     guanako_update_finished();
                     parsing = false;
-                    if (loop_update.is_running())
-                        loop_update.quit();
                     return false;
                 });
                 return null;

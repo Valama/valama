@@ -62,8 +62,6 @@ public static int main (string[] args) {
     if (Args.debuglevel >= 1)
         Guanako.debug = true;
 
-    loop_update = new MainLoop();
-
     if (Args.projectfiles.length > 0)
         try {
             project = new ValamaProject (Args.projectfiles[0], Args.syntaxfile);
@@ -85,7 +83,6 @@ static bool quit_valama() {
     if (widget_main != null)
         widget_main.close();
     window_main.destroy();
-    loop_update.quit();
     return true;
 }
 
@@ -329,9 +326,6 @@ public class GuanakoCompletion : Gtk.SourceCompletionProvider, Object {
                 /* Get completion proposals from Guanako */
                 while (true) {
                     completion_run = new Project.CompletionRun (project.guanako_project);
-
-                    if (parsing)
-                        loop_update.run();
 
                     /* Get current line */
                     completion_mark = source_viewer.current_srcbuffer.get_insert();

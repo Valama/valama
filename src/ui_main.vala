@@ -27,7 +27,6 @@ static ValamaProject project;
 static Guanako.FrankenStein frankenstein;
 
 static bool parsing = false;
-static MainLoop loop_update;
 
 //TODO: Use plugins.
 static ProjectBrowser wdg_pbrw;
