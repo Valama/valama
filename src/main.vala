@@ -85,6 +85,7 @@ static bool quit_valama() {
     if (widget_main != null)
         widget_main.close();
     window_main.destroy();
+    loop_update.quit();
     return true;
 }
 
