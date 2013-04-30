@@ -780,6 +780,27 @@ namespace Guanako {
                     return;
                 }
 
+                if (current_rule.expr.has_prefix ("*number")) {
+                    Regex r = /^(?P<number>\d*)(?P<rest>.*)$/;
+                    MatchInfo info;
+                    if (!r.match (written, 0, out info))
+                        return;
+                    if (info.fetch_named ("number") == null)
+                        return;
+                    compare (rule[1:rule.length], info.fetch_named ("rest"), call_params, depth + 1, ref ret, ref private_cur_stack);
+                    return;
+                }
+
+                if (current_rule.expr.has_prefix ("*string")) {
+                    Regex r = /^(?P<word>.*?)+(?=\")(?P<rest>.*)$/;
+                    MatchInfo info;
+                    if (!r.match (written, 0, out info))
+                        return;
+                    if (info.fetch_named ("word") == null)
+                        return;
+                    compare (rule[1:rule.length], info.fetch_named ("rest"), call_params, depth + 1, ref ret, ref private_cur_stack);
+                    return;
+                }
 
                 if (current_rule.expr == "_") {
                     if (!(written.has_prefix (" ") || written.has_prefix ("\t")))

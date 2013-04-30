@@ -118,7 +118,7 @@ ParamBrackets
 ParamBracketsChild
 $Value ?$ParamBracketsIter
 ParamBracketsIter
-?_ , ?_ $Value
+?_ , ?_ $ParamBracketsChild
 
 
 # ==============
@@ -126,7 +126,16 @@ ParamBracketsIter
 # ==============
 
 Value
-$ValInst{@}|$ValStat{@}
+$ValInst{@}|$ValStat{@}|$ValString|$ValNumber
+
+ValString
+" *string "
+
+ValNumber
+*number ?$ValNumberDecimal ?f
+
+ValNumberDecimal
+. *number
 
 ValIterInst : parent
 . $ValInst{parent}
