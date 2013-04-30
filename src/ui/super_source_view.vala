@@ -51,6 +51,7 @@ public class SuperSourceView : SourceView {
             while (true) {
                 for (int q = 0; q < animations.size; q++)
                     if (animations[q].finished) {
+                        animations[q].queue_draw ();
                         animations.remove_at(q);
                         continue;
                     }
@@ -72,8 +73,7 @@ public class SuperSourceView : SourceView {
         animations.add (animation);
     }
     public LineAnnotation annotate (int line, string text, double r, double g, double b, bool always_visible, int offset = 1) {
-        var animation = new LineAnnotation(this, line, r, g, b);
-        animation.offset = offset;
+        var animation = new LineAnnotation(this, line, r, g, b, offset);
         animation.text = text;
         animation.always_visible = always_visible;
         animations.add (animation);
@@ -91,14 +91,15 @@ public class SuperSourceView : SourceView {
         internal abstract void draw (Cairo.Context cr);
     }
     public class LineAnnotation : Animation{
-        public LineAnnotation(SuperSourceView view, int line, double r, double g, double b) {
+        public LineAnnotation(SuperSourceView view, int line, double r, double g, double b, int offset) {
             this.r = r;
             this.g = g;
             this.b = b;
             this.view = view;
             this.line = line;
+            this.offset = offset;
             animated = false;
-            advance();
+            queue_draw();
         }
         public int line;
         public int offset;

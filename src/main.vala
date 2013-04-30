@@ -398,7 +398,7 @@ public class GuanakoCompletion : Gtk.SourceCompletionProvider, Object {
                             lblstr += ")";
                         } else
                             lblstr = current_symbol.name;
-                        current_symbol_annotation = source_viewer.current_srcview.annotate (line - 1, lblstr, 0.5, 0.5, 0.5, true);
+                        current_symbol_annotation = source_viewer.current_srcview.annotate (line - 1, lblstr, 0.5, 0.5, 0.5, true, -1);
                     } else
                         current_symbol_annotation = null;
                     GLib.Idle.add (() => {
