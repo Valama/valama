@@ -1617,7 +1617,7 @@ public class ValamaProject : Object {
                     debug_msg (_("Skip '%s' choice.\n"), pkg.name);
         } else {
             var context = new Vala.CodeContext();
-            Guanako.Project.context_prep (ref context, 2, 32);  //TODO: Dynamic version.
+            Guanako.Project.context_prep (context, 2, 32);  //TODO: Dynamic version.
             //TODO: Do this like init method in ProjectTemplate (check against all vapis).
             foreach (var pkg in choice.packages)
                 if (context.get_vapi_path (pkg.name) != null) {

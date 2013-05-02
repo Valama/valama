@@ -38,6 +38,7 @@ namespace Guanako {
 
     public class Project {
         CodeContext context;
+        CodeContext context_internal;
         ParserExt parser;
         int glib_major;
         int glib_minor;
@@ -65,19 +66,20 @@ namespace Guanako {
 
         public Project (string? filename = null,
                         int glib_major = 2, int glib_minor = 18) throws IOError, Error {
-            context = new CodeContext();
+            context_internal = new CodeContext();
             parser = new ParserExt();
             packages = new FixedTreeSet<string>();
             sourcefiles = new FixedTreeSet<SourceFile>();
             defines = new FixedTreeSet<string>();
             defines_manual = new FixedTreeSet<string>();
-            context.report = new Reporter();
+            context_internal.report = new Reporter();
             manual_report = null;
 
             this.glib_major = glib_major;
             this.glib_minor = glib_minor;
 
-            context_prep (ref context, glib_major, glib_minor, define_action_int);
+            context_prep (context_internal, glib_major, glib_minor, define_action_int);
+            context = context_internal;
 
             build_syntax_map (filename);
         }
@@ -91,7 +93,7 @@ namespace Guanako {
         /**
          * Set {@link Vala.CodeContext} options and flags.
          */
-        public static void context_prep (ref CodeContext context,
+        public static void context_prep (CodeContext context,
                                          int? glib_major = null,
                                          int? glib_minor = null,
                                          DefineAction? action = null) {
@@ -133,14 +135,14 @@ namespace Guanako {
 
         public inline SourceFile[] get_source_files() {
             lock (context)
-                return get_source_files_int();
+                return get_source_files_int (context);
         }
 
         /*
          * Not a beautiful piece of code, but necessary to convert from
          * Vala.List.
          */
-        private SourceFile[] get_source_files_int() {
+        private SourceFile[] get_source_files_int (CodeContext context) {
             SourceFile[] files = new SourceFile[0];
             foreach (SourceFile file in context.get_source_files())
                 if (file.file_type == SourceFileType.SOURCE)
@@ -148,18 +150,18 @@ namespace Guanako {
             return files;
         }
 
-        private bool add_source_file (SourceFile source_file) {
-            foreach (SourceFile file in get_source_files_int())
+        private bool add_source_file_int (SourceFile source_file) {
+            foreach (SourceFile file in get_source_files_int (context_internal))
                 if (file.filename == source_file.filename)
                     return false;
 
             if (source_file.file_type == SourceFileType.SOURCE) {
                 var ns_ref = new UsingDirective (new UnresolvedSymbol (null, "GLib"));
                 source_file.add_using_directive (ns_ref);
-                context.root.add_using_directive (ns_ref);
+                context_internal.root.add_using_directive (ns_ref);
             }
 
-            context.add_source_file (source_file);
+            context_internal.add_source_file (source_file);
             sourcefiles.add (source_file);
             return true;
         }
@@ -173,18 +175,20 @@ namespace Guanako {
         }
 
         public SourceFile? add_source_file_by_name (string filename, bool is_vapi = false) {
-            lock (context) {
+            lock (context_internal) {
                 SourceFile source_file;
                 if (is_vapi)
-                    source_file = new SourceFile (context,
+                    source_file = new SourceFile (context_internal,
                                                   SourceFileType.PACKAGE,
                                                   filename);
                 else
-                    source_file = new SourceFile (context,
+                    source_file = new SourceFile (context_internal,
                                                   SourceFileType.SOURCE,
                                                   filename);
-                if (!add_source_file (source_file))
+                if (!add_source_file_int (source_file))
                     return null;
+                lock (context)
+                    context = context_internal;
                 return source_file;
             }
         }
@@ -216,9 +220,12 @@ namespace Guanako {
         }
 
         public inline void commit_defines() {
-            lock (context)
+            lock (context_internal) {
                 foreach (var define in defines_manual)
-                    context.add_define (define);
+                    context_internal.add_define (define);
+                lock (context)
+                    context = context_internal;
+            }
         }
 
         public inline bool remove_define (string define) {
@@ -262,16 +269,16 @@ namespace Guanako {
         }
 
         public string[] add_packages (string[] package_names, bool auto_update) {
-            lock (context) {
+            lock (context_internal) {
                 string[] missing_packages = new string[0];
 
-                var old_deps = get_package_dependencies (packages.to_array());
+                var old_deps = get_package_dependencies_int (context_internal, packages.to_array());
 
                 var new_deps = package_names;
                 /* Collect all new dependencies coming with the new packages */
-                foreach (string pkg in get_package_dependencies (package_names))
+                foreach (string pkg in get_package_dependencies_int (context_internal, package_names))
                     if (!(pkg in old_deps) && !(pkg in new_deps)) {
-                        var vapi_path = context.get_vapi_path (pkg);
+                        var vapi_path = context_internal.get_vapi_path (pkg);
                         if (vapi_path == null) {
                             stderr.printf (_("Warning: Vapi for package %s not found.\n"), pkg);
                             missing_packages += pkg;
@@ -284,21 +291,21 @@ namespace Guanako {
                 foreach (string package_name in package_names) {
                     /* Add the new packages */
                     packages.add (package_name);
-                    var vapi_path = context.get_vapi_path (package_name);
+                    var vapi_path = context_internal.get_vapi_path (package_name);
                     if (vapi_path == null) {
                         stderr.printf (_("Warning: Vapi for package %s not found.\n"), package_name);
                         missing_packages += package_name;
                         continue;
                     }
                     debug_msg (_("Vapi found: %s\n"), vapi_path);
-                    context.add_external_package (package_name);
+                    context_internal.add_external_package (package_name);
                 }
 
                 /* Update completion info of all the new packages */
                 if (auto_update)
                     foreach (string pkg in new_deps) {
-                        var vapi_path = context.get_vapi_path (pkg);
-                        var pkg_file = get_source_file_int (vapi_path);
+                        var vapi_path = context_internal.get_vapi_path (pkg);
+                        var pkg_file = get_source_file_int (context_internal, vapi_path);
                         if (pkg_file == null) {
                             stderr.printf (_("Could not load vapi: %s\n"), vapi_path);
                             missing_packages += pkg;
@@ -307,16 +314,18 @@ namespace Guanako {
                         update_file (pkg_file);
                     }
 
+                lock (context)
+                    context = context_internal;
                 return missing_packages;
             }
         }
 
         public inline SourceFile? get_source_file (string filename) {
             lock (context)
-                return get_source_file_int (filename);
+                return get_source_file_int (context, filename);
         }
 
-        private SourceFile? get_source_file_int (string filename) {
+        private SourceFile? get_source_file_int (CodeContext context, string filename) {
             foreach (SourceFile file in context.get_source_files())
                 if (file.filename == filename)
                     return file;
@@ -324,11 +333,11 @@ namespace Guanako {
         }
 
         public void remove_package (string package_name) {
-            lock (context) {
+            lock (context_internal) {
                 packages.remove (package_name);
-                var deps = get_package_dependencies (packages.to_array());
+                var deps = get_package_dependencies_int (context_internal, packages.to_array());
 
-                var remove_candidates = get_package_dependencies (new string[] {package_name});
+                var remove_candidates = get_package_dependencies_int (context_internal, new string[] {package_name});
                 remove_candidates += package_name;
 
                 /* Collect all dependencies of package_name that are not required any more */
@@ -339,11 +348,14 @@ namespace Guanako {
 
                 foreach (string pkg in unused) {
                     packages.remove (pkg);
-                    var pkg_file = get_source_file_int (context.get_vapi_path (pkg));
+                    var pkg_file = get_source_file_int (context_internal, context.get_vapi_path (pkg));
                     if (pkg_file == null)
                         continue;
                     vanish_file (pkg_file);
                 }
+
+                lock (context)
+                    context = context_internal;
             }
         }
 
@@ -354,22 +366,22 @@ namespace Guanako {
         private void update_complete (string[] rm_files = {},
                                       string[] rm_pkgs = {},
                                       string[] rm_defines = {}) {
-            lock (context) {
+            lock (context_internal) {
                 var old_sourcefiles = sourcefiles;
-                var old_packages = context.get_packages();
+                var old_packages = context_internal.get_packages();
                 sourcefiles = new FixedTreeSet<SourceFile>();
                 foreach (var define in rm_defines)
                     if (defines_manual.remove (define))
                         defines.remove (define);
 
-                context = new CodeContext();
-                context_prep (ref context, glib_major, glib_minor, define_action_int);
+                context_internal = new CodeContext();
+                context_prep (context_internal, glib_major, glib_minor, define_action_int);
 
                 parser = new ParserExt();
                 foreach (var sf in old_sourcefiles) {
                     if (sf.filename in rm_files)
                         continue;
-                    var sf_new = new SourceFile (context,
+                    var sf_new = new SourceFile (context_internal,
                                                  sf.file_type,
                                                  sf.filename,
                                                  sf.content,
@@ -377,44 +389,48 @@ namespace Guanako {
                     if (sf.file_type == SourceFileType.SOURCE) {
                         var ns_ref = new UsingDirective (new UnresolvedSymbol (null, "GLib"));
                         sf_new.add_using_directive (ns_ref);
-                        context.root.add_using_directive (ns_ref);
+                        context_internal.root.add_using_directive (ns_ref);
                     }
-                    context.add_source_file (sf_new);
+                    context_internal.add_source_file (sf_new);
                     sourcefiles.add (sf_new);
                 }
                 //TODO: Use packages from context.get_source_files directly.
                 foreach (var pkg in old_packages) {
                     if (pkg in rm_pkgs)
                         continue;
-                    context.add_external_package (pkg);
+                    context_internal.add_external_package (pkg);
                 }
                 foreach (var define in defines_manual)
-                    context.add_define (define);
+                    context_internal.add_define (define);
 
                 update_int();
+                lock (context)
+                    context = context_internal;
             }
         }
 
         public inline void init() {
             if (!initialized)
-                lock (context) {
+                lock (context_internal) {
                     initialized = true;
                     update_int();
+                    lock (context)
+                        context = context_internal;
                 }
         }
 
         private void update_int() {
             if (manual_report == null)
-                context.report = new Reporter();
+                context_internal.report = new Reporter();
             else
-                context.report = Object.new (manual_report) as Reporter;
+                context_internal.report = Object.new (manual_report) as Reporter;
 
-            CodeContext.push (context);
-            parser.parse (context);
+            CodeContext.push (context_internal);
+            parser.parse (context_internal);
 
-            context.resolver.resolve (context);
-            context.analyzer.analyze (context);
-            context.flow_analyzer.analyze (context);
+            context_internal.resolver.resolve (context_internal);
+            context_internal.analyzer.analyze (context_internal);
+            context_internal.flow_analyzer.analyze (context_internal);
             CodeContext.pop();
         }
 
@@ -431,8 +447,8 @@ namespace Guanako {
                          * We need to remove it from the scope.
                          */
                         sym.owner.remove (sym.name);
-                    if (context.entry_point == sym)
-                        context.entry_point = null;
+                    if (context_internal.entry_point == sym)
+                        context_internal.entry_point = null;
                     sym.name = "";  //TODO: Find a less stupid solution...
                 }
             }
@@ -441,13 +457,13 @@ namespace Guanako {
         public void update_file (Vala.SourceFile file, string? new_content = null) {
             if (new_content != null)
                 file.content = new_content;
-            lock (context) {
+            lock (context_internal) {
                 /*
                  * Removing nodes in the same loop causes problems (probably
                  * due to read-only list).
                  */
                 debug_msg ("Update source file: %s\n", file.filename);
-                (context.report as Reporter).reset_file (file.filename);
+                (context_internal.report as Reporter).reset_file (file.filename);
 
                 vanish_file (file);
 
@@ -455,17 +471,20 @@ namespace Guanako {
                 if (file.file_type == SourceFileType.SOURCE) {
                     var ns_ref = new Vala.UsingDirective (new Vala.UnresolvedSymbol (null, "GLib"));
                     file.add_using_directive (ns_ref);
-                    context.root.add_using_directive (ns_ref);
+                    context_internal.root.add_using_directive (ns_ref);
                 }
 
-                CodeContext.push (context);
+                CodeContext.push (context_internal);
                 parser.parse_file (file);
 
-                context.resolver.resolve (context);
-                context.analyzer.visit_source_file (file);
-                context.flow_analyzer.visit_source_file (file);
+                context_internal.resolver.resolve (context_internal);
+                context_internal.analyzer.visit_source_file (file);
+                context_internal.flow_analyzer.visit_source_file (file);
 
                 CodeContext.pop();
+
+                lock (context)
+                    context = context_internal;
                 debug_msg ("Source file update finished.\n");
             }
         }
@@ -1237,6 +1256,11 @@ namespace Guanako {
         }
 
         public string[] get_package_dependencies (string[] package_names) {
+            lock (context)
+                return get_package_dependencies_int (context, package_names);
+        }
+
+        private string[] get_package_dependencies_int (CodeContext context, string[] package_names) {
             string[] ret = new string[0];
             foreach (string package_name in package_names) {
                 var vapi_path = context.get_vapi_path (package_name);
@@ -1262,7 +1286,7 @@ namespace Guanako {
                 }
             }
             if (ret.length > 0) {
-                var child_dep = get_package_dependencies (ret);
+                var child_dep = get_package_dependencies_int (context, ret);
                 foreach (string dep in child_dep)
                     ret += dep;
             }
