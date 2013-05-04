@@ -402,6 +402,12 @@ public class ValamaProject : Object {
     public bool add_multiple_files { get; set; default = false; }
 
     /**
+     * List of opened files.
+     */
+    //TODO: Support only for templates and not normal projects.
+    public Gee.ArrayList<string> files_opened { get; private set; }
+
+    /**
      * Ordered list of all opened Buffers mapped with filenames.
      */
     //TODO: Do we need an __ordered__ list? Gtk has already focus handling.
@@ -525,6 +531,8 @@ public class ValamaProject : Object {
         files = new TreeSet<string>();
         b_files = new TreeSet<string>();
         d_files = new TreeSet<string>();
+
+        files_opened = new Gee.ArrayList<string>();
 
         msg (_("Load project file: %s\n"), this.project_file);
         load_project_file();  // can throw LoadingError
@@ -1347,6 +1355,20 @@ public class ValamaProject : Object {
                         }
                     }
                     break;
+                case "opened-files":
+                    for (Xml.Node* p = i-> children; p != null; p = p->next) {
+                        if (p->type != ElementType.ELEMENT_NODE)
+                            continue;
+                        switch (p->name) {
+                            case "file":
+                                files_opened.add (get_absolute_path (p->get_content()));
+                                break;
+                            default:
+                                warning_msg (_("Unknown configuration file value line %hu: %s\n"), p->line, p->name);
+                                break;
+                        }
+                    }
+                    break;
                 default:
                     warning_msg (_("Unknown configuration file value line %hu: %s\n"), i->line, i->name);
                     break;
@@ -1688,6 +1710,8 @@ public class ValamaProject : Object {
                 return null;
             }
         }
+        if (filename != "")
+            files_opened.add (filename);
 
         var bfr = new SourceBuffer();
         var view = new SuperSourceView (bfr);
@@ -1920,8 +1944,10 @@ public class ValamaProject : Object {
                                    Markup.escape_text (filename));
             switch (ret) {
                 case ResponseType.REJECT:
+                    files_opened.remove (filename);
                     return true;
                 case ResponseType.ACCEPT:
+                    files_opened.remove (filename);
                     return buffer_save (filename);
                 case ResponseType.CANCEL:
                     return false;

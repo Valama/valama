@@ -479,11 +479,13 @@ class UiSourceViewer : UiElement {
      *
      * @param filename Name of file to switch to.
      * @param line Line where to jump.
-     * @param setcursor If `true` set cursor to position.
      * @param col Column where to jump.
+     * @param setcursor If `true` set cursor to position.
+     * @param focus If `true` focus item.
      */
-    public void jump_to_position (string filename, int line, int col, bool setcursor = true) {
-        on_file_selected (filename);
+    public void jump_to_position (string filename, int line, int col,
+                                  bool setcursor = true, bool focus = true) {
+        on_file_selected (filename, focus);
         var srcbuffer = project.get_buffer_by_file (filename);
         if (srcbuffer == null)
             return;
@@ -492,7 +494,8 @@ class UiSourceViewer : UiElement {
         srcbuffer.select_range (titer, titer);
         var srcview = get_sourceview_by_file (filename);
         GLib.Idle.add(()=>{
-            srcview.grab_focus();
+            if (focus)
+                srcview.grab_focus();
             srcview.scroll_to_iter (titer, 0.42, true, 1.0, 1.0);
             return false;
         });

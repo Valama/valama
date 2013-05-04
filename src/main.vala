@@ -124,6 +124,13 @@ static void show_main_screen (ValamaProject load_project) {
     window_main.add (widget_main);
     window_main.add_accel_group (widget_main.accel_group);
 
+    /* Open default source files. */
+    var focus = true;
+    foreach (var file in project.files_opened) {
+        on_file_selected (file, focus);
+        focus = false;
+    }
+
     /* Application signals. */
     source_viewer.buffer_close.connect (project.close_buffer);
 
@@ -258,10 +265,12 @@ static void redo_change() {
  * Load file and change focus.
  *
  * @param filename Name of file.
+ * @param focus `true` to focus item.
  * @return Return `true` on success else `false`.
  */
-static bool on_file_selected (string filename) {
-    if (source_viewer.current_srcfocus == filename)
+static bool on_file_selected (string filename, bool focus = true) {
+    if (source_viewer.current_srcfocus == filename ||
+            (!focus && source_viewer.get_sourceview_by_file (filename) != null))
         return true;
 
     string txt = "";
@@ -270,8 +279,9 @@ static bool on_file_selected (string filename) {
         var view = project.open_new_buffer (txt, filename);
         if (view != null)
             source_viewer.add_srcitem (view, filename);
-        source_viewer.focus_src (filename);
-        source_viewer.jump_to_position (filename, 0, 0, true);
+        if (focus)
+            source_viewer.focus_src (filename);
+        source_viewer.jump_to_position (filename, 0, 0, true, focus);
         return true;
     } catch (GLib.FileError e) {
         errmsg (_("Could not load file: %s\n"), e.message);
