@@ -509,10 +509,11 @@ public class FileTransfer : Object {
  *
  * @param path Pathname to split.
  * @param basename Control return of absolute or relative parts of path.
+ * @param root Prepend root path or not.
  * @return If basename is `false`, return list of full paths. Else return
  *         absolute paths.
  */
-public string[] split_path (string path, bool basename = true) {
+public string[] split_path (string path, bool basename = true, bool root = true) {
     string[] pathlist = {};
     string subpath = path;
 
@@ -520,7 +521,8 @@ public string[] split_path (string path, bool basename = true) {
     if (Path.skip_root (path) != null) {
         var rootlesspart = Path.skip_root (path);
         var rootindex = subpath.last_index_of (rootlesspart);
-        pathlist += subpath[0:rootindex];
+        if (root)
+            pathlist += subpath[0:rootindex];
         subpath = rootlesspart;
     }
 

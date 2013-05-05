@@ -227,9 +227,11 @@ public class MainWidget : Box {
         var system_layout_filename = Path.build_path (Path.DIR_SEPARATOR_S,
                                                       Config.PACKAGE_DATA_DIR,
                                                       "layout.xml");
-        if (Args.reset_layout || (!load_layout (local_layout_filename, null, err) &&
-                                                                Args.layoutfile == null))
-            load_layout (system_layout_filename);
+        if (Args.reset_layout || (!load_layout (this.layout,
+                                                local_layout_filename,
+                                                null,
+                                                err) && Args.layoutfile == null))
+            load_layout (this.layout, system_layout_filename);
 
         try {
             load_meta (Path.build_path (Path.DIR_SEPARATOR_S,
@@ -264,7 +266,7 @@ public class MainWidget : Box {
                                     cachedir,
                                     "ui_meta.xml"));
 
-        /* Gdl layout. */
+        /* Gdl main layout. */
         var local_layout_filename = Path.build_path (Path.DIR_SEPARATOR_S,
                                                      cachedir,
                                                      "layout.xml");
@@ -275,7 +277,7 @@ public class MainWidget : Box {
             } catch (GLib.Error e) {
                 errmsg (_("Couldn't create cache directory: %s\n"), e.message);
             }
-        save_layout (local_layout_filename);
+        save_layout (this.layout, local_layout_filename);
         return true;
     }
 
@@ -626,44 +628,6 @@ public class MainWidget : Box {
         this.toolbar.add (item);
     }
 
-    /**
-     * Save current {@link Gdl.DockLayout} to file.
-     *
-     * @param  filename Name of file to save layout to.
-     * @param section Save specific layout section.
-     * @return Return `true` on success else `false`.
-     */
-    public bool save_layout (string filename, string section = "__default__") {
-        this.layout.save_layout (section);
-        bool ret = this.layout.save_to_file (filename);
-        if (!ret)
-            errmsg (_("Couldn't save layout to file: %s\n"), filename);
-        else
-            debug_msg (_("Layout '%s' saved to file: %s\n"), section, filename);
-        return ret;
-    }
-
-    /**
-     * Load {@link Gdl.DockLayout} from filename.
-     *
-     * @param filename Name of file to load layout from.
-     * @param section Name of default section to load settings from.
-     * @param error Display error if layout file loading failed.
-     * @return Return `true` on success else `false`.
-     */
-    public bool load_layout (string filename,
-                             string? section = null,
-                             bool error = true) {
-        debug_msg (_("Load layout...\n"));
-        string lsection = (section != null) ? section : "__default__";
-        bool ret = this.layout.load_from_file (filename);
-        if (ret)
-            debug_msg (_("Layouts loaded from file: %s\n"), filename);
-        else if (error)
-            errmsg (_("Couldn't load layout file: %s\n"), filename);
-        return (ret && this.layout_reload (lsection));
-    }
-
     //TODO; Move this to layout file.
     /**
      * Save user interface meta information.
@@ -740,21 +704,6 @@ public class MainWidget : Box {
                     break;
             }
         }
-    }
-
-    /**
-     * Reload current {@link Gdl.DockLayout}. May be helpful on window resize.
-     *
-     * @param section Name of default section to load settings from.
-     * @return Return `true` on success else `false`.
-     */
-    public bool layout_reload (string section = "__default__") {
-        bool ret = this.layout.load_layout (section);
-        if (!ret)
-            errmsg (_("Couldn't load layout: %s\n"), section);
-        else
-            debug_msg (_("Layout loaded: %s\n"), section);
-        return ret;
     }
 
     /**

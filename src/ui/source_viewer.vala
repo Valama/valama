@@ -103,6 +103,7 @@ class UiSourceViewer : UiElement {
 
         srcdock = new Dock();
         vbox.pack_start (this.srcdock, true, true);
+        /* Mapping warnings may show up. See #697700 */
         this.srcdock.master.switcher_style = SwitcherStyle.TABS;
 #if GDL_3_8_2
         this.srcdock.master.tab_pos = PositionType.TOP;

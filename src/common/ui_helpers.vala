@@ -300,4 +300,69 @@ public void build_plain_treestore (string storename, string[] elements, ref Tree
     }
 }
 
+/**
+ * Load {@link Gdl.DockLayout} from filename.
+ *
+ * @param layout Layout to load.
+ * @param filename Name of file to load layout from.
+ * @param section Name of default section to load settings from.
+ * @param error Display error if layout file does not exist.
+ * @return Return `true` on success else `false`.
+ */
+public bool load_layout (Gdl.DockLayout layout,
+                         string filename,
+                         string? section = null,
+                         bool error = true) {
+    if (!FileUtils.test (filename, FileTest.IS_REGULAR)) {  //TODO: Allow symlinks.
+        if (error)
+            warning_msg (_("Layout file does not exist: %s\n"), filename);
+        else
+            debug_msg (_("Layout file does not exist: %s\n"), filename);
+        return false;
+    }
+    debug_msg (_("Load layout...\n"));
+    string lsection = (section != null) ? section : "__default__";
+    bool ret = layout.load_from_file (filename);
+    if (ret)
+        debug_msg (_("Layouts loaded from file: %s\n"), filename);
+    else
+        errmsg (_("Couldn't load layout file: %s\n"), filename);
+    return (ret && layout_reload (layout, lsection));
+}
+
+/**
+ * Reload {@link Gdl.DockLayout}. May be helpful on window resize.
+ *
+ * @param layout Layout to reload.
+ * @param section Name of default section to load settings from.
+ * @return Return `true` on success else `false`.
+ */
+public bool layout_reload (Gdl.DockLayout layout, string section = "__default__") {
+    bool ret = layout.load_layout (section);
+    if (!ret)
+        errmsg (_("Couldn't load layout: %s\n"), section);
+    else
+        debug_msg (_("Layout loaded: %s\n"), section);
+    return ret;
+}
+
+/**
+ * Save current {@link Gdl.DockLayout} to file.
+ *
+ * @param layout Layout to save.
+ * @param filename Name of file to save layout to.
+ * @param section Save specific layout section.
+ * @return Return `true` on success else `false`.
+ */
+public bool save_layout (Gdl.DockLayout layout, string filename,
+                         string section = "__default__") {
+    layout.save_layout (section);
+    bool ret = layout.save_to_file (filename);
+    if (!ret)
+        errmsg (_("Couldn't save layout to file: %s\n"), filename);
+    else
+        debug_msg (_("Layout '%s' saved to file: %s\n"), section, filename);
+    return ret;
+}
+
 // vim: set ai ts=4 sts=4 et sw=4
