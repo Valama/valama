@@ -238,6 +238,9 @@ static void create_new_file() {
     var filename = ui_create_file_dialog (null, "vala");
     if (filename != null) {
         project.add_source_file (filename);
+        var view = project.open_new_buffer ("", filename);
+        if (view != null)
+            source_viewer.add_srcitem (view, filename);
         source_viewer.focus_src (filename);
     }
 }

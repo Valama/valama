@@ -42,7 +42,9 @@ public string? ui_create_file_dialog (string? path = null, string? extension = n
     dlg.resizable = false;
 
     var box_main = new Box (Orientation.VERTICAL, 0);
-    var frame_filename = new Frame (_("Add new file to project"));
+    var frame_filename = new Frame (_("Add new file to project (%s)").printf (
+                                        (path != null) ? _("'%s' directory").printf (path)
+                                                       : _("root directory")));
     var box_filename = new Box (Orientation.VERTICAL, 0);
     frame_filename.add (box_filename);
 
@@ -80,12 +82,20 @@ public string? ui_create_file_dialog (string? path = null, string? extension = n
                     filename += @".$extension";
             var f = File.new_for_path (filename);
             if (!f.query_exists()) {
+                if (f.get_parent() != null && !f.get_parent().query_exists())
+                    try {
+                        f.get_parent().make_directory_with_parents();
+                    } catch (GLib.Error e) {
+                        errmsg (_("Could not create parent directory: %s\n"), e.message);
+                    }
                 try {
-                        f.create (FileCreateFlags.NONE).close();
+                    f.create (FileCreateFlags.NONE).close();
                 } catch (GLib.IOError e) {
-                    errmsg (_("Could not write to new file: %s"), e.message);
+                    errmsg (_("Could not write to new file: %s\n"), e.message);
+                    filename = null;
                 } catch (GLib.Error e) {
-                    errmsg (_("Could not create new file: %s"), e.message);
+                    errmsg (_("Could not create new file: %s\n"), e.message);
+                    filename = null;
                 }
             }
         }

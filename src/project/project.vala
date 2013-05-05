@@ -985,6 +985,8 @@ public class ValamaProject : Object {
      * file from disk. Keep track to not include it with source directories
      * next time.
      *
+     * Close buffer manually.
+     *
      * @param filename Path to file to unregister.
      * @return `true` on success else `false` (e.g. if file was not found).
      */
@@ -993,9 +995,11 @@ public class ValamaProject : Object {
         debug_msg (_("Remove source file: %s\n"), filename_abs);
         if (!files.remove (filename_abs))
             return false;
-        guanako_project.remove_file (guanako_project.get_source_file_by_name (filename_abs));
-        close_viewbuffer (filename_abs);
-        source_files_changed();
+        new Thread<void*> (_("Remove source file"), () => {
+            source_files_changed();
+            guanako_project.remove_file (guanako_project.get_source_file_by_name (filename_abs));
+            return null;
+        });
         return true;
     }
 
@@ -1030,7 +1034,7 @@ public class ValamaProject : Object {
     }
 
     /**
-     * Remove build system file from project.
+     * Remove build system file from project. Close buffer manually.
      *
      * @param filename Path to file to unregister.
      * @return `true` on success else `false` (e.g. if file was not found).
@@ -1040,7 +1044,6 @@ public class ValamaProject : Object {
         debug_msg (_("Remove build system file: %s\n"), filename_abs);
         if (!b_files.remove (filename_abs))
             return false;
-        close_viewbuffer (filename_abs);
         buildsystem_files_changed();
         return true;
     }
@@ -1076,7 +1079,7 @@ public class ValamaProject : Object {
     }
 
     /**
-     * Remove data file from project.
+     * Remove data file from project. Close buffer manually.
      *
      * @param filename Path to file to unregister.
      * @return `true` on success else `false` (e.g. if file was not found).
@@ -1086,7 +1089,6 @@ public class ValamaProject : Object {
         debug_msg (_("Remove data file: %s\n"), filename_abs);
         if (!d_files.remove (filename_abs))
             return false;
-        close_viewbuffer (filename_abs);
         data_files_changed();
         return true;
     }
