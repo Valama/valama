@@ -170,333 +170,333 @@ msgstr "L'application a reçu le signal : %s\n"
 
 #: ../src/project/build_project.vala:155
 msgid "Application still running. Quit it manually.\n"
-msgstr ""
+msgstr "L'application est toujours en cours. Quitter la manuellement.\n"
 
 #: ../src/project/build_project.vala:186
 #, c-format
 msgid "Application terminated with exit status: %d\n"
-msgstr ""
+msgstr "L'application s'est terminée avec le statut : %d"
 
 #: ../src/dialogs/create_project.vala:306
 msgid "Author"
-msgstr ""
+msgstr "Auteur"
 
 #: ../src/dialogs/create_project.vala:63
 msgid "Author information"
-msgstr ""
+msgstr "Informations auteur"
 
 #: ../src/dialogs/create_project.vala:308
 msgid "Authors"
-msgstr ""
+msgstr "Auteurs"
 
 #: ../src/ui/welcome_screen.vala:428 ../src/ui_main.vala:400
 msgid "Back"
-msgstr ""
+msgstr "Retour"
 
 #: ../src/ui_main.vala:189
 msgid "Breakpoints / Timers"
-msgstr ""
+msgstr "Points d'arrêt / Timers"
 
 #: ../src/project/project.vala:1815
 msgid "Buffer loaded.\n"
-msgstr ""
+msgstr "Buffer chargé.\n"
 
 #: ../src/project/project.vala:1833
 msgid "Buffer update"
-msgstr ""
+msgstr "Mise à jour du buffer"
 
 #: ../src/project/build_project.vala:66
 #, c-format
 msgid "Build command received signal: %s\n"
-msgstr ""
+msgstr "La commande build a reçu le signal : %s\n"
 
 #: ../src/ui/build_output.vala:87
 msgid "Build complete"
-msgstr ""
+msgstr "Build terminé"
 
 #: ../src/buildsystem/base.vala:422 ../src/buildsystem/cmake.vala:44
 msgid "Build directory not set."
-msgstr ""
+msgstr "Répertoire de build non paramètré."
 
 #: ../src/ui/build_output.vala:91
 msgid "Build failed"
-msgstr ""
+msgstr "Build échoué"
 
 #: ../src/ui_main.vala:177
 msgid "Build output"
-msgstr ""
+msgstr "Sortie build"
 
 #: ../src/project/project_templates.vala:72
 #, c-format
 msgid "Build system '%s' currently not supported by template selector.\n"
-msgstr ""
+msgstr "Le système build '%s' n'est actuellement pas supporté par le selecteur de modèles.\n"
 
 #: ../src/project/project.vala:1619
 #, c-format
 msgid "Build system '%s' not supported.\n"
-msgstr ""
+msgstr "Système build '%s' non supporté.\n"
 
 #: ../src/project/project.vala:1018
 #, c-format
 msgid "Build system file does not exist: %s\n"
-msgstr ""
+msgstr "Fichier du système buils n'existe pas : %s\n"
 
 #: ../src/ui/project_browser.vala:244
 msgid "Build system files"
-msgstr ""
+msgstr "Fichiers du système build"
 
 #: ../src/common/args.vala:38
 msgid "Build systems directory."
-msgstr ""
+msgstr "Répertoire des systèmes build"
 
 #: ../src/ui/build_output.vala:72
 msgid "Building..."
-msgstr ""
+msgstr "Construction..."
 
 #: ../src/buildsystem/base.vala:75
 #, c-format
 msgid "Buildsystem build finished: %s\n"
-msgstr ""
+msgstr "Build du système de build terminé : %s\n"
 
 #: ../src/buildsystem/base.vala:72
 #, c-format
 msgid "Buildsystem build started: %s\n"
-msgstr ""
+msgstr "build du système de buils démarré : %s\n"
 
 #: ../src/buildsystem/base.vala:81
 #, c-format
 msgid "Buildsystem cleaning finished: %s\n"
-msgstr ""
+msgstr "Nettoyage du système de build terminé : %s\n"
 
 #: ../src/buildsystem/base.vala:78
 #, c-format
 msgid "Buildsystem cleaning started: %s\n"
-msgstr ""
+msgstr "Nettoyage du système de build démarré : %s\n"
 
 #: ../src/buildsystem/base.vala:69
 #, c-format
 msgid "Buildsystem configuration finished: %s\n"
-msgstr ""
+msgstr "Configuration du système de build terminée : %s\n"
 
 #: ../src/buildsystem/base.vala:66
 #, c-format
 msgid "Buildsystem configuration started: %s\n"
-msgstr ""
+msgstr "Configuration du système de build démarrée : %s\n"
 
 #: ../src/buildsystem/base.vala:87
 #, c-format
 msgid "Buildsystem distcleaning finished: %s\n"
-msgstr ""
+msgstr "Distcleaning du système de build terminé : %s\n"
 
 #: ../src/buildsystem/base.vala:84
 #, c-format
 msgid "Buildsystem distcleaning started: %s\n"
-msgstr ""
+msgstr "Distcleaning du système de build démarré : %s\n"
 
 #: ../src/buildsystem/base.vala:63
 #, c-format
 msgid "Buildsystem initialization finished: %s\n"
-msgstr ""
+msgstr "Initialisation du système de build terminée : %s\n"
 
 #: ../src/buildsystem/base.vala:60
 #, c-format
 msgid "Buildsystem initialization started: %s\n"
-msgstr ""
+msgstr "Initialisation du système de buiks démarrée : %s\n"
 
 #: ../src/buildsystem/base.vala:93
 #, c-format
 msgid "Buildsystem tests finished: %s\n"
-msgstr ""
+msgstr "Tests du système de build terminés : %s\n"
 
 #: ../src/buildsystem/base.vala:90
 #, c-format
 msgid "Buildsystem tests started: %s\n"
-msgstr ""
+msgstr "Tests du système de build démarrés : %s\n"
 
 #: ../guanako/guanako.vala:934
 #, c-format
 msgid "Call '%s' not found in >%s<\n"
-msgstr ""
+msgstr "Appel '%s' non trouvé dans >%s<\n"
 
 #: ../src/dialogs/create_project.vala:655
 #, c-format
 msgid "Cannot apply substitution '@%s@'%s -> '%s': %s does not exist\n"
-msgstr ""
+msgstr "Impossible d'appliquer la substitution '@%s@'%s -> '%s': %s n'existe pas\n"
 
 #: ../src/dialogs/create_project.vala:737
 #, c-format
 msgid "Cannot create temporary file '%s' to apply substitutions: %s\n"
-msgstr ""
+msgstr "Impossible de créer le fichier '%s' pour appliquer les substitutions : %s\n"
 
 #: ../src/project/project.vala:1169 ../src/project/project.vala:1525
 #: ../src/project/project_templates.vala:201 ../src/ui_main.vala:662
 #: ../guanako/stylecheck.vala:360
 msgid "Cannot parse file."
-msgstr ""
+msgstr "Impossible de parser le fichier."
 
 #: ../src/dialogs/create_project.vala:718
 #, c-format
 msgid "Cannot read file '%s': %s\n"
-msgstr ""
+msgstr "Impossible de lire le fichier '%s' : %s\n"
 
 #: ../src/ui/source_viewer.vala:65
 #, c-format
 msgid "Change current focus: %s\n"
-msgstr ""
+msgstr "Changer le focus actuel : %s\n"
 
 #: ../src/ui/stylechecker.vala:61
 msgid "Checker loaded.\n"
-msgstr ""
+msgstr "Vérificateur chargé.\n"
 
 #: ../src/project/project.vala:1638 ../src/project/project.vala:1648
 #, c-format
 msgid "Choose '%s' package.\n"
-msgstr ""
+msgstr "Choisir le paquet '%s'.\n"
 
 #: ../src/dialogs/create_file.vala:32
 msgid "Choose filename"
-msgstr ""
+msgstr "Choisissez un fichier"
 
 #: ../src/dialogs/create_project.vala:510
 msgid "Choose project template"
-msgstr ""
+msgstr "Choisissez un modèle de projet"
 
 #: ../src/ui/app_output.vala:51
 msgid "Clear output"
-msgstr ""
+msgstr "Effacer la sortie"
 
 #: ../src/project/project.vala:1962
 msgid "Close buffer.\n"
-msgstr ""
+msgstr "Fermer le buffer.\n"
 
 #: ../src/ui_main.vala:402
 msgid "Close project"
-msgstr ""
+msgstr "Fermer le projet"
 
 #: ../src/ui/source_viewer.vala:186
 #, c-format
 msgid "Close view and buffer: %s\n"
-msgstr ""
+msgstr "Fermer la vue et le buffer : %s\n"
 
 #: ../src/ui_main.vala:197
 msgid "Coding style checker"
-msgstr ""
+msgstr "Vérificateur de style de codage"
 
 #: ../src/dialogs/missing_packages.vala:39
 msgid "Compiling and auto completion might fail!"
-msgstr ""
+msgstr "La compilation et l'autocompletion peuvent échouer !"
 
 #: ../src/main.vala:338
 msgid "Completion"
-msgstr ""
+msgstr "Complètement"
 
 #: ../src/common/common.vala:471
 #, c-format
 msgid "Copy from '%s' to '%s'.\n"
-msgstr ""
+msgstr "Copier de '%s' vers '%s'.\n"
 
 #: ../src/common/common.vala:348
 msgid "Copying finished.\n"
-msgstr ""
+msgstr "Copie terminée.\n"
 
 #: ../src/dialogs/about.vala:50
 msgid "Copyright © 2012, 2013 Valama development team"
-msgstr ""
+msgstr "Copyright © 2012, 2013 Valama development team"
 
 #: ../guanako/guanako_frankenstein.vala:27
 #, c-format
 msgid "Could not acquire name\n"
-msgstr ""
+msgstr "Impossible d'acquérir le nom\n"
 
 #: ../src/project/project.vala:712
 msgid "Could not add project to recent manager.\n"
-msgstr ""
+msgstr "Impossible d'ajouter au fichiers récents.\n"
 
 #: ../src/ui/source_viewer.vala:144
 #, c-format
 msgid "Could not change focus to: %s\n"
-msgstr ""
+msgstr "Impossible de transférer le focus vers : %s\n"
 
 #: ../src/project/project.vala:1112
 #, c-format
 msgid "Could not close ViewMap for: %s\n"
-msgstr ""
+msgstr "Impossible de fermer ViewMap pour : %s\n"
 
 #: ../src/dialogs/create_project.vala:742
 #: ../src/dialogs/create_project.vala:775
 #, c-format
 msgid "Could not close file descriptor for '%s': %s\n"
-msgstr ""
+msgstr "Impossible de fermer le descripteur de fichier pour '%s' : %s\n"
 
 #: ../src/ui/source_viewer.vala:182
 #, c-format
 msgid "Could not close view: %s\n"
-msgstr ""
+msgstr "Impossible de fermer la vue : %s\n"
 
 #: ../src/ui/ui_elements.vala:118
 msgid "Could not connect locking signals.\n"
-msgstr ""
+msgstr "Impossible de connecter les signaux de verrouillage.\n"
 
 #: ../src/project/project.vala:121
 #, c-format
 msgid "Could not convert '%s' to %s.\n"
-msgstr ""
+msgstr "Impossible de convertir '%s' vers %s.\n"
 
 #: ../src/project/project.vala:52 ../src/project/project.vala:84
 #: ../src/project/project.vala:103
 #, c-format
 msgid "Could not convert '%s' to string: %u\n"
-msgstr ""
+msgstr "Impossible de convertir '%s' en chaîne : %u\n"
 
 #: ../src/buildsystem/base.vala:575
 #, c-format
 msgid "Could not convert all characters: %s\n"
-msgstr ""
+msgstr "Impossible de convertir tous les caractères : %s\n"
 
 #: ../src/dialogs/create_project.vala:611
 #, c-format
 msgid "Could not copy templates for new project: %s\n"
-msgstr ""
+msgstr "Impossible de copier les modèles pour le nouveau projet : %s\n"
 
 #: ../src/dialogs/create_file.vala:97
 #, c-format
 msgid "Could not create new file: %s\n"
-msgstr ""
+msgstr "Impossible de créer le nouveau fichier : %s\n"
 
 #: ../src/dialogs/create_file.vala:89
 #, c-format
 msgid "Could not create parent directory: %s\n"
-msgstr ""
+msgstr "Impossible de créer le répertoire parent : %s\n"
 
 #: ../src/project/project.vala:1846
 #, c-format
 msgid "Could not create thread to update buffer: %s\n"
-msgstr ""
+msgstr "Impossible de démarrer le processus pour la mise à jour du buffer : %s\n"
 
 #: ../src/project/project.vala:659
 #, c-format
 msgid "Could not create thread to update source files: %s\n"
-msgstr ""
+msgstr "Impossible de démarrer le processus pour la mise à jour des fichiers sources : %s\n"
 
 #: ../src/dialogs/create_project.vala:673
 #, c-format
 msgid "Could not determine file path: %s\n"
-msgstr ""
+msgstr "Impossible de déterminer le chemin du fichier : %s\n"
 
 #: ../src/ui/source_viewer.vala:449
 #, c-format
 msgid "Could not find ScrolledWindow widget: %s\n"
-msgstr ""
+msgstr "Impossible de trouver le widget ScrolledWindow : %s"
 
 #: ../src/buildsystem/base.vala:313
 #, c-format
 msgid "Could not find pkg-config file for '%s'. "
-msgstr ""
+msgstr "Impossible de touver le fichier pkg-config pour '%s'. "
 
 #: ../src/project/project_templates.vala:352
 #, c-format
 msgid "Could not get template directory files: %s\n"
-msgstr ""
+msgstr "Impossible de trouver les fichiers du répertoire modèle : %s\n"
 
 #: ../src/project/project.vala:575
 #, c-format
