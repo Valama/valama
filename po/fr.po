@@ -1,7 +1,7 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# Martin Lorang <martin@lorang.net>, 2012.
 #
 msgid ""
 msgstr ""
@@ -9,9 +9,9 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2013-05-06 22:59+0200\n"
 "PO-Revision-Date: 2013-05-07 19:53+0200\n"
-"Last-Translator: Martin LORANG <martin@lorang.net>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"Last-Translator: Martin Lorang <martin@lorang.net>\n"
+"Language-Team: French\n"
+"Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -22,26 +22,29 @@ msgid ""
 "\n"
 "Returns:\n"
 msgstr ""
+"\n"
+"\n"
+"Retours chariots:\n"
 
 #: ../src/dialogs/create_project.vala:656
 #: ../src/dialogs/create_project.vala:710
 msgid " (line)"
-msgstr ""
+msgstr " (ligne)"
 
 #: ../src/project/project.vala:601 ../src/project/project.vala:603
 #, c-format
 msgid "%s - Vala"
-msgstr ""
+msgstr "%s - Vala"
 
 #: ../src/ui/reports.vala:286
 #, c-format
 msgid "%s found: %s: %d(%d)-%d(%d): %s\n"
-msgstr ""
+msgstr "%s trouvé: %s: %d(%d)-%d(%d): %s\n"
 
 #: ../src/ui/current_file_structure.vala:106
 #, c-format
 msgid "%s update finished (not a valid source buffer)!\n"
-msgstr ""
+msgstr "Mise à jour de %s terminé (pas un source valide) !\n"
 
 #: ../src/ui/breakpoints.vala:240 ../src/ui/current_file_structure.vala:175
 #: ../src/ui/current_symbol.vala:150 ../src/ui/project_browser.vala:260
@@ -49,121 +52,121 @@ msgstr ""
 #: ../src/ui/source_viewer.vala:524 ../src/ui/symbol_browser.vala:141
 #, c-format
 msgid "%s update finished!\n"
-msgstr ""
+msgstr "Mise à jour de %s terminée !\n"
 
 #: ../src/common/ui_helpers.vala:110
 msgid "' Please choose one from: "
-msgstr ""
+msgstr "Sélectionner un parmi : "
 
 #: ../src/project/build_project.vala:138
 #, c-format
 msgid "'%s' build failed: %s\n"
-msgstr ""
+msgstr "build de '%s' échouée : %s\n"
 
 #: ../src/project/build_project.vala:130
 #, c-format
 msgid "'%s' cleaning failed: %s\n"
-msgstr ""
+msgstr "cleaning de '%s' échoué : %s\n"
 
 #: ../src/project/build_project.vala:134
 #, c-format
 msgid "'%s' configuration failed: %s\n"
-msgstr ""
+msgstr "configuration de '%s' échouée : %s\n"
 
 #: ../src/dialogs/create_file.vala:46
 #, c-format
 msgid "'%s' directory"
-msgstr ""
+msgstr "répertoire '%s'"
 
 #: ../src/project/build_project.vala:126
 #, c-format
 msgid "'%s' initialization failed: %s\n"
-msgstr ""
+msgstr "initialisation de '%s' échoué : %s\n"
 
 #: ../src/common/args.vala:76
 #, c-format
 msgid "'%s' not a positive number"
-msgstr ""
+msgstr "'%s' n'est pas un nombre positif"
 
 #: ../src/project/build_project.vala:142
 #, c-format
 msgid "'%s' tests failed: %s\n"
-msgstr ""
+msgstr "tests de '%s' échoués : %s\n"
 
 #: ../src/project/build_project.vala:115
 #, c-format
 msgid "'Build' failed with exit status: %d\n"
-msgstr ""
+msgstr "'Build' échouée avec le statut : %d\n"
 
 #: ../src/project/build_project.vala:101
 #, c-format
 msgid "'Clean' failed with exit status: %d\n"
-msgstr ""
+msgstr "'Clean' échoué avec le statut : %d\n"
 
 #: ../src/project/build_project.vala:120
 #, c-format
 msgid "'Configure' failed with exit status: %d\n"
-msgstr ""
+msgstr "'Configure' échoué avec le statut : %d\n"
 
 #: ../src/project/build_project.vala:97
 #, c-format
 msgid "'Distclean' failed with exit status: %d\n"
-msgstr ""
+msgstr "'Distclean' échoué avec le statut : %d\n"
 
 #: ../src/project/build_project.vala:92
 #, c-format
 msgid "'Initialization' failed with exit status: %d\n"
-msgstr ""
+msgstr "'Initialization' échoué avec le statut : %d\n"
 
 #: ../src/project/build_project.vala:110
 #, c-format
 msgid "'Tests' failed with exit status: %d\n"
-msgstr ""
+msgstr "'Tests' échoué avec le statut : %d\n"
 
 #: ../src/project/project.vala:1705
 msgid "(new file)"
-msgstr ""
+msgstr "(nouveau fichier)"
 
 #: ../src/common/args.vala:50
 msgid "- Valama: next generation Vala IDE"
-msgstr ""
+msgstr "- Valama: next generation Vala IDE"
 
 #: ../src/dialogs/create_file.vala:45
 #, c-format
 msgid "Add new file to project (%s)"
-msgstr ""
+msgstr "Ajouter un nouveau fichier au projet (%s)"
 
 #: ../src/project/project.vala:867 ../src/project/project.vala:878
 #, c-format
 msgid "Add package: %s\n"
-msgstr ""
+msgstr "Ajouter un paquet : %s\n"
 
 #: ../src/project/project.vala:706
 #, c-format
 msgid "Add project to recent manager: %s - %s\n"
-msgstr ""
+msgstr "Ajouter un projet au gestionnaire des récents : %s - %s\n"
 
 #: ../src/ui/search.vala:71
 msgid "All files"
-msgstr ""
+msgstr "Tous les fichiers"
 
 #: ../src/ui/welcome_screen.vala:587
 msgid "All files (*)"
-msgstr ""
+msgstr "Tous les fichiers (*)"
 
 #: ../src/project/project.vala:511 ../src/project/project.vala:565
 #, c-format
 msgid "An error occurred while loading new Guanako project: %s\n"
-msgstr ""
+msgstr "une erreur est survenue durant le chargement d'un nouveau projet Guanako : %s\n"
 
 #: ../src/ui/app_output.vala:39 ../src/ui_main.vala:181
 msgid "Application output"
-msgstr ""
+msgstr "Sortie application"
 
 #: ../src/project/build_project.vala:170
 #, c-format
 msgid "Application received signal: %s\n"
-msgstr ""
+msgstr "L'application a reçu le signal : %s\n"
 
 #: ../src/project/build_project.vala:155
 msgid "Application still running. Quit it manually.\n"
