@@ -54,7 +54,9 @@ public class ProjectBrowser : UiElement {
 
         var btn_add = new ToolButton (null, null);
         btn_add.icon_name = "list-add-symbolic";
-        btn_add.clicked.connect (on_add_button);
+        btn_add.clicked.connect (() => {
+            on_add_button();
+        });
         btn_add.sensitive = false;
         toolbar.add (btn_add);
 
@@ -63,6 +65,15 @@ public class ProjectBrowser : UiElement {
         btn_rem.clicked.connect (on_remove_button);
         btn_rem.sensitive = false;
         toolbar.add (btn_rem);
+
+        var btn_mkdir = new ToolButton (null, null);
+        btn_mkdir.icon_name = "folder-symbolic";
+        btn_mkdir.clicked.connect (() => {
+            on_add_button (true);
+        });
+        btn_mkdir.sensitive = false;
+        btn_mkdir.no_show_all = true;
+        toolbar.add (btn_mkdir);
 
         var toolbar_title = new Toolbar ();
         toolbar_title.get_style_context().add_class (STYLE_CLASS_PRIMARY_TOOLBAR);
@@ -142,7 +153,11 @@ public class ProjectBrowser : UiElement {
             tree_view.get_cursor (out path, null);
             if (path == null) {  // no bug -> focus changed to other widget
                 btn_add.sensitive = false;
+                btn_add.tooltip_text = "";
                 btn_rem.sensitive = false;
+                btn_rem.tooltip_text = "";
+                btn_mkdir.sensitive = false;
+                btn_mkdir.tooltip_text = "";
                 return;
             }
 
@@ -158,21 +173,47 @@ public class ProjectBrowser : UiElement {
 
             switch (store_type) {
                 case StoreType.PACKAGE_TREE:
+                    btn_add.sensitive = true;
+                    btn_add.tooltip_text = _("Add new package");
+                    btn_rem.sensitive = false;
+                    btn_rem.tooltip_text = "";
+                    btn_mkdir.hide();
+                    break;
                 case StoreType.FILE_TREE:
                 case StoreType.DIRECTORY:
                     btn_add.sensitive = true;
+                    btn_add.tooltip_text = _("Add new file");
                     btn_rem.sensitive = false;
+                    // btn_rem.tooltip_text = _("Remove directory (from disk)");
+                    btn_rem.tooltip_text = "";
+                    btn_mkdir.sensitive = true;
+                    btn_mkdir.tooltip_text = _("Add new directory");
+                    btn_mkdir.show();
                     break;
                 case StoreType.PACKAGE:
+                    btn_add.sensitive = true;
+                    btn_add.tooltip_text = _("Add new package");
+                    btn_rem.sensitive = true;
+                    btn_rem.tooltip_text = _("Remove package");
+                    btn_mkdir.hide();
+                    break;
                 case StoreType.FILE:
                     btn_add.sensitive = true;
+                    btn_add.tooltip_text = _("Add new file");
                     btn_rem.sensitive = true;
+                    btn_rem.tooltip_text = _("Remove file (from disk)");
+                    btn_mkdir.sensitive = true;
+                    btn_mkdir.tooltip_text = _("Add new directory");
+                    btn_mkdir.show();
                     break;
                 default:
                     bug_msg (_("Unexpected enum value: %s: %u\n"),
                              "ui_project_browser - cursor_changed", store_type);
                     btn_add.sensitive = false;
+                    btn_add.tooltip_text = "";
                     btn_rem.sensitive = false;
+                    btn_rem.tooltip_text = "";
+                    btn_mkdir.hide();
                     break;
             }
         });
@@ -240,10 +281,21 @@ public class ProjectBrowser : UiElement {
         b_pathmap = new Gee.HashMap<string, TreeIter?>();
         d_pathmap = new Gee.HashMap<string, TreeIter?>();
 
-        build_file_treestore (_("Sources"), project.files.to_array(), ref store, ref pathmap);
-        build_file_treestore (_("Build system files"), project.b_files.to_array(), ref store, ref b_pathmap);
-        build_file_treestore (_("Data files"), project.d_files.to_array(), ref store, ref d_pathmap);
-        build_plain_treestore (_("Packages"), project.packages.get_keys().to_array(), ref store);
+        build_file_treestore (_("Sources"),
+                              project.source_dirs.to_array(),
+                              project.files.to_array(),
+                              ref store, ref pathmap);
+        build_file_treestore (_("Build system files"),
+                              project.buildsystem_dirs.to_array(),
+                              project.b_files.to_array(),
+                              ref store, ref b_pathmap);
+        build_file_treestore (_("Data files"),
+                              project.data_dirs.to_array(),
+                              project.d_files.to_array(),
+                              ref store, ref d_pathmap);
+        build_plain_treestore (_("Packages"),
+                              project.packages.get_keys().to_array(),
+                              ref store);
 
         tree_view.row_collapsed.connect ((iter, path) => {
             if (path in tree_view_expanded)
@@ -312,7 +364,7 @@ public class ProjectBrowser : UiElement {
         return ret;
     }
 
-    private void on_add_button() {
+    private void on_add_button (bool directory = false) {
         TreePath path;
         tree_view.get_cursor (out path, null);
         if (path == null) {
@@ -335,22 +387,22 @@ public class ProjectBrowser : UiElement {
                 string? filename = null;
                 switch (path.get_indices()[0]) {
                     case 0:
-                        filename = ui_create_file_dialog (null, "vala");
-                        project.add_source_file (filename);
+                        filename = ui_create_file_dialog (null, "vala", directory);
+                        project.add_source_file (filename, directory);
                         break;
                     case 1:
-                        filename = ui_create_file_dialog();
-                        project.add_buildsystem_file (filename);
+                        filename = ui_create_file_dialog (null, null, directory);
+                        project.add_buildsystem_file (filename, directory);
                         break;
                     case 2:
-                        filename = ui_create_file_dialog();
-                        project.add_data_file (filename);
+                        filename = ui_create_file_dialog (null, null, directory);
+                        project.add_data_file (filename, directory);
                         break;
                     default:
                         bug_msg (_("Unknown treepath start to add a new file: %s\n"), path.to_string());
                         break;
                 }
-                if (filename != null)
+                if (filename != null && !directory)
                     on_file_selected (filename);
                 break;
             case StoreType.FILE:
@@ -373,32 +425,36 @@ public class ProjectBrowser : UiElement {
                 string? filename = null;
                 switch (path.get_indices()[0]) {
                     case 0:
-                        filename = ui_create_file_dialog (filepath, "vala");
-                        project.add_source_file (filename);
+                        filename = ui_create_file_dialog (filepath, "vala", directory);
+                        project.add_source_file (filename, directory);
                         break;
                     case 1:
-                        filename = ui_create_file_dialog (filepath);
-                        project.add_buildsystem_file (filename);
+                        filename = ui_create_file_dialog (filepath, null, directory);
+                        project.add_buildsystem_file (filename, directory);
                         break;
                     case 2:
-                        filename = ui_create_file_dialog (filepath);
-                        project.add_data_file (filename);
+                        filename = ui_create_file_dialog (filepath, null, directory);
+                        project.add_data_file (filename, directory);
                         break;
                     default:
                         bug_msg (_("Unknown treepath start to add a new file: %s\n"), path.to_string());
                         break;
                 }
-                if (filename != null)
+                if (filename != null && !directory)
                     on_file_selected (filename);
                 break;
             case StoreType.PACKAGE_TREE:
             case StoreType.PACKAGE:
-                var pkg = package_selection_dialog (project);
-                if (pkg != null) {
-                    string[] missing_packages = project.add_package_by_name (pkg);
-                    if (missing_packages.length > 0)
-                        ui_missing_packages_dialog (missing_packages);
-                }
+                if (!directory) {
+                    var pkg = package_selection_dialog (project);
+                    if (pkg != null) {
+                        string[] missing_packages = project.add_package_by_name (pkg);
+                        if (missing_packages.length > 0)
+                            ui_missing_packages_dialog (missing_packages);
+                    }
+                } else
+                    bug_msg (_("Unexpected enum value: %s: %s\n"),
+                             "ui_project_browser - add_button", store_type.to_string());
                 break;
             default:
                 bug_msg (_("Unexpected enum value: %s: %u\n"),

@@ -575,16 +575,16 @@ public class ValamaProject : Object {
                 bug_msg (_("Could not initialize build system: %s\n"), e.message);
             }
 
-        generate_file_list (_source_dirs.to_array(),
-                            _source_files.to_array(),
+        generate_file_list (ref _source_dirs,
+                            ref _source_files,
                             add_source_file);
 
-        generate_file_list (_buildsystem_dirs.to_array(),
-                            _buildsystem_files.to_array(),
+        generate_file_list (ref _buildsystem_dirs,
+                            ref _buildsystem_files,
                             add_buildsystem_file);
 
-        generate_file_list (_data_dirs.to_array(),
-                            _data_files.to_array(),
+        generate_file_list (ref _data_dirs,
+                            ref _data_files,
                             add_data_file);
 
         vieworder = new Gee.LinkedList<ViewMap?>();
@@ -713,22 +713,38 @@ public class ValamaProject : Object {
     }
 
     /**
-     * Reduce length of file list: Prefer directories and remove directories
-     * without content.
+     * Reduce length of file list: Prefer directories and optionally remove
+     * directories without content.
      *
      * @param c_dirs Directories.
      * @param c_files Files.
-     ( @param extensions Valid file extensions.
+     * @param extensions Valid file extensions.
+     * @param check Check file/directory existence.
+     * @param rmdir Remove empty directories.
      */
     private void balance_dir_file_sets (ref TreeSet<string> c_dirs,
                                         ref TreeSet<string> c_files,
                                         string[]? extensions = null,
-                                        string[]? filenames = null) {
-        var new_c_dirs = new TreeSet<string>();
+                                        string[]? filenames = null,
+                                        bool check = false,
+                                        bool rmdir = false) {
         var visited_bad = new TreeSet<string>();
         var new_c_files = new TreeSet<string>();
 
+        if (check) {
+            var removals = new TreeSet<string>();
+            foreach (var dir in c_dirs)
+                if (!FileUtils.test (dir, FileTest.IS_DIR))
+                    removals.add (dir);
+            foreach (var dir in removals)
+                c_dirs.remove (dir);
+        }
+        var new_c_dirs = (rmdir) ? new TreeSet<string>() : c_dirs;
+
         foreach (var filename in c_files) {
+            if (check && !FileUtils.test (filename, FileTest.IS_REGULAR))
+                continue;
+
             var dirname = Path.get_dirname (filename);
 
             if (c_dirs.contains (dirname)) {
@@ -789,62 +805,69 @@ public class ValamaProject : Object {
         }
         c_files = new_c_files;
 
-        foreach (var dirname in c_dirs) {
-            if (new_c_dirs.contains (dirname))
-                continue;
-            try {
-                var enumerator = File.new_for_path (dirname).enumerate_children (
-                                                                "standard::*",
-                                                                FileQueryInfoFlags.NONE,
-                                                                null);
-                FileInfo info = null;
-                var matching = false;
-                while (!matching && (info = enumerator.next_file()) != null) {
-                    if (info.get_file_type() != FileType.REGULAR)  //TODO: Other FileTypes?
-                        continue;
+        if (rmdir) {
+            foreach (var dirname in c_dirs) {
+                if (new_c_dirs.contains (dirname))
+                    continue;
+                try {
+                    var enumerator = File.new_for_path (dirname).enumerate_children (
+                                                                    "standard::*",
+                                                                    FileQueryInfoFlags.NONE,
+                                                                    null);
+                    FileInfo info = null;
+                    var matching = false;
+                    while (!matching && (info = enumerator.next_file()) != null) {
+                        if (info.get_file_type() != FileType.REGULAR)  //TODO: Other FileTypes?
+                            continue;
 
-                    if (filenames != null) {
-                        foreach (var name in filenames)
-                            if (Path.get_basename (info.get_name()) == name) {
-                                matching = true;
+                        if (filenames != null) {
+                            foreach (var name in filenames)
+                                if (Path.get_basename (info.get_name()) == name) {
+                                    matching = true;
+                                    break;
+                                }
+                            if (matching)
                                 break;
-                            }
-                        if (matching)
-                            break;
-                    }
-
-                    if (extensions != null)
-                        foreach (var ext in extensions) {
-                            if (info.get_name().has_suffix (ext)) {
-                                matching = true;
-                                break;
-                            }
                         }
-                    else
-                        matching = true;
+
+                        if (extensions != null)
+                            foreach (var ext in extensions) {
+                                if (info.get_name().has_suffix (ext)) {
+                                    matching = true;
+                                    break;
+                                }
+                            }
+                        else
+                            matching = true;
+                    }
+                    if (matching)
+                        new_c_dirs.add (dirname);
+                } catch (GLib.Error e) {
+                    warning_msg (_("Could not list or iterate through directory content of '%s': %s\n"),
+                                 dirname, e.message);
                 }
-                if (matching)
-                    new_c_dirs.add (dirname);
-            } catch (GLib.Error e) {
-                warning_msg (_("Could not list or iterate through directory content of '%s': %s\n"),
-                             dirname, e.message);
             }
+            c_dirs = new_c_dirs;
         }
-        c_dirs = new_c_dirs;
     }
 
-    public void balance_pfile_dirs() {
-        var s_dirs_tmp = new TreeSet<string>();
+    public void balance_pfile_dirs (bool check = true) {
+        var s_dirs_tmp = source_dirs;
         var s_files_tmp = files;
-        var b_dirs_tmp = new TreeSet<string>();
+        var b_dirs_tmp = buildsystem_dirs;
         var b_files_tmp = b_files;
-        var d_dirs_tmp = new TreeSet<string>();
+        var d_dirs_tmp = data_dirs;
         var d_files_tmp = d_files;
+
         balance_dir_file_sets (ref s_dirs_tmp, ref s_files_tmp,
-                               new string[]{".vala", ".vapi"});
+                               new string[]{".vala", ".vapi"}, null,
+                               check);
         balance_dir_file_sets (ref b_dirs_tmp, ref b_files_tmp,
-                               new string[]{".cmake"}, new string[]{"CMakeLists.txt"});
-        balance_dir_file_sets (ref d_dirs_tmp, ref d_files_tmp);
+                               new string[]{".cmake"}, new string[]{"CMakeLists.txt"},
+                               check);
+        balance_dir_file_sets (ref d_dirs_tmp, ref d_files_tmp,
+                               null, null,
+                               check);
 
         source_dirs = s_dirs_tmp;
         source_files = s_files_tmp;
@@ -948,15 +971,26 @@ public class ValamaProject : Object {
      * Add source file and register with Guanako.
      *
      * @param filename Path to file.
+     * @param directory Add directory.
      */
-    public void add_source_file (string? filename) {
-        if (filename == null || !(filename.has_suffix (".vala") || filename.has_suffix (".vapi")))
+    public void add_source_file (string? filename, bool directory = false) {
+        if (filename == null || (!directory &&
+                    !(filename.has_suffix (".vala") || filename.has_suffix (".vapi"))))
             return;
         var filename_abs = get_absolute_path (filename);
 
         var f = File.new_for_path (filename_abs);
         if (!f.query_exists()) {
-            warning_msg (_("Source file does not exist: %s\n"), filename_abs);
+            if (!directory)
+                warning_msg (_("Source file does not exist: %s\n"), filename_abs);
+            else
+                warning_msg (_("Source directory does not exist: %s\n"), filename_abs);
+            return;
+        }
+
+        if (directory) {
+            source_dirs.add (filename);
+            source_files_changed();
             return;
         }
 
@@ -1007,15 +1041,26 @@ public class ValamaProject : Object {
      * Add file to build system list.
      *
      * @param filename Path to file.
+     * @param directory Add directory.
      */
-    public void add_buildsystem_file (string? filename) {
-        if (builder == null || filename == null || !builder.check_buildsystem_file (filename))
+    public void add_buildsystem_file (string? filename, bool directory = false) {
+        if (builder == null || filename == null || (!directory &&
+                    !builder.check_buildsystem_file (filename)))
             return;
         var filename_abs = get_absolute_path (filename);
 
         var f = File.new_for_path (filename_abs);
         if (!f.query_exists()) {
-            warning_msg (_("Build system file does not exist: %s\n"), filename_abs);
+            if (!directory)
+                warning_msg (_("Build system file does not exist: %s\n"), filename_abs);
+            else
+                warning_msg (_("Build system directory does not exist: %s\n"), filename_abs);
+            return;
+        }
+
+        if (directory) {
+            buildsystem_dirs.add (filename);
+            buildsystem_files_changed();
             return;
         }
 
@@ -1052,15 +1097,25 @@ public class ValamaProject : Object {
      * Add file to extra file list.
      *
      * @param filename Path to file.
+     * @param directory Add directory.
      */
-    public void add_data_file (string? filename) {
+    public void add_data_file (string? filename, bool directory = false) {
         if (filename == null)
             return;
         var filename_abs = get_absolute_path (filename);
 
         var f = File.new_for_path (filename_abs);
         if (!f.query_exists()) {
-            warning_msg (_("Data file does not exist: %s\n"), filename_abs);
+            if (!directory)
+                warning_msg (_("Data file does not exist: %s\n"), filename_abs);
+            else
+                warning_msg (_("Data directory does not exist: %s\n"), filename_abs);
+            return;
+        }
+
+        if (directory) {
+            data_dirs.add (filename);
+            data_files_changed();
             return;
         }
 
@@ -1116,23 +1171,27 @@ public class ValamaProject : Object {
      * Callback to perform action with valid file.
      *
      * @param filename Absolute path to existing file.
+     * @param directory Add directory (not used).
      */
-    public delegate void FileCallback (string filename);
+    public delegate void FileCallback (string filename, bool directory = false);
     /**
      * Iterate over directories and files and fill list.
+     *
+     * Check for file existence.
      *
      * @param dirlist List of directories.
      * @param filelist List of files.
      * @param action Method to perform on each found file in directory or
      *               file list.
      */
-    public void generate_file_list (string[] dirlist,
-                                    string[] filelist,
+    public void generate_file_list (ref TreeSet<string> dirlist,
+                                    ref TreeSet<string> filelist,
                                     FileCallback? action = null) {
         File directory;
         FileEnumerator enumerator;
         FileInfo file_info;
 
+        var removals = new TreeSet<string>();
         foreach (var dir in dirlist) {
             try {
                 directory = File.new_for_path (dir);
@@ -1146,12 +1205,24 @@ public class ValamaProject : Object {
                                              file_info.get_name()));
                 }
             } catch (GLib.Error e) {
-                errmsg (_("Could not open file in '%s': %s\n"), dir, e.message);
+                errmsg (_("Could not open directory or file in '%s': %s\n"), dir, e.message);
+                removals.add (dir);
             }
         }
+        foreach (var dir in removals)
+            dirlist.remove (dir);
 
-        foreach (var filename in filelist)
+        removals.clear();
+        foreach (var filename in filelist) {
+            if (!FileUtils.test (filename, FileTest.IS_REGULAR)) {
+                errmsg (_("Will not add '%s' to file list: File not valid\n"), filename);
+                removals.add (filename);
+                continue;
+            }
             action (filename);
+        }
+        foreach (var file in removals)
+            filelist.remove (file);
     }
 
     /**
@@ -1572,7 +1643,7 @@ public class ValamaProject : Object {
 
         var changed_files = new TreeSet<string>();
         foreach (var map in vieworder) {
-            //TOOD: Ask here too if dirty.
+            //TODO: Ask here too if dirty.
             if (map.filename == "")
                 continue;
             if (((SourceBuffer) map.view.buffer).dirty)

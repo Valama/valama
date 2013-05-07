@@ -57,8 +57,10 @@ public class ProjectTemplate {
         vproject = new ValamaProject (vlp_file, null, false);
 
         s_files = new TreeSet<string>();
-        vproject.generate_file_list (vproject.source_dirs.to_array(),
-                                     vproject.source_files.to_array(),
+        var source_dirs = vproject.source_dirs;
+        var source_files = vproject.source_files;
+        vproject.generate_file_list (ref source_dirs,
+                                     ref source_files,
                                      (filename) => {
             if (!(filename.has_suffix (".vala") || filename.has_suffix (".vapi")))
                 return;

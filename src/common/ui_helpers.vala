@@ -235,6 +235,8 @@ public enum StoreType {
 /**
  * Build {@link Gtk.TreeStore} with files. Each directory has its own leaves.
  *
+ * Input will be sorted.
+ *
  * @param storename Name of store.
  * @param files List of files to add to store.
  * @param store {@link Gtk.TreeStore} to initialize.
@@ -242,6 +244,7 @@ public enum StoreType {
  *                correctly.
  */
 public void build_file_treestore (string storename,
+                                  string[] dirs,
                                   string[] files,
                                   ref TreeStore store,
                                   ref Gee.HashMap<string, TreeIter?> pathmap) {
@@ -249,13 +252,20 @@ public void build_file_treestore (string storename,
         store.append (out iter_base, null);
         store.set (iter_base, 0, storename, 1, StoreType.FILE_TREE, -1);
 
-        foreach (string file in files) {
-            var pathparts = split_path (project.get_relative_path (file), false);
+        /* Filename -> filetype mappings. Value is `true` for directories. */
+        var tmap = new Gee.TreeMap<string, bool>();
+        foreach (var file in files)
+            tmap[file] = false;
+        foreach (var dir in dirs)
+            tmap[dir] = true;
 
-            if (pathparts.length == 0) {
-                bug_msg (_("Couldn't add element to TreeStore '%s': %s\n"), storename, file);
-                return;
-            }
+        foreach (var entry in tmap.entries) {
+            var pathparts = split_path (project.get_relative_path (entry.key), false);
+
+            /* Project root directory. */
+            if (pathparts.length == 0)
+                continue;
+
             for (int depth = 0; depth < pathparts.length; ++depth) {
                 if (pathmap.has_key (pathparts[depth]))
                     continue;
@@ -267,7 +277,7 @@ public void build_file_treestore (string storename,
                     store.append (out iter, pathmap[Path.get_dirname (pathparts[depth])]);
 
                 StoreType store_type;
-                if (depth < pathparts.length - 1)
+                if (entry.value || depth < pathparts.length - 1)
                     store_type = StoreType.DIRECTORY;
                 else
                     store_type = StoreType.FILE;

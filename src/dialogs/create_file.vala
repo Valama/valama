@@ -27,14 +27,18 @@ using Vala;
  *
  * @param path Root path of new file.
  * @param extension File extension.
+ * @param directory Create directory.
+ * @return Filename or `null`.
  */
-public string? ui_create_file_dialog (string? path = null, string? extension = null) {
-    var dlg = new Dialog.with_buttons (_("Choose filename"),
+public string? ui_create_file_dialog (string? path = null, string? extension = null,
+                                      bool directory = false) {
+    var dlg = new Dialog.with_buttons ((!directory) ? _("Choose filename")
+                                                    : _("Choose directory name"),
                                        window_main,
                                        DialogFlags.MODAL,
                                        Stock.CANCEL,
                                        ResponseType.CANCEL,
-                                       Stock.OPEN,
+                                       (!directory) ? Stock.OPEN : Stock.ADD,
                                        ResponseType.ACCEPT,
                                        null);
 
@@ -42,9 +46,11 @@ public string? ui_create_file_dialog (string? path = null, string? extension = n
     dlg.resizable = false;
 
     var box_main = new Box (Orientation.VERTICAL, 0);
-    var frame_filename = new Frame (_("Add new file to project (%s)").printf (
-                                        (path != null) ? _("'%s' directory").printf (path)
-                                                       : _("root directory")));
+    var desc = ((!directory) ? _("Add new file to project (%s)")
+                             : _("Create new subdirectory (%s)")).printf (
+                            (path != null) ? _("inside '%s' directory").printf (path)
+                                           : _("inside root directory"));
+    var frame_filename = new Frame (desc);
     var box_filename = new Box (Orientation.VERTICAL, 0);
     frame_filename.add (box_filename);
 
@@ -77,26 +83,37 @@ public string? ui_create_file_dialog (string? path = null, string? extension = n
             filename = Path.build_path (Path.DIR_SEPARATOR_S,
                                         basepath,
                                         ent_filename.text);
-            if (extension != null)
-                if (!filename.has_suffix (@".$extension"))
-                    filename += @".$extension";
-            var f = File.new_for_path (filename);
-            if (!f.query_exists()) {
-                if (f.get_parent() != null && !f.get_parent().query_exists())
+            if (!directory) {
+                if (extension != null)
+                    if (!filename.has_suffix (@".$extension"))
+                        filename += @".$extension";
+                var f = File.new_for_path (filename);
+                if (!f.query_exists()) {
+                    if (f.get_parent() != null && !f.get_parent().query_exists())
+                        try {
+                            f.get_parent().make_directory_with_parents();
+                        } catch (GLib.Error e) {
+                            errmsg (_("Could not create parent directory: %s\n"), e.message);
+                        }
                     try {
-                        f.get_parent().make_directory_with_parents();
+                        f.create (FileCreateFlags.NONE).close();
+                    } catch (GLib.IOError e) {
+                        errmsg (_("Could not write to new file: %s\n"), e.message);
+                        filename = null;
                     } catch (GLib.Error e) {
-                        errmsg (_("Could not create parent directory: %s\n"), e.message);
+                        errmsg (_("Could not create new file: %s\n"), e.message);
+                        filename = null;
                     }
-                try {
-                    f.create (FileCreateFlags.NONE).close();
-                } catch (GLib.IOError e) {
-                    errmsg (_("Could not write to new file: %s\n"), e.message);
-                    filename = null;
-                } catch (GLib.Error e) {
-                    errmsg (_("Could not create new file: %s\n"), e.message);
-                    filename = null;
                 }
+            } else {
+                var f = File.new_for_path (filename);
+                if (!f.query_exists())
+                    try {
+                        f.make_directory_with_parents();
+                    } catch (GLib.Error e) {
+                        errmsg (_("Could not create new directory: %s\n"), e.message);
+                        filename = null;
+                    }
             }
         }
         dlg.destroy();
