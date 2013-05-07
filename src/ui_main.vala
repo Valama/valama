@@ -459,7 +459,7 @@ public class MainWidget : Box {
         add_button (ti);
 
         var btnBuild = new Gtk.ToolButton.from_stock (Stock.EXECUTE);
-        add_accel_activate (btnBuild, Gdk.Key.b, Gdk.ModifierType.CONTROL_MASK, "clicked");
+        add_accel_activate (btnBuild, Gdk.Key.F7, 0, "clicked");
         add_button (btnBuild);
         btnBuild.set_tooltip_text (_("Save current file and build project"));
         btnBuild.clicked.connect (() => {
@@ -467,7 +467,7 @@ public class MainWidget : Box {
         });
 
         var btnRun = new Gtk.ToolButton.from_stock (Stock.MEDIA_PLAY);
-        add_accel_activate (btnRun, Gdk.Key.l, Gdk.ModifierType.CONTROL_MASK, "clicked");
+        add_accel_activate (btnRun, Gdk.Key.F5, 0, "clicked");
         add_button (btnRun);
         btnRun.set_tooltip_text (_("Run application"));
         btnRun.clicked.connect (() => {
