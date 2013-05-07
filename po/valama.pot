@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Valama 0.1.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-05-06 22:59+0200\n"
+"POT-Creation-Date: 2013-05-07 11:17+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -45,7 +45,7 @@ msgid "%s update finished (not a valid source buffer)!\n"
 msgstr ""
 
 #: ../src/ui/breakpoints.vala:240 ../src/ui/current_file_structure.vala:175
-#: ../src/ui/current_symbol.vala:150 ../src/ui/project_browser.vala:260
+#: ../src/ui/current_symbol.vala:150 ../src/ui/project_browser.vala:312
 #: ../src/ui/reports.vala:279 ../src/ui/search.vala:246
 #: ../src/ui/source_viewer.vala:524 ../src/ui/symbol_browser.vala:141
 #, c-format
@@ -69,11 +69,6 @@ msgstr ""
 #: ../src/project/build_project.vala:134
 #, c-format
 msgid "'%s' configuration failed: %s\n"
-msgstr ""
-
-#: ../src/dialogs/create_file.vala:46
-#, c-format
-msgid "'%s' directory"
 msgstr ""
 
 #: ../src/project/build_project.vala:126
@@ -121,7 +116,7 @@ msgstr ""
 msgid "'Tests' failed with exit status: %d\n"
 msgstr ""
 
-#: ../src/project/project.vala:1705
+#: ../src/project/project.vala:1776
 msgid "(new file)"
 msgstr ""
 
@@ -129,12 +124,24 @@ msgstr ""
 msgid "- Valama: next generation Vala IDE"
 msgstr ""
 
-#: ../src/dialogs/create_file.vala:45
+#: ../src/ui/project_browser.vala:190 ../src/ui/project_browser.vala:206
+msgid "Add new directory"
+msgstr ""
+
+#: ../src/ui/project_browser.vala:185 ../src/ui/project_browser.vala:202
+msgid "Add new file"
+msgstr ""
+
+#: ../src/dialogs/create_file.vala:49
 #, c-format
 msgid "Add new file to project (%s)"
 msgstr ""
 
-#: ../src/project/project.vala:867 ../src/project/project.vala:878
+#: ../src/ui/project_browser.vala:177 ../src/ui/project_browser.vala:195
+msgid "Add new package"
+msgstr ""
+
+#: ../src/project/project.vala:890 ../src/project/project.vala:901
 #, c-format
 msgid "Add package: %s\n"
 msgstr ""
@@ -195,11 +202,11 @@ msgstr ""
 msgid "Breakpoints / Timers"
 msgstr ""
 
-#: ../src/project/project.vala:1815
+#: ../src/project/project.vala:1886
 msgid "Buffer loaded.\n"
 msgstr ""
 
-#: ../src/project/project.vala:1833
+#: ../src/project/project.vala:1904
 msgid "Buffer update"
 msgstr ""
 
@@ -224,22 +231,27 @@ msgstr ""
 msgid "Build output"
 msgstr ""
 
-#: ../src/project/project_templates.vala:72
+#: ../src/project/project_templates.vala:74
 #, c-format
 msgid "Build system '%s' currently not supported by template selector.\n"
 msgstr ""
 
-#: ../src/project/project.vala:1619
+#: ../src/project/project.vala:1690
 #, c-format
 msgid "Build system '%s' not supported.\n"
 msgstr ""
 
-#: ../src/project/project.vala:1018
+#: ../src/project/project.vala:1057
+#, c-format
+msgid "Build system directory does not exist: %s\n"
+msgstr ""
+
+#: ../src/project/project.vala:1055
 #, c-format
 msgid "Build system file does not exist: %s\n"
 msgstr ""
 
-#: ../src/ui/project_browser.vala:244
+#: ../src/ui/project_browser.vala:288
 msgid "Build system files"
 msgstr ""
 
@@ -326,8 +338,8 @@ msgstr ""
 msgid "Cannot create temporary file '%s' to apply substitutions: %s\n"
 msgstr ""
 
-#: ../src/project/project.vala:1169 ../src/project/project.vala:1525
-#: ../src/project/project_templates.vala:201 ../src/ui_main.vala:662
+#: ../src/project/project.vala:1240 ../src/project/project.vala:1596
+#: ../src/project/project_templates.vala:203 ../src/ui_main.vala:662
 #: ../guanako/stylecheck.vala:360
 msgid "Cannot parse file."
 msgstr ""
@@ -346,12 +358,16 @@ msgstr ""
 msgid "Checker loaded.\n"
 msgstr ""
 
-#: ../src/project/project.vala:1638 ../src/project/project.vala:1648
+#: ../src/project/project.vala:1709 ../src/project/project.vala:1719
 #, c-format
 msgid "Choose '%s' package.\n"
 msgstr ""
 
-#: ../src/dialogs/create_file.vala:32
+#: ../src/dialogs/create_file.vala:36
+msgid "Choose directory name"
+msgstr ""
+
+#: ../src/dialogs/create_file.vala:35
 msgid "Choose filename"
 msgstr ""
 
@@ -363,7 +379,7 @@ msgstr ""
 msgid "Clear output"
 msgstr ""
 
-#: ../src/project/project.vala:1962
+#: ../src/project/project.vala:2033
 msgid "Close buffer.\n"
 msgstr ""
 
@@ -415,7 +431,7 @@ msgstr ""
 msgid "Could not change focus to: %s\n"
 msgstr ""
 
-#: ../src/project/project.vala:1112
+#: ../src/project/project.vala:1167
 #, c-format
 msgid "Could not close ViewMap for: %s\n"
 msgstr ""
@@ -456,17 +472,22 @@ msgstr ""
 msgid "Could not copy templates for new project: %s\n"
 msgstr ""
 
-#: ../src/dialogs/create_file.vala:97
+#: ../src/dialogs/create_file.vala:114
+#, c-format
+msgid "Could not create new directory: %s\n"
+msgstr ""
+
+#: ../src/dialogs/create_file.vala:104
 #, c-format
 msgid "Could not create new file: %s\n"
 msgstr ""
 
-#: ../src/dialogs/create_file.vala:89
+#: ../src/dialogs/create_file.vala:96
 #, c-format
 msgid "Could not create parent directory: %s\n"
 msgstr ""
 
-#: ../src/project/project.vala:1846
+#: ../src/project/project.vala:1917
 #, c-format
 msgid "Could not create thread to update buffer: %s\n"
 msgstr ""
@@ -491,7 +512,7 @@ msgstr ""
 msgid "Could not find pkg-config file for '%s'. "
 msgstr ""
 
-#: ../src/project/project_templates.vala:352
+#: ../src/project/project_templates.vala:354
 #, c-format
 msgid "Could not get template directory files: %s\n"
 msgstr ""
@@ -507,12 +528,12 @@ msgid "Could not launch completion thread successfully: %s\n"
 msgstr ""
 
 #: ../src/dialogs/create_project.vala:684 ../src/main.vala:189
-#: ../src/project/project.vala:786 ../src/project/project.vala:829
+#: ../src/project/project.vala:802 ../src/project/project.vala:846
 #, c-format
 msgid "Could not list or iterate through directory content of '%s': %s\n"
 msgstr ""
 
-#: ../src/project/project.vala:978
+#: ../src/project/project.vala:1012
 #, c-format
 msgid "Could not load Vala source file: %s\n"
 msgstr ""
@@ -522,7 +543,7 @@ msgstr ""
 msgid "Could not load Valama text logo: %s\n"
 msgstr ""
 
-#: ../src/project/project.vala:1766 ../src/ui/source_viewer.vala:278
+#: ../src/project/project.vala:1837 ../src/ui/source_viewer.vala:278
 #, c-format
 msgid "Could not load completion: %s\n"
 msgstr ""
@@ -562,12 +583,12 @@ msgstr ""
 msgid "Could not load project: %s\n"
 msgstr ""
 
-#: ../src/project/project_templates.vala:223
+#: ../src/project/project_templates.vala:225
 #, c-format
 msgid "Could not load template '%s': %s\n"
 msgstr ""
 
-#: ../src/project/project_templates.vala:190
+#: ../src/project/project_templates.vala:192
 #, c-format
 msgid "Could not load template image: %s\n"
 msgstr ""
@@ -577,9 +598,9 @@ msgstr ""
 msgid "Could not load vapi: %s\n"
 msgstr ""
 
-#: ../src/project/project.vala:1149
+#: ../src/project/project.vala:1208
 #, c-format
-msgid "Could not open file in '%s': %s\n"
+msgid "Could not open directory or file in '%s': %s\n"
 msgstr ""
 
 #: ../src/buildsystem/plain.vala:91 ../src/common/common.vala:570
@@ -632,7 +653,7 @@ msgstr ""
 msgid "Could not register service\n"
 msgstr ""
 
-#: ../src/project/project.vala:1386
+#: ../src/project/project.vala:1457
 msgid "Could not select a package from choice.\n"
 msgstr ""
 
@@ -672,7 +693,7 @@ msgstr ""
 msgid "Could not update vapi files: %s\n"
 msgstr ""
 
-#: ../src/dialogs/create_file.vala:94
+#: ../src/dialogs/create_file.vala:101
 #, c-format
 msgid "Could not write to new file: %s\n"
 msgstr ""
@@ -687,11 +708,6 @@ msgstr ""
 msgid "Could read file content of '%s': %s\n"
 msgstr ""
 
-#: ../src/common/ui_helpers.vala:256
-#, c-format
-msgid "Couldn't add element to TreeStore '%s': %s\n"
-msgstr ""
-
 #: ../src/dialogs/project_settings.vala:69
 #, c-format
 msgid "Couldn't compare project files inodes: %s\n"
@@ -702,15 +718,15 @@ msgstr ""
 msgid "Couldn't create cache directory: %s\n"
 msgstr ""
 
-#: ../src/ui/project_browser.vala:319 ../src/ui/project_browser.vala:414
+#: ../src/ui/project_browser.vala:371 ../src/ui/project_browser.vala:470
 #, c-format
 msgid "Couldn't get current tree path: %s\n"
 msgstr ""
 
-#: ../src/ui/project_browser.vala:104 ../src/ui/project_browser.vala:116
-#: ../src/ui/project_browser.vala:151 ../src/ui/project_browser.vala:325
-#: ../src/ui/project_browser.vala:362 ../src/ui/project_browser.vala:420
-#: ../src/ui/project_browser.vala:438
+#: ../src/ui/project_browser.vala:115 ../src/ui/project_browser.vala:127
+#: ../src/ui/project_browser.vala:166 ../src/ui/project_browser.vala:377
+#: ../src/ui/project_browser.vala:414 ../src/ui/project_browser.vala:476
+#: ../src/ui/project_browser.vala:494
 #, c-format
 msgid "Couldn't get iterator in TreeView: %s\n"
 msgstr ""
@@ -720,12 +736,12 @@ msgstr ""
 msgid "Couldn't load Valama project: %s\n"
 msgstr ""
 
-#: ../src/common/ui_helpers.vala:329
+#: ../src/common/ui_helpers.vala:339
 #, c-format
 msgid "Couldn't load layout file: %s\n"
 msgstr ""
 
-#: ../src/common/ui_helpers.vala:343
+#: ../src/common/ui_helpers.vala:353
 #, c-format
 msgid "Couldn't load layout: %s\n"
 msgstr ""
@@ -736,12 +752,12 @@ msgstr ""
 msgid "Couldn't load new project: %s\n"
 msgstr ""
 
-#: ../src/common/ui_helpers.vala:362
+#: ../src/common/ui_helpers.vala:372
 #, c-format
 msgid "Couldn't save layout to file: %s\n"
 msgstr ""
 
-#: ../src/project/project.vala:1914
+#: ../src/project/project.vala:1985
 #, c-format
 msgid "Couldn't save project file: %s\n"
 msgstr ""
@@ -752,6 +768,11 @@ msgstr ""
 
 #: ../src/ui/welcome_screen.vala:287
 msgid "Create new project"
+msgstr ""
+
+#: ../src/dialogs/create_file.vala:50
+#, c-format
+msgid "Create new subdirectory (%s)"
 msgstr ""
 
 #: ../src/ui/welcome_screen.vala:293
@@ -770,12 +791,17 @@ msgstr ""
 msgid "DIRECTORY"
 msgstr ""
 
-#: ../src/project/project.vala:1063
+#: ../src/project/project.vala:1112
+#, c-format
+msgid "Data directory does not exist: %s\n"
+msgstr ""
+
+#: ../src/project/project.vala:1110
 #, c-format
 msgid "Data file does not exist: %s\n"
 msgstr ""
 
-#: ../src/ui/project_browser.vala:245
+#: ../src/ui/project_browser.vala:292
 msgid "Data files"
 msgstr ""
 
@@ -804,11 +830,11 @@ msgstr ""
 msgid "Display version number."
 msgstr ""
 
-#: ../src/ui/project_browser.vala:450
+#: ../src/ui/project_browser.vala:506
 msgid "Do you want to delete this file?"
 msgstr ""
 
-#: ../src/dialogs/create_file.vala:74
+#: ../src/dialogs/create_file.vala:80
 msgid "Don't let this field empty. Name a file."
 msgstr ""
 
@@ -860,15 +886,15 @@ msgstr ""
 msgid "File"
 msgstr ""
 
-#: ../src/project/project.vala:969 ../src/project/project.vala:1027
+#: ../src/project/project.vala:1003 ../src/project/project.vala:1072
 msgid "File already a data file. Skip it.\n"
 msgstr ""
 
-#: ../src/project/project.vala:1024 ../src/project/project.vala:1069
+#: ../src/project/project.vala:1069 ../src/project/project.vala:1124
 msgid "File already a source file. Skip it.\n"
 msgstr ""
 
-#: ../src/project/project.vala:966 ../src/project/project.vala:1072
+#: ../src/project/project.vala:1000 ../src/project/project.vala:1127
 msgid "File already registered for build system. Skip it.\n"
 msgstr ""
 
@@ -876,11 +902,11 @@ msgstr ""
 msgid "File copying cancelled."
 msgstr ""
 
-#: ../src/project/project_templates.vala:207
+#: ../src/project/project_templates.vala:209
 msgid "File does not contain enough information"
 msgstr ""
 
-#: ../src/project/project.vala:1175 ../src/project/project.vala:1531
+#: ../src/project/project.vala:1246 ../src/project/project.vala:1602
 #: ../src/ui_main.vala:668 ../guanako/stylecheck.vala:366
 msgid "File does not contain enough information."
 msgstr ""
@@ -889,11 +915,11 @@ msgstr ""
 msgid "File does not exist."
 msgstr ""
 
-#: ../src/project/project.vala:1945
+#: ../src/project/project.vala:2016
 msgid "File is modified. Do you want to save it?"
 msgstr ""
 
-#: ../src/project/project.vala:1931
+#: ../src/project/project.vala:2002
 #, c-format
 msgid "File not registered in project to check if buffer is dirty: %s\n"
 msgstr ""
@@ -908,7 +934,7 @@ msgstr ""
 msgid "Focus dock item: %s (%s)\n"
 msgstr ""
 
-#: ../src/project/project.vala:1585
+#: ../src/project/project.vala:1656
 msgid "Following files are modified. Do you want to save them?"
 msgstr ""
 
@@ -916,17 +942,17 @@ msgstr ""
 msgid "Force loading of possibly incompatible template or project files."
 msgstr ""
 
-#: ../src/project/project.vala:1022
+#: ../src/project/project.vala:1067
 #, c-format
 msgid "Found build system file: %s\n"
 msgstr ""
 
-#: ../src/project/project.vala:1067
+#: ../src/project/project.vala:1122
 #, c-format
 msgid "Found data file: %s\n"
 msgstr ""
 
-#: ../src/project/project.vala:963
+#: ../src/project/project.vala:997
 #, c-format
 msgid "Found source file: %s\n"
 msgstr ""
@@ -970,18 +996,18 @@ msgstr ""
 msgid "IOChannel operation failed: %s\n"
 msgstr ""
 
-#: ../src/project/project.vala:1187
+#: ../src/project/project.vala:1258
 #, c-format
 msgid "Ignore project file loading error: %s\n"
 msgstr ""
 
-#: ../src/project/project_templates.vala:310
-#: ../src/project/project_templates.vala:317
+#: ../src/project/project_templates.vala:312
+#: ../src/project/project_templates.vala:319
 #, c-format
 msgid "Ignore substitution with missing '%s' property line %hu."
 msgstr ""
 
-#: ../src/project/project_templates.vala:220
+#: ../src/project/project_templates.vala:222
 #, c-format
 msgid "Ignore template file loading error: %s\n"
 msgstr ""
@@ -1008,22 +1034,22 @@ msgstr ""
 msgid "Launching application failed: %s\n"
 msgstr ""
 
-#: ../src/common/ui_helpers.vala:364
+#: ../src/common/ui_helpers.vala:374
 #, c-format
 msgid "Layout '%s' saved to file: %s\n"
 msgstr ""
 
-#: ../src/common/ui_helpers.vala:318 ../src/common/ui_helpers.vala:320
+#: ../src/common/ui_helpers.vala:328 ../src/common/ui_helpers.vala:330
 #, c-format
 msgid "Layout file does not exist: %s\n"
 msgstr ""
 
-#: ../src/common/ui_helpers.vala:345
+#: ../src/common/ui_helpers.vala:355
 #, c-format
 msgid "Layout loaded: %s\n"
 msgstr ""
 
-#: ../src/common/ui_helpers.vala:327
+#: ../src/common/ui_helpers.vala:337
 #, c-format
 msgid "Layouts loaded from file: %s\n"
 msgstr ""
@@ -1047,11 +1073,11 @@ msgstr ""
 msgid "Load default layout."
 msgstr ""
 
-#: ../src/common/ui_helpers.vala:323
+#: ../src/common/ui_helpers.vala:333
 msgid "Load layout...\n"
 msgstr ""
 
-#: ../src/project/project.vala:1704
+#: ../src/project/project.vala:1775
 #, c-format
 msgid "Load new buffer: %s\n"
 msgstr ""
@@ -1070,7 +1096,7 @@ msgstr ""
 msgid "Load project from file."
 msgstr ""
 
-#: ../src/project/project.vala:1519
+#: ../src/project/project.vala:1590
 #, c-format
 msgid "Load project meta information: %s\n"
 msgstr ""
@@ -1142,11 +1168,11 @@ msgstr ""
 msgid "No default capturing group ('matchgroup'). Set it to 0: %s\n"
 msgstr ""
 
-#: ../src/project/project.vala:1902
+#: ../src/project/project.vala:1973
 msgid "No file selected.\n"
 msgstr ""
 
-#: ../src/project/project.vala:1263
+#: ../src/project/project.vala:1334
 #, c-format
 msgid "No packages to choose between: line %hu\n"
 msgstr ""
@@ -1191,18 +1217,18 @@ msgstr ""
 msgid "Output debug information."
 msgstr ""
 
-#: ../src/project/project.vala:2085
+#: ../src/project/project.vala:2156
 #, c-format
 msgid "Package '%s' has relation information but no version: "
 msgstr ""
 
-#: ../src/project/project.vala:898 ../src/project/project.vala:915
+#: ../src/project/project.vala:921 ../src/project/project.vala:938
 #, c-format
 msgid "Package '%s' not in list, skip it.\n"
 msgstr ""
 
-#: ../src/dialogs/create_project.vala:407 ../src/ui/project_browser.vala:246
-#: ../src/ui/project_browser.vala:281
+#: ../src/dialogs/create_project.vala:407 ../src/ui/project_browser.vala:296
+#: ../src/ui/project_browser.vala:333
 msgid "Packages"
 msgstr ""
 
@@ -1260,7 +1286,7 @@ msgstr ""
 msgid "Project file to old: %s < %s\n"
 msgstr ""
 
-#: ../src/project/project.vala:1181
+#: ../src/project/project.vala:1252
 #, c-format
 msgid "Project file too old: %s < %s"
 msgstr ""
@@ -1299,26 +1325,34 @@ msgstr ""
 msgid "Release"
 msgstr ""
 
-#: ../src/project/project.vala:1044
+#: ../src/project/project.vala:1089
 #, c-format
 msgid "Remove build system file: %s\n"
 msgstr ""
 
-#: ../src/project/project.vala:1089
+#: ../src/project/project.vala:1144
 #, c-format
 msgid "Remove data file: %s\n"
 msgstr ""
 
-#: ../src/project/project.vala:896 ../src/project/project.vala:913
+#: ../src/ui/project_browser.vala:204
+msgid "Remove file (from disk)"
+msgstr ""
+
+#: ../src/ui/project_browser.vala:197
+msgid "Remove package"
+msgstr ""
+
+#: ../src/project/project.vala:919 ../src/project/project.vala:936
 #, c-format
 msgid "Remove package: %s\n"
 msgstr ""
 
-#: ../src/project/project.vala:998
+#: ../src/project/project.vala:1032
 msgid "Remove source file"
 msgstr ""
 
-#: ../src/project/project.vala:995
+#: ../src/project/project.vala:1029
 #, c-format
 msgid "Remove source file: %s\n"
 msgstr ""
@@ -1328,7 +1362,7 @@ msgid "Report widget"
 msgstr ""
 
 #: ../src/ui/breakpoints.vala:180 ../src/ui/current_file_structure.vala:102
-#: ../src/ui/current_symbol.vala:67 ../src/ui/project_browser.vala:233
+#: ../src/ui/current_symbol.vala:67 ../src/ui/project_browser.vala:274
 #: ../src/ui/reports.vala:155 ../src/ui/search.vala:245
 #: ../src/ui/source_viewer.vala:523 ../src/ui/symbol_browser.vala:119
 #, c-format
@@ -1357,11 +1391,11 @@ msgstr ""
 msgid "Save current file and build project"
 msgstr ""
 
-#: ../src/project/project.vala:1401
+#: ../src/project/project.vala:1472
 msgid "Save project file.\n"
 msgstr ""
 
-#: ../src/project/project.vala:1502
+#: ../src/project/project.vala:1573
 #, c-format
 msgid "Save project meta information: %s\n"
 msgstr ""
@@ -1374,7 +1408,7 @@ msgstr ""
 msgid "Select Valama project file"
 msgstr ""
 
-#: ../src/ui/project_browser.vala:268
+#: ../src/ui/project_browser.vala:320
 msgid "Select new packages"
 msgstr ""
 
@@ -1382,7 +1416,7 @@ msgstr ""
 msgid "Select template"
 msgstr ""
 
-#: ../src/ui/project_browser.vala:89
+#: ../src/ui/project_browser.vala:100
 msgid "Settings"
 msgstr ""
 
@@ -1431,13 +1465,13 @@ msgstr ""
 msgid "Skip %s\n"
 msgstr ""
 
-#: ../src/project/project.vala:1641 ../src/project/project.vala:1651
+#: ../src/project/project.vala:1712 ../src/project/project.vala:1722
 #, c-format
 msgid "Skip '%s' choice.\n"
 msgstr ""
 
-#: ../src/project/project.vala:980 ../src/project/project.vala:1031
-#: ../src/project/project.vala:1076
+#: ../src/project/project.vala:1014 ../src/project/project.vala:1076
+#: ../src/project/project.vala:1131
 #, c-format
 msgid "Skip already added file: %s\n"
 msgstr ""
@@ -1452,7 +1486,12 @@ msgstr ""
 msgid "Skip overwrite from '%s' to '%s'.\n"
 msgstr ""
 
-#: ../src/project/project.vala:959
+#: ../src/project/project.vala:987
+#, c-format
+msgid "Source directory does not exist: %s\n"
+msgstr ""
+
+#: ../src/project/project.vala:985
 #, c-format
 msgid "Source file does not exist: %s\n"
 msgstr ""
@@ -1473,7 +1512,7 @@ msgstr ""
 msgid "Source view id out of range.\n"
 msgstr ""
 
-#: ../src/ui/project_browser.vala:243
+#: ../src/ui/project_browser.vala:284
 msgid "Sources"
 msgstr ""
 
@@ -1494,17 +1533,17 @@ msgstr ""
 msgid "Symbol browser"
 msgstr ""
 
-#: ../src/project/project_templates.vala:213
+#: ../src/project/project_templates.vala:215
 #, c-format
 msgid "Template file '%s' too old: %s < %s"
 msgstr ""
 
-#: ../src/project/project_templates.vala:292
+#: ../src/project/project_templates.vala:294
 #, c-format
 msgid "Template has no description: line %hu"
 msgstr ""
 
-#: ../src/project/project_templates.vala:285
+#: ../src/project/project_templates.vala:287
 #, c-format
 msgid "Template has no name: line %hu"
 msgstr ""
@@ -1538,7 +1577,7 @@ msgstr ""
 msgid "Type not implemented yet: %s\n"
 msgstr ""
 
-#: ../src/ui/project_browser.vala:479
+#: ../src/ui/project_browser.vala:535
 #, c-format
 msgid "Unable to delete source file '%s': %s\n"
 msgstr ""
@@ -1558,15 +1597,20 @@ msgstr ""
 msgid "Unexpected enum value: %s: %d\n"
 msgstr ""
 
+#: ../src/ui/project_browser.vala:456
+#, c-format
+msgid "Unexpected enum value: %s: %s\n"
+msgstr ""
+
 #: ../src/common/common.vala:500 ../src/dialogs/about.vala:66
-#: ../src/project/project.vala:254 ../src/project/project_templates.vala:100
-#: ../src/ui/project_browser.vala:134 ../src/ui/project_browser.vala:172
-#: ../src/ui/project_browser.vala:404 ../src/ui/project_browser.vala:487
+#: ../src/project/project.vala:254 ../src/project/project_templates.vala:102
+#: ../src/ui/project_browser.vala:145 ../src/ui/project_browser.vala:210
+#: ../src/ui/project_browser.vala:460 ../src/ui/project_browser.vala:543
 #, c-format
 msgid "Unexpected enum value: %s: %u\n"
 msgstr ""
 
-#: ../src/project/project.vala:1595 ../src/project/project.vala:1957
+#: ../src/project/project.vala:1666 ../src/project/project.vala:2028
 #, c-format
 msgid "Unexpected response value: %s - %u"
 msgstr ""
@@ -1576,20 +1620,20 @@ msgstr ""
 msgid "Unknown ReportType: %s\n"
 msgstr ""
 
-#: ../src/project/project.vala:1555 ../src/ui_main.vala:696
+#: ../src/project/project.vala:1626 ../src/ui_main.vala:696
 #, c-format
 msgid "Unknown attribute for 's' line %hu: %s\n"
 msgstr ""
 
-#: ../src/project/project.vala:1215 ../src/project/project.vala:1256
-#: ../src/project/project.vala:1271 ../src/project/project.vala:1285
-#: ../src/project/project.vala:1299 ../src/project/project.vala:1313
-#: ../src/project/project.vala:1327 ../src/project/project.vala:1341
-#: ../src/project/project.vala:1355 ../src/project/project.vala:1369
-#: ../src/project/project.vala:1375 ../src/project/project.vala:1559
-#: ../src/project/project_templates.vala:276
-#: ../src/project/project_templates.vala:338
-#: ../src/project/project_templates.vala:344 ../src/ui_main.vala:702
+#: ../src/project/project.vala:1286 ../src/project/project.vala:1327
+#: ../src/project/project.vala:1342 ../src/project/project.vala:1356
+#: ../src/project/project.vala:1370 ../src/project/project.vala:1384
+#: ../src/project/project.vala:1398 ../src/project/project.vala:1412
+#: ../src/project/project.vala:1426 ../src/project/project.vala:1440
+#: ../src/project/project.vala:1446 ../src/project/project.vala:1630
+#: ../src/project/project_templates.vala:278
+#: ../src/project/project_templates.vala:340
+#: ../src/project/project_templates.vala:346 ../src/ui_main.vala:702
 #, c-format
 msgid "Unknown configuration file value line %hu: %s\n"
 msgstr ""
@@ -1599,8 +1643,8 @@ msgstr ""
 msgid "Unknown package version relation: %s - %s\n"
 msgstr ""
 
-#: ../src/project/project.vala:1237 ../src/project/project.vala:2076
-#: ../src/project/project_templates.vala:249
+#: ../src/project/project.vala:1308 ../src/project/project.vala:2147
+#: ../src/project/project_templates.vala:251
 #, c-format
 msgid "Unknown property for '%s' line %hu: %s\n"
 msgstr ""
@@ -1610,13 +1654,13 @@ msgstr ""
 msgid "Unknown status: %d - %s\n"
 msgstr ""
 
-#: ../src/ui/project_browser.vala:350 ../src/ui/project_browser.vala:388
-#: ../src/ui/project_browser.vala:466
+#: ../src/ui/project_browser.vala:402 ../src/ui/project_browser.vala:440
+#: ../src/ui/project_browser.vala:522
 #, c-format
 msgid "Unknown treepath start to add a new file: %s\n"
 msgstr ""
 
-#: ../src/project/project_templates.vala:330
+#: ../src/project/project_templates.vala:332
 #, c-format
 msgid "Unknown value for substitution property '%s' line %hu (assume '%s'): %s"
 msgstr ""
@@ -1723,6 +1767,11 @@ msgstr ""
 msgid "Warning: Vapi for package %s not found.\n"
 msgstr ""
 
+#: ../src/project/project.vala:1218
+#, c-format
+msgid "Will not add '%s' to file list: File not valid\n"
+msgstr ""
+
 #: ../src/common/args.vala:39
 msgid "[DEBUGLEVEL]"
 msgstr ""
@@ -1735,7 +1784,7 @@ msgstr ""
 msgid "build command failed"
 msgstr ""
 
-#: ../src/project/project.vala:866
+#: ../src/project/project.vala:889
 #, c-format
 msgid "choice"
 msgstr ""
@@ -1753,12 +1802,22 @@ msgstr ""
 msgid "exclude"
 msgstr ""
 
-#: ../src/dialogs/create_file.vala:56
+#: ../src/dialogs/create_file.vala:62
 msgid "filename"
 msgstr ""
 
 #: ../src/common/ui_helpers.vala:119
 msgid "insert_text"
+msgstr ""
+
+#: ../src/dialogs/create_file.vala:51
+#, c-format
+msgid "inside '%s' directory"
+msgstr ""
+
+#: ../src/dialogs/create_file.vala:52
+#, c-format
+msgid "inside root directory"
 msgstr ""
 
 #: ../src/buildsystem/base.vala:381
@@ -1796,11 +1855,6 @@ msgstr ""
 #: ../guanako/guanako.vala:855
 #, c-format
 msgid "pop_cur symbol not found! >%s<\n"
-msgstr ""
-
-#: ../src/dialogs/create_file.vala:47
-#, c-format
-msgid "root directory"
 msgstr ""
 
 #: ../src/dialogs/create_project.vala:376 ../src/project/project.vala:44
