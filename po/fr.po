@@ -175,7 +175,7 @@ msgstr "L'application est toujours en cours. Quitter la manuellement.\n"
 #: ../src/project/build_project.vala:186
 #, c-format
 msgid "Application terminated with exit status: %d\n"
-msgstr "L'application s'est terminée avec le statut : %d"
+msgstr "L'application s'est terminée avec le statut : %d\n"
 
 #: ../src/dialogs/create_project.vala:306
 msgid "Author"
@@ -486,7 +486,7 @@ msgstr "Impossible de déterminer le chemin du fichier : %s\n"
 #: ../src/ui/source_viewer.vala:449
 #, c-format
 msgid "Could not find ScrolledWindow widget: %s\n"
-msgstr "Impossible de trouver le widget ScrolledWindow : %s"
+msgstr "Impossible de trouver le widget ScrolledWindow : %s\n"
 
 #: ../src/buildsystem/base.vala:313
 #, c-format
@@ -1170,7 +1170,7 @@ msgstr "Fichier inexistant."
 #: ../guanako/guanako.vala:119
 #, c-format
 msgid "Not a valid Vala version, will  not set VALA_X_Y defines: %s\n"
-msgstr "Pas une version valide de Vala, les defines VALA_X_Y ne seront pas définis : %s"
+msgstr "Pas une version valide de Vala, les defines VALA_X_Y ne seront pas définis : %s\n"
 
 #: ../src/common/common.vala:310
 #, c-format
