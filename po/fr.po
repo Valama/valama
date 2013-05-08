@@ -1,6 +1,6 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
+# French translations for Valama package.
+# Copyright (C) 2012 THE Valama'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the Valama package.
 # Martin Lorang <martin@lorang.net>, 2012.
 #
 msgid ""
@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Valama 0.1.2\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2013-05-06 22:59+0200\n"
-"PO-Revision-Date: 2013-05-07 19:53+0200\n"
+"PO-Revision-Date: 2013-05-08 10:50+0200\n"
 "Last-Translator: Martin Lorang <martin@lorang.net>\n"
 "Language-Team: French\n"
 "Language: fr\n"
