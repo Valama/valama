@@ -1572,7 +1572,7 @@ msgstr "Valeur enum inatendue : %s : %u\n"
 #: ../src/project/project.vala:1595 ../src/project/project.vala:1957
 #, c-format
 msgid "Unexpected response value: %s - %u"
-msgstr "Valeur response inattendue : %s - %u"
+msgstr "Valeur réponse inattendue : %s - %u"
 
 #: ../src/ui/reports.vala:250
 #, c-format
