@@ -1505,61 +1505,61 @@ msgstr "Fichier modèle '%s' trop vieux : %s < %s"
 #: ../src/project/project_templates.vala:292
 #, c-format
 msgid "Template has no description: line %hu"
-msgstr ""
+msgstr "Le modèle n'a pas de description : ligne %hu"
 
 #: ../src/project/project_templates.vala:285
 #, c-format
 msgid "Template has no name: line %hu"
-msgstr ""
+msgstr "Le modèle n'a pas de nom : ligne %hu"
 
 #: ../src/dialogs/create_project.vala:79
 msgid "Template information"
-msgstr ""
+msgstr "Informations du modèle"
 
 #: ../src/dialogs/create_project.vala:125
 msgid "Templates"
-msgstr ""
+msgstr "Modèles"
 
 #: ../src/common/args.vala:37
 msgid "Templates directory."
-msgstr ""
+msgstr "Répertoire des modèles."
 
 #: ../src/dialogs/missing_packages.vala:36
 msgid "The following vala packages are not available on your system:\n"
-msgstr ""
+msgstr "Les paquets suivants sont indisponibles sur votre système :\n"
 
 #: ../src/ui/breakpoints.vala:58
 msgid "Time"
-msgstr ""
+msgstr "Heure"
 
 #: ../src/ui/symbol_browser.vala:47
 msgid "Type"
-msgstr ""
+msgstr "Type"
 
 #: ../guanako/stylecheck.vala:569 ../guanako/stylecheck.vala:610
 #, c-format
 msgid "Type not implemented yet: %s\n"
-msgstr ""
+msgstr "Type non implémenter actuellement : %s\n"
 
 #: ../src/ui/project_browser.vala:479
 #, c-format
 msgid "Unable to delete source file '%s': %s\n"
-msgstr ""
+msgstr "Impossible d'effacer le fichier source '%s' : %s\n"
 
 #: ../src/buildsystem/base.vala:357
 #, c-format
 msgid "Unable to guess package for define: %s\n"
-msgstr ""
+msgstr "Impossible de deviner le paquet pour le define : %s\n"
 
 #: ../src/ui_main.vala:435
 msgid "Undo last change"
-msgstr ""
+msgstr "Annuler"
 
 #: ../src/dialogs/create_project.vala:385
 #: ../src/dialogs/project_settings.vala:207
 #, c-format
 msgid "Unexpected enum value: %s: %d\n"
-msgstr ""
+msgstr "Valeur enum inatendue : %s : %d\n"
 
 #: ../src/common/common.vala:500 ../src/dialogs/about.vala:66
 #: ../src/project/project.vala:254 ../src/project/project_templates.vala:100
@@ -1567,22 +1567,22 @@ msgstr ""
 #: ../src/ui/project_browser.vala:404 ../src/ui/project_browser.vala:487
 #, c-format
 msgid "Unexpected enum value: %s: %u\n"
-msgstr ""
+msgstr "Valeur enum inatendue : %s : %u\n"
 
 #: ../src/project/project.vala:1595 ../src/project/project.vala:1957
 #, c-format
 msgid "Unexpected response value: %s - %u"
-msgstr ""
+msgstr "Valeur response inattendue : %s - %u"
 
 #: ../src/ui/reports.vala:250
 #, c-format
 msgid "Unknown ReportType: %s\n"
-msgstr ""
+msgstr "ReportType inconnu : %s\n"
 
 #: ../src/project/project.vala:1555 ../src/ui_main.vala:696
 #, c-format
 msgid "Unknown attribute for 's' line %hu: %s\n"
-msgstr ""
+msgstr "Attribut inconnu pour '%s' ligne %hu : %s\n"
 
 #: ../src/project/project.vala:1215 ../src/project/project.vala:1256
 #: ../src/project/project.vala:1271 ../src/project/project.vala:1285
@@ -1595,225 +1595,225 @@ msgstr ""
 #: ../src/project/project_templates.vala:344 ../src/ui_main.vala:702
 #, c-format
 msgid "Unknown configuration file value line %hu: %s\n"
-msgstr ""
+msgstr "Valeur de fichier de configuration inconnue ligne %hu : %s\n"
 
 #: ../src/buildsystem/base.vala:340
 #, c-format
 msgid "Unknown package version relation: %s - %s\n"
-msgstr ""
+msgstr "Relation de vertion de paquet inconnue : %s - %s\n"
 
 #: ../src/project/project.vala:1237 ../src/project/project.vala:2076
 #: ../src/project/project_templates.vala:249
 #, c-format
 msgid "Unknown property for '%s' line %hu: %s\n"
-msgstr ""
+msgstr "Propriété inconnue pour '%s' ligne %hu : %s\n"
 
 #: ../src/buildsystem/base.vala:152
 #, c-format
 msgid "Unknown status: %d - %s\n"
-msgstr ""
+msgstr "Statut inconnu : %d - %s\n"
 
 #: ../src/ui/project_browser.vala:350 ../src/ui/project_browser.vala:388
 #: ../src/ui/project_browser.vala:466
 #, c-format
 msgid "Unknown treepath start to add a new file: %s\n"
-msgstr ""
+msgstr "Trepath inconnu commence à ajouter un nouveau fichier : %s\n"
 
 #: ../src/project/project_templates.vala:330
 #, c-format
 msgid "Unknown value for substitution property '%s' line %hu (assume '%s'): %s"
-msgstr ""
+msgstr "Valeur de propriété de substitution '%s' inconnue ligne %hu (suppose '%s') : %s"
 
 #: ../src/main.vala:96
 msgid "Valama"
-msgstr ""
+msgstr "Valama"
 
 #: ../src/dialogs/project_settings.vala:42 ../src/ui/welcome_screen.vala:581
 msgid "Valama project files (*.vlp)"
-msgstr ""
+msgstr "Fichiers projet Valama (*.vlp)"
 
 #: ../src/buildsystem/base.vala:100
 msgid "Valama project not initialized"
-msgstr ""
+msgstr "Projet Valama non initialisé"
 
 #: ../src/buildsystem/cmake.vala:46
 msgid "Valama project not initialized."
-msgstr ""
+msgstr "Projet Valama non initialisé."
 
 #: ../guanako/guanako.vala:287 ../guanako/guanako.vala:300
 #, c-format
 msgid "Vapi found: %s\n"
-msgstr ""
+msgstr "Trouvé Vapi : %s\n"
 
 #: ../guanako/guanako.vala:874
 #, c-format
 msgid "Variable '%s' not found! >%s<\n"
-msgstr ""
+msgstr "Variable '%s' non trouvé ! >%s<\n"
 
 #: ../src/dialogs/project_settings.vala:151
 msgid "Version:"
-msgstr ""
+msgstr "Version : "
 
 #: ../src/ui_main.vala:344
 msgid "View"
-msgstr ""
+msgstr "Montrer"
 
 #: ../src/dialogs/project_settings.vala:38
 msgid "View all files (*)"
-msgstr ""
+msgstr "Montrer tous les fichiers (*)"
 
 #: ../guanako/reporter.vala:39
 msgid "Warning"
-msgstr ""
+msgstr "Attention"
 
 #: ../src/common/common.vala:667
 #, c-format
 msgid "Warning: "
-msgstr ""
+msgstr "Attention : "
 
 #: ../guanako/stylecheck.vala:467
 #, c-format
 msgid "Warning: No CheckType found, assume 'GLOBAL'.\n"
-msgstr ""
+msgstr "Attention : pas de CheckType trouvé, suppose 'GLOBAL'. \n"
 
 #: ../guanako/stylecheck.vala:463
 #, c-format
 msgid "Warning: No description found.\n"
-msgstr ""
+msgstr "Attention : Pas de description trouvée.\n"
 
 #: ../guanako/stylecheck.vala:447
 #, c-format
 msgid "Warning: No regex to check.\n"
-msgstr ""
+msgstr "Attention : Pas de regec à vérifier.\n"
 
 #: ../guanako/stylecheck.vala:397
 #, c-format
 msgid "Warning: Skip different description: '%s' - '%s'\n"
-msgstr ""
+msgstr "Attention : ignore descriptions différentes : '%s' - '%s'\n"
 
 #: ../guanako/stylecheck.vala:437
 #, c-format
 msgid "Warning: Skip different match groups: '%d' - '%d'\n"
-msgstr ""
+msgstr "Attention : ignore différents match groups : '%d' - '%d'\n"
 
 #: ../guanako/stylecheck.vala:427
 #, c-format
 msgid "Warning: Skip different regexes: '%s' - '%s'\n"
-msgstr ""
+msgstr "Attention : ignore différentes regex : '%s' - '%s'\n"
 
 #: ../guanako/stylecheck.vala:410
 #, c-format
 msgid "Warning: Skip different type: '%s' - '%s'\n"
-msgstr ""
+msgstr "Attention : ignore differents types : '%s' - '%s'\n"
 
 #: ../guanako/stylecheck.vala:408
 #, c-format
 msgid "Warning: Unknown CheckType '%s', assume 'GLOBAL'.\n"
-msgstr ""
+msgstr "Attention : CheckType '%s' inconnu, suppose 'GLOBAL'.\n"
 
 #: ../guanako/stylecheck.vala:613
 #, c-format
 msgid "Warning: Unknown check type: %s\n"
-msgstr ""
+msgstr "Attention : type de vérification inconnu : %s\n"
 
 #: ../guanako/stylecheck.vala:442 ../guanako/stylecheck.vala:457
 #, c-format
 msgid "Warning: Unknown configuration file value line %hu: %s\n"
-msgstr ""
+msgstr "Attention : valeur de fichier de configuration inconnue ligne %hu : %s\n"
 
 #: ../guanako/guanako.vala:283 ../guanako/guanako.vala:296
 #, c-format
 msgid "Warning: Vapi for package %s not found.\n"
-msgstr ""
+msgstr "Attention : Vapi introuvable pour le paquet %s.\n"
 
 #: ../src/common/args.vala:39
 msgid "[DEBUGLEVEL]"
-msgstr ""
+msgstr "[DEBUGLEVEL]"
 
 #: ../src/common/args.vala:43
 msgid "[FILE...]"
-msgstr ""
+msgstr "[FILE...]"
 
 #: ../src/buildsystem/cmake.vala:166
 msgid "build command failed"
-msgstr ""
+msgstr "Construction échouée"
 
 #: ../src/project/project.vala:866
 #, c-format
 msgid "choice"
-msgstr ""
+msgstr "choix"
 
 #: ../src/buildsystem/cmake.vala:133
 msgid "configure command failed"
-msgstr ""
+msgstr "configuration échouée"
 
 #: ../src/buildsystem/base.vala:117
 #, c-format
 msgid "directory creation failed: %s"
-msgstr ""
+msgstr "création de répertoire échoué : %s"
 
 #: ../src/project/project.vala:50
 msgid "exclude"
-msgstr ""
+msgstr "exclure"
 
 #: ../src/dialogs/create_file.vala:56
 msgid "filename"
-msgstr ""
+msgstr "nom de fichier"
 
 #: ../src/common/ui_helpers.vala:119
 msgid "insert_text"
-msgstr ""
+msgstr "insertion texte"
 
 #: ../src/buildsystem/base.vala:381
 msgid "launching failed"
-msgstr ""
+msgstr "lancement échoué"
 
 #: ../src/dialogs/create_project.vala:284
 msgid "no long description"
-msgstr ""
+msgstr "pas de description longue"
 
 #: ../src/dialogs/create_project.vala:451
 msgid "no package required"
-msgstr ""
+msgstr "pas de paquet requis"
 
 #: ../src/dialogs/create_project.vala:473
 msgid "no source files"
-msgstr ""
+msgstr "pas de fichiers sources"
 
 #: ../src/main.vala:522
 msgid "none"
-msgstr ""
+msgstr "rien"
 
 #: ../src/dialogs/create_project.vala:425
 msgid "not available"
-msgstr ""
+msgstr "indisponible"
 
 #: ../src/dialogs/create_project.vala:382
 msgid "not supported"
-msgstr ""
+msgstr "non supporté"
 
 #: ../src/project/project.vala:48
 msgid "only"
-msgstr ""
+msgstr "seulement"
 
 #: ../guanako/guanako.vala:855
 #, c-format
 msgid "pop_cur symbol not found! >%s<\n"
-msgstr ""
+msgstr "Symbole pop_cur non trouvé : >%s<\n"
 
 #: ../src/dialogs/create_file.vala:47
 #, c-format
 msgid "root directory"
-msgstr ""
+msgstr "répertoire racine"
 
 #: ../src/dialogs/create_project.vala:376 ../src/project/project.vala:44
 msgid "since"
-msgstr ""
+msgstr "depuis"
 
 #: ../src/dialogs/create_project.vala:379 ../src/project/project.vala:46
 msgid "until"
-msgstr ""
+msgstr "jusqu'à"
 
 #: ../src/project/project.vala:376
 msgid "valama_project"
-msgstr ""
+msgstr "projet_valama"
