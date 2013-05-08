@@ -296,7 +296,7 @@ if(XGETTEXT_FOUND)
 
 
   function(gettext_create_translations potfile)
-    cmake_parse_arguments(ARGS "ALL" "COMMENT;PODIR;LOCALEDIR" "LANGUAGES;POFILES" ${ARGN})
+    cmake_parse_arguments(ARGS "ALL;NOUPDATE" "COMMENT;PODIR;LOCALEDIR" "LANGUAGES;POFILES" ${ARGN})
 
     get_filename_component(_potBasename ${potfile} NAME_WE)
     get_filename_component(_absPotFile ${potfile} ABSOLUTE)
@@ -350,9 +350,21 @@ if(XGETTEXT_FOUND)
     set(_gmoFiles)
     foreach (lang ${langs})
       get_filename_component(_absFile "${lang}.po" ABSOLUTE)
-      get_filename_component(_abs_PATH "${_absFile}" PATH)
       set(_gmoFile "${CMAKE_CURRENT_BINARY_DIR}/${lang}.gmo")
 
+      if(ARGS_NOUPDATE)
+        set(_absFile_new "${CMAKE_CURRENT_BINARY_DIR}/${lang}.po")
+        add_custom_command(
+          OUTPUT
+            "${_absFile_new}"
+          COMMAND
+            ${CMAKE_COMMAND} -E copy "${_absFile}" "${_absFile_new}"
+          DEPENDS
+            "${_absPotFile}"
+            "${_absFile}"
+        )
+        set(_absFile "${_absFile_new}")
+      endif()
       add_custom_command(
         OUTPUT
           "${_gmoFile}"

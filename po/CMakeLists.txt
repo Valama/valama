@@ -26,5 +26,19 @@ if(XGETTEXT_FOUND)
     WORKING_DIRECTORY
       "../"
   )
-  gettext_create_translations("${potfile}" ALL)
+  option(UPDATE_PO "Update .po files." ON)
+  if(UPDATE_PO)
+    gettext_create_translations("${potfile}"
+      ALL
+      LOCALEDIR
+        "${localedir}"
+    )
+  else()
+    gettext_create_translations("${potfile}"
+      ALL
+      NOUPDATE
+      LOCALEDIR
+        "${localedir}"
+    )
+  endif()
 endif()
