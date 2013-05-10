@@ -115,7 +115,7 @@ public abstract class UiElement : Object{
                 initialized = true;
             });
         } else
-            error_msg (_("Could not connect locking signals.\n"));
+            error_msg (_("Could not initialize locking signals.\n"));
         locking = true;
         saved_behavior = null;
         show = null;

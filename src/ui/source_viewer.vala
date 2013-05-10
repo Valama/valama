@@ -62,6 +62,7 @@ class UiSourceViewer : UiElement {
         }
         private set {
             if (this._current_srcfocus != value) {
+                // TRANSLATORS: Change focus of source view to new file.
                 debug_msg (_("Change current focus: %s\n"), value);
 
                 this._current_srcfocus = value;
@@ -141,6 +142,7 @@ class UiSourceViewer : UiElement {
                 return;
             }
         }
+        // TRANSLATORS: Could not change source view focus to new file.
         warning_msg (_("Could not change focus to: %s\n"), filename);
     }
 
@@ -295,7 +297,10 @@ class UiSourceViewer : UiElement {
             pos_col_lbl.label = get_label_row_col (view);
         });
 
-        var insmode_lbl = new Label ((view.overwrite) ? _("OVR") : _("INS"));
+        // TRANSLATORS: overwrite input mode
+        var insmode_lbl = new Label ((view.overwrite) ? _("OVR")
+        // TRANSLATORS: insert input mode
+                                                      : _("INS"));
         insmode_lbl.width_request = 50;
         lgrid.attach (insmode_lbl, 1, 0, 1, 1);
         view.notify["overwrite"].connect (() => {
@@ -403,6 +408,7 @@ class UiSourceViewer : UiElement {
         view.buffer.get_iter_at_mark (out iter, view.buffer.get_insert());
         var row = iter.get_line();
         var column = view.get_visual_column (iter);
+        // TRANSLATORS: Short name for Line X, Column Y
         return _("Ln %d, Col %d").printf (row + 1, column + 1);
     }
 
@@ -446,6 +452,8 @@ class UiSourceViewer : UiElement {
                 scroll_widget = ((Box) child).get_children().nth_data (0) as ScrolledWindow;
         });
         if (scroll_widget == null)
+            // TRANSLATORS: This is an technical information. You might not want
+            // to translate "ScrolledWindow".
             bug_msg (_("Could not find ScrolledWindow widget: %s\n"), item.name);
         return (SuperSourceView) scroll_widget.get_child();
 #endif

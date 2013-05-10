@@ -449,6 +449,10 @@ namespace Guanako {
                                     }
                                     if (match_num == null) {
                                         match_num = 0;
+                                        // TRANSLATORS:
+                                        // A "capturing group" is used to group (and possibly mark) expressions
+                                        // within regular expressions for later use. Usually they are numbered
+                                        // so we can access them over an index.
                                         debug_msg (_("No default capturing group ('matchgroup'). Set it to 0: %s\n"), regex);
                                     }
                                     rchecks.add (new RegexCheck.str (regex, match_num));
@@ -464,6 +468,8 @@ namespace Guanako {
                         }
                         if (type == null) {
                             type = CheckType.GLOBAL;
+                            // TRANSLATORS: This is a technical information. You migth not
+                            // want to translate "CheckType".
                             stderr.printf (_("Warning: No CheckType found, assume 'GLOBAL'.\n"));
                         }
                         add_checks (description, rchecks, type);
@@ -610,7 +616,7 @@ namespace Guanako {
                         stdout.printf (_("Type not implemented yet: %s\n"), checkmap.type.to_string());
                         break;
                     default:
-                        stderr.printf (_("Warning: Unknown check type: %s\n"), checkmap.type.to_string());
+                        stderr.printf (_("Warning: Unknown CheckType: %s\n"), checkmap.type.to_string());
                         break;
                 }
                 // if (!loopcond)

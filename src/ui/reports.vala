@@ -269,7 +269,8 @@ class UiReport : UiElement {
             storelist.add (err);
         }
 
-        debug_msg (_("Errors: %i, Warnings: %i, Deprecated: %i, Experimental: %i, Notes: %i  -  %i\n"),
+        // TRANSLATORS: Notes aren't notices but comments/remarks.
+        debug_msg (_("Errors: %d, Warnings: %d, Deprecated: %d, Experimental: %d, Notes: %d  -  %d\n"),
                    errs,
                    warns,
                    depr,
@@ -283,6 +284,8 @@ class UiReport : UiElement {
 public class ReportWrapper : Guanako.Reporter {
     private inline void dbg_ref_msg (ReportType type, Vala.SourceReference? source, string message) {
         if (source != null)
+            // TRANSLATORS:
+            // E.g.: Warning found: myfile.vala: 12(13)-12(17): unused variable `test'
             debug_msg_level (2, _("%s found: %s: %d(%d)-%d(%d): %s\n"),
                              type.to_string(),
                              project.get_relative_path (source.file.filename),

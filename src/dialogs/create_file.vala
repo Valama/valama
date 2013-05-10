@@ -46,10 +46,16 @@ public string? ui_create_file_dialog (string? path = null, string? extension = n
     dlg.resizable = false;
 
     var box_main = new Box (Orientation.VERTICAL, 0);
+    // TRANSLATORS:
+    // E.g.: "Add new file to project (inside 'src/' directory)"
     var desc = ((!directory) ? _("Add new file to project (%s)")
+    // TRANSLATORS:
+    // E.g.: "Create new subdirectory (inside 'src/' directory)"
                              : _("Create new subdirectory (%s)")).printf (
+    // TRANSLATORS:
+    // Context: Add new file to project (inside `foobar' directory)
                             (path != null) ? _("inside '%s' directory").printf (path)
-                                           : _("inside root directory"));
+                                           : _("inside project root directory"));
     var frame_filename = new Frame (desc);
     var box_filename = new Box (Orientation.VERTICAL, 0);
     frame_filename.add (box_filename);

@@ -112,7 +112,7 @@ public class ProjectBrowser : UiElement {
         tree_view.row_activated.connect ((path, column) => {
             TreeIter iter;
             if (!tree_view.model.get_iter (out iter, path)) {
-                bug_msg (_("Couldn't get iterator in TreeView: %s\n"), path.to_string());
+                bug_msg (_("Could not get iterator in TreeView: %s\n"), path.to_string());
                 return;
             }
 
@@ -124,7 +124,7 @@ public class ProjectBrowser : UiElement {
                     string filepath = val;
                     while (path.up()) {
                         if (!tree_view.model.get_iter (out iter, path)) {
-                            bug_msg (_("Couldn't get iterator in TreeView: %s\n"), path.to_string());
+                            bug_msg (_("Could not get iterator in TreeView: %s\n"), path.to_string());
                             return;
                         }
                         tree_view.model.get (iter, 0, out val, 1, out store_type, -1);
@@ -163,7 +163,7 @@ public class ProjectBrowser : UiElement {
 
             TreeIter iter;
             if (!tree_view.model.get_iter (out iter, path)) {
-                bug_msg (_("Couldn't get iterator in TreeView: %s\n"), path.to_string());
+                bug_msg (_("Could not get iterator in TreeView: %s\n"), path.to_string());
                 return;
             }
 
@@ -271,6 +271,7 @@ public class ProjectBrowser : UiElement {
 
     //TODO: Don't rebuild complete store on update.
     protected override void build() {
+        // TRANSLATORS: E.g. "Run project browser update!"
         debug_msg (_("Run %s update!\n"), get_name());
         update_needed = false;
 
@@ -289,6 +290,9 @@ public class ProjectBrowser : UiElement {
                               project.buildsystem_dirs.to_array(),
                               project.b_files.to_array(),
                               ref store, ref b_pathmap);
+        // TRANSLATORS:
+        // "Data files" means the file is neighter a (Vala) source file nor a
+        // build system file - it's an other file or data file.
         build_file_treestore (_("Data files"),
                               project.data_dirs.to_array(),
                               project.d_files.to_array(),
@@ -309,6 +313,7 @@ public class ProjectBrowser : UiElement {
         foreach (var path in tree_view_expanded)
             tree_view.expand_to_path (path);
 
+        // TRANSLATORS: E.g. "Project browser update finished!"
         debug_msg (_("%s update finished!\n"), get_name());
     }
 
@@ -368,13 +373,17 @@ public class ProjectBrowser : UiElement {
         TreePath path;
         tree_view.get_cursor (out path, null);
         if (path == null) {
-            bug_msg (_("Couldn't get current tree path: %s\n"), "ui_project_browser - on_add_button");
+            // TRANSLATORS: This is a technical information. You might not want
+            // to translate "TreePath".
+            bug_msg (_("Could not get current TreePath: %s\n"), "ui_project_browser - on_add_button");
             return;
         }
 
         TreeIter iter;
         if (!tree_view.model.get_iter (out iter, path)) {
-            bug_msg (_("Couldn't get iterator in TreeView: %s\n"), path.to_string());
+            // TRANSLATORS: This is a technical information. You might not want
+            // to translate "TreeView".
+            bug_msg (_("Could not get iterator in TreeView: %s\n"), path.to_string());
             return;
         }
 
@@ -399,7 +408,9 @@ public class ProjectBrowser : UiElement {
                         project.add_data_file (filename, directory);
                         break;
                     default:
-                        bug_msg (_("Unknown treepath start to add a new file: %s\n"), path.to_string());
+                        // TRANSLATORS: This is a technical information. You might not want
+                        // to translate "TreePath".
+                        bug_msg (_("Unknown TreePath start to add a new file: %s\n"), path.to_string());
                         break;
                 }
                 if (filename != null && !directory)
@@ -411,7 +422,7 @@ public class ProjectBrowser : UiElement {
                 StoreType stype;
                 while (path.up()) {
                     if (!tree_view.model.get_iter (out iter, path)) {
-                        bug_msg (_("Couldn't get iterator in TreeView: %s\n"), path.to_string());
+                        bug_msg (_("Could not get iterator in TreeView: %s\n"), path.to_string());
                         return;
                     }
                     tree_view.model.get (iter, 0, out val, 1, out stype, -1);
@@ -437,7 +448,7 @@ public class ProjectBrowser : UiElement {
                         project.add_data_file (filename, directory);
                         break;
                     default:
-                        bug_msg (_("Unknown treepath start to add a new file: %s\n"), path.to_string());
+                        bug_msg (_("Unknown TreePath start to add a new file: %s\n"), path.to_string());
                         break;
                 }
                 if (filename != null && !directory)
@@ -467,13 +478,13 @@ public class ProjectBrowser : UiElement {
         TreePath path;
         tree_view.get_cursor (out path, null);
         if (path == null) {
-            bug_msg (_("Couldn't get current tree path: %s\n"), "ui_project_browser - on_remove_button");
+            bug_msg (_("Could not get current TreePath: %s\n"), "ui_project_browser - on_remove_button");
             return;
         }
 
         TreeIter iter;
         if (!tree_view.model.get_iter (out iter, path)) {
-            bug_msg (_("Couldn't get iterator in TreeView: %s\n"), path.to_string());
+            bug_msg (_("Could not get iterator in TreeView: %s\n"), path.to_string());
             return;
         }
 
@@ -491,7 +502,7 @@ public class ProjectBrowser : UiElement {
                 StoreType stype;
                 while (path.up()) {
                     if (!tree_view.model.get_iter (out iter, path)) {
-                        bug_msg (_("Couldn't get iterator in TreeView: %s\n"), path.to_string());
+                        bug_msg (_("Could not get iterator in TreeView: %s\n"), path.to_string());
                         return;
                     }
                     tree_view.model.get (iter, 0, out val, 1, out stype, -1);
@@ -519,7 +530,7 @@ public class ProjectBrowser : UiElement {
                             project.remove_data_file (abs_filepath);
                             break;
                         default:
-                            bug_msg (_("Unknown treepath start to add a new file: %s\n"), path.to_string());
+                            bug_msg (_("Unknown TreePath start to add a new file: %s\n"), path.to_string());
                             break;
                     }
                     /*

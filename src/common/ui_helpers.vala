@@ -106,8 +106,9 @@ public class Entry : Gtk.Entry {
         MatchInfo match_info = null;  // init to null to make valac happy
         if (!this.valid_chars.match (input_text, 0, out match_info)) {
             if (err_label != null) {
-                this.err_label.set_label (_("Invalid character: '") + match_info.get_string() +
-                                        _("' Please choose one from: ") + this.valid_chars.get_pattern());
+                this.err_label.set_label (
+                    _("Invalid character: '%s' Please choose one from: %s").printf (
+                    match_info.get_string(), this.valid_chars.get_pattern()));
                 this.label_resettable = false;
             }
             this.disable_timer();  // reset timer to let it start again
@@ -116,7 +117,7 @@ public class Entry : Gtk.Entry {
                     this.err_label.set_label (reset_string);
                 return true;
             }));
-            Signal.stop_emission_by_name (this, _("insert_text"));
+            Signal.stop_emission_by_name (this, "insert_text");
         } else if (err_label != null && this.label_resettable) {
             this.label_resettable = false;
             this.err_label.set_label (reset_string);

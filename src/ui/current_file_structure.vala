@@ -103,6 +103,7 @@ public class UiCurrentFileStructure : UiElement {
 
         var focus_file = project.guanako_project.get_source_file_by_name (source_viewer.current_srcfocus);
         if (focus_file == null) {
+            // TRANSLATORS: E.g. "Project browser update finished ..."
             debug_msg (_("%s update finished (not a valid source buffer)!\n"), get_name());
             return;
         }

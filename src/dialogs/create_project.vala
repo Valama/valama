@@ -652,7 +652,12 @@ public class TempSubsHelper {
                                           sub.file);
             var f = File.new_for_path (target);
             if (!f.query_exists()) {
+                // TRANSLATORS:
+                // Context: "Cannot apply substitution @foobar@ (line) -> 'barfoo'"... or
+                //          "Cannot apply substitution @foobar@ -> 'barfoo'"...
                 warning_msg (_("Cannot apply substitution '@%s@'%s -> '%s': %s does not exist\n"),
+                // TRANSLATORS:
+                // Context: "Cannot apply substitution @foobar@->>> (line)<<<- -> 'barfoo'"...
                              sub.match, (sub.line) ? _(" (line)") : "", sub.replace, target);
                 continue;
             }

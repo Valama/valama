@@ -41,12 +41,16 @@ public enum VersionRelation {
     public string? to_string() {
         switch (this) {
             case SINCE:
+                // TRANSLATORS: Version relation: X >= Y
                 return _("since");
             case UNTIL:
+                // TRANSLATORS: Version relation: X <= Y
                 return _("until");
             case ONLY:
+                // TRANSLATORS: Version relation: X == Y
                 return _("only");
             case EXCLUDE:
+                // TRANSLATORS: Version relation: X != Y
                 return _("exclude");
             default:
                 error_msg (_("Could not convert '%s' to string: %u\n"),
@@ -118,7 +122,7 @@ public enum IdeModes {
             case "Release":
                 return RELEASE;
             default:
-                error_msg (_("Could not convert '%s' to %s.\n"),
+                error_msg (_("Could not convert '%s' to '%s'.\n"),
                            modename, "IdeModes");
                 return null;
         }
@@ -886,6 +890,7 @@ public class ValamaProject : Object {
     public void add_package (PackageInfo pkg) {
         var info = pkg.to_string();
         if (pkg.choice != null)
+            // TRANSLATORS: Choice of different packages.
             info += " (%s)".printf (_("choice"));
         debug_msg_level (2, _("Add package: %s\n"), info);
         packages[pkg.name] = pkg;
@@ -1164,7 +1169,10 @@ public class ValamaProject : Object {
         if (vmap != null)
             vieworder.remove (vmap);
         else
-            warning_msg (_("Could not close ViewMap for: %s\n"), filename);
+            // TRANSLATORS:
+            // Context: "Could not close source view (mapping) for: myfile.vala"
+            warning_msg (_("Could not close source view (mapping) for: %s\n"),
+                         filename);
     }
 
     /**
@@ -1623,7 +1631,7 @@ public class ValamaProject : Object {
                     if (mode != null)
                         idemode = mode;
                     else
-                        warning_msg (_("Unknown attribute for 's' line %hu: %s\n"),
+                        warning_msg (_("Unknown attribute for '%s' line %hu: %s\n"),
                                        "idemode", i->line, i->get_content());
                     break;
                 default:
@@ -1999,7 +2007,11 @@ public class ValamaProject : Object {
                 var srcbuf = (SourceBuffer) map.view.buffer;
                 return srcbuf.dirty;
             }
-        warning_msg (_("File not registered in project to check if buffer is dirty: %s\n"), filename);
+        // TRANSLATORS:
+        // File has to be registered with Valama (loaded) to check if the
+        // buffer was modified.
+        warning_msg (_("File not registered in project to check if buffer is dirty: %s\n"),
+                     filename);
         return false;
     }
 
@@ -2153,6 +2165,8 @@ public class ValamaProject : Object {
             else
                 package.rel = VersionRelation.SINCE;
         } else if (node->has_prop ("rel") != null)
+            // TRANSLATORS:
+            // That means we know "`package' >= ". Something is missing, isn't it?
             warning_msg (_("Package '%s' has relation information but no version: "
                                 + "line: %hu: %s\n"),
                          package.name, node->line, node->get_prop ("rel"));

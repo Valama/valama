@@ -351,7 +351,7 @@ public ProjectTemplate[] load_templates() {
             templates.set (new_template.name, new_template);
         }
     } catch (GLib.Error e) {
-        errmsg (_("Could not get template directory files: %s\n"), e.message);
+        errmsg (_("Could not process files in template directory: %s\n"), e.message);
     }
 
     return templates.values.to_array();

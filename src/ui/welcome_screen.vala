@@ -425,6 +425,8 @@ public class WelcomeScreen : Alignment {
 
         btn_prev = new ToolButton (new Image.from_icon_name ("go-previous-symbolic",
                                                              IconSize.BUTTON),
+                                   // TRANSLATORS: Of course not the body part ;) .
+                                   // Go to the previous window.
                                                              _("Back"));
         toolbar.add (btn_prev);
         btn_prev.clicked.connect (() => {
@@ -436,7 +438,7 @@ public class WelcomeScreen : Alignment {
                     main_screen_selected();
                     /*
                      * TODO: Proper solution to work around half pressed button
-                     *       after swichting back again.
+                     *       after switching back again.
                      */
                     btn_prev.forall ((child) => {
                         var btn = child as Button;
@@ -584,6 +586,7 @@ public class WelcomeScreen : Alignment {
         chooser_open.set_filter (filter_vlp);  // set default filter
 
         var filter_all = new FileFilter();
+        // TRANSLATORS: (*) is a file filter (globbing) and matches all files.
         filter_all.set_filter_name (_("All files (*)"));
         filter_all.add_pattern ("*");
         chooser_open.add_filter (filter_all);

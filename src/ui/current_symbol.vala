@@ -32,6 +32,9 @@ public class UiCurrentSymbol : UiElement {
         var toolbar_title = new Toolbar ();
         toolbar_title.get_style_context().add_class (STYLE_CLASS_PRIMARY_TOOLBAR);
         var ti_title = new ToolItem();
+        // TRANSLATORS:
+        // "Symbol" in programming context as primitive data type used to name
+        // variables and functions.
         ti_title.add (new Label (_("Current symbol")));
         toolbar_title.add(ti_title);
 

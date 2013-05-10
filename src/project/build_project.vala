@@ -135,6 +135,8 @@ public class ProjectBuilder : Object {
             build_finished (false);
             return false;
         } catch (BuildError.BUILD_FAILED e) {
+            // TRANSLATORS:
+            // E.g. "CMake build failed: some error" or "Autotools build failed: some error"
             warning_msg (_("'%s' build failed: %s\n"), project.builder.get_name(), e.message);
             build_finished (false);
             return false;
@@ -183,7 +185,7 @@ public class ProjectBuilder : Object {
                  * Cast exit_status explicitly to int otherwise printf would
                  * give use some garbage.
                  */
-                app_output (_("Application terminated with exit status: %d\n").printf (
+                app_output (_("Application terminated with exit status '%d'.\n").printf (
                                                                     (int) exit_status));
                 app_output ("--------------------------------------------\n");
             }

@@ -88,7 +88,7 @@ public class BuilderPlain : BuildSystem {
                     throw new BuildError.INITIALIZATION_FAILED (_("Could not update file: %s\n"),
                                                                 e.message);
                 } catch (GLib.Error e) {
-                    throw new BuildError.INITIALIZATION_FAILED (_("Could not open file to write: %s\n"),
+                    throw new BuildError.INITIALIZATION_FAILED (_("Could not open file writable: %s\n"),
                                                                 e.message);
                 }
                 valacargs += tmppath;

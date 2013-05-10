@@ -519,9 +519,12 @@ public class GuanakoCompletion : Gtk.SourceCompletionProvider, Object {
             if (param_string.length > 1)
                 param_string = param_string.substring (0, param_string.length - 2);
             else
+                // TRANSLATORS: Context: Parameters: none
                 param_string = _("none");
-            vbox.pack_start (new Label (_("Parameters:\n") + param_string +
-                                        _("\n\nReturns:\n") +
+            vbox.pack_start (new Label (_("Parameters:\n") + param_string + "\n\n"
+                             // TRANSLATORS:
+                             // Returns a return value (programming).
+                                        + _("Returns:\n") +
                                         mth.return_type.data_type.name));
             info_inner_widget = vbox;
         } else

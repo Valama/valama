@@ -66,7 +66,7 @@ public void ui_load_project() {
                             FileQueryInfoFlags.NONE).get_attribute_as_string (
                                     FileAttribute.UNIX_INODE));
         } catch (GLib.Error e) {
-            errmsg (_("Couldn't compare project files inodes: %s\n"), e.message);
+            errmsg (_("Could not compare project files inodes: %s\n"), e.message);
             comp = false;
         }
         if (comp) {
@@ -76,7 +76,7 @@ public void ui_load_project() {
             try {
                 new_project = new ValamaProject (new_filename);
             } catch (LoadingError e) {
-                errmsg (_("Couldn't load new project: %s\n"), e.message);
+                errmsg (_("Could not load new project: %s\n"), e.message);
                 dlg.close();
                 return;
             }

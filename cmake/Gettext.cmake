@@ -156,7 +156,7 @@ set(XGETTEXT_OPTIONS_DEFAULT
   "--keyword=NC_:1c,2"
   "-s"
   "--escape"
-  "--add-comments=\"/\""
+  "--add-comments=\"TRANSLATORS:\""  #TODO: Make this configurable.
   "--from-code=UTF-8"
 )
 

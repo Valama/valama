@@ -44,6 +44,7 @@ public class SymbolBrowser : UiElement {
         var tmcolumn = new TreeViewColumn.with_attributes (_("Symbol"), tmrenderer, "markup", null);
         tree_view.append_column (tmcolumn);
         tree_view.insert_column_with_attributes (-1,
+        // TRANSLATORS: Type in programming context as data type.
                                                  _("Type"),
                                                  new CellRendererText(),
                                                  "text",

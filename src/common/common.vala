@@ -567,7 +567,7 @@ public bool save_file (string filename, string text) {
     } catch (GLib.IOError e) {
         errmsg (_("Could not update file: %s\n"), e.message);
     } catch (GLib.Error e) {
-        errmsg (_("Could not open file to write: %s\n"), e.message);
+        errmsg (_("Could not open file writable: %s\n"), e.message);
     }
     return false;
 }
@@ -672,6 +672,7 @@ public inline void error_msg (string format, ...) {
 }
 
 public inline void bug_msg (string format, ...) {
+    // TRANSLATORS: Very important string ;) . Thanks btw. for your translation!
     stderr.printf (format.vprintf (va_list()) + _("Please report a bug!\n"));
 }
 

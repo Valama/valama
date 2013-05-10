@@ -275,7 +275,7 @@ public class MainWidget : Box {
             try {
                 f.make_directory_with_parents();
             } catch (GLib.Error e) {
-                errmsg (_("Couldn't create cache directory: %s\n"), e.message);
+                errmsg (_("Could not create cache directory: %s\n"), e.message);
             }
         save_layout (this.layout, local_layout_filename);
         return true;
@@ -357,6 +357,7 @@ public class MainWidget : Box {
         add_view_menu_item (menu_view, wdg_smb_browser, _("Show symbol browser"));
         add_view_menu_item (menu_view, wdg_current_symbol, _("Show current symbol"));
 
+        // TRANSLATORS: Lock user interface elements to prevent moving them around.
         var item_view_lockhide = new CheckMenuItem.with_mnemonic ("_" + _("Lock elements"));
         menu_view.append (item_view_lockhide);
         item_view_lockhide.toggled.connect (() => {
@@ -693,7 +694,7 @@ public class MainWidget : Box {
                             locked = false;
                             break;
                         default:
-                            warning_msg (_("Unknown attribute for 's' line %hu: %s\n"),
+                            warning_msg (_("Unknown attribute for '%s' line %hu: %s\n"),
                                          "locked", i->line, i->get_content());
                             break;
                     }
@@ -712,6 +713,8 @@ public class MainWidget : Box {
      * @param item The item to receive focus.
      */
     public void focus_dock_item (DockItem item) {
+        // TRANSLATORS:
+        // Focus docking widget (Gdl.DockItem): long name / file name (short name)
         debug_msg (_("Focus dock item: %s (%s)\n"), item.long_name, item.name);
         /* Hack around gdl_dock_notebook with gtk_notebook. */
         var pa = item.parent;

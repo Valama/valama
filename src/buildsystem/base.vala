@@ -164,6 +164,9 @@ public abstract class BuildSystem : Object {
 
     protected virtual void unregister_define (string define) {
         if (project.define_set (define, false))
+            // TRANSLATORS:
+            // A "define" is a preprocessor symbol which is either set or unset:
+            // #if FOOBAR || BARFOO   <- where FOOBAR and BARFOO are defines
             debug_msg (_("Disable define: %s\n"), define);
     }
 
@@ -345,7 +348,8 @@ public abstract class BuildSystem : Object {
                                 package = check;
                                 return true;
                             } else
-                                debug_msg_level (2, _("Incompatible version for package %s %s %s found: %s\n"),
+                                // TRANSLATORS: Context: ... for package `foobar' <= 0.42 found: ...
+                                debug_msg_level (2, _("Incompatible version for package '%s' %s %s found: %s\n"),
                                            pkg_name[i], (pkg_rel != null) ? pkg_rel : ">=", ver,
                                            version);
                         }
@@ -419,6 +423,9 @@ public abstract class BuildSystem : Object {
 
     public virtual bool preparate() throws BuildError.INITIALIZATION_FAILED {
         if (buildpath == null)
+            // TRANSLATORS:
+            // The user has to choose a directory where to build the application
+            // so it might be undefined.
             throw new BuildError.INITIALIZATION_FAILED (_("Build directory not set."));
         init_dir (buildpath);
         return true;
@@ -574,6 +581,8 @@ public abstract class BuildSystem : Object {
         } catch (GLib.ConvertError e) {
             errmsg (_("Could not convert all characters: %s\n"), e.message);
         } catch (GLib.IOChannelError e) {
+            // TRANSLATORS: This is a technical information. So you might not
+            // want to translate "IOChannel".
             errmsg (_("IOChannel operation failed: %s\n"), e.message);
         }
         return_value = true;
