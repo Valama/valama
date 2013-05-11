@@ -1430,7 +1430,7 @@ msgstr "Entferne Quelldatei: %s\n"
 
 #: ../src/ui_main.vala:169
 msgid "Report widget"
-msgstr "Reporter-Widget"
+msgstr "Reporter"
 
 #. TRANSLATORS:
 #. Returns a return value (programming).
