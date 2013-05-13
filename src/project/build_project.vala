@@ -27,7 +27,7 @@ public class ProjectBuilder : Object {
     private bool project_needs_compile = false;
     private bool initialized = false;
 
-    public signal void build_started ();
+    public signal void build_started (bool clear);
     public signal void build_finished (bool success);
     public signal void build_progress (int percent);
     public signal void build_output (string output);
@@ -78,8 +78,9 @@ public class ProjectBuilder : Object {
      * @return Return `true` on success else `false`.
      */
     public bool build_project (bool clean = false, bool tests = false,
-                                bool distclean = false, bool cont = true) {
-        build_started();
+                                bool distclean = false, bool cont = true,
+                                bool clear = true) {
+        build_started (clear);
 
         if (!init()) {
             build_finished(false);
@@ -142,6 +143,79 @@ public class ProjectBuilder : Object {
             return false;
         } catch (BuildError.TEST_FAILED e) {
             warning_msg (_("'%s' tests failed: %s\n"), project.builder.get_name(), e.message);
+            build_finished (false);
+            return false;
+        }
+        build_finished (true);
+        return true;
+    }
+
+    /**
+     * Clean up project build system files.
+     *
+     * @return `true` on success.
+     */
+    public bool clean_project (bool clear = true) {
+        build_started (clear);
+        if (!init()) {
+            build_finished(false);
+            return false;
+        }
+        try {
+            int? exit_status;
+            if (!project.builder.initialize (out exit_status)) {
+                warning_msg (_("'Initialization' failed with exit status: %d\n"), exit_status);
+                build_finished (false);
+                return false;
+            }
+            stdout.printf ("try to clean\n");
+            if (!project.builder.clean (out exit_status)) {
+                warning_msg (_("'Distclean' failed with exit status: %d\n"), exit_status);
+                build_finished (false);
+                return false;
+            }
+        } catch (BuildError.INITIALIZATION_FAILED e) {
+            warning_msg (_("'%s' initialization failed: %s\n"), project.builder.get_name(), e.message);
+            build_finished (false);
+            return false;
+        } catch (BuildError.CLEAN_FAILED e) {
+            warning_msg (_("'%s' cleaning failed: %s\n"), project.builder.get_name(), e.message);
+            build_finished (false);
+            return false;
+        }
+        build_finished (true);
+        return true;
+    }
+
+    /**
+     * Clean up all project build system files.
+     *
+     * @return `true` on success.
+     */
+    public bool distclean_project (bool clear = true) {
+        build_started (clear);
+        if (!init()) {
+            build_finished(false);
+            return false;
+        }
+        try {
+            int? exit_status;
+            if (!project.builder.initialize (out exit_status)) {
+                warning_msg (_("'Initialization' failed with exit status: %d\n"), exit_status);
+                build_finished (false);
+                return false;
+            }
+            if (!project.builder.distclean (out exit_status)) {
+                warning_msg (_("'Distclean' failed with exit status: %d\n"), exit_status);
+                build_finished (false);
+                return false;
+            }
+        } catch (BuildError.INITIALIZATION_FAILED e) {
+            warning_msg (_("'%s' initialization failed: %s\n"), project.builder.get_name(), e.message);
+            build_finished (false);
+            return false;
+        } catch (BuildError.CLEAN_FAILED e) {
+            warning_msg (_("'%s' cleaning failed: %s\n"), project.builder.get_name(), e.message);
             build_finished (false);
             return false;
         }

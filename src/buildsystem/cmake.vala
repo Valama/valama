@@ -115,7 +115,7 @@ public class BuilderCMake : BuildSystem {
         return true;
     }
 
-    public override bool configure(out int? exit_status = null) throws BuildError.INITIALIZATION_FAILED,
+    public override bool configure (out int? exit_status = null) throws BuildError.INITIALIZATION_FAILED,
                                             BuildError.CONFIGURATION_FAILED {
         exit_status = null;
         if (!initialized && !initialize (out exit_status))
@@ -198,6 +198,70 @@ public class BuilderCMake : BuildSystem {
         exit_status = exit;
         built = true;
         build_finished();
+        return exit_status == 0;
+    }
+
+    public override bool check_existance() {
+        var f = File.new_for_path (buildpath);
+        return f.query_exists();
+    }
+
+    public override bool clean (out int? exit_status = null)
+                                        throws BuildError.CLEAN_FAILED {
+        exit_status = null;
+        // cleaned = false;
+        clean_started();
+
+        if (!check_existance()) {
+            build_output (_("No data to clean."));
+            clean_finished();
+            return true;
+        }
+
+        var cmdline = new string[] {"make", "clean"};
+
+        Pid? pid;
+        if (!call_cmd (cmdline, out pid)) {
+            clean_finished();
+            throw new BuildError.CLEAN_FAILED (_("clean command failed"));
+        }
+
+        int? exit = null;
+        ChildWatch.add (pid, (intpid, status) => {
+            exit = get_exit (status);
+            Process.close_pid (intpid);
+            builder_loop.quit();
+        });
+
+        builder_loop.run();
+        exit_status = exit;
+        // cleaned = true;
+        clean_finished();
+        return exit_status == 0;
+    }
+
+    public override bool distclean (out int? exit_status = null)
+                                            throws BuildError.CLEAN_FAILED {
+        exit_status = null;
+        // distcleaned = false;
+        distclean_started();
+
+        if (!check_existance()) {
+            build_output (_("No data to clean."));
+            clean_finished();
+            return true;
+        }
+
+        try {
+            remove_recursively (buildpath, true, false);
+            exit_status = 0;
+        } catch (GLib.Error e) {
+            exit_status = 1;
+            throw new BuildError.CLEAN_FAILED (_("distclean command failed: %s"), e.message);
+        }
+
+        // distcleaned = true;
+        distclean_finished();
         return exit_status == 0;
     }
 }

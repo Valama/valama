@@ -376,10 +376,87 @@ public class MainWidget : Box {
 
         /* Project */
         var item_project = new Gtk.MenuItem.with_mnemonic ("_" + _("Project"));
-        item_project.set_sensitive (false);
         add_menu (item_project);
         var menu_project = new Gtk.Menu();
         item_project.set_submenu (menu_project);
+
+        var item_project_settings = new ImageMenuItem.from_stock (Stock.PREFERENCES, null);
+        item_project_settings.label = _("Settings");
+        menu_project.append (item_project_settings);
+        item_project_settings.activate.connect (() => {
+            ui_project_dialog (project);
+        });
+
+        /* Build */
+        var item_build = new Gtk.MenuItem.with_mnemonic ("_" + _("Build"));
+        add_menu (item_build);
+        var menu_build = new Gtk.Menu();
+        item_build.set_submenu (menu_build);
+
+        var item_build_build = new ImageMenuItem.from_stock (Stock.EXECUTE, null);
+        item_build_build.label = _("Build");
+        add_accel_activate (item_build_build, Gdk.Key.F7, 0);
+        menu_build.append (item_build_build);
+        item_build_build.activate.connect (() => {
+            project_builder.build_project();
+        });
+
+        var item_build_rebuild = new ImageMenuItem.with_label (_("Rebuild"));
+        menu_build.append (item_build_rebuild);
+        item_build_rebuild.activate.connect (() => {
+            project_builder.build_project (true);
+        });
+
+        var item_build_cleanbuild = new ImageMenuItem.with_label (_("Clean build"));
+        menu_build.append (item_build_cleanbuild);
+        item_build_cleanbuild.activate.connect (() => {
+            project_builder.build_project (false, false, true);
+        });
+
+        var item_build_clean = new ImageMenuItem.from_stock (Stock.CLEAR, null);
+        item_build_clean.label = _("Clean");
+        menu_build.append (item_build_clean);
+        item_build_clean.activate.connect (() => {
+            project_builder.clean_project();
+        });
+
+        var item_build_distclean = new ImageMenuItem.with_label (_("Clean all"));
+        menu_build.append (item_build_distclean);
+        item_build_distclean.activate.connect (() => {
+            project_builder.distclean_project();
+        });
+
+        /* Run */
+        var item_run = new Gtk.MenuItem.with_mnemonic ("_" + _("Run"));
+        add_menu (item_run);
+        var menu_run = new Gtk.Menu();
+        item_run.set_submenu (menu_run);
+
+        var item_run_run = new ImageMenuItem.from_stock (Stock.MEDIA_PLAY, null);
+        item_run_run.label = _("Execute");
+        add_accel_activate (item_run_run, Gdk.Key.F5, 0);
+        menu_run.append (item_run_run);
+        item_run_run.activate.connect (() => {
+            project_builder.launch();
+        });
+
+        var item_run_stop = new ImageMenuItem.from_stock (Stock.MEDIA_STOP, null);
+        // item_run_stop.label = _("Stop");
+        item_run_stop.sensitive = false;
+        add_accel_activate (item_run_run, Gdk.Key.F5, Gdk.ModifierType.SHIFT_MASK);
+        menu_run.append (item_run_stop);
+        item_run_stop.activate.connect (() => {
+            project_builder.quit();
+        });
+        project_builder.notify["app-running"].connect (() => {
+            if (project_builder.app_running) {
+                item_run_run.sensitive = false;
+                item_run_stop.sensitive = true;
+            } else {
+                item_run_run.sensitive = true;
+                item_run_stop.sensitive = false;
+            }
+        });
 
         /* Help */
         var item_help = new Gtk.MenuItem.with_mnemonic ("_" + _("Help"));
@@ -460,7 +537,6 @@ public class MainWidget : Box {
         add_button (ti);
 
         var btnBuild = new Gtk.ToolButton.from_stock (Stock.EXECUTE);
-        add_accel_activate (btnBuild, Gdk.Key.F7, 0, "clicked");
         add_button (btnBuild);
         btnBuild.set_tooltip_text (_("Save current file and build project"));
         btnBuild.clicked.connect (() => {
@@ -468,7 +544,6 @@ public class MainWidget : Box {
         });
 
         var btnRun = new Gtk.ToolButton.from_stock (Stock.MEDIA_PLAY);
-        add_accel_activate (btnRun, Gdk.Key.F5, 0, "clicked");
         add_button (btnRun);
         btnRun.set_tooltip_text (_("Run application"));
         btnRun.clicked.connect (() => {

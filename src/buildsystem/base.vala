@@ -465,6 +465,10 @@ public abstract class BuildSystem : Object {
         return true;
     }
 
+    public virtual bool check_existance() {
+        return true;
+    }
+
     public virtual bool clean (out int? exit_status = null)
                                         throws BuildError.CLEAN_FAILED {
         exit_status = 0;

@@ -66,14 +66,15 @@ public class BuildOutput : UiElement {
         widget = vbox;
         widget.show_all();
 
-        project_builder.build_started.connect (()=> {
+        project_builder.build_started.connect ((clear) => {
             info_bar.no_show_all = false;
             info_bar.show_all();
-            info_label.label = _("Building...");
+            info_label.label = _("Running...");
             info_icon.stock = Stock.EXECUTE;
             info_bar.set_message_type (MessageType.INFO);
 
-            textview.buffer.text = "";
+            if (clear)
+                textview.buffer.text = "";
             focused = false;
             progressbar.visible = true;
         });
@@ -84,11 +85,11 @@ public class BuildOutput : UiElement {
             progressbar.visible = false;
 
             if (success) {
-                info_label.label = _("Build complete");
+                info_label.label = _("Succeeded");
                 info_icon.stock = Stock.OK;
                 info_bar.set_message_type (MessageType.INFO);
             } else {
-                info_label.label = _("Build failed");
+                info_label.label = _("Failed");
                 info_icon.stock = Stock.DIALOG_ERROR;
                 info_bar.set_message_type (MessageType.ERROR);
             }

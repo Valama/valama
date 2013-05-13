@@ -505,6 +505,72 @@ public class FileTransfer : Object {
 
 
 /**
+ * Remove file or directory / directory content recursively.
+ *
+ * @param path File or directory to remove.
+ * @param recursively If `false` don't remove directories. Only useful if
+                      {@link path} is directory. To also remove parent, enable
+                      {@link with_parent}.
+ * @param with_parent Remove current directory. Maybe only useful if
+                      {@link recursively} is enabled.
+ *
+ * @return `true` on success else `false`.
+ */
+public bool remove_recursively (string path,
+                                bool recursively = true,
+                                bool with_parent = false)
+                                        throws GLib.IOError, GLib.Error {
+    var f = File.new_for_path (path);
+    if (!f.query_exists())
+        throw new IOError.NOT_FOUND (_("file does not exist"));
+
+    var filetype = f.query_file_type (FileQueryInfoFlags.NONE, null);
+    switch (filetype) {
+        case FileType.REGULAR:
+            return f.delete();
+        case FileType.DIRECTORY:
+            var enumerator = f.enumerate_children ("standard::*",
+                                                   FileQueryInfoFlags.NONE,
+                                                   null);
+            FileInfo? info = null;
+            while ((info = enumerator.next_file()) != null) {
+                var new_file = f.resolve_relative_path (info.get_name());
+                if (info.get_file_type() == FileType.DIRECTORY) {
+                    if (recursively) {
+                        remove_recursively_int (new_file);
+                        new_file.delete();
+                    }
+                } else
+                    new_file.delete();
+            }
+
+            if (with_parent)
+                return f.delete();
+            else
+                return true;
+        default:
+            throw new IOError.NOT_SUPPORTED (_("no regular file or directory"));
+    }
+}
+
+
+private void remove_recursively_int (File f) throws GLib.IOError, GLib.Error {
+    var enumerator = f.enumerate_children ("standard::*",
+                                           FileQueryInfoFlags.NONE,
+                                           null);
+    FileInfo? info = null;
+    while ((info = enumerator.next_file()) != null) {
+        var new_file = f.resolve_relative_path (info.get_name());
+        if (info.get_file_type() == FileType.DIRECTORY) {
+            remove_recursively_int (new_file);
+            new_file.delete();
+        } else
+            new_file.delete();
+    }
+}
+
+
+/**
  * Generate list of filename parts spited on {@link GLib.Path.DIR_SEPARATOR}.
  *
  * @param path Pathname to split.
