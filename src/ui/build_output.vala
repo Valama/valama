@@ -58,6 +58,14 @@ public class BuildOutput : UiElement {
         scrw.add (textview);
         vbox.pack_start (scrw, true, true);
 
+        double? prev_pos = null;
+        textview.size_allocate.connect (() => {
+            var adj = scrw.vadjustment;
+            if (prev_pos == null || adj.get_value() == prev_pos)
+                adj.set_value (adj.upper - adj.page_size);
+            prev_pos = adj.upper - adj.page_size;
+        });
+
         progressbar = new ProgressBar();
         vbox.pack_start (progressbar, false, true);
         progressbar.visible = false;
@@ -73,8 +81,10 @@ public class BuildOutput : UiElement {
             info_icon.stock = Stock.EXECUTE;
             info_bar.set_message_type (MessageType.INFO);
 
-            if (clear)
+            if (clear) {
                 textview.buffer.text = "";
+                prev_pos = null;
+            }
             focused = false;
             progressbar.visible = true;
         });
