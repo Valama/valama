@@ -96,7 +96,7 @@ static bool quit_valama() {
 
 public class Valama : Gtk.Application {
     public Valama () {
-        Object (application_id: "app.valama", flags: GLib.ApplicationFlags.FLAGS_NONE);
+        Object (application_id: "app.valama", flags: GLib.ApplicationFlags.NON_UNIQUE);
     }
 
     public override void activate () {
