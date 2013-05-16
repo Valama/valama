@@ -876,11 +876,16 @@ namespace Guanako {
                         stdout.printf (_("Variable '%s' not found! >%s<\n"), parent_param_name, compare_rule[0].expr);
                         return;
                     }
-                    Symbol[] children = new Symbol[0];
-                    if (parent_param.symbol == null)
-                        children = accessible;
-                    else
-                        children = get_child_symbols (get_type_of_symbol (parent_param.symbol, parent_param.resolve_array));
+                    Vala.List<Symbol>[] children;
+                    if (parent_param.symbol == null) {
+                        children = new Vala.List<Symbol>[1];
+                        children[0] = new Vala.ArrayList<Symbol>();
+                        foreach (Symbol child in accessible)
+                            if (symbol_is_type (child, child_type))
+                                children[0].add(child);
+                    } else {
+                        children = get_child_symbols_of_type (get_type_of_symbol (parent_param.symbol, parent_param.resolve_array), child_type);
+                    }
 
                     Regex r2 = /^(?P<word>\w*)(?P<rest>.*)$/;
                     MatchInfo info2;
@@ -889,9 +894,10 @@ namespace Guanako {
                     var word = info2.fetch_named ("word");
                     var rest = info2.fetch_named ("rest");
 
+                    var thdlist = new Thread<void*>[0];
                     bool match_found = false;
-                    foreach (Symbol child in children) {
-                        if (symbol_is_type (child, child_type)) {
+                    foreach (Vala.List<Symbol> list in children)
+                        foreach (Symbol child in list) {
                             if (binding != null)
                                 if (!symbol_has_binding (child, binding))
                                     continue;
@@ -907,14 +913,15 @@ namespace Guanako {
                                     target_param.symbol = child;
                                     target_param.resolve_array = binding != null && binding.contains ("arr_el");
                                 }
-                                compare (rule[1:rule.length], rest, call_params, depth + 1, ref ret, ref private_cur_stack);
+                                thdlist += compare_threaded (this, rule[1:rule.length], rest, call_params, depth + 1, ref ret, ref private_cur_stack);
                             }
                             if (rest == "" && child.name.has_prefix (word) && child.name.length > word.length) {
                                 match_found = true;
                                 ret.add (new CompletionProposal (child, word.length));
                             }
                         }
-                    }
+                    foreach (Thread<void*> thd in thdlist)
+                        thd.join();
                     if (match_found) {
                         if (private_cur_stack.size > 0)
                             cur_stack = private_cur_stack;

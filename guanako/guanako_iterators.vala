@@ -22,6 +22,113 @@ using Vala;
 
 namespace Guanako {
 
+    private Vala.List<Symbol>[] get_child_symbols_of_type (Symbol smb, string type) {
+        var ret = new Vala.List<Symbol>[0];
+        if (smb is Class) {
+            //If parent is a Class, add its base class and types (i.e. interfaces it implements etc)
+            var p = (Class) smb;
+            if (p.base_class != null)
+                ret += get_child_symbols_of_type_simple (p.base_class, type);
+            foreach (DataType p_type in p.get_base_types())
+                ret += get_child_symbols_of_type_simple (p_type.data_type, type);
+        }
+        var main_res = get_child_symbols_of_type_simple (smb, type);
+        if (main_res != null)
+            ret += main_res;
+        return ret;
+    }
+
+    private Vala.List<Symbol>? get_child_symbols_of_type_simple (Symbol smb, string type) {
+        if (smb is Namespace) {
+            var cv = (Namespace) smb;
+            if (type == "Namespace")
+                return cv.get_namespaces();
+            if (type == "Constant")
+                return cv.get_constants();
+            if (type == "Enum")
+                return cv.get_enums();
+            if (type == "ErrorDomain")
+                return cv.get_error_domains();
+            if (type == "Struct")
+                return cv.get_structs();
+            if (type == "Interface")
+                return cv.get_interfaces();
+            if (type == "Class")
+                return cv.get_classes();
+            if (type == "Field")
+                return cv.get_fields();
+            if (type == "Delegate")
+                return cv.get_delegates();
+            if (type == "Method")
+                return cv.get_methods();
+        }
+        if (smb is Class) {
+            var cv = (Class) smb;
+            if (type == "Constant")
+                return cv.get_constants();
+            if (type == "Enum")
+                return cv.get_enums();
+            if (type == "Struct")
+                return cv.get_structs();
+            if (type == "Class")
+                return cv.get_classes();
+            if (type == "Field")
+                return cv.get_fields();
+            if (type == "Delegate")
+                return cv.get_delegates();
+        }
+        if (smb is Enum) {
+            var cv = (Enum) smb;
+            if (type == "Constant")
+                return cv.get_constants();
+            if (type == "Method")
+                return cv.get_methods();
+        }
+        if (smb is ErrorDomain) {
+            var cv = (ErrorDomain) smb;
+            if (type == "ErrorCode")
+                return cv.get_codes();
+            if (type == "Method")
+                return cv.get_methods();
+        }
+        if (smb is Interface) {
+            var cv = (Interface) smb;
+            if (type == "Constant")
+                return cv.get_constants();
+            if (type == "Enum")
+                return cv.get_enums();
+            if (type == "Struct")
+                return cv.get_structs();
+            if (type == "Class")
+                return cv.get_classes();
+            if (type == "Field")
+                return cv.get_fields();
+            if (type == "Delegate")
+                return cv.get_delegates();
+        }
+        if (smb is Struct) {
+            var cv = (Struct) smb;
+            if (type == "Constant")
+                return cv.get_constants();
+            if (type == "Property")
+                return cv.get_properties();
+            if (type == "Field")
+                return cv.get_fields();
+            if (type == "Method")
+                return cv.get_methods();
+        }
+        if (smb is ObjectTypeSymbol) {
+            var cv = (ObjectTypeSymbol) smb;
+            if (type == "Property")
+                return cv.get_properties();
+            if (type == "Method")
+                return cv.get_methods();
+            if (type == "Signal")
+                return cv.get_signals();
+        }
+        return null;
+    }
+
     /*
      * Get parent's children.
      */

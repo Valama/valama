@@ -30,6 +30,7 @@ set(srcfiles
 "src/common/args.vala"
 "src/common/common.vala"
 "src/common/ui_helpers.vala"
+"src/completion_provider.vala"
 "src/dialogs/about.vala"
 "src/dialogs/create_file.vala"
 "src/dialogs/create_project.vala"
