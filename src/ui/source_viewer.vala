@@ -86,6 +86,10 @@ class UiSourceViewer : UiElement {
      */
     public SuperSourceView? current_srcview { get; private set; default = null; }
     /**
+     * List of currently in used annotations.
+     */
+    private ArrayList<SuperSourceView.LineAnnotation> annotations;
+    /**
      * Currently selected {@link SourceBuffer}.
      */
     public SourceBuffer? current_srcbuffer { get; private set; default = null; }
@@ -122,7 +126,93 @@ class UiSourceViewer : UiElement {
             langmap[language] = new Pair<string, int> (lang_id, ++num);
         }
 
+        annotations = new ArrayList<SuperSourceView.LineAnnotation>();
+
         widget = vbox;
+    }
+
+    /**
+     * Initialize application signals.
+     */
+    public void init() {
+        source_viewer.buffer_close.connect (project.close_buffer);
+        source_viewer.current_sourceview_changed.connect (() => {
+            var srcbuf = source_viewer.current_srcbuffer;
+            project.undo_changed (srcbuf.can_undo);
+            project.redo_changed (srcbuf.can_redo);
+            if (!is_new_document (source_viewer.current_srcfocus))
+                project.buffer_changed (project.buffer_is_dirty (
+                                                source_viewer.current_srcfocus));
+            else
+                project.buffer_changed (true);
+        });
+        widget_main.request_close.connect (() => {
+            widget_main.close();
+            window_main.remove (widget_main);
+            project = null;
+            window_main.add (vscreen);
+            widget_main = null;
+        });
+
+        project.guanako_update_finished.connect (() => {
+            project.foreach_buffer ((s, bfr) => {
+                TextIter first_iter;
+                TextIter end_iter;
+                bfr.get_start_iter (out first_iter);
+                bfr.get_end_iter (out end_iter);
+                bfr.remove_tag_by_name ("error_bg", first_iter, end_iter);
+                bfr.remove_tag_by_name ("warning_bg", first_iter, end_iter);
+            });
+
+            foreach (var annotation in annotations)
+                annotation.finished = true;
+            annotations = new ArrayList<SuperSourceView.LineAnnotation>();
+
+            foreach (var err in project.get_errorlist()) {
+                var bfr = project.get_buffer_by_file (err.source.file.filename);
+                if (bfr != null)
+                    apply_annotation (get_sourceview_by_file (err.source.file.filename, false),
+                                      bfr,
+                                      err);
+            }
+        });
+    }
+
+    private void apply_annotation (SuperSourceView view, SourceBuffer bfr, Guanako.Reporter.Error err) {
+        TextIter? iter_start = null;
+        TextIter? iter_end = null;
+        bfr.get_iter_at_line (out iter_start, err.source.begin.line - 1);
+        bfr.get_iter_at_line (out iter_end, err.source.end.line - 1);
+        iter_start.forward_chars (err.source.begin.column - 1);
+        iter_end.forward_chars (err.source.end.column);
+
+        var annotation_line = err.source.begin.line - 1;
+        int offset = 1;
+        foreach (var annotation in annotations)
+            if (annotation.line == annotation_line)
+                offset++;
+
+        switch (err.type) {
+            case Guanako.ReportType.ERROR:
+                bfr.apply_tag_by_name ("error_bg", iter_start, iter_end);
+                annotations.add (view.annotate (annotation_line, err.message, 1.0, 0.0, 0.0, false, offset));
+                break;
+            case Guanako.ReportType.WARNING:
+                bfr.apply_tag_by_name ("warning_bg", iter_start, iter_end);
+                annotations.add (view.annotate (annotation_line, err.message, 1.0, 1.0, 0.0, false, offset));
+                break;
+            case Guanako.ReportType.DEPRECATED:
+                annotations.add (view.annotate (annotation_line, err.message, 0.0, 0.0, 1.0, false, offset));
+                break;
+            case Guanako.ReportType.EXPERIMENTAL:
+                annotations.add (view.annotate (annotation_line, err.message, 1.0, 1.0, 0.0, false, offset));
+                break;
+            case Guanako.ReportType.NOTE:
+                break;
+            default:
+                bug_msg (_("Unknown ReportType: %s\n"), err.type.to_string());
+                break;
+        }
     }
 
     /**
@@ -203,7 +293,7 @@ class UiSourceViewer : UiElement {
      * @param view {@link Gtk.SourceView} object to add.
      * @param filepath Name of file (used to identify item).
      */
-    public void add_srcitem (SourceView view, string filepath = "") {
+    public void add_srcitem (SuperSourceView view, string filepath = "") {
         string displayname, filename = filepath;
         if (filename == "")
             displayname = filename = _("New document");
@@ -233,7 +323,9 @@ class UiSourceViewer : UiElement {
         tag = srcbuf.create_tag ("search", null);
         tag.background_rgba = Gdk.RGBA() { red = 1.0, green = 1.0, blue = 0.8, alpha = 1.0 };
 
-        //"left-margin", "1", "left-margin-set", "true",
+        if (project != null)
+            foreach (var err in project.get_errorlist())
+                apply_annotation (view, srcbuf, err);
 
         /* Statusbar */
         var statusbar = new Statusbar();

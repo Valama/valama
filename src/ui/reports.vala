@@ -103,7 +103,6 @@ class UiReport : UiElement {
     }
 
     ArrayList<Reporter.Error> storelist;
-    ArrayList<SuperSourceView.LineAnnotation> annotations = new ArrayList<SuperSourceView.LineAnnotation>();
 
     public UiReport (ReportType reptype = ReportType.ALL, bool showall = false) {
         var vbox = new Box (Orientation.VERTICAL, 0);
@@ -153,29 +152,7 @@ class UiReport : UiElement {
             return;
 
         debug_msg (_("Run %s update!\n"), get_name());
-        TextBuffer bfr = null;
         storelist = new ArrayList<Reporter.Error>();
-
-        if (showall) {
-            project.foreach_buffer ((s, bfr) => {
-                TextIter first_iter;
-                TextIter end_iter;
-                bfr.get_start_iter (out first_iter);
-                bfr.get_end_iter (out end_iter);
-                bfr.remove_tag_by_name ("error_bg", first_iter, end_iter);
-                bfr.remove_tag_by_name ("warning_bg", first_iter, end_iter);
-            });
-        } else {
-            bfr = project.get_buffer_by_file (source_viewer.current_srcfocus);
-            if (bfr != null) {
-                TextIter first_iter;
-                TextIter end_iter;
-                bfr.get_start_iter (out first_iter);
-                bfr.get_end_iter (out end_iter);
-                bfr.remove_tag_by_name ("error_bg", first_iter, end_iter);
-                bfr.remove_tag_by_name ("warning_bg", first_iter, end_iter);
-            }
-        }
 
         int errs = 0;
         int warns = 0;
@@ -183,63 +160,28 @@ class UiReport : UiElement {
         int exp = 0;
         int note = 0;
 
-        foreach (SuperSourceView.LineAnnotation annotation in annotations)
-            annotation.finished = true;
-        annotations = new ArrayList<SuperSourceView.LineAnnotation>();
-
         foreach (var err in project.get_errorlist()) {
             if ((err.type & reptype) == 0 ||
                     (!showall &&
                      err.source.file.filename != source_viewer.current_srcfocus))
                 continue;
 
-            if (showall)
-                bfr = project.get_buffer_by_file (err.source.file.filename);
-
-            var view = source_viewer.get_sourceview_by_file (err.source.file.filename, false);
-
             Gdk.Pixbuf? pixbuf = null;
-            TextIter? iter_start = null;
-            TextIter? iter_end = null;
-            if (bfr != null) {
-                bfr.get_iter_at_line (out iter_start, err.source.begin.line - 1);
-                bfr.get_iter_at_line (out iter_end, err.source.end.line - 1);
-                iter_start.forward_chars (err.source.begin.column - 1);
-                iter_end.forward_chars (err.source.end.column);
-            }
-
-            var annotation_line = err.source.begin.line - 1;
-            int offset = 1;
-            foreach (SuperSourceView.LineAnnotation annotation in annotations)
-                if (annotation.line == annotation_line)
-                    offset++;
             switch (err.type) {
                 case ReportType.ERROR:
-                    if (bfr != null) {
-                        bfr.apply_tag_by_name ("error_bg", iter_start, iter_end);
-                        annotations.add (view.annotate (annotation_line, err.message, 1.0, 0.0, 0.0, false, offset));
-                    }
                     pixbuf = pixmap_err;
                     ++errs;
                     break;
                 case ReportType.WARNING:
-                    if (bfr != null) {
-                        bfr.apply_tag_by_name ("warning_bg", iter_start, iter_end);
-                        annotations.add (view.annotate (annotation_line, err.message, 1.0, 1.0, 0.0, false, offset));
-                    }
                     pixbuf = pixmap_warn;
                     ++warns;
                     break;
                 case ReportType.DEPRECATED:
                     pixbuf = pixmap_depr;
-                    if (view != null)
-                        annotations.add (view.annotate (annotation_line, err.message, 0.0, 0.0, 1.0, false, offset));
                     ++depr;
                     break;
                 case ReportType.EXPERIMENTAL:
                     pixbuf = pixmap_exp;
-                    if (view != null)
-                        annotations.add (view.annotate (annotation_line, err.message, 1.0, 1.0, 0.0, false, offset));
                     ++exp;
                     break;
                 case ReportType.NOTE:
@@ -247,7 +189,7 @@ class UiReport : UiElement {
                     ++note;
                     break;
                 default:
-                    bug_msg (_("Unknown ReportType: %s\n"), reptype.to_string());
+                    bug_msg (_("Unknown ReportType: %s\n"), err.type.to_string());
                     break;
             }
 

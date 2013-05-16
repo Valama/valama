@@ -132,25 +132,7 @@ static void show_main_screen (ValamaProject load_project) {
     }
 
     /* Application signals. */
-    source_viewer.buffer_close.connect (project.close_buffer);
-
-    source_viewer.current_sourceview_changed.connect (() => {
-        var srcbuf = source_viewer.current_srcbuffer;
-        project.undo_changed (srcbuf.can_undo);
-        project.redo_changed (srcbuf.can_redo);
-        if (!is_new_document (source_viewer.current_srcfocus))
-            project.buffer_changed (project.buffer_is_dirty (
-                                            source_viewer.current_srcfocus));
-        else
-            project.buffer_changed (true);
-    });
-    widget_main.request_close.connect (() => {
-        widget_main.close();
-        window_main.remove (widget_main);
-        project = null;
-        window_main.add (vscreen);
-        widget_main = null;
-    });
+    source_viewer.init();
 }
 
 static void load_icons() {
