@@ -29,6 +29,7 @@ set(includedir "include")
 set(datadir "${datarootdir}/${project_name_lower}")
 set(localedir "${datarootdir}/locale")
 set(appdir "${datarootdir}/applications")
+set(gsettingsdir "${datarootdir}/glib-2.0/schemas")
 set(pixrootdir "${datarootdir}/pixmaps")
 set(pixdir "${pixrootdir}/${project_name_lower}")
 set(docdir "${datadir}/doc")
@@ -338,6 +339,7 @@ install(FILES "data/layout.xml" DESTINATION "${datadir}")
 install(DIRECTORY "data/templates" DESTINATION "${datadir}")
 install(DIRECTORY "data/buildsystems" DESTINATION "${datadir}")
 install(FILES "data/valama.xml" DESTINATION "${mimedir}")
+install(FILES "data/app.valama.gschema.xml" DESTINATION "${gsettingsdir}")
 
 
 # Print some information about build.
