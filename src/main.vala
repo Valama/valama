@@ -28,6 +28,7 @@ static MainWidget? widget_main = null;
 static RecentManager recentmgr;
 static WelcomeScreen? vscreen = null;
 static Valama gtk_app;
+static ValamaSettings settings;
 
 public static int main (string[] args) {
     Intl.textdomain (Config.GETTEXT_PACKAGE);
@@ -37,6 +38,8 @@ public static int main (string[] args) {
                                        Environment.get_user_cache_dir(),
                                        "valama",
                                        "recent_projects.xml"));
+
+    settings = new ValamaSettings ();
 
     /* Command line parsing. */
     /* Copied from Yorba application. */
@@ -77,6 +80,11 @@ public static int main (string[] args) {
 }
 
 static bool quit_valama() {
+    int sx, sy;
+    window_main.get_size (out sx, out sy);
+    settings.window_size_x = sx;
+    settings.window_size_y = sy;
+
     if (project != null)
         if (!project.close())
             return false;
@@ -95,8 +103,7 @@ public class Valama : Gtk.Application {
         window_main = new ApplicationWindow(gtk_app);
         window_main.title = _("Valama");
         window_main.hide_titlebar_when_maximized = true;
-        window_main.set_default_size (1200, 600);
-        window_main.maximize();
+        window_main.set_default_size (settings.window_size_x, settings.window_size_y);
 
         window_main.delete_event.connect (()=>{
             return !quit_valama();

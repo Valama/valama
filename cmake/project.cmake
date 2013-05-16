@@ -40,6 +40,7 @@ set(srcfiles
 "src/project/build_project.vala"
 "src/project/project.vala"
 "src/project/project_templates.vala"
+"src/settings.vala"
 "src/ui/app_output.vala"
 "src/ui/breakpoints.vala"
 "src/ui/build_output.vala"
