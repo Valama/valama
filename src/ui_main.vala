@@ -297,6 +297,7 @@ public class MainWidget : Box {
         add_accel_activate (item_file_new, Gdk.Key.n);
 
         var item_file_open = new ImageMenuItem.from_stock (Stock.OPEN, null);
+        item_file_open.label = _("Open project");
         menu_file.append (item_file_open);
         item_file_open.activate.connect (() => {
             ui_load_project();
@@ -304,6 +305,7 @@ public class MainWidget : Box {
         add_accel_activate (item_file_open, Gdk.Key.o);
 
         var item_file_save = new ImageMenuItem.from_stock (Stock.SAVE, null);
+        item_file_save.label = _("Save all");
         menu_file.append (item_file_save);
         item_file_save.activate.connect (() => {
             project.buffer_save();
