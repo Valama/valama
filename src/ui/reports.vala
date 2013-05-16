@@ -134,7 +134,8 @@ class UiReport : UiElement {
 
         project.guanako_update_finished.connect (build);
         source_viewer.current_sourceview_changed.connect (() => {
-            build();
+            if (!this.showall)
+                build();
         });
 
         widget = vbox;
