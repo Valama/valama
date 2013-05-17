@@ -40,10 +40,14 @@ On Fedora based systems install following packages:
 ### Installation ###
  1. `sudo make install`
 
+This will automatically install and compile gsettings schemas. (You can
+disable installtion/removal hooks during compile time with
+`-DPOSTINSTALL_HOOK=OFF` option.)
+
 #### Local installation ####
 Build Valama then run with following options directly from build directory:
 
-    LD_LIBRARY_PATH=guanako ./valama --syntax ../guanako/data/syntax --templates ../data/templates --buildsystems ../data/buildsystems [FILE]
+    XDG_DATA_DIRS=".:$XDG_DATA_DIRS" LD_LIBRARY_PATH=guanako ./valama --syntax ../guanako/data/syntax --templates ../data/templates --buildsystems ../data/buildsystems [FILE]
 
 Optionally use `--layout ../data/layout.xml` to use standard layout.
 
