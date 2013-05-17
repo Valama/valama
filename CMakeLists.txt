@@ -16,9 +16,10 @@
 # with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+cmake_minimum_required(VERSION "2.8.4")
+
 include("${CMAKE_SOURCE_DIR}/cmake/project.cmake")
 
-cmake_minimum_required(VERSION "2.8.4")
 project("${project_name}" C)
 string(TOLOWER "${project_name}" project_name_lower)
 
@@ -60,6 +61,8 @@ option(VALADOC_VERBOSE "Verbose (private/internal) document generation." OFF)
 option(VALADOC_EXTRA "Generate documentation also for all depending packages." OFF)
 option(COMPRESS_MANPAGE "Compress manpage" ON)
 option(CREATE_CHANGELOG "Create changelog from git log." OFF)
+option(LOCAL "Add some functionality to execute directly from source directory." ON)
+option(POSTINSTALL_HOOK "Execute hook scripts (gsettings update) after installation." ON)
 
 if(GUANAKO)
   set(project_root "${project_name_lower}")
@@ -330,6 +333,15 @@ endif()
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${manfile}" DESTINATION "${mandir}/man1")
 
 
+# Gsettings schemas
+gsettings_install(
+  LOCAL
+    ${LOCAL}
+  FILES
+    "${CMAKE_CURRENT_SOURCE_DIR}/data/app.valama.gschema.xml"
+)
+
+
 install(TARGETS ${project_name_lower} DESTINATION "${bindir}")
 
 # Additional files.
@@ -339,7 +351,16 @@ install(FILES "data/layout.xml" DESTINATION "${datadir}")
 install(DIRECTORY "data/templates" DESTINATION "${datadir}")
 install(DIRECTORY "data/buildsystems" DESTINATION "${datadir}")
 install(FILES "data/valama.xml" DESTINATION "${mimedir}")
-install(FILES "data/app.valama.gschema.xml" DESTINATION "${gsettingsdir}")
+
+
+# Uninstall target
+add_custom_target(uninstall
+  COMMAND
+    ${CMAKE_COMMAND} -D "CUSTOM_SOURCE_DIR:FILEPATH=${CMAKE_SOURCE_DIR}"
+                     -D "POSTREMOVE_HOOK:BOOL=${POSTINSTALL_HOOK}"
+                     -D "GSETTINGSDIR:FILEPATH=${install_prefix}${gsettingsdir}"
+                     -P "${CMAKE_SOURCE_DIR}/cmake/SimpleUninstall.cmake"
+)
 
 
 # Print some information about build.

@@ -16,10 +16,11 @@
 # with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+cmake_minimum_required(VERSION "2.8.4")
+
 include("${CMAKE_SOURCE_DIR}/cmake/guanako.cmake")
 include("${CMAKE_SOURCE_DIR}/cmake/Common.cmake")
 
-cmake_minimum_required(VERSION "2.8.4")
 project("${project_name}" C)
 string(TOLOWER "${project_name}" project_name_lower)
 

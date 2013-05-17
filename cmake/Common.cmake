@@ -127,9 +127,7 @@ function(convert_svg_to_png output)
             DEPENDS
               "${ARGS_ICON}"
             COMMAND
-              ${CONVERT}
-            ARGS
-              "-background" "none" "-resize" "${size}x${size}" "${ARGS_ICON}" "${iconpath}"
+              "${CONVERT}" "-background" "none" "-resize" "${size}x${size}" "${ARGS_ICON}" "${iconpath}"
           )
           list(APPEND png_list "${iconpath}")
           if(ARGS_DESTINATION)
@@ -196,3 +194,92 @@ macro(datestring output)
     )
   endif()
 endmacro()
+
+
+##
+# Install gsettings file and compile schemas.
+#
+# Depends on cmake/GlibCompileSchema.cmake.in.
+#
+# Usage:
+# Pass a list of schema files to install and compile.
+#
+#
+# Simple example:
+#
+#   gsettings_install(
+#     LOCAL
+#       TRUE
+#     GSETTINGSDIR
+#       share/glib-2.0/schemas
+#     FILES
+#       "data/app.foobar.gschema.xml"
+#   )
+#
+function(gsettings_install)
+  include(CMakeParseArguments)
+  cmake_parse_arguments(ARGS "" "LOCAL;GSETTINGSDIR" "FILES" ${ARGN})
+
+  if(NOT "" STREQUAL "${ARGS_FILES}")
+    if(ARGS_LOCAL)
+      set(GSETTINGSDIR "glib-2.0/schemas")
+      configure_file(
+        "${CMAKE_SOURCE_DIR}/cmake/GlibCompileSchema.cmake.in"
+        "${CMAKE_BINARY_DIR}/GlibCompileSchema_local.cmake"
+        @ONLY
+      )
+      foreach(gfile ${ARGS_FILES})
+        get_filename_component(filename "${gfile}" NAME)
+        add_custom_command(
+            COMMAND
+              ${CMAKE_COMMAND} -E make_directory "${GSETTINGSDIR}"
+            COMMAND
+              ${CMAKE_COMMAND} -E copy_if_different
+                                      "${gfile}"
+                                      "${CMAKE_CURRENT_BINARY_DIR}/glib-2.0/schemas/${filename}"
+            OUTPUT
+              "${GSETTINGSDIR}"
+            COMMENT
+              "Install gsettings schemas locally." VERBATIM
+        )
+      endforeach()
+      add_custom_command(
+          COMMAND
+            ${CMAKE_COMMAND} -P "${CMAKE_BINARY_DIR}/GlibCompileSchema_local.cmake"
+          DEPENDS
+            "${GSETTINGSDIR}"
+          OUTPUT
+            "glib-2.0/schemas/gschemas.compiled"
+          COMMENT
+            "Compile gsettings schemas." VERBATIM
+      )
+      add_custom_target(gsettings
+        ALL
+        DEPENDS
+          "glib-2.0/schemas/gschemas.compiled"
+      )
+    endif()
+
+    if(NOT ARGS_GSETTINGSDIR)
+      set(ARGS_GSETTINGSDIR "share/glib-2.0/schemas")
+    endif()
+    foreach(gfile ${ARGS_FILES})
+      install(FILES "${gfile}" DESTINATION "${ARGS_GSETTINGSDIR}")
+    endforeach()
+
+    if(POSTINSTALL_HOOK AND NOT "$ENV{DESTDIR}")
+      if(CMAKE_INSTALL_PREFIX)
+        set(install_prefix "${CMAKE_INSTALL_PREFIX}/")
+      else()
+        set(install_prefix)
+      endif()
+      set(GSETTINGSDIR "${install_prefix}${ARGS_GSETTINGSDIR}")
+      configure_file(
+        "${CMAKE_SOURCE_DIR}/cmake/GlibCompileSchema.cmake.in"
+        "${CMAKE_BINARY_DIR}/GlibCompileSchema.cmake"
+        @ONLY
+      )
+      install(SCRIPT "${CMAKE_BINARY_DIR}/GlibCompileSchema.cmake")
+    endif()
+  endif()
+endfunction()
