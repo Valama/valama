@@ -325,7 +325,8 @@ class UiSourceViewer : UiElement {
 
         if (project != null)
             foreach (var err in project.get_errorlist())
-                apply_annotation (view, srcbuf, err);
+                if (err.source.file.filename == filename)
+                    apply_annotation (view, srcbuf, err);
 
         /* Statusbar */
         var statusbar = new Statusbar();
