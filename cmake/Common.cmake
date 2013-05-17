@@ -202,7 +202,18 @@ endmacro()
 # Depends on cmake/GlibCompileSchema.cmake.in.
 #
 # Usage:
-# Pass a list of schema files to install and compile.
+#
+# LOCAL
+#   If true compile gsettings schemas locally (in
+#   ${CMAKE_BINARY_DIR}/glib-2.0/schemas) directory). Add this directory to
+#   your XDG_DATA_DIRS variable.
+#
+# GSETTINGSDIR
+#   Directory where to install gsettings schemas. Default is:
+#   share/glib-2.0/schemas
+#
+# FILES
+#   List of gsettings schema files to install / compiile.
 #
 #
 # Simple example:
