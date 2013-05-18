@@ -33,19 +33,27 @@ const string VLP_VERSION_MIN = "0.1";
  * Version relations. Can be used e.g. for package or valac versions.
  */
 public enum VersionRelation {
+    AFTER,  // >
     SINCE,  // >=
     UNTIL,  // <=
+    BEFORE, // <
     ONLY,   // ==
     EXCLUDE;// !=
 
     public string? to_string() {
         switch (this) {
+            case AFTER:
+                // TRANSLATORS: Version relation: X > Y
+                return _("after");
             case SINCE:
                 // TRANSLATORS: Version relation: X >= Y
                 return _("since");
             case UNTIL:
                 // TRANSLATORS: Version relation: X <= Y
                 return _("until");
+            case BEFORE:
+                // TRANSLATORS: Version relation: X < Y
+                return _("before");
             case ONLY:
                 // TRANSLATORS: Version relation: X == Y
                 return _("only");
@@ -242,11 +250,17 @@ public class PackageInfo {
         var relation = "";
         if (rel != null)
             switch (rel) {
+                case VersionRelation.AFTER:
+                    relation = " > ";
+                    break;
                 case VersionRelation.SINCE:
                     relation = " >= ";
                     break;
                 case VersionRelation.UNTIL:
                     relation = " <= ";
+                    break;
+                case VersionRelation.BEFORE:
+                    relation = " < ";
                     break;
                 case VersionRelation.ONLY:
                     relation = " = ";
@@ -2144,11 +2158,17 @@ public class ValamaProject : Object {
             package.version = node->get_prop ("version");
             if (node->has_prop ("rel") != null)
                 switch (node->get_prop ("rel")) {
+                    case "after":
+                        package.rel = VersionRelation.AFTER;
+                        break;
                     case "since":
                         package.rel = VersionRelation.SINCE;
                         break;
                     case "until":
                         package.rel = VersionRelation.UNTIL;
+                        break;
+                    case "before":
+                        package.rel = VersionRelation.BEFORE;
                         break;
                     case "only":
                         package.rel = VersionRelation.ONLY;

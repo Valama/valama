@@ -86,10 +86,16 @@ public class ProjectTemplate {
                     var pkg_rel = (pkg.rel != null) ? pkg.rel : VersionRelation.SINCE;
                     bool unmet;
                     switch (pkg_rel) {
-                        case VersionRelation.SINCE:
+                        case VersionRelation.AFTER:
                             unmet = comp_version (pkg_ver, pkg.version) < 0;
                             break;
+                        case VersionRelation.SINCE:
+                            unmet = comp_version (pkg_ver, pkg.version) <= 0;
+                            break;
                         case VersionRelation.UNTIL:
+                            unmet = comp_version (pkg_ver, pkg.version) >= 0;
+                            break;
+                        case VersionRelation.BEFORE:
                             unmet = comp_version (pkg_ver, pkg.version) > 0;
                             break;
                         case VersionRelation.ONLY:
@@ -235,11 +241,17 @@ public ProjectTemplate[] load_templates() {
                         version.version = i->get_content();
                         if (i->has_prop ("rel") != null)
                             switch (i->get_prop ("rel")) {
+                                case "after":
+                                    version.rel = VersionRelation.AFTER;
+                                    break;
                                 case "since":
                                     version.rel = VersionRelation.SINCE;
                                     break;
                                 case "until":
                                     version.rel = VersionRelation.UNTIL;
+                                    break;
+                                case "before":
+                                    version.rel = VersionRelation.BEFORE;
                                     break;
                                 case "only":
                                     version.rel = VersionRelation.ONLY;
