@@ -21,15 +21,21 @@ using Vala;
 namespace Guanako {
     public class FrankenStein {
         public FrankenStein() {
-            Bus.own_name (BusType.SESSION, "app.valama.frankenstein", BusNameOwnerFlags.NONE,
+            var pid = ((int)Posix.getpid()).to_string();
+            dbus_name = "app.valama.frankenstein";
+            dbus_path = "/app/valama/frankenstein" + pid;
+            build_frankenstein_mainblock();
+            Bus.own_name (BusType.SESSION, dbus_name, BusNameOwnerFlags.NONE,
                   on_bus_aquired,
                   () => {},
                   () => stderr.printf (_("Could not acquire name.\n")));
         }
+        string dbus_name;
+        string dbus_path;
 
         void on_bus_aquired (DBusConnection conn) {
             try {
-                conn.register_object ("/app/valama/frankenstein", new FrankenDBUS (this));
+                conn.register_object (dbus_path, new FrankenDBUS (this));
             } catch (IOError e) {
                 stderr.printf (_("Could not register service.\n"));
             }
@@ -102,7 +108,10 @@ namespace Guanako {
             return ret.str;
         }
 
-        public const string frankenstein_mainblock = """
+        public string frankenstein_mainblock { public get; private set; default = "";}
+
+        private void build_frankenstein_mainblock () {
+            frankenstein_mainblock = """
 [DBus (name = "app.valama.frankenstein")]
 interface FrankenDBUS : Object {
     public abstract void timer_finished (int timer_id, double time) throws IOError;
@@ -131,8 +140,7 @@ static void frankenstop_callback (int stop_id) {
     if (frankenstein_client == null) {
         try {
             frankenstein_client = Bus.get_proxy_sync (BusType.SESSION,
-                                                      "app.valama.frankenstein",
-                                                      "/app/valama/frankenstein");
+                                                      "app.valama.frankenstein", """" + dbus_path + """");
         } catch (GLib.IOError e) {
             stderr.printf ("Failed to get Frankenstein D-Bus signal: %s\n", e.message);
         }
@@ -142,8 +150,8 @@ static void frankenstop_callback (int stop_id) {
     } catch (GLib.IOError e) {
         stderr.printf ("Frankenstein client failed to stop: %s\n", e.message);
     }
-}
-""";
+}""";
+        }
     }
 }
 

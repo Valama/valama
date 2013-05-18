@@ -93,7 +93,7 @@ public class BuilderPlain : BuildSystem {
                                                                      FileCreateFlags.REPLACE_DESTINATION));
                     dos.put_string (frankenstein.frankensteinify_sourcefile (srcfile));
                     if (!mainblock) {
-                        dos.put_string (Guanako.FrankenStein.frankenstein_mainblock);
+                        dos.put_string (frankenstein.frankenstein_mainblock);
                         mainblock = true;
                     }
                 } catch (GLib.IOError e) {

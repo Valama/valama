@@ -10,6 +10,7 @@ set(required_pkgs
 "libvala-0.18"
 "libvala-0.20"
 "libxml-2.0"
+"posix {nocheck,nolink}"
 )
 set(srcfiles
 "gee_treeset_fix.vala"
