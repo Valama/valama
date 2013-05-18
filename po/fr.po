@@ -1178,7 +1178,7 @@ msgstr "Lieu"
 #. TRANSLATORS: Lock user interface elements to prevent moving them around.
 #: ../src/ui_main.vala:361
 msgid "Lock elements"
-msgstr "Verrouller éléments"
+msgstr "Verrouiller éléments"
 
 #: ../guanako/guanako.vala:835 ../guanako/guanako.vala:847
 #: ../guanako/guanako.vala:865 ../guanako/guanako.vala:928
