@@ -1688,6 +1688,7 @@ public class ValamaProject : Object {
             return true;
         }
         switch (buildsystem) {
+            case "plain":
             case "valama":
                 builder = new BuilderPlain();
                 break;

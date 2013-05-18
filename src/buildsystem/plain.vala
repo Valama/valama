@@ -48,7 +48,12 @@ public class BuilderPlain : BuildSystem {
         cmdline = null;
 
         string[] valacargs = new string[] {"valac"};
-        valacargs += "--target-glib=2.32"; //TODO; Avoid hardcoding.
+        string? target_glib_version;
+        if (!package_exists ("glib-2.0", out target_glib_version)) {
+            build_output (_("No glib-2.0 package found.\n"));
+            return false;
+        }
+        valacargs += @"--target-glib=$(target_glib_version)";
         valacargs += "--thread";
         valacargs += @"--output=$(get_executable())";
 
@@ -59,31 +64,38 @@ public class BuilderPlain : BuildSystem {
             foreach (var file in project.guanako_project.get_source_files())
                 valacargs += file.filename;
         } else {
-            int cnt = 0;
+            var mainblock = false;
             foreach (var src_file_path in project.files){
-                if (src_file_path.has_suffix (".vapi"))
+                if (src_file_path.has_suffix (".vapi")) {
+                    valacargs += src_file_path;
                     continue;
+                }
+
                 string content;
                 try {
                     FileUtils.get_contents (src_file_path, out content);
                 } catch (GLib.FileError e) {
-                    throw new BuildError.INITIALIZATION_FAILED (_("Could read file content of '%s': %s\n"),
+                    throw new BuildError.INITIALIZATION_FAILED (_("Could not read file content of '%s': %s\n"),
                                                                 src_file_path, e.message);
                 }
                 var srcfile = project.guanako_project.get_source_file_by_name (src_file_path);
                 srcfile.content = content; //TODO: Find out why SourceFile.content is empty at the beginning (??)
+                var fname = project.get_relative_path (src_file_path);
                 var tmppath = Path.build_path (Path.DIR_SEPARATOR_S,
                                                buildpath,
-                                               cnt.to_string() + ".vala");
+                                               fname.replace (Path.DIR_SEPARATOR_S, "=+"));
                 var tmpfile = File.new_for_path (tmppath);
 
                 try {
+                    build_output (_("Prepare file for FrankenStein: %s\n").printf (fname));
                     var dos = new DataOutputStream (tmpfile.replace (null,
                                                                      false,
                                                                      FileCreateFlags.REPLACE_DESTINATION));
                     dos.put_string (frankenstein.frankensteinify_sourcefile (srcfile));
-                    if (cnt == 0)
-                        dos.put_string (frankenstein.get_frankenstein_mainblock());
+                    if (!mainblock) {
+                        dos.put_string (Guanako.FrankenStein.frankenstein_mainblock);
+                        mainblock = true;
+                    }
                 } catch (GLib.IOError e) {
                     throw new BuildError.INITIALIZATION_FAILED (_("Could not update file: %s\n"),
                                                                 e.message);
@@ -92,9 +104,11 @@ public class BuilderPlain : BuildSystem {
                                                                 e.message);
                 }
                 valacargs += tmppath;
-                cnt++;
             }
         }
+
+        foreach (var define in project.defines)
+            valacargs += @"--define=$define";
 
         cmdline = valacargs;
 
