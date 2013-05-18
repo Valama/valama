@@ -22,8 +22,8 @@ namespace Guanako {
     public class FrankenStein {
         public FrankenStein() {
             var pid = ((int)Posix.getpid()).to_string();
-            dbus_name = "app.valama.frankenstein";
-            dbus_path = "/app/valama/frankenstein" + pid;
+            dbus_name = "app.valama.frankenstein" + pid;
+            dbus_path = "/app/valama/frankenstein";
             build_frankenstein_mainblock();
             Bus.own_name (BusType.SESSION, dbus_name, BusNameOwnerFlags.NONE,
                   on_bus_aquired,
@@ -92,8 +92,7 @@ namespace Guanako {
                 lines[ftime.start_line - 1] = @"var frankentimer_$cnt = new GLib.Timer();\n"
                                                 + @"frankentimer_$cnt.start();\n"
                                                 + lines[ftime.start_line - 1];
-                lines[ftime.end_line - 1] = @"frankentimer_callback ($cnt),\n"
-                                            + @"                       frankentimer_$cnt.elapsed());\n"
+                lines[ftime.end_line - 1] = @"frankentimer_callback ($cnt, frankentimer_$cnt.elapsed());\n"
                                             + lines[ftime.end_line - 1];
                 cnt++;
             }
@@ -123,16 +122,15 @@ static void frankentimer_callback (int timer_id, double time) {
     if (frankenstein_client == null) {
         try {
             frankenstein_client = Bus.get_proxy_sync (BusType.SESSION,
-                                                      "app.valama.frankenstein",
-                                                      "/app/valama/frankenstein");
+                                                      """" + dbus_name + """", """" + dbus_path + """");
         } catch (GLib.IOError e) {
-            stderr.printf ("Failed to get Frankenstein D-Bus signal: %s\n", e.message);
+            stderr.printf ("Failed to connect to DBus server: %s\n", e.message);
         }
     }
     try {
         frankenstein_client.timer_finished (timer_id, time);
     } catch (GLib.IOError e) {
-        stderr.printf ("Frankenstein timer couldn't finish successful: %s\n", e.message);
+        stderr.printf ("Failed to send Frankentimer finished signal: %s\n", e.message);
     }
 }
 
@@ -140,15 +138,15 @@ static void frankenstop_callback (int stop_id) {
     if (frankenstein_client == null) {
         try {
             frankenstein_client = Bus.get_proxy_sync (BusType.SESSION,
-                                                      "app.valama.frankenstein", """" + dbus_path + """");
+                                                      """" + dbus_name + """", """" + dbus_path + """");
         } catch (GLib.IOError e) {
-            stderr.printf ("Failed to get Frankenstein D-Bus signal: %s\n", e.message);
+            stderr.printf ("Failed to connect to DBus server: %s\n", e.message);
         }
     }
     try {
         frankenstein_client.stop_reached (stop_id);
     } catch (GLib.IOError e) {
-        stderr.printf ("Frankenstein client failed to stop: %s\n", e.message);
+        stderr.printf ("Failed to send Frankenstop reached signal: %s\n", e.message);
     }
 }""";
         }
