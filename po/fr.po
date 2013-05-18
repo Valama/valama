@@ -155,7 +155,7 @@ msgstr "Tous les fichiers"
 
 #. TRANSLATORS: (*) is a file filter (globbing) and matches all files.
 #: ../src/ui/welcome_screen.vala:590
-msgid "All files (*)"Buffer
+msgid "All files (*)"
 msgstr "Tous les fichiers (*)"
 
 #: ../src/project/project.vala:515 ../src/project/project.vala:569
