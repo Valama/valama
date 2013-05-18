@@ -33,13 +33,13 @@ msgstr "%s - Vala"
 #: ../src/ui/reports.vala:289
 #, c-format
 msgid "%s found: %s: %d(%d)-%d(%d): %s\n"
-msgstr "%s trouvé: %s: %d(%d)-%d(%d): %s\n"
+msgstr "%s trouvé : %s : %d(%d)-%d(%d) : %s\n"
 
 #. TRANSLATORS: E.g. "Project browser update finished ..."
 #: ../src/ui/current_file_structure.vala:107
 #, c-format
 msgid "%s update finished (not a valid source buffer)!\n"
-msgstr "Mise à jour de %s terminé (pas un source valide) !\n"
+msgstr "Mise à jour de %s terminé (pas une zone tampon source valide) !\n"
 
 #. TRANSLATORS: E.g. "Project browser update finished!"
 #: ../src/ui/breakpoints.vala:240 ../src/ui/current_file_structure.vala:176
@@ -121,14 +121,12 @@ msgid "- Valama: next generation Vala IDE"
 msgstr "- Valama: next generation Vala IDE"
 
 #: ../src/ui/project_browser.vala:190 ../src/ui/project_browser.vala:206
-#, fuzzy
 msgid "Add new directory"
-msgstr "répertoire '%s'"
+msgstr "Ajouter nouveau répertoire"
 
 #: ../src/ui/project_browser.vala:185 ../src/ui/project_browser.vala:202
-#, fuzzy
 msgid "Add new file"
-msgstr "(nouveau fichier)"
+msgstr "Ajouter nouveau fichier"
 
 #. TRANSLATORS:
 #. E.g.: "Add new file to project (inside 'src/' directory)"
@@ -209,11 +207,11 @@ msgstr "Points d'arrêt / Timers"
 
 #: ../src/project/project.vala:1894
 msgid "Buffer loaded.\n"
-msgstr "Buffer chargé.\n"
+msgstr "Zone tampon chargée.\n"
 
 #: ../src/project/project.vala:1912
 msgid "Buffer update"
-msgstr "Mise à jour du buffer"
+msgstr "Mise à jour de la zone tampon"
 
 #: ../src/project/build_project.vala:66
 #, c-format
@@ -252,9 +250,9 @@ msgid "Build system '%s' not supported.\n"
 msgstr "Système build '%s' non supporté.\n"
 
 #: ../src/project/project.vala:1062
-#, fuzzy, c-format
+#, c-format
 msgid "Build system directory does not exist: %s\n"
-msgstr "Fichier du système buils n'existe pas : %s\n"
+msgstr "Répertoire du système build n'existe pas : %s\n"
 
 #: ../src/project/project.vala:1060
 #, c-format
@@ -351,7 +349,7 @@ msgstr ""
 #, c-format
 msgid "Cannot create temporary file '%s' to apply substitutions: %s\n"
 msgstr ""
-"Impossible de créer le fichier '%s' pour appliquer les substitutions : %s\n"
+"Impossible de créer le fichier temporaire '%s' pour appliquer les substitutions : %s\n"
 
 #: ../src/project/project.vala:1248 ../src/project/project.vala:1604
 #: ../src/project/project_templates.vala:203 ../src/ui_main.vala:663
@@ -380,9 +378,8 @@ msgid "Choose '%s' package.\n"
 msgstr "Choisir le paquet '%s'.\n"
 
 #: ../src/dialogs/create_file.vala:36
-#, fuzzy
 msgid "Choose directory name"
-msgstr "Choisissez un fichier"
+msgstr "Choisissez un nom de répertoire"
 
 #: ../src/dialogs/create_file.vala:35
 msgid "Choose filename"
@@ -398,7 +395,7 @@ msgstr "Effacer la sortie"
 
 #: ../src/project/project.vala:2045
 msgid "Close buffer.\n"
-msgstr "Fermer le buffer.\n"
+msgstr "Fermer la zone tampon.\n"
 
 #: ../src/ui_main.vala:403
 msgid "Close project"
@@ -407,7 +404,7 @@ msgstr "Fermer le projet"
 #: ../src/ui/source_viewer.vala:188
 #, c-format
 msgid "Close view and buffer: %s\n"
-msgstr "Fermer la vue et le buffer : %s\n"
+msgstr "Fermer la vue et la zone tampon : %s\n"
 
 #: ../src/ui_main.vala:197
 msgid "Coding style checker"
@@ -458,9 +455,9 @@ msgstr "Impossible de fermer le descripteur de fichier pour '%s' : %s\n"
 #. TRANSLATORS:
 #. Context: "Could not close source view (mapping) for: myfile.vala"
 #: ../src/project/project.vala:1174
-#, fuzzy, c-format
+#, c-format
 msgid "Could not close source view (mapping) for: %s\n"
-msgstr "Impossible de fermer ViewMap pour : %s\n"
+msgstr "Impossible de fermer la vue source (mapping) pour : %s\n"
 
 #: ../src/ui/source_viewer.vala:184
 #, c-format
@@ -517,7 +514,7 @@ msgstr "Impossible de créer le répertoire parent : %s\n"
 #, c-format
 msgid "Could not create thread to update buffer: %s\n"
 msgstr ""
-"Impossible de démarrer le processus pour la mise à jour du buffer : %s\n"
+"Impossible de démarrer le processus pour la mise à jour de la zone tampon : %s\n"
 
 #: ../src/project/project.vala:663
 #, c-format
@@ -546,9 +543,9 @@ msgstr "Impossible de touver le fichier pkg-config pour '%s'. "
 #. TRANSLATORS: This is a technical information. You might not want
 #. to translate "TreePath".
 #: ../src/ui/project_browser.vala:378 ../src/ui/project_browser.vala:481
-#, fuzzy, c-format
+#, c-format
 msgid "Could not get current TreePath: %s\n"
-msgstr "Impossible d'obtenir le chemin en cours : %s\n"
+msgstr "Impossible d'obtenir le TreePath courrant : %s\n"
 
 #. TRANSLATORS: This is a technical information. You might not want
 #. to translate "TreeView".
@@ -646,9 +643,9 @@ msgid "Could not load vapi: %s\n"
 msgstr "Impossible de charger vapi : %s\n"
 
 #: ../src/project/project.vala:1216
-#, fuzzy, c-format
+#, c-format
 msgid "Could not open directory or file in '%s': %s\n"
-msgstr "Impossible d'ouvrir un fichier dans '%s' : %s\n"
+msgstr "Impossible d'ouvrir un répertoire ou un fichier dans '%s' : %s\n"
 
 #: ../src/buildsystem/plain.vala:91 ../src/common/common.vala:570
 #, c-format
@@ -729,7 +726,7 @@ msgstr "Impossible de soumettre le sous-processus : %s\n"
 #: ../src/ui/source_viewer.vala:273
 #, c-format
 msgid "Could not unload completion: %s\n"
-msgstr "Impossible de décharger la complétion : %s\n"
+msgstr "Impossible de désactiver la complétion : %s\n"
 
 #: ../src/dialogs/create_project.vala:784
 #, c-format
@@ -805,9 +802,9 @@ msgstr "Créer nouveau projet"
 #. TRANSLATORS:
 #. E.g.: "Create new subdirectory (inside 'src/' directory)"
 #: ../src/dialogs/create_file.vala:54
-#, fuzzy, c-format
+#, c-format
 msgid "Create new subdirectory (%s)"
-msgstr "Impossible de créer le répertoire cache : %s\n"
+msgstr "Créer nouveau répertoire (%s)"
 
 #: ../src/ui/welcome_screen.vala:293
 msgid "Create project"
@@ -830,9 +827,9 @@ msgid "DIRECTORY"
 msgstr "RÉPERTOIRE"
 
 #: ../src/project/project.vala:1117
-#, fuzzy, c-format
+#, c-format
 msgid "Data directory does not exist: %s\n"
-msgstr "Fichier de données inexistant : %s\n"
+msgstr "Répertoire de données inexistant : %s\n"
 
 #: ../src/project/project.vala:1115
 #, c-format
@@ -975,7 +972,7 @@ msgstr "Le fichier a été modifié. Voulez-vous le sauvegarder ?"
 #, c-format
 msgid "File not registered in project to check if buffer is dirty: %s\n"
 msgstr ""
-"Le fichier non enregistré dans le projet pour vérifier l'état du buffe : %s\n"
+"Le fichier non enregistré dans le projet pour vérifier l'état de la zone tampon : %s\n"
 
 #: ../src/common/common.vala:565
 #, c-format
@@ -1079,7 +1076,7 @@ msgstr "Version incompatible du paquet '%s' %s %s trouvé : %s\n"
 
 #: ../src/project/project.vala:693
 msgid "Initial buffer update"
-msgstr "Mise à jour initiale du buffer"
+msgstr "Mise à jour initiale de la zone tampon"
 
 #: ../src/common/ui_helpers.vala:110
 #, c-format
@@ -1088,7 +1085,7 @@ msgstr "Caractère invalide : '%s' Sélectionner un parmi : %s"
 
 #: ../src/ui/source_viewer.vala:242
 msgid "Language: "
-msgstr "Langue : "
+msgstr "Langage : "
 
 #: ../src/project/build_project.vala:194
 #, c-format
@@ -1142,7 +1139,7 @@ msgstr "Charger l'agencement...\n"
 #: ../src/project/project.vala:1783
 #, c-format
 msgid "Load new buffer: %s\n"
-msgstr "Charger le nouveau buffer : %s\n"
+msgstr "Charger la nouvelle zone tampon : %s\n"
 
 #: ../src/main.vala:179
 #, c-format
@@ -1181,7 +1178,7 @@ msgstr "Lieu"
 #. TRANSLATORS: Lock user interface elements to prevent moving them around.
 #: ../src/ui_main.vala:361
 msgid "Lock elements"
-msgstr "Éléments de verroulliage"
+msgstr "Verrouiller éléments"
 
 #: ../guanako/guanako.vala:835 ../guanako/guanako.vala:847
 #: ../guanako/guanako.vala:865 ../guanako/guanako.vala:928
@@ -1233,7 +1230,7 @@ msgstr "Pas de symbole courrant"
 #: ../guanako/stylecheck.vala:456
 #, c-format
 msgid "No default capturing group ('matchgroup'). Set it to 0: %s\n"
-msgstr "Pas de groupe de capture par default ('matchgroup'). mis à 0 : %s\n"
+msgstr "Pas de groupe de capture par default ('matchgroup'). Mis à 0 : %s\n"
 
 #: ../src/project/project.vala:1981
 msgid "No file selected.\n"
@@ -1251,7 +1248,7 @@ msgstr "Pas de projets recents"
 #: ../src/ui/source_viewer.vala:481
 #, c-format
 msgid "No such file found in opened buffers: %s\n"
-msgstr "Fichier non trouvé dans les buffers ouverts : %s\n"
+msgstr "Fichier non trouvé dans les zones tampons ouvertes : %s\n"
 
 #: ../src/common/common.vala:223
 msgid "No such file."
@@ -1285,7 +1282,7 @@ msgstr "Ouvrir projet"
 
 #: ../src/common/args.vala:41
 msgid "Output debug information."
-msgstr "Sortir information de debug."
+msgstr "Afficher information de debug."
 
 #. TRANSLATORS:
 #. That means we know "`package' >= ". Something is missing, isn't it?
@@ -1417,9 +1414,8 @@ msgid "Remove file (from disk)"
 msgstr ""
 
 #: ../src/ui/project_browser.vala:197
-#, fuzzy
 msgid "Remove package"
-msgstr "Efacer le paquet : %s\n"
+msgstr "Efacer le paquet"
 
 #: ../src/project/project.vala:924 ../src/project/project.vala:941
 #, c-format
@@ -1513,7 +1509,7 @@ msgstr "Afficher la sortie de l'application"
 
 #: ../src/ui_main.vala:354
 msgid "Show breakpoints"
-msgstr "Afficher les points d'arret"
+msgstr "Afficher les points d'arrêt"
 
 #: ../src/ui_main.vala:352
 msgid "Show build output"
@@ -1574,9 +1570,9 @@ msgid "Skip overwrite from '%s' to '%s'.\n"
 msgstr "Ignorer écrasement de '%s' sur '%s'.\n"
 
 #: ../src/project/project.vala:992
-#, fuzzy, c-format
+#, c-format
 msgid "Source directory does not exist: %s\n"
-msgstr "Fichier source inexistant : %s\n"
+msgstr "Répertoire source inexistant : %s\n"
 
 #: ../src/project/project.vala:990
 #, c-format
@@ -1714,7 +1710,7 @@ msgstr "ReportType inconnu : %s\n"
 #: ../src/ui/project_browser.vala:533
 #, c-format
 msgid "Unknown TreePath start to add a new file: %s\n"
-msgstr "Treepath inconnu commence à ajouter un nouveau fichier : %s\n"
+msgstr "Début de Treepath inconnu pour ajouter un nouveau fichier : %s\n"
 
 #: ../src/project/project.vala:1634 ../src/ui_main.vala:697
 #, c-format
@@ -1809,7 +1805,7 @@ msgstr "Attention : "
 #: ../guanako/stylecheck.vala:473
 #, c-format
 msgid "Warning: No CheckType found, assume 'GLOBAL'.\n"
-msgstr "Attention : pas de CheckType trouvé, suppose 'GLOBAL'. \n"
+msgstr "Attention : pas de CheckType trouvé, suppose 'GLOBAL'.\n"
 
 #: ../guanako/stylecheck.vala:467
 #, c-format
@@ -1906,14 +1902,14 @@ msgstr "nom de fichier"
 #. TRANSLATORS:
 #. Context: Add new file to project (inside `foobar' directory)
 #: ../src/dialogs/create_file.vala:57
-#, fuzzy, c-format
+#, c-format
 msgid "inside '%s' directory"
-msgstr "répertoire '%s'"
+msgstr "dans le répertoire '%s'"
 
 #: ../src/dialogs/create_file.vala:58
-#, fuzzy, c-format
+#, c-format
 msgid "inside project root directory"
-msgstr "répertoire racine"
+msgstr "dans le répertoire racine du projet"
 
 #: ../src/buildsystem/base.vala:385
 msgid "launching failed"
@@ -1934,7 +1930,7 @@ msgstr "pas de fichiers sources"
 #. TRANSLATORS: Context: Parameters: none
 #: ../src/main.vala:523
 msgid "none"
-msgstr "rien"
+msgstr "aucun"
 
 #: ../src/dialogs/create_project.vala:425
 msgid "not available"
