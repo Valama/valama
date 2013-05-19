@@ -124,15 +124,20 @@ pkg_check_modules(GLIB2.0 REQUIRED "glib-2.0")
 
 
 # Configure template files.
+set(stripped_pkgs)
+foreach(pkgstr ${required_pkgs})
+  string(REGEX REPLACE "^([^ \t]+).*" "\\1"  pkg "${pkgstr}")
+  list(APPEND stripped_pkgs "${pkg}")
+endforeach()
 base_list_to_delimited_string(pc_requirements
   DELIM " "
-  BASE_LIST ${required_pkgs}
+  BASE_LIST ${stripped_pkgs}
 )
 configure_file("${project_name_lower}.pc.in" "${project_name_lower}.pc")
 
 base_list_to_delimited_string(deps_requirements
   DELIM "\n"
-  BASE_LIST ${required_pkgs}
+  BASE_LIST ${stripped_pkgs}
 )
 configure_file("${project_name_lower}.deps.in" "${project_name_lower}.deps")
 
