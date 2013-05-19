@@ -25,13 +25,18 @@ namespace Guanako {
             dbus_name = "app.valama.frankenstein" + pid;
             dbus_path = "/app/valama/frankenstein";
             build_frankenstein_mainblock();
-            Bus.own_name (BusType.SESSION, dbus_name, BusNameOwnerFlags.NONE,
+            owner_id = Bus.own_name (BusType.SESSION, dbus_name, BusNameOwnerFlags.NONE,
                   on_bus_aquired,
                   () => {},
                   () => stderr.printf (_("Could not acquire name.\n")));
         }
         string dbus_name;
         string dbus_path;
+        uint owner_id;
+
+        ~FrankenStein() {
+            Bus.unown_name (owner_id);
+        }
 
         void on_bus_aquired (DBusConnection conn) {
             try {

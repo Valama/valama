@@ -42,6 +42,7 @@ class UiBreakpoints : UiElement {
         var box_main = new Box (Orientation.VERTICAL, 0);
 
         tree_view = new TreeView();
+
         tree_view.insert_column_with_attributes (-1,
                                                  _("Line"),
                                                  new CellRendererText(),
@@ -118,14 +119,27 @@ class UiBreakpoints : UiElement {
     }
 
     void timer_finished (FrankenStein.FrankenTimer timer, int timer_id, double time) {
+        widget_main.focus_dock_item (this.dock_item);
+
         var pth = new TreePath.from_indices (timer_id);
         TreeIter iter;
         store.get_iter (out iter, pth);
         store.set (iter, 2, time.to_string(), -1);
+        tree_view.set_cursor (pth, null, false);
+        source_viewer.focus_src (timer.file.filename);
+        var view = source_viewer.get_sourceview_by_file (timer.file.filename);
+        view.highlight_line (timer.start_line - 1);
     }
 
     void stop_reached (FrankenStein.FrankenStop stop, int stop_id) {
+        widget_main.focus_dock_item (this.dock_item);
+
+        var pth = new TreePath.from_indices (frankenstein.frankentimers.size + stop_id);
+        tree_view.set_cursor (pth, null, false);
         btn_resume.sensitive = true;
+        source_viewer.focus_src (stop.file.filename);
+        var view = source_viewer.get_sourceview_by_file (stop.file.filename);
+        view.highlight_line (stop.line - 1);
         resume_wait_loop.run();
     }
 
@@ -147,15 +161,32 @@ class UiBreakpoints : UiElement {
         }
         if (iter_start.get_line() == iter_end.get_line()){
             var new_stop = new FrankenStein.FrankenStop(focus_file, iter_start.get_line() + 1, true);
+            if (stop_exists (new_stop))
+                return;
             frankenstein.frankenstops.add (new_stop);
             btn_remove.sensitive = true;
         } else {
             var new_timer = new FrankenStein.FrankenTimer(focus_file, iter_start.get_line() + 1, iter_end.get_line() + 1, true);
+            if (timer_exists (new_timer))
+                return;
             frankenstein.frankentimers.add (new_timer);
             btn_remove.sensitive = true;
         }
-        //TODO: automatically select added entry
         build();
+    }
+
+    bool stop_exists (FrankenStein.FrankenStop stop) {
+        foreach (FrankenStein.FrankenStop s in frankenstein.frankenstops)
+            if (s != stop && s.line == stop.line && s.file == stop.file)
+                return true;
+        return false;
+    }
+
+    bool timer_exists (FrankenStein.FrankenTimer timer) {
+        foreach (FrankenStein.FrankenTimer t in frankenstein.frankentimers)
+            if (t != timer && t.start_line == timer.start_line && t.end_line == timer.end_line && t.file == timer.file)
+                return true;
+        return false;
     }
 
     void on_btn_remove_clicked() {
@@ -172,15 +203,17 @@ class UiBreakpoints : UiElement {
         if (frankenstein.frankentimers.size == 0 && frankenstein.frankenstops.size == 0)
             btn_remove.sensitive = false;
 
-        //TODO: automatically select last entry or entry before removed entry
         build();
     }
 
     public override void build() {
         debug_msg (_("Run %s update!\n"), get_name());
+        
+        TreePath old_cursor;
+        tree_view.get_cursor (out old_cursor, null);
+
         store = new ListStore (3, typeof (string), typeof (string), typeof (string));
         tree_view.set_model (store);
-
 
 
         foreach (Guanako.FrankenStein.FrankenTimer timer in frankenstein.frankentimers) {
@@ -205,6 +238,9 @@ class UiBreakpoints : UiElement {
                        -1);
 
         }
+
+        if (old_cursor != null)
+            tree_view.set_cursor (old_cursor, null, false);
 
         /* Clear existing marks */
         project.foreach_buffer((s, bfr)=>{
@@ -237,6 +273,7 @@ class UiBreakpoints : UiElement {
 
             map_breakpoints[stop] = bfr.create_source_mark (null, "stop", iter);
         }
+
         debug_msg (_("%s update finished!\n"), get_name());
     }
 
@@ -265,6 +302,8 @@ class UiBreakpoints : UiElement {
 #endif
             if (timer.start_line != iter.get_line() + 1) {
                 timer.start_line = iter.get_line() + 1;
+                if (timer_exists (timer))
+                    frankenstein.frankentimers.remove (timer);
                 need_update = true;
             }
 #if GEE_0_8
@@ -292,6 +331,8 @@ class UiBreakpoints : UiElement {
 #endif
             if (timer.end_line != iter.get_line() + 1) {
                 timer.end_line = iter.get_line() + 1;
+                if (timer_exists (timer))
+                    frankenstein.frankentimers.remove (timer);
                 need_update = true;
             }
 #if GEE_0_8
@@ -319,6 +360,8 @@ class UiBreakpoints : UiElement {
 #endif
             if (stop.line != iter.get_line() + 1) {
                 stop.line = iter.get_line() + 1;
+                if (stop_exists (stop))
+                    frankenstein.frankenstops.remove (stop);
                 need_update = true;
             }
 #if GEE_0_8
