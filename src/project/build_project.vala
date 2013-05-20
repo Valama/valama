@@ -46,6 +46,10 @@ public class ProjectBuilder : Object {
         init();
     }
 
+    public void request_compile() {
+        project_needs_compile = true;
+    }
+
     private bool init() {
         if (initialized)
             return true;

@@ -149,11 +149,11 @@ public class MainWidget : Box {
         project.guanako_project.set_reporter (typeof (ReportWrapper));
 
         frankenstein = new Guanako.FrankenStein();
-        wdg_breakpoints = new UiBreakpoints (frankenstein);
 
         wdg_report = new UiReport();
         wdg_smb_browser = new SymbolBrowser();
         project_builder = new ProjectBuilder();
+        wdg_breakpoints = new UiBreakpoints (frankenstein);
         wdg_build_output = new BuildOutput();
         wdg_app_output = new AppOutput();
         wdg_current_file_structure = new UiCurrentFileStructure();

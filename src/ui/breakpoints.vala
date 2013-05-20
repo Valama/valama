@@ -30,6 +30,8 @@ class UiBreakpoints : UiElement {
     ListStore? store = null;
     MainLoop resume_wait_loop = new MainLoop();
 
+    InfoBar info_bar;
+
     ToolButton btn_add;
     ToolButton btn_remove;
     ToolButton btn_resume;
@@ -38,6 +40,12 @@ class UiBreakpoints : UiElement {
         this.frankenstein = frankenstein;
         frankenstein.timer_finished.connect (timer_finished);
         frankenstein.stop_reached.connect (stop_reached);
+        frankenstein.received_invalid_id.connect (()=> {
+            info_bar.visible = true;
+        });
+        project_builder.build_started.connect (() => {
+            info_bar.visible = false;
+        });
 
         var box_main = new Box (Orientation.VERTICAL, 0);
 
@@ -91,6 +99,16 @@ class UiBreakpoints : UiElement {
         toolbar.add (btn_resume);
 
         box_main.pack_start (toolbar, false, true);
+
+        info_bar = new InfoBar();
+        var content_area = (Container)info_bar.get_content_area();
+        var info_box = new Box(Orientation.HORIZONTAL, 5);
+        info_box.pack_start (new Image.from_stock(Stock.DIALOG_ERROR, Gtk.IconSize.LARGE_TOOLBAR), false, true);
+        info_box.pack_start (new Label (_("Received invalid ID. Try to rebuild.")), true, true);
+        content_area.add (info_box);
+        content_area.show_all();
+        info_bar.no_show_all = true;
+        box_main.pack_start (info_bar, false, true);
 
         mode_to_show (IdeModes.DEBUG);
 
@@ -172,6 +190,7 @@ class UiBreakpoints : UiElement {
             frankenstein.frankentimers.add (new_timer);
             btn_remove.sensitive = true;
         }
+        project_builder.request_compile();
         build();
     }
 
@@ -203,6 +222,7 @@ class UiBreakpoints : UiElement {
         if (frankenstein.frankentimers.size == 0 && frankenstein.frankenstops.size == 0)
             btn_remove.sensitive = false;
 
+        project_builder.request_compile();
         build();
     }
 
@@ -371,8 +391,10 @@ class UiBreakpoints : UiElement {
         };
 #endif
 
-        if (need_update)
+        if (need_update) {
+            project_builder.request_compile();
             build();
+        }
     }
 }
 

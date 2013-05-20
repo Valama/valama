@@ -53,10 +53,16 @@ namespace Guanako {
             }
             FrankenStein parent;
             public void timer_finished (int timer_id, double time) {
-                parent.timer_finished (parent.frankentimers[timer_id], timer_id, time);
+                if (timer_id >= parent.frankentimers.size)
+                    parent.received_invalid_id();
+                else
+                    parent.timer_finished (parent.frankentimers[timer_id], timer_id, time);
             }
             public void stop_reached (int stop_id) {
-                parent.stop_reached (parent.frankenstops[stop_id], stop_id);
+                if (stop_id >= parent.frankenstops.size)
+                    parent.received_invalid_id();
+                else
+                    parent.stop_reached (parent.frankenstops[stop_id], stop_id);
             }
         }
 
@@ -88,6 +94,7 @@ namespace Guanako {
         public Gee.ArrayList<FrankenStop?> frankenstops = new Gee.ArrayList<FrankenStop?>();
         public signal void timer_finished (FrankenTimer timer, int timer_id, double time);
         public signal void stop_reached (FrankenStop stop, int stop_id);
+        public signal void received_invalid_id ();
 
         public string frankensteinify_sourcefile (SourceFile file) {
             //FIXME: Don't read entire file into memory.
