@@ -29,7 +29,7 @@
 ##
 # The gettext_create_pot macro creates .pot files with xgettext from multiple
 # source files.
-# Provide target 'pot_file' to generate .pot file.
+# Provide target 'pot' to generate .pot file.
 #
 # Supported sections:
 #
@@ -236,7 +236,7 @@ if(XGETTEXT_FOUND)
 
       add_custom_command(
         OUTPUT
-          "pot_file"
+          "pot"
         COMMAND
           ${XGETTEXT_EXECUTABLE} ${xgettext_options} "-o" "${CMAKE_CURRENT_BINARY_DIR}/${potfile}" ${src_list}
         DEPENDS
@@ -247,7 +247,7 @@ if(XGETTEXT_FOUND)
       )
 
       if(ARGS_SRCFILES AND ARGS_GLADEFILES)
-        add_custom_target(pot_file
+        add_custom_target(pot
           COMMAND
             "${XGETTEXT_EXECUTABLE}" ${xgettext_options} "-o" "${CMAKE_CURRENT_BINARY_DIR}/_source.pot" ${src_list}
           COMMAND
@@ -263,7 +263,7 @@ if(XGETTEXT_FOUND)
             "Extract translateable messages to ${potfile}"
         )
       elseif(ARGS_SRCFILES)
-        add_custom_target(pot_file
+        add_custom_target(pot
           COMMAND
             "${XGETTEXT_EXECUTABLE}" ${xgettext_options} "-o" "${CMAKE_CURRENT_BINARY_DIR}/_source.pot" ${src_list}
           COMMAND
@@ -277,7 +277,7 @@ if(XGETTEXT_FOUND)
             "Extract translateable messages to ${potfile}"
         )
       else()
-        add_custom_target(pot_file
+        add_custom_target(pot
           COMMAND
             "${XGETTEXT_EXECUTABLE}" "--language=Glade" "--omit-header" "-o" "${CMAKE_CURRENT_BINARY_DIR}/_glade.pot" ${glade_list}
           COMMAND
