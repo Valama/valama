@@ -539,6 +539,7 @@ public class MainWidget : Box {
         add_button (ti);
 
         var btnBuild = new Gtk.ToolButton.from_stock (Stock.EXECUTE);
+        btnBuild.label = _("Build");
         add_button (btnBuild);
         btnBuild.set_tooltip_text (_("Save current file and build project"));
         btnBuild.clicked.connect (() => {
@@ -546,6 +547,7 @@ public class MainWidget : Box {
         });
 
         var btnRun = new Gtk.ToolButton.from_stock (Stock.MEDIA_PLAY);
+        btnRun.label = _("Execute");
         add_button (btnRun);
         btnRun.set_tooltip_text (_("Run application"));
         btnRun.clicked.connect (() => {

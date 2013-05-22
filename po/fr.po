@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Valama 0.1.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-05-22 20:33+0200\n"
+"POT-Creation-Date: 2013-05-22 20:42+0200\n"
 "PO-Revision-Date: 2013-05-08 10:50+0200\n"
 "Last-Translator: Martin Lorang <martin@lorang.net>\n"
 "Language-Team: French\n"
@@ -217,7 +217,7 @@ msgstr "Zone tampon chargée.\n"
 msgid "Buffer update"
 msgstr "Mise à jour de la zone tampon"
 
-#: ../src/ui_main.vala:393 ../src/ui_main.vala:399
+#: ../src/ui_main.vala:393 ../src/ui_main.vala:399 ../src/ui_main.vala:542
 msgid "Build"
 msgstr "Construction..."
 
@@ -349,7 +349,7 @@ msgstr ""
 "substitutions : %s\n"
 
 #: ../src/project/project.vala:1264 ../src/project/project.vala:1620
-#: ../src/project/project_templates.vala:209 ../src/ui_main.vala:740
+#: ../src/project/project_templates.vala:209 ../src/ui_main.vala:742
 #: ../guanako/stylecheck.vala:360
 msgid "Cannot parse file."
 msgstr "Impossible de parser le fichier."
@@ -930,7 +930,7 @@ msgstr ""
 "Erreurs : %d, Attentions : %d, Obsolète : %d, Expérimental : %d, Notes : %d "
 "- %d\n"
 
-#: ../src/ui_main.vala:438
+#: ../src/ui_main.vala:438 ../src/ui_main.vala:550
 msgid "Execute"
 msgstr ""
 
@@ -972,7 +972,7 @@ msgid "File does not contain enough information"
 msgstr "Le fichier ne contient pas assez d'informations"
 
 #: ../src/project/project.vala:1270 ../src/project/project.vala:1626
-#: ../src/ui_main.vala:746 ../guanako/stylecheck.vala:366
+#: ../src/ui_main.vala:748 ../guanako/stylecheck.vala:366
 msgid "File does not contain enough information."
 msgstr "Le fichier ne contient pas assez d'informations."
 
@@ -1001,7 +1001,7 @@ msgstr "Fichier sauvegardé : %s\n"
 
 #. TRANSLATORS:
 #. Focus docking widget (Gdl.DockItem): long name / file name (short name)
-#: ../src/ui_main.vala:795
+#: ../src/ui_main.vala:797
 #, c-format
 msgid "Focus dock item: %s (%s)\n"
 msgstr "Focus sur l'élément du dock : %s (%s)\n"
@@ -1143,7 +1143,7 @@ msgstr "Ligne"
 msgid "Ln %d, Col %d"
 msgstr "Lg %d, Col %d"
 
-#: ../src/ui_main.vala:734
+#: ../src/ui_main.vala:736
 #, c-format
 msgid "Load Ui meta information: %s\n"
 msgstr "Charger les meta-informations de l'IU : %s\n"
@@ -1504,7 +1504,7 @@ msgstr ""
 "Exécuter '%s --help' pour voir la liste complète des options disponibles de "
 "la ligne de commande.\n"
 
-#: ../src/ui_main.vala:550
+#: ../src/ui_main.vala:552
 msgid "Run application"
 msgstr "Exécuter l'application"
 
@@ -1512,7 +1512,7 @@ msgstr "Exécuter l'application"
 msgid "Running..."
 msgstr "Construction..."
 
-#: ../src/ui_main.vala:716
+#: ../src/ui_main.vala:718
 #, c-format
 msgid "Save Ui meta information: %s\n"
 msgstr "Sauvegarder les méta-informations de l'IU : %s\n"
@@ -1525,7 +1525,7 @@ msgstr ""
 msgid "Save current file"
 msgstr "Sauvegarder le fichier courrant"
 
-#: ../src/ui_main.vala:543
+#: ../src/ui_main.vala:544
 msgid "Save current file and build project"
 msgstr "Sauvegarder le fichier courrant et construire le projet"
 
@@ -1771,7 +1771,7 @@ msgstr "ReportType inconnu : %s\n"
 msgid "Unknown TreePath start to add a new file: %s\n"
 msgstr "Début de Treepath inconnu pour ajouter un nouveau fichier : %s\n"
 
-#: ../src/project/project.vala:1650 ../src/ui_main.vala:774
+#: ../src/project/project.vala:1650 ../src/ui_main.vala:776
 #, c-format
 msgid "Unknown attribute for '%s' line %hu: %s\n"
 msgstr "Attribut inconnu pour '%s' ligne %hu : %s\n"
@@ -1784,7 +1784,7 @@ msgstr "Attribut inconnu pour '%s' ligne %hu : %s\n"
 #: ../src/project/project.vala:1470 ../src/project/project.vala:1654
 #: ../src/project/project_templates.vala:290
 #: ../src/project/project_templates.vala:352
-#: ../src/project/project_templates.vala:358 ../src/ui_main.vala:780
+#: ../src/project/project_templates.vala:358 ../src/ui_main.vala:782
 #, c-format
 msgid "Unknown configuration file value line %hu: %s\n"
 msgstr "Valeur de fichier de configuration inconnue ligne %hu : %s\n"
