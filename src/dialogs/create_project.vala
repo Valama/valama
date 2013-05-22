@@ -634,7 +634,7 @@ public static ValamaProject? create_project_from_template (ProjectTemplate templ
                                       false);
         new_proj.project_name = project_name;
         new_proj.save_to_recent();
-        new_proj.save();
+        new_proj.save_project_file();
     } catch (LoadingError e) {
         errmsg (_("Couldn't load new project: %s\n"), e.message);
     }

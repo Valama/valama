@@ -8,23 +8,40 @@
 	</version>
 	<packages>
 		<choice all="yes">
-			<package>libvala-0.20</package>
-			<package>libvala-0.18</package>
+			<package name="libvala-0.20" define="VALAC_0_20"/>
+			<package name="libvala-0.18"/>
 		</choice>
 		<choice all="yes">
-			<package>gee-0.8</package>
-			<package>gee-1.0</package>
+			<package name="gee-0.8" define="GEE_0_8"/>
+			<package name="gee-1.0" define="GEE_1_0"/>
 		</choice>
-		<package>gdk-3.0</package>
-		<package version="3.4" rel="since">gdl-3.0</package>
-		<package>gio-2.0</package>
-		<package version="2.32" rel="since">glib-2.0</package>
-		<package>gobject-2.0</package>
-		<package version="3.4" rel="since">gtk+-3.0</package>
-		<package>gtksourceview-3.0</package>
-		<package>guanako</package>
-		<package>libxml-2.0</package>
-		<package>posix</package>
+		<package name="gdk-3.0"/>
+		<package name="gdl-3.0" version="3.4" rel="since">
+			<extracheck vapi="extravapi/gdl-3.0.vapi" define="GDL_3_8_2">
+				<package name="gdl-3.0" version="3.8.2" rel="since"/>
+			</extracheck>
+			<extracheck vapi="extravapi/gdl-3.0.vapi">
+				<package name="gdl-3.0" version="3.5.5" rel="since"/>
+				<package name="libvala-0.18"/>
+			</extracheck>
+			<extracheck vapi="extravapi/gdl-3.0-old.vapi" define="GDL_LESS_3_5_5">
+				<package name="gdl-3.0" version="3.5.5" rel="before"/>
+				<package name="libvala-0.20"/>
+			</extracheck>
+			<extracheck define="GDL_LESS_3_5_5"/>
+		</package>
+		<package name="gio-2.0"/>
+		<package name="glib-2.0" version="2.32" rel="since"/>
+		<package name="gobject-2.0"/>
+		<package name="gtk+-3.0" version="3.4" rel="since">
+			<extracheck define="GTK_3_6">
+				<package name="gtk+-3.0" version="3.6" rel="since"/>
+			</extracheck>
+		</package>
+		<package name="gtksourceview-3.0"/>
+		<package name="guanako"/>
+		<package name="libxml-2.0"/>
+		<package name="posix"/>
 	</packages>
 	<source-directories>
 		<directory>src</directory>

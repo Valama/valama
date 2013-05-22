@@ -182,6 +182,7 @@ public class PkgChoice {
     /**
      * Indicate if all packages should go to build system package list.
      */
+    //TODO: Do we need this?
     public bool all = false;
     /**
      * Ordered list of packages. Packages in the front have higher
@@ -203,7 +204,7 @@ public class PkgChoice {
      *
      * @param pkg Package to add to package choices list.
      */
-    public void add_package (PackageInfo pkg) {
+    public inline void add_package (PackageInfo pkg) {
         pkg.choice = this;
         packages.add (pkg);
     }
@@ -214,11 +215,73 @@ public class PkgChoice {
      * @param pkg Package choice.
      * @return `false` if choices list is empty after operation, else `true`.
      */
-    public bool remove_package (PackageInfo pkg) {
+    public inline bool remove_package (PackageInfo pkg) {
         packages.remove (pkg);
         if (packages.size == 0)
             return false;
         return true;
+    }
+}
+
+public class PkgCheck {
+    public Gee.ArrayList<PackageInfo> packages { get; private set;
+                                                 default = new Gee.ArrayList<PackageInfo>(); }
+    public string? custom_vapi { get; set; default = null; }
+    public string? define { get; set; default = null; }
+    public string? description { get; set; default = null; }
+
+    public inline void add_package (PackageInfo package) {
+        packages.add (package);
+    }
+
+    public inline bool remove_package (PackageInfo package) {
+        packages.remove (package);
+        if (packages.size == 0)
+            return false;
+        return true;
+    }
+
+    public bool check() {
+        foreach (var pkg in packages) {
+            stdout.printf ("pkg check: %s\n", pkg.name);
+        }
+        return true;
+    }
+
+    public string to_string() {
+        var strb = new StringBuilder();
+        for (int i = 0;  i < packages.size; ++i) {
+            if (i != 0)
+                strb.append (", ");
+            strb.append (packages[i].to_string());
+        }
+        if (custom_vapi != null || define != null || description != null) {
+            var start = false;
+            if (packages.size > 0)
+                strb.append (" - ");
+            if (custom_vapi != null) {
+                if (!start)
+                    start = true;
+                else
+                    strb.append (" ");
+                strb.append (_("vapi: ") + custom_vapi);
+            }
+            if (define != null) {
+                if (!start)
+                    start = true;
+                else
+                    strb.append (", ");
+                strb.append (_("define: ") + define);
+            }
+            if (description != null) {
+                if (!start)
+                    start = true;
+                else
+                    strb.append (" ");
+                strb.append (@"($description)");
+            }
+        }
+        return strb.str;
     }
 }
 
@@ -244,44 +307,105 @@ public class PackageInfo {
      * Version (meaning differs with {@link rel}).
      */
     public virtual string? version { get; set; default = null; }
+    /**
+     * Currently available version on system.
+     */
+    public virtual string? current_version { get; set; default = null; }
+    /**
+     * Custom vapi (path) for this package.
+     */
+    public virtual string? custom_vapi { get; set; default = null; }
+    /**
+     * Define related to package.
+     */
+    public virtual string? define { get; set; default = null; }
+    /**
+     * Ordered list of additional package relation checks.
+     *
+     * Also package relations with different packages. Helps to use custom
+     * vapis only for specific versions and set defines.
+     */
+    public virtual Gee.ArrayList<PkgCheck>? extrachecks { get; set; default = null; }
 
     /**
      * Convert class object to string.
      */
-    public string? to_string() {
-        var relation = "";
-        if (rel != null)
+    public string to_string() {
+        var strb = new StringBuilder (name);
+        strb.append (to_string_version());
+        return strb.str;
+    }
+
+    public string to_string_full() {
+        var strb = new StringBuilder (name);
+        var need_space = false;
+        var need_close = false;
+
+        if (current_version != null) {
+            strb.append (current_version);
+            need_space = true;
+        }
+
+        if (need_space)
+            strb.append (" ");
+        strb.append (to_string_version());
+        need_space = true;
+
+        if (define != null) {
+            need_close = true;
+            strb.append (" {");
+            strb.append (define);
+        }
+
+        if (custom_vapi != null) {
+            if (!need_close) {
+                strb.append (" {");
+                need_close = true;
+            } else
+                strb.append (", ");
+            strb.append (custom_vapi);
+        }
+
+        if (need_close)
+            strb.append ("}");
+        return strb.str;
+    }
+
+    private string to_string_version() {
+        var strb = new StringBuilder();
+        if (rel != null) {
             switch (rel) {
                 case VersionRelation.AFTER:
-                    relation = " > ";
+                    strb.append (" > ");
                     break;
                 case VersionRelation.SINCE:
-                    relation = " >= ";
+                    strb.append (" >= ");
                     break;
                 case VersionRelation.UNTIL:
-                    relation = " <= ";
+                    strb.append (" <= ");
                     break;
                 case VersionRelation.BEFORE:
-                    relation = " < ";
+                    strb.append (" < ");
                     break;
                 case VersionRelation.ONLY:
-                    relation = " = ";
+                    strb.append (" = ");
                     break;
                 case VersionRelation.EXCLUDE:
-                    relation = " != ";
+                    strb.append (" != ");
                     break;
                 default:
                     bug_msg (_("Unexpected enum value: %s: %u\n"),
                              "PackageInfo - to_string", rel);
+                    strb.append (" ?? ");
                     break;
             }
-        if (version != null) {
-            if (relation != "")
-                relation += version;
-            else
-                relation = @" >= $version";
+            if (version != null)
+                strb.append (version);
+        } else if (version != null) {
+            strb.append (" >= ");
+            strb.append (version);
         }
-        return name + relation;
+        return strb.str;
     }
 
     /**
@@ -904,7 +1028,7 @@ public class ValamaProject : Object {
      * @param pkg Package to add.
      */
     public void add_package (PackageInfo pkg) {
-        var info = pkg.to_string();
+        var info = pkg.to_string_full();
         if (pkg.choice != null)
             // TRANSLATORS: Choice of different packages.
             info += " (%s)".printf (_("choice"));
@@ -1492,7 +1616,7 @@ public class ValamaProject : Object {
      *
      * @param balance If `true` balance file and directory lists.
      */
-    public void save (bool balance = true) {
+    public void save_project_file (bool balance = true) {
         debug_msg (_("Save project file.\n"));
 
         if (balance)
@@ -1521,25 +1645,14 @@ public class ValamaProject : Object {
                 writer.write_attribute ("all", (choice.all) ? "yes" : "no");
                 if (choice.description != null)
                     writer.write_element ("description", choice.description);
-                foreach (var pkg in choice.packages) {
-                    writer.write_element ("package", pkg.name);
-                    if (pkg.version != null)
-                        writer.write_attribute ("version", pkg.version);
-                    if (pkg.rel != null)
-                        writer.write_attribute ("rel", pkg.rel.to_string());
-                }
+                foreach (var pkg in choice.packages)
+                    write_pkg (writer, pkg);
                 writer.end_element();
             }
             foreach (var pkg in packages.get_values()) {
                 if (pkg.choice != null)
                     continue;
-                writer.start_element ("package");
-                if (pkg.version != null)
-                    writer.write_attribute ("version", pkg.version);
-                if (pkg.rel != null)
-                    writer.write_attribute ("rel", pkg.rel.to_string());
-                writer.write_string (pkg.name);
-                writer.end_element();
+                write_pkg (writer, pkg);
             }
             writer.end_element();
         }
@@ -1586,6 +1699,33 @@ public class ValamaProject : Object {
             writer.end_element();
         }
 
+        writer.end_element();
+    }
+
+    private void write_pkg (TextWriter writer, PackageInfo pkg) {
+        writer.start_element ("package");
+        writer.write_attribute ("name", pkg.name);
+        if (pkg.version != null)
+            writer.write_attribute ("version", pkg.version);
+        if (pkg.rel != null)
+            writer.write_attribute ("rel", pkg.rel.to_string());
+        if (pkg.custom_vapi != null)
+            writer.write_attribute ("vapi", pkg.custom_vapi);
+        if (pkg.define != null)
+            writer.write_attribute ("define", pkg.define);
+        if (pkg.extrachecks != null)
+            foreach (var extracheck in pkg.extrachecks) {
+                writer.start_element ("extracheck");
+                if (extracheck.description != null)
+                    writer.write_element ("description", extracheck.description);
+                if (extracheck.custom_vapi != null)
+                    writer.write_attribute ("vapi", extracheck.custom_vapi);
+                if (extracheck.define != null)
+                    writer.write_attribute ("define", extracheck.define);
+                foreach (var checkpkg in extracheck.packages)
+                    write_pkg (writer, checkpkg);
+                writer.end_element();
+            }
         writer.end_element();
     }
 
@@ -1660,7 +1800,7 @@ public class ValamaProject : Object {
 
     public bool close (bool save_all = false) {
         save_meta();
-        save();
+        save_project_file();
 
         if (save_all)
             return buffer_save_all();
@@ -2152,10 +2292,13 @@ public class ValamaProject : Object {
      * @return Return {@link PackageInfo} or null if no package found.
      */
     private PackageInfo? get_package_info (Xml.Node* node) {
-        var package = new PackageInfo();
-        package.name = node->get_content();
-        if (package.name == null)
+        if (node->has_prop ("name") == null) {
+            warning_msg (_("No package name line %hu.\n"), node->line);
             return null;
+        }
+        var package = new PackageInfo();
+        package.name = node->get_prop ("name");
+
         if (node->has_prop ("version") != null) {
             package.version = node->get_prop ("version");
             if (node->has_prop ("rel") != null)
@@ -2193,6 +2336,52 @@ public class ValamaProject : Object {
             warning_msg (_("Package '%s' has relation information but no version: "
                                 + "line: %hu: %s\n"),
                          package.name, node->line, node->get_prop ("rel"));
+
+        if (node->has_prop ("vapi") != null)
+            package.custom_vapi = node->get_prop ("vapi");
+        if (node->has_prop ("define") != null)
+            package.define = node->get_prop ("define");
+
+        for (Xml.Node* p = node->children; p != null; p = p->next) {
+            if (p->type != ElementType.ELEMENT_NODE)
+                continue;
+            switch (p->name) {
+                case "extracheck":
+                    var pkgcheck = new PkgCheck();
+                    if (p->has_prop ("vapi") != null)
+                        pkgcheck.custom_vapi = p->get_prop ("vapi");
+                    if (p->has_prop ("define") != null)
+                        pkgcheck.define = p->get_prop ("define");
+                    for (Xml.Node* pp = p->children; pp != null; pp = pp->next) {
+                        if (pp->type != ElementType.ELEMENT_NODE)
+                            continue;
+                        switch (pp->name) {
+                            case "description":
+                                pkgcheck.description = pp->get_content();
+                                break;
+                            case "package":
+                                var pkg = get_package_info (pp);
+                                if (pkg != null)
+                                    pkgcheck.add_package (pkg);
+                                break;
+                            default:
+                                warning_msg (_("Unknown configuration file value line %hu: %s\n"),
+                                             pp->line, pp->name);
+                                break;
+                        }
+                    }
+                    debug_msg (_("PkgCheck for package '%s' found: %s\n"), package.name, pkgcheck.to_string());
+                    if (package.extrachecks == null)
+                        package.extrachecks = new Gee.ArrayList<PkgCheck>();
+                    package.extrachecks.add (pkgcheck);
+                    break;
+                default:
+                    warning_msg (_("Unknown configuration file value line %hu: %s\n"),
+                                 p->line, p->name);
+                    break;
+            }
+        }
+
         return package;
     }
 }
