@@ -125,15 +125,23 @@ pkg_check_modules(GLIB2.0 REQUIRED "glib-2.0")
 
 # Configure template files.
 set(stripped_pkgs)
+set(stripped_pkgs_pkgconfig)
 foreach(pkgstr ${required_pkgs})
-  string(REGEX REPLACE "^([^ \t]+).*" "\\1"  pkg "${pkgstr}")
-  list(APPEND stripped_pkgs "${pkg}")
+  set(matchit)
+  string(REGEX MATCH "([^{ \t]*)[ \t]*{([^}]+,|)[ \t]*nocheck[ \t]*(|,[^}]+)}[ \t]*$" matchit ${pkgstr})
+  string(REGEX REPLACE "^([^{ \t]*)[ \t]*{[^{}]*}[ \t]*$" "\\1" pkg ${pkgstr})
+  if(NOT matchit)
+    list(APPEND stripped_pkgs_pkgconfig "${pkg}")
+  endif()
+
+  string(REGEX REPLACE "^([^ \t]+).*" "\\1"  pkg_pkgconfig "${pkgstr}")
+  list(APPEND stripped_pkgs "${pkg_pkgconfig}")
 endforeach()
 base_list_to_delimited_string(pc_requirements
   DELIM " "
-  BASE_LIST ${stripped_pkgs}
+  BASE_LIST ${stripped_pkgs_pkgconfig}
 )
-configure_file("${project_name_lower}.pc.in" "${project_name_lower}.pc")
+configure_file("${project_name_lower}.pc.in" "${project_name_lower}.pc" @ONLY)
 
 base_list_to_delimited_string(deps_requirements
   DELIM "\n"
