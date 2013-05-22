@@ -213,7 +213,7 @@ public class BuilderCMake : BuildSystem {
         clean_started();
 
         if (!check_existance()) {
-            build_output (_("No data to clean."));
+            build_output (_("No data to clean.\n"));
             clean_finished();
             return true;
         }
@@ -247,7 +247,7 @@ public class BuilderCMake : BuildSystem {
         distclean_started();
 
         if (!check_existance()) {
-            build_output (_("No data to clean."));
+            build_output (_("No data to clean.\n"));
             clean_finished();
             return true;
         }

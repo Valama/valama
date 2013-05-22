@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Valama 0.1.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-05-22 20:20+0200\n"
+"POT-Creation-Date: 2013-05-22 20:33+0200\n"
 "PO-Revision-Date: 2013-05-10 02:50+0100\n"
 "Last-Translator: Dominique Lasserre <lasserre.d@gmail.com>\n"
 "Language-Team: German\n"
@@ -62,7 +62,7 @@ msgstr "'%s'-Kompilieren fehlgeschlagen: %s\n"
 #: ../src/project/build_project.vala:222
 #, c-format
 msgid "'%s' cleaning failed: %s\n"
-msgstr "'%s'-Säubern fehlgeschlagen: %s\n"
+msgstr "'%s'-Aufräumen fehlgeschlagen: %s\n"
 
 #: ../src/project/build_project.vala:139
 #, c-format
@@ -93,7 +93,7 @@ msgstr "'Kompilieren' mit Rückgabewert '%d' fehlgeschlagen.\n"
 #: ../src/project/build_project.vala:106
 #, c-format
 msgid "'Clean' failed with exit status: %d\n"
-msgstr "'Säubern' mit Rückgabewert '%d' fehlgeschlagen.\n"
+msgstr "'Aufräumen' mit Rückgabewert '%d' fehlgeschlagen.\n"
 
 #: ../src/project/build_project.vala:125
 #, c-format
@@ -104,7 +104,7 @@ msgstr "'Konfigurieren' mit Rückgabewert '%d' fehlgeschlagen.\n"
 #: ../src/project/build_project.vala:213
 #, c-format
 msgid "'Distclean' failed with exit status: %d\n"
-msgstr "'Vollständig säubern' mit Rückgabewert '%d' fehlgeschlagen.\n"
+msgstr "'Vollständiges Aufräumen' mit Rückgabewert '%d' fehlgeschlagen.\n"
 
 #: ../src/project/build_project.vala:97 ../src/project/build_project.vala:171
 #: ../src/project/build_project.vala:208
@@ -278,12 +278,12 @@ msgstr "Build-System-Kompiliervorgang gestartet: %s\n"
 #: ../src/buildsystem/base.vala:81
 #, c-format
 msgid "Buildsystem cleaning finished: %s\n"
-msgstr "Build-System-Säubern abgeschlossen: %s\n"
+msgstr "Build-System-Aufräumen abgeschlossen: %s\n"
 
 #: ../src/buildsystem/base.vala:78
 #, c-format
 msgid "Buildsystem cleaning started: %s\n"
-msgstr "Build-System-Säubern gestartet: %s\n"
+msgstr "Build-System-Aufräumen gestartet: %s\n"
 
 #: ../src/buildsystem/base.vala:69
 #, c-format
@@ -298,12 +298,12 @@ msgstr "Build-System-Konfiguration gestartet: %s\n"
 #: ../src/buildsystem/base.vala:87
 #, c-format
 msgid "Buildsystem distcleaning finished: %s\n"
-msgstr "Vollständiges Build-System-Säubern beendet: %s\n"
+msgstr "Vollständiges Build-System-Aufräumen beendet: %s\n"
 
 #: ../src/buildsystem/base.vala:84
 #, c-format
 msgid "Buildsystem distcleaning started: %s\n"
-msgstr "Vollständiges Build-System-Säubern gestartet: %s\n"
+msgstr "Vollständiges Build-System-Aufräumen gestartet: %s\n"
 
 #: ../src/buildsystem/base.vala:63
 #, c-format
@@ -385,7 +385,7 @@ msgstr "Projektvorlage wählen"
 
 #: ../src/ui_main.vala:419
 msgid "Clean"
-msgstr ""
+msgstr "Aufräumen"
 
 #: ../src/ui_main.vala:425
 msgid "Clean all"
@@ -393,7 +393,7 @@ msgstr "Vollständig aufräumen"
 
 #: ../src/ui_main.vala:412
 msgid "Clean build"
-msgstr ""
+msgstr "Sauberes Kompilieren"
 
 #: ../src/ui/app_output.vala:51
 msgid "Clear output"
@@ -926,7 +926,7 @@ msgstr ""
 
 #: ../src/ui_main.vala:438
 msgid "Execute"
-msgstr ""
+msgstr "Ausführen"
 
 #: ../guanako/reporter.vala:43
 msgid "Experimental"
@@ -938,7 +938,7 @@ msgstr "DATEI"
 
 #: ../src/ui/build_output.vala:102
 msgid "Failed"
-msgstr ""
+msgstr "Fehlgeschlagen"
 
 #: ../src/ui/breakpoints.vala:61 ../src/ui/reports.vala:67
 #: ../src/ui_main.vala:289
@@ -1245,8 +1245,8 @@ msgid "No current symbol"
 msgstr "Kein aktuelles Symbol"
 
 #: ../src/buildsystem/cmake.vala:216 ../src/buildsystem/cmake.vala:250
-msgid "No data to clean."
-msgstr ""
+msgid "No data to clean.\n"
+msgstr "Nichts zum Aufräumen.\n"
 
 #. TRANSLATORS:
 #. A "capturing group" is used to group (and possibly mark) expressions
@@ -1361,7 +1361,7 @@ msgstr "Bitte melden Sie diesen Fehler!\n"
 #: ../src/buildsystem/plain.vala:91
 #, c-format
 msgid "Prepare file for FrankenStein: %s\n"
-msgstr ""
+msgstr "Datei für FrankenStein vorbereiten: %s\n"
 
 #: ../src/ui/current_file_structure.vala:49
 msgid "Private"
@@ -1417,11 +1417,11 @@ msgstr "Schließen"
 
 #: ../src/ui_main.vala:406
 msgid "Rebuild"
-msgstr ""
+msgstr "Rekompilieren"
 
 #: ../src/ui/breakpoints.vala:107
 msgid "Received invalid ID. Try to rebuild."
-msgstr ""
+msgstr "Ungültige ID empfangen. Erneutes Kompilieren könnte helfen."
 
 #: ../src/ui/welcome_screen.vala:279
 msgid "Recent projects"
@@ -1479,7 +1479,7 @@ msgstr "Rückgabe:\n"
 
 #: ../src/ui_main.vala:432
 msgid "Run"
-msgstr ""
+msgstr "Ausführen"
 
 #. TRANSLATORS: E.g. "Run project browser update!"
 #: ../src/ui/breakpoints.vala:230 ../src/ui/current_file_structure.vala:102
@@ -1512,7 +1512,7 @@ msgstr "Speichere Benutzeroberflächen-Metainformation: %s\n"
 
 #: ../src/ui_main.vala:308
 msgid "Save all"
-msgstr ""
+msgstr "Alles speichern"
 
 #: ../src/ui_main.vala:504
 msgid "Save current file"
@@ -1654,7 +1654,7 @@ msgstr "Ersetze:  '@%s@'%s -> '%s': %s\n"
 
 #: ../src/ui/build_output.vala:98
 msgid "Succeeded"
-msgstr ""
+msgstr "Erfolgreich"
 
 #: ../src/dialogs/create_project.vala:363
 msgid "Supported Vala versions"
@@ -1926,12 +1926,12 @@ msgstr "[DATEI...]"
 #. TRANSLATORS: Version relation: X > Y
 #: ../src/dialogs/create_project.vala:375
 msgid "after"
-msgstr ""
+msgstr "nach"
 
 #. TRANSLATORS: Version relation: X < Y
 #: ../src/dialogs/create_project.vala:387
 msgid "before"
-msgstr ""
+msgstr "vor"
 
 #: ../src/buildsystem/cmake.vala:166
 msgid "build command failed"
@@ -1945,7 +1945,7 @@ msgstr "Auswahl"
 
 #: ../src/buildsystem/cmake.vala:226
 msgid "clean command failed"
-msgstr "Säuberkommando fehlgeschlagen"
+msgstr "Kommando zum Aufräumen fehlgeschlagen"
 
 #: ../src/buildsystem/cmake.vala:133
 msgid "configure command failed"
@@ -1959,7 +1959,7 @@ msgstr "Anlegen eines neuen Verzeichnisses fehlgeschlagen: %s"
 #: ../src/buildsystem/cmake.vala:260
 #, c-format
 msgid "distclean command failed: %s"
-msgstr "Vollständiges säuberkommando fehlgeschlagen"
+msgstr "Kommando zum vollständiges Aufräumen fehlgeschlagen"
 
 #: ../src/common/common.vala:525
 msgid "file does not exist"
@@ -1995,7 +1995,7 @@ msgstr "kein Paket benötigt"
 
 #: ../src/common/common.vala:552
 msgid "no regular file or directory"
-msgstr ""
+msgstr "keine reguläre Datei oder Verzeichnis"
 
 #: ../src/dialogs/create_project.vala:485
 msgid "no source files"
