@@ -42,29 +42,24 @@ public enum VersionRelation {
 
     public string? to_string() {
         switch (this) {
-            //TODO: Check if and where translation is needed.
+            //TODO: Check if and where translation is needed. See also
+            //      create_project.vala for gettext comments.
             case AFTER:
-                // TRANSLATORS: Version relation: X > Y
                 // return _("after");
                 return "after";
             case SINCE:
-                // TRANSLATORS: Version relation: X >= Y
                 // return _("since");
                 return "since";
             case UNTIL:
-                // TRANSLATORS: Version relation: X <= Y
                 // return _("until");
                 return "until";
             case BEFORE:
-                // TRANSLATORS: Version relation: X < Y
                 // return _("before");
                 return "before";
             case ONLY:
-                // TRANSLATORS: Version relation: X == Y
                 // return _("only");
                 return "only";
             case EXCLUDE:
-                // TRANSLATORS: Version relation: X != Y
                 // return _("exclude");
                 return "exclude";
             default:

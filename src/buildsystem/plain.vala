@@ -50,7 +50,8 @@ public class BuilderPlain : BuildSystem {
         string[] valacargs = new string[] {"valac"};
         string? target_glib_version;
         if (!package_exists ("glib-2.0", out target_glib_version)) {
-            build_output (_("No glib-2.0 package found.\n"));
+            //TRANSLATORS: E.g.: No `glib-2.0' package found.
+            build_output (_("No '%s' package found.\n").printf ("glib-2.0"));
             return false;
         }
         valacargs += @"--target-glib=$(target_glib_version)";

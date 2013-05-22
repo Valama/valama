@@ -371,20 +371,26 @@ public class UiTemplateSelector : TemplatePage {
                 string relation_after = "";
                 switch (ver.rel) {
                     case VersionRelation.AFTER:
+                        // TRANSLATORS: Version relation: X > Y
                         relation = _("after");
                         break;
                     case VersionRelation.SINCE:
+                        // TRANSLATORS: Version relation: X >= Y
                         relation = _("since");
                         break;
                     case VersionRelation.UNTIL:
+                        // TRANSLATORS: Version relation: X <= Y
                         relation = _("until");
                         break;
                     case VersionRelation.BEFORE:
+                        // TRANSLATORS: Version relation: X < Y
                         relation = _("before");
                         break;
                     case VersionRelation.ONLY:
+                        // TRANSLATORS: Version relation: X == Y
                         break;
                     case VersionRelation.EXCLUDE:
+                        // TRANSLATORS: Version relation: X != Y
                         relation_after = " " + _("not supported");
                         break;
                     default:
