@@ -28,17 +28,8 @@ if(XGETTEXT_FOUND)
   )
   option(UPDATE_PO "Update .po files." ON)
   if(UPDATE_PO)
-    gettext_create_translations("${potfile}"
-      ALL
-      LOCALEDIR
-        "${localedir}"
-    )
+    gettext_create_translations("${potfile}" ALL)
   else()
-    gettext_create_translations("${potfile}"
-      ALL
-      NOUPDATE
-      LOCALEDIR
-        "${localedir}"
-    )
+    gettext_create_translations("${potfile}" ALL NOUPDATE)
   endif()
 endif()

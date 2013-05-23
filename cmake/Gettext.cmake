@@ -25,7 +25,9 @@
 # xgettext.
 ##
 # Constant:
-# XGETTEXT_OPTIONS_DEFAULT: Provide common xgettext options for vala.
+# XGETTEXT_OPTIONS_DEFAULT: Provide common xgettext options.
+# XGETTEXT_VALA_OPTIONS_DEFAULT: Provide common xgettext options for Vala files.
+# XGETTEXT_GLADE_OPTIONS_DEFAULT: Provide common xgettext options for glade.
 ##
 # The gettext_create_pot macro creates .pot files with xgettext from multiple
 # source files.
@@ -43,9 +45,10 @@
 #   (${GETTEXT_PACKAGE_NAME} is package name from option above)
 #
 # OPTIONS (optional)
-#   Pass list of xgettext options (you can use XGETTEXT_OPTIONS_DEFAULT
-#   constant).
-#   Default: ${XGETTEXT_OPTIONS_DEFAULT}
+#   Pass list of xgettext options (you can use XGETTEXT_OPTIONS_DEFAULT,
+#   XGETTEXT_VALA_OPTIONS_DEFAULT and XGETTEXT_GLADE_OPTIONS_DEFAULT
+#   constants).
+#   Default: ${XGETTEXT_{,VALA,GLADE}_OPTIONS_DEFAULT}
 #
 # SRCFILES (optional/mandatory)
 #   List of source files to extract gettext strings from. Globbing is
@@ -149,30 +152,41 @@ endif()
 
 
 set(XGETTEXT_OPTIONS_DEFAULT
-  "--language" "C"
-  "--keyword=_"
-  "--keyword=N_"
-  "--keyword=C_:1c,2"
-  "--keyword=NC_:1c,2"
   "-s"
   "--escape"
   "--add-comments=\"TRANSLATORS:\""  #TODO: Make this configurable.
   "--from-code=UTF-8"
 )
+set(XGETTEXT_VALA_OPTIONS_DEFAULT
+  "--language" "C"
+  "--keyword=_"
+  "--keyword=N_"
+  "--keyword=C_:1c,2"
+  "--keyword=NC_:1c,2"
+)
+set(XGETTEXT_GLADE_OPTIONS_DEFAULT
+  "--language" "Glade"
+  "--omit-header"
+)
 
 
 if(XGETTEXT_FOUND)
   macro(gettext_create_pot potfile)
-    cmake_parse_arguments(ARGS "" "PACKAGE;VERSION;WORKING_DIRECTORY" "OPTIONS;SRCFILES;GLADEFILES" ${ARGN})
+    cmake_parse_arguments(ARGS "" "PACKAGE;VERSION;WORKING_DIRECTORY"
+      "OPTIONS;VALA_OPTIONS;GLADE_OPTIONS;SRCFILES;GLADEFILES" ${ARGN})
 
     if(ARGS_PACKAGE)
       set(package_name "${ARGS_PACKAGE}")
+    elseif(GETTEXT_PACKAGE)
+      set(package_name "${GETTEXT_PACKAGE}")
     else()
       set(package_name "${PROJECT_NAME}")
     endif()
 
     if(ARGS_VERSION)
       set(package_version "${ARGS_VERSION}")
+    elseif(VERSION)
+      set(package_version "${VERSION}")
     else()
       set(package_version "${${package_name}_VERSION}")
     endif()
@@ -180,17 +194,25 @@ if(XGETTEXT_FOUND)
     set(GETTEXT_PACKAGE_NAME "${package_name}" PARENT_SCOPE)
     set(GETTEXT_PACKAGE_VERSION "${package_version}" PARENT_SCOPE)
 
+    set(xgettext_options "--package-name" "${package_name}")
+    if(package_version)
+      list(APPEND xgettext_options "--package-version" "${package_version}")
+    endif()
     if(ARGS_OPTIONS)
-      set(xgettext_options
-            "--package-name" "${package_name}"
-            "--package-version" "${package_version}"
-            ${ARGS_OPTIONS}
-      )
+      list(APPEND xgettext_options ${ARGS_OPTIONS})
     else()
-      set(xgettext_options ${XGETTEXT_OPTIONS_DEFAULT}
-            "--package-name" "${package_name}"
-            "--package-version" "${package_version}"
-      )
+      list(APPEND xgettext_options ${XGETTEXT_OPTIONS_DEFAULT})
+    endif()
+
+    if(ARGS_XGETTEXT_VALA_OPTIONS_DEFAULT)
+      set(xgettext_vala_options ${ARGS_XGETTEXT_VALA_OPTIONS_DEFAULT})
+    else()
+      set(xgettext_vala_options ${XGETTEXT_VALA_OPTIONS_DEFAULT})
+    endif()
+    if(ARGS_XGETTEXT_GLADE_OPTIONS_DEFAULT)
+      set(xgettext_glade_options ${ARGS_XGETTEXT_GLADE_OPTIONS_DEFAULT})
+    else()
+      set(xgettext_glade_options ${XGETTEXT_GLADE_OPTIONS_DEFAULT})
     endif()
 
     if(ARGS_SRCFILES OR ARGS_GLADEFILES)
@@ -229,68 +251,67 @@ if(XGETTEXT_FOUND)
         else()
           get_filename_component(absFile "${ARGS_WORKING_DIRECTORY}${globexpr}" ABSOLUTE)
           file(RELATIVE_PATH relFile "${CMAKE_CURRENT_SOURCE_DIR}" "${absFile}")
-          list(APPEND src_list "${relFile}")
-          list(APPEND src_list_abs "${absFile}")
+          list(APPEND glade_list "${relFile}")
+          list(APPEND glade_list_abs "${absFile}")
         endif()
       endforeach()
 
-      add_custom_command(
-        OUTPUT
-          "pot"
+
+      if(ARGS_SRCFILES)
+        add_custom_command(
+          OUTPUT
+            "${CMAKE_CURRENT_BINARY_DIR}/_source.pot"
         COMMAND
-          ${XGETTEXT_EXECUTABLE} ${xgettext_options} "-o" "${CMAKE_CURRENT_BINARY_DIR}/${potfile}" ${src_list}
+            "${XGETTEXT_EXECUTABLE}" ${xgettext_options} ${xgettext_vala_options} "-o" "${CMAKE_CURRENT_BINARY_DIR}/_source.pot" ${src_list}
+        COMMAND
+            # Make sure file exists even if no translatable strings available.
+            ${CMAKE_COMMAND} -E touch "${CMAKE_CURRENT_BINARY_DIR}/_source.pot"
         DEPENDS
           ${src_list_abs}
-          ${glade_list_abs}
         WORKING_DIRECTORY
           "${CMAKE_CURRENT_SOURCE_DIR}"
       )
-
-      if(ARGS_SRCFILES AND ARGS_GLADEFILES)
-        add_custom_target(pot
-          COMMAND
-            "${XGETTEXT_EXECUTABLE}" ${xgettext_options} "-o" "${CMAKE_CURRENT_BINARY_DIR}/_source.pot" ${src_list}
-          COMMAND
-            "${XGETTEXT_EXECUTABLE}" "--language=Glade" "--omit-header" "-o" "${CMAKE_CURRENT_BINARY_DIR}/_glade.pot" ${glade_list}
-          COMMAND
-            "${GETTEXT_MSGCAT_EXECUTABLE}" "-o" "${potfile}" "--use-first" "${CMAKE_CURRENT_BINARY_DIR}/_source.pot" "${CMAKE_CURRENT_BINARY_DIR}/_glade.pot"
-          DEPENDS
-            ${src_list_abs}
-            ${glade_list_abs}
-          WORKING_DIRECTORY
-            "${CMAKE_CURRENT_SOURCE_DIR}"
-          COMMENT
-            "Extract translateable messages to ${potfile}"
-        )
-      elseif(ARGS_SRCFILES)
-        add_custom_target(pot
-          COMMAND
-            "${XGETTEXT_EXECUTABLE}" ${xgettext_options} "-o" "${CMAKE_CURRENT_BINARY_DIR}/_source.pot" ${src_list}
-          COMMAND
-            "${GETTEXT_MSGCAT_EXECUTABLE}" "-o" "${potfile}" "--use-first" "${CMAKE_CURRENT_BINARY_DIR}/_source.pot"
-          DEPENDS
-            ${src_list_abs}
-            ${glade_list_abs}
-          WORKING_DIRECTORY
-            "${CMAKE_CURRENT_SOURCE_DIR}"
-          COMMENT
-            "Extract translateable messages to ${potfile}"
-        )
       else()
-        add_custom_target(pot
+        add_custom_command(
+          OUTPUT
+            "${CMAKE_CURRENT_BINARY_DIR}/_source.pot"
           COMMAND
-            "${XGETTEXT_EXECUTABLE}" "--language=Glade" "--omit-header" "-o" "${CMAKE_CURRENT_BINARY_DIR}/_glade.pot" ${glade_list}
-          COMMAND
-            "${GETTEXT_MSGCAT_EXECUTABLE}" "-o" "${potfile}" "--use-first" "${CMAKE_CURRENT_BINARY_DIR}/_glade.pot"
-          DEPENDS
-            ${src_list_abs}
-            ${glade_list_abs}
-          WORKING_DIRECTORY
-            "${CMAKE_CURRENT_SOURCE_DIR}"
-          COMMENT
-            "Extract translateable messages to ${potfile}"
+            ${CMAKE_COMMAND} -E touch "${CMAKE_CURRENT_BINARY_DIR}/_source.pot"
         )
       endif()
+      if(ARGS_GLADEFILES)
+        add_custom_command(
+          OUTPUT
+            "${CMAKE_CURRENT_BINARY_DIR}/_glade.pot"
+          COMMAND
+            "${XGETTEXT_EXECUTABLE}" ${xgettext_options} ${xgettext_glade_options} "-o" "${CMAKE_CURRENT_BINARY_DIR}/_glade.pot" ${glade_list}
+          COMMAND
+            ${CMAKE_COMMAND} -E touch "${CMAKE_CURRENT_BINARY_DIR}/_glade.pot"
+          DEPENDS
+            ${glade_list_abs}
+          WORKING_DIRECTORY
+            "${CMAKE_CURRENT_SOURCE_DIR}"
+        )
+      else()
+        add_custom_command(
+          OUTPUT
+            "${CMAKE_CURRENT_BINARY_DIR}/_glade.pot"
+          COMMAND
+            ${CMAKE_COMMAND} -E touch "${CMAKE_CURRENT_BINARY_DIR}/_glade.pot"
+        )
+      endif()
+
+      add_custom_target(pot
+        COMMAND
+          "${GETTEXT_MSGCAT_EXECUTABLE}" "-o" "${potfile}" "--use-first" "${CMAKE_CURRENT_BINARY_DIR}/_source.pot" "${CMAKE_CURRENT_BINARY_DIR}/_glade.pot"
+        DEPENDS
+          "${CMAKE_CURRENT_BINARY_DIR}/_source.pot"
+          "${CMAKE_CURRENT_BINARY_DIR}/_glade.pot"
+        WORKING_DIRECTORY
+          "${CMAKE_CURRENT_SOURCE_DIR}"
+        COMMENT
+          "Extract translatable messages to ${potfile}"
+      )
     endif()
   endmacro()
 
@@ -383,7 +404,7 @@ if(XGETTEXT_FOUND)
         FILES
           "${_gmoFile}"
         DESTINATION
-          "${localedir}/${lang}/LC_MESSAGES"
+          "${_localedir}/${lang}/LC_MESSAGES"
         RENAME
           "${_potBasename}.mo"
       )
