@@ -218,7 +218,7 @@ msgstr "Pufferupdate"
 
 #: ../src/ui_main.vala:393 ../src/ui_main.vala:399 ../src/ui_main.vala:542
 msgid "Build"
-msgstr "Kompiliere..."
+msgstr "Kompiliere"
 
 #: ../src/project/build_project.vala:70
 #, c-format
