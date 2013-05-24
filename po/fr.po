@@ -219,7 +219,7 @@ msgstr "Mise à jour de la zone tampon"
 
 #: ../src/ui_main.vala:393 ../src/ui_main.vala:399 ../src/ui_main.vala:542
 msgid "Build"
-msgstr "Construction..."
+msgstr "Build"
 
 #: ../src/project/build_project.vala:70
 #, c-format
@@ -257,7 +257,7 @@ msgstr "Répertoire du système build n'existe pas : %s\n"
 #: ../src/project/project.vala:1076
 #, c-format
 msgid "Build system file does not exist: %s\n"
-msgstr "Fichier du système buils n'existe pas : %s\n"
+msgstr "Fichier du système build n'existe pas : %s\n"
 
 #: ../src/ui/project_browser.vala:289
 msgid "Build system files"
@@ -315,7 +315,7 @@ msgstr "Initialisation du système de build terminée : %s\n"
 #: ../src/buildsystem/base.vala:60
 #, c-format
 msgid "Buildsystem initialization started: %s\n"
-msgstr "Initialisation du système de buiks démarrée : %s\n"
+msgstr "Initialisation du système de build démarrée : %s\n"
 
 #: ../src/buildsystem/base.vala:93
 #, c-format
@@ -388,16 +388,15 @@ msgstr "Choisissez un modèle de projet"
 
 #: ../src/ui_main.vala:419
 msgid "Clean"
-msgstr ""
+msgstr "Clean"
 
 #: ../src/ui_main.vala:425
-#, fuzzy
 msgid "Clean all"
-msgstr "Afficher tout"
+msgstr "Clean all"
 
 #: ../src/ui_main.vala:412
 msgid "Clean build"
-msgstr ""
+msgstr "Clean build"
 
 #: ../src/ui/app_output.vala:51
 msgid "Clear output"
@@ -556,7 +555,7 @@ msgstr "Impossible de touver le fichier pkg-config pour '%s'. "
 #: ../src/ui/project_browser.vala:378 ../src/ui/project_browser.vala:481
 #, c-format
 msgid "Could not get current TreePath: %s\n"
-msgstr "Impossible d'obtenir le TreePath courrant : %s\n"
+msgstr "Impossible d'obtenir le TreePath courant : %s\n"
 
 #. TRANSLATORS: This is a technical information. You might not want
 #. to translate "TreeView".
@@ -932,7 +931,7 @@ msgstr ""
 
 #: ../src/ui_main.vala:438 ../src/ui_main.vala:550
 msgid "Execute"
-msgstr ""
+msgstr "Exécuter"
 
 #: ../guanako/reporter.vala:43
 msgid "Experimental"
@@ -944,7 +943,7 @@ msgstr "FICHIER"
 
 #: ../src/ui/build_output.vala:102
 msgid "Failed"
-msgstr ""
+msgstr "Échoué"
 
 #: ../src/ui/breakpoints.vala:61 ../src/ui/reports.vala:67
 #: ../src/ui_main.vala:289
@@ -961,7 +960,7 @@ msgstr "Le fichier est déjà un fichier source : ignoré.\n"
 
 #: ../src/project/project.vala:1021 ../src/project/project.vala:1148
 msgid "File already registered for build system. Skip it.\n"
-msgstr "Li fichier est déjà enregistré pour le système de build : ignoré.\n"
+msgstr "Le fichier est déjà enregistré pour le système de build : ignoré.\n"
 
 #: ../src/common/common.vala:422
 msgid "File copying cancelled."
@@ -1198,7 +1197,7 @@ msgstr "Lieu"
 #. TRANSLATORS: Lock user interface elements to prevent moving them around.
 #: ../src/ui_main.vala:363
 msgid "Lock elements"
-msgstr "Verrouiller éléments"
+msgstr "Verrouiller les éléments"
 
 #: ../guanako/guanako.vala:835 ../guanako/guanako.vala:847
 #: ../guanako/guanako.vala:865 ../guanako/guanako.vala:935
@@ -1241,17 +1240,17 @@ msgstr "Next generation Vala IDE"
 
 #. TRANSLATORS: E.g.: No `glib-2.0' package found.
 #: ../src/buildsystem/plain.vala:54
-#, fuzzy, c-format
+#, c-format
 msgid "No '%s' package found.\n"
-msgstr "Choisir le paquet '%s'.\n"
+msgstr "Le paquet '%s' n'a pas été trouvé.\n"
 
 #: ../src/ui/current_symbol.vala:48 ../src/ui/current_symbol.vala:75
 msgid "No current symbol"
-msgstr "Pas de symbole courrant"
+msgstr "Pas de symbole courant"
 
 #: ../src/buildsystem/cmake.vala:216 ../src/buildsystem/cmake.vala:250
 msgid "No data to clean.\n"
-msgstr ""
+msgstr "Pas de données à nettoyer.\n"
 
 #. TRANSLATORS:
 #. A "capturing group" is used to group (and possibly mark) expressions
@@ -1303,7 +1302,7 @@ msgstr "Note"
 #. TRANSLATORS: overwrite input mode
 #: ../src/ui/source_viewer.vala:394 ../src/ui/source_viewer.vala:400
 msgid "OVR"
-msgstr "OVR"
+msgstr "REMPL"
 
 #: ../src/dialogs/project_settings.vala:27 ../src/ui/welcome_screen.vala:299
 #: ../src/ui/welcome_screen.vala:304 ../src/ui_main.vala:300
@@ -1368,7 +1367,7 @@ msgstr "Signaler un bug SVP !\n"
 #: ../src/buildsystem/plain.vala:91
 #, c-format
 msgid "Prepare file for FrankenStein: %s\n"
-msgstr ""
+msgstr "Préparation du fichier pour FrankenStein : %s\n"
 
 #: ../src/ui/current_file_structure.vala:49
 msgid "Private"
@@ -1424,11 +1423,11 @@ msgstr "Quitter"
 
 #: ../src/ui_main.vala:406
 msgid "Rebuild"
-msgstr ""
+msgstr "Rebuild"
 
 #: ../src/ui/breakpoints.vala:107
 msgid "Received invalid ID. Try to rebuild."
-msgstr ""
+msgstr "Reçu un ID non valide. Essai de reconstruire."
 
 #: ../src/ui/welcome_screen.vala:279
 msgid "Recent projects"
@@ -1454,7 +1453,7 @@ msgstr "Effacer le fichier de données : %s\n"
 
 #: ../src/ui/project_browser.vala:204
 msgid "Remove file (from disk)"
-msgstr ""
+msgstr "Supprimer le fichier (du disque)"
 
 #: ../src/ui/project_browser.vala:197
 msgid "Remove package"
@@ -1486,7 +1485,7 @@ msgstr "Retours chariots:\n"
 
 #: ../src/ui_main.vala:432
 msgid "Run"
-msgstr ""
+msgstr "Executer"
 
 #. TRANSLATORS: E.g. "Run project browser update!"
 #: ../src/ui/breakpoints.vala:230 ../src/ui/current_file_structure.vala:102
@@ -1510,7 +1509,7 @@ msgstr "Exécuter l'application"
 
 #: ../src/ui/build_output.vala:80
 msgid "Running..."
-msgstr "Construction..."
+msgstr "Exécution..."
 
 #: ../src/ui_main.vala:718
 #, c-format
@@ -1519,15 +1518,15 @@ msgstr "Sauvegarder les méta-informations de l'IU : %s\n"
 
 #: ../src/ui_main.vala:308
 msgid "Save all"
-msgstr ""
+msgstr "Sauvegarder tout"
 
 #: ../src/ui_main.vala:504
 msgid "Save current file"
-msgstr "Sauvegarder le fichier courrant"
+msgstr "Sauvegarder le fichier courant"
 
 #: ../src/ui_main.vala:544
 msgid "Save current file and build project"
-msgstr "Sauvegarder le fichier courrant et construire le projet"
+msgstr "Sauvegarder le fichier courant et construire le projet"
 
 #: ../src/project/project.vala:1496
 msgid "Save project file.\n"
@@ -1572,11 +1571,11 @@ msgstr "Afficher la sortie du processus de construction"
 
 #: ../src/ui_main.vala:357
 msgid "Show current file structure"
-msgstr "Afficher la structure du fichier courrant"
+msgstr "Afficher la structure du fichier courant"
 
 #: ../src/ui_main.vala:360
 msgid "Show current symbol"
-msgstr "Afficher le symbole courrant"
+msgstr "Afficher le symbole courant"
 
 #: ../src/ui_main.vala:353
 msgid "Show project browser"
@@ -1661,7 +1660,7 @@ msgstr "Substituer : '@%s@'%s -> '%s': %s\n"
 
 #: ../src/ui/build_output.vala:98
 msgid "Succeeded"
-msgstr ""
+msgstr "Réussi"
 
 #: ../src/dialogs/create_project.vala:363
 msgid "Supported Vala versions"
@@ -1844,11 +1843,11 @@ msgstr "Version : "
 
 #: ../src/ui_main.vala:346
 msgid "View"
-msgstr "Montrer"
+msgstr "Afficher"
 
 #: ../src/dialogs/project_settings.vala:38
 msgid "View all files (*)"
-msgstr "Montrer tous les fichiers (*)"
+msgstr "Afficher tous les fichiers (*)"
 
 #: ../guanako/reporter.vala:39
 msgid "Warning"
@@ -1920,7 +1919,7 @@ msgstr "Attention : Vapi introuvable pour le paquet %s.\n"
 #: ../src/project/project.vala:1242
 #, c-format
 msgid "Will not add '%s' to file list: File not valid\n"
-msgstr ""
+msgstr "'%s' non ajouté à la liste des fichiers : fichier non valide\n"
 
 #: ../src/common/args.vala:41
 msgid "[DEBUGLEVEL]"
@@ -1933,12 +1932,12 @@ msgstr "[FILE...]"
 #. TRANSLATORS: Version relation: X > Y
 #: ../src/dialogs/create_project.vala:375
 msgid "after"
-msgstr ""
+msgstr "après"
 
 #. TRANSLATORS: Version relation: X < Y
 #: ../src/dialogs/create_project.vala:387
 msgid "before"
-msgstr ""
+msgstr "avant"
 
 #: ../src/buildsystem/cmake.vala:166
 msgid "build command failed"
@@ -1951,9 +1950,9 @@ msgid "choice"
 msgstr "choix"
 
 #: ../src/buildsystem/cmake.vala:226
-#, fuzzy
+#
 msgid "clean command failed"
-msgstr "Construction échouée"
+msgstr "Commande nettoyage échouée"
 
 #: ../src/buildsystem/cmake.vala:133
 msgid "configure command failed"
@@ -1965,9 +1964,9 @@ msgid "directory creation failed: %s"
 msgstr "création de répertoire échoué : %s"
 
 #: ../src/buildsystem/cmake.vala:260
-#, fuzzy, c-format
+#, c-format
 msgid "distclean command failed: %s"
-msgstr "Construction échouée"
+msgstr "Commande distclean échouée"
 
 #: ../src/common/common.vala:525
 msgid "file does not exist"
@@ -2003,7 +2002,7 @@ msgstr "pas de paquet requis"
 
 #: ../src/common/common.vala:552
 msgid "no regular file or directory"
-msgstr ""
+msgstr "pas de fichier ou répertoire normal"
 
 #: ../src/dialogs/create_project.vala:485
 msgid "no source files"
