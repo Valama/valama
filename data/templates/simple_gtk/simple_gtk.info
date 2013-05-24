@@ -6,9 +6,11 @@
     <name>
         <en>Simple GTK+ 3</en>
         <de>GTK+ 3 Beispiel</de>
+        <fr>Exemple GTK+ 3</fr>
     </name>
     <description>
         <en>Simple GTK+ 3 project</en>
         <de>Einfaches GTK+ 3-Projekt</de>
+        <fr>Projet GTK+ 3 simple</fr>
     </description>
 </template>
