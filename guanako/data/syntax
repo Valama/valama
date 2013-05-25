@@ -80,9 +80,9 @@ AssgIterStat : parent
 . $AssgStat{parent}
 
 AssgInst : parent
-$AssgInstContinue{parent}|$AssgChildSignalConnect{parent}
+$AssgInstContinue{parent}|$AssgChildSignalConnect{parent}|$AssgChildMethodInst{parent}
 AssgInstContinue : parent
-$ChildVariableInst{parent}>{a}|$ChildPropertyInst{parent}>{a}|$AssgChildMethodInst{parent} $AssgIterInst{a}|$AssgEndAssg
+$ChildVariableInst{parent}>{a}|$ChildPropertyInst{parent}>{a} $AssgIterInst{a}|$AssgEndAssg
 
 AssgStat : parent
 $AssgChildStuffStat{parent}|$AssgChildVariablesStat{parent}|$AssgChildMethodStat{parent}
@@ -144,7 +144,7 @@ ValIterStat : parent
 . $ValStat{parent}
 
 ValInst : parent
-$ChildVariableInst{parent}>{a}|$ChildPropertyInst{parent}>{a}|$ValChildMethodInst{parent}|$ChildConstInst{parent}>{a} ?$ValIterInst{a}
+$ChildVariableInst{parent}>{a}|$ChildPropertyInst{parent}>{a}|$ValChildMethodInst{parent} ?$ValIterInst{a}
 
 ValStat : parent
 $ValChildStuffStat{parent}|$ValChildVariablesStat{parent}|$ValChildMethodStat{parent}
@@ -153,7 +153,7 @@ ValChildStuffStat : parent
 {parent}>Namespace{a}|{parent}>Class{a} $ValIterStat{a}
 
 ValChildVariablesStat : parent
-$ChildVariableStat{parent}>{a}|$ChildPropertyStat{parent}>{a}|$ChildConstStat{parent}>{a}|{parent}>Enum{a} ?$ValIterInst{a}
+$ChildVariableStat{parent}>{a}|$ChildPropertyStat{parent}>{a}|$ChildConst{parent}>{a}|{parent}>Enum{a} ?$ValIterInst{a}
 
 # TODO: Handle arrays
 ValChildMethodStat : parent
@@ -215,15 +215,10 @@ MethodNameInst : parent
 # Helper functions to abstract single vs array types
 # ==============
 
-ChildConstInst : parent
-{parent}>Constant<instance,array>{ret}|{parent}>Constant<instance,single>{ret}|$ChildConstInstArrEl{parent}>{ret}
-ChildConstInstArrEl : parent
+ChildConst : parent
+{parent}>Constant<instance,array>{ret}|{parent}>Constant<instance,single>{ret}|$ChildConstArrEl{parent}>{ret}
+ChildConstArrEl : parent
 {parent}>Constant<instance,arr_el>{ret} ?_ [ ?_ $Value ?_ ]
-
-ChildConstStat : parent
-{parent}>Constant<static,array>{ret}|{parent}>Constant<static,single>{ret}|$ChildConstStatArrEl{parent}>{ret}
-ChildConstStatArrEl : parent
-{parent}>Constant<static,arr_el>{ret} ?_ [ ?_ $Value ?_ ]
 
 ChildVariableInst : parent
 {parent}>Field<instance,array>{ret}|{parent}>Field<instance,single>{ret}|$ChildVariableInstArrEl{parent}>{ret}

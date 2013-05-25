@@ -24,13 +24,20 @@ namespace Guanako {
 
     private Vala.List<Symbol>[] get_child_symbols_of_type (Symbol smb, string type) {
         var ret = new Vala.List<Symbol>[0];
+
         if (smb is Class) {
             //If parent is a Class, add its base class and types (i.e. interfaces it implements etc)
             var p = (Class) smb;
-            if (p.base_class != null)
-                ret += get_child_symbols_of_type_simple (p.base_class, type);
-            foreach (DataType p_type in p.get_base_types())
-                ret += get_child_symbols_of_type_simple (p_type.data_type, type);
+            if (p.base_class != null) {
+                var base_ret = get_child_symbols_of_type (p.base_class, type);
+                foreach (Vala.List<Symbol> list in base_ret)
+                    ret += list;
+            }
+            foreach (DataType p_type in p.get_base_types()) {
+                var base_ret = get_child_symbols_of_type (p_type.data_type, type);
+                foreach (Vala.List<Symbol> list in base_ret)
+                    ret += list;
+            }
         }
         var main_res = get_child_symbols_of_type_simple (smb, type);
         if (main_res != null)
