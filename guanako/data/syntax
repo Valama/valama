@@ -205,10 +205,10 @@ $MethodNameStatClasses{parent}|$MethodNameStatVariables{parent}
 MethodNameStatClasses : parent
 {parent}>Namespace{a}|{parent}>Class{a} . $MethodNameStat{a}|{a}>Method<static>
 MethodNameStatVariables : parent
-{parent}>Variable<static>{a}|{parent}>Property<static>{a} . $MethodNameInst{a}|{a}>Method<instance>
+{parent}>Field<static>{a}|{parent}>Property<static>{a} . $MethodNameInst{a}|{a}>Method<instance>
 
 MethodNameInst : parent
-{parent}>Variable<instance>{a}|{parent}>Property<instance>{a} . $MethodNameInst{a}|{a}>Method<instance>
+{parent}>Field<instance>{a}|{parent}>Property<instance>{a} . $MethodNameInst{a}|{a}>Method<instance>
 
 
 # ==============
@@ -221,19 +221,19 @@ ChildConstInstArrEl : parent
 {parent}>Constant<instance,arr_el>{ret} ?_ [ ?_ $Value ?_ ]
 
 ChildConstStat : parent
-{parent}>Constant<instance,array>{ret}|{parent}>Constant<instance,single>{ret}|$ChildConstStatArrEl{parent}>{ret}
+{parent}>Constant<static,array>{ret}|{parent}>Constant<static,single>{ret}|$ChildConstStatArrEl{parent}>{ret}
 ChildConstStatArrEl : parent
-{parent}>Constant<instance,arr_el>{ret} ?_ [ ?_ $Value ?_ ]
+{parent}>Constant<static,arr_el>{ret} ?_ [ ?_ $Value ?_ ]
 
 ChildVariableInst : parent
-{parent}>Variable<instance,array>{ret}|{parent}>Variable<instance,single>{ret}|$ChildVariableInstArrEl{parent}>{ret}
+{parent}>Field<instance,array>{ret}|{parent}>Field<instance,single>{ret}|$ChildVariableInstArrEl{parent}>{ret}
 ChildVariableInstArrEl : parent
-{parent}>Variable<instance,arr_el>{ret} ?_ [ ?_ $Value ?_ ]
+{parent}>Field<instance,arr_el>{ret} ?_ [ ?_ $Value ?_ ]
 
 ChildVariableStat : parent
-{parent}>Variable<static,array>{ret}|{parent}>Variable<static,single>{ret}|$ChildVariableStatArrEl{parent}>{ret}
+{parent}>Field<static,array>{ret}|{parent}>Field<static,single>{ret}|$ChildVariableStatArrEl{parent}>{ret}
 ChildVariableStatArrEl : parent
-{parent}>Variable<static,arr_el>{ret} ?_ [ ?_ $Value ?_ ]
+{parent}>Field<static,arr_el>{ret} ?_ [ ?_ $Value ?_ ]
 
 ChildPropertyInst : parent
 {parent}>Property<instance,array>{ret}|{parent}>Property<instance,single>{ret}|$ChildPropertyInstArrEl{parent}>{ret}
