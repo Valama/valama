@@ -4,9 +4,9 @@
         <mail>lasserre.d@gmail.com</mail>
     </author>
     <name>
-        <en>Cmake</en>
+        <en>CMake</en>
     </name>
     <description>
-        <en>Cmake buildsystem.</en>
+        <en>CMake buildsystem.</en>
     </description>
 </buildsystem>

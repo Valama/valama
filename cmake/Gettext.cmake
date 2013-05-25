@@ -364,7 +364,9 @@ if(XGETTEXT_FOUND)
       endforeach()
     endif()
 
-    list(REMOVE_DUPLICATES langs)
+    if(langs)
+      list(REMOVE_DUPLICATES langs)
+    endif()
 
 
     set(_gmoFile)

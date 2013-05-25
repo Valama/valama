@@ -40,7 +40,7 @@
 #   List of all Vala packages the project depends on.
 #
 # SRCFILES
-#   List of all project files. GLobbing is supported.
+#   List of all project files. Globbing is supported.
 #
 # OPTIONS (optional)
 #   List of additional valadoc options.
@@ -56,12 +56,12 @@ if(VALADOC_FOUND)
         set(make_all)
       endif()
 
+      string(TOLOWER "${package_name}" package_name_lower)
       if(ARGS_INSTALLDIR)
         set(installdir "${ARGS_DOCDIR}")
       elseif(datadir)
         set(installdir "${datadir}")
       elseif(package_name)
-        string(TOLOWER "${package_name}" package_name_lower)
         set(installdir "share/${package_name_lower}")
       else()
         message(SEND_ERROR "No installation directory given.")
@@ -74,12 +74,22 @@ if(VALADOC_FOUND)
       endif()
 
       set(srcfiles)
+      set(srcfiles_abs)
       foreach(globexpr ${ARGS_SRCFILES})
         file(GLOB tmpsrcfiles ${globexpr})
-        foreach(tmpsrcfile ${tmpsrcfiles})
-          file(RELATIVE_PATH srcfile "${CMAKE_CURRENT_BINARY_DIR}" "${tmpsrcfile}")
+        if(tmpsrcfiles)
+          foreach(tmpsrcfile ${tmpsrcfiles})
+            file(RELATIVE_PATH srcfile "${CMAKE_CURRENT_BINARY_DIR}" "${tmpsrcfile}")
+            list(APPEND srcfiles "${srcfile}")
+            get_filename_component(srcfile_abs "${tmpsrcfile}" ABSOLUTE)
+            list(APPEND srcfiles_abs "${srcfile_abs}")
+          endforeach()
+        else()
+          file(RELATIVE_PATH srcfile "${CMAKE_CURRENT_BINARY_DIR}" "${globexpr}")
           list(APPEND srcfiles "${srcfile}")
-        endforeach()
+          get_filename_component(srcfile_abs "${globexpr}" ABSOLUTE)
+          list(APPEND srcfiles_abs "${srcfile_abs}")
+        endif()
       endforeach()
 
       set(pkg_opts)
@@ -103,10 +113,10 @@ if(VALADOC_FOUND)
         COMMAND
           ${VALADOC_EXECUTABLE} ${srcfiles} ${pkg_opts} ${valadoc_options}
         DEPENDS
-          ${ARGS_SRCFILES}
+          ${srcfiles_abs}
       )
 
-      add_custom_target(docs
+      add_custom_target("docs-${package_name_lower}"
         ${make_all}
         DEPENDS
           "${docdir}/index.html"

@@ -112,33 +112,185 @@ function(convert_svg_to_png output)
   if(ARGS_ICON)
     if(ARGS_PNG_NAME)
       find_program(CONVERT convert)
-      if(NOT datarootdir)
-        set(datarootdir "share")
-      endif()
-
-      foreach(size ${ARGS_SIZES})
-        set(tmppath "icons/hicolor/${size}x${size}/apps")
-        set(iconpath "${CMAKE_CURRENT_BINARY_DIR}/${tmppath}/${ARGS_PNG_NAME}.png")
-        execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/${tmppath}")
-        add_custom_command(
-          OUTPUT
-            "${iconpath}"
-          DEPENDS
-            "${ARGS_ICON}"
-          COMMAND
-            ${CONVERT}
-          ARGS
-            "-background" "none" "-resize" "${size}x${size}" "${ARGS_ICON}" "${iconpath}"
-        )
-        list(APPEND png_list "${iconpath}")
-        if(ARGS_DESTINATION)
-          install(FILES "${iconpath}" DESTINATION "${ARGS_DESTINATION}")
-        else()
-          install(FILES "${iconpath}" DESTINATION "${datarootdir}/${tmppath}")
+      if(CONVERT)
+        if(NOT datarootdir)
+          set(datarootdir "share")
         endif()
-      endforeach()
+
+        foreach(size ${ARGS_SIZES})
+          set(tmppath "icons/hicolor/${size}x${size}/apps")
+          set(iconpath "${CMAKE_CURRENT_BINARY_DIR}/${tmppath}/${ARGS_PNG_NAME}.png")
+          execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/${tmppath}")
+          add_custom_command(
+            OUTPUT
+              "${iconpath}"
+            DEPENDS
+              "${ARGS_ICON}"
+            COMMAND
+              "${CONVERT}" "-background" "none" "-resize" "${size}x${size}" "${ARGS_ICON}" "${iconpath}"
+          )
+          list(APPEND png_list "${iconpath}")
+          if(ARGS_DESTINATION)
+            install(FILES "${iconpath}" DESTINATION "${ARGS_DESTINATION}")
+          else()
+            install(FILES "${iconpath}" DESTINATION "${datarootdir}/${tmppath}")
+          endif()
+        endforeach()
+      else()
+        message(WARNING "Could not find convert program. Don't generate icons.")
+      endif()
     endif()
   endif()
 
   set(${output} "${png_list}" PARENT_SCOPE)
+endfunction()
+
+
+##
+# Get formatted date string.
+#
+# Usage:
+# The first parameter is set to output date string.
+#
+# FORMAT
+#   Format string.
+#
+#
+# Simple example:
+#
+#   datestring(date
+#     FORMAT "%B %Y"
+#   )
+#   # Will print out e.g. "Date: April 2013"
+#   message("Date: ${date}")
+#
+#
+macro(datestring output)
+  include(CMakeParseArguments)
+  cmake_parse_arguments(ARGS "" "FORMAT" "" ${ARGN})
+
+  if(ARGS_FORMAT)
+    set(format "${ARGS_FORMAT}")
+  else()
+    set(format "${ARGN}")
+  endif()
+
+  if(WIN32)
+    #FIXME: Needs to be tested. Perhaps wrapping with cmd is needed.
+    execute_process(
+      COMMAND
+        "date" "${format}"
+      OUTPUT_VARIABLE
+        "${output}"
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+  else()
+    execute_process(
+      COMMAND
+      "date" "+${format}"
+      OUTPUT_VARIABLE
+        "${output}"
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+  endif()
+endmacro()
+
+
+##
+# Install gsettings file and compile schemas.
+#
+# Depends on cmake/GlibCompileSchema.cmake.in.
+#
+# Usage:
+#
+# LOCAL
+#   If true compile gsettings schemas locally (in
+#   ${CMAKE_BINARY_DIR}/glib-2.0/schemas) directory). Add this directory to
+#   your XDG_DATA_DIRS variable.
+#
+# GSETTINGSDIR
+#   Directory where to install gsettings schemas. Default is:
+#   share/glib-2.0/schemas
+#
+# FILES
+#   List of gsettings schema files to install / compiile.
+#
+#
+# Simple example:
+#
+#   gsettings_install(
+#     LOCAL
+#       TRUE
+#     GSETTINGSDIR
+#       share/glib-2.0/schemas
+#     FILES
+#       "data/app.foobar.gschema.xml"
+#   )
+#
+function(gsettings_install)
+  include(CMakeParseArguments)
+  cmake_parse_arguments(ARGS "" "LOCAL;GSETTINGSDIR" "FILES" ${ARGN})
+
+  if(NOT "" STREQUAL "${ARGS_FILES}")
+    if(ARGS_LOCAL)
+      set(GSETTINGSDIR "glib-2.0/schemas")
+      configure_file(
+        "${CMAKE_SOURCE_DIR}/cmake/GlibCompileSchema.cmake.in"
+        "${CMAKE_BINARY_DIR}/GlibCompileSchema_local.cmake"
+        @ONLY
+      )
+      foreach(gfile ${ARGS_FILES})
+        get_filename_component(filename "${gfile}" NAME)
+        add_custom_command(
+            COMMAND
+              ${CMAKE_COMMAND} -E make_directory "${GSETTINGSDIR}"
+            COMMAND
+              ${CMAKE_COMMAND} -E copy_if_different
+                                      "${gfile}"
+                                      "${CMAKE_CURRENT_BINARY_DIR}/glib-2.0/schemas/${filename}"
+            OUTPUT
+              "${GSETTINGSDIR}"
+            COMMENT
+              "Install gsettings schemas locally." VERBATIM
+        )
+      endforeach()
+      add_custom_command(
+          COMMAND
+            ${CMAKE_COMMAND} -P "${CMAKE_BINARY_DIR}/GlibCompileSchema_local.cmake"
+          DEPENDS
+            "${GSETTINGSDIR}"
+          OUTPUT
+            "glib-2.0/schemas/gschemas.compiled"
+          COMMENT
+            "Compile gsettings schemas." VERBATIM
+      )
+      add_custom_target(gsettings
+        ALL
+        DEPENDS
+          "glib-2.0/schemas/gschemas.compiled"
+      )
+    endif()
+
+    if(NOT ARGS_GSETTINGSDIR)
+      set(ARGS_GSETTINGSDIR "share/glib-2.0/schemas")
+    endif()
+    foreach(gfile ${ARGS_FILES})
+      install(FILES "${gfile}" DESTINATION "${ARGS_GSETTINGSDIR}")
+    endforeach()
+
+    if(POSTINSTALL_HOOK AND NOT "$ENV{DESTDIR}")
+      if(CMAKE_INSTALL_PREFIX)
+        set(install_prefix "${CMAKE_INSTALL_PREFIX}/")
+      else()
+        set(install_prefix)
+      endif()
+      set(GSETTINGSDIR "${install_prefix}${ARGS_GSETTINGSDIR}")
+      configure_file(
+        "${CMAKE_SOURCE_DIR}/cmake/GlibCompileSchema.cmake.in"
+        "${CMAKE_BINARY_DIR}/GlibCompileSchema.cmake"
+        @ONLY
+      )
+      install(SCRIPT "${CMAKE_BINARY_DIR}/GlibCompileSchema.cmake")
+    endif()
+  endif()
 endfunction()

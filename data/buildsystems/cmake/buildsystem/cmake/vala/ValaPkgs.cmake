@@ -37,6 +37,12 @@
 # VAPIS
 #   A list of custom .vapi files. Globbing is supported. (optional)
 #
+# LIBRARY
+#   Name of library to generate.
+#
+# GIRFILE
+#   Generate GObject-Introspection repository file.
+#
 # OPTIONS
 #   A list of options passed to the valac compiler. (optional)
 #
@@ -64,7 +70,7 @@
 #
 include(CMakeParseArguments)
 function(vala_pkgs output)
-  cmake_parse_arguments(ARGS "" "" "PACKAGES;OPTIONAL;SRCFILES;VAPIS;OPTIONS" ${ARGN})
+  cmake_parse_arguments(ARGS "" "LIBRARY;GIRFILE" "PACKAGES;OPTIONAL;SRCFILES;VAPIS;OPTIONS" ${ARGN})
 
 
   if(ARGS_PACKAGES OR ARGS_OPTIONAL)
@@ -179,8 +185,15 @@ function(vala_pkgs output)
         ${pkglist}
       CUSTOM_VAPIS
         ${vapifiles}
+      GENERATE_VAPI
+        "${ARGS_LIBRARY}"
+      GENERATE_HEADER
+        "${ARGS_LIBRARY}"
+      GENERATE_GIR
+        "${ARGS_GIRFILE}"
       OPTIONS
         ${ARGS_OPTIONS}
+      PUBLIC
     )
 
     set(${output} ${VALA_C} PARENT_SCOPE)

@@ -9,9 +9,9 @@
 # default cmake functions.
 #
 # The first parameter provided is a variable, which will be filled with a list
-# of c files outputted by the vala compiler. This list can than be used in
-# conjuction with functions like "add_executable" or others to create the
-# neccessary compile rules with CMake.
+# of C files outputted by the vala compiler. This list can than be used in
+# conjunction with functions like "add_executable" or others to create the
+# necessary compile rules with CMake.
 #
 # The following sections may be specified afterwards to provide certain options
 # to the vala compiler:
@@ -40,10 +40,19 @@
 #   the compiled library. The provided name will be used for this and a
 #   <provided_name>.vapi file will be created.
 #
+# GENERATE_GIR
+#   Create a GObject-Introspection repository file. Name it
+#   "<provided_name>.gir". Library name is set to generated vapi name without
+#   file extension suffix or if no vapi is to be generated guess from gir
+#   name.
+#
 # GENERATE_HEADER
 #   Let the compiler generate a header file for the compiled code. There will
 #   be a header file as well as an internal header file being generated called
 #   <provided_name>.h and <provided_name>_internal.h
+#
+# PUBLIC
+#   When enabled generate only public parts of vapis/headers.
 #
 # The following call is a simple example to the vala_precompile macro showing
 # an example to every of the optional sections:
@@ -68,6 +77,8 @@
 #       some_vapi.vapi
 #     GENERATE_VAPI
 #       myvapi
+#     GENERATE_GIR
+#       MyLib-1.0
 #     GENERATE_HEADER
 #       myheader
 #     )
@@ -109,7 +120,7 @@
 include(CMakeParseArguments)
 
 function(vala_precompile output)
-  cmake_parse_arguments(ARGS "" "DIRECTORY;GENERATE_HEADER;GENERATE_VAPI"
+  cmake_parse_arguments(ARGS "PUBLIC" "DIRECTORY;GENERATE_HEADER;GENERATE_VAPI;GENERATE_GIR"
       "SOURCES;PACKAGES;OPTIONS;CUSTOM_VAPIS" ${ARGN})
 
   if(ARGS_DIRECTORY)
@@ -144,22 +155,41 @@ function(vala_precompile output)
   endif()
 
   set(vapi_arguments)
+  set(gir_arguments)
   if(ARGS_GENERATE_VAPI)
     list(APPEND out_files "${DIRECTORY}/${ARGS_GENERATE_VAPI}.vapi")
-    set(vapi_arguments "--internal-vapi=${ARGS_GENERATE_VAPI}.vapi")
+    if(ARGS_PUBLIC)
+      set(vapi_arguments "--library=${ARGS_GENERATE_VAPI}")
+    else()
+      set(vapi_arguments "--internal-vapi=${ARGS_GENERATE_VAPI}.vapi")
+    endif()
 
     # Header and internal header is needed to generate internal vapi
-    if(NOT ARGS_GENERATE_HEADER)
+    if(NOT ARGS_PUBLIC AND NOT ARGS_GENERATE_HEADER)
       set(ARGS_GENERATE_HEADER ${ARGS_GENERATE_VAPI})
+    endif()
+  endif()
+
+  if(ARGS_GENERATE_GIR)
+    list(APPEND out_files "${DIRECTORY}/${ARGS_GENERATE_GIR}.gir")
+    list(APPEND gir_arguments "--gir=${ARGS_GENERATE_GIR}.gir")
+    if(NOT ARGS_PUBLIC OR NOT ARGS_GENERATE_VAPI)
+      set(tmplibname)
+      string(REGEX MATCH "^[^-]*" tmplibname "${ARGS_GENERATE_GIR}")
+      set(libname)
+      string(TOLOWER "${tmplibname}" libname)
+      list(APPEND gir_arguments "--library=${libname}")
     endif()
   endif()
 
   set(header_arguments)
   if(ARGS_GENERATE_HEADER)
     list(APPEND out_files "${DIRECTORY}/${ARGS_GENERATE_HEADER}.h")
-    list(APPEND out_files "${DIRECTORY}/${ARGS_GENERATE_HEADER}_internal.h")
     list(APPEND header_arguments "--header=${DIRECTORY}/${ARGS_GENERATE_HEADER}.h")
-    list(APPEND header_arguments "--internal-header=${DIRECTORY}/${ARGS_GENERATE_HEADER}_internal.h")
+    if(NOT ARGS_PUBLIC)
+      list(APPEND out_files "${DIRECTORY}/${ARGS_GENERATE_HEADER}_internal.h")
+      list(APPEND header_arguments "--internal-header=${DIRECTORY}/${ARGS_GENERATE_HEADER}_internal.h")
+    endif()
   endif()
 
   add_custom_command(
@@ -170,6 +200,7 @@ function(vala_precompile output)
         "-C"
         ${header_arguments}
         ${vapi_arguments}
+        ${gir_arguments}
         "-b" "${CMAKE_CURRENT_SOURCE_DIR}"
         "-d" "${DIRECTORY}"
         ${vala_pkg_opts}
