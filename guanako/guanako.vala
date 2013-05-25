@@ -1032,7 +1032,8 @@ namespace Guanako {
             bool symbol_is_type (Symbol smb, string type) {
                 if (type == "Parameter" && smb is Vala.Parameter)
                     return true;
-                if (type == "Field" && smb is Field)
+                // Simply treat LocalVariables as fields
+                if (type == "Field" && (smb is Field || smb is LocalVariable))
                     return true;
                 if (type == "Method" && smb is Method)
                     return true;

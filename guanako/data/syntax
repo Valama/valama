@@ -144,7 +144,7 @@ ValIterStat : parent
 . $ValStat{parent}
 
 ValInst : parent
-$ChildVariableInst{parent}>{a}|$ChildPropertyInst{parent}>{a}|$ValChildMethodInst{parent} ?$ValIterInst{a}
+$ChildVariableInst{parent}>{a}|$ChildPropertyInst{parent}>{a}|$ValChildMethodInst{parent}|$ChildConst{parent}>{a} ?$ValIterInst{a}
 
 ValStat : parent
 $ValChildStuffStat{parent}|$ValChildVariablesStat{parent}|$ValChildMethodStat{parent}
