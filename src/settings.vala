@@ -20,7 +20,7 @@
 class ValamaSettings {
 
     public ValamaSettings() {
-        settings = new Settings("app.valama");
+        settings = new Settings ("apps.valama");
     }
     Settings settings;
 

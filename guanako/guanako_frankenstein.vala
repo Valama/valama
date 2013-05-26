@@ -22,8 +22,8 @@ namespace Guanako {
     public class FrankenStein {
         public FrankenStein() {
             var pid = ((int)Posix.getpid()).to_string();
-            dbus_name = "app.valama.frankenstein" + pid;
-            dbus_path = "/app/valama/frankenstein";
+            dbus_name = "apps.valama.frankenstein" + pid;
+            dbus_path = "/apps/valama/frankenstein";
             build_frankenstein_mainblock();
             owner_id = Bus.own_name (BusType.SESSION, dbus_name, BusNameOwnerFlags.NONE,
                   on_bus_aquired,
