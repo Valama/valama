@@ -278,7 +278,7 @@ function(gsettings_install)
       install(FILES "${gfile}" DESTINATION "${ARGS_GSETTINGSDIR}")
     endforeach()
 
-    if(POSTINSTALL_HOOK AND NOT "$ENV{DESTDIR}")
+    if(POSTINSTALL_HOOK AND "$ENV{DESTDIR}" STREQUAL "")
       if(CMAKE_INSTALL_PREFIX)
         set(install_prefix "${CMAKE_INSTALL_PREFIX}/")
       else()

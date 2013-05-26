@@ -23,13 +23,22 @@ if(XGETTEXT_FOUND)
     SRCFILES
       ${srcfiles}
       "guanako/*.vala"
+    DESKTOPFILES
+      "data/valama.desktop.in"
     WORKING_DIRECTORY
       "../"
   )
   option(UPDATE_PO "Update .po files." ON)
   if(UPDATE_PO)
-    gettext_create_translations("${potfile}" ALL)
+    set(NOUPDATE "NOUPDATE")
   else()
-    gettext_create_translations("${potfile}" ALL NOUPDATE)
+    set(NOUPDATE)
   endif()
+  option(INSTALL_INTLTOOL_MERGED "Copy intltoolized files into source tree." OFF)
+  if(INSTALL_INTLTOOL_MERGED)
+    set(DESKTOPFILES_INSTALL "DESKTOPFILES_INSTALL")
+  else()
+    set(DESKTOPFILES_INSTALL)
+  endif()
+  gettext_create_translations("${potfile}" ALL ${NOUPDATE} ${DESKTOPFILES_INSTALL})
 endif()
