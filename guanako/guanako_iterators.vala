@@ -132,6 +132,13 @@ namespace Guanako {
                 return cv.get_methods();
             if (type == "Signal")
                 return cv.get_signals();
+            if (type == "CreationMethod") {
+                var ret = new Vala.ArrayList<Symbol>();
+                foreach (Symbol m in cv.get_methods())
+                    if (m is CreationMethod)
+                        ret.add (m);
+                return ret;
+            }
         }
         return null;
     }

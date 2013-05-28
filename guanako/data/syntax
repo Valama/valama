@@ -34,20 +34,21 @@ foreach ?_ ( ?_ $Type _ *word _ in _ $Value ?_ )
 
 
 BoolExp
-$BoolExpComp|$BoolExpNeg|$BoolExpBrackets|$BoolExpAnd
+$Value|$BoolExpComp|$BoolExpNeg|$BoolExpBrackets|$BoolExpAnd
+# $Value should be limited to bool values
 #|$BoolExpOr
 
 BoolExpComp
 $Value _ $BoolExpValComp|$BoolExpTypeComp
 
 BoolExpValComp
-==|<=|>=|!= _ $Value
+==|<=|>=|!=|<|> _ $Value
 
 BoolExpTypeComp
 is _ $Type
 
 BoolExpNeg
-! ?_ ( ?_ $BoolExp ?_ )
+! ?_ $BoolExp
 
 #BoolExpOr
 #$BoolExp _ || _ $BoolExp
@@ -116,10 +117,11 @@ MLSdeclaration
 ParamBrackets
 ( ?_ ?$ParamBracketsChild ?_ )
 ParamBracketsChild
-$Value ?$ParamBracketsIter
+?$ParamBracketsMod $Value ?$ParamBracketsIter
 ParamBracketsIter
 ?_ , ?_ $ParamBracketsChild
-
+ParamBracketsMod
+ref|out _
 
 # ==============
 # A value that could be used for assignments etc
@@ -169,11 +171,16 @@ ValChildMethodInst : parent
 
 # TODO: Correct struct initialization
 NewType
-new _ $Type>{a} ?$NewTypeCreationCall{a} ?_ $ParamBrackets
+new _ $Type>{a} $NewTypeCreationCall{a}|$NewTypeArrayInit
 
 NewTypeCreationCall : parent
-. {parent}>CreationMethod
+?$NewTypeCreationMth{parent}>{parent} push_cur>{parent} ?_ $ParamBrackets pop_cur>{parent}
 
+NewTypeCreationMth : parent
+. {parent}>CreationMethod{ret}
+
+NewTypeArrayInit : parent
+?_ [ ?_ $Value ?_ ]
 
 # ==============
 # A class or a struct
