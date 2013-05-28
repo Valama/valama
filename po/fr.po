@@ -55,7 +55,7 @@ msgstr "Mise à jour de %s terminée !\n"
 #: ../src/project/build_project.vala:145
 #, c-format
 msgid "'%s' build failed: %s\n"
-msgstr "build de '%s' échouée : %s\n"
+msgstr "Construction de '%s' échouée : %s\n"
 
 #: ../src/project/build_project.vala:135 ../src/project/build_project.vala:186
 #: ../src/project/build_project.vala:222
@@ -87,12 +87,12 @@ msgstr "tests de '%s' échoués : %s\n"
 #: ../src/project/build_project.vala:120
 #, c-format
 msgid "'Build' failed with exit status: %d\n"
-msgstr "'Build' échouée avec le statut : %d\n"
+msgstr "'Construction' échouée avec le statut : %d\n"
 
 #: ../src/project/build_project.vala:106
 #, c-format
 msgid "'Clean' failed with exit status: %d\n"
-msgstr "'Clean' échoué avec le statut : %d\n"
+msgstr "'Nettoyage' échoué avec le statut : %d\n"
 
 #: ../src/project/build_project.vala:125
 #, c-format
@@ -219,113 +219,113 @@ msgstr "Mise à jour de la zone tampon"
 
 #: ../src/ui_main.vala:393 ../src/ui_main.vala:399 ../src/ui_main.vala:542
 msgid "Build"
-msgstr "Build"
+msgstr "Construire"
 
 #: ../src/project/build_project.vala:70
 #, c-format
 msgid "Build command received signal: %s\n"
-msgstr "La commande build a reçu le signal : %s\n"
+msgstr "La commande construire a reçu le signal : %s\n"
 
 #. TRANSLATORS:
 #. The user has to choose a directory where to build the application
 #. so it might be undefined.
 #: ../src/buildsystem/base.vala:429 ../src/buildsystem/cmake.vala:44
 msgid "Build directory not set."
-msgstr "Répertoire de build non paramètré."
+msgstr "Répertoire de construction non paramètré."
 
 #: ../src/ui_main.vala:177
 msgid "Build output"
-msgstr "Sortie build"
+msgstr "Sortie de construction"
 
 #: ../src/project/project_templates.vala:74
 #, c-format
 msgid "Build system '%s' currently not supported by template selector.\n"
 msgstr ""
-"Le système build '%s' n'est actuellement pas supporté par le selecteur de "
+"Le système de construction '%s' n'est actuellement pas supporté par le selecteur de "
 "modèles.\n"
 
 #: ../src/project/project.vala:1715
 #, c-format
 msgid "Build system '%s' not supported.\n"
-msgstr "Système build '%s' non supporté.\n"
+msgstr "Système de construction '%s' non supporté.\n"
 
 #: ../src/project/project.vala:1078
 #, c-format
 msgid "Build system directory does not exist: %s\n"
-msgstr "Répertoire du système build n'existe pas : %s\n"
+msgstr "Répertoire du système de construction n'existe pas : %s\n"
 
 #: ../src/project/project.vala:1076
 #, c-format
 msgid "Build system file does not exist: %s\n"
-msgstr "Fichier du système build n'existe pas : %s\n"
+msgstr "Fichier du système de construction n'existe pas : %s\n"
 
 #: ../src/ui/project_browser.vala:289
 msgid "Build system files"
-msgstr "Fichiers du système build"
+msgstr "Fichiers du système de construction"
 
 #: ../src/common/args.vala:40
 msgid "Build systems directory."
-msgstr "Répertoire des systèmes build"
+msgstr "Répertoire des systèmes de construction"
 
 #: ../src/buildsystem/base.vala:75
 #, c-format
 msgid "Buildsystem build finished: %s\n"
-msgstr "Build du système de build terminé : %s\n"
+msgstr "Construction du système de construction terminé : %s\n"
 
 #: ../src/buildsystem/base.vala:72
 #, c-format
 msgid "Buildsystem build started: %s\n"
-msgstr "build du système de buils démarré : %s\n"
+msgstr "Construction du système de buils démarré : %s\n"
 
 #: ../src/buildsystem/base.vala:81
 #, c-format
 msgid "Buildsystem cleaning finished: %s\n"
-msgstr "Nettoyage du système de build terminé : %s\n"
+msgstr "Nettoyage du système de construction terminé : %s\n"
 
 #: ../src/buildsystem/base.vala:78
 #, c-format
 msgid "Buildsystem cleaning started: %s\n"
-msgstr "Nettoyage du système de build démarré : %s\n"
+msgstr "Nettoyage du système de construction démarré : %s\n"
 
 #: ../src/buildsystem/base.vala:69
 #, c-format
 msgid "Buildsystem configuration finished: %s\n"
-msgstr "Configuration du système de build terminée : %s\n"
+msgstr "Configuration du système de construction terminée : %s\n"
 
 #: ../src/buildsystem/base.vala:66
 #, c-format
 msgid "Buildsystem configuration started: %s\n"
-msgstr "Configuration du système de build démarrée : %s\n"
+msgstr "Configuration du système de construction démarrée : %s\n"
 
 #: ../src/buildsystem/base.vala:87
 #, c-format
 msgid "Buildsystem distcleaning finished: %s\n"
-msgstr "Distcleaning du système de build terminé : %s\n"
+msgstr "Distcleaning du système de construction terminé : %s\n"
 
 #: ../src/buildsystem/base.vala:84
 #, c-format
 msgid "Buildsystem distcleaning started: %s\n"
-msgstr "Distcleaning du système de build démarré : %s\n"
+msgstr "Distcleaning du système de construction démarré : %s\n"
 
 #: ../src/buildsystem/base.vala:63
 #, c-format
 msgid "Buildsystem initialization finished: %s\n"
-msgstr "Initialisation du système de build terminée : %s\n"
+msgstr "Initialisation du système de construction terminée : %s\n"
 
 #: ../src/buildsystem/base.vala:60
 #, c-format
 msgid "Buildsystem initialization started: %s\n"
-msgstr "Initialisation du système de build démarrée : %s\n"
+msgstr "Initialisation du système de construction démarrée : %s\n"
 
 #: ../src/buildsystem/base.vala:93
 #, c-format
 msgid "Buildsystem tests finished: %s\n"
-msgstr "Tests du système de build terminés : %s\n"
+msgstr "Tests du système de construction terminés : %s\n"
 
 #: ../src/buildsystem/base.vala:90
 #, c-format
 msgid "Buildsystem tests started: %s\n"
-msgstr "Tests du système de build démarrés : %s\n"
+msgstr "Tests du système de construction démarrés : %s\n"
 
 #: ../guanako/guanako.vala:943
 #, c-format
@@ -396,7 +396,7 @@ msgstr "Clean all"
 
 #: ../src/ui_main.vala:412
 msgid "Clean build"
-msgstr "Clean build"
+msgstr "Construction propre"
 
 #: ../src/ui/app_output.vala:51
 msgid "Clear output"
@@ -570,7 +570,7 @@ msgstr "Impossible d'obtenir l'itérateur dans TreeView : %s\n"
 #: ../src/project/project.vala:595
 #, c-format
 msgid "Could not initialize build system: %s\n"
-msgstr "Impossible d'initialiser le système de build : %s\n"
+msgstr "Impossible d'initialiser le système de construction : %s\n"
 
 #: ../src/ui/ui_elements.vala:118
 msgid "Could not initialize locking signals.\n"
@@ -960,7 +960,7 @@ msgstr "Le fichier est déjà un fichier source : ignoré.\n"
 
 #: ../src/project/project.vala:1021 ../src/project/project.vala:1148
 msgid "File already registered for build system. Skip it.\n"
-msgstr "Le fichier est déjà enregistré pour le système de build : ignoré.\n"
+msgstr "Le fichier est déjà enregistré pour le système de construction : ignoré.\n"
 
 #: ../src/common/common.vala:422
 msgid "File copying cancelled."
@@ -1017,7 +1017,7 @@ msgstr ""
 #: ../src/project/project.vala:1088
 #, c-format
 msgid "Found build system file: %s\n"
-msgstr "Trouvé le fichier de système de build : %s\n"
+msgstr "Trouvé le fichier de système de construction : %s\n"
 
 #: ../src/project/project.vala:1143
 #, c-format
@@ -1423,7 +1423,7 @@ msgstr "Quitter"
 
 #: ../src/ui_main.vala:406
 msgid "Rebuild"
-msgstr "Rebuild"
+msgstr "Reconstruire"
 
 #: ../src/ui/breakpoints.vala:107
 msgid "Received invalid ID. Try to rebuild."
@@ -1444,7 +1444,7 @@ msgstr "Release"
 #: ../src/project/project.vala:1110
 #, c-format
 msgid "Remove build system file: %s\n"
-msgstr "Effacer le fichier du système de build : %s\n"
+msgstr "Effacer le fichier du système de construction : %s\n"
 
 #: ../src/project/project.vala:1165
 #, c-format
@@ -1559,43 +1559,43 @@ msgstr "Paramètres"
 
 #: ../src/ui_main.vala:355
 msgid "Show application output"
-msgstr "Afficher la sortie de l'application"
+msgstr "Sortie de l'application"
 
 #: ../src/ui_main.vala:356
 msgid "Show breakpoints"
-msgstr "Afficher les points d'arrêt"
+msgstr "Points d'arrêt"
 
 #: ../src/ui_main.vala:354
 msgid "Show build output"
-msgstr "Afficher la sortie du processus de construction"
+msgstr "Sortie du processus de construction"
 
 #: ../src/ui_main.vala:357
 msgid "Show current file structure"
-msgstr "Afficher la structure du fichier courant"
+msgstr "Structure du fichier courant"
 
 #: ../src/ui_main.vala:360
 msgid "Show current symbol"
-msgstr "Afficher le symbole courant"
+msgstr "Symbole courant"
 
 #: ../src/ui_main.vala:353
 msgid "Show project browser"
-msgstr "Afficher le navigateur de projet"
+msgstr "Navigateur de projet"
 
 #: ../src/ui_main.vala:352
 msgid "Show reports"
-msgstr "Afficher les rapports"
+msgstr "Rapports"
 
 #: ../src/ui_main.vala:351
 msgid "Show search"
-msgstr "Afficher les recherches"
+msgstr "Recherches"
 
 #: ../src/ui_main.vala:358
 msgid "Show style checker"
-msgstr "Afiicher le vérificateur de style"
+msgstr "Vérificateur de style"
 
 #: ../src/ui_main.vala:359
 msgid "Show symbol browser"
-msgstr "Afficher le navigateur de symboles"
+msgstr "Navigateur de symboles"
 
 #: ../src/common/common.vala:443
 #, c-format
@@ -1843,7 +1843,7 @@ msgstr "Version : "
 
 #: ../src/ui_main.vala:346
 msgid "View"
-msgstr "Afficher"
+msgstr "Affichage"
 
 #: ../src/dialogs/project_settings.vala:38
 msgid "View all files (*)"
