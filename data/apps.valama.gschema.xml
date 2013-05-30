@@ -1,5 +1,5 @@
 <schemalist>
-  <schema id="apps.valama" path="/apps/valama/" gettext-domain="">
+  <schema id="apps.valama" path="/apps/valama/" gettext-domain="valama">
 
     <key name="window-size-x" type="i">
       <default>950</default>

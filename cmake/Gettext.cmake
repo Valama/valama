@@ -82,9 +82,6 @@
 #   Make translations target a dependency of the 'all' target. (Build
 #   translations with every build.)
 #
-# COMMENT (optional)
-#   Cmake comment for translations target.
-#
 # PODIR (optional)
 #   Directory with .po files.
 #   Default: ${CMAKE_CURRENT_SOURCE_DIR}
@@ -111,11 +108,7 @@
 #       SRCFILES
 #         "${PROJECT_SOURCE_DIR}/src/*.vala"
 #     )
-#     gettext_create_translations("${potfile}"
-#       ALL
-#       COMMENT
-#         "Build translations."
-#     )
+#     gettext_create_translations("${potfile}" ALL)
 #   endif()
 #
 ##
@@ -285,7 +278,9 @@ if(XGETTEXT_FOUND)
       set(desktop_list)
       set(desktop_list_abs)
       set(desktop_list_b)
+      set(desktop_list_b_abs)
       set(desktop_list_h)
+      set(desktop_list_h_abs)
       foreach(globexpr ${ARGS_DESKTOPFILES})
         if(NOT IS_ABSOLUTE "${globexpr}")
           get_filename_component(absDir "${ARGS_WORKING_DIRECTORY}" ABSOLUTE)
@@ -301,10 +296,18 @@ if(XGETTEXT_FOUND)
 
             file(RELATIVE_PATH relFile_b "${PROJECT_SOURCE_DIR}" "${absFile}")
             list(APPEND desktop_list_b "${relFile_b}")
-            list(APPEND desktop_list_h "${PROJECT_BINARY_DIR}/${relFile_b}.h")
-            execute_process(
+            get_filename_component(absFile_b "${PROJECT_BINARY_DIR}/${relFile_b}" ABSOLUTE)
+            list(APPEND desktop_list_b_abs "${absFile_b}")
+            file(RELATIVE_PATH relFile_h "${CMAKE_CURRENT_SOURCE_DIR}" "${absFile_b}.h")
+            list(APPEND desktop_list_h "${relFile_h}")
+            list(APPEND desktop_list_h_abs "${absFile_b}.h")
+            add_custom_command(
+              OUTPUT
+                "${absFile_b}"
               COMMAND
-                ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/${relFile}" "${relFile_b}"
+                ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/${relFile}" "${absFile_b}"
+              DEPENDS
+                "${absFile}"
             )
           endforeach()
         else()
@@ -314,10 +317,18 @@ if(XGETTEXT_FOUND)
 
           file(RELATIVE_PATH relFile_b "${PROJECT_SOURCE_DIR}" "${globexpr}")
           list(APPEND desktop_list_b "${relFile_b}")
-          list(APPEND desktop_list_h "${PROJECT_BINARY_DIR}/${relFile_b}.h")
-          execute_process(
+          get_filename_component(absFile_b "${PROJECT_BINARY_DIR}/${relFile_b}" ABSOLUTE)
+          list(APPEND desktop_list_b_abs "${absFile_b}")
+          file(RELATIVE_PATH relFile_h "${CMAKE_CURRENT_SOURCE_DIR}" "${absFile_b}.h")
+          list(APPEND desktop_list_h "${relFile_h}")
+          list(APPEND desktop_list_h_abs "${absFile_b}.h")
+          add_custom_command(
+            OUTPUT
+              "${absFile_b}"
             COMMAND
-              ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/${relFile}" "${relFile_b}"
+              ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/${relFile}" "${absFile_b}"
+            DEPENDS
+              "${absFile}"
           )
         endif()
       endforeach()
@@ -326,7 +337,9 @@ if(XGETTEXT_FOUND)
       set(gsettings_list)
       set(gsettings_list_abs)
       set(gsettings_list_b)
+      set(gsettings_list_b_abs)
       set(gsettings_list_h)
+      set(gsettings_list_h_abs)
       foreach(globexpr ${ARGS_GSETTINGSFILES})
         if(NOT IS_ABSOLUTE "${globexpr}")
           get_filename_component(absDir "${ARGS_WORKING_DIRECTORY}" ABSOLUTE)
@@ -342,10 +355,18 @@ if(XGETTEXT_FOUND)
 
             file(RELATIVE_PATH relFile_b "${PROJECT_SOURCE_DIR}" "${absFile}")
             list(APPEND gsettings_list_b "${relFile_b}")
-            list(APPEND gsettings_list_h "${PROJECT_BINARY_DIR}/${relFile_b}.h")
-            execute_process(
+            get_filename_component(absFile_b "${PROJECT_BINARY_DIR}/${relFile_b}" ABSOLUTE)
+            list(APPEND gsettings_list_b_abs "${absFile_b}")
+            file(RELATIVE_PATH relFile_h "${CMAKE_CURRENT_SOURCE_DIR}" "${absFile_b}.h")
+            list(APPEND gsettings_list_h "${relFile_h}")
+            list(APPEND gsettings_list_h_abs "${absFile_b}.h")
+            add_custom_command(
+              OUTPUT
+                "${absFile_b}"
               COMMAND
-                ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/${relFile}" "${relFile_b}"
+                ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/${relFile}" "${absFile_b}"
+              DEPENDS
+                "${absFile}"
             )
           endforeach()
         else()
@@ -355,10 +376,16 @@ if(XGETTEXT_FOUND)
 
           file(RELATIVE_PATH relFile_b "${PROJECT_SOURCE_DIR}" "${globexpr}")
           list(APPEND gsettings_list_b "${relFile_b}")
-          list(APPEND gsettings_list_h "${PROJECT_BINARY_DIR}/${relFile_b}.h")
-          execute_process(
+          get_filename_component(absFile_b "${PROJECT_BINARY_DIR}/${relFile_b}" ABSOLUTE)
+          list(APPEND gsettings_list_b_abs "${absFile_b}")
+          file(RELATIVE_PATH relFile_h "${CMAKE_CURRENT_SOURCE_DIR}" "${absFile_b}.h")
+          list(APPEND gsettings_list_h "${relFile_h}")
+          list(APPEND gsettings_list_h_abs "${absFile_b}.h")
+          add_custom_command(
+            OUTPUT
+              "${absFile_b}"
             COMMAND
-              ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/${relFile}" "${relFile_b}"
+              ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/${relFile}" "${absFile_b}"
           )
         endif()
       endforeach()
@@ -410,12 +437,11 @@ if(XGETTEXT_FOUND)
       if(ARGS_DESKTOPFILES)
         add_custom_command(
           OUTPUT
-            ${desktop_list_h}
+            ${desktop_list_h_abs}
           COMMAND
             "${INTLTOOL_EXTRACT_EXECUTABLE}" ${INTLTOOL_OPTIONS_DEFAULT} "--type" "gettext/ini" ${desktop_list_b}
           DEPENDS
             ${desktop_list_b_abs}
-            ${desktop_list_abs}
           WORKING_DIRECTORY
             "${PROJECT_BINARY_DIR}"
         )
@@ -427,7 +453,7 @@ if(XGETTEXT_FOUND)
           COMMAND
             ${CMAKE_COMMAND} -E touch "${CMAKE_CURRENT_BINARY_DIR}/_desktop.pot"
           DEPENDS
-            ${desktop_list_h}
+            ${desktop_list_h_abs}
           WORKING_DIRECTORY
             "${CMAKE_CURRENT_SOURCE_DIR}"
         )
@@ -442,12 +468,11 @@ if(XGETTEXT_FOUND)
       if(ARGS_GSETTINGSFILES)
         add_custom_command(
           OUTPUT
-            ${gsettings_list_h}
+            ${gsettings_list_h_abs}
           COMMAND
             "${INTLTOOL_EXTRACT_EXECUTABLE}" ${INTLTOOL_OPTIONS_DEFAULT} "--type" "gettext/gsettings" ${gsettings_list_b}
           DEPENDS
             ${gsettings_list_b_abs}
-            ${gsettings_list_abs}
           WORKING_DIRECTORY
             "${PROJECT_BINARY_DIR}"
         )
@@ -459,7 +484,7 @@ if(XGETTEXT_FOUND)
           COMMAND
             ${CMAKE_COMMAND} -E touch "${CMAKE_CURRENT_BINARY_DIR}/_gsettings.pot"
           DEPENDS
-            ${gsettings_list_h}
+            ${gsettings_list_h_abs}
           WORKING_DIRECTORY
             "${CMAKE_CURRENT_SOURCE_DIR}"
         )
@@ -491,7 +516,7 @@ if(XGETTEXT_FOUND)
 
   function(gettext_create_translations potfile)
     cmake_parse_arguments(ARGS "ALL;NOUPDATE;DESKTOPFILES_INSTALL"
-        "COMMENT;PODIR;LOCALEDIR" "LANGUAGES;POFILES" ${ARGN})
+        "PODIR;LOCALEDIR" "LANGUAGES;POFILES" ${ARGN})
 
     get_filename_component(_potBasename ${potfile} NAME_WE)
     get_filename_component(_absPotFile ${potfile} ABSOLUTE)
@@ -591,45 +616,56 @@ if(XGETTEXT_FOUND)
     if(langs AND _INTLTOOL_DESKTOPFILES)
       foreach(desktopfiletmp ${_INTLTOOL_DESKTOPFILES})
         string(REGEX REPLACE "(\\.desktop).*$" "\\1" desktopfile "${desktopfiletmp}")
-        list(APPEND desktopfiles "${PROJECT_BINARY_DIR}/${desktopfile}")
-        execute_process(
+        set(desktopfile_abs "${PROJECT_BINARY_DIR}/${desktopfile}")
+        list(APPEND desktopfiles "${desktopfile_abs}")
+        add_custom_command(
+          OUTPUT
+            "${desktopfile_abs}"
           COMMAND
-            "${INTLTOOL_MERGE_EXECUTABLE}" ${INTLTOOL_OPTIONS_DEFAULT} "--desktop-style" "${CMAKE_CURRENT_SOURCE_DIR}" "${PROJECT_BINARY_DIR}/${desktopfiletmp}" "${PROJECT_BINARY_DIR}/${desktopfile}"
+            "${INTLTOOL_MERGE_EXECUTABLE}" ${INTLTOOL_OPTIONS_DEFAULT} "--desktop-style" "${CMAKE_CURRENT_SOURCE_DIR}" "${PROJECT_BINARY_DIR}/${desktopfiletmp}" "${desktopfile_abs}"
+          DEPENDS
+            "${PROJECT_BINARY_DIR}/${desktopfiletmp}"
         )
         if(ARGS_DESKTOPFILES_INSTALL)
-          execute_process(
+          add_custom_command(
+            OUTPUT
+              "${CMAKE_SOURCE_DIR}/${desktopfile}"
+              "desktopinstall.stamp"
             COMMAND
-              ${CMAKE_COMMAND} -E copy_if_different "${PROJECT_BINARY_DIR}/${desktopfile}" "${PROJECT_SOURCE_DIR}/${desktopfile}"
+              ${CMAKE_COMMAND} -E copy_if_different "${desktopfile_abs}" "${CMAKE_SOURCE_DIR}/${desktopfile}"
+            COMMAND
+              ${CMAKE_COMMAND} -E touch "desktopinstall.stamp"
+            DEPENDS
+              "${desktopfile_abs}"
+          )
+        else()
+          add_custom_command(
+              OUTPUT
+                "desktopinstall.stamp"
+              COMMAND
+                ${CMAKE_COMMAND} -E touch "desktopinstall.stamp"
+              DEPENDS
+                "${desktopfile_abs}"
           )
         endif()
         install(
           FILES
-            "${PROJECT_BINARY_DIR}/${desktopfile}"
+            "${desktopfile_abs}"
           DESTINATION
             "share/applications"
         )
       endforeach()
     endif()
 
-    if(ARGS_COMMENT)
-      add_custom_target(translations
-        "${make_all}"
-        DEPENDS
-          ${_gmoFiles}
-          ${desktopfiles}
-        COMMENT
-          "${ARGS_COMMENT}" VERBATIM
-      )
-    else()
-      add_custom_target(translations
-        "${make_all}"
-        DEPENDS
-          ${_gmoFiles}
-          ${desktopfiles}
-        COMMENT
-          "Build translations." VERBATIM
-      )
-    endif()
+    add_custom_target(translations
+      "${make_all}"
+      DEPENDS
+        ${_gmoFiles}
+        ${desktopfiles}
+        "desktopinstall.stamp"
+      COMMENT
+        "Build translations." VERBATIM
+    )
   endfunction()
 endif()
 
