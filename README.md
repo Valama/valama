@@ -14,7 +14,7 @@ The next gen Vala IDE.
  * glib-2.0
  * gio-2.0
  * gee-0.8 or gee-1.0
- * libvala-0.18 (>= 0.17) or libvala-0.20 (>= 0.19) or newer libvala
+ * at least libvala-0.20 (recommended) or libvala-0.18
  * gdk-3.0
  * gdl-3.0 (>= 3.5.5 is recommended)
  * gtk+-3.0 (>= 3.4)
@@ -27,11 +27,11 @@ The next gen Vala IDE.
 
 On Debian based systems install following packages:
 
-    sudo apt-get install build-essential valac-0.18 libvala-0.18-dev cmake pkg-config libgtksourceview-3.0-dev libgee-dev libxml2-dev libgdl-3-dev gnome-icon-theme-symbolic imagemagick
+    sudo apt-get install build-essential valac-0.20 libvala-0.20-dev cmake pkg-config libgtksourceview-3.0-dev libgee-dev libxml2-dev libgdl-3-dev gnome-icon-theme-symbolic imagemagick intltool
 
 On Fedora based systems install following packages:
 
-    sudo yum install vala-devel cmake libgtksourceview3-devel libgee-devel libxml2-devel libgdl-devel gnome-icon-theme-symbolic ImageMagick
+    sudo yum install vala-devel cmake libgtksourceview3-devel libgee-devel libxml2-devel libgdl-devel gnome-icon-theme-symbolic ImageMagick intltool
 
 **Hint:** If you want to use a newer version of `libvala`, change  `cmake/project.cmake` and `cmake/guanako.cmake` (and if you want to use Valama `valama.vlp`) accordingly.
 
@@ -58,6 +58,10 @@ Optionally use `--layout ../data/layout.xml` to use standard layout.
 ## Packaging files for distributions ##
 To build and install Valama for your distribution look at the [packaging](https://github.com/Valama/valama/tree/packaging) branch. If you don't find your distribution there, you are welcome to contribute your packaging files to this branch (and put you work under GPL-3+).
 
+
+## Contribution ##
+See the wiki page for some information: [Wiki](https://github.com/Valama/valama/wiki)
+
 ## License ##
 Valama is distributed under the terms of the GNU General Public License version 3 or later and published by:
  * Linus Seelinger
@@ -66,4 +70,4 @@ Valama is distributed under the terms of the GNU General Public License version 
 For a full list of all contributors see [here](https://github.com/Valama/valama/graphs/contributors) and take a look at `AUTHORS` file.
 
 ## Credits ##
-element-\* icons from Anjuta IDE (www.anjuta.org, GPL2 licensed)
+element-\* icons from Anjuta IDE (http://projects.gnome.org/anjuta, GPL2 licensed)
