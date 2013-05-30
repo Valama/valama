@@ -240,27 +240,28 @@ function(gsettings_install)
         @ONLY
       )
       foreach(gfile ${ARGS_FILES})
+        if(NOT IS_ABSOLUTE "${gfile}")
+          set(gfile "${CMAKE_CURRENT_SOURCE_DIR}/${gfile}")
+        endif()
         get_filename_component(filename "${gfile}" NAME)
         add_custom_command(
-            COMMAND
-              ${CMAKE_COMMAND} -E make_directory "${GSETTINGSDIR}"
+            OUTPUT
+              "${GSETTINGSDIR}"
             COMMAND
               ${CMAKE_COMMAND} -E copy_if_different
                                       "${gfile}"
                                       "${CMAKE_CURRENT_BINARY_DIR}/glib-2.0/schemas/${filename}"
-            OUTPUT
-              "${GSETTINGSDIR}"
             COMMENT
               "Install gsettings schemas locally." VERBATIM
         )
       endforeach()
       add_custom_command(
+          OUTPUT
+            "glib-2.0/schemas/gschemas.compiled"
           COMMAND
             ${CMAKE_COMMAND} -P "${CMAKE_BINARY_DIR}/GlibCompileSchema_local.cmake"
           DEPENDS
             "${GSETTINGSDIR}"
-          OUTPUT
-            "glib-2.0/schemas/gschemas.compiled"
           COMMENT
             "Compile gsettings schemas." VERBATIM
       )

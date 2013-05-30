@@ -334,12 +334,12 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${manfile}" DESTINATION "${mandir}/ma
 
 
 # Gsettings schemas
-gsettings_install(
-  LOCAL
-    ${LOCAL}
-  FILES
-    "${CMAKE_CURRENT_SOURCE_DIR}/data/apps.valama.gschema.xml"
-)
+if(LOCAL)
+  set(local_build "LOCAL")
+else()
+  set(local_build)
+endif()
+gsettings_install(${local_build} FILES "data/apps.valama.gschema.xml")
 
 
 install(TARGETS ${project_name_lower} DESTINATION "${bindir}")
