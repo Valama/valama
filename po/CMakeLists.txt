@@ -25,6 +25,8 @@ if(XGETTEXT_FOUND)
       "guanako/*.vala"
     DESKTOPFILES
       "data/valama.desktop.in"
+    GSETTINGSFILES
+      "data/apps.valama.gschema.xml"
     WORKING_DIRECTORY
       "../"
   )

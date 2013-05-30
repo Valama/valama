@@ -338,7 +338,7 @@ gsettings_install(
   LOCAL
     ${LOCAL}
   FILES
-    "${CMAKE_CURRENT_SOURCE_DIR}/data/apps.valama.gschema.xml"
+    "${CMAKE_CURRENT_BINARY_DIR}/data/apps.valama.gschema.xml"
 )
 
 
