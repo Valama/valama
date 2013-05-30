@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Valama 0.1.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-05-22 20:42+0200\n"
+"POT-Creation-Date: 2013-05-30 21:20+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -682,7 +682,7 @@ msgstr ""
 msgid "Could not read file content of '%s': %s\n"
 msgstr ""
 
-#: ../guanako/guanako.vala:1293 ../guanako/guanako_vapi_discoverer.vala:51
+#: ../guanako/guanako_vapi_discoverer.vala:51 ../guanako/guanako.vala:1294
 #, c-format
 msgid "Could not read file: %s"
 msgstr ""
@@ -692,7 +692,7 @@ msgstr ""
 msgid "Could not read file: %s\n"
 msgstr ""
 
-#: ../guanako/guanako.vala:1291
+#: ../guanako/guanako.vala:1292
 #, c-format
 msgid "Could not read line: %s"
 msgstr ""
@@ -1022,7 +1022,7 @@ msgstr ""
 msgid "Github project page"
 msgstr ""
 
-#: ../guanako/guanako.vala:1115
+#: ../guanako/guanako.vala:1116
 msgid "Guanako Completion"
 msgstr ""
 
@@ -2008,4 +2008,24 @@ msgstr ""
 
 #: ../src/project/project.vala:396
 msgid "valama_project"
+msgstr ""
+
+#: ../build/data/valama.desktop.in.h:3
+msgid "Create Vala projects."
+msgstr ""
+
+#: ../build/data/valama.desktop.in.h:2
+msgid "IDE"
+msgstr ""
+
+#: ../build/data/valama.desktop.in.h:4
+msgid "Vala;IDE;Development;"
+msgstr ""
+
+#: ../build/data/apps.valama.gschema.xml.h:1
+msgid "Horizontal window size"
+msgstr ""
+
+#: ../build/data/apps.valama.gschema.xml.h:2
+msgid "Vertical window size"
 msgstr ""
