@@ -648,6 +648,7 @@ if(XGETTEXT_FOUND)
                 "${desktopfile_abs}"
           )
         endif()
+        list(APPEND desktopfiles "desktopinstall.stamp")
         install(
           FILES
             "${desktopfile_abs}"
@@ -662,7 +663,6 @@ if(XGETTEXT_FOUND)
       DEPENDS
         ${_gmoFiles}
         ${desktopfiles}
-        "desktopinstall.stamp"
       COMMENT
         "Build translations." VERBATIM
     )
