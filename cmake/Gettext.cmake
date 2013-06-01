@@ -614,15 +614,18 @@ if(XGETTEXT_FOUND)
 
     set(desktopfiles)
     if(langs AND _INTLTOOL_DESKTOPFILES)
+      file(RELATIVE_PATH cursrcdir_rel "${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
       foreach(desktopfiletmp ${_INTLTOOL_DESKTOPFILES})
         string(REGEX REPLACE "(\\.desktop).*$" "\\1" desktopfile "${desktopfiletmp}")
         set(desktopfile_abs "${PROJECT_BINARY_DIR}/${desktopfile}")
         list(APPEND desktopfiles "${desktopfile_abs}")
+        file(RELATIVE_PATH desktopfile_rel "${CMAKE_CURRENT_BINARY_DIR}" "${desktopfile_abs}")
+        file(RELATIVE_PATH desktopfiletmp_rel "${CMAKE_CURRENT_BINARY_DIR}" "${PROJECT_BINARY_DIR}/${desktopfiletmp}")
         add_custom_command(
           OUTPUT
             "${desktopfile_abs}"
           COMMAND
-            "${INTLTOOL_MERGE_EXECUTABLE}" ${INTLTOOL_OPTIONS_DEFAULT} "--desktop-style" "${CMAKE_CURRENT_SOURCE_DIR}" "${PROJECT_BINARY_DIR}/${desktopfiletmp}" "${desktopfile_abs}"
+            "${INTLTOOL_MERGE_EXECUTABLE}" ${INTLTOOL_OPTIONS_DEFAULT} "--desktop-style" "${cursrcdir_rel}" "${desktopfiletmp_rel}" "${desktopfile_rel}"
           DEPENDS
             "${PROJECT_BINARY_DIR}/${desktopfiletmp}"
         )
