@@ -2,7 +2,7 @@
 
 The next gen Vala IDE.
 
-![Valama 04.03.2013](https://raw.github.com/Valama/valama/gh-pages/images/valama_2013-03-04.png)
+![Valama 28.05.2013](https://raw.github.com/Valama/valama/gh-pages/images/valama_2013-05-28.png)
 
 ## Manual installation ##
 
