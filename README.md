@@ -31,7 +31,7 @@ On Debian based systems install following packages:
 
 On Fedora based systems install following packages:
 
-    sudo yum install vala-devel cmake libgtksourceview3-devel libgee-devel libxml2-devel libgdl-devel gnome-icon-theme-symbolic ImageMagick intltool
+    sudo yum install vala-devel cmake gtksourceview3-devel libgee-devel libxml2-devel libgdl-devel gnome-icon-theme-symbolic ImageMagick intltool
 
 **Hint:** If you want to use a newer version of `libvala`, change  `cmake/project.cmake` and `cmake/guanako.cmake` (and if you want to use Valama `valama.vlp`) accordingly.
 
