@@ -96,6 +96,8 @@ target_link_libraries("${project_name_lower}" ${PROJECT_LDFLAGS})
 add_definitions(${PROJECT_C_FLAGS})
 install(TARGETS ${project_name_lower} DESTINATION "${bindir}")
 
+install(FILES datadir/48/slocvala.png DESTINATION "${CMAKE_INSTALL_PREFIX}share/icons/hicolor/48x48/apps")
+
 
 # Uninstall target
 add_custom_target(uninstall
