@@ -615,6 +615,9 @@ if(XGETTEXT_FOUND)
     set(desktopfiles)
     if(langs AND _INTLTOOL_DESKTOPFILES)
       file(RELATIVE_PATH cursrcdir_rel "${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
+      if(cursrcdir_rel STREQUAL "")
+        set(cursrcdir_rel ".")
+      endif()
       foreach(desktopfiletmp ${_INTLTOOL_DESKTOPFILES})
         string(REGEX REPLACE "(\\.desktop).*$" "\\1" desktopfile "${desktopfiletmp}")
         set(desktopfile_abs "${PROJECT_BINARY_DIR}/${desktopfile}")
@@ -629,7 +632,7 @@ if(XGETTEXT_FOUND)
           DEPENDS
             "${PROJECT_BINARY_DIR}/${desktopfiletmp}"
         )
-        if(ARGS_DESKTOPFILES_INSTALL)
+        if(ARGS_DESKTOPFILES_INSTALL AND NOT cursrcdir_rel STREQUAL ".")
           add_custom_command(
             OUTPUT
               "${CMAKE_SOURCE_DIR}/${desktopfile}"
