@@ -150,6 +150,19 @@ namespace Guanako {
             return files;
         }
 
+        public inline SourceFile[] get_vapis() {
+            lock (context)
+                return get_vapis_int (context);
+        }
+
+        private SourceFile[] get_vapis_int (CodeContext context) {
+            SourceFile[] files = new SourceFile[0];
+            foreach (SourceFile file in context.get_source_files())
+                if (file.file_type == SourceFileType.PACKAGE)
+                    files += file;
+            return files;
+        }
+
         private bool add_source_file_int (SourceFile source_file) {
             foreach (SourceFile file in get_source_files_int (context_internal))
                 if (file.filename == source_file.filename)
@@ -187,6 +200,8 @@ namespace Guanako {
                                                   filename);
                 if (!add_source_file_int (source_file))
                     return null;
+                else if (is_vapi)
+                    debug_msg (_("Vapi found: %s\n"), filename);
                 lock (context)
                     context = context_internal;
                 return source_file;
@@ -290,7 +305,6 @@ namespace Guanako {
 
                 foreach (string package_name in package_names) {
                     /* Add the new packages */
-                    packages.add (package_name);
                     var vapi_path = context_internal.get_vapi_path (package_name);
                     if (vapi_path == null) {
                         stderr.printf (_("Warning: Vapi for package %s not found.\n"), package_name);
@@ -299,6 +313,7 @@ namespace Guanako {
                     }
                     debug_msg (_("Vapi found: %s\n"), vapi_path);
                     context_internal.add_external_package (package_name);
+                    packages.add (package_name);
                 }
 
                 /* Update completion info of all the new packages */
@@ -309,6 +324,7 @@ namespace Guanako {
                         if (pkg_file == null) {
                             stderr.printf (_("Could not load vapi: %s\n"), vapi_path);
                             missing_packages += pkg;
+                            packages.remove (pkg);
                             continue;
                         }
                         update_file (pkg_file);

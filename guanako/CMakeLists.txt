@@ -192,12 +192,7 @@ else()
 endif()
 add_definitions(-DPACKAGE_DATA_DIR="${install_prefix}${datadir}")
 add_definitions(-DLOCALE_DIR="${install_prefix}${localedir}")
-add_definitions(-DPIXMAP_DIR="${install_prefix}${pixdir}")
 add_definitions(-DVALA_VERSION="${VALA_SHORTVER}")
-
-# Set custom C-macros.
-add_definitions(-DVALA_VAPI_DIR="${VALA_VAPIDIR}")
-add_definitions(-DVALA_DATA_DIR="${VALA_DATADIR}")
 
 install(TARGETS "${project_name_lower}" DESTINATION "${libdir}")
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${project_name_lower}.pc" DESTINATION "lib/pkgconfig")

@@ -21,18 +21,52 @@ using GLib;
 using Vala;
 
 namespace Guanako {
+    public static inline string? get_vapi_path (string pkg, string[]? directories = null) {
+        return get_file_path (pkg, ".vapi", directories);
+    }
+
+    public static inline string? get_deps_path (string pkg, string[]? directories = null) {
+        return get_file_path (pkg, ".deps", directories);
+    }
+
+    private static string? get_file_path (string pkg, string ext, string[]? directories) {
+        if  (directories != null)
+            //TRANSLATORS: E.g.: Checking .vapi dir: /usr/share/vala/vapi
+            foreach (var dir in directories) {
+                debug_msg ("Checking %s dir: %s\n", ext, dir);
+                var filename = Path.build_path (Path.DIR_SEPARATOR_S, dir, pkg + ext);
+                if (FileUtils.test (filename, FileTest.EXISTS))
+                    return filename;
+            }
+        foreach (var dir in get_vapi_dirs()) {
+            debug_msg ("Checking %s dir: %s\n", ext, dir);
+            var filename = Path.build_path (Path.DIR_SEPARATOR_S, dir, pkg + ext);
+            if (FileUtils.test (filename, FileTest.EXISTS))
+                return filename;
+        }
+        return null;
+    }
+
+    public static string[] get_vapi_dirs() {
+        var dirs = new string[0];
+        foreach (var dir in Environment.get_system_data_dirs())
+            dirs += Path.build_path (Path.DIR_SEPARATOR_S, dir, "vala/vapi");
+        foreach (var dir in Environment.get_system_data_dirs())
+            dirs += Path.build_path (Path.DIR_SEPARATOR_S, dir,
+                                     "vala-" + Config.VALA_VERSION,
+                                     "vapi");
+        return dirs;
+    }
 
     /**
      * Get Vala packages from filenames and sort them.
      */
     public static GLib.List<string>? get_available_packages() {
         GLib.List<string> list = null;
-        string[] paths = new string[] {Config.VALA_VAPI_DIR,
-                                       Path.build_path (Path.DIR_SEPARATOR_S,
-                                                        Config.VALA_DATA_DIR,
-                                                        "vapi")};
-        foreach (string path in paths) {
-            debug_msg ("Checking vapi dir: %s\n", path);
+        foreach (string path in get_vapi_dirs()) {
+            if (!FileUtils.test (path, FileTest.IS_DIR))
+                continue;
+            debug_msg ("Checking %s dir: %s\n", ".vapi", path);
             try {
                 var enumerator = File.new_for_path (path).enumerate_children (FileAttribute.STANDARD_NAME, 0);
                 FileInfo file_info;

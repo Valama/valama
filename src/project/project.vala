@@ -224,11 +224,14 @@ public class PkgChoice {
 }
 
 public class PkgCheck {
-    public Gee.ArrayList<PackageInfo> packages { get; private set;
-                                                 default = new Gee.ArrayList<PackageInfo>(); }
+    public Gee.ArrayList<PackageInfo> packages { get; private set; }
     public string? custom_vapi { get; set; default = null; }
     public string? define { get; set; default = null; }
     public string? description { get; set; default = null; }
+
+    public PkgCheck() {
+        packages = new Gee.ArrayList<PackageInfo>();
+    }
 
     public inline void add_package (PackageInfo package) {
         packages.add (package);
@@ -241,9 +244,31 @@ public class PkgCheck {
         return true;
     }
 
-    public bool check() {
+    public bool check (ref string? custom_vapi, ref TreeSet<string> defines) {
         foreach (var pkg in packages) {
-            stdout.printf ("pkg check: %s\n", pkg.name);
+            if (!pkg.check_available())
+                return false;
+            if (this.custom_vapi != null)
+                //TODO: Support for multiple custom vapis? Could be done with
+                //      multiple checks/pkgs though.
+                custom_vapi = this.custom_vapi;
+            if (define != null)
+                defines.add (define);
+            /*
+             *NOTE: Currently extrachecks are optional and if no check at all
+             * succeeds it won't result to failure.
+             */
+            // bool found = true;
+            if (pkg.extrachecks != null) {
+                // found = false;
+                foreach (var check in pkg.extrachecks)
+                    if (check.check (ref custom_vapi, ref defines)) {
+                        // found = true;
+                        break;
+                    }
+            }
+            // if (!found)
+            //     return false;
         }
         return true;
     }
@@ -316,6 +341,10 @@ public class PackageInfo {
      */
     public virtual string? custom_vapi { get; set; default = null; }
     /**
+     * Disable checking of package dependencies.
+     */
+    public virtual bool? nodeps { get; set; default = null; }
+    /**
      * Define related to package.
      */
     public virtual string? define { get; set; default = null; }
@@ -326,6 +355,74 @@ public class PackageInfo {
      * vapis only for specific versions and set defines.
      */
     public virtual Gee.ArrayList<PkgCheck>? extrachecks { get; set; default = null; }
+
+    /**
+     * Test if package is available.
+     *
+     * Use pkg-config to check version. If no .pc file is available always
+     * true.
+     *
+     * @param recheck If `true` don't use cached version.
+     *
+     * @return `true` if available else `false`.
+     */
+    public bool check_available (bool recheck = true) {
+        if (version == null)
+            return true;
+
+        string? vapi = (custom_vapi == null) ? Guanako.get_vapi_path (name)
+                                            // NOTE: Be careful, project initialization dependency.
+                                             : project.get_absolute_path (custom_vapi);
+        if (vapi == null || !FileUtils.test (vapi, FileTest.EXISTS)) {
+            debug_msg_level (2, _("Vapi not found for %s: %s\n"), name, vapi);
+            return false;
+        }
+
+        if (current_version == null || recheck) {
+            string? curversion;
+            if (!package_exists (name, out curversion)) {
+                debug_msg (_("Could not find pkg-config file for '%s'. Assume package exists.\n"), name);
+                return true;
+            } else {
+                current_version = curversion;
+                if (curversion == null)
+                    return false;
+            }
+        }
+
+        bool ret;
+        switch (rel) {
+            case VersionRelation.AFTER:
+                ret = comp_version (current_version, version) > 0;
+                break;
+            case VersionRelation.SINCE:
+                ret = comp_version (current_version, version) >= 0;
+                break;
+            case VersionRelation.BEFORE:
+                ret = comp_version (current_version, version) < 0;
+                break;
+            case VersionRelation.UNTIL:
+                ret = comp_version (current_version, version) <= 0;
+                break;
+            case VersionRelation.EXCLUDE:
+                ret = comp_version (current_version, version) != 0;
+                break;
+            case VersionRelation.ONLY:
+                ret = comp_version (current_version, version) == 0;
+                break;
+            default: // null
+                ret = comp_version (current_version, version) >= 0;
+                break;
+        }
+        if (ret)
+            return true;
+        else {
+            //TODO: Use >, >=, etc. instead of after, since, etc. here
+            debug_msg_level (2, _("Incompatible version for package '%s' %s %s found: %s\n"),
+                       name, (rel != null) ? rel.to_string() : ">=", version, current_version);
+            return false;
+        }
+    }
 
     /**
      * Convert class object to string.
@@ -564,8 +661,7 @@ public class ValamaProject : Object {
     /**
      * Required packages with version information.
      *
-     * Use {@link add_package} or {@link add_package_by_name} to add a new
-     * package.
+     * Use {@link add_package} or {@link} to add a new package.
      */
     public TreeMultiMap<string, PackageInfo?> packages { get; private set; }
 
@@ -733,7 +829,72 @@ public class ValamaProject : Object {
 
         vieworder = new Gee.LinkedList<ViewMap?>();
 
-        string[] missing_packages = guanako_project.add_packages (packages.get_keys().to_array(), false);
+        var extrapkgs = new TreeSet<PackageInfo>();
+        var normpkgs = new TreeSet<string>();
+        foreach (var pkg in packages.get_values())
+            if ((pkg.custom_vapi != null) || (pkg.nodeps != null && pkg.nodeps))
+                extrapkgs.add (pkg);
+            else
+                normpkgs.add (pkg.name);
+
+        var missings = new TreeSet<string>();
+
+        foreach (var pkg in extrapkgs) {
+            if (pkg.custom_vapi != null) {
+                //NOTE: !pkg.nodeps results to error see #700985.
+                if (pkg.nodeps == null || pkg.nodeps == false) {
+                    var depsfile = Guanako.get_deps_path (
+                                    Path.get_basename (pkg.custom_vapi.substring (
+                                                       0,
+                                                       pkg.custom_vapi.length - 5)),
+                                    new string[] { Path.get_dirname (
+                                                        get_absolute_path (pkg.custom_vapi))
+                                                 });
+                    if (depsfile != null) {
+                        debug_msg (_("Dependency file found: %s\n"), depsfile);
+                        try {
+                            string contents;
+                            FileUtils.get_contents (depsfile, out contents);
+                            foreach (var pkgname in contents.split ("\n")) {
+                                pkgname = pkgname.strip();
+                                if (pkgname != "")
+                                    normpkgs.add (pkgname);
+                            }
+                        } catch (FileError e) {
+                            warning_msg (_("Unable to read dependency file: %s\n"), e.message);
+                            break;
+                        }
+                    } else
+                        debug_msg (_("No dependency file (.deps) for package '%s' found.\n"),
+                                   pkg.name);
+                }
+                if (guanako_project.add_source_file_by_name (get_absolute_path (pkg.custom_vapi), true) == null) {
+                    missings.add (pkg.custom_vapi);
+                    warning_msg (_("Could not add custom vapi for %s: %s\n"),
+                                 pkg.name, pkg.custom_vapi);
+                } else
+                    normpkgs.remove (pkg.name);
+            } else if (pkg.nodeps != null && pkg.nodeps) {
+                var vapifile = guanako_project.get_context_vapi_path (pkg.name);
+                if (vapifile == null || guanako_project.add_source_file_by_name (vapifile, true) == null) {
+                    missings.add (pkg.name);
+                    warning_msg (_("Could not add custom vapi for %s: %s\n"),
+                                 pkg.name, pkg.custom_vapi);
+                } else
+                    normpkgs.remove (pkg.name);
+            } else
+                bug_msg (_("Unknown situation: %s\n"), "project.vala - extrapkgs");
+        }
+
+        var missing_packages = guanako_project.add_packages (normpkgs.to_array(), false);
+        foreach (var pkg in missing_packages)
+            missings.add (pkg);
+
+        foreach (var pkg in packages.get_values())
+            if (pkg.define != null && !(pkg.name in missings))
+                guanako_project.add_define (pkg.define);
+        guanako_project.commit_defines();
+
         packages_changed();
 
         if (missing_packages.length > 0)
@@ -1033,6 +1194,36 @@ public class ValamaProject : Object {
             // TRANSLATORS: Choice of different packages.
             info += " (%s)".printf (_("choice"));
         debug_msg_level (2, _("Add package: %s\n"), info);
+        if (pkg.extrachecks != null) {
+            foreach (var check in pkg.extrachecks) {
+                string? custom_vapi = null;
+                var custom_defines = new TreeSet<string>();
+                if (check.check (ref custom_vapi, ref custom_defines)) {
+                    var strb = new StringBuilder();
+                    var space = false;
+                    if (custom_vapi != null) {
+                        pkg.custom_vapi = custom_vapi;
+                        strb.append ("vapi: %s".printf (custom_vapi));
+                        space = true;
+                    }
+                    if (space)
+                        strb.append (", ");
+                    if (custom_defines.size == 1)
+                        strb.append (_("define:"));
+                    else if (custom_defines.size > 1)
+                        strb.append (_("defines:"));
+                    foreach (var define in custom_defines) {
+                        defines.add (define);
+                        guanako_project.add_define (define);
+                        defines_changed (true, define);
+                        strb.append (@" $define");
+                    }
+                    if (strb.str != "")
+                        debug_msg_level (2, _("PkgCheck succeeded: %s\n"), strb.str);
+                    break;
+                }
+            }
+        }
         packages[pkg.name] = pkg;
     }
 
@@ -1139,7 +1330,8 @@ public class ValamaProject : Object {
             return;
         }
 
-        msg (_("Found source file: %s\n"), filename_abs);
+        if (!filename.has_suffix(".vapi"))
+            msg (_("Found source file: %s\n"), filename_abs);
 
         if (b_files.contains (filename_abs)) {
             warning_msg (_("File already registered for build system. Skip it.\n"), filename_abs);
@@ -1711,6 +1903,8 @@ public class ValamaProject : Object {
             writer.write_attribute ("rel", pkg.rel.to_string());
         if (pkg.custom_vapi != null)
             writer.write_attribute ("vapi", pkg.custom_vapi);
+        if (pkg.nodeps != null)
+            writer.write_attribute ("nodeps", (pkg.nodeps) ? "true" : "false");
         if (pkg.define != null)
             writer.write_attribute ("define", pkg.define);
         if (pkg.extrachecks != null)
@@ -1876,11 +2070,9 @@ public class ValamaProject : Object {
                 } else
                     debug_msg (_("Skip '%s' choice.\n"), pkg.name);
         } else {
-            var context = new Vala.CodeContext();
-            Guanako.Project.context_prep (context, 2, 32);  //TODO: Dynamic version.
             //TODO: Do this like init method in ProjectTemplate (check against all vapis).
             foreach (var pkg in choice.packages)
-                if (context.get_vapi_path (pkg.name) != null) {
+                if (Guanako.get_vapi_path (pkg.name) != null) {
                     debug_msg (_("Choose '%s' package.\n"), pkg.name);
                     return pkg;
                 } else
@@ -2337,8 +2529,28 @@ public class ValamaProject : Object {
                                 + "line: %hu: %s\n"),
                          package.name, node->line, node->get_prop ("rel"));
 
-        if (node->has_prop ("vapi") != null)
-            package.custom_vapi = node->get_prop ("vapi");
+        if (node->has_prop ("vapi") != null) {
+            var vapi = node->get_prop ("vapi");
+            if (vapi.has_suffix (".vapi"))
+                package.custom_vapi = vapi;
+            else
+                warning_msg (_("Custom vapi '%s' has incorrect file name extension line: %hu\n"),
+                             vapi, node->line);
+        }
+        if (node->has_prop ("nodeps") != null)
+            switch (node->get_prop ("nodeps")) {
+                case "true":
+                    package.nodeps = true;
+                    break;
+                case "false":
+                    package.nodeps = false;
+                    break;
+                default:
+                    warning_msg (_("Unknown property for '%s' line %hu: %s\n"
+                                        + "Will choose '%s'\n"),
+                                 "nodeps", node->line, node->get_prop ("nodeps"), "false");
+                    break;
+            }
         if (node->has_prop ("define") != null)
             package.define = node->get_prop ("define");
 

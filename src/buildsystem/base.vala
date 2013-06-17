@@ -180,7 +180,7 @@ public abstract class BuildSystem : Object {
         var defparts = define.split ("_");
         string[] pkg_name = {""};
         string[] pkg_ver = {};
-        string? pkg_rel = null;
+        string? pkg_rel = null;  //TODO: Better use VersionRelation here
         bool prev_alpha = false;
         for (int i = 0; i < defparts.length; ++i) {
             if (i == defparts.length - 1)
@@ -190,6 +190,10 @@ public abstract class BuildSystem : Object {
 
             if (pkg_rel == null)
                 switch (check) {
+                    case "after":
+                        pkg_rel = ">";
+                        prev_alpha = true;
+                        continue;
                     case "since":
                         pkg_rel = ">=";
                         prev_alpha = true;
@@ -323,6 +327,9 @@ public abstract class BuildSystem : Object {
                                 return false;
                             bool ret;
                             switch (pkg_rel) {
+                                case ">":
+                                    ret = comp_version (version, ver) > 0;
+                                    break;
                                 case null:
                                 case ">=":
                                     ret = comp_version (version, ver) >= 0;

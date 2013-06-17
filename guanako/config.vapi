@@ -6,10 +6,6 @@ namespace Config {
     public const string PACKAGE_DATA_DIR;
 
     public const string LOCALE_DIR;
-    public const string PIXMAP_DIR;
 
     public const string VALA_VERSION;
-
-    public const string VALA_VAPI_DIR;
-    public const string VALA_DATA_DIR;
 }

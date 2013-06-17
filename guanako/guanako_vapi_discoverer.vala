@@ -20,14 +20,8 @@
 using GLib;
 
 namespace Guanako {
-
     public static string? discover_vapi_file (string needle_namespace) {
-        string[] directories = {Config.VALA_VAPI_DIR,
-                                Path.build_path (Path.DIR_SEPARATOR_S,
-                                                Config.VALA_DATA_DIR,
-                                                "vapi")};
-
-        foreach (string vapipath in directories) {
+        foreach (string vapipath in get_vapi_dirs()) {
             var directory = File.new_for_path (vapipath);
 
             try {
