@@ -341,6 +341,10 @@ public class PackageInfo {
      */
     public virtual string? custom_vapi { get; set; default = null; }
     /**
+     * If `true` save custom vapi. Disable if vapi is enabled by extracheck.
+     */
+    public bool save_vapi { get; set; default = true; }
+    /**
      * Disable checking of package dependencies.
      */
     public virtual bool? nodeps { get; set; default = null; }
@@ -1203,6 +1207,7 @@ public class ValamaProject : Object {
                     var space = false;
                     if (custom_vapi != null) {
                         pkg.custom_vapi = custom_vapi;
+                        pkg.save_vapi = false;
                         strb.append ("vapi: %s".printf (custom_vapi));
                         space = true;
                     }
@@ -1901,7 +1906,7 @@ public class ValamaProject : Object {
             writer.write_attribute ("version", pkg.version);
         if (pkg.rel != null)
             writer.write_attribute ("rel", pkg.rel.to_string());
-        if (pkg.custom_vapi != null)
+        if (pkg.custom_vapi != null && pkg.save_vapi)
             writer.write_attribute ("vapi", pkg.custom_vapi);
         if (pkg.nodeps != null)
             writer.write_attribute ("nodeps", (pkg.nodeps) ? "true" : "false");
