@@ -2111,6 +2111,16 @@ public class ValamaProject : Object {
     }
 
     /**
+     * Check if define is already enabled.
+     *
+     * @param define Name of define.
+     * @return `true` if enabled else `false`.
+     */
+    public inline bool define_is_enabled (string define) {
+        return (define in guanako_project.defines);
+    }
+
+    /**
      * Emit when undo flag of current {@link SourceBuffer} has changed.
      *
      * @param undo_possibility `true` if undo is possible.

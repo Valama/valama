@@ -154,6 +154,8 @@ public abstract class BuildSystem : Object {
     }
 
     protected virtual void register_define (string define) {
+        if (project.define_is_enabled (define))
+            return;
         string package;
         if (guess_pkg_by_define (define, out package)) {
             if (project.define_set (define))
