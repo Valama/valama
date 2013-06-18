@@ -182,7 +182,7 @@ public abstract class BuildSystem : Object {
         var defparts = define.split ("_");
         string[] pkg_name = {""};
         string[] pkg_ver = {};
-        string? pkg_rel = null;  //TODO: Better use VersionRelation here
+        VersionRelation? pkg_rel = null;
         bool prev_alpha = false;
         for (int i = 0; i < defparts.length; ++i) {
             if (i == defparts.length - 1)
@@ -190,37 +190,13 @@ public abstract class BuildSystem : Object {
 
             var check = defparts[i].down();
 
-            if (pkg_rel == null)
-                switch (check) {
-                    case "after":
-                        pkg_rel = ">";
-                        prev_alpha = true;
-                        continue;
-                    case "since":
-                        pkg_rel = ">=";
-                        prev_alpha = true;
-                        continue;
-                    case "less":
-                        pkg_rel = "<";
-                        prev_alpha = true;
-                        continue;
-                    case "until":
-                        pkg_rel = "<=";
-                        prev_alpha = true;
-                        continue;
-                    case "not":
-                    case "exclude":
-                    case "except":
-                        pkg_rel = "!=";
-                        prev_alpha = true;
-                        continue;
-                    case "only":
-                        pkg_rel = "==";
-                        prev_alpha = true;
-                        continue;
-                    default:
-                        break;
+            if (pkg_rel == null) {
+                pkg_rel = VersionRelation.name_to_rel (check);
+                if (pkg_rel != null) {
+                    prev_alpha = true;
+                    continue;
                 }
+            }
 
             if (prev_alpha) {
                 var tmpver = string.joinv (".", defparts[i:defparts.length]);
@@ -246,7 +222,7 @@ public abstract class BuildSystem : Object {
             } else {
                 prev_alpha = true;
                 if (end && (defparts.length == 1 ||
-                                defparts.length == 2 && pkg_rel == "!="))
+                                defparts.length == 2 && pkg_rel == VersionRelation.EXCLUDE))
                     switch (check) {
                         case "unix":
                         case "linux":
@@ -328,38 +304,43 @@ public abstract class BuildSystem : Object {
                             if (version == null)
                                 return false;
                             bool ret;
-                            switch (pkg_rel) {
-                                case ">":
-                                    ret = comp_version (version, ver) > 0;
-                                    break;
-                                case null:
-                                case ">=":
-                                    ret = comp_version (version, ver) >= 0;
-                                    break;
-                                case "<":
-                                    ret = comp_version (version, ver) < 0;
-                                    break;
-                                case "<=":
-                                    ret = comp_version (version, ver) <= 0;
-                                    break;
-                                case "!=":
-                                    ret = comp_version (version, ver) != 0;
-                                    break;
-                                case "==":
-                                    ret = comp_version (version, ver) == 0;
-                                    break;
-                                default:
-                                    bug_msg (_("Unknown package version relation: %s - %s\n"),
-                                               pkg_rel, "guess_pkg_by_define");
-                                    continue;
-                            }
+                            if (pkg_rel != null)
+                                switch (pkg_rel) {
+                                    case VersionRelation.AFTER:
+                                        ret = comp_version (version, ver) > 0;
+                                        break;
+                                    case VersionRelation.SINCE:
+                                        ret = comp_version (version, ver) >= 0;
+                                        break;
+                                    case VersionRelation.BEFORE:
+                                        ret = comp_version (version, ver) < 0;
+                                        break;
+                                    case VersionRelation.UNTIL:
+                                        ret = comp_version (version, ver) <= 0;
+                                        break;
+                                    case VersionRelation.ONLY:
+                                        ret = comp_version (version, ver) == 0;
+                                        break;
+                                    case VersionRelation.EXCLUDE:
+                                        ret = comp_version (version, ver) != 0;
+                                        break;
+                                    default:
+                                        bug_msg (_("Unknown package version relation: %u - %s\n"),
+                                                   pkg_rel, "guess_pkg_by_define");
+                                        continue;
+                                }
+                            else
+                                ret = comp_version (version, ver) >= 0;
                             if (ret) {
                                 package = check;
                                 return true;
                             } else
                                 // TRANSLATORS: Context: ... for package `foobar' <= 0.42 found: ...
                                 debug_msg_level (2, _("Incompatible version for package '%s' %s %s found: %s\n"),
-                                           pkg_name[i], (pkg_rel != null) ? pkg_rel : ">=", ver,
+                                           pkg_name[i],
+                                           (pkg_rel != null) ? VersionRelation.to_string_symbol (pkg_rel)
+                                                             : ">=",
+                                           ver,
                                            version);
                         }
                     }

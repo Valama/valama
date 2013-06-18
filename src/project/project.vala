@@ -68,6 +68,72 @@ public enum VersionRelation {
                 return null;
         }
     }
+
+    public static string? to_string_symbol (VersionRelation rel) {
+        switch (rel) {
+            case AFTER:
+                return ">";
+            case SINCE:
+                return ">=";
+            case UNTIL:
+                return "<=";
+            case BEFORE:
+                return "<";
+            case ONLY:
+                return "==";
+            case EXCLUDE:
+                return "!=";
+            default:
+                error_msg (_("Could not convert '%s' to string: %u\n"),
+                           "VersionRelation", rel);
+                return null;
+        }
+    }
+
+    public static VersionRelation? name_to_rel (string name) {
+        switch (name) {
+            case "after":
+                return AFTER;
+            case "since":
+                return SINCE;
+            case "until":
+                return UNTIL;
+            case "less":
+            case "before":
+                return BEFORE;
+            case "only":
+                return ONLY;
+            case "not":
+            case "except":
+            case "exclude":
+                return EXCLUDE;
+            default:
+                error_msg (_("Could not convert '%s' to %s.\n"),
+                           name, "VersionRelation");
+                return null;
+        }
+    }
+
+    public static VersionRelation? symbol_to_rel (string symbol) {
+        switch (symbol) {
+            case ">":
+                return AFTER;
+            case ">=":
+                return SINCE;
+            case "<=":
+                return UNTIL;
+            case "<":
+                return BEFORE;
+            case "==":
+                return ONLY;
+            case "!=":
+                return EXCLUDE;
+            default:
+                error_msg (_("Could not convert '%s' to %s.\n"),
+                           symbol, "VersionRelation");
+                return null;
+        }
+    }
 }
 
 /**
@@ -421,9 +487,12 @@ public class PackageInfo {
         if (ret)
             return true;
         else {
-            //TODO: Use >, >=, etc. instead of after, since, etc. here
             debug_msg_level (2, _("Incompatible version for package '%s' %s %s found: %s\n"),
-                       name, (rel != null) ? rel.to_string() : ">=", version, current_version);
+                       name,
+                       (rel != null) ? VersionRelation.to_string_symbol (rel)
+                                     : ">=",
+                       version,
+                       current_version);
             return false;
         }
     }
@@ -475,31 +544,7 @@ public class PackageInfo {
     private string to_string_version() {
         var strb = new StringBuilder();
         if (rel != null) {
-            switch (rel) {
-                case VersionRelation.AFTER:
-                    strb.append (" > ");
-                    break;
-                case VersionRelation.SINCE:
-                    strb.append (" >= ");
-                    break;
-                case VersionRelation.UNTIL:
-                    strb.append (" <= ");
-                    break;
-                case VersionRelation.BEFORE:
-                    strb.append (" < ");
-                    break;
-                case VersionRelation.ONLY:
-                    strb.append (" = ");
-                    break;
-                case VersionRelation.EXCLUDE:
-                    strb.append (" != ");
-                    break;
-                default:
-                    bug_msg (_("Unexpected enum value: %s: %u\n"),
-                             "PackageInfo - to_string", rel);
-                    strb.append (" ?? ");
-                    break;
-            }
+            strb.append (@" $(VersionRelation.to_string_symbol (rel)) ");
             if (version != null)
                 strb.append (version);
         } else if (version != null) {
@@ -2508,34 +2553,17 @@ public class ValamaProject : Object {
 
         if (node->has_prop ("version") != null) {
             package.version = node->get_prop ("version");
-            if (node->has_prop ("rel") != null)
-                switch (node->get_prop ("rel")) {
-                    case "after":
-                        package.rel = VersionRelation.AFTER;
-                        break;
-                    case "since":
-                        package.rel = VersionRelation.SINCE;
-                        break;
-                    case "until":
-                        package.rel = VersionRelation.UNTIL;
-                        break;
-                    case "before":
-                        package.rel = VersionRelation.BEFORE;
-                        break;
-                    case "only":
-                        package.rel = VersionRelation.ONLY;
-                        break;
-                    case "exclude":
-                        package.rel = VersionRelation.EXCLUDE;
-                        break;
-                    default:
-                        warning_msg (_("Unknown property for '%s' line %hu: %s\n"
-                                            + "Will choose '%s'\n"),
-                                     "rel", node->line, node->get_prop ("rel"), "since");
-                        package.rel = VersionRelation.SINCE;
-                        break;
+            if (node->has_prop ("rel") != null) {
+                var rel = VersionRelation.name_to_rel (node->get_prop ("rel"));
+                if (rel != null)
+                    package.rel = rel;
+                else {
+                    warning_msg (_("Unknown property for '%s' line %hu: %s\n"
+                                        + "Will choose '%s'\n"),
+                                 "rel", node->line, node->get_prop ("rel"), "since");
+                    package.rel = VersionRelation.SINCE;
                 }
-            else
+            } else
                 package.rel = VersionRelation.SINCE;
         } else if (node->has_prop ("rel") != null)
             // TRANSLATORS:

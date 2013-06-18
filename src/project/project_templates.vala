@@ -239,33 +239,17 @@ public ProjectTemplate[] load_templates() {
                     case "vala-version":
                         var version = new TemplateValaVersion();
                         version.version = i->get_content();
-                        if (i->has_prop ("rel") != null)
-                            switch (i->get_prop ("rel")) {
-                                case "after":
-                                    version.rel = VersionRelation.AFTER;
-                                    break;
-                                case "since":
-                                    version.rel = VersionRelation.SINCE;
-                                    break;
-                                case "until":
-                                    version.rel = VersionRelation.UNTIL;
-                                    break;
-                                case "before":
-                                    version.rel = VersionRelation.BEFORE;
-                                    break;
-                                case "only":
-                                    version.rel = VersionRelation.ONLY;
-                                    break;
-                                case "exclude":
-                                    version.rel = VersionRelation.EXCLUDE;
-                                    break;
-                                default:
-                                    warning_msg (_("Unknown property for '%s' line %hu: %s\n"
-                                                            + "Will choose '%s'\n"),
-                                                 "rel", i->line, i->get_prop ("rel"), "only");
-                                    version.rel = VersionRelation.ONLY;
-                                    break;
+                        if (i->has_prop ("rel") != null) {
+                            var rel = VersionRelation.name_to_rel (i->get_prop ("rel"));
+                            if (rel != null)
+                                version.rel = rel;
+                            else {
+                                warning_msg (_("Unknown property for '%s' line %hu: %s\n"
+                                                        + "Will choose '%s'\n"),
+                                             "rel", i->line, i->get_prop ("rel"), "only");
+                                version.rel = VersionRelation.ONLY;
                             }
+                        }
                         new_template.versions.add (version);
                         break;
                     case "author":
