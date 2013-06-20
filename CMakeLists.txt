@@ -51,6 +51,7 @@ find_package(Vala "0.17" REQUIRED)
 
 option(TRANSLATION "Build translation." ON)
 option(ICONS "Generate icons." ON)
+option(TESTS "Run tests after after build." ON)
 option(GUANAKO "Build guanako library." ON)
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
   option(DOCS "Build documentation." ON)
@@ -289,6 +290,12 @@ else()
 endif()
 
 
+# Run tests.
+if(TESTS)
+  add_subdirectory("tests")
+endif()
+
+
 if(CREATE_CHANGELOG)
   execute_process(COMMAND git log
                   WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
@@ -428,6 +435,11 @@ if(GETTEXT_PACKAGE_NAME)
   else()
     message("Gettext package:        ${GETTEXT_PACKAGE_NAME}")
   endif()
+endif()
+if(TESTS)
+  message("Tests:                  enabled")
+else()
+  message("Tests:                  disabled")
 endif()
 if(CMAKE_VERBOSE_MAKEFILE)
   message("Verbose build:          yes")

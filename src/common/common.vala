@@ -584,13 +584,22 @@ public string[] split_path (string path, bool basename = true, bool root = true)
     string subpath = path;
 
     /* Strip root from path name. */
+    var rootfound = false;
     if (Path.skip_root (path) != null) {
         var rootlesspart = Path.skip_root (path);
         var rootindex = subpath.last_index_of (rootlesspart);
-        if (root)
+        if (root) {
             pathlist += subpath[0:rootindex];
+            if (!basename)
+                rootfound = true;
+        }
         subpath = rootlesspart;
     }
+
+    /* Strip path delimiter. */
+    var dirsepindex = subpath.last_index_of (Path.DIR_SEPARATOR_S);
+    if (dirsepindex != -1 && subpath.length - dirsepindex == Path.DIR_SEPARATOR_S.length)
+        subpath = subpath[0:dirsepindex];
 
     /* Generate list of file parts. */
     string[] tmppathlist = {};
@@ -604,7 +613,10 @@ public string[] split_path (string path, bool basename = true, bool root = true)
 
     /* Reverse order of file parts list and add it to final list. */
     for (int i = tmppathlist.length - 1; i >= 0; --i)
-        pathlist += tmppathlist[i];
+        if (rootfound)
+            pathlist += pathlist[0] + tmppathlist[i];
+        else
+            pathlist += tmppathlist[i];
 
     return pathlist;
 }
@@ -628,7 +640,7 @@ public bool save_file (string filename, string text) {
         dos.put_string (text);
         dos.flush();
         dos.close();
-        msg (_("File saved: %s\n"),  file.get_path());
+        msg (_("File saved: %s\n"), file.get_path());
         return true;
     } catch (GLib.IOError e) {
         errmsg (_("Could not update file: %s\n"), e.message);
