@@ -20,9 +20,9 @@
 using Vala;
 using GLib;
 using Gee;
-using Xml;
 using Gtk;
 using Pango;
+using Xml;
 
 /**
  * Current compatible version of project file.
@@ -241,353 +241,11 @@ public enum IdeModes {
     }
 }
 
-/**
- * Vala package alternatives.
- */
-public class PkgChoice {
-    /**
-     * Indicate if all packages should go to build system package list.
-     */
-    //TODO: Do we need this?
-    public bool all = false;
-    /**
-     * Ordered list of packages. Packages in the front have higher
-     * priority.
-     */
-    public Gee.ArrayList<PackageInfo?> packages { get; private set; }
-    /**
-     * Optional description.
-     */
-    public string? description = null;
-
-    public PkgChoice() {
-        packages = new Gee.ArrayList<PackageInfo?>();
-    }
-
-    /**
-     * Automatically add {@link PkgChoice} reference to each
-     * {@link PackageInfo} object.
-     *
-     * @param pkg Package to add to package choices list.
-     */
-    public inline void add_package (PackageInfo pkg) {
-        pkg.choice = this;
-        packages.add (pkg);
-    }
-
-    /**
-     * Remove {@link PackageInfo} object from choices list.
-     *
-     * @param pkg Package choice.
-     * @return `false` if choices list is empty after operation, else `true`.
-     */
-    public inline bool remove_package (PackageInfo pkg) {
-        packages.remove (pkg);
-        if (packages.size == 0)
-            return false;
-        return true;
-    }
-}
-
-public class PkgCheck {
-    public Gee.ArrayList<PackageInfo> packages { get; private set; }
-    public string? custom_vapi { get; set; default = null; }
-    public string? define { get; set; default = null; }
-    public string? description { get; set; default = null; }
-
-    public PkgCheck() {
-        packages = new Gee.ArrayList<PackageInfo>();
-    }
-
-    public inline void add_package (PackageInfo package) {
-        packages.add (package);
-    }
-
-    public inline bool remove_package (PackageInfo package) {
-        packages.remove (package);
-        if (packages.size == 0)
-            return false;
-        return true;
-    }
-
-    public bool check (ref string? custom_vapi, ref TreeSet<string> defines) {
-        foreach (var pkg in packages) {
-            if (!pkg.check_available())
-                return false;
-            if (this.custom_vapi != null)
-                //TODO: Support for multiple custom vapis? Could be done with
-                //      multiple checks/pkgs though.
-                custom_vapi = this.custom_vapi;
-            if (define != null)
-                defines.add (define);
-            /*
-             *NOTE: Currently extrachecks are optional and if no check at all
-             * succeeds it won't result to failure.
-             */
-            // bool found = true;
-            if (pkg.extrachecks != null) {
-                // found = false;
-                foreach (var check in pkg.extrachecks)
-                    if (check.check (ref custom_vapi, ref defines)) {
-                        // found = true;
-                        break;
-                    }
-            }
-            // if (!found)
-            //     return false;
-        }
-        return true;
-    }
-
-    public string to_string() {
-        var strb = new StringBuilder();
-        for (int i = 0;  i < packages.size; ++i) {
-            if (i != 0)
-                strb.append (", ");
-            strb.append (packages[i].to_string());
-        }
-        if (custom_vapi != null || define != null || description != null) {
-            var start = false;
-            if (packages.size > 0)
-                strb.append (" - ");
-            if (custom_vapi != null) {
-                if (!start)
-                    start = true;
-                else
-                    strb.append (" ");
-                strb.append (_("vapi: ") + custom_vapi);
-            }
-            if (define != null) {
-                if (!start)
-                    start = true;
-                else
-                    strb.append (", ");
-                strb.append (_("define: ") + define);
-            }
-            if (description != null) {
-                if (!start)
-                    start = true;
-                else
-                    strb.append (" ");
-                strb.append (@"($description)");
-            }
-        }
-        return strb.str;
-    }
-}
-
-/**
- * Vala package information.
- */
-public class PackageInfo {
-    /**
-     * Reference to {@link PkgChoice} if any.
-     *
-     * Do not modify this value manually. It will result in undefined behaviour.
-     */
-    public virtual PkgChoice? choice { get; set; default = null; }
-    /**
-     * Version relation.
-     */
-    public virtual VersionRelation? rel { get; set; default = null; }
-    /**
-     * Package name.
-     */
-    public virtual string name { get; set; }
-    /**
-     * Version (meaning differs with {@link rel}).
-     */
-    public virtual string? version { get; set; default = null; }
-    /**
-     * Currently available version on system.
-     */
-    public virtual string? current_version { get; set; default = null; }
-    /**
-     * Custom vapi (path) for this package.
-     */
-    public virtual string? custom_vapi { get; set; default = null; }
-    /**
-     * If `true` save custom vapi. Disable if vapi is enabled by extracheck.
-     */
-    public bool save_vapi { get; set; default = true; }
-    /**
-     * Disable checking of package dependencies.
-     */
-    public virtual bool? nodeps { get; set; default = null; }
-    /**
-     * Define related to package.
-     */
-    public virtual string? define { get; set; default = null; }
-    /**
-     * Ordered list of additional package relation checks.
-     *
-     * Also package relations with different packages. Helps to use custom
-     * vapis only for specific versions and set defines.
-     */
-    public virtual Gee.ArrayList<PkgCheck>? extrachecks { get; set; default = null; }
-
-    /**
-     * Test if package is available.
-     *
-     * Use pkg-config to check version. If no .pc file is available always
-     * true.
-     *
-     * @param recheck If `true` don't use cached version.
-     *
-     * @return `true` if available else `false`.
-     */
-    public bool check_available (bool recheck = true) {
-        if (version == null)
-            return true;
-
-        string? vapi = (custom_vapi == null) ? Guanako.get_vapi_path (name)
-                                            // NOTE: Be careful, project initialization dependency.
-                                             : project.get_absolute_path (custom_vapi);
-        if (vapi == null || !FileUtils.test (vapi, FileTest.EXISTS)) {
-            debug_msg_level (2, _("Vapi not found for %s: %s\n"), name, vapi);
-            return false;
-        }
-
-        if (current_version == null || recheck) {
-            string? curversion;
-            if (!package_exists (name, out curversion)) {
-                debug_msg (_("Could not find pkg-config file for '%s'. Assume package exists.\n"), name);
-                return true;
-            } else {
-                current_version = curversion;
-                if (curversion == null)
-                    return false;
-            }
-        }
-
-        bool ret;
-        switch (rel) {
-            case VersionRelation.AFTER:
-                ret = comp_version (current_version, version) > 0;
-                break;
-            case VersionRelation.SINCE:
-                ret = comp_version (current_version, version) >= 0;
-                break;
-            case VersionRelation.BEFORE:
-                ret = comp_version (current_version, version) < 0;
-                break;
-            case VersionRelation.UNTIL:
-                ret = comp_version (current_version, version) <= 0;
-                break;
-            case VersionRelation.EXCLUDE:
-                ret = comp_version (current_version, version) != 0;
-                break;
-            case VersionRelation.ONLY:
-                ret = comp_version (current_version, version) == 0;
-                break;
-            default: // null
-                ret = comp_version (current_version, version) >= 0;
-                break;
-        }
-        if (ret)
-            return true;
-        else {
-            debug_msg_level (2, _("Incompatible version for package '%s' %s %s found: %s\n"),
-                       name,
-                       (rel != null) ? VersionRelation.to_string_symbol (rel)
-                                     : ">=",
-                       version,
-                       current_version);
-            return false;
-        }
-    }
-
-    /**
-     * Convert class object to string.
-     */
-    public string to_string() {
-        var strb = new StringBuilder (name);
-        strb.append (to_string_version());
-        return strb.str;
-    }
-
-    public string to_string_full() {
-        var strb = new StringBuilder (name);
-        var need_space = false;
-        var need_close = false;
-
-        if (current_version != null) {
-            strb.append (current_version);
-            need_space = true;
-        }
-
-        if (need_space)
-            strb.append (" ");
-        strb.append (to_string_version());
-        need_space = true;
-
-        if (define != null) {
-            need_close = true;
-            strb.append (" {");
-            strb.append (define);
-        }
-
-        if (custom_vapi != null) {
-            if (!need_close) {
-                strb.append (" {");
-                need_close = true;
-            } else
-                strb.append (", ");
-            strb.append (custom_vapi);
-        }
-
-        if (need_close)
-            strb.append ("}");
-        return strb.str;
-    }
-
-    private string to_string_version() {
-        var strb = new StringBuilder();
-        if (rel != null) {
-            strb.append (@" $(VersionRelation.to_string_symbol (rel)) ");
-            if (version != null)
-                strb.append (version);
-        } else if (version != null) {
-            strb.append (" >= ");
-            strb.append (version);
-        }
-        return strb.str;
-    }
-
-    /**
-     * Compare {@link PackageInfo} objects.
-     *
-     * @param pkg1 First package.
-     * @param pkg2 Second package.
-     * @return Return > 0 if pkg1 > pkg2, < 0 if pkg1 < pkg2 or 0 if pkg1 == pkg2.
-     */
-    public static int compare_func (PackageInfo pkg1, PackageInfo pkg2) {
-        int namerel = strcmp (pkg1.name, pkg2.name);
-        if (namerel != 0)
-            return namerel;
-
-        int verrel = comp_version (pkg1.version, pkg2.version);
-        if (verrel != 0)
-            return verrel;
-
-        if (pkg1.rel != null && pkg2.rel != null) {
-            int relrel = pkg1.rel - pkg2.rel;
-            if (relrel != 0)
-                return relrel;
-        } else if (pkg1.rel != null)
-            return 1;
-        else if (pkg2.rel != null)
-            return -1;
-
-        return 0;
-    }
-}
-
 
 /**
  * Valama project application.
  */
-public class ValamaProject : Object {
+public class ValamaProject : ProjectFile {
     /**
      * Attached Guanako project to provide code completion.
      */
@@ -598,104 +256,16 @@ public class ValamaProject : Object {
      */
     public BuildSystem? builder { get; private set; default = null; }
 
-    private string _project_path;
-    /**
-     * Absolute path to project root.
-     */
-    public string project_path {
-        get {
-            return _project_path;
-        }
-        private set {
-            _project_path = value;
-            project_path_file = File.new_for_path (value);
-        }
-    }
-
-    /**
-     * Project path file object.
-     */
-    public File project_path_file { get; private set; }
-    /**
-     * Absolute path to project file.
-     */
-    public string project_file { get; private set; }
-    /**
-     * List of package choices.
-     */
-    public Gee.ArrayList<PkgChoice?> package_choices { get; private set; }
-    /**
-     * Project source directories (absolute paths).
-     */
-    public TreeSet<string> source_dirs { get; private set; }
-    /**
-     * Project extra source files (absolute paths).
-     */
-    public TreeSet<string> source_files { get; private set; }
-    /**
-     * Project build system directories (absolute paths).
-     */
-    public TreeSet<string> buildsystem_dirs { get; private set; }
-    /**
-     * Project extra build system files (absolute paths).
-     */
-    public TreeSet<string> buildsystem_files { get; private set; }
-    /**
-     * Project directories for extra files (absolute paths).
-     */
-    public TreeSet<string> data_dirs { get; private set; }
-    /**
-     * Project extra files (absolute paths).
-     */
-    public TreeSet<string> data_files { get; private set; }
-    /**
-     * Project version first part.
-     */
-    public int version_major { get; set; default = 0; }
-    /**
-     * Project version second part.
-     */
-    public int version_minor { get; set; default = 0; }
-    /**
-     * Project version third part.
-     */
-    public int version_patch { get; set; default = 0; }
-    /**
-     * Name of project.
-     */
-    public string project_name { get; set; default = _("valama_project"); }
-    /**
-     * Version of .vlp file
-     */
-    public string project_file_version { get; private set; default = "0"; }
     /**
      * Identifier to provide context state to plug-ins.
      */
     public IdeModes idemode { get; set; default = IdeModes.DEBUG; }
 
     /**
-     * List of source files.
-     */
-    public TreeSet<string> files { get; private set; }
-    /**
-     * List of build system files.
-     */
-    public TreeSet<string> b_files { get; private set; }
-    /**
-     * List of extra files.
-     */
-    public TreeSet<string> d_files { get; private set; }
-    /**
      * Flag to show multiple files are added and an update on each new file
      * is not necessary. Set this manually.
      */
     public bool add_multiple_files { get; set; default = false; }
-
-    /**
-     * List of opened files.
-     */
-    //TODO: Support only for templates and not normal projects.
-    public Gee.ArrayList<string> files_opened { get; private set; }
 
     /**
      * Ordered list of all opened Buffers mapped with filenames.
@@ -712,7 +282,8 @@ public class ValamaProject : Object {
      *
      * Use {@link add_package} or {@link} to add a new package.
      */
-    public TreeMultiMap<string, PackageInfo?> packages { get; private set; }
+    //Fixme: multiple package lists, this one is hiding the underlying one...
+    public new TreeMultiMap<string, PackageInfo?> packages { get; private set; }
 
     /**
      * All used defines in project.
@@ -785,9 +356,7 @@ public class ValamaProject : Object {
                           string? syntaxfile = null,
                           bool fully = true,
                           bool save_recent = true) throws LoadingError {
-        var proj_file = File.new_for_path (project_file);
-        this.project_file = proj_file.get_path();
-        project_path = proj_file.get_parent().get_path(); //TODO: Check valid path?
+        base (project_file);
 
         if (fully)
             try {                       //TODO: Allow changing glib version.
@@ -806,25 +375,24 @@ public class ValamaProject : Object {
 #elif GEE_1_0
         packages = new TreeMultiMap<string, PackageInfo?> (null, (CompareFunc?) PackageInfo.compare_func);
 #endif
-        package_choices = new Gee.ArrayList<PkgChoice?>();
-        source_dirs = new TreeSet<string>();
-        source_files = new TreeSet<string>();
-        buildsystem_dirs = new TreeSet<string>();
-        buildsystem_files = new TreeSet<string>();
-        data_dirs = new TreeSet<string>();
-        data_files = new TreeSet<string>();
 
         defines = new TreeSet<string>();
         used_defines = new TreeMap<string, TreeSet<string>>();
 
-        files = new TreeSet<string>();
-        b_files = new TreeSet<string>();
-        d_files = new TreeSet<string>();
-
-        files_opened = new Gee.ArrayList<string>();
-
-        msg (_("Load project file: %s\n"), this.project_file);
-        load_project_file();  // can throw LoadingError
+        //FIXME: multiple packages lists
+        foreach (PackageInfo pkg in base.packages)
+            add_package (pkg);
+        add_multiple_files = true;
+        foreach (var choice in package_choices) {
+            var pkg = get_choice (choice);
+            if (pkg != null)
+                add_package (pkg);
+            else {
+                warning_msg (_("Could not select a package from choice.\n"));
+                add_package (choice.packages[0]);
+            }
+        }
+        add_multiple_files = false;
 
         if (fully)
             init (syntaxfile, save_recent);
@@ -864,16 +432,16 @@ public class ValamaProject : Object {
                 bug_msg (_("Could not initialize build system: %s\n"), e.message);
             }
 
-        generate_file_list (ref _source_dirs,
-                            ref _source_files,
+        generate_file_list (ref source_dirs,
+                            ref source_files,
                             add_source_file);
 
-        generate_file_list (ref _buildsystem_dirs,
-                            ref _buildsystem_files,
+        generate_file_list (ref buildsystem_dirs,
+                            ref buildsystem_files,
                             add_buildsystem_file);
 
-        generate_file_list (ref _data_dirs,
-                            ref _data_files,
+        generate_file_list (ref data_dirs,
+                            ref data_files,
                             add_data_file);
 
         vieworder = new Gee.LinkedList<ViewMap?>();
@@ -1057,178 +625,13 @@ public class ValamaProject : Object {
      * Update list of recent projects.
      */
     public inline void save_to_recent() {
-        debug_msg_level (3, _("Add project to recent manager: %s - %s\n"), project_name, project_file);
-        if (!recentmgr.add_full (project_file,
+        debug_msg_level (3, _("Add project to recent manager: %s - %s\n"), project_name, project_file_path);
+        if (!recentmgr.add_full (project_file_path,
                                  RecentData() { display_name = project_name,
                                                 mime_type = "application/octet-stream",
                                                 app_name = "Valama",  //TODO: Translatable?
                                                 app_exec = "valama %u"}))
             warning_msg (_("Could not add project to recent manager.\n"));
-    }
-
-    /**
-     * Reduce length of file list: Prefer directories and optionally remove
-     * directories without content.
-     *
-     * @param c_dirs Directories.
-     * @param c_files Files.
-     * @param extensions Valid file extensions.
-     * @param check Check file/directory existence.
-     * @param rmdir Remove empty directories.
-     */
-    private void balance_dir_file_sets (ref TreeSet<string> c_dirs,
-                                        ref TreeSet<string> c_files,
-                                        string[]? extensions = null,
-                                        string[]? filenames = null,
-                                        bool check = false,
-                                        bool rmdir = false) {
-        var visited_bad = new TreeSet<string>();
-        var new_c_files = new TreeSet<string>();
-
-        if (check) {
-            var removals = new TreeSet<string>();
-            foreach (var dir in c_dirs)
-                if (!FileUtils.test (dir, FileTest.IS_DIR))
-                    removals.add (dir);
-            foreach (var dir in removals)
-                c_dirs.remove (dir);
-        }
-        var new_c_dirs = (rmdir) ? new TreeSet<string>() : c_dirs;
-
-        foreach (var filename in c_files) {
-            if (check && !FileUtils.test (filename, FileTest.IS_REGULAR))
-                continue;
-
-            var dirname = Path.get_dirname (filename);
-
-            if (c_dirs.contains (dirname)) {
-                new_c_dirs.add (dirname);
-                continue;
-            }
-
-            if (visited_bad.contains (dirname)) {
-                new_c_files.add (filename);
-                continue;
-            }
-
-            try {
-                var enumerator = File.new_for_path (dirname).enumerate_children (
-                                                                "standard::*",
-                                                                FileQueryInfoFlags.NONE,
-                                                                null);
-                FileInfo info = null;
-                var matching = false;
-                while (!matching && (info = enumerator.next_file()) != null) {
-                    if (info.get_file_type() != FileType.REGULAR ||  //TODO: Follow symlinks.
-                                            c_files.contains (Path.build_path (Path.DIR_SEPARATOR_S,
-                                                                               dirname,
-                                                                               info.get_name())))
-                        continue;
-
-                    if (filenames != null) {
-                        foreach (var name in filenames)
-                            if (Path.get_basename (info.get_name()) == name) {
-                                matching = true;
-                                break;
-                            }
-                        if (matching)
-                            break;
-                    }
-
-                    if (extensions != null)
-                        foreach (var ext in extensions) {
-                            if (info.get_name().has_suffix (ext)) {
-                                matching = true;
-                                break;
-                            }
-                        }
-                    else
-                        matching = true;
-                }
-                if (matching) {
-                    visited_bad.add (dirname);
-                    new_c_files.add (filename);
-                } else {
-                    c_dirs.add (dirname);
-                    new_c_dirs.add (dirname);
-                }
-            } catch (GLib.Error e) {
-                warning_msg (_("Could not list or iterate through directory content of '%s': %s\n"),
-                             dirname, e.message);
-            }
-        }
-        c_files = new_c_files;
-
-        if (rmdir) {
-            foreach (var dirname in c_dirs) {
-                if (new_c_dirs.contains (dirname))
-                    continue;
-                try {
-                    var enumerator = File.new_for_path (dirname).enumerate_children (
-                                                                    "standard::*",
-                                                                    FileQueryInfoFlags.NONE,
-                                                                    null);
-                    FileInfo info = null;
-                    var matching = false;
-                    while (!matching && (info = enumerator.next_file()) != null) {
-                        if (info.get_file_type() != FileType.REGULAR)  //TODO: Other FileTypes?
-                            continue;
-
-                        if (filenames != null) {
-                            foreach (var name in filenames)
-                                if (Path.get_basename (info.get_name()) == name) {
-                                    matching = true;
-                                    break;
-                                }
-                            if (matching)
-                                break;
-                        }
-
-                        if (extensions != null)
-                            foreach (var ext in extensions) {
-                                if (info.get_name().has_suffix (ext)) {
-                                    matching = true;
-                                    break;
-                                }
-                            }
-                        else
-                            matching = true;
-                    }
-                    if (matching)
-                        new_c_dirs.add (dirname);
-                } catch (GLib.Error e) {
-                    warning_msg (_("Could not list or iterate through directory content of '%s': %s\n"),
-                                 dirname, e.message);
-                }
-            }
-            c_dirs = new_c_dirs;
-        }
-    }
-
-    public void balance_pfile_dirs (bool check = true) {
-        var s_dirs_tmp = source_dirs;
-        var s_files_tmp = files;
-        var b_dirs_tmp = buildsystem_dirs;
-        var b_files_tmp = b_files;
-        var d_dirs_tmp = data_dirs;
-        var d_files_tmp = d_files;
-
-        balance_dir_file_sets (ref s_dirs_tmp, ref s_files_tmp,
-                               new string[]{".vala", ".vapi"}, null,
-                               check);
-        balance_dir_file_sets (ref b_dirs_tmp, ref b_files_tmp,
-                               new string[]{".cmake"}, new string[]{"CMakeLists.txt"},
-                               check);
-        balance_dir_file_sets (ref d_dirs_tmp, ref d_files_tmp,
-                               null, null,
-                               check);
-
-        source_dirs = s_dirs_tmp;
-        source_files = s_files_tmp;
-        buildsystem_dirs = b_dirs_tmp;
-        buildsystem_files = b_files_tmp;
-        data_dirs = d_dirs_tmp;
-        data_files = d_files_tmp;
     }
 
     /**
@@ -1613,364 +1016,6 @@ public class ValamaProject : Object {
         }
         foreach (var file in removals)
             filelist.remove (file);
-    }
-
-    /**
-     * Load Valama project from .vlp (xml) file.
-     *
-     * @throws LoadingError Throw if file to load contains errors. E.g. it
-     *                      does not exist or does not contain enough
-     *                      information.
-     */
-    private void load_project_file() throws LoadingError {
-        Xml.Doc* doc = Xml.Parser.parse_file (project_file);
-
-        if (doc == null) {
-            delete doc;
-            throw new LoadingError.FILE_IS_GARBAGE (_("Cannot parse file."));
-        }
-
-        Xml.Node* root_node = doc->get_root_element();
-        if (root_node == null || root_node->name != "project") {
-            delete doc;
-            throw new LoadingError.FILE_IS_EMPTY (_("File does not contain enough information."));
-        }
-
-        if (root_node->has_prop ("version") != null)
-            project_file_version = root_node->get_prop ("version");
-        if (comp_version (project_file_version, VLP_VERSION_MIN) < 0) {
-            var errstr = _("Project file too old: %s < %s").printf (project_file_version,
-                                                                    VLP_VERSION_MIN);
-            if (!Args.forceold) {
-                throw new LoadingError.FILE_IS_OLD (errstr);
-                delete doc;
-            } else
-                warning_msg (_("Ignore project file loading error: %s\n"), errstr);
-        }
-
-        for (Xml.Node* i = root_node->children; i != null; i = i->next) {
-            if (i->type != ElementType.ELEMENT_NODE)
-                continue;
-            switch (i->name) {
-                case "name":
-                    project_name = i->get_content();
-                    break;
-                case "buildsystem":
-                    add_builder (i->get_content());
-                    break;
-                case "version":
-                    for (Xml.Node* p = i->children; p != null; p = p->next) {
-                        if (p->type != ElementType.ELEMENT_NODE)
-                            continue;
-                        switch (p->name) {
-                            case "major":
-                                version_major = int.parse (p->get_content());
-                                break;
-                            case "minor":
-                                version_minor = int.parse (p->get_content());
-                                break;
-                            case "patch":
-                                version_patch = int.parse (p->get_content());
-                                break;
-                            default:
-                                warning_msg (_("Unknown configuration file value line %hu: %s\n"),
-                                             p->line, p->name);
-                                break;
-                        }
-                    }
-                    break;
-                case "packages":
-                    for (Xml.Node* p = i->children; p != null; p = p->next) {
-                        if (p->type != ElementType.ELEMENT_NODE)
-                            continue;
-                        switch (p->name) {
-                            case "choice":
-                                var choice = new PkgChoice();
-                                if (p->has_prop ("all") != null)
-                                    switch (p->get_prop ("all")) {
-                                        case "yes":
-                                            choice.all = true;
-                                            break;
-                                        case "no":
-                                            choice.all = false;
-                                            break;
-                                        default:
-                                            warning_msg (_("Unknown property for '%s' line %hu: %s\n"
-                                                                + "Will choose '%s'\n"),
-                                                         "rel", p->line, p->get_prop ("all"), "no");
-                                            choice.all = false;
-                                            break;
-                                    }
-                                for (Xml.Node* pp = p->children; pp != null; pp = pp->next) {
-                                    if (pp->type != ElementType.ELEMENT_NODE)
-                                        continue;
-                                    switch (pp->name) {
-                                        case "description":
-                                            choice.description = pp->get_content();
-                                            break;
-                                        case "package":
-                                            var pkg = get_package_info (pp);
-                                            if (pkg != null)
-                                                choice.add_package (pkg);
-                                            break;
-                                        default:
-                                            warning_msg (_("Unknown configuration file value line %hu: %s\n"), pp->line, pp->name);
-                                            break;
-                                    }
-                                }
-                                if (choice.packages.size > 0)
-                                    package_choices.add (choice);
-                                else
-                                    warning_msg (_("No packages to choose between: line %hu\n"), p->line);
-                                break;
-                            case "package":
-                                var pkg = get_package_info (p);
-                                if (pkg != null)
-                                    add_package (pkg);
-                                break;
-                            default:
-                                warning_msg (_("Unknown configuration file value line %hu: %s\n"), p->line, p->name);
-                                break;
-                        }
-                    }
-                    break;
-                case "source-directories":
-                    for (Xml.Node* p = i-> children; p != null; p = p->next) {
-                        if (p->type != ElementType.ELEMENT_NODE)
-                            continue;
-                        switch (p->name) {
-                            case "directory":
-                                source_dirs.add (get_absolute_path (p->get_content()));
-                                break;
-                            default:
-                                warning_msg (_("Unknown configuration file value line %hu: %s\n"), p->line, p->name);
-                                break;
-                        }
-                    }
-                    break;
-                case "source-files":
-                    for (Xml.Node* p = i-> children; p != null; p = p->next) {
-                        if (p->type != ElementType.ELEMENT_NODE)
-                            continue;
-                        switch (p->name) {
-                            case "file":
-                                source_files.add (get_absolute_path (p->get_content()));
-                                break;
-                            default:
-                                warning_msg (_("Unknown configuration file value line %hu: %s\n"), p->line, p->name);
-                                break;
-                        }
-                    }
-                    break;
-                case "buildsystem-directories":
-                    for (Xml.Node* p = i-> children; p != null; p = p->next) {
-                        if (p->type != ElementType.ELEMENT_NODE)
-                            continue;
-                        switch (p->name) {
-                            case "directory":
-                                buildsystem_dirs.add (get_absolute_path (p->get_content()));
-                                break;
-                            default:
-                                warning_msg (_("Unknown configuration file value line %hu: %s\n"), p->line, p->name);
-                                break;
-                        }
-                    }
-                    break;
-                case "buildsystem-files":
-                    for (Xml.Node* p = i-> children; p != null; p = p->next) {
-                        if (p->type != ElementType.ELEMENT_NODE)
-                            continue;
-                        switch (p->name) {
-                            case "file":
-                                buildsystem_files.add (get_absolute_path (p->get_content()));
-                                break;
-                            default:
-                                warning_msg (_("Unknown configuration file value line %hu: %s\n"), p->line, p->name);
-                                break;
-                        }
-                    }
-                    break;
-                case "data-directories":
-                    for (Xml.Node* p = i-> children; p != null; p = p->next) {
-                        if (p->type != ElementType.ELEMENT_NODE)
-                            continue;
-                        switch (p->name) {
-                            case "directory":
-                                data_dirs.add (get_absolute_path (p->get_content()));
-                                break;
-                            default:
-                                warning_msg (_("Unknown configuration file value line %hu: %s\n"), p->line, p->name);
-                                break;
-                        }
-                    }
-                    break;
-                case "data-files":
-                    for (Xml.Node* p = i-> children; p != null; p = p->next) {
-                        if (p->type != ElementType.ELEMENT_NODE)
-                            continue;
-                        switch (p->name) {
-                            case "file":
-                                data_files.add (get_absolute_path (p->get_content()));
-                                break;
-                            default:
-                                warning_msg (_("Unknown configuration file value line %hu: %s\n"), p->line, p->name);
-                                break;
-                        }
-                    }
-                    break;
-                case "opened-files":
-                    for (Xml.Node* p = i-> children; p != null; p = p->next) {
-                        if (p->type != ElementType.ELEMENT_NODE)
-                            continue;
-                        switch (p->name) {
-                            case "file":
-                                files_opened.add (get_absolute_path (p->get_content()));
-                                break;
-                            default:
-                                warning_msg (_("Unknown configuration file value line %hu: %s\n"), p->line, p->name);
-                                break;
-                        }
-                    }
-                    break;
-                default:
-                    warning_msg (_("Unknown configuration file value line %hu: %s\n"), i->line, i->name);
-                    break;
-            }
-        }
-
-        add_multiple_files = true;
-        foreach (var choice in package_choices) {
-            var pkg = get_choice (choice);
-            if (pkg != null)
-                add_package (pkg);
-            else {
-                warning_msg (_("Could not select a package from choice.\n"));
-                add_package (choice.packages[0]);
-            }
-        }
-        add_multiple_files = false;
-
-        delete doc;
-    }
-
-    /**
-     * Save project to {@link project_file}.
-     *
-     * @param balance If `true` balance file and directory lists.
-     */
-    public void save_project_file (bool balance = true) {
-        debug_msg (_("Save project file.\n"));
-
-        if (balance)
-            balance_pfile_dirs();
-
-        var writer = new TextWriter.filename (project_file);
-        writer.set_indent (true);
-        writer.set_indent_string ("\t");
-
-        writer.start_element ("project");
-        writer.write_attribute ("version", project_file_version);
-        writer.write_element ("name", project_name);
-        if (builder != null)
-            writer.write_element ("buildsystem", builder.get_name_id());
-
-        writer.start_element ("version");
-        writer.write_element ("major", version_major.to_string());
-        writer.write_element ("minor", version_minor.to_string());
-        writer.write_element ("patch", version_patch.to_string());
-        writer.end_element();
-
-        if (packages.size > 0 || package_choices.size > 0) {
-            writer.start_element ("packages");
-            foreach (var choice in package_choices) {
-                writer.start_element ("choice");
-                writer.write_attribute ("all", (choice.all) ? "yes" : "no");
-                if (choice.description != null)
-                    writer.write_element ("description", choice.description);
-                foreach (var pkg in choice.packages)
-                    write_pkg (writer, pkg);
-                writer.end_element();
-            }
-            foreach (var pkg in packages.get_values()) {
-                if (pkg.choice != null)
-                    continue;
-                write_pkg (writer, pkg);
-            }
-            writer.end_element();
-        }
-
-        if (source_dirs.size > 0) {
-            writer.start_element ("source-directories");
-            foreach (var directory in source_dirs)
-                writer.write_element ("directory", get_relative_path (directory));
-            writer.end_element();
-        }
-
-        if (source_files.size > 0) {
-            writer.start_element ("source-files");
-            foreach (var filename in source_files)
-                writer.write_element ("file", get_relative_path (filename));
-            writer.end_element();
-        }
-
-        if (buildsystem_dirs.size > 0) {
-            writer.start_element ("buildsystem-directories");
-            foreach (var directory in buildsystem_dirs)
-                writer.write_element ("directory", get_relative_path (directory));
-            writer.end_element();
-        }
-
-        if (buildsystem_files.size > 0) {
-            writer.start_element ("buildsystem-files");
-            foreach (var filename in buildsystem_files)
-                writer.write_element ("file", get_relative_path (filename));
-            writer.end_element();
-        }
-
-        if (data_dirs.size > 0) {
-            writer.start_element ("data-directories");
-            foreach (var directory in data_dirs)
-                writer.write_element ("directory", get_relative_path (directory));
-            writer.end_element();
-        }
-
-        if (data_files.size > 0) {
-            writer.start_element ("data-files");
-            foreach (var filename in data_files)
-                writer.write_element ("file", get_relative_path (filename));
-            writer.end_element();
-        }
-
-        writer.end_element();
-    }
-
-    private void write_pkg (TextWriter writer, PackageInfo pkg) {
-        writer.start_element ("package");
-        writer.write_attribute ("name", pkg.name);
-        if (pkg.version != null)
-            writer.write_attribute ("version", pkg.version);
-        if (pkg.rel != null)
-            writer.write_attribute ("rel", pkg.rel.to_string());
-        if (pkg.custom_vapi != null && pkg.save_vapi)
-            writer.write_attribute ("vapi", pkg.custom_vapi);
-        if (pkg.nodeps != null)
-            writer.write_attribute ("nodeps", (pkg.nodeps) ? "true" : "false");
-        if (pkg.define != null)
-            writer.write_attribute ("define", pkg.define);
-        if (pkg.extrachecks != null)
-            foreach (var extracheck in pkg.extrachecks) {
-                writer.start_element ("extracheck");
-                if (extracheck.description != null)
-                    writer.write_element ("description", extracheck.description);
-                if (extracheck.custom_vapi != null)
-                    writer.write_attribute ("vapi", extracheck.custom_vapi);
-                if (extracheck.define != null)
-                    writer.write_attribute ("define", extracheck.define);
-                foreach (var checkpkg in extracheck.packages)
-                    write_pkg (writer, checkpkg);
-                writer.end_element();
-            }
-        writer.end_element();
     }
 
     private void save_meta() {
@@ -2505,140 +1550,7 @@ public class ValamaProject : Object {
             action (map.filename, (SourceBuffer) map.view.buffer);
     }
 
-    /**
-     * Get absolute path to file.
-     *
-     * @param path Absolute path or path relative to project root directory.
-     * @return Return absolute path to directory.
-     */
-    public string get_absolute_path (string path) {
-        if (Path.is_absolute (path))
-            return path;
-        return Path.build_path (Path.DIR_SEPARATOR_S, project_path, path);
-    }
 
-    /**
-     * Get relative path to project directory if file is in same directory
-     * tree.
-     *
-     * @param path Absolute or relative path.
-     * @return Return relative path to project root directory or absolute path
-     *         if file is not in tree below project root.
-     */
-    public string get_relative_path (string path) {
-        if (!Path.is_absolute (path))
-            return path;
-        if (path.has_prefix (project_path)) {  // only simple string comparison
-            var rel = project_path_file.get_relative_path (File.new_for_path (path));
-            if (rel == null)
-                return "";
-            return rel;
-        }
-        return path;
-    }
-
-    /**
-     * Load package information from {@link Xml.Node}.
-     *
-     * @param node Package {@link Xml.Node} to search for infos.
-     * @return Return {@link PackageInfo} or null if no package found.
-     */
-    private PackageInfo? get_package_info (Xml.Node* node) {
-        if (node->has_prop ("name") == null) {
-            warning_msg (_("No package name line %hu.\n"), node->line);
-            return null;
-        }
-        var package = new PackageInfo();
-        package.name = node->get_prop ("name");
-
-        if (node->has_prop ("version") != null) {
-            package.version = node->get_prop ("version");
-            if (node->has_prop ("rel") != null) {
-                var rel = VersionRelation.name_to_rel (node->get_prop ("rel"));
-                if (rel != null)
-                    package.rel = rel;
-                else {
-                    warning_msg (_("Unknown property for '%s' line %hu: %s\n"
-                                        + "Will choose '%s'\n"),
-                                 "rel", node->line, node->get_prop ("rel"), "since");
-                    package.rel = VersionRelation.SINCE;
-                }
-            } else
-                package.rel = VersionRelation.SINCE;
-        } else if (node->has_prop ("rel") != null)
-            // TRANSLATORS:
-            // That means we know "`package' >= ". Something is missing, isn't it?
-            warning_msg (_("Package '%s' has relation information but no version: "
-                                + "line: %hu: %s\n"),
-                         package.name, node->line, node->get_prop ("rel"));
-
-        if (node->has_prop ("vapi") != null) {
-            var vapi = node->get_prop ("vapi");
-            if (vapi.has_suffix (".vapi"))
-                package.custom_vapi = vapi;
-            else
-                warning_msg (_("Custom vapi '%s' has incorrect file name extension line: %hu\n"),
-                             vapi, node->line);
-        }
-        if (node->has_prop ("nodeps") != null)
-            switch (node->get_prop ("nodeps")) {
-                case "true":
-                    package.nodeps = true;
-                    break;
-                case "false":
-                    package.nodeps = false;
-                    break;
-                default:
-                    warning_msg (_("Unknown property for '%s' line %hu: %s\n"
-                                        + "Will choose '%s'\n"),
-                                 "nodeps", node->line, node->get_prop ("nodeps"), "false");
-                    break;
-            }
-        if (node->has_prop ("define") != null)
-            package.define = node->get_prop ("define");
-
-        for (Xml.Node* p = node->children; p != null; p = p->next) {
-            if (p->type != ElementType.ELEMENT_NODE)
-                continue;
-            switch (p->name) {
-                case "extracheck":
-                    var pkgcheck = new PkgCheck();
-                    if (p->has_prop ("vapi") != null)
-                        pkgcheck.custom_vapi = p->get_prop ("vapi");
-                    if (p->has_prop ("define") != null)
-                        pkgcheck.define = p->get_prop ("define");
-                    for (Xml.Node* pp = p->children; pp != null; pp = pp->next) {
-                        if (pp->type != ElementType.ELEMENT_NODE)
-                            continue;
-                        switch (pp->name) {
-                            case "description":
-                                pkgcheck.description = pp->get_content();
-                                break;
-                            case "package":
-                                var pkg = get_package_info (pp);
-                                if (pkg != null)
-                                    pkgcheck.add_package (pkg);
-                                break;
-                            default:
-                                warning_msg (_("Unknown configuration file value line %hu: %s\n"),
-                                             pp->line, pp->name);
-                                break;
-                        }
-                    }
-                    debug_msg (_("PkgCheck for package '%s' found: %s\n"), package.name, pkgcheck.to_string());
-                    if (package.extrachecks == null)
-                        package.extrachecks = new Gee.ArrayList<PkgCheck>();
-                    package.extrachecks.add (pkgcheck);
-                    break;
-                default:
-                    warning_msg (_("Unknown configuration file value line %hu: %s\n"),
-                                 p->line, p->name);
-                    break;
-            }
-        }
-
-        return package;
-    }
 }
 
 /**

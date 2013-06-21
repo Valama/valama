@@ -52,7 +52,7 @@ public void ui_load_project() {
          * On Unix-like systems compare inodes. On others only compare file names.
          */
 #if !UNIX
-        if (project.project_file != new_filename) {
+        if (project.project_file_path != new_filename) {
 #else
         //TODO: Check if there is a better solution.
         bool comp;
@@ -61,7 +61,7 @@ public void ui_load_project() {
                             FileAttribute.UNIX_INODE,
                             FileQueryInfoFlags.NONE).get_attribute_as_string (
                                     FileAttribute.UNIX_INODE) !=
-                    File.new_for_path (project.project_file).query_info (
+                    File.new_for_path (project.project_file_path).query_info (
                             FileAttribute.UNIX_INODE,
                             FileQueryInfoFlags.NONE).get_attribute_as_string (
                                     FileAttribute.UNIX_INODE));
