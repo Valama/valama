@@ -127,7 +127,8 @@ add_definitions(-DVALA_VERSION="${VALA_SHORTVER}")
 add_executable("tests" ${VALA_C})
 target_link_libraries("tests" ${PROJECT_LDFLAGS})
 add_definitions(${PROJECT_C_FLAGS})
-target_link_libraries("tests" "guanako")
+# target_link_libraries("tests" "guanako")
+add_dependencies("tests" "guanako" "valama")
 
 add_custom_command(
   OUTPUT
