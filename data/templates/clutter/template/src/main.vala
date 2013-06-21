@@ -7,7 +7,7 @@ static Rectangle r;
 static void main (string[] args) {
     Clutter.init (ref args);
 
-    stage = Stage.get_default();
+    stage = new Stage();
 
     r = new Rectangle();
     r.width = 100;
@@ -19,8 +19,8 @@ static void main (string[] args) {
         return false;
     });
 
-    stage.add_actor (r);
-    stage.show_all();
+    stage.add_child (r);
+    stage.show();
 
     animate_it();
 
@@ -30,8 +30,8 @@ static void main (string[] args) {
 static void animate_it() {
     r.x = 0;
     r.y = 0;
-    var animation = r.animate (AnimationMode.EASE_OUT_BOUNCE, 3000,
-                               x: stage.width - r.width,
-                               y: stage.height - r.height,
-                               rotation_angle_z: r.rotation_angle_z + 90);
+    r.animate (AnimationMode.EASE_OUT_BOUNCE, 3000,
+               x: stage.width - r.width,
+               y: stage.height - r.height,
+               rotation_angle_z: r.rotation_angle_z + 90);
 }
