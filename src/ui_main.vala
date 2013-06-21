@@ -40,7 +40,6 @@ static UiBreakpoints wdg_breakpoints;
 static UiSearch wdg_search;
 static SymbolBrowser wdg_smb_browser;
 static UiStyleChecker wdg_stylechecker;
-static UiCurrentSymbol wdg_current_symbol;
 
 static Gee.HashMap<string, Gdk.Pixbuf> map_icons;
 
@@ -159,7 +158,6 @@ public class MainWidget : Box {
         wdg_current_file_structure = new UiCurrentFileStructure();
         wdg_search = new UiSearch();
         wdg_stylechecker = new UiStyleChecker();
-        wdg_current_symbol = new UiCurrentSymbol();
 
         /* Gdl elements. */
         add_item ("SourceView", _("Source view"), source_viewer,
@@ -199,10 +197,6 @@ public class MainWidget : Box {
                               DockItemBehavior.NORMAL,
                               DockPlacement.LEFT);
         add_item ("SymbolBrowser", _("Symbol browser"), wdg_smb_browser,
-                              Stock.CONVERT,
-                              DockItemBehavior.NORMAL,
-                              DockPlacement.RIGHT);
-        add_item ("CurrentSymbol", _("Current symbol"), wdg_current_symbol,
                               Stock.CONVERT,
                               DockItemBehavior.NORMAL,
                               DockPlacement.RIGHT);
@@ -357,7 +351,6 @@ public class MainWidget : Box {
         add_view_menu_item (menu_view, wdg_current_file_structure, _("Show current file structure"));
         add_view_menu_item (menu_view, wdg_stylechecker, _("Show style checker"));
         add_view_menu_item (menu_view, wdg_smb_browser, _("Show symbol browser"));
-        add_view_menu_item (menu_view, wdg_current_symbol, _("Show current symbol"));
 
         // TRANSLATORS: Lock user interface elements to prevent moving them around.
         var item_view_lockhide = new CheckMenuItem.with_mnemonic ("_" + _("Lock elements"));

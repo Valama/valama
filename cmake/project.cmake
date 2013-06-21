@@ -45,7 +45,6 @@ set(srcfiles
 "src/ui/breakpoints.vala"
 "src/ui/build_output.vala"
 "src/ui/current_file_structure.vala"
-"src/ui/current_symbol.vala"
 "src/ui/project_browser.vala"
 "src/ui/reports.vala"
 "src/ui/search.vala"
