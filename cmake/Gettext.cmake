@@ -206,6 +206,10 @@ if(XGETTEXT_FOUND)
     set(GETTEXT_PACKAGE_NAME "${package_name}" PARENT_SCOPE)
     set(GETTEXT_PACKAGE_VERSION "${package_version}" PARENT_SCOPE)
 
+    if(NOT ARGS_WORKING_DIRECTORY)
+      set(ARGS_WORKING_DIRECTORY "../")
+    endif()
+
     set(xgettext_options "--package-name" "${package_name}")
     if(package_version)
       list(APPEND xgettext_options "--package-version" "${package_version}")

@@ -27,8 +27,6 @@ if(XGETTEXT_FOUND)
       "data/valama.desktop.in"
     GSETTINGSFILES
       "data/apps.valama.gschema.xml"
-    WORKING_DIRECTORY
-      "../"
   )
   option(UPDATE_PO "Update .po files." ON)
   if(UPDATE_PO)
