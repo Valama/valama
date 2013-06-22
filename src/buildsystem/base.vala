@@ -292,7 +292,7 @@ public abstract class BuildSystem : Object {
             foreach (var check in checks) {
                 foreach (var ver in pkg_ver) {
                     /* Does not cover choices (intended). */
-                    if (check in project.packages.get_keys()) {
+                    if (check in project.packages.keys) {
                         string? version;
                         if (!package_exists (check, out version)) {
                             debug_msg (_("Could not find pkg-config file for '%s'. "
@@ -493,7 +493,7 @@ public abstract class BuildSystem : Object {
                                                          (EqualFunc?) PkgBuildInfo.compare_name);
 #endif
 
-        foreach (var pkg in project.packages.get_values()) {
+        foreach (var pkg in project.packages.values) {
             pkgmaps.set (pkg.name, new PkgBuildInfo (pkg.name,
                                                      pkg.version,
                                                      pkg.rel));

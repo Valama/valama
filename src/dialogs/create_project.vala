@@ -422,7 +422,7 @@ public class UiTemplateSelector : TemplatePage {
         detailed_grid.attach (detailed_pkg_info, 0, detailed_line++, 2, 1);
 
         if (template.vproject.packages.size > 0)
-            foreach (var pkg in template.vproject.packages.get_values()) {
+            foreach (var pkg in template.vproject.packages.values) {
                 Label pkg_lbl;
                 var strb_pkgstr = new StringBuilder();
                 if (pkg in template.unmet_deps) {

@@ -298,7 +298,7 @@ public class ProjectBrowser : UiElement {
                               project.d_files.to_array(),
                               ref store, ref d_pathmap);
         build_plain_treestore (_("Packages"),
-                              project.packages.get_keys().to_array(),
+                              project.packages.keys.to_array(),
                               ref store);
 
         tree_view.row_collapsed.connect ((iter, path) => {
@@ -344,7 +344,7 @@ public class ProjectBrowser : UiElement {
         var avail_packages = Guanako.get_available_packages();
         var proposed_packages = new string[0];
         foreach (var pkg in avail_packages) {
-            if (pkg in project.packages.get_keys())  //Ignore packages that are already selected
+            if (pkg in project.packages.keys)  //Ignore packages that are already selected
                 continue;
             proposed_packages += pkg;
             TreeIter iter;
@@ -459,8 +459,8 @@ public class ProjectBrowser : UiElement {
                 if (!directory) {
                     var pkg = package_selection_dialog (project);
                     if (pkg != null) {
-                        string[] missing_packages = project.add_package_by_name (pkg);
-                        if (missing_packages.length > 0)
+                        string[]? missing_packages = project.add_package_by_name (pkg);
+                        if (missing_packages != null && missing_packages.length > 0)
                             ui_missing_packages_dialog (missing_packages);
                     }
                 } else

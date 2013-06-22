@@ -278,15 +278,6 @@ public class ValamaProject : ProjectFile {
     public GuanakoCompletion comp_provider { get; private set; }
 
     /**
-     * Required packages with version information.
-     *
-     * Use {@link add_package} or {@link add_package_by_name} to add a new
-     * package.
-     */
-    //Fixme: multiple package lists, this one is hiding the underlying one...
-    public new TreeMultiMap<string, PackageInfo?> packages { get; private set; }
-
-    /**
      * All used defines in project.
      *
      * Use {@link set_define} or {@link unset_define} to add or remove define.
@@ -371,18 +362,11 @@ public class ValamaProject : ProjectFile {
                                         e.message);
             }
 
-#if GEE_0_8
-        packages = new TreeMultiMap<string, PackageInfo?> (null, (CompareDataFunc<PackageInfo?>?) PackageInfo.compare_func);
-#elif GEE_1_0
-        packages = new TreeMultiMap<string, PackageInfo?> (null, (CompareFunc?) PackageInfo.compare_func);
-#endif
-
         defines = new TreeSet<string>();
         used_defines = new TreeMap<string, TreeSet<string>>();
 
-        //FIXME: multiple packages lists
-        foreach (PackageInfo pkg in base.packages)
-            add_package (pkg);
+        foreach (var pkg in packages.values)
+            add_package (pkg, true);
         add_multiple_files = true;
         foreach (var choice in package_choices) {
             var pkg = get_choice (choice);
@@ -433,23 +417,23 @@ public class ValamaProject : ProjectFile {
                 bug_msg (_("Could not initialize build system: %s\n"), e.message);
             }
 
-        generate_file_list (ref source_dirs,
-                            ref source_files,
+        generate_file_list (ref _source_dirs,
+                            ref _source_files,
                             add_source_file);
 
-        generate_file_list (ref buildsystem_dirs,
-                            ref buildsystem_files,
+        generate_file_list (ref _buildsystem_dirs,
+                            ref _buildsystem_files,
                             add_buildsystem_file);
 
-        generate_file_list (ref data_dirs,
-                            ref data_files,
+        generate_file_list (ref _data_dirs,
+                            ref _data_files,
                             add_data_file);
 
         vieworder = new Gee.LinkedList<ViewMap?>();
 
         var extrapkgs = new TreeSet<PackageInfo>();
         var normpkgs = new TreeSet<string>();
-        foreach (var pkg in packages.get_values())
+        foreach (var pkg in packages.values)
             if ((pkg.custom_vapi != null) || (pkg.nodeps != null && pkg.nodeps))
                 extrapkgs.add (pkg);
             else
@@ -508,7 +492,7 @@ public class ValamaProject : ProjectFile {
         foreach (var pkg in missing_packages)
             missings.add (pkg);
 
-        foreach (var pkg in packages.get_values())
+        foreach (var pkg in packages.values)
             if (pkg.define != null && !(pkg.name in missings))
                 guanako_project.add_define (pkg.define);
         guanako_project.commit_defines();
@@ -640,8 +624,15 @@ public class ValamaProject : ProjectFile {
      * emit packages_changed signal.
      *
      * @param pkg Package to add.
+     * @param upgrade If `true` upgrade pkg with new values.
      */
-    public void add_package (PackageInfo pkg) {
+    public void add_package (PackageInfo pkg, bool upgrade = false) {
+        var included = pkg.name in packages.keys;
+        if (!upgrade && included) {
+            debug_msg_level (2, _("Package '%s' already included. Skip it.\n"), pkg.name);
+            return;
+        }
+
         var info = pkg.to_string_full();
         if (pkg.choice != null)
             // TRANSLATORS: Choice of different packages.
@@ -678,23 +669,26 @@ public class ValamaProject : ProjectFile {
                 }
             }
         }
-        packages[pkg.name] = pkg;
+
+        if (!included)
+            packages[pkg.name] = pkg;
     }
 
     /**
      * Add package to project by package name and update Guanako project.
      *
      * @param pkg Package to add.
-     * @return Not available packages.
+     * @return Not available packages or `null` if package was previously added.
      */
-    public string[] add_package_by_name (string pkg) {
+    public string[]? add_package_by_name (string pkg) {
         debug_msg_level (2, _("Add package: %s\n"), pkg);
-        var pkginfo = new PackageInfo();
-        pkginfo.name = pkg;
-        if (!(pkginfo in packages[pkg])) {
+        if (!(pkg in packages.keys)) {
+            var pkginfo = new PackageInfo();
+            pkginfo.name = pkg;
             packages[pkg] = pkginfo;
             packages_changed();
-        }
+        } else
+            return null;
         return guanako_project.add_packages (new string[] {pkg}, true);
     }
 
@@ -707,7 +701,7 @@ public class ValamaProject : ProjectFile {
      */
     public bool remove_package (PackageInfo pkg) {
         debug_msg_level (2, _("Remove package: %s\n"), pkg.to_string());
-        if (!packages.remove (pkg.name, pkg)) {
+        if (!packages.unset (pkg.name)) {
             debug_msg (_("Package '%s' not in list, skip it.\n"), pkg.name);
             return false;
         }
@@ -724,15 +718,15 @@ public class ValamaProject : ProjectFile {
      */
     public bool remove_package_by_name (string pkg) {
         debug_msg_level (2, _("Remove package: %s\n"), pkg);
-        if (!(pkg in packages.get_keys())) {
+        if (!(pkg in packages.keys)) {
             debug_msg (_("Package '%s' not in list, skip it.\n"), pkg);
             return false;
         }
 
-        foreach (var pkginfo in packages[pkg])
-            if (pkginfo.choice != null && !pkginfo.choice.remove_package (pkginfo))
-                package_choices.remove (pkginfo.choice);
-        packages.remove_all (pkg);
+        var pkginfo = packages[pkg];
+        if (pkginfo.choice != null && !pkginfo.choice.remove_package (pkginfo))
+            package_choices.remove (pkginfo.choice);
+        packages.unset (pkg);
 
         guanako_project.remove_package (pkg);
         packages_changed();

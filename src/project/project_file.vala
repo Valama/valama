@@ -58,13 +58,25 @@ public class ProjectFile : Object {
     public int version_minor { get; set; default = 0; }
     public int version_patch { get; set; default = 0; }
 
-    public Gee.ArrayList<PkgChoice?> package_choices { get; private set; default = new Gee.ArrayList<PkgChoice?>(); }
-    public TreeSet<string> source_dirs = new TreeSet<string>();
-    public TreeSet<string> source_files = new TreeSet<string>();
-    public TreeSet<string> buildsystem_dirs = new TreeSet<string>();
-    public TreeSet<string> buildsystem_files = new TreeSet<string>();
-    public TreeSet<string> data_dirs = new TreeSet<string>();
-    public TreeSet<string> data_files = new TreeSet<string>();
+    public ArrayList<PkgChoice?> package_choices { get; private set; default = new ArrayList<PkgChoice?>(); }
+
+    protected TreeSet<string> _source_dirs = new TreeSet<string>();
+    public TreeSet<string> source_dirs { get { return _source_dirs; } protected set { _source_dirs = value; } }
+
+    protected TreeSet<string> _source_files = new TreeSet<string>();
+    public TreeSet<string> source_files { get { return _source_files; } protected set { _source_files = value; } }
+
+    protected TreeSet<string> _buildsystem_dirs = new TreeSet<string>();
+    public TreeSet<string> buildsystem_dirs { get { return _buildsystem_dirs; } protected set { _buildsystem_dirs = value; } }
+
+    protected TreeSet<string> _buildsystem_files = new TreeSet<string>();
+    public TreeSet<string> buildsystem_files { get { return _buildsystem_files; } protected set { _buildsystem_files = value; } }
+
+    protected TreeSet<string> _data_dirs = new TreeSet<string>();
+    public TreeSet<string> data_dirs { get { return _data_dirs; } protected set { _data_dirs = value; } }
+
+    protected TreeSet<string> _data_files = new TreeSet<string>();
+    public TreeSet<string> data_files { get { return _data_files; } protected set { _data_files = value; } }
 
     /**
      * List of source files.
@@ -80,15 +92,21 @@ public class ProjectFile : Object {
     public TreeSet<string> d_files { get; private set; default = new TreeSet<string>(); }
 
 
-    public Gee.ArrayList<PackageInfo> packages = new Gee.ArrayList<PackageInfo>();
+    public TreeMap<string, PackageInfo?> packages { get; private set;
+#if GEE_0_8
+        default = new TreeMap<string, PackageInfo?> (null, (EqualDataFunc<PackageInfo?>?) PackageInfo.compare_func);
+#elif GEE_1_0
+        default = new TreeMap<string, PackageInfo?> (null, (EqualFunc?) PackageInfo.compare_func);
+#endif
+    }
 
     /**
      * List of opened files.
      */
     //TODO: Support only for templates and not normal projects.
-    public Gee.ArrayList<string> files_opened = new Gee.ArrayList<string>();
+    public ArrayList<string> files_opened { get; protected set; default = new ArrayList<string>(); }
 
-    public string buildsystem = "";
+    public string buildsystem { get; protected set; default = ""; }
 
      /**
      * Load Valama project from .vlp (xml) file.
@@ -201,7 +219,7 @@ public class ProjectFile : Object {
                             case "package":
                                 var pkg = get_package_info (p);
                                 if (pkg != null)
-                                    packages.add (pkg);
+                                    packages[pkg.name] = pkg;
                                 break;
                             default:
                                 warning_msg (_("Unknown configuration file value line %hu: %s\n"), p->line, p->name);
@@ -355,7 +373,7 @@ public class ProjectFile : Object {
                     write_pkg (writer, pkg);
                 writer.end_element();
             }
-            foreach (var pkg in packages) {
+            foreach (var pkg in packages.values) {
                 if (pkg.choice != null)
                     continue;
                 write_pkg (writer, pkg);
@@ -497,7 +515,7 @@ public class ProjectFile : Object {
                     }
                     debug_msg (_("PkgCheck for package '%s' found: %s\n"), package.name, pkgcheck.to_string());
                     if (package.extrachecks == null)
-                        package.extrachecks = new Gee.ArrayList<PkgCheck>();
+                        package.extrachecks = new ArrayList<PkgCheck>();
                     package.extrachecks.add (pkgcheck);
                     break;
                 default:

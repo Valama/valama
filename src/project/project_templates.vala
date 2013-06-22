@@ -77,7 +77,7 @@ public class ProjectTemplate {
             }
 
         unmet_deps = new ArrayList<PackageInfo?>();
-        foreach (var pkg in vproject.packages.get_values())
+        foreach (var pkg in vproject.packages.values)
             if (!(pkg.name in available_packages))
                 unmet_deps.add (pkg);
             else {
