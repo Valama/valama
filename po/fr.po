@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Valama 0.1.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-05-22 20:42+0200\n"
+"POT-Creation-Date: 2013-05-30 21:20+0200\n"
 "PO-Revision-Date: 2013-05-08 10:50+0200\n"
 "Last-Translator: Martin Lorang <martin@lorang.net>\n"
 "Language-Team: French\n"
@@ -241,8 +241,8 @@ msgstr "Sortie de construction"
 #, c-format
 msgid "Build system '%s' currently not supported by template selector.\n"
 msgstr ""
-"Le système de construction '%s' n'est actuellement pas supporté par le selecteur de "
-"modèles.\n"
+"Le système de construction '%s' n'est actuellement pas supporté par le "
+"selecteur de modèles.\n"
 
 #: ../src/project/project.vala:1715
 #, c-format
@@ -692,7 +692,7 @@ msgstr "Impossible de lire le fichier '%s' correctement : %s\n"
 msgid "Could not read file content of '%s': %s\n"
 msgstr "Impossible de lire le contenu de '%s' : %s\n"
 
-#: ../guanako/guanako.vala:1293 ../guanako/guanako_vapi_discoverer.vala:51
+#: ../guanako/guanako_vapi_discoverer.vala:51 ../guanako/guanako.vala:1294
 #, c-format
 msgid "Could not read file: %s"
 msgstr "Impossible de lire le fichier : %s"
@@ -702,7 +702,7 @@ msgstr "Impossible de lire le fichier : %s"
 msgid "Could not read file: %s\n"
 msgstr "Impossible de lire le fichier : %s\n"
 
-#: ../guanako/guanako.vala:1291
+#: ../guanako/guanako.vala:1292
 #, c-format
 msgid "Could not read line: %s"
 msgstr "Impossible de lire une ligne : %s"
@@ -800,6 +800,11 @@ msgstr "Impossible de sauvegarder l'agencement : %s\n"
 #, c-format
 msgid "Couldn't save project file: %s\n"
 msgstr "Impossible de sauvegarder le fichier projet : %s\n"
+
+#: ../build/data/valama.desktop.in.h:3
+#, fuzzy
+msgid "Create Vala projects."
+msgstr "Créer projet"
 
 #: ../src/ui_main.vala:492
 msgid "Create new file"
@@ -960,7 +965,8 @@ msgstr "Le fichier est déjà un fichier source : ignoré.\n"
 
 #: ../src/project/project.vala:1021 ../src/project/project.vala:1148
 msgid "File already registered for build system. Skip it.\n"
-msgstr "Le fichier est déjà enregistré pour le système de construction : ignoré.\n"
+msgstr ""
+"Le fichier est déjà enregistré pour le système de construction : ignoré.\n"
 
 #: ../src/common/common.vala:422
 msgid "File copying cancelled."
@@ -1043,7 +1049,7 @@ msgstr "Allemand"
 msgid "Github project page"
 msgstr "Page projet Github"
 
-#: ../guanako/guanako.vala:1115
+#: ../guanako/guanako.vala:1116
 msgid "Guanako Completion"
 msgstr "Complétion Guanako"
 
@@ -1054,6 +1060,14 @@ msgstr "Fichier de syntaxe Guanako."
 #: ../src/ui_main.vala:464
 msgid "Help"
 msgstr "Aide"
+
+#: ../build/data/apps.valama.gschema.xml.h:1
+msgid "Horizontal window size"
+msgstr ""
+
+#: ../build/data/valama.desktop.in.h:2
+msgid "IDE"
+msgstr ""
 
 #: ../src/ui_main.vala:529
 msgid "IDE mode"
@@ -1811,6 +1825,10 @@ msgstr ""
 "Valeur de propriété de substitution '%s' inconnue ligne %hu (suppose '%s') : "
 "%s"
 
+#: ../build/data/valama.desktop.in.h:4
+msgid "Vala;IDE;Development;"
+msgstr ""
+
 #: ../src/main.vala:104
 msgid "Valama"
 msgstr "Valama"
@@ -1840,6 +1858,10 @@ msgstr "Variable '%s' non trouvé ! >%s<\n"
 #: ../src/dialogs/project_settings.vala:151
 msgid "Version:"
 msgstr "Version : "
+
+#: ../build/data/apps.valama.gschema.xml.h:2
+msgid "Vertical window size"
+msgstr ""
 
 #: ../src/ui_main.vala:346
 msgid "View"
@@ -1949,8 +1971,8 @@ msgstr "Construction échouée"
 msgid "choice"
 msgstr "choix"
 
-#: ../src/buildsystem/cmake.vala:226
 #
+#: ../src/buildsystem/cmake.vala:226
 msgid "clean command failed"
 msgstr "Commande nettoyage échouée"
 

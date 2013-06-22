@@ -350,6 +350,8 @@ public class ValamaProject : ProjectFile {
                           bool save_recent = true) throws LoadingError {
         base (project_file);
 
+        add_builder (buildsystem);
+
         if (fully)
             try {                       //TODO: Allow changing glib version.
                 guanako_project = new Guanako.Project (syntaxfile, 2, 32);

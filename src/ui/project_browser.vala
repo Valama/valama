@@ -288,7 +288,7 @@ public class ProjectBrowser : UiElement {
                               ref store, ref pathmap);
         build_file_treestore (_("Build system files"),
                               project.buildsystem_dirs.to_array(),
-                              project.b_files.to_array(),
+                              project.buildsystem_files.to_array(),
                               ref store, ref b_pathmap);
         // TRANSLATORS:
         // "Data files" means the file is neighter a (Vala) source file nor a
