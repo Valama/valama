@@ -280,7 +280,8 @@ public class ValamaProject : ProjectFile {
     /**
      * Required packages with version information.
      *
-     * Use {@link add_package} or {@link} to add a new package.
+     * Use {@link add_package} or {@link add_package_by_name} to add a new
+     * package.
      */
     //Fixme: multiple package lists, this one is hiding the underlying one...
     public new TreeMultiMap<string, PackageInfo?> packages { get; private set; }

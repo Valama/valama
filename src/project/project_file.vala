@@ -318,7 +318,7 @@ public class ProjectFile : Object {
 
 
     /**
-     * Save project to {@link project_file}.
+     * Save project to {@link project_file_path}.
      *
      * @param balance If `true` balance file and directory lists.
      */
