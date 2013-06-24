@@ -39,7 +39,7 @@ static UiCurrentFileStructure wdg_current_file_structure;
 static UiBreakpoints wdg_breakpoints;
 static UiSearch wdg_search;
 static SymbolBrowser wdg_smb_browser;
-static UiStyleChecker wdg_stylechecker;
+// static UiStyleChecker wdg_stylechecker;
 
 static Gee.HashMap<string, Gdk.Pixbuf> map_icons;
 
@@ -157,7 +157,7 @@ public class MainWidget : Box {
         wdg_app_output = new AppOutput();
         wdg_current_file_structure = new UiCurrentFileStructure();
         wdg_search = new UiSearch();
-        wdg_stylechecker = new UiStyleChecker();
+        // wdg_stylechecker = new UiStyleChecker();
 
         /* Gdl elements. */
         add_item ("SourceView", _("Source view"), source_viewer,
@@ -192,10 +192,10 @@ public class MainWidget : Box {
                               Stock.FILE,
                               DockItemBehavior.NORMAL,
                               DockPlacement.LEFT);
-        add_item ("StyleChecker", _("Coding style checker"), wdg_stylechecker,
-                              Stock.COLOR_PICKER,
-                              DockItemBehavior.NORMAL,
-                              DockPlacement.LEFT);
+        // add_item ("StyleChecker", _("Coding style checker"), wdg_stylechecker,
+        //                       Stock.COLOR_PICKER,
+        //                       DockItemBehavior.NORMAL,
+        //                       DockPlacement.LEFT);
         add_item ("SymbolBrowser", _("Symbol browser"), wdg_smb_browser,
                               Stock.CONVERT,
                               DockItemBehavior.NORMAL,
@@ -349,7 +349,7 @@ public class MainWidget : Box {
         add_view_menu_item (menu_view, wdg_app_output, _("Show application output"));
         add_view_menu_item (menu_view, wdg_breakpoints, _("Show breakpoints"));
         add_view_menu_item (menu_view, wdg_current_file_structure, _("Show current file structure"));
-        add_view_menu_item (menu_view, wdg_stylechecker, _("Show style checker"));
+        // add_view_menu_item (menu_view, wdg_stylechecker, _("Show style checker"));
         add_view_menu_item (menu_view, wdg_smb_browser, _("Show symbol browser"));
 
         // TRANSLATORS: Lock user interface elements to prevent moving them around.

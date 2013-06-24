@@ -23,7 +23,6 @@ set(srcfiles
 "reporter.vala"
 "scanner/valascanner.vala"
 "scanner/valaparser.vala"
-"stylecheck.vala"
 )
 set(vapifiles
 "config.vapi"
