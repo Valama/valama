@@ -34,6 +34,18 @@ class UiReport : UiElement {
     Gdk.Pixbuf pixmap_exp;
     Gdk.Pixbuf pixmap_note;
 
+    /* Sort order and sort column for showall display mode. */
+    //TODO: Make this a configuration option.
+    private SortType? sort_order_all = null;
+    private int? sort_id_all = null;
+    /* Sort order and sort column for file specific display mode. */
+    private SortType? sort_order = null;
+    private int? sort_id = null;
+    /**
+     * Synchronize sort order for file specific and display all modes.
+     */
+    private bool sort_sync = true;
+
     private ReportType _reptype;
     public ReportType reptype {
         get {
@@ -56,31 +68,45 @@ class UiReport : UiElement {
                 scrw.remove (tree_view);
 
             tree_view = new TreeView();
-            tree_view.insert_column_with_attributes (-1,
+
+            var column_pix = new TreeViewColumn.with_attributes (
                                                      null,
                                                      new CellRendererPixbuf(),
                                                      "pixbuf",
                                                      0,
                                                      null);
-            if (value)
-                tree_view.insert_column_with_attributes (-1,
-                                                         _("File"),
-                                                         new CellRendererText(),
-                                                         "text",
-                                                         1,
-                                                         null);
-            tree_view.insert_column_with_attributes (-1,
+            column_pix.sort_column_id = 0;
+            tree_view.append_column (column_pix);
+
+            if (value) {
+                var column_file = new TreeViewColumn.with_attributes (
+                                                    _("File"),
+                                                    new CellRendererText(),
+                                                    "text",
+                                                    1,
+                                                    null);
+                column_file.sort_column_id = 1;
+                tree_view.append_column (column_file);
+            }
+
+            var column_loc = new TreeViewColumn.with_attributes (
                                                      _("Location"),
                                                      new CellRendererText(),
                                                      "text",
                                                      (int) value + 1,
                                                      null);
-            tree_view.insert_column_with_attributes (-1,
+            if (!value)
+                column_loc.sort_column_id = 1;
+            tree_view.append_column (column_loc);
+
+            var column_err = new TreeViewColumn.with_attributes (
                                                      _("Error"),
                                                      new CellRendererText(),
                                                      "text",
                                                      (int) value + 2,
                                                      null);
+            column_err.sort_column_id = (int) value + 2;
+            tree_view.append_column (column_err);
             tree_view.can_focus = false;
 
             tree_view.row_activated.connect ((path) => {
@@ -140,12 +166,124 @@ class UiReport : UiElement {
         widget = vbox;
     }
 
+    private int comp_err_filename (TreeModel model, TreeIter a, TreeIter b) {
+        Value a_str;
+        Value b_str;
+        model.get_value (a, 1, out a_str);
+        model.get_value (b, 1, out b_str);
+        var ret = strcmp ((string) a_str, (string) b_str);
+        if (ret != 0)
+            return ret;
+
+        Value a_int;
+        Value b_int;
+        model.get_value (a, 2, out a_int);
+        model.get_value (b, 2, out b_int);
+        return (int) a_int - (int) b_int;
+    }
+
+    private int comp_err_pixbuf (TreeModel model, TreeIter a, TreeIter b) {
+        Value a_pix;
+        Value b_pix;
+        model.get_value (a, 0, out a_pix);
+        model.get_value (b, 0, out b_pix);
+        var ret = errpix_to_int ((Gdk.Pixbuf) a_pix) - errpix_to_int ((Gdk.Pixbuf) b_pix);
+        if (ret != 0)
+            return ret;
+
+        ret = comp_err_filename (model, a, b);
+        if (tree_view.get_column (0).sort_order == SortType.ASCENDING)
+            return ret;
+        else
+            return (-1)*ret;
+    }
+
+    private int errpix_to_int (Gdk.Pixbuf pixbuf) {
+        if (pixbuf == pixmap_err)
+            return 1;
+        else if (pixbuf == pixmap_warn)
+            return 2;
+        else if (pixbuf == pixmap_depr)
+            return 3;
+        else if (pixbuf == pixmap_exp)
+            return 4;
+        else if (pixbuf == pixmap_note)
+            return 5;
+        bug_msg (_("No valid pixbuf (%s).\n"), "UiReport.errpix_to_int");
+        return -1;
+    }
+
+    private int comp_err_errors (TreeModel model, TreeIter a, TreeIter b) {
+        Value a_str;
+        Value b_str;
+        model.get_value (a, (int) showall + 2, out a_str);
+        model.get_value (b, (int) showall + 2, out b_str);
+        var ret = strcmp ((string) a_str, (string) b_str);
+        if (ret != 0)
+            return ret;
+
+        ret = comp_err_filename (model, a, b);
+        if (tree_view.get_column ((int) showall + 2).sort_order == SortType.ASCENDING)
+            return ret;
+        else
+            return (-1)*ret;
+    }
+
     public override void build() {
         ListStore store;
-        if (showall)
-            store = new ListStore (4, typeof (Gdk.Pixbuf),typeof (string), typeof (string), typeof (string));
-        else
-            store = new ListStore (3, typeof (Gdk.Pixbuf), typeof (string), typeof (string));
+        if (showall) {
+            store = new ListStore (4, typeof (Gdk.Pixbuf), typeof (string), typeof (int), typeof (string));
+            store.set_sort_func (1, comp_err_filename);
+            store.set_sort_func (0, comp_err_pixbuf);
+            store.set_sort_func ((int) showall + 2, comp_err_errors);
+            if (sort_order_all != null && sort_id_all != null)
+                store.set_sort_column_id (sort_id_all, sort_order_all);
+            else
+                store.set_sort_column_id (1, SortType.ASCENDING);
+        } else {
+            store = new ListStore (3, typeof (Gdk.Pixbuf), typeof (int), typeof (string));
+            store.set_sort_func (0, comp_err_pixbuf);
+            store.set_sort_func ((int) showall + 2, comp_err_errors);
+
+            if (sort_order != null && sort_id != null)
+                store.set_sort_column_id (sort_id, sort_order);
+            else
+                store.set_sort_column_id (1, SortType.ASCENDING);
+        }
+        store.sort_column_changed.connect (() => {
+            int new_sid;
+            SortType new_sorder;
+            if (store.get_sort_column_id (out new_sid, out new_sorder)) {
+                if (showall) {
+                    sort_order_all = new_sorder;
+                    sort_id_all = new_sid;
+                    if (sort_sync)
+                        switch (new_sid) {
+                            case 0:
+                                sort_order = new_sorder;
+                                sort_id = 0;
+                                break;
+                            case 1: //TODO: Fallthrough to case 2?
+                                break;
+                            case 2:
+                                sort_order = new_sorder;
+                                sort_id = 1;
+                                break;
+                            case 3:
+                                sort_order = new_sorder;
+                                sort_id = 2;
+                                break;
+                            default:
+                                bug_msg (_("No valid column to sort: %d - %s\n"),
+                                         new_sid, "UiReport.build");
+                                break;
+                        }
+                } else {
+                    sort_order = new_sorder;
+                    sort_id = new_sid;
+                }
+            }
+        });
         tree_view.set_model (store);
 
         if (!showall && !(source_viewer.current_srcfocus in project.files))
@@ -199,13 +337,13 @@ class UiReport : UiElement {
                 store.set (next,
                            0, pixbuf,
                            1, project.get_relative_path (err.source.file.filename),
-                           2, err.source.begin.line.to_string(),
+                           2, err.source.begin.line,
                            3, err.message,
                            -1);
             else
                 store.set (next,
                            0, pixbuf,
-                           1, err.source.begin.line.to_string(),
+                           1, err.source.begin.line,
                            2, err.message,
                            -1);
             storelist.add (err);
