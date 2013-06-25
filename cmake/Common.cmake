@@ -204,7 +204,7 @@ endmacro()
 # Usage:
 #
 # LOCAL
-#   If true compile gsettings schemas locally (in
+#   If set compile gsettings schemas locally (in
 #   ${CMAKE_BINARY_DIR}/glib-2.0/schemas) directory). Add this directory to
 #   your XDG_DATA_DIRS variable.
 #
@@ -220,7 +220,6 @@ endmacro()
 #
 #   gsettings_install(
 #     LOCAL
-#       TRUE
 #     GSETTINGSDIR
 #       share/glib-2.0/schemas
 #     FILES
@@ -229,7 +228,7 @@ endmacro()
 #
 function(gsettings_install)
   include(CMakeParseArguments)
-  cmake_parse_arguments(ARGS "" "LOCAL;GSETTINGSDIR" "FILES" ${ARGN})
+  cmake_parse_arguments(ARGS "LOCAL" "GSETTINGSDIR" "FILES" ${ARGN})
 
   if(NOT "" STREQUAL "${ARGS_FILES}")
     if(ARGS_LOCAL)
