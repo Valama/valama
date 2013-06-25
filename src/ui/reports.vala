@@ -236,6 +236,7 @@ class UiReport : UiElement {
             store.set_sort_func (1, comp_err_filename);
             store.set_sort_func (0, comp_err_pixbuf);
             store.set_sort_func ((int) showall + 2, comp_err_errors);
+
             if (sort_order_all != null && sort_id_all != null)
                 store.set_sort_column_id (sort_id_all, sort_order_all);
             else
@@ -265,7 +266,7 @@ class UiReport : UiElement {
                                 break;
                             case 1: //TODO: Fallthrough to case 2?
                                 break;
-                            case 2:
+                            case 2: //NOTE: Currently not reachable.
                                 sort_order = new_sorder;
                                 sort_id = 1;
                                 break;
@@ -275,12 +276,29 @@ class UiReport : UiElement {
                                 break;
                             default:
                                 bug_msg (_("No valid column to sort: %d - %s\n"),
-                                         new_sid, "UiReport.build");
+                                         new_sid, "UiReport.build (showall)");
                                 break;
                         }
                 } else {
                     sort_order = new_sorder;
                     sort_id = new_sid;
+                    if (sort_sync)
+                        switch (new_sid) {
+                            case 0:
+                                sort_order_all = new_sorder;
+                                sort_id_all = 0;
+                                break;
+                            case 1:
+                                break;
+                            case 2:
+                                sort_order_all = new_sorder;
+                                sort_id_all = 3;
+                                break;
+                            default:
+                                bug_msg (_("No valid column to sort: %d - %s\n"),
+                                         new_sid, "UiReport.build");
+                                break;
+                        }
                 }
             }
         });
