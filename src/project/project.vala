@@ -69,7 +69,7 @@ public enum VersionRelation {
         }
     }
 
-    public static string? to_string_symbol (VersionRelation rel) {
+    public static string? to_string_symbol (VersionRelation rel, bool err = true) {
         switch (rel) {
             case AFTER:
                 return ">";
@@ -84,13 +84,14 @@ public enum VersionRelation {
             case EXCLUDE:
                 return "!=";
             default:
-                error_msg (_("Could not convert '%s' to string: %u\n"),
-                           "VersionRelation", rel);
+                if (err)
+                    error_msg (_("Could not convert '%s' to string: %u\n"),
+                               "VersionRelation", rel);
                 return null;
         }
     }
 
-    public static VersionRelation? name_to_rel (string name) {
+    public static VersionRelation? name_to_rel (string name, bool err = true) {
         switch (name) {
             case "after":
                 return AFTER;
@@ -108,8 +109,9 @@ public enum VersionRelation {
             case "exclude":
                 return EXCLUDE;
             default:
-                error_msg (_("Could not convert '%s' to %s.\n"),
-                           name, "VersionRelation");
+                if (err)
+                    error_msg (_("Could not convert '%s' to %s.\n"),
+                               name, "VersionRelation");
                 return null;
         }
     }

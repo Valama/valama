@@ -191,7 +191,7 @@ public abstract class BuildSystem : Object {
             var check = defparts[i].down();
 
             if (pkg_rel == null) {
-                pkg_rel = VersionRelation.name_to_rel (check);
+                pkg_rel = VersionRelation.name_to_rel (check, false);
                 if (pkg_rel != null) {
                     prev_alpha = true;
                     continue;
