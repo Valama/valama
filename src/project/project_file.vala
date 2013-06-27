@@ -19,6 +19,11 @@
 using Gee;
 using Xml;
 
+/**
+ * Current compatible version of project file.
+ */
+const string VLP_VERSION_MIN = "0.1";
+
 public class ProjectFile : Object {
     public ProjectFile (string project_file) {
         this.project_file_path = project_file;
@@ -568,6 +573,7 @@ public class ProjectFile : Object {
             return path;
         return Path.build_path (Path.DIR_SEPARATOR_S, project_path, path);
     }
+
     /**
      * Get relative path to project directory if file is in same directory
      * tree.
@@ -587,6 +593,7 @@ public class ProjectFile : Object {
         }
         return path;
     }
+
     public void balance_pfile_dirs (bool check = true) {
         var s_dirs_tmp = source_dirs;
         var s_files_tmp = files;
@@ -612,6 +619,7 @@ public class ProjectFile : Object {
         data_dirs = d_dirs_tmp;
         data_files = d_files_tmp;
     }
+
     /**
      * Reduce length of file list: Prefer directories and optionally remove
      * directories without content.
@@ -750,7 +758,30 @@ public class ProjectFile : Object {
             c_dirs = new_c_dirs;
         }
     }
+}
 
+
+/**
+ * Throw on project file loading errors.
+ */
+public errordomain LoadingError {
+    /**
+     * File content probably too old.
+     */
+    FILE_IS_OLD,
+    /**
+     * File does not contain enough information.
+     */
+    FILE_IS_EMPTY,
+    /**
+     * Unable to load file.
+     */
+    FILE_IS_GARBAGE,
+    /**
+     * Could not load Guanako completion.
+     */
+    //TODO: Disable completion instead. This is ValamaProject specific so remove it.
+    COMPLETION_NOT_AVAILABLE
 }
 
 // vim: set ai ts=4 sts=4 et sw=4

@@ -25,120 +25,6 @@ using Pango;
 using Xml;
 
 /**
- * Current compatible version of project file.
- */
-const string VLP_VERSION_MIN = "0.1";
-
-/**
- * Version relations. Can be used e.g. for package or valac versions.
- */
-public enum VersionRelation {
-    AFTER,  // >
-    SINCE,  // >=
-    UNTIL,  // <=
-    BEFORE, // <
-    ONLY,   // ==
-    EXCLUDE;// !=
-
-    public string? to_string() {
-        switch (this) {
-            //TODO: Check if and where translation is needed. See also
-            //      create_project.vala for gettext comments.
-            case AFTER:
-                // return _("after");
-                return "after";
-            case SINCE:
-                // return _("since");
-                return "since";
-            case UNTIL:
-                // return _("until");
-                return "until";
-            case BEFORE:
-                // return _("before");
-                return "before";
-            case ONLY:
-                // return _("only");
-                return "only";
-            case EXCLUDE:
-                // return _("exclude");
-                return "exclude";
-            default:
-                error_msg (_("Could not convert '%s' to string: %u\n"),
-                           "VersionRelation", this);
-                return null;
-        }
-    }
-
-    public static string? to_string_symbol (VersionRelation rel, bool err = true) {
-        switch (rel) {
-            case AFTER:
-                return ">";
-            case SINCE:
-                return ">=";
-            case UNTIL:
-                return "<=";
-            case BEFORE:
-                return "<";
-            case ONLY:
-                return "==";
-            case EXCLUDE:
-                return "!=";
-            default:
-                if (err)
-                    error_msg (_("Could not convert '%s' to string: %u\n"),
-                               "VersionRelation", rel);
-                return null;
-        }
-    }
-
-    public static VersionRelation? name_to_rel (string name, bool err = true) {
-        switch (name) {
-            case "after":
-                return AFTER;
-            case "since":
-                return SINCE;
-            case "until":
-                return UNTIL;
-            case "less":
-            case "before":
-                return BEFORE;
-            case "only":
-                return ONLY;
-            case "not":
-            case "except":
-            case "exclude":
-                return EXCLUDE;
-            default:
-                if (err)
-                    error_msg (_("Could not convert '%s' to %s.\n"),
-                               name, "VersionRelation");
-                return null;
-        }
-    }
-
-    public static VersionRelation? symbol_to_rel (string symbol) {
-        switch (symbol) {
-            case ">":
-                return AFTER;
-            case ">=":
-                return SINCE;
-            case "<=":
-                return UNTIL;
-            case "<":
-                return BEFORE;
-            case "==":
-                return ONLY;
-            case "!=":
-                return EXCLUDE;
-            default:
-                error_msg (_("Could not convert '%s' to %s.\n"),
-                           symbol, "VersionRelation");
-                return null;
-        }
-    }
-}
-
-/**
  * IDE modes on which plug-ins can decide how to do some tasks.
  */
 [Flags]
@@ -648,7 +534,7 @@ public class ValamaProject : ProjectFile {
             foreach (var check in pkg.extrachecks) {
                 string? custom_vapi = null;
                 var custom_defines = new TreeSet<string>();
-                if (check.check (ref custom_vapi, ref custom_defines)) {
+                if (check.check (this, ref custom_vapi, ref custom_defines)) {
                     var strb = new StringBuilder();
                     var space = false;
                     if (custom_vapi != null) {
@@ -1567,30 +1453,6 @@ public class SourceBuffer : Gtk.SourceBuffer {
     public bool needs_guanako_update = false;
     public uint timeout_id = -1;
     public bool last_key_valid = false;
-}
-
-
-/**
- * Throw on project file loading errors.
- */
-public errordomain LoadingError {
-    /**
-     * File content probably too old.
-     */
-    FILE_IS_OLD,
-    /**
-     * File does not contain enough information.
-     */
-    FILE_IS_EMPTY,
-    /**
-     * Unable to load file.
-     */
-    FILE_IS_GARBAGE,
-    /**
-     * Could not load Guanako completion.
-     */
-    //TODO: Disable completion instead.
-    COMPLETION_NOT_AVAILABLE
 }
 
 // vim: set ai ts=4 sts=4 et sw=4

@@ -648,42 +648,6 @@ public class PkgBuildInfo : PackageInfo {
 }
 
 
-public static bool package_exists (string package_name,
-                                   out string? package_version = null) {
-    var pc = @"pkg-config --modversion $package_name";
-    int exit_status;
-    package_version = null;
-
-    try {
-        string err;  // don't print error to console output
-        string? pkg_ver;
-        Process.spawn_command_line_sync (pc, out pkg_ver, out err, out exit_status);
-        if (pkg_ver != null)
-            package_version = pkg_ver.strip();
-        return (0 == exit_status);
-    } catch (SpawnError e) {
-        warning_msg (_("Could not spawn pkg-config package existence check: %s\n"), e.message);
-        return false;
-    }
-}
-
-
-public static bool package_flags (string package_name, out string? package_flags = null) {
-    var pc = @"pkg-config --cflags --libs $package_name";
-    int exit_status;
-    package_flags = null;
-
-    try {
-        string err;
-        Process.spawn_command_line_sync (pc, out package_flags, out err, out exit_status);
-        return (0 == exit_status);
-    } catch (SpawnError e) {
-        warning_msg (_("Could not spawn pkg-config process to get package flags: %s\n"), e.message);
-        return false;
-    }
-}
-
-
 public errordomain BuildError {
     INITIALIZATION_FAILED,
     CONFIGURATION_FAILED,
