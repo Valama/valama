@@ -497,8 +497,8 @@ public class ValamaProject : ProjectFile {
             missings.add (pkg);
 
         foreach (var pkg in packages.values)
-            if (pkg.define != null && !(pkg.name in missings))
-                guanako_project.add_define (pkg.define);
+            if (pkg.define != null && !(pkg.name in missings) && guanako_project.add_define (pkg.define))
+                defines.add (pkg.define);
         guanako_project.commit_defines();
 
         packages_changed();
@@ -518,8 +518,9 @@ public class ValamaProject : ProjectFile {
         guanako_update_finished.connect (() => {
             var used_defines_new = new TreeMap<string, TreeSet<string>>();
             var mit = guanako_project.get_defines_used().map_iterator();
-            while (mit.next()) {
-                foreach (var define in mit.get_value())
+            var new_defines = new TreeSet<string>();
+            while (mit.next())
+                foreach (var define in mit.get_value()) {
                     if (define in used_defines_new.keys)
                         used_defines_new[define].add (mit.get_key());
                     else {
@@ -527,7 +528,9 @@ public class ValamaProject : ProjectFile {
                         tset.add (mit.get_key());
                         used_defines_new[define] = tset;
                     }
-            }
+                    if (!(define in defines))
+                        new_defines.add (define);
+                }
             used_defines = used_defines_new;
 
             var removals = new TreeSet<string>();
@@ -591,9 +594,8 @@ public class ValamaProject : ProjectFile {
                     init_define_signals();
             }
 
-            foreach (var define in used_defines.keys)
-                if (defines.add (define))
-                    defines_changed (true, define);
+            foreach (var define in new_defines)
+                defines_changed (true, define);
         });
 
         parsing = true;
@@ -1182,7 +1184,7 @@ public class ValamaProject : ProjectFile {
      * @return `true` on success.
      */
     public inline bool set_define (string define) {
-        if ((define in defines) && guanako_project.add_define (define)) {
+        if (used_defines.has_key (define) && guanako_project.add_define (define)) {
             defines_update();
             return true;
         }

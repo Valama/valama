@@ -58,8 +58,25 @@ public class BuilderPlain : BuildSystem {
         valacargs += "--thread";
         valacargs += @"--output=$(get_executable())";
 
-        foreach (var pkgname in project.guanako_project.packages)
-            valacargs += @"--pkg=$pkgname";
+        foreach (var pkg in project.packages.values) {
+            build_output (_("Add package: %s\n").printf (pkg.name));
+            if (pkg.custom_vapi == null)
+                valacargs += @"--pkg=$(pkg.name)";
+            else {
+                valacargs += project.get_absolute_path (pkg.custom_vapi);
+                string? pkgflags;
+                if (package_flags (pkg.name, out pkgflags))
+                    try {
+                        string[] pkgflags_args;
+                        Shell.parse_argv (pkgflags, out pkgflags_args);
+                        foreach (var ccpart in pkgflags_args)
+                            valacargs += @"--Xcc=$ccpart";
+                    } catch (GLib.ShellError e) {
+                        warning_msg (_("Could not parse package flags '%s': %s\n"),
+                                     pkgflags, e.message);
+                    }
+            }
+        }
 
         if (project.idemode != IdeModes.DEBUG) {
             foreach (var file in project.guanako_project.get_source_files())
