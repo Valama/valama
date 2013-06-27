@@ -94,16 +94,16 @@ public class ProjectBuilder : Object {
         try {
             int? exit_status;
             if (!project.builder.initialize (out exit_status)) {
-                warning_msg (_("'Initialization' failed with exit status: %d\n"), exit_status);
+                warning_msg (_("'Initialization' failed with exit status: %d\n"), (int) exit_status);
                 build_finished (false);
                 return false;
             }
             if (distclean && !project.builder.distclean (out exit_status)) {
-                warning_msg (_("'Distclean' failed with exit status: %d\n"), exit_status);
+                warning_msg (_("'Distclean' failed with exit status: %d\n"), (int) exit_status);
                 build_finished (false);
                 return false;
             } else if (clean && !project.builder.clean (out exit_status)) {
-                warning_msg (_("'Clean' failed with exit status: %d\n"), exit_status);
+                warning_msg (_("'Clean' failed with exit status: %d\n"), (int) exit_status);
                 build_finished (false);
                 return false;
             }
@@ -112,17 +112,17 @@ public class ProjectBuilder : Object {
                     if (project.builder.build (out exit_status)) {
                         project_needs_compile = false;
                         if (tests && !project.builder.runtests (out exit_status)) {
-                            warning_msg (_("'Tests' failed with exit status: %d\n"), exit_status);
+                            warning_msg (_("'Tests' failed with exit status: %d\n"), (int) exit_status);
                             build_finished (false);
                             return false;
                         }
                     } else {
-                        warning_msg (_("'Build' failed with exit status: %d\n"), exit_status);
+                        warning_msg (_("'Build' failed with exit status: %d\n"), (int) exit_status);
                         build_finished (false);
                         return false;
                     }
                 } else {
-                    warning_msg (_("'Configure' failed with exit status: %d\n"), exit_status);
+                    warning_msg (_("'Configure' failed with exit status: %d\n"), (int) exit_status);
                     build_finished (false);
                     return false;
                 }
@@ -168,13 +168,13 @@ public class ProjectBuilder : Object {
         try {
             int? exit_status;
             if (!project.builder.initialize (out exit_status)) {
-                warning_msg (_("'Initialization' failed with exit status: %d\n"), exit_status);
+                warning_msg (_("'Initialization' failed with exit status: %d\n"), (int) exit_status);
                 build_finished (false);
                 return false;
             }
             stdout.printf ("try to clean\n");
             if (!project.builder.clean (out exit_status)) {
-                warning_msg (_("'Distclean' failed with exit status: %d\n"), exit_status);
+                warning_msg (_("'Distclean' failed with exit status: %d\n"), (int) exit_status);
                 build_finished (false);
                 return false;
             }
@@ -205,12 +205,12 @@ public class ProjectBuilder : Object {
         try {
             int? exit_status;
             if (!project.builder.initialize (out exit_status)) {
-                warning_msg (_("'Initialization' failed with exit status: %d\n"), exit_status);
+                warning_msg (_("'Initialization' failed with exit status: %d\n"), (int) exit_status);
                 build_finished (false);
                 return false;
             }
             if (!project.builder.distclean (out exit_status)) {
-                warning_msg (_("'Distclean' failed with exit status: %d\n"), exit_status);
+                warning_msg (_("'Distclean' failed with exit status: %d\n"), (int) exit_status);
                 build_finished (false);
                 return false;
             }
