@@ -25,17 +25,13 @@ using Xml;
 const string VLP_VERSION_MIN = "0.1";
 
 public class ProjectFile : Object {
-    public ProjectFile (string project_file) {
+    public ProjectFile (string project_file) throws LoadingError {
         this.project_file_path = project_file;
 
         var proj_file = File.new_for_path (project_file);
         project_path = proj_file.get_parent().get_path(); //TODO: Check valid path?
 
-        try {
-            load_project_file ();
-        } catch (LoadingError e) {
-            errmsg (_("Error loading project file '%s': %s\n"), project_file, e.message);
-        }
+        load_project_file();
     }
 
     public string project_file_path  { get; private set; }

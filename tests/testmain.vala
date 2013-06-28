@@ -24,6 +24,7 @@ void main (string[] args) {
 
     TestSuite.get_root().add_suite (new TestCompVersion().get_suite());
     TestSuite.get_root().add_suite (new TestPathSplit().get_suite());
+    TestSuite.get_root().add_suite (new TestProjectfile().get_suite());
 
     Test.run();
 }

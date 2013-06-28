@@ -236,7 +236,12 @@ public class ValamaProject : ProjectFile {
                           string? syntaxfile = null,
                           bool fully = true,
                           bool save_recent = true) throws LoadingError {
-        base (project_file);
+        try {
+            base (project_file);
+        } catch (LoadingError e) {
+            errmsg (_("Error loading project file '%s': %s\n"), project_file, e.message);
+            throw e;
+        }
 
         add_builder (buildsystem);
 

@@ -20,6 +20,8 @@
 cmake_minimum_required(VERSION "2.8.4")
 
 set(extra_srcfiles
+  "../src/project/package_management.vala"
+  "../src/project/project_file.vala"
   "../src/common/args.vala"
   "../src/common/common.vala"
 )
@@ -27,9 +29,14 @@ set(required_pkgs
   "gee-0.8"
   "gee-1.0"
   "gio-2.0"
+  "libxml-2.0"
+  "guanako"
 )
 set(vapifiles
   "../vapi/config.vapi"
+)
+set(datadirs
+  "projectfile"
 )
 
 # Custom library version checks.
@@ -130,6 +137,13 @@ add_definitions(${PROJECT_C_FLAGS})
 # target_link_libraries("tests" "guanako")
 add_dependencies("tests" "guanako" "valama")
 
+copy_dirs(
+  TARGET
+    "copy_datafiles"
+  DIRS
+    ${datadirs}
+)
+
 add_custom_command(
   OUTPUT
     "tests.stamp"
@@ -139,6 +153,7 @@ add_custom_command(
     ${CMAKE_COMMAND} -E touch "tests.stamp"
   DEPENDS
     "tests"
+    "copy_datafiles"
   COMMENT
     "Run tests" VERBATIM
 )
