@@ -44,6 +44,7 @@ public class TestProjectfile : TestCase {
         assert (p.get_absolute_path ("foo/bar/foo") == Path.build_path (Path.DIR_SEPARATOR_S,
                                                                         Environment.get_current_dir(),
                                                                         "projectfile", "foo", "bar", "foo"));
+        assert (p.get_relative_path ("foo/bar/foo") == "foo/bar/foo");
         assert (p.get_relative_path ("/foo/bar/foo") == "/foo/bar/foo");
         assert (p.get_relative_path (Path.build_path (Path.DIR_SEPARATOR_S,
                                                       Environment.get_current_dir(),
