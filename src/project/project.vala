@@ -644,7 +644,7 @@ public class ValamaProject : ProjectFile {
      *
      * @return Return error list.
      */
-    public inline Gee.ArrayList<Guanako.Reporter.Error?> get_errorlist() {
+    public inline Gee.ArrayList<Guanako.Reporter.Error> get_errorlist() {
         return guanako_project.get_errorlist();
     }
 

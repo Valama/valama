@@ -27,6 +27,7 @@ using Guanako;
  */
 class UiReport : UiElement {
     TreeView tree_view = null;
+    ListStore store;
     ScrolledWindow scrw;
     Gdk.Pixbuf pixmap_err;
     Gdk.Pixbuf pixmap_warn;
@@ -99,24 +100,35 @@ class UiReport : UiElement {
                 column_loc.sort_column_id = 1;
             tree_view.append_column (column_loc);
 
-            var column_err = new TreeViewColumn.with_attributes (
+            var column_errline = new TreeViewColumn.with_attributes (
                                                      _("Error"),
                                                      new CellRendererText(),
                                                      "text",
                                                      (int) value + 2,
                                                      null);
-            column_err.sort_column_id = (int) value + 2;
-            tree_view.append_column (column_err);
+            column_errline.sort_column_id = (int) value + 2;
+            tree_view.append_column (column_errline);
             tree_view.can_focus = false;
 
-            tree_view.row_activated.connect ((path) => {
-                int index = path.get_indices()[0];
-                var err = storelist[index];
+            var column_err = new TreeViewColumn();
+            column_err.visible = false;
+            tree_view.append_column (column_err);
 
-                source_viewer.jump_to_position (err.source.file.filename,
-                                                err.source.begin.line - 1,
-                                                err.source.begin.column - 1);
-                source_viewer.current_srcview.highlight_line (err.source.begin.line - 1);
+            tree_view.row_activated.connect ((path) => {
+                TreeIter iter;
+                store.get_iter (out iter, path);
+
+                Value err_val;
+                store.get_value (iter, (int) value + 3, out err_val);
+                var err = err_val as Reporter.Error;
+                if (err != null) {
+                    source_viewer.jump_to_position (err.source.file.filename,
+                                                    err.source.begin.line - 1,
+                                                    err.source.begin.column - 1);
+                    source_viewer.current_srcview.highlight_line (err.source.begin.line - 1);
+                } else
+                    bug_msg (_("Could not get %s from %s: %s\n"),
+                             "Reporter.Error", "ListStore", "show_all.set");
             });
 
             scrw.add (tree_view);
@@ -127,8 +139,6 @@ class UiReport : UiElement {
 
         }
     }
-
-    ArrayList<Reporter.Error> storelist;
 
     public UiReport (ReportType reptype = ReportType.ALL, bool showall = false) {
         var vbox = new Box (Orientation.VERTICAL, 0);
@@ -230,9 +240,12 @@ class UiReport : UiElement {
     }
 
     public override void build() {
-        ListStore store;
         if (showall) {
-            store = new ListStore (4, typeof (Gdk.Pixbuf), typeof (string), typeof (int), typeof (string));
+            store = new ListStore (5, typeof (Gdk.Pixbuf),
+                                      typeof (string),
+                                      typeof (int),
+                                      typeof (string),
+                                      typeof (Reporter.Error));
             store.set_sort_func (1, comp_err_filename);
             store.set_sort_func (0, comp_err_pixbuf);
             store.set_sort_func ((int) showall + 2, comp_err_errors);
@@ -242,7 +255,10 @@ class UiReport : UiElement {
             else
                 store.set_sort_column_id (1, SortType.ASCENDING);
         } else {
-            store = new ListStore (3, typeof (Gdk.Pixbuf), typeof (int), typeof (string));
+            store = new ListStore (4, typeof (Gdk.Pixbuf),
+                                      typeof (int),
+                                      typeof (string),
+                                      typeof (Reporter.Error));
             store.set_sort_func (0, comp_err_pixbuf);
             store.set_sort_func ((int) showall + 2, comp_err_errors);
 
@@ -308,7 +324,6 @@ class UiReport : UiElement {
             return;
 
         debug_msg (_("Run %s update!\n"), get_name());
-        storelist = new ArrayList<Reporter.Error>();
 
         int errs = 0;
         int warns = 0;
@@ -357,14 +372,15 @@ class UiReport : UiElement {
                            1, project.get_relative_path (err.source.file.filename),
                            2, err.source.begin.line,
                            3, err.message,
+                           4, err,
                            -1);
             else
                 store.set (next,
                            0, pixbuf,
                            1, err.source.begin.line,
                            2, err.message,
+                           3, err,
                            -1);
-            storelist.add (err);
         }
 
         // TRANSLATORS: Notes aren't notices but comments/remarks.

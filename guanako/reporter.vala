@@ -53,7 +53,7 @@ namespace Guanako {
         public virtual Gee.ArrayList<Error> errlist { get; protected set; }
         private bool general_error = false;
 
-        public class Error {
+        public class Error : Object {
             public SourceReference source;
             public string message;
             public ReportType type;
