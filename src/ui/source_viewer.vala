@@ -181,10 +181,38 @@ class UiSourceViewer : UiElement {
     private void apply_annotation (SuperSourceView view, SourceBuffer bfr, Guanako.Reporter.Error err) {
         TextIter? iter_start = null;
         TextIter? iter_end = null;
-        bfr.get_iter_at_line (out iter_start, err.source.begin.line - 1);
-        bfr.get_iter_at_line (out iter_end, err.source.end.line - 1);
-        iter_start.forward_chars (err.source.begin.column - 1);
-        iter_end.forward_chars (err.source.end.column);
+
+        // We have broken message positions in some cases ...
+        if (is_after_eof (bfr, err.source.begin))
+            bfr.get_end_iter (out iter_start);
+        else
+            bfr.get_iter_at_line_offset (out iter_start,
+                                         err.source.begin.line - 1,
+                                         err.source.begin.column - 1);
+
+        if (is_after_eof (bfr, err.source.end) || (err.source.end.line == 0 && err.source.end.column == 0))
+            bfr.get_end_iter (out iter_end);
+        else
+            bfr.get_iter_at_line_offset (out iter_end,
+                                         err.source.end.line - 1,
+                                         err.source.end.column);
+
+        // end == begin -> we want to make sure that the error is visible
+        // There is also a case where end > begin but I can't remember
+        // how to trigger it. I think it has something to do with main blocks.
+        if (iter_end.compare (iter_start) <= 0) {
+            iter_end = iter_start;
+            bool tmp = iter_end.forward_char();
+            if (tmp == false)
+                iter_start.backward_char();
+
+            // We have to make sure that there is at least one
+            // visible character between start and end
+            // Example: "public class Foo {"
+            // => The missing-}-error is invisible
+            if (!contains_invisible_char (iter_start, iter_end))
+                extend_to_invisible_char (ref iter_start, ref iter_end);
+        }
 
         var annotation_line = err.source.begin.line - 1;
         int offset = 1;
@@ -213,6 +241,42 @@ class UiSourceViewer : UiElement {
                 bug_msg (_("Unknown ReportType: %s\n"), err.type.to_string());
                 break;
         }
+    }
+
+    private bool is_after_eof (TextBuffer buffer, Vala.SourceLocation location) {
+        TextIter iter_end;
+
+        buffer.get_end_iter (out iter_end);
+        int last_line = iter_end.get_line() + 1;
+        int last_column = iter_end.get_chars_in_line();
+
+        return location.line > last_line || (location.line == last_line && location.column > last_column);
+    }
+
+    private inline bool contains_invisible_char (TextIter start, TextIter end) {
+        return start.forward_find_char ((c) => { return c.iscntrl() == false; }, end);
+    }
+
+    private inline void extend_to_invisible_char (ref TextIter iter_start, ref TextIter iter_end) {
+        TextIter iter = iter_end;
+        do {
+                if (iter.get_char().iscntrl() == false) {
+                        iter_start = iter;
+                        iter_end = iter;
+                        iter_end.forward_char();
+                        return;
+                }
+        } while (iter.forward_char());
+
+        iter = iter_start;
+        do {
+                if (iter.get_char().iscntrl() == false) {
+                        iter_start = iter;
+                        iter_end = iter;
+                        iter_end.forward_char();
+                        return;
+                }
+        } while (iter.backward_char());
     }
 
     /**
