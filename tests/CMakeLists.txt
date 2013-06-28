@@ -39,6 +39,12 @@ set(datadirs
   "projectfile"
 )
 
+if(GUANAKO)
+  list(REMOVE_ITEM required_pkgs "guanako")
+  list(APPEND vapifiles "${CMAKE_BINARY_DIR}/guanako/guanako.vapi")
+  list(APPEND required_pkgs "libvala-${VALA_SHORTVER}")
+endif()
+
 # Custom library version checks.
 set(valac_cond)
 find_package(PkgConfig)
@@ -134,7 +140,10 @@ add_definitions(-DVALA_VERSION="${VALA_SHORTVER}")
 add_executable("tests" ${VALA_C})
 target_link_libraries("tests" ${PROJECT_LDFLAGS})
 add_definitions(${PROJECT_C_FLAGS})
-# target_link_libraries("tests" "guanako")
+if(GUANAKO)
+  include_directories("${PROJECT_BINARY_DIR}/guanako")
+  target_link_libraries("tests" "guanako")
+endif()
 add_dependencies("tests" "guanako" "valama")
 
 copy_dirs(

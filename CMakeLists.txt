@@ -219,12 +219,13 @@ add_definitions(-DLOCALE_DIR="${install_prefix}${localedir}")
 add_definitions(-DPIXMAP_DIR="${install_prefix}${pixdir}")
 add_definitions(-DVALA_VERSION="${VALA_SHORTVER}")
 
-include_directories("${PROJECT_BINARY_DIR}/guanako")
-
 add_executable("${project_name_lower}" ${VALA_C})
 target_link_libraries("${project_name_lower}" ${PROJECT_LDFLAGS})
 add_definitions(${PROJECT_C_FLAGS})
-target_link_libraries("${project_name_lower}" "guanako")
+if(GUANAKO)
+  include_directories("${PROJECT_BINARY_DIR}/guanako")
+  target_link_libraries("${project_name_lower}" "guanako")
+endif()
 
 if(gdl_workarround)
   target_link_libraries("${project_name_lower}" ${GDL3.0_LDFLAGS})
