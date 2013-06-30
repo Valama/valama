@@ -28,6 +28,9 @@ public class SymbolBrowser : UiElement {
     private bool update_needed = true;
     private ulong build_init_id;
 
+    private SortType? sort_order = null;
+    private int? sort_id = null;
+
     public SymbolBrowser (ValamaProject? vproject=null) {
         if (vproject != null)
             project = vproject;
@@ -38,11 +41,19 @@ public class SymbolBrowser : UiElement {
                                                  null,
                                                  new CellRendererPixbuf(),
                                                  "pixbuf",
-                                                 2,
+                                                 3,
                                                  null);
+
         var tmrenderer = new CellRendererText();
-        var tmcolumn = new TreeViewColumn.with_attributes (_("Symbol"), tmrenderer, "markup", null);
-        tree_view.append_column (tmcolumn);
+        var column_sym = new TreeViewColumn.with_attributes (
+                                                 _("Symbol"),
+                                                 tmrenderer,
+                                                 "markup",
+                                                 0,
+                                                 null);
+        column_sym.sort_column_id = 0;
+        tree_view.append_column (column_sym);
+
         tree_view.insert_column_with_attributes (-1,
         // TRANSLATORS: Type in programming context as data type.
                                                  _("Type"),
@@ -50,7 +61,12 @@ public class SymbolBrowser : UiElement {
                                                  "text",
                                                  1,
                                                  null);
-        var store = new TreeStore (3, typeof (string), typeof (string), typeof (Gdk.Pixbuf));
+
+        var column_access = new TreeViewColumn();
+        column_access.visible = false;
+        tree_view.append_column (column_access);
+
+        var store = new TreeStore (4, typeof (string), typeof (string), typeof (uint), typeof (Gdk.Pixbuf));
         tree_view.set_model (store);
         TreeIter iter;
         store.append (out iter, null);
@@ -89,7 +105,7 @@ public class SymbolBrowser : UiElement {
             project.disconnect (build_init_id);
             Source.remove (timer_id);
             tree_view.sensitive = true;
-            tmcolumn.set_attributes (tmrenderer, "text", 0);
+            column_sym.set_attributes (tmrenderer, "text", 0);
             build();
         });
 
@@ -115,10 +131,102 @@ public class SymbolBrowser : UiElement {
         });
     }
 
+    private int comp_sym (TreeModel model, TreeIter a, TreeIter b) {
+        Value a_type;
+        Value b_type;
+        model.get_value (a, 1, out a_type);
+        model.get_value (b, 1, out b_type);
+        var ret = symtype_to_int ((string) a_type) - symtype_to_int ((string) b_type);
+        if (ret != 0)
+            return ret;
+
+        Value a_access;
+        Value b_access;
+        model.get_value (a, 2, out a_access);
+        model.get_value (b, 2, out b_access);
+        ret = symaccess_to_int ((uint) a_access) - symaccess_to_int ((uint) b_access);
+        if (ret != 0) {
+            if (tree_view.get_column (1).sort_order == SortType.ASCENDING)
+                return ret;
+            else
+                return (-1)*ret;
+        }
+
+        Value a_str;
+        Value b_str;
+        model.get_value (a, 0, out a_str);
+        model.get_value (b, 0, out b_str);
+        ret = strcmp ((string) a_str, (string) b_str);
+        if (tree_view.get_column (1).sort_order == SortType.ASCENDING)
+            return ret;
+        else
+            return (-1)*ret;
+    }
+
+    private int symtype_to_int (string type) {
+        //TODO: Hash table to speed lookup up?
+        switch (type) {
+            case "Namespace":
+                return 0;
+            case "Constant":
+                return 1;
+            case "Enum":
+                return 2;
+            case "Enum_value":
+                return 3;
+            case "Error_domain":
+                return 4;
+            case "Error_code":
+                return 5;
+            case "Struct":
+                return 6;
+            case "Interface":
+                return 7;
+            case "Class":
+                return 8;
+            case "Property":
+                return 9;
+            case "Field":
+                return 10;
+            case "Delegate":
+                return 11;
+            case "Method":
+                return 12;
+            case "Signal":
+                return 13;
+            //TODO; What about CreationMethod?
+            default:
+                bug_msg (_("No valid type: %s - %s\n"), type, "UiReport.symtype_to_int");
+                return -1;
+        }
+    }
+
+    private int symaccess_to_int (uint access) {
+        switch (access) {
+            case SymbolAccessibility.INTERNAL:
+                return 0;
+            case SymbolAccessibility.PRIVATE:
+                return 1;
+            case SymbolAccessibility.PROTECTED:
+                return 2;
+            case SymbolAccessibility.PUBLIC:
+                return 3;
+            default:
+                bug_msg (_("No valid type: %u - %s\n"), access, "UiReport.symaccess_to_int");
+                return -1;
+        }
+    }
+
     public override void build() {
         update_needed = false;
         debug_msg (_("Run %s update!\n"), get_name());
-        var store = new TreeStore (3, typeof (string), typeof (string), typeof (Gdk.Pixbuf));
+        var store = new TreeStore (4, typeof (string), typeof (string), typeof (uint), typeof (Gdk.Pixbuf));
+        store.set_sort_func (0, comp_sym);
+        if (sort_order != null && sort_id != null)
+            store.set_sort_column_id (sort_id, sort_order);
+        else
+            store.set_sort_column_id (0, SortType.ASCENDING);
+
         tree_view.set_model (store);
 
         TreeIter[] iters = new TreeIter[0];
@@ -131,7 +239,11 @@ public class SymbolBrowser : UiElement {
                 else
                     store.append (out next, iters[depth - 2]);
                 string typename = get_symbol_type_name(smb);
-                store.set (next, 0, smb.name, 1, typename.up(1) + typename.substring(1), 2, get_pixbuf_for_symbol (smb), -1);
+                store.set (next, 0, smb.name,
+                                 1, typename.up(1) + typename.substring(1),
+                                 2, (uint) smb.access,
+                                 3, get_pixbuf_for_symbol (smb),
+                                 -1);
                 if (iters.length < depth)
                     iters += next;
                 else
