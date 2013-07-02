@@ -13,7 +13,7 @@ The next gen Vala IDE.
  * gobject-2.0
  * glib-2.0
  * gio-2.0
- * gee-0.8 or gee-1.0
+ * gee-0.8 (recommended) or gee-1.0
  * at least libvala-0.20 (recommended) or libvala-0.18
  * gdk-3.0
  * gdl-3.0 (>= 3.5.5 is recommended)
@@ -21,19 +21,19 @@ The next gen Vala IDE.
  * gtksourceview-3.0
  * libxml-2.0
  * gthread-2.0
- * GNOME desktop icon theme (symbolic icons) (only required to display icons properly)
- * ImageMagick (only required to generate application icons from svg template) (recommended)
  * Intltool (required to generate .desktop and .xml files with localization)
+ * GNOME desktop icon theme (symbolic icons) (only required to display icons properly)
+ * rsvg-convert (only required to generate application icons from svg template) (recommended)
 
 On Debian based systems install following packages:
 
-    sudo apt-get install build-essential valac-0.20 libvala-0.20-dev cmake pkg-config libgtksourceview-3.0-dev libgee-dev libxml2-dev libgdl-3-dev gnome-icon-theme-symbolic imagemagick intltool
+    sudo apt-get install build-essential valac-0.20 libvala-0.20-dev cmake pkg-config libgtksourceview-3.0-dev libgee-0.8-dev libxml2-dev libgdl-3-dev intltool gnome-icon-theme-symbolic librsvg2-bin
 
 On Fedora based systems install following packages:
 
-    sudo yum install vala-devel cmake gtksourceview3-devel libgee-devel libxml2-devel libgdl-devel gnome-icon-theme-symbolic ImageMagick intltool
+    sudo yum install vala-devel cmake gtksourceview3-devel libgee-devel libxml2-devel libgdl-devel intltool gnome-icon-theme-symbolic librsvg2
 
-**Hint:** If you want to use a newer version of `libvala`, change  `cmake/project.cmake` and `cmake/guanako.cmake` (and if you want to use Valama `valama.vlp`) accordingly.
+**Hint:** If you want to use a newer version of `libvala`, change  `cmake/project.cmake` and `cmake/guanako.cmake` (and if you want to use Valama also `valama.vlp`) accordingly.
 
 ### Building ###
  1. `mkdir build && cd build`
@@ -70,4 +70,4 @@ Valama is distributed under the terms of the GNU General Public License version 
 For a full list of all contributors see [here](https://github.com/Valama/valama/graphs/contributors) and take a look at `AUTHORS` file.
 
 ## Credits ##
-element-\* icons from Anjuta IDE (http://projects.gnome.org/anjuta, GPL2 licensed)
+element-\* icons from [Anjuta IDE](https://projects.gnome.org/anjuta/) (GPL2 licensed)

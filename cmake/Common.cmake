@@ -65,8 +65,7 @@ endfunction()
 
 
 ##
-# Convert svg to png and set up installation places. convert tool from
-# imagemagick is required.
+# Convert svg to png and set up installation places. rsvg-convert is required.
 #
 # Usage:
 # The first parameter is set to all png files. Add them later to a custom
@@ -111,7 +110,7 @@ function(convert_svg_to_png output)
   set(png_list)
   if(ARGS_ICON)
     if(ARGS_PNG_NAME)
-      find_program(CONVERT convert)
+      find_program(CONVERT rsvg-convert)
       if(CONVERT)
         if(NOT datarootdir)
           set(datarootdir "share")
@@ -127,7 +126,7 @@ function(convert_svg_to_png output)
             DEPENDS
               "${ARGS_ICON}"
             COMMAND
-              "${CONVERT}" "-background" "none" "-resize" "${size}x${size}" "${ARGS_ICON}" "${iconpath}"
+              "${CONVERT}" "--background-color" "none" "--width" "${size}" "--height" "${size}" "${ARGS_ICON}" ">${iconpath}"
           )
           list(APPEND png_list "${iconpath}")
           if(ARGS_DESTINATION)
