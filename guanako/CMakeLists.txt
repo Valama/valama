@@ -68,9 +68,9 @@ set(valac_cond)
 find_package(PkgConfig)
 # libvala-X.Y
 if(VALA_SHORTVER STREQUAL "0.20")
-  list(REMOVE_ITEM required_pkgs "libvala-0.18" )
+  list(REMOVE_ITEM required_pkgs "libvala-0.18")
 else()
-  list(REMOVE_ITEM required_pkgs "libvala-0.20" )
+  list(REMOVE_ITEM required_pkgs "libvala-0.20")
 endif()
 # gee-1.0 and gee-0.8
 set(gee_ver)
@@ -154,8 +154,10 @@ set(default_vala_flags
   "--thread"
   "--target-glib" "${GLIB2.0_VERSION}"
   "--enable-experimental"
+  #"--fatal-warnings"
   ${valac_cond}
 )
+
 include(ValaPkgs)
 vala_pkgs(VALA_C
   PACKAGES

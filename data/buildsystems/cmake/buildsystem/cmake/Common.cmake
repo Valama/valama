@@ -164,7 +164,6 @@ endfunction()
 #   # Will print out e.g. "Date: April 2013"
 #   message("Date: ${date}")
 #
-#
 macro(datestring output)
   include(CMakeParseArguments)
   cmake_parse_arguments(ARGS "" "FORMAT" "" ${ARGN})
@@ -204,7 +203,7 @@ endmacro()
 # Usage:
 #
 # LOCAL
-#   If true compile gsettings schemas locally (in
+#   If set compile gsettings schemas locally (in
 #   ${CMAKE_BINARY_DIR}/glib-2.0/schemas) directory). Add this directory to
 #   your XDG_DATA_DIRS variable.
 #
@@ -220,7 +219,6 @@ endmacro()
 #
 #   gsettings_install(
 #     LOCAL
-#       TRUE
 #     GSETTINGSDIR
 #       share/glib-2.0/schemas
 #     FILES
@@ -229,7 +227,7 @@ endmacro()
 #
 function(gsettings_install)
   include(CMakeParseArguments)
-  cmake_parse_arguments(ARGS "" "LOCAL;GSETTINGSDIR" "FILES" ${ARGN})
+  cmake_parse_arguments(ARGS "LOCAL" "GSETTINGSDIR" "FILES" ${ARGN})
 
   if(NOT "" STREQUAL "${ARGS_FILES}")
     if(ARGS_LOCAL)
@@ -240,27 +238,28 @@ function(gsettings_install)
         @ONLY
       )
       foreach(gfile ${ARGS_FILES})
+        if(NOT IS_ABSOLUTE "${gfile}")
+          set(gfile "${CMAKE_CURRENT_SOURCE_DIR}/${gfile}")
+        endif()
         get_filename_component(filename "${gfile}" NAME)
         add_custom_command(
-            COMMAND
-              ${CMAKE_COMMAND} -E make_directory "${GSETTINGSDIR}"
+            OUTPUT
+              "${GSETTINGSDIR}"
             COMMAND
               ${CMAKE_COMMAND} -E copy_if_different
                                       "${gfile}"
                                       "${CMAKE_CURRENT_BINARY_DIR}/glib-2.0/schemas/${filename}"
-            OUTPUT
-              "${GSETTINGSDIR}"
             COMMENT
               "Install gsettings schemas locally." VERBATIM
         )
       endforeach()
       add_custom_command(
+          OUTPUT
+            "glib-2.0/schemas/gschemas.compiled"
           COMMAND
             ${CMAKE_COMMAND} -P "${CMAKE_BINARY_DIR}/GlibCompileSchema_local.cmake"
           DEPENDS
             "${GSETTINGSDIR}"
-          OUTPUT
-            "glib-2.0/schemas/gschemas.compiled"
           COMMENT
             "Compile gsettings schemas." VERBATIM
       )
@@ -278,7 +277,7 @@ function(gsettings_install)
       install(FILES "${gfile}" DESTINATION "${ARGS_GSETTINGSDIR}")
     endforeach()
 
-    if(POSTINSTALL_HOOK AND NOT "$ENV{DESTDIR}")
+    if(POSTINSTALL_HOOK AND "$ENV{DESTDIR}" STREQUAL "")
       if(CMAKE_INSTALL_PREFIX)
         set(install_prefix "${CMAKE_INSTALL_PREFIX}/")
       else()
@@ -294,3 +293,126 @@ function(gsettings_install)
     endif()
   endif()
 endfunction()
+
+
+##
+# Recursively copy directory content.
+#
+# Usage:
+#
+# TARGET
+#   Name of CMake target. Default is 'copy_dirs'.
+#
+# BASEDIR
+#   Name of base directory to build relative paths compared  to TARGETDIR.
+#   Default is ${CMAKE_CURRENT_SOURCE_DIR}.
+#
+# TARGETDIR
+#   Name of base directory where to copy files to. Default is
+#   ${CMAKE_CURRENT_BINARY_DIR}.
+#
+# DIRS
+#   List of directories (or files) to recursively copy.
+#
+#
+# Simple example:
+#
+#     copy_dirs(
+#       TARGET
+#         "custom_target_name
+#       BASEDIR
+#         "${CMAKE_CURRENT_SOURCE_DIR}/foo"
+#       TARGETDIR
+#         "${CMAKE_CURRENT_BINARY_DIR}/bar"
+#       DIRS
+#         "blub̈́*"
+#         "/foobar/bar"
+#     )
+#     # Copy ${}/foo/blub* and /foobar/bar to ${}/bar (= ${}/bar/blub*) and
+#     #                                                  ${}/bar/foobar/bar)
+#     add_custom_target("foobar"
+#       ALL
+#       DEPENDS
+#         "custom_target_name"
+#       COMMENT "Copy some files" VERBATIM
+#     )
+#
+function(copy_dirs)
+  include(CMakeParseArguments)
+  cmake_parse_arguments(ARGS "" "TARGET;BASEDIR;TARGETDIR" "DIRS" ${ARGN})
+
+  if(NOT ARGS_BASEDIR)
+    set(ARGS_BASEDIR "${CMAKE_CURRENT_SOURCE_DIR}")
+  endif()
+  if(NOT ARGS_TARGET)
+    set(ARGS_TARGET "copy_dirs")
+  endif()
+  if(NOT ARGS_TARGETDIR)
+    set(ARGS_TARGETDIR "${CMAKE_CURRENT_BINARY_DIR}")
+  endif()
+
+  set(copyfiles)
+  foreach(globexpr ${ARGS_DIRS})
+    file(GLOB tmpdirs ${globexpr})
+    if(tmpdirs)
+      foreach(tmpdir ${tmpdirs})
+        get_files_recursively(files "${tmpdir}")
+        list(APPEND copyfiles ${files})
+      endforeach()
+    else()
+      get_files_recursively(files "${globexpr}")
+      list(APPEND copyfiles ${files})
+    endif()
+  endforeach()
+
+  set(copyfiles_d)
+  foreach(copyfile ${copyfiles})
+    file(RELATIVE_PATH copyfile_d "${ARGS_BASEDIR}" "${copyfile}")
+    set(copyfile_d "${ARGS_TARGETDIR}/${copyfile_d}")
+    add_custom_command(
+      OUTPUT
+        "${copyfile_d}"
+      COMMAND
+        ${CMAKE_COMMAND} -E copy_if_different "${copyfile}" "${copyfile_d}"
+      DEPENDS
+        "${copyfile}"
+    )
+    list(APPEND copyfiles_d "${copyfile_d}")
+  endforeach()
+
+  add_custom_target("${ARGS_TARGET}"
+    DEPENDS
+      ${copyfiles_d}
+    #COMMENT "Copy data files." VERBATIM
+  )
+endfunction()
+
+
+##
+# Recursively get list of files.
+#
+# From refaim on stackoverflow: http://stackoverflow.com/a/7788165/770468
+#
+# Usage:
+# The first parameter is set to list of files. The second one is the path of
+# current directory.
+#
+#
+# Simple example:
+#
+#   # Set ${files} to all files in foo/ directory.
+#   get_files_recursively(files "foo")
+#
+macro(get_files_recursively result curdir)
+  file(GLOB children RELATIVE "${curdir}" "${curdir}/*")
+  set(files)
+  foreach(child ${children})
+    if(IS_DIRECTORY "${curdir}/${child}")
+      get_files_recursively(subfiles "${curdir}")
+      list(APPEND files ${subfiles})
+    else()
+      list(APPEND files "${curdir}/${child}")
+    endif()
+  endforeach()
+  set(${result} ${files})
+endmacro()
