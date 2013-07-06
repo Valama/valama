@@ -110,31 +110,14 @@ public class GuanakoCompletion : Gtk.SourceCompletionProvider, Object {
                     if (current_symbol_annotation != null)
                         current_symbol_annotation.finished = true;
 
-                    if (current_symbol != null) {
-                        string lblstr = "";
-                        if (current_symbol is Method) {
-                            var mth = current_symbol as Method;
-                            if (mth.return_type.data_type != null)
-                                lblstr += mth.return_type.data_type.name;
-                            else
-                                lblstr += "void";
-                            lblstr += " " + mth.name + " (";
-                            var prms = mth.get_parameters();
-                            for (int q = 0; q < prms.size; q++) {
-                                if (prms[q].direction == ParameterDirection.OUT)
-                                    lblstr += "out ";
-                                else if (prms[q].direction == ParameterDirection.REF)
-                                    lblstr += "ref ";
-                                lblstr += prms[q].variable_type.data_type.name + " " + prms[q].name;
-                                if (q < prms.size - 1)
-                                    lblstr += ", ";
-                            }
-
-                            lblstr += ")";
-                        } else
-                            lblstr = current_symbol.name;
-                        current_symbol_annotation = source_viewer.current_srcview.annotate (line - 1, lblstr, 0.5, 0.5, 0.5, true, -1);
-                    } else
+                    if (current_symbol != null)
+                        current_symbol_annotation = source_viewer.current_srcview.annotate (
+                                                        line - 1,
+                                                        Guanako.symbolsig_to_string (current_symbol),
+                                                        0.5, 0.5, 0.5,
+                                                        true,
+                                                        -1);
+                    else
                         current_symbol_annotation = null;
                     GLib.Idle.add (() => {
                         project.completion_finished (current_symbol);
