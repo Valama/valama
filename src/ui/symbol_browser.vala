@@ -28,6 +28,11 @@ public class SymbolBrowser : UiElement {
     private bool update_needed = true;
     private ulong build_init_id;
 
+    private bool init_done = false;
+    private CellRendererText tmrenderer;
+    private TreeViewColumn column_sym;
+    private uint timer_id;
+
     private SortType? sort_order = null;
     private int? sort_id = null;
 
@@ -44,8 +49,8 @@ public class SymbolBrowser : UiElement {
                                                  3,
                                                  null);
 
-        var tmrenderer = new CellRendererText();
-        var column_sym = new TreeViewColumn.with_attributes (
+        tmrenderer = new CellRendererText();
+        column_sym = new TreeViewColumn.with_attributes (
                                                  _("Symbol"),
                                                  tmrenderer,
                                                  "markup",
@@ -74,7 +79,7 @@ public class SymbolBrowser : UiElement {
         tree_view.sensitive = false;
 
         int state = -1;
-        var timer_id = Timeout.add (800, () => {
+        timer_id = Timeout.add (800, () => {
             switch (state) {
                 case 0:
                     store.set (iter, 0, "<i>" + Markup.escape_text (_("Loading")) + ".  </i>", -1);
@@ -103,9 +108,6 @@ public class SymbolBrowser : UiElement {
          */
         build_init_id = project.guanako_update_finished.connect (() => {
             project.disconnect (build_init_id);
-            Source.remove (timer_id);
-            tree_view.sensitive = true;
-            column_sym.set_attributes (tmrenderer, "text", 0);
             build();
         });
 
@@ -218,40 +220,51 @@ public class SymbolBrowser : UiElement {
     }
 
     public override void build() {
-        update_needed = false;
-        debug_msg (_("Run %s update!\n"), get_name());
-        var store = new TreeStore (4, typeof (string), typeof (string), typeof (uint), typeof (Gdk.Pixbuf));
-        store.set_sort_func (0, comp_sym);
-        if (sort_order != null && sort_id != null)
-            store.set_sort_column_id (sort_id, sort_order);
-        else
-            store.set_sort_column_id (0, SortType.ASCENDING);
+        new Thread<void*> (_("Symbol browser update"), () => {
+            update_needed = false;
+            debug_msg (_("Run %s update!\n"), get_name());
 
-        tree_view.set_model (store);
+            var store = new TreeStore (4, typeof (string), typeof (string), typeof (uint), typeof (Gdk.Pixbuf));
+            store.set_sort_func (0, comp_sym);
+            if (sort_order != null && sort_id != null)
+                store.set_sort_column_id (sort_id, sort_order);
+            else
+                store.set_sort_column_id (0, SortType.ASCENDING);
 
-        TreeIter[] iters = new TreeIter[0];
+            TreeIter[] iters = new TreeIter[0];
 
-        Guanako.iter_symbol (project.guanako_project.root_symbol, (smb, depth) => {
-            if (smb.name != null) {
-                TreeIter next;
-                if (depth == 1)
-                    store.append (out next, null);
-                else
-                    store.append (out next, iters[depth - 2]);
-                string typename = get_symbol_type_name(smb);
-                store.set (next, 0, smb.name,
-                                 1, typename.up(1) + typename.substring(1),
-                                 2, (uint) smb.access,
-                                 3, get_pixbuf_for_symbol (smb),
-                                 -1);
-                if (iters.length < depth)
-                    iters += next;
-                else
-                    iters[depth - 1] = next;
+            Guanako.iter_symbol (project.guanako_project.root_symbol, (smb, depth) => {
+                if (smb.name != null) {
+                    TreeIter next;
+                    if (depth == 1)
+                        store.append (out next, null);
+                    else
+                        store.append (out next, iters[depth - 2]);
+                    string typename = get_symbol_type_name(smb);
+                    store.set (next, 0, smb.name,
+                                     1, typename.up(1) + typename.substring(1),
+                                     2, (uint) smb.access,
+                                     3, get_pixbuf_for_symbol (smb),
+                                     -1);
+                    if (iters.length < depth)
+                        iters += next;
+                    else
+                        iters[depth - 1] = next;
+                }
+                return Guanako.IterCallbackReturns.CONTINUE;
+            });
+
+            if (!init_done) {
+                init_done = true;
+                Source.remove (timer_id);
+                tree_view.sensitive = true;
+                column_sym.set_attributes (tmrenderer, "text", 0);
             }
-            return Guanako.IterCallbackReturns.CONTINUE;
+            tree_view.set_model (store);
+
+            debug_msg (_("%s update finished!\n"), get_name());
+            return null;
         });
-        debug_msg (_("%s update finished!\n"), get_name());
     }
 }
 
