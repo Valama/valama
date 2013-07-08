@@ -180,11 +180,14 @@ public ProjectTemplate[] load_templates() {
                                                  dirpath,
                                                  new_template.name,
                                                  "template");
-            //TODO: Ignore case.
-            foreach (var filetype in new string[] {"png",
-                                                   "jpg",
-                                                   "jpeg",
-                                                   "svg"}) {
+            foreach (var filetype in new string[] {"png","jpg","jpeg","svg",
+#if UNIX           //TODO: Better solution for case insensitive file extension?
+                   "Png","pNg","pnG","PNg","PnG","pNG","PNG",
+                   "Jpg","jPg","jpG","JPg","JpG","jPG","JPG",
+                   "Jpeg","jPeg","jpEg","jpeG","JPeg","JpEg","JpeG","jPEg","jPeG","jpEG","JPEg","JPeG","JpEG","jPEG","JPEG",
+                   "Svg","sVg","svG","SVg","SvG","sVG","SVG"
+#endif
+                                                  }) {
                 var icon_path = Path.build_path (Path.DIR_SEPARATOR_S,
                                                  dirpath,
                                                  new_template.name,
@@ -371,7 +374,7 @@ private string? get_lang_content (Xml.Node* node, ArrayList<string?> locales) {
         if (desc_start == null)
             desc_start = p->get_content();
         var tmpid = locales.index_of (p->name);
-        if (tmpid >= 0 && tmpid < locid) {
+        if (0 <= tmpid < locid) {
             locid = tmpid;
             desc = p->get_content();
             if (tmpid == 0)

@@ -579,7 +579,7 @@ private void remove_recursively_int (File f) throws GLib.IOError, GLib.Error {
  * @return If basename is `false`, return list of full paths. Else return
  *         absolute paths.
  */
-public string[] split_path (string path, bool basename = true, bool root = true) {
+public static string[] split_path (string path, bool basename = true, bool root = true) {
     string[] pathlist = {};
     string subpath = path;
 
@@ -589,7 +589,7 @@ public string[] split_path (string path, bool basename = true, bool root = true)
         var rootlesspart = Path.skip_root (path);
         var rootindex = subpath.last_index_of (rootlesspart);
         if (root) {
-            pathlist += subpath[0:rootindex];
+            pathlist += subpath[0:byte_index_to_character_index (subpath, rootindex)];
             if (!basename)
                 rootfound = true;
         }
@@ -598,8 +598,11 @@ public string[] split_path (string path, bool basename = true, bool root = true)
 
     /* Strip path delimiter. */
     var dirsepindex = subpath.last_index_of (Path.DIR_SEPARATOR_S);
-    if (dirsepindex != -1 && subpath.length - dirsepindex == Path.DIR_SEPARATOR_S.length)
-        subpath = subpath[0:dirsepindex];
+    if (dirsepindex != -1) {
+        var dirsepindexch = byte_index_to_character_index (subpath, dirsepindex);
+        if (subpath.length - dirsepindexch == Path.DIR_SEPARATOR_S.length)
+            subpath = subpath[0:dirsepindexch];
+    }
 
     /* Generate list of file parts. */
     string[] tmppathlist = {};
@@ -619,6 +622,21 @@ public string[] split_path (string path, bool basename = true, bool root = true)
             pathlist += tmppathlist[i];
 
     return pathlist;
+}
+
+
+public static int byte_index_to_character_index (string text, int byte_index, bool silent = false) {
+    if (!text.valid_char (byte_index)) {
+        if (!silent)
+            error_msg (_("No character found at byte index %d: %s\n"), byte_index, text);
+        return -1;
+    }
+
+    for (var i = 0; i < text.char_count(); ++i)
+        if (text.index_of_nth_char (i) == byte_index)
+            return i;
+
+    assert_not_reached();
 }
 
 

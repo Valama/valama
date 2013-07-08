@@ -25,6 +25,8 @@ public class TestPathSplit : TestCase {
         add_test ("standard", test_normal);
         add_test ("relative_paths", test_relative_paths);
         add_test ("relative_paths_special", test_relative_paths_special);
+        add_test ("utf8_paths", test_utf8);
+        add_test ("bytecharindex", test_bytetoindex);
     }
 
     public override void set_up() {}
@@ -101,6 +103,20 @@ public class TestPathSplit : TestCase {
         assert (split_path ("", true, false).length == 0);
         assert (split_path ("", false, true).length == 0);
         assert (split_path ("", false, false).length == 0);
+    }
+
+    public void test_utf8() {
+        var baseparts = new string[] {"/", "𤭢水は方円の器に従い", "asdf", "人は善悪の友による。"};
+        var splitpaths = split_path ("/𤭢水は方円の器に従い/asdf/人は善悪の友による。", true, true);
+        assert (baseparts.length == splitpaths.length);
+        for (int i = 0; i < baseparts.length; ++i)
+            assert (splitpaths[i] == baseparts[i]);
+    }
+
+    public void test_bytetoindex() {
+        var mbytestr = "楽あれば苦あり。";  // 3 byte characters
+        for (var i = 0; i < mbytestr.length; ++i)
+            assert (byte_index_to_character_index (mbytestr, i, true) == ((i%3 == 0) ? i/3 : -1));
     }
 }
 
