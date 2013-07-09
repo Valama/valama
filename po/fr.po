@@ -1988,7 +1988,7 @@ msgstr "création de répertoire échoué : %s"
 #: ../src/buildsystem/cmake.vala:260
 #, c-format
 msgid "distclean command failed: %s"
-msgstr "Commande distclean échouée"
+msgstr "Commande distclean échouée : %s"
 
 #: ../src/common/common.vala:525
 msgid "file does not exist"

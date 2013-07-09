@@ -1979,7 +1979,7 @@ msgstr "Anlegen eines neuen Verzeichnisses fehlgeschlagen: %s"
 #: ../src/buildsystem/cmake.vala:260
 #, c-format
 msgid "distclean command failed: %s"
-msgstr "Kommando zum vollständiges Aufräumen fehlgeschlagen"
+msgstr "Kommando zum vollständiges Aufräumen fehlgeschlagen: %s"
 
 #: ../src/common/common.vala:525
 msgid "file does not exist"
