@@ -42,6 +42,7 @@ On Fedora based systems install following packages:
 
 ### Installation ###
  1. `sudo make install`
+ 1. `sudo ldconfig` (to update linker cache for the shared Guanako helper library)
 
 This will automatically install and compile gsettings schemas. (You can
 disable installtion/removal hooks during compile time with
