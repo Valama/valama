@@ -34,6 +34,7 @@ set(srcfiles
 "src/dialogs/about.vala"
 "src/dialogs/create_file.vala"
 "src/dialogs/create_project.vala"
+"src/dialogs/open_file.vala"
 "src/dialogs/missing_packages.vala"
 "src/dialogs/project_settings.vala"
 "src/main.vala"

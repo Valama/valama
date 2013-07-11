@@ -29,12 +29,16 @@ public class UiTemplateSelector : TemplatePage {
     private ProjectTemplate[] available_templates;
     private ToggleToolButton btn_credits;
     private ToggleToolButton btn_vlpinfo;
+    private ToggleToolButton btn_info;
 
+    private bool initialized;
     private bool accel_added;
+    private bool has_content;
 
     private Widget tinfo;
 
     public UiTemplateSelector() {
+        initialized = false;
         var accel_group = new AccelGroup();
         accel_added = false;
 
@@ -74,7 +78,7 @@ public class UiTemplateSelector : TemplatePage {
         separator_expand.draw = false;
         toolbar.add (separator_expand);
 
-        var btn_info = new ToggleToolButton.from_stock (Stock.INFO);
+        btn_info = new ToggleToolButton.from_stock (Stock.INFO);
         btn_info.sensitive = false;
         btn_info.tooltip_text = _("Template information");
         toolbar.add (btn_info);
@@ -113,9 +117,6 @@ public class UiTemplateSelector : TemplatePage {
 
         });
 
-        var store = new ListStore (2, typeof (string), typeof (Gdk.Pixbuf));
-        tree_view.set_model (store);
-
         tree_view.insert_column_with_attributes (-1,
                                                  null,
                                                  new CellRendererPixbuf(),
@@ -127,12 +128,61 @@ public class UiTemplateSelector : TemplatePage {
                                                  "markup",
                                                  0);
 
+        tree_view.row_activated.connect (() => {
+            btn_info.active = true;
+        });
+
+        /* Take care not to make those global accelerators permanent. */
+        this.selected.connect (() => {
+            if (!initialized) {
+                //TODO: Fill TreeView async.
+                init();
+            }
+            if (!accel_added) {
+                window_main.add_accel_group (accel_group);
+                accel_added = true;
+            }
+            Idle.add (() => {
+                if (has_content)
+                    next (true);
+                prev (true);
+                tree_view.grab_focus();
+                return false;
+            });
+            return _("Select template");
+        });
+        this.deselected.connect ((status) => {
+            if (accel_added) {
+                window_main.remove_accel_group (accel_group);
+                accel_added = false;
+            }
+            btn_info.active = false;
+            if (status)
+                TemplatePage.template = get_selected_template();
+        });
+
+        this.widget = vbox;
+    }
+
+    public override string get_id() {
+        return "UiTemplateSelector";
+    }
+
+    protected override void init() {
+        initialized = true;
+
+        var store = new ListStore (2, typeof (string), typeof (Gdk.Pixbuf));
+        tree_view.set_model (store);
+
         available_templates = load_templates();
+        if (available_templates.length == 0)
+            return;
 
         bool first_entry = true;
         string[] available_packages = new string[0];
         foreach (string av_pkg in Guanako.get_available_packages())
             available_packages += av_pkg;
+
         foreach (var template in available_templates) {
             TreeIter iter;
             store.append (out iter);
@@ -144,6 +194,7 @@ public class UiTemplateSelector : TemplatePage {
                 continue;
             }
             btn_info.sensitive = true;
+            has_content = true;
 
             var strb_tlabel = new StringBuilder();
             if (template.unmet_deps.size > 0)
@@ -175,34 +226,6 @@ public class UiTemplateSelector : TemplatePage {
                 first_entry = false;
             }
         }
-
-        tree_view.row_activated.connect (() => {
-            btn_info.active = true;
-        });
-
-        /* Take care not to make those global accelerators permanent. */
-        this.selected.connect (() => {
-            if (!accel_added) {
-                window_main.add_accel_group (accel_group);
-                accel_added = true;
-            }
-            Idle.add (() => {
-                tree_view.grab_focus();
-                return false;
-            });
-            return _("Select template");
-        });
-        this.deselected.connect ((status) => {
-            if (accel_added) {
-                window_main.remove_accel_group (accel_group);
-                accel_added = false;
-            }
-            btn_info.active = false;
-            if (status)
-                TemplatePage.template = get_selected_template();
-        });
-
-        this.widget = vbox;
     }
 
     public ProjectTemplate? get_selected_template() {

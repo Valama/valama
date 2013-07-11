@@ -58,6 +58,16 @@ public abstract class TemplatePage : Object {
      * Emit to change next-button sensitivity.
      */
     public signal void next (bool status);
+
+    public signal void move_prev();
+    public signal void move_next();
+
+    public signal void load_project (ValamaProject? project);
+
+    public abstract string get_id();
+
+    protected virtual void init() {}
+    public virtual void manual_init() {}
 }
 
 
@@ -520,15 +530,23 @@ public class WelcomeScreen : Alignment {
      * @param tpage Add {@link TemplatePage.widget} to creation steps.
      * @param pos Insert step at position. If `null` append it.
      */
+    //TODO: Use tpage id to switch to next or previous page (hash table).
     public void add_tpage (TemplatePage tpage, int? pos = null,
                                             int prev = 1, int next = 1) {
-        add_page (tpage.widget, pos);
+        if (pos == null)
+            nbook.append_page (tpage.widget);
+        else
+            nbook.insert_page (tpage.widget, null, pos);
+
+        tpage.load_project.connect ((project) => {
+            project_loaded (project);
+        });
 
         nbook.switch_page.connect ((page, num) => {
             if (initialized) {
                 if (tpage.widget == page) {
-                    btn_prev.sensitive = true;
-                    btn_next.sensitive = true;
+                    btn_prev.sensitive = false;
+                    btn_next.sensitive = false;
                     nbook_prev_n = prev;
                     nbook_next_n = next;
                     var s = tpage.selected();
@@ -546,6 +564,12 @@ public class WelcomeScreen : Alignment {
             if (tpage.widget == current_page)
                 btn_next.sensitive = status;
         });
+        tpage.move_prev.connect (() => {
+            btn_prev.clicked();
+        });
+        tpage.move_next.connect (() => {
+            btn_next.clicked();
+        });
         main_screen_selected.connect (() => {
             tpage.deselected (false);
         });
@@ -561,7 +585,7 @@ public class WelcomeScreen : Alignment {
      *  * project settings element
      */
     private void init_default_pages() {
-        add_page (opener);
+        add_tpage (new UiTemplateOpener());
         add_tpage (new UiTemplateSelector(), null, 2);
         add_page (get_simple_setting());
 
