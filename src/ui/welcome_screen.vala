@@ -129,10 +129,6 @@ public class WelcomeScreen : Alignment {
      * switch between creation steps.
      */
     private Widget creator;
-    /**
-     * File chooser widget.
-     */
-    private Widget opener;
 
     /**
      * Initialization state. Signal emissions will be tracked after
@@ -211,7 +207,6 @@ public class WelcomeScreen : Alignment {
 
         build_main();
         build_creator();
-        build_opener();
 
         project_loaded.connect ((project) => {
             if (project != null) {
@@ -423,7 +418,7 @@ public class WelcomeScreen : Alignment {
     /**
      * Build up creator {@link Gtk.Grid} with previous- and next-button.
      *
-     * Creation steps must be added with {@link add_page} or {@link add_tpage}.
+     * Creation steps must be added with {@link add_tpage}.
      */
     private void build_creator() {
         var grid_creator = new Grid();
@@ -508,23 +503,6 @@ public class WelcomeScreen : Alignment {
     }
 
     /**
-     * Add new creation step.
-     *
-     * All signals have to be connected manually. Use {@link add_tpage}
-     * instead.
-     *
-     * @param page Add {@link Gtk.Widget} to creation steps.
-     * @param pos Insert step at position. If `null` append it.
-     */
-    [Deprecated (replacement = "add_tpage()")]
-    private inline void add_page (Widget page, int? pos = null) {
-        if (pos == null)
-            nbook.append_page (page);
-        else
-            nbook.insert_page (page, null, pos);
-    }
-
-    /**
      * Add new creation step and setup common signals.
      *
      * @param tpage Add {@link TemplatePage.widget} to creation steps.
@@ -587,147 +565,10 @@ public class WelcomeScreen : Alignment {
     private void init_default_pages() {
         add_tpage (new UiTemplateOpener());
         add_tpage (new UiTemplateSelector(), null, 2);
-        add_page (get_simple_setting());
+        add_tpage (new UiTemplateSettings());
 
         initialize();
         nbook.show_all();
-    }
-
-    /**
-     * Build file open element.
-     *
-     * @param prev Go n steps back with previous-button. If negative reset.
-     * @param next Go n steps forward with next-button. If negative reset.
-     */
-    private void build_opener (int prev = 1, int next = -1) {
-        var chooser_open = new FileChooserWidget (FileChooserAction.OPEN);
-        chooser_open.expand = true;
-
-        var filter_vlp = new FileFilter();
-        filter_vlp.set_filter_name (_("Valama project files (*.vlp)"));
-        filter_vlp.add_pattern ("*.vlp");
-        chooser_open.add_filter (filter_vlp);
-        chooser_open.set_filter (filter_vlp);  // set default filter
-
-        var filter_all = new FileFilter();
-        // TRANSLATORS: (*) is a file filter (globbing) and matches all files.
-        filter_all.set_filter_name (_("All files (*)"));
-        filter_all.add_pattern ("*");
-        chooser_open.add_filter (filter_all);
-
-        var selected = false;
-        chooser_open.selection_changed.connect (() => {
-            if (selected && chooser_open == current_page) {
-                var selected_filename = chooser_open.get_filename();
-                if (selected_filename == null ||  //TODO: Other filetypes?
-                            File.new_for_path (selected_filename).query_file_type (
-                                                    FileQueryInfoFlags.NONE) != FileType.REGULAR)
-                    btn_next.sensitive = false;
-                else
-                    btn_next.sensitive = selected_filename.has_suffix (".vlp");
-            }
-        });
-        /* Double click. */
-        chooser_open.file_activated.connect (() => {
-            if (selected && chooser_open == current_page && btn_next.sensitive)
-                btn_next.clicked();
-        });
-
-        nbook.switch_page.connect ((page) => {
-            if (initialized) {
-                if (chooser_open == page) {
-                    selected = true;
-                    btn_prev.sensitive = true;
-                    btn_next.sensitive = false;
-                    nbook_prev_n = prev;
-                    nbook_next_n = next;
-                    selector_description (_("Select Valama project file"));
-                } else if (current_page != null && chooser_open == current_page)
-                    selected = false;
-            }
-        });
-        btn_next.clicked.connect (() => {
-            if (selected && chooser_open == current_page)
-                try {
-                    project_loaded (new ValamaProject (chooser_open.get_filename(), Args.syntaxfile));
-                } catch (LoadingError e) {
-                    //TODO: Show error message in UI.
-                    error_msg (_("Could not load project: %s\n"), e.message);
-                }
-        });
-
-        opener = chooser_open;
-    }
-
-    /**
-     * Build project settings element.
-     *
-     * @param prev Go n steps back with previous-button. If negative reset.
-     * @param next Go n steps forward with next-button. If negative reset.
-     */
-    public Widget get_simple_setting (int prev = 1, int next = -1) {
-        var grid_pinfo = new Grid();
-        grid_pinfo.column_spacing = 10;
-        grid_pinfo.row_spacing = 15;
-        grid_pinfo.row_homogeneous = false;
-        grid_pinfo.column_homogeneous = true;
-
-        var lbl_pname = new Label (_("Project name"));
-        grid_pinfo.attach (lbl_pname, 0, 2, 1, 1);
-        lbl_pname.halign = Align.END;
-
-        var valid_chars = /^[a-z0-9.:_-]+$/i;  // keep "-" at the end!
-        var ent_pname = new Entry.with_inputcheck (null, valid_chars);
-        grid_pinfo.attach (ent_pname, 1, 2, 1, 1);
-        ent_pname.set_placeholder_text (_("Project name"));
-
-        var selected = false;
-        ent_pname.valid_input.connect (() => {
-            if (selected && grid_pinfo == current_page)
-                btn_next.sensitive = true;
-        });
-        ent_pname.invalid_input.connect (() => {
-            if (selected && grid_pinfo == current_page)
-                btn_next.sensitive = false;
-        });
-
-        var lbl_plocation = new Label (_("Location"));
-        grid_pinfo.attach (lbl_plocation, 0, 5, 1, 1);
-        lbl_plocation.halign = Align.END;
-
-        //TODO: Use in place dialog (FileChooserWidget).
-        var chooser_location = new FileChooserButton (_("New project location"),
-                                                      Gtk.FileChooserAction.SELECT_FOLDER);
-        grid_pinfo.attach (chooser_location, 1, 5, 1, 1);
-
-        nbook.switch_page.connect ((page) => {
-            if (initialized) {
-                if (grid_pinfo == page) {
-                    btn_prev.sensitive = true;
-                    btn_next.sensitive = false;
-                    selected = true;
-                    nbook_prev_n = prev;
-                    nbook_next_n = next;
-                } else if (current_page != null && grid_pinfo == current_page)
-                    selected = false;
-            }
-        });
-        btn_next.clicked.connect (() => {
-            //FIXME: Find solution where btn_next.sensitive is not important.
-            if (selected && btn_next.sensitive && grid_pinfo == current_page &&
-                                                TemplatePage.template != null) {
-                var target_folder = Path.build_path (Path.DIR_SEPARATOR_S,
-                                                     chooser_location.get_current_folder(),
-                                                     ent_pname.text);
-                var new_project = create_project_from_template (
-                                                TemplatePage.template,
-                                                target_folder,
-                                                ent_pname.text);
-                project_loaded (new_project);
-            }
-        });
-
-        return grid_pinfo;
     }
 }
 
