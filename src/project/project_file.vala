@@ -342,7 +342,7 @@ public class ProjectFile : Object {
      * @param balance If `true` balance file and directory lists.
      */
     public void save_project_file (bool balance = true) {
-        debug_msg (_("Save project file.\n"));
+        debug_msg (_("Save project file: %s\n"), project_file_path);
 
         if (balance)
             balance_pfile_dirs();

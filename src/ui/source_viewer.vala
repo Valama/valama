@@ -146,13 +146,6 @@ class UiSourceViewer : UiElement {
             else
                 project.buffer_changed (true);
         });
-        widget_main.request_close.connect (() => {
-            widget_main.close();
-            window_main.remove (widget_main);
-            project = null;
-            window_main.add (vscreen);
-            widget_main = null;
-        });
 
         project.guanako_update_finished.connect (() => {
             project.foreach_buffer ((s, bfr) => {

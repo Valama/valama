@@ -131,6 +131,14 @@ static void show_main_screen (ValamaProject load_project) {
     window_main.add (widget_main);
     window_main.add_accel_group (widget_main.accel_group);
 
+    widget_main.request_close.connect (() => {
+        widget_main.close();
+        window_main.remove (widget_main);
+        project = null;
+        window_main.add (vscreen);
+        widget_main = null;
+    });
+
     /* Open default source files. */
     var focus = true;
     foreach (var file in project.files_opened) {
