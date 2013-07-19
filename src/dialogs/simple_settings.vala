@@ -26,7 +26,14 @@ public class UiTemplateSettings : TemplatePage {
     private bool initialized = false;
     private bool has_content = false;
 
-    public UiTemplateSettings() {
+    public UiTemplateSettings (string? nextpage = null, string? prevpage = null) {
+        if (nextpage != null)
+            default_next = nextpage;
+        if (prevpage != null)
+            default_prev = prevpage;
+
+        description = _("Project settings");
+
         var vbox = new Box (Orientation.HORIZONTAL, 0);
         selected.connect (() => {
             if (!initialized) {
@@ -41,9 +48,9 @@ public class UiTemplateSettings : TemplatePage {
                 grid_pinfo.grab_focus();
                 return false;
             });
-            return _("Project settings");
         });
 
+        vbox.show_all();
         widget = vbox;
     }
 
@@ -67,7 +74,7 @@ public class UiTemplateSettings : TemplatePage {
         var valid_chars = /^[a-z0-9.:_-]+$/i;  // keep "-" at the end!
         var ent_pname = new Entry.with_inputcheck (null, valid_chars);
         grid_pinfo.attach (ent_pname, 1, 2, 1, 1);
-        ent_pname.set_placeholder_text (_("Project name"));
+        ent_pname.set_placeholder_text (_("project name"));
 
         ent_pname.valid_input.connect (() => {
             next (true);

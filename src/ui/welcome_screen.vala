@@ -20,6 +20,7 @@
 using GLib;
 using Gtk;
 using Gdk;
+using Gee;
 
 
 /**
@@ -37,18 +38,36 @@ public abstract class TemplatePage : Object {
     public static ProjectTemplate? template = null;
 
     /**
-     * Emit signal to initialize object (e.g. add accelerators).
-     *
-     * @return Page description.
+     * List of ids of previous pages. Including of default is not necessary
      */
-    public signal string? selected();
+    public TreeSet<string> possible_prevs = new TreeSet<string>();
+    /**
+     * List of ids of next pages. Including of default is not necessary.
+     */
+    public TreeSet<string> possible_nexts = new TreeSet<string>();
 
+    /**
+     * Id of page to switch back by default.
+     *
+     * `prev` or `start` can be used to switch to previous page or start page.
+     */
+    public string default_prev { get; protected set; default = "prev"; }
+    /**
+     * Id of page to switch forward by default.
+     */
+    public string default_next { get; protected set; default = ""; }
+
+    /**
+     * Emit signal to initialize object (e.g. add accelerators).
+     */
+    public signal void selected();
     /**
      * Emit signal when no longer focused (e.g. to disable accelerators).
      *
      * @param status `true` to commit changes (usually with next-button press).
+     * @param chpage id of page to switch to or `null` if default page is used.
      */
-    public signal void deselected (bool status);
+    public signal void deselected (bool status, string? chpage = null);
 
     /**
      * Emit to change previous-button sensitivity.
@@ -59,15 +78,45 @@ public abstract class TemplatePage : Object {
      */
     public signal void next (bool status);
 
-    public signal void move_prev();
-    public signal void move_next();
+    public bool prev_default_status { get; protected set; default = true; }
+    public bool next_default_status { get; protected set; default = false; }
+
+    /**
+     * Directly move to a page.
+     *
+     * @param prevpage Move to this id or if `null` move to {@link default_prev}
+     */
+    public signal void move_prev (string? prevpage = null);
+    /**
+     * Directly move to a page.
+     *
+     * @param nextpage Move to this id or if `null` move to {@link default_next}
+     */
+    public signal void move_next (string? nextpage = null);
 
     public signal void load_project (ValamaProject? project);
 
+    /**
+     * Unique template page id.
+     *
+     * `prev`, `start` are reserved ids.
+     */
     public abstract string get_id();
+
+    public string? description { get; protected set; default = null; }
+
+    public string? heading { get; protected set; default = null; }
 
     protected virtual void init() {}
     public virtual void manual_init() {}
+
+    //TODO: Does this work?
+    protected static void switch_default_prev (TemplatePage tpage, string newprev) {
+        tpage.default_prev = newprev;
+    }
+    protected static void switch_default_next (TemplatePage tpage, string newnext) {
+        tpage.default_next = newnext;
+    }
 }
 
 
@@ -97,19 +146,20 @@ public class WelcomeScreen : Alignment {
     private ToolButton btn_next;
 
     /**
-     * Holds all creation steps.
+     * Hash of all pages (creation steps).
      */
-    private Notebook nbook;
+    private TreeMap<string, TemplatePage> tpagehash = new TreeMap<string, TemplatePage>();
+
     /**
-     * Steps (pages) to go backward with previous-button. If negative, reset
-     * to start page.
+     * Page id to go back with previous-button.
+     *
+     * `prev` or `start` can be used to switch to previous page or start page.
      */
-    private int nbook_prev_n;
+    private string prev_id = "start";
     /**
-     * Steps (pages) to go forward with next-button. If negative, reset to
-     * start page.
+     * Page id where to go forward with next-button.
      */
-    private int nbook_next_n;
+    private string next_id = "";
 
     /**
      * Current selected recent project.
@@ -118,7 +168,7 @@ public class WelcomeScreen : Alignment {
     /**
      * Current page of creation step.
      */
-    private Widget? current_page;
+    private TemplatePage? current_tpage;
 
     /**
      * Start page.
@@ -129,17 +179,18 @@ public class WelcomeScreen : Alignment {
      * switch between creation steps.
      */
     private Widget creator;
+    private Container creatorpage;
 
     /**
      * Initialization state. Signal emissions will be tracked after
      * initialized. Activate with {@link initialize}.
      */
     private bool initialized;
+
     /**
-     * Last clicked creator button. `true` if {@link btn_next} else if
-     * {@link btn_prev} `false`.
+     * Stack of ids of previously visited pages.
      */
-    private bool is_next;
+    private ArrayQueue<string> prevstack = new ArrayQueue<string>();
 
     /**
      * Emitted when a item in recent project list is selected.
@@ -197,13 +248,9 @@ public class WelcomeScreen : Alignment {
         this.yscale = 0.0f;
 
         current_recent = null;
-        current_page = null;
+        current_tpage = null;
 
         initialized = false;
-        is_next = false;
-
-        nbook_prev_n = 1;
-        nbook_next_n = 1;
 
         build_main();
         build_creator();
@@ -212,6 +259,7 @@ public class WelcomeScreen : Alignment {
             if (project != null) {
                 this.remove (this.get_child());
                 this.add (main_screen);
+                main_screen_selected();
             }
         });
 
@@ -293,21 +341,22 @@ public class WelcomeScreen : Alignment {
         btn_create.width_request = 250;
         btn_create.vexpand = false;
         btn_create.clicked.connect (() => {
+            selector_heading (_("Create project"));
+            next_id = "UiTemplateSelector";
+            btn_next.clicked();
             this.remove (main_screen);
             this.add (creator);
-            selector_heading (_("Create project"));
-            /* Force switch_page signal to emit all selected signals. */
-            nbook.switch_page (nbook.get_nth_page (1), 1);  // 0th page is opener
         });
         grid_main.attach (btn_create, 1, 2, 1, 1);
 
         var btn_open = new Button.with_label (_("Open project"));
         btn_open.vexpand = false;
         btn_open.clicked.connect (() => {
+            selector_heading (_("Open project"));
+            next_id = "UiTemplateOpener";
+            btn_next.clicked();
             this.remove (main_screen);
             this.add (creator);
-            selector_heading (_("Open project"));
-            nbook.switch_page (nbook.get_nth_page (0), 0);
         });
         recent_selected.connect (() => {
             btn_open.sensitive = (current_recent != null) ? true : false;
@@ -348,9 +397,9 @@ public class WelcomeScreen : Alignment {
         if (recentmgr.get_items().length() > 0) {
             /* Sort elements before. */
 #if GEE_0_8
-            var recent_items = new Gee.TreeSet<RecentInfo> (cmp_recent_info);
+            var recent_items = new TreeSet<RecentInfo> (cmp_recent_info);
 #elif GEE_1_0
-            var recent_items = new Gee.TreeSet<RecentInfo> ((CompareFunc?) cmp_recent_info);
+            var recent_items = new TreeSet<RecentInfo> ((CompareFunc?) cmp_recent_info);
 #endif
             foreach (var info in recentmgr.get_items())
                 recent_items.add (info);
@@ -435,32 +484,58 @@ public class WelcomeScreen : Alignment {
                                                              _("Back"));
         toolbar.add (btn_prev);
         btn_prev.clicked.connect (() => {
-            is_next = false;
-            if (nbook_prev_n >= 0) {
-                if (nbook_prev_n > nbook.page || nbook.page <= 0) {  // "<=" for empty notebook
-                    this.remove (creator);
-                    this.add (main_screen);
-                    main_screen_selected();
-                    /*
-                     * TODO: Proper solution to work around half pressed button
-                     *       after switching back again.
-                     */
-                    btn_prev.forall ((child) => {
-                        var btn = child as Button;
-                        if (btn != null) {
-                            btn.sensitive = false;
-                            btn.sensitive = true;
-                            //btn.button_release_event...
-                        }
-                    });
+            if (prev_id == "start")
+                switch_to_main();
+            else if (tpagehash.has_key (prev_id)) {
+                if (current_tpage != null) {
+                    creatorpage.remove (current_tpage.widget);
+                    current_tpage.deselected (false);
+                }
+                switch_tpage (prev_id);
+
+                string? id = null;
+                while (true) {
+                    id = prevstack.poll_tail();
+                    if (id == null)
+                        break;
+                    else if (id == current_tpage.get_id()) {
+                        id = prevstack.poll_tail();
+                        break;
+                    }
+                }
+
+                if (current_tpage.default_prev != "prev")
+                    prev_id = current_tpage.default_prev;
+                else {
+                    if (id != null)
+                        prev_id = id;
+                    else
+                        prev_id = "start";
+                }
+            } else {
+                bug_msg (_("No such id for previous step: %s\n"), prev_id);
+                if (current_tpage != null) {
+                    creatorpage.remove (current_tpage.widget);
+                    current_tpage.deselected (false);
+                }
+                var id = prevstack.poll_tail();
+                if (id != null) {
+                    current_tpage = tpagehash[id];
+                    creatorpage.add (current_tpage.widget);
+                    prev_id = current_tpage.default_prev;
                 } else
-                    nbook.page -= nbook_prev_n;
+                    // Go to start.
+                    switch_to_main();
             }
         });
         main_screen_selected.connect (() => {
             /* Reset to default values. */
-            current_page = null;
+            if (current_tpage != null)
+                creatorpage.remove (current_tpage.widget);
+            current_tpage = null;
             TemplatePage.template = null;
+            prev_id = "start";
+            prevstack.clear();
         });
 
         var creator_lbl_item = new ToolItem();
@@ -485,21 +560,72 @@ public class WelcomeScreen : Alignment {
                                                              _("Next"));
         toolbar.add (btn_next);
         btn_next.clicked.connect (() => {
-            is_next = true;
-            if (nbook_next_n >= 0)
-                nbook.page += nbook_next_n;
+            if (next_id == "")
+                current_tpage.deselected (true);
+            else if (tpagehash.has_key (next_id)) {
+                if (current_tpage != null) {
+                    prevstack.offer_tail (current_tpage.get_id());
+                    creatorpage.remove (current_tpage.widget);
+                    current_tpage.deselected (true);
+                }
+                switch_tpage (next_id);
+
+                if (current_tpage.default_prev != "prev")
+                    prev_id = current_tpage.default_prev;
+                else {
+                    var id = prevstack.peek_tail();
+                    if (id != null)
+                        prev_id = id;
+                    else
+                        prev_id = "start";
+                }
+            } else
+                bug_msg (_("No such id for next step: %s\n"), next_id);
         });
 
-        nbook = new Notebook();
-        grid_creator.attach (nbook, 0, 1, 1, 1);
-        nbook.show_tabs = false;
-        nbook.switch_page.connect_after ((page) => {
-            if (initialized)
-                current_page = page;
-        });
+        creatorpage = new Box (Orientation.VERTICAL, 0);
+        grid_creator.attach (creatorpage, 0, 1, 1, 1);
 
         grid_creator.show_all();
         creator = grid_creator;
+    }
+
+    /**
+     * Switch to {@link TemplatePage} with given id.
+     *
+     * Ensure id exists. Does not set {@link prev_id}.
+     */
+    private void switch_tpage (string id) {
+        current_tpage = tpagehash[id];
+
+        btn_prev.sensitive = current_tpage.prev_default_status;
+        btn_next.sensitive = current_tpage.next_default_status;
+        next_id = current_tpage.default_next;
+        if (current_tpage.heading != null)
+            selector_heading (current_tpage.heading);
+        if (current_tpage.description != null)
+            selector_description (current_tpage.description);
+
+        creatorpage.add (current_tpage.widget);
+        current_tpage.selected();
+    }
+
+    private void switch_to_main() {
+        remove (creator);
+        add (main_screen);
+        main_screen_selected();
+        /*
+         * TODO: Proper solution to work around half pressed button
+         *       after switching back again.
+         */
+        btn_prev.forall ((child) => {
+            var btn = child as Button;
+            if (btn != null) {
+                btn.sensitive = false;
+                btn.sensitive = true;
+                //btn.button_release_event...
+            }
+        });
     }
 
     /**
@@ -508,45 +634,34 @@ public class WelcomeScreen : Alignment {
      * @param tpage Add {@link TemplatePage.widget} to creation steps.
      * @param pos Insert step at position. If `null` append it.
      */
-    //TODO: Use tpage id to switch to next or previous page (hash table).
-    public void add_tpage (TemplatePage tpage, int? pos = null,
-                                            int prev = 1, int next = 1) {
-        if (pos == null)
-            nbook.append_page (tpage.widget);
-        else
-            nbook.insert_page (tpage.widget, null, pos);
+    public void add_tpage (TemplatePage tpage) {
+        tpagehash[tpage.get_id()] = tpage;
 
         tpage.load_project.connect ((project) => {
             project_loaded (project);
         });
 
-        nbook.switch_page.connect ((page, num) => {
-            if (initialized) {
-                if (tpage.widget == page) {
-                    btn_prev.sensitive = false;
-                    btn_next.sensitive = false;
-                    nbook_prev_n = prev;
-                    nbook_next_n = next;
-                    var s = tpage.selected();
-                    if (s != null)
-                        selector_description (s);
-                } else if (current_page != null && tpage.widget == current_page)
-                    tpage.deselected (is_next);
-            }
-        });
         tpage.prev.connect ((status) => {
-            if (tpage.widget == current_page)
+            if (tpage == current_tpage)
                 btn_prev.sensitive = status;
         });
         tpage.next.connect ((status) => {
-            if (tpage.widget == current_page)
+            if (tpage == current_tpage)
                 btn_next.sensitive = status;
         });
-        tpage.move_prev.connect (() => {
-            btn_prev.clicked();
+        tpage.move_prev.connect ((id) => {
+            if (tpage == current_tpage) {
+                if (id != null)
+                    prev_id = id;
+                btn_prev.clicked();
+            }
         });
-        tpage.move_next.connect (() => {
-            btn_next.clicked();
+        tpage.move_next.connect ((id) => {
+            if (tpage == current_tpage) {
+                if (id != null)
+                    next_id = id;
+                btn_next.clicked();
+            }
         });
         main_screen_selected.connect (() => {
             tpage.deselected (false);
@@ -564,11 +679,11 @@ public class WelcomeScreen : Alignment {
      */
     private void init_default_pages() {
         add_tpage (new UiTemplateOpener());
-        add_tpage (new UiTemplateSelector(), null, 2);
+        add_tpage (new UiTemplateSelector("UiTemplateSettings"));
         add_tpage (new UiTemplateSettings());
 
         initialize();
-        nbook.show_all();
+        creatorpage.show_all();
     }
 }
 

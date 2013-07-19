@@ -37,7 +37,14 @@ public class UiTemplateSelector : TemplatePage {
 
     private Widget tinfo;
 
-    public UiTemplateSelector() {
+    public UiTemplateSelector (string? nextpage = null, string? prevpage = null) {
+        if (nextpage != null)
+            default_next = nextpage;
+        if (prevpage != null)
+            default_prev = prevpage;
+
+        description = _("Select template");
+
         initialized = false;
         var accel_group = new AccelGroup();
         accel_added = false;
@@ -149,7 +156,6 @@ public class UiTemplateSelector : TemplatePage {
                 tree_view.grab_focus();
                 return false;
             });
-            return _("Select template");
         });
         this.deselected.connect ((status) => {
             if (accel_added) {
@@ -161,6 +167,7 @@ public class UiTemplateSelector : TemplatePage {
                 TemplatePage.template = get_selected_template();
         });
 
+        vbox.show_all();
         this.widget = vbox;
     }
 

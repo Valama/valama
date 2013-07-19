@@ -26,7 +26,14 @@ public class UiTemplateOpener : TemplatePage {
     private bool initialized = false;
     private bool valid = false;
 
-    public UiTemplateOpener() {
+    public UiTemplateOpener (string? nextpage = null, string? prevpage = null) {
+        if (nextpage != null)
+            default_next = nextpage;
+        if (prevpage != null)
+            default_prev = prevpage;
+
+        description = _("Select Valama project file");
+
         var vbox = new Box (Orientation.HORIZONTAL, 0);
         selected.connect (() => {
             if (!initialized) {
@@ -39,7 +46,6 @@ public class UiTemplateOpener : TemplatePage {
                 chooser_open.grab_focus();
                 return false;
             });
-            return _("Select Valama project file");
         });
         deselected.connect ((status) => {
             if (status)
@@ -50,6 +56,8 @@ public class UiTemplateOpener : TemplatePage {
                     error_msg (_("Could not load project: %s\n"), e.message);
                 }
         });
+
+        vbox.show_all();
         widget = vbox;
     }
 
