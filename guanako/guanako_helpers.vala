@@ -134,12 +134,15 @@ namespace Guanako {
         return true;
     }
 
-    public static string symbolsig_to_string (Vala.Symbol smb, bool fullsig = false, bool fullname = false) {
+    public static string symbolsig_to_string (Symbol smb, bool? fullsig = false,
+                                            bool? fullname = false, string format = " ",
+                                            string formatfst = "", string formatlst = "") {
         var lblstr = new StringBuilder();
         if (smb is Method) {
-            var mth = smb as Method;
+            var mth = (Method) smb;
+            var relname = mth.get_full_name();
 
-            if (fullsig) {
+            if (fullsig != null && fullsig) {
                 switch (mth.access) {
                     case SymbolAccessibility.INTERNAL:
                         lblstr.append ("internal ");
@@ -179,18 +182,37 @@ namespace Guanako {
             if (mth.has_result) {
                 if (!mth.return_type.value_owned)
                     lblstr.append ("unowned ");
-                lblstr.append (datatype_to_string (mth.return_type, fullname) + " ");
+                if (fullname == null)
+                    lblstr.append (datatype_to_string (mth.return_type, relname) + " ");
+                else if (fullname)
+                    lblstr.append (datatype_to_string (mth.return_type, "") + " ");
+                else
+                    lblstr.append (datatype_to_string (mth.return_type, null) + " ");
             } else if (!(smb is CreationMethod))
                 lblstr.append ("void ");
 
-            if (fullname)
-                lblstr.append (mth.get_full_name() + " (");
-            else
-                lblstr.append (mth.name + " (");
-            lblstr.append (parameters_to_string (mth.get_parameters(), fullname));
-            lblstr.append (")");
+            if (fullname == null) {
+                lblstr.append (mth.get_full_name() + " (" + formatfst);
+                if (fullsig == null && mth.get_parameters().size > 0)
+                    lblstr.append ("..");
+                else
+                    lblstr.append (parameters_to_string (mth.get_parameters(), relname, format));
+            } else if (fullname) {
+                lblstr.append (relname + " (" + formatfst);
+                if (fullsig == null && mth.get_parameters().size > 0)
+                    lblstr.append ("..");
+                else
+                    lblstr.append (parameters_to_string (mth.get_parameters(), "", format));
+            } else {
+                lblstr.append (mth.name + " (" + formatfst);
+                if (fullsig == null && mth.get_parameters().size > 0)
+                    lblstr.append ("..");
+                else
+                    lblstr.append (parameters_to_string (mth.get_parameters(), null, format));
+            }
+            lblstr.append (formatlst + ")");
 
-            if (fullsig) {
+            if (fullsig != null && fullsig) {
                 foreach (var precond in mth.get_preconditions())
                     lblstr.append ("\nrequires (" + expression_to_string (precond) + ")");
                 foreach (var postcond in mth.get_postconditions())
@@ -199,16 +221,29 @@ namespace Guanako {
             //TODO: deprecated and experimental
         } else if (smb is Class) {
             //TODO: base types
-            var mth = (smb as Class).default_construction_method;
-            if (fullname)
-                lblstr.append (smb.get_full_name() + " (");
-            else
-                lblstr.append (smb.name + " (");
-            lblstr.append (parameters_to_string (mth.get_parameters(), fullname));
-            lblstr.append (")");
+            if (fullsig != null) {
+                var mth = ((Class) smb).default_construction_method;
+                if (mth != null) {
+                    var relname = mth.get_full_name();
+
+                    if (fullname == null) {
+                        lblstr.append (smb.get_full_name() + " (" + formatfst);
+                        lblstr.append (parameters_to_string (mth.get_parameters(), relname, format));
+                    } else if (fullname) {
+                        lblstr.append (smb.get_full_name() + " (" + formatfst);
+                        lblstr.append (parameters_to_string (mth.get_parameters(), "", format));
+                    } else {
+                        lblstr.append (smb.name + " (" + formatfst);
+                        lblstr.append (parameters_to_string (mth.get_parameters(), null, format));
+                    }
+                    lblstr.append (formatlst + ")");
+                } else
+                    lblstr.append (smb.name);
+            } else
+                lblstr.append (smb.name);
         } else {
             //TODO: All other possible types.
-            if (fullname)
+            if (fullname == null || fullname)
                 lblstr.append (smb.get_full_name());
             else
                 lblstr.append (smb.name);
@@ -216,7 +251,24 @@ namespace Guanako {
         return lblstr.str;
     }
 
-    private static string parameters_to_string (Vala.List<Vala.Parameter>? prms, bool fullname) {
+    private static string get_symbol_rel_name (Symbol smb, string? relsmb) {
+        if (relsmb == null)
+            return smb.name;
+        else if (relsmb == "")
+            return smb.get_full_name();
+        else {
+            var s = smb.get_full_name();
+            if (s.has_prefix (relsmb)) {
+                if (s[relsmb.length + 1] == '.')
+                    return s[relsmb.length:s.length];
+                else
+                    return s[relsmb.length + 1:s.length];
+            } else
+                return s;
+        }
+    }
+
+    private static string parameters_to_string (Vala.List<Vala.Parameter>? prms, string? relname, string format) {
         var lblstr = new StringBuilder();
         for (int q = 0; q < prms.size; q++) {
             if (prms[q].ellipsis) {
@@ -239,35 +291,50 @@ namespace Guanako {
                     break;
             }
 
-            lblstr.append (datatype_to_string (prms[q].variable_type, fullname));
-            if (fullname)
-                lblstr.append (" " + prms[q].get_full_name());
-            else
-                lblstr.append (" " + prms[q].name);
+            lblstr.append (datatype_to_string (prms[q].variable_type, relname));
+            lblstr.append (" " + get_symbol_rel_name (prms[q], relname));
 
             if (prms[q].initializer != null)
                 lblstr.append (" = " + expression_to_string (prms[q].initializer));
 
             if (q < prms.size - 1)
-                lblstr.append (", ");
+                lblstr.append ("," + format);
+
         }
         return lblstr.str;
     }
 
-    private static string expression_to_string (Vala.Expression e) {
-        if (e is Vala.Literal)
+    private static string expression_to_string (Expression e) {
+        if (e is Literal)
             return e.to_string();
-        else if (e is Vala.MemberAccess)
-            return "%s".printf ((e as Vala.MemberAccess).member_name);
-        else if (e is Vala.BinaryExpression) {
-            var be = e as Vala.BinaryExpression;
+        else if (e is MemberAccess)
+            return "%s".printf (((MemberAccess) e).member_name);
+        else if (e is BinaryExpression) {
+            var be = (BinaryExpression) e;
             return "%s %s %s".printf (expression_to_string (be.left),
                                       binary_operator_to_string (be.operator),
                                       expression_to_string (be.right));
-        } else if (e is Vala.UnaryExpression) {
-            var ue = e as Vala.UnaryExpression;
+        } else if (e is UnaryExpression) {
+            var ue = (UnaryExpression) e;
             return "%s%s".printf (unary_operator_to_string (ue.operator),
                                   expression_to_string (ue.inner));
+        } else if (e is ArrayCreationExpression) {
+            var ace = (ArrayCreationExpression) e;
+            var str = datatype_to_string (ace.element_type, null);
+            if (ace.initializer_list != null) {
+                var initializer_list = ace.initializer_list.get_initializers();
+                if (initializer_list.size > 0) {
+                    var lblstr = new StringBuilder ("{" + expression_to_string (initializer_list[0]));
+                    for (int i = 1; i < ace.initializer_list.size; ++i)
+                        lblstr.append (", " + expression_to_string (initializer_list[i]));
+                    lblstr.append ("}");
+                    return lblstr.str;
+                }
+            }
+            if (ace.rank == 1 && str == "string")
+                return "{}";
+            else
+                return "new %s[%d]".printf (str, ace.rank-1);
         } else {
             stderr.printf (_("Unknown expression: %s\n"), e.type_name);
             stderr.printf (_("Please report a bug!\n"));
@@ -275,7 +342,7 @@ namespace Guanako {
         }
     }
 
-    private static string binary_operator_to_string (Vala.BinaryOperator op) {
+    private static string binary_operator_to_string (BinaryOperator op) {
         switch (op) {
             case BinaryOperator.NONE:
                 return "";
@@ -320,12 +387,12 @@ namespace Guanako {
             case BinaryOperator.COALESCE:
                 return "??";
             default:
-                EnumClass cl = (EnumClass) typeof (Vala.BinaryOperator).class_ref ();
+                EnumClass cl = (EnumClass) typeof (BinaryOperator).class_ref ();
                 return cl.get_value (op).value_nick;
         }
     }
 
-    private static string unary_operator_to_string (Vala.UnaryOperator op) {
+    private static string unary_operator_to_string (UnaryOperator op) {
         switch (op) {
             case UnaryOperator.NONE:
                 return "";
@@ -346,70 +413,59 @@ namespace Guanako {
             case UnaryOperator.OUT:
                 return "out";
             default:
-                EnumClass cl = (EnumClass) typeof (Vala.UnaryOperator).class_ref ();
+                EnumClass cl = (EnumClass) typeof (UnaryOperator).class_ref ();
                 return cl.get_value (op).value_nick;
         }
     }
 
-    private static string datatype_to_string (DataType? vt, bool fullname = false) {
+    private static string datatype_to_string (DataType? vt, string? relname) {
         var lblstr = new StringBuilder();
         var shownull = true;
         if (vt.is_array()) {
             var arr = (vt as ArrayType).element_type;
-            if (fullname)
-                lblstr.append (arr.data_type.get_full_name());
-            else
-                lblstr.append (arr.data_type.name);
-            lblstr.append (type_arguments_to_string (vt.get_type_arguments(), fullname));
+            if (arr is GenericType)
+                lblstr.append (((GenericType) arr).to_qualified_string());
+            else if (arr is PointerType) {
+                uint i = 0;
+                lblstr.append (pointertype_to_string ((PointerType) arr, relname, ref i));
+                lblstr.append (type_arguments_to_string (vt.get_type_arguments(), relname));
+                while (i-- != 0)
+                    lblstr.append ("*");
+            } else
+                lblstr.append (get_symbol_rel_name (arr.data_type, relname));
+            lblstr.append (type_arguments_to_string (vt.get_type_arguments(), relname));
             if (arr.nullable)
                 lblstr.append ("?");
             lblstr.append ("[]");
         } else {
             uint i = 0;
-            if (vt.data_type != null) {
-                if (fullname)
-                    lblstr.append (vt.data_type.get_full_name());
-                else
-                    lblstr.append (vt.data_type.name);
-            }
-            else if (vt is DelegateType) {
-                if (fullname)
-                    lblstr.append ((vt as DelegateType).delegate_symbol.get_full_name());
-                else
-                    lblstr.append ((vt as DelegateType).delegate_symbol.name);
-            } else if (vt is PointerType) {
-                var vt_tmp = vt;
-                while (true) {
-                    ++i;
-                    vt_tmp = (vt_tmp as PointerType).base_type;
-                    if (vt_tmp is VoidType) {
-                        lblstr.append ("void");
-                        break;
-                    } else if (vt_tmp.data_type != null) {
-                        if (fullname)
-                            lblstr.append (vt_tmp.data_type.get_full_name());
-                        else
-                            lblstr.append (vt_tmp.data_type.name);
-                        break;
-                    } else if (vt_tmp is DelegateType) {
-                        if (fullname)
-                            lblstr.append ((vt_tmp as DelegateType).delegate_symbol.get_full_name());
-                        else
-                            lblstr.append ((vt_tmp as DelegateType).delegate_symbol.name);
-                        break;
-                    }
-                }
+            if (vt.data_type != null)
+                lblstr.append (get_symbol_rel_name (vt.data_type, relname));
+            else if (vt is DelegateType)
+                lblstr.append (get_symbol_rel_name (((DelegateType) vt).delegate_symbol, relname));
+            else if (vt is PointerType) {
+                lblstr.append (pointertype_to_string ((PointerType) vt, relname, ref i));
                 shownull = false;
             } else if (vt is GenericType) {
-                lblstr.append ((vt as GenericType).to_qualified_string());
+                lblstr.append (((GenericType) vt).to_qualified_string());
                 shownull = false;
+            } else if (vt is Vala.ErrorType) {
+                var et = (Vala.ErrorType) vt;
+                if (et.error_domain != null)
+                    lblstr.append (get_symbol_rel_name (et.error_domain, relname));
+                else {
+                    if (relname == null)
+                        lblstr.append ("Error");
+                    else
+                        lblstr.append ("GLib.Error");
+                }
             } else {  //TODO: Can this happen?
                 stderr.printf (_("Unknown type: %s\n"), vt.to_qualified_string());
                 stderr.printf (_("Please report a bug!\n"));
                 lblstr.append ("UNKOWN");
             }
 
-            lblstr.append (type_arguments_to_string (vt.get_type_arguments(), fullname));
+            lblstr.append (type_arguments_to_string (vt.get_type_arguments(), relname));
 
             while (i-- != 0)
                 lblstr.append ("*");
@@ -419,18 +475,136 @@ namespace Guanako {
         return lblstr.str;
     }
 
-    private static string type_arguments_to_string (Vala.List<DataType> typeargs, bool fullname) {
+    private static string pointertype_to_string (PointerType vt, string? relname, ref uint i) {
+        var lblstr = new StringBuilder();
+        DataType vt_tmp = vt;
+        while (true) {
+            ++i;
+            vt_tmp = (vt_tmp as PointerType).base_type;
+            if (vt_tmp is VoidType) {
+                lblstr.append ("void");
+                break;
+            } else if (vt_tmp.data_type != null) {
+                lblstr.append (get_symbol_rel_name (vt_tmp.data_type, relname));
+                break;
+            } else if (vt_tmp is DelegateType) {
+                lblstr.append (get_symbol_rel_name (((DelegateType) vt_tmp).delegate_symbol, relname));
+                break;
+            } else if (vt_tmp is GenericType) {
+                lblstr.append (((GenericType) vt_tmp).to_qualified_string());
+                break;
+            }
+        }
+        return lblstr.str;
+    }
+
+    private static string type_arguments_to_string (Vala.List<DataType> typeargs, string? relname) {
         var lblstr = new StringBuilder();
         if (typeargs.size > 0) {
             lblstr.append ("<");
             for (int j = 0; j < typeargs.size - 1; ++j) {
-                lblstr.append (datatype_to_string (typeargs[j], fullname));
+                lblstr.append (datatype_to_string (typeargs[j], relname));
                 lblstr.append (", ");
             }
-            lblstr.append (datatype_to_string (typeargs[typeargs.size - 1], fullname));
+            lblstr.append (datatype_to_string (typeargs[typeargs.size - 1], relname));
             lblstr.append (">");
         }
         return lblstr.str;
+    }
+
+    public static string symboltype_to_string (Symbol smb) {
+        //NOTE: Order of checks should represent frequency of occurrence.
+        if (smb is Subroutine) {
+            if (smb is Method) {
+                if (smb is CreationMethod)
+                    return _("Creation method");
+                if (smb is DynamicMethod)
+                    return _("Dynamic method");
+                if (smb is ArrayMoveMethod)
+                    return _("Array move method");
+                if (smb is ArrayResizeMethod)
+                    return _("Array resize method");
+                return _("Method");
+            }
+            if (smb is Constructor)
+                return _("Constructor");
+            if (smb is Destructor)
+                return _("Destructor");
+            if (smb is PropertyAccessor)
+                return _("Property accessor");
+            return _("Subroutine");
+        }
+
+        if (smb is TypeSymbol) {
+            if (smb is ObjectTypeSymbol) {
+                if (smb is Class)
+                    return _("Class");
+                if (smb is Enum)
+                    return _("Enum");
+                if (smb is Interface)
+                    return _("Interface");
+                if (smb is Delegate)
+                    return _("Delegate");
+                if (smb is ErrorCode)
+                    return _("Error code");
+                if (smb is ErrorDomain)
+                    return _("Error domain");
+                return _("Object type symbol");
+            }
+            if (smb is Struct)
+                return _("Struct");
+            return _("Type symbol");
+        }
+
+        if (smb is Variable) {
+            if (smb is LocalVariable)
+                return _("Local variable");
+            if (smb is Vala.Parameter)
+                return _("Parameter");
+            if (smb is Field)
+                return _("Field");
+            if (smb is ArrayLengthField)
+                return _("Array length field");
+            return _("Variable");
+        }
+
+        if (smb is Block) {
+            if (smb is ForeachStatement)
+                return _("Foreach statement");
+            if (smb is SwitchSection)
+                return _("Switch section");
+            return _("Block");
+        }
+
+        if (smb is Constant) {
+            if (smb is Vala.EnumValue)
+                return _("Enum value");
+            return _("Constant");
+        }
+
+        if (smb is Namespace)
+            return _("Namespace");
+
+        if (smb is Property) {
+            if (smb is DynamicProperty)
+                return _("Dynamic property");
+            return _("Property");
+        }
+
+        if (smb is Vala.Signal) {
+            if (smb is DynamicSignal)
+                return _("Dynamic signal");
+            return _("Signal");
+        }
+
+        if (smb is TypeParameter)
+            return _("Type parameter");
+
+        if (smb is UnresolvedSymbol)
+            return _("Unresolved symbol");
+
+        stderr.printf (_("Could not get type name of: %s\n"), smb.name);
+        return "";
     }
 }
 

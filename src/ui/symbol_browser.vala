@@ -29,7 +29,6 @@ public class SymbolBrowser : UiElement {
     private ulong build_init_id;
 
     private bool init_done = false;
-    private CellRendererText tmrenderer;
     private TreeViewColumn column_sym;
     private uint timer_id;
 
@@ -49,29 +48,49 @@ public class SymbolBrowser : UiElement {
                                                  3,
                                                  null);
 
-        tmrenderer = new CellRendererText();
-        column_sym = new TreeViewColumn.with_attributes (
+        var column_vissym = new TreeViewColumn.with_attributes (
                                                  _("Symbol"),
-                                                 tmrenderer,
+                                                 new CellRendererText(),
                                                  "markup",
+                                                 5,
+                                                 null);
+        column_vissym.sort_column_id = 0;
+        tree_view.append_column (column_vissym);
+
+        column_sym = new TreeViewColumn.with_attributes (
+                                                 null,
+                                                 new CellRendererText(),
+                                                 "text",
                                                  0,
                                                  null);
-        column_sym.sort_column_id = 0;
+        column_sym.visible = false;
         tree_view.append_column (column_sym);
 
-        tree_view.insert_column_with_attributes (-1,
-        // TRANSLATORS: Type in programming context as data type.
-                                                 _("Type"),
+        var column_type = new TreeViewColumn.with_attributes (
+                                                 null,
                                                  new CellRendererText(),
                                                  "text",
                                                  1,
                                                  null);
+        column_type.visible = false;
+        tree_view.append_column (column_type);
 
         var column_access = new TreeViewColumn();
         column_access.visible = false;
         tree_view.append_column (column_access);
 
-        var store = new TreeStore (4, typeof (string), typeof (string), typeof (uint), typeof (Gdk.Pixbuf));
+        var column_tooltip = new TreeViewColumn.with_attributes (
+                                                 null,
+                                                 new CellRendererText(),
+                                                 "markup",
+                                                 4,
+                                                 null);
+        column_tooltip.visible = false;
+        tree_view.tooltip_column = 4;
+
+        var store = new TreeStore (6, typeof (string), typeof (string), typeof (uint),
+                                      typeof (Gdk.Pixbuf),
+                                      typeof (string), typeof (string));
         tree_view.set_model (store);
         TreeIter iter;
         store.append (out iter, null);
@@ -82,19 +101,19 @@ public class SymbolBrowser : UiElement {
         timer_id = Timeout.add (800, () => {
             switch (state) {
                 case 0:
-                    store.set (iter, 0, "<i>" + Markup.escape_text (_("Loading")) + ".  </i>", -1);
+                    store.set (iter, 5, "<i>" + Markup.escape_text (_("Loading")) + ".  </i>", -1);
                     ++state;
                     break;
                 case 1:
-                    store.set (iter, 0, "<i>" + Markup.escape_text (_("Loading")) + ".. </i>", -1);
+                    store.set (iter, 5, "<i>" + Markup.escape_text (_("Loading")) + ".. </i>", -1);
                     ++state;
                     break;
                 case 2:
-                    store.set (iter, 0, "<i>" + Markup.escape_text (_("Loading")) + "...</i>", -1);
+                    store.set (iter, 5, "<i>" + Markup.escape_text (_("Loading")) + "...</i>", -1);
                     ++state;
                     break;
                 default:
-                    store.set (iter, 0, "<i>" + Markup.escape_text (_("Loading")) + "   </i>", -1);
+                    store.set (iter, 5, "<i>" + Markup.escape_text (_("Loading")) + "   </i>", -1);
                     state = 0;
                     break;
             }
@@ -223,13 +242,14 @@ public class SymbolBrowser : UiElement {
         new Thread<void*> (_("Symbol browser update"), () => {
             update_needed = false;
             debug_msg (_("Run %s update!\n"), get_name());
-
-            var store = new TreeStore (4, typeof (string), typeof (string), typeof (uint), typeof (Gdk.Pixbuf));
-            store.set_sort_func (0, comp_sym);
+            var store = new TreeStore (6, typeof (string), typeof (string), typeof (uint),
+                                          typeof (Gdk.Pixbuf),
+                                          typeof (string), typeof (string));
+            store.set_sort_func (5, comp_sym);
             if (sort_order != null && sort_id != null)
                 store.set_sort_column_id (sort_id, sort_order);
             else
-                store.set_sort_column_id (0, SortType.ASCENDING);
+                store.set_sort_column_id (5, SortType.ASCENDING);
 
             TreeIter[] iters = new TreeIter[0];
 
@@ -245,6 +265,8 @@ public class SymbolBrowser : UiElement {
                                      1, typename.up(1) + typename.substring(1),
                                      2, (uint) smb.access,
                                      3, get_pixbuf_for_symbol (smb),
+                                     4, Markup.escape_text (Guanako.symbolsig_to_string (smb)),
+                                     5, Markup.escape_text (Guanako.symbolsig_to_string (smb, null)),
                                      -1);
                     if (iters.length < depth)
                         iters += next;
@@ -258,7 +280,6 @@ public class SymbolBrowser : UiElement {
                 init_done = true;
                 Source.remove (timer_id);
                 tree_view.sensitive = true;
-                column_sym.set_attributes (tmrenderer, "text", 0);
             }
             tree_view.set_model (store);
 

@@ -1022,7 +1022,7 @@ namespace Guanako {
                 return;
             }
 
-            Symbol? get_type_of_symbol (Symbol smb, bool resolve_array) {
+            static Symbol? get_type_of_symbol (Symbol smb, bool resolve_array) {
                 if (smb is Class || smb is Namespace || smb is Struct || smb is Enum)
                     return smb;
 
@@ -1045,7 +1045,7 @@ namespace Guanako {
                 return type.data_type;
             }
 
-            bool symbol_is_type (Symbol smb, string type) {
+            static bool symbol_is_type (Symbol smb, string type) {
                 if (type == "Parameter" && smb is Vala.Parameter)
                     return true;
                 // Simply treat LocalVariables as fields
@@ -1070,7 +1070,7 @@ namespace Guanako {
                 return false;
             }
 
-            bool symbol_has_binding (Symbol smb, string? binding) {
+            static bool symbol_has_binding (Symbol smb, string? binding) {
                 if (binding == null)
                     return true;
 
