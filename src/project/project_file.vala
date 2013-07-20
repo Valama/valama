@@ -94,11 +94,7 @@ public class ProjectFile : Object {
 
 
     public TreeMap<string, PackageInfo?> packages { get; private set;
-#if GEE_0_8
         default = new TreeMap<string, PackageInfo?> (null, (EqualDataFunc<PackageInfo?>?) PackageInfo.compare_func);
-#elif GEE_1_0
-        default = new TreeMap<string, PackageInfo?> (null, (EqualFunc?) PackageInfo.compare_func);
-#endif
     }
 
     /**

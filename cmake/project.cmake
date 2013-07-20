@@ -8,7 +8,6 @@ set(required_pkgs
 "gdk-pixbuf-2.0 {nolink}"
 "gdl-3.0 >= 3.4"
 "gee-0.8"
-"gee-1.0"
 "gio-2.0"
 "glib-2.0 >= 2.32"
 "gobject-2.0"

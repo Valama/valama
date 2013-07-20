@@ -11,10 +11,7 @@
 			<package name="libvala-0.20" define="VALAC_0_20"/>
 			<package name="libvala-0.18"/>
 		</choice>
-		<choice all="yes">
-			<package name="gee-0.8" define="GEE_0_8"/>
-			<package name="gee-1.0" define="GEE_1_0"/>
-		</choice>
+		<package name="gee-0.8"/>
 		<package name="gdk-3.0"/>
 		<package name="gdl-3.0" version="3.4" rel="since">
 			<extracheck vapi="extravapi/gdl-3.0.vapi" define="GDL_3_8_2">

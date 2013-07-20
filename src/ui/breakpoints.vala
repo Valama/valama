@@ -304,92 +304,47 @@ class UiBreakpoints : UiElement {
         bool need_update = false;
 
         TextIter? iter = null;
-#if GEE_0_8
         map_timer_starts.map_iterator().foreach ((timer, mark) => {
-#elif GEE_1_0
-        var mit_start = map_timer_starts.map_iterator();
-        while (mit_start.next()) {
-            var timer = mit_start.get_key();
-            var mark = mit_start.get_value();
-#endif
             var bfr = project.get_buffer_by_file (timer.file.filename);
             bfr.get_iter_at_mark (out iter, mark);
             if (iter == null)
-#if GEE_0_8
                 return true;
-#elif GEE_1_0
-                continue;
-#endif
             if (timer.start_line != iter.get_line() + 1) {
                 timer.start_line = iter.get_line() + 1;
                 if (timer_exists (timer))
                     frankenstein.frankentimers.remove (timer);
                 need_update = true;
             }
-#if GEE_0_8
             return true;
         });
-#elif GEE_1_0
-        };
-#endif
 
-#if GEE_0_8
         map_timer_ends.map_iterator().foreach ((timer, mark) => {
-#elif GEE_1_0
-        var mit_end = map_timer_ends.map_iterator();
-        while (mit_end.next()) {
-            var timer = mit_end.get_key();
-            var mark = mit_end.get_value();
-#endif
             var bfr = project.get_buffer_by_file (timer.file.filename);
             bfr.get_iter_at_mark (out iter, mark);
             if (iter == null)
-#if GEE_0_8
                 return true;
-#elif GEE_1_0
-                continue;
-#endif
             if (timer.end_line != iter.get_line() + 1) {
                 timer.end_line = iter.get_line() + 1;
                 if (timer_exists (timer))
                     frankenstein.frankentimers.remove (timer);
                 need_update = true;
             }
-#if GEE_0_8
             return true;
         });
-#elif GEE_1_0
-        };
-#endif
 
-#if GEE_0_8
         map_breakpoints.map_iterator().foreach ((stop, mark) => {
-#elif GEE_1_0
-        var mit_bp = map_breakpoints.map_iterator();
-        while (mit_bp.next()) {
-            var stop = mit_bp.get_key();
-            var mark = mit_bp.get_value();
-#endif
             var bfr = project.get_buffer_by_file (stop.file.filename);
             bfr.get_iter_at_mark (out iter, mark);
             if (iter == null)
-#if GEE_0_8
                 return true;
-#elif GEE_1_0
-                continue;
-#endif
             if (stop.line != iter.get_line() + 1) {
                 stop.line = iter.get_line() + 1;
                 if (stop_exists (stop))
                     frankenstein.frankenstops.remove (stop);
                 need_update = true;
             }
-#if GEE_0_8
             return true;
         });
-#elif GEE_1_0
-        };
-#endif
 
         if (need_update) {
             project_builder.request_compile();

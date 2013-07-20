@@ -789,9 +789,7 @@ public class Pair<K,V> : Gee.Map.Entry<K,V> {
         get { return _value; }
         set { _value = value; }
     }
-#if GEE_0_8
     public override bool read_only { get { return false; } }
-#endif
 
     public Pair (K key, V value) {
         _key = key;

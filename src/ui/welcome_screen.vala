@@ -425,11 +425,7 @@ GtkGrid#grid_recent_projects > .button:hover {
         grid_recent_projects.name = "grid_recent_projects";
         if (recentmgr.get_items().length() > 0) {
             /* Sort elements before. */
-#if GEE_0_8
             var recent_items = new TreeSet<RecentInfo> (cmp_recent_info);
-#elif GEE_1_0
-            var recent_items = new TreeSet<RecentInfo> ((CompareFunc?) cmp_recent_info);
-#endif
             foreach (var info in recentmgr.get_items())
                 recent_items.add (info);
             int cnt = 0;

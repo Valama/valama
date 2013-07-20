@@ -486,12 +486,7 @@ public abstract class BuildSystem : Object {
     }
 
     protected static TreeMap<string, PkgBuildInfo> get_pkgmaps() {
-        var pkgmaps = new TreeMap<string, PkgBuildInfo> (null,
-#if GEE_0_8
-                                                         PkgBuildInfo.compare_name);
-#elif GEE_1_0
-                                                         (EqualFunc?) PkgBuildInfo.compare_name);
-#endif
+        var pkgmaps = new TreeMap<string, PkgBuildInfo> (null, PkgBuildInfo.compare_name);
 
         foreach (var pkg in project.packages.values) {
             pkgmaps.set (pkg.name, new PkgBuildInfo (pkg.name,
