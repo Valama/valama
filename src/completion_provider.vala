@@ -126,20 +126,20 @@ public class GuanakoCompletion : Gtk.SourceCompletionProvider, Object {
 
                     /* Assign icons and pass the proposals on to Gtk.SourceView */
                     var props = new GLib.List<Gtk.SourceCompletionItem>();
-                    foreach (FixedTreeSet<CompletionProposal> list in guanako_proposals)
-                    foreach (CompletionProposal guanako_proposal in list) {
-                        if (guanako_proposal.symbol.name != null) {
+                    foreach (Gee.TreeSet<CompletionProposal> list in guanako_proposals)
+                        foreach (CompletionProposal guanako_proposal in list) {
+                            if (guanako_proposal.symbol.name != null) {
 
-                            Gdk.Pixbuf pixbuf = get_pixbuf_for_symbol (guanako_proposal.symbol);
+                                Gdk.Pixbuf pixbuf = get_pixbuf_for_symbol (guanako_proposal.symbol);
 
-                            var item = new ComplItem (guanako_proposal.symbol.name,
-                                                    guanako_proposal.symbol.name,
-                                                    pixbuf,
-                                                    null,
-                                                    guanako_proposal);
-                            props.append (item);
+                                var item = new ComplItem (guanako_proposal.symbol.name,
+                                                        guanako_proposal.symbol.name,
+                                                        pixbuf,
+                                                        null,
+                                                        guanako_proposal);
+                                props.append (item);
+                            }
                         }
-                    }
                     GLib.Idle.add (() => {
                         if (context is SourceCompletionContext)
                             context.add_proposals (this, props, true);

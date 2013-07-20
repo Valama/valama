@@ -12,7 +12,6 @@ set(required_pkgs
 "posix {nocheck,nolink}"
 )
 set(srcfiles
-"gee_treeset_fix.vala"
 "guanako_auto_indent.vala"
 "guanako_helpers.vala"
 "guanako_iterators.vala"

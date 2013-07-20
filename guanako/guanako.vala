@@ -48,30 +48,30 @@ namespace Guanako {
         /**
          * Manually added packages.
          */
-        public FixedTreeSet<string> packages { get; private set; }
+        public TreeSet<string> packages { get; private set; }
         /**
          * Manually added source files.
          */
-        public FixedTreeSet<SourceFile> sourcefiles { get; private set; }
+        public TreeSet<SourceFile> sourcefiles { get; private set; }
 
         /**
          * All enabled defines.
          */
-        public FixedTreeSet<string> defines { get; private set; }
+        public TreeSet<string> defines { get; private set; }
         /**
          * Manually enabled defines.
          */
-        public FixedTreeSet<string> defines_manual { get; private set; }
+        public TreeSet<string> defines_manual { get; private set; }
 
 
         public Project (string? filename = null,
                         int glib_major = 2, int glib_minor = 18) throws IOError, Error {
             context_internal = new CodeContext();
             parser = new ParserExt();
-            packages = new FixedTreeSet<string>();
-            sourcefiles = new FixedTreeSet<SourceFile>();
-            defines = new FixedTreeSet<string>();
-            defines_manual = new FixedTreeSet<string>();
+            packages = new TreeSet<string>();
+            sourcefiles = new TreeSet<SourceFile>();
+            defines = new TreeSet<string>();
+            defines_manual = new TreeSet<string>();
             context_internal.report = new Reporter();
             manual_report = null;
 
@@ -385,7 +385,7 @@ namespace Guanako {
             lock (context_internal) {
                 var old_sourcefiles = sourcefiles;
                 var old_packages = context_internal.get_packages();
-                sourcefiles = new FixedTreeSet<SourceFile>();
+                sourcefiles = new TreeSet<SourceFile>();
                 foreach (var define in rm_defines)
                     if (defines_manual.remove (define))
                         defines.remove (define);
@@ -563,9 +563,9 @@ namespace Guanako {
         public class ProposalSet {
             public ProposalSet() {
                 // TreeSet with custom sorting function
-                comp_sets = new FixedTreeSet<CompletionProposal>[27];
+                comp_sets = new TreeSet<CompletionProposal>[27];
                 for (int q = 0; q < 27; q++)
-                    comp_sets[q] = new FixedTreeSet<CompletionProposal> ((a,b) => {
+                    comp_sets[q] = new TreeSet<CompletionProposal> ((a,b) => {
                         var name_a = ((CompletionProposal)a).symbol.name;
                         var name_b = ((CompletionProposal)b).symbol.name;
                         var name_a_case = name_a.casefold();
@@ -635,7 +635,7 @@ namespace Guanako {
                 }
                 loop_thread.quit();
             }
-            public FixedTreeSet<CompletionProposal>[] comp_sets;
+            public TreeSet<CompletionProposal>[] comp_sets;
         }
 
         public class CompletionRun {
@@ -725,7 +725,7 @@ namespace Guanako {
                 abort_flag = true;
             }
 
-            public FixedTreeSet<CompletionProposal>[]? run (SourceFile file, int line, int col, string written) {
+            public TreeSet<CompletionProposal>[]? run (SourceFile file, int line, int col, string written) {
                 var inside_symbol = parent_project.get_symbol_at_pos (file, line, col);
                 string initial_rule_name = "";
                 if (inside_symbol == null) {
