@@ -287,15 +287,31 @@ public class WelcomeScreen : Alignment {
         grid_main.row_spacing = 5;
         grid_main.set_size_request (WIDTH, HEIGHT);
 
-        Image? img_valama = null;
-        try {
-            img_valama = new Image.from_pixbuf(new Pixbuf.from_file (
-                                        Path.build_path (Path.DIR_SEPARATOR_S,
-                                                         Config.PACKAGE_DATA_DIR,
-                                                         "valama-text.png")));
-            grid_main.attach (img_valama, 1, 4, 1, 16);
+        var evb_extra = new EventBox();
+        evb_extra.name = "evb_extra";
+        grid_main.attach (evb_extra, 1, 5, 1, 15);
+
+        var grid_extra = new Grid();
+        evb_extra.add (grid_extra);
+        grid_extra.expand = true;
+
+        var prov = new CssProvider();
+        var disp = Gdk.Display.get_default();
+        var screen = disp.get_default_screen();
+        StyleContext.add_provider_for_screen (screen, prov, STYLE_PROVIDER_PRIORITY_APPLICATION);
+        try {  //TODO: Use GResource.
+            prov.load_from_data ("""
+GtkEventBox#evb_extra {
+    background-image: url('%s');
+    background-repeat: no-repeat;
+    background-position: center;
+}
+GtkGrid#grid_recent_projects > .button:hover {
+    background-image: none;
+}
+""".printf (Path.build_path (Path.DIR_SEPARATOR_S, Config.PACKAGE_DATA_DIR, "valama-text.png")), -1);
         } catch (GLib.Error e) {
-            errmsg (_("Could not load Valama text logo: %s\n"), e.message);
+            bug_msg (_("Could not load %s CSS definitions.\n"), "WelcomeScreen");
         }
 
         /* Recent projects. */
@@ -352,16 +368,28 @@ public class WelcomeScreen : Alignment {
         var btn_open = new Button.with_label (_("Open project"));
         btn_open.vexpand = false;
         btn_open.clicked.connect (() => {
-            selector_heading (_("Open project"));
-            next_id = "UiTemplateOpener";
-            btn_next.clicked();
-            this.remove (main_screen);
-            this.add (creator);
+            try {
+                project_loaded (new ValamaProject (current_recent.get_uri_display(), Args.syntaxfile));
+            } catch (LoadingError e) {
+                //TODO: Show error message in UI.
+                error_msg (_("Could not load project: %s\n"), e.message);
+            }
         });
         recent_selected.connect (() => {
             btn_open.sensitive = (current_recent != null) ? true : false;
         });
         grid_main.attach (btn_open, 1, 3, 1, 1);
+
+        var btn_load = new Button.with_label (_("Load project"));
+        btn_load.vexpand = false;
+        btn_load.clicked.connect (() => {
+            selector_heading (_("Load project"));
+            next_id = "UiTemplateOpener";
+            btn_next.clicked();
+            this.remove (main_screen);
+            this.add (creator);
+        });
+        grid_main.attach (btn_load, 1, 4, 1, 1);
 
         var btn_quit = new Button.with_label (_("Quit"));
         btn_quit.clicked.connect (()=>{
@@ -394,6 +422,7 @@ public class WelcomeScreen : Alignment {
      */
     private void recent_build (out Grid grid_recent_projects) {
         grid_recent_projects = new Grid();
+        grid_recent_projects.name = "grid_recent_projects";
         if (recentmgr.get_items().length() > 0) {
             /* Sort elements before. */
 #if GEE_0_8
@@ -414,22 +443,27 @@ public class WelcomeScreen : Alignment {
                     btn_proj.relief = ReliefStyle.HALF;
                 } else
                     btn_proj.relief = ReliefStyle.NONE;
+                var doubleclick = false;
                 btn_proj.event.connect ((event) => {
                     switch (event.type) {
                         case EventType.@2BUTTON_PRESS:
-                            btn_proj.activate();
-                            try {
-                                project_loaded (new ValamaProject (info.get_uri(), Args.syntaxfile));
-                                /* Move element to top. */
-                                recent_btn_selected (btn_proj);
-                            } catch (LoadingError e) {
-                                error_msg (_("Could not load new project: %s\n"), e.message);
-                            }
+                            doubleclick = true;
                             return false;
                         case EventType.BUTTON_PRESS:
+                            doubleclick = false;
                             current_recent = info;
                             recent_selected (btn_proj);
                             btn_proj.relief = ReliefStyle.HALF;
+                            return false;
+                        case EventType.BUTTON_RELEASE:
+                            if (doubleclick)
+                                try {
+                                    project_loaded (new ValamaProject (info.get_uri(), Args.syntaxfile));
+                                    /* Move element to top. */
+                                    recent_btn_selected (btn_proj);
+                                } catch (LoadingError e) {
+                                    error_msg (_("Could not load new project: %s\n"), e.message);
+                                }
                             return false;
                         default:
                             return false;
