@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Valama 0.1.2\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2013-05-30 21:20+0200\n"
-"PO-Revision-Date: 2013-05-08 10:50+0200\n"
+"PO-Revision-Date: 2013-07-21 17:30+0200\n"
 "Last-Translator: Martin Lorang <martin@lorang.net>\n"
 "Language-Team: French\n"
 "Language: fr\n"
@@ -802,9 +802,8 @@ msgid "Couldn't save project file: %s\n"
 msgstr "Impossible de sauvegarder le fichier projet : %s\n"
 
 #: ../build/data/valama.desktop.in.h:3
-#, fuzzy
 msgid "Create Vala projects."
-msgstr "Créer projet"
+msgstr "Créer projet Vala."
 
 #: ../src/ui_main.vala:492
 msgid "Create new file"
@@ -1063,11 +1062,11 @@ msgstr "Aide"
 
 #: ../build/data/apps.valama.gschema.xml.h:1
 msgid "Horizontal window size"
-msgstr ""
+msgstr "Taille horizontale de la fenêtre"
 
 #: ../build/data/valama.desktop.in.h:2
 msgid "IDE"
-msgstr ""
+msgstr "EDI"
 
 #: ../src/ui_main.vala:529
 msgid "IDE mode"
@@ -1827,7 +1826,7 @@ msgstr ""
 
 #: ../build/data/valama.desktop.in.h:4
 msgid "Vala;IDE;Development;"
-msgstr ""
+msgstr "Vala;EDI;Développement"
 
 #: ../src/main.vala:104
 msgid "Valama"
@@ -1861,7 +1860,7 @@ msgstr "Version : "
 
 #: ../build/data/apps.valama.gschema.xml.h:2
 msgid "Vertical window size"
-msgstr ""
+msgstr "Taille verticale de la fenêtre"
 
 #: ../src/ui_main.vala:346
 msgid "View"
