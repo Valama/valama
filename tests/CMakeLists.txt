@@ -30,6 +30,7 @@ set(required_pkgs
   "gio-2.0"
   "libxml-2.0"
   "guanako"
+  "posix {nocheck}"
 )
 set(vapifiles
   "../vapi/config.vapi"

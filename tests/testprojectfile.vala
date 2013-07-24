@@ -23,6 +23,7 @@ public class TestProjectfile : TestCase {
     public TestProjectfile() {
         base ("TestProjectfile");
         add_test ("paths", test_paths);
+        add_test ("invalid", test_invalid);
         add_test ("version", test_version);
     }
 
@@ -54,7 +55,50 @@ public class TestProjectfile : TestCase {
                                                       "projectfile")) == "");
     }
 
+    public void test_invalid() {
+        int fd;
+        int err = Posix.stderr.fileno();
+        var bak2 = Posix.dup (err);
+
+        ProjectFile p_invalid_notexistant = null;
+        try {
+            Posix.stderr.flush();
+            fd = Posix.open ("/dev/null", Posix.O_WRONLY);
+            Posix.dup2 (fd, err);
+            p_invalid_notexistant = new ProjectFile ("projectfile/invalid_notexistant.vlp");
+        } catch (LoadingError e) {
+        }
+        Posix.stderr.flush();
+        Posix.dup2 (bak2, err);
+        assert (p_invalid_notexistant as ProjectFile == null);
+
+        ProjectFile p_invalid_garbage = null;
+        try {
+            Posix.stderr.flush();
+            fd = Posix.open ("/dev/null", Posix.O_WRONLY);
+            Posix.dup2 (fd, err);
+            p_invalid_garbage = new ProjectFile ("projectfile/invalid_garbage.vlp");
+        } catch (LoadingError e) {
+        }
+        Posix.stderr.flush();
+        Posix.dup2 (bak2, err);
+        assert (p_invalid_garbage as ProjectFile == null);
+
+        ProjectFile p_invalid_empty = null;
+        try {
+            p_invalid_garbage = new ProjectFile ("projectfile/invalid_empty.vlp");
+        } catch (LoadingError e) {
+        }
+        assert (p_invalid_empty as ProjectFile == null);
+    }
+
     public void test_version() {
+        int fd;
+        var @out = Posix.stdout.fileno();
+        var bak1 = Posix.dup (@out);
+        var swpforceold = Args.forceold;
+        Args.forceold = false;
+
         ProjectFile p_version_none = null;
         try {
             //NOTE: Execution in tests/ directory is mandatory.
@@ -70,6 +114,20 @@ public class TestProjectfile : TestCase {
         }
         assert (p_version_low as ProjectFile == null);
 
+        Args.forceold = true;
+        ProjectFile p_version_lowforce = null;
+        try {
+            Posix.stdout.flush();
+            fd = Posix.open ("/dev/null", Posix.O_WRONLY);
+            Posix.dup2 (fd, @out);
+            p_version_lowforce = new ProjectFile ("projectfile/version_low.vlp");
+        } catch (LoadingError e) {
+        }
+        Posix.stdout.flush();
+        Posix.dup2 (bak1, @out);
+        assert (p_version_lowforce as ProjectFile != null);
+
+        Args.forceold = false;
         ProjectFile p_version_exact = null;
         try {
             p_version_exact = new ProjectFile ("projectfile/version_exact.vlp");
@@ -85,6 +143,8 @@ public class TestProjectfile : TestCase {
             error (_("LoadingError: %s\n"), e.message);
         }
         assert (p_version_high as ProjectFile != null);
+
+        Args.forceold = swpforceold;
     }
 }
 
