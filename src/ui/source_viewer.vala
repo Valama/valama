@@ -388,10 +388,10 @@ class UiSourceViewer : UiElement {
 
         var srcbuf = (SourceBuffer) view.buffer;
         var attr = new SourceMarkAttributes();
-        attr.stock_id = Stock.MEDIA_FORWARD;
+        attr.icon_name = "media-seek-forward";
         view.set_mark_attributes ("timer", attr, 0);
         var attr2 = new SourceMarkAttributes();
-        attr2.stock_id = Stock.STOP;
+        attr2.icon_name = "media-seek-stop";
         view.set_mark_attributes ("stop", attr2, 0);
         view.show_line_marks = true;
         TextTag tag = srcbuf.create_tag ("error_bg", null);
@@ -486,12 +486,12 @@ class UiSourceViewer : UiElement {
          */
         var item = new DockItem.with_stock ("SourceView " + srcitems.size.to_string(),
                                             displayname,
-                                            (srcbuf.dirty) ? Stock.NEW : Stock.EDIT,
+                                            (srcbuf.dirty) ? "gtk-new" : "gtk-edit",
                                             DockItemBehavior.LOCKED);
         srcbuf.notify["dirty"].connect (() => {
             /* Work around #695972 to update icon. */
             //item.stock_id = (srcbuf.dirty) ? Stock.NEW : Stock.EDIT;
-            item.set ("stock-id", (srcbuf.dirty) ? Stock.NEW : Stock.EDIT);
+            item.set ("stock-id", (srcbuf.dirty) ? "gtk-new" : "gtk-edit");
         });
         item.add (vbox);
 

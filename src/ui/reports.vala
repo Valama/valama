@@ -156,16 +156,33 @@ class UiReport : UiElement {
         });
         vbox.pack_start (btn_showall, false, true);
 
-        var w_err = new Invisible();
-        pixmap_err = w_err.render_icon (Stock.DIALOG_ERROR, IconSize.MENU, null);
-        var w_warn = new Invisible();
-        pixmap_warn = w_warn.render_icon (Stock.DIALOG_WARNING, IconSize.MENU, null);
-        var w_depr = new Invisible();
-        pixmap_depr = w_depr.render_icon (Stock.DIALOG_QUESTION, IconSize.MENU, null);
-        var w_exp = new Invisible();
-        pixmap_exp = w_exp.render_icon (Stock.ABOUT, IconSize.MENU, null);
-        var w_note = new Invisible();
-        pixmap_note = w_note.render_icon (Stock.DIALOG_INFO, IconSize.MENU, null);
+        var theme = IconTheme.get_default();
+        try {
+            //TODO: Does this use fallback icon?
+            pixmap_err = theme.load_icon ("dialog-error", IconSize.MENU, IconLookupFlags.GENERIC_FALLBACK);
+        } catch (GLib.Error e) {
+            errmsg (_("Could not load theme icon: %s\n"), e.message);
+        }
+        try {
+            pixmap_warn = theme.load_icon ("dialog-warning", IconSize.MENU, IconLookupFlags.GENERIC_FALLBACK);
+        } catch (GLib.Error e) {
+            errmsg (_("Could not load theme icon: %s\n"), e.message);
+        }
+        try {
+            pixmap_depr = theme.load_icon ("dialog-question", IconSize.MENU, IconLookupFlags.GENERIC_FALLBACK);
+        } catch (GLib.Error e) {
+            errmsg (_("Could not load theme icon: %s\n"), e.message);
+        }
+        try {
+            pixmap_exp = theme.load_icon ("help-about", IconSize.MENU, IconLookupFlags.GENERIC_FALLBACK);
+        } catch (GLib.Error e) {
+            errmsg (_("Could not load theme icon: %s\n"), e.message);
+        }
+        try {
+            pixmap_note = theme.load_icon ("dialog-information", IconSize.MENU, IconLookupFlags.GENERIC_FALLBACK);
+        } catch (GLib.Error e) {
+            errmsg (_("Could not load theme icon: %s\n"), e.message);
+        }
 
         project.guanako_update_finished.connect (build);
         source_viewer.current_sourceview_changed.connect (() => {

@@ -36,9 +36,9 @@ public string? ui_create_file_dialog (string? path = null, string? extension = n
                                                     : _("Choose directory name"),
                                        window_main,
                                        DialogFlags.MODAL,
-                                       Stock.CANCEL,
+                                       "_" + _("Cancel"),
                                        ResponseType.CANCEL,
-                                       (!directory) ? Stock.OPEN : Stock.ADD,
+                                       "_" + ((!directory) ? _("Open") : _("Add")),
                                        ResponseType.ACCEPT,
                                        null);
 

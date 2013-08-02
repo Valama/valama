@@ -85,7 +85,8 @@ public class UiTemplateSelector : TemplatePage {
         separator_expand.draw = false;
         toolbar.add (separator_expand);
 
-        btn_info = new ToggleToolButton.from_stock (Stock.INFO);
+        btn_info = new ToggleToolButton();
+        btn_info.icon_name = "dialog-information";
         btn_info.sensitive = false;
         btn_info.tooltip_text = _("Template information");
         toolbar.add (btn_info);
@@ -552,9 +553,9 @@ public ValamaProject? ui_create_project_dialog() {
     var dlg = new Dialog.with_buttons (_("Choose project template"),
                                        window_main,
                                        DialogFlags.MODAL,
-                                       Stock.CANCEL,
+                                       "_" + _("Cancel"),
                                        ResponseType.CANCEL,
-                                       Stock.OPEN,
+                                       "_" + _("Open"),
                                        ResponseType.ACCEPT,
                                        null);
 

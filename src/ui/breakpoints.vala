@@ -94,7 +94,7 @@ class UiBreakpoints : UiElement {
 
         btn_resume = new ToolButton (null, null);
         btn_resume.sensitive = false;
-        btn_resume.stock_id = Stock.MEDIA_PLAY;
+        btn_resume.icon_name = "media-playback-start";
         btn_resume.clicked.connect (on_btn_resume_clicked);
         toolbar.add (btn_resume);
 
@@ -103,7 +103,7 @@ class UiBreakpoints : UiElement {
         info_bar = new InfoBar();
         var content_area = (Container)info_bar.get_content_area();
         var info_box = new Box(Orientation.HORIZONTAL, 5);
-        info_box.pack_start (new Image.from_stock(Stock.DIALOG_ERROR, Gtk.IconSize.LARGE_TOOLBAR), false, true);
+        info_box.pack_start (new Image.from_icon_name ("dialog-error", IconSize.LARGE_TOOLBAR), false, true);
         info_box.pack_start (new Label (_("Received invalid ID. Try to rebuild.")), true, true);
         content_area.add (info_box);
         content_area.show_all();

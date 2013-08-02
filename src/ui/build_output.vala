@@ -78,7 +78,7 @@ public class BuildOutput : UiElement {
             info_bar.no_show_all = false;
             info_bar.show_all();
             info_label.label = _("Running...");
-            info_icon.stock = Stock.EXECUTE;
+            info_icon.icon_name = "system-run";
             info_bar.set_message_type (MessageType.INFO);
 
             if (clear) {
@@ -96,11 +96,11 @@ public class BuildOutput : UiElement {
 
             if (success) {
                 info_label.label = _("Succeeded");
-                info_icon.stock = Stock.OK;
+                info_icon.icon_name = "gtk-ok";
                 info_bar.set_message_type (MessageType.INFO);
             } else {
                 info_label.label = _("Failed");
-                info_icon.stock = Stock.DIALOG_ERROR;
+                info_icon.icon_name = "dialog-error";
                 info_bar.set_message_type (MessageType.ERROR);
             }
         });

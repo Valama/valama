@@ -165,39 +165,39 @@ public class MainWidget : Box {
                               DockItemBehavior.NO_GRIP | DockItemBehavior.CANT_DOCK_CENTER,
                               DockPlacement.TOP);
         add_item ("ReportWrapper", _("Report widget"), wdg_report,
-                              Stock.INFO,
+                              "gtk-info",
                               DockItemBehavior.NORMAL,
                               DockPlacement.BOTTOM);
         add_item ("ProjectBrowser", _("Project browser"), wdg_pbrw,
-                              Stock.FILE,
+                              "gtk-file",
                               DockItemBehavior.NORMAL,
                               DockPlacement.LEFT);
         add_item ("BuildOutput", _("Build output"), wdg_build_output,
-                              Stock.FILE,
+                              "gtk-file",
                               DockItemBehavior.NORMAL,
                               DockPlacement.LEFT);
         add_item ("AppOutput", _("Application output"), wdg_app_output,
-                              Stock.FILE,
+                              "gtk-file",
                               DockItemBehavior.NORMAL,
                               DockPlacement.LEFT);
         add_item ("Search", _("Search"), wdg_search,
-                              Stock.FIND,
+                              "gtk-find",
                               DockItemBehavior.NORMAL,
                               DockPlacement.LEFT);
         add_item ("Breakpoints", _("Breakpoints / Timers"), wdg_breakpoints,
-                              Stock.FILE,
+                              "gtk-file",
                               DockItemBehavior.NORMAL,
                               DockPlacement.LEFT);
         add_item ("CurrentFileStructure", _("Current file"), wdg_current_file_structure,
-                              Stock.FILE,
+                              "gtk-file",
                               DockItemBehavior.NORMAL,
                               DockPlacement.LEFT);
         // add_item ("StyleChecker", _("Coding style checker"), wdg_stylechecker,
-        //                       Stock.COLOR_PICKER,
+        //                       "gtk-color-picker",
         //                       DockItemBehavior.NORMAL,
         //                       DockPlacement.LEFT);
         add_item ("SymbolBrowser", _("Symbol browser"), wdg_smb_browser,
-                              Stock.CONVERT,
+                              "gtk-convert",
                               DockItemBehavior.NORMAL,
                               DockPlacement.RIGHT);
 
@@ -285,21 +285,28 @@ public class MainWidget : Box {
         var menu_file = new Gtk.Menu();
         item_file.set_submenu (menu_file);
 
-        var item_file_new = new ImageMenuItem.from_stock (Stock.NEW, null);
+        var item_file_new = new ImageMenuItem.with_mnemonic ("_" + _("New"));
+        var image_file_new = new Image();
+        image_file_new.icon_name = "document-new";
+        item_file_new.image = image_file_new;
         menu_file.append (item_file_new);
         item_file_new.activate.connect (create_new_file);
         add_accel_activate (item_file_new, Gdk.Key.n);
 
-        var item_file_open = new ImageMenuItem.from_stock (Stock.OPEN, null);
-        item_file_open.label = _("Open project");
+        var item_file_open = new ImageMenuItem.with_mnemonic ("_" + _("Open project"));
+        var image_file_open = new Image();
+        image_file_open.icon_name = "document-open";
+        item_file_open.image = image_file_open;
         menu_file.append (item_file_open);
         item_file_open.activate.connect (() => {
             ui_load_project();
         });
         add_accel_activate (item_file_open, Gdk.Key.o);
 
-        var item_file_save = new ImageMenuItem.from_stock (Stock.SAVE, null);
-        item_file_save.label = _("Save all");
+        var item_file_save = new ImageMenuItem.with_mnemonic ("_" + _("Save all"));
+        var image_file_save = new Image();
+        image_file_save.icon_name = "document-save";
+        item_file_save.image = image_file_save;
         menu_file.append (item_file_save);
         item_file_save.activate.connect (() => {
             project.buffer_save();
@@ -309,7 +316,10 @@ public class MainWidget : Box {
 
         menu_file.append (new SeparatorMenuItem());
 
-        var item_file_quit = new ImageMenuItem.from_stock (Stock.QUIT, null);
+        var item_file_quit = new ImageMenuItem.with_mnemonic ("_" + _("Quit"));
+        var image_file_quit = new Image();
+        image_file_quit.icon_name = "application-exit";
+        item_file_quit.image = image_file_quit;
         menu_file.append (item_file_quit);
         item_file_quit.activate.connect (() => {
             quit_valama();
@@ -322,14 +332,20 @@ public class MainWidget : Box {
         var menu_edit = new Gtk.Menu();
         item_edit.set_submenu (menu_edit);
 
-        var item_edit_undo = new ImageMenuItem.from_stock (Stock.UNDO, null);
+        var item_edit_undo = new ImageMenuItem.with_mnemonic ("_" + _("Undo"));
+        var image_edit_undo = new Image();
+        image_edit_undo.icon_name = "edit-undo";
+        item_edit_undo.image = image_edit_undo;
         item_edit_undo.set_sensitive (false);
         menu_edit.append (item_edit_undo);
         item_edit_undo.activate.connect (undo_change);
         project.undo_changed.connect (item_edit_undo.set_sensitive);
         add_accel_activate (item_edit_undo, Gdk.Key.u);
 
-        var item_edit_redo = new ImageMenuItem.from_stock (Stock.REDO, null);
+        var item_edit_redo = new ImageMenuItem.with_mnemonic ("_" + _("Redo"));
+        var image_edit_redo = new Image();
+        image_edit_redo.icon_name = "edit-redo";
+        item_edit_redo.image = image_edit_redo;
         item_edit_redo.set_sensitive (false);
         menu_edit.append (item_edit_redo);
         item_edit_redo.activate.connect (redo_change);
@@ -376,8 +392,10 @@ public class MainWidget : Box {
         var menu_project = new Gtk.Menu();
         item_project.set_submenu (menu_project);
 
-        var item_project_settings = new ImageMenuItem.from_stock (Stock.PREFERENCES, null);
-        item_project_settings.label = _("Settings");
+        var item_project_settings = new ImageMenuItem.with_mnemonic ("_" + _("Settings"));
+        var image_project_settings = new Image();
+        image_project_settings.icon_name = "preferences-system";
+        item_project_settings.image = image_project_settings;
         menu_project.append (item_project_settings);
         item_project_settings.activate.connect (() => {
             ui_project_dialog (project);
@@ -394,16 +412,20 @@ public class MainWidget : Box {
         var menu_run = new Gtk.Menu();
         item_run.set_submenu (menu_run);
 
-        var item_run_run = new ImageMenuItem.from_stock (Stock.MEDIA_PLAY, null);
-        item_run_run.label = _("Execute");
+        var item_run_run = new ImageMenuItem.with_mnemonic ("_" + _("Execute"));
+        var image_run_run = new Image();
+        image_run_run.icon_name = "media-playback-start";
+        item_run_run.image = image_run_run;
         add_accel_activate (item_run_run, Gdk.Key.F5, 0);
         menu_run.append (item_run_run);
         item_run_run.activate.connect (() => {
             project_builder.launch();
         });
 
-        var item_run_stop = new ImageMenuItem.from_stock (Stock.MEDIA_STOP, null);
-        // item_run_stop.label = _("Stop");
+        var item_run_stop = new ImageMenuItem.with_mnemonic ("_" + _("Stop"));
+        var image_run_stop = new Image();
+        image_run_stop.icon_name = "media-playback-stop";
+        item_run_stop.image = image_run_stop;
         item_run_stop.sensitive = false;
         add_accel_activate (item_run_run, Gdk.Key.F5, Gdk.ModifierType.SHIFT_MASK);
         menu_run.append (item_run_stop);
@@ -426,7 +448,10 @@ public class MainWidget : Box {
         var menu_help = new Gtk.Menu();
         item_help.set_submenu (menu_help);
 
-        var item_help_about = new ImageMenuItem.from_stock (Stock.ABOUT, null);
+        var item_help_about = new ImageMenuItem.with_mnemonic ("_" + _("About"));
+        var image_help_about = new Image();
+        image_help_about.icon_name = "help-about";
+        item_help_about.image = image_help_about;
         menu_help.append (item_help_about);
         item_help_about.activate.connect (ui_about_dialog);
 
@@ -436,8 +461,10 @@ public class MainWidget : Box {
     private Gtk.Menu build_build_menu () {
         var menu_build = new Gtk.Menu();
 
-        var item_build_build = new ImageMenuItem.from_stock (Stock.EXECUTE, null);
-        item_build_build.label = _("Build");
+        var item_build_build = new ImageMenuItem.with_mnemonic ("_" + _("Build"));
+        var image_build_build = new Image();
+        image_build_build.icon_name = "system-run";
+        item_build_build.image = image_build_build;
         add_accel_activate (item_build_build, Gdk.Key.F7, 0);
         menu_build.append (item_build_build);
         item_build_build.activate.connect (() => {
@@ -456,8 +483,10 @@ public class MainWidget : Box {
             project_builder.build_project (false, false, true);
         });
 
-        var item_build_clean = new ImageMenuItem.from_stock (Stock.CLEAR, null);
-        item_build_clean.label = _("Clean");
+        var item_build_clean = new ImageMenuItem.with_mnemonic ("_" + _("Clean"));
+        var image_build_clean = new Image();
+        image_build_clean.icon_name = "edit-clear";
+        item_build_clean.image = image_build_clean;
         menu_build.append (item_build_clean);
         item_build_clean.activate.connect (() => {
             project_builder.clean_project();
@@ -486,12 +515,14 @@ public class MainWidget : Box {
 
         toolbar.add (new SeparatorToolItem());
 
-        var btnNewFile = new ToolButton.from_stock (Stock.NEW);
+        var btnNewFile = new ToolButton (null, _("New"));
+        btnNewFile.icon_name = "document-new";
         toolbar.add (btnNewFile);
         btnNewFile.set_tooltip_text (_("Create new file"));
         btnNewFile.clicked.connect (create_new_file);
 
-        var btnSave = new ToolButton.from_stock (Stock.SAVE);
+        var btnSave = new ToolButton (null, _("Save"));
+        btnSave.icon_name = "document-save";
         toolbar.add (btnSave);
         btnSave.set_tooltip_text (_("Save current file"));
         btnSave.clicked.connect (() => {
@@ -501,14 +532,16 @@ public class MainWidget : Box {
 
         toolbar.add (new SeparatorToolItem());
 
-        var btnUndo = new ToolButton.from_stock (Stock.UNDO);
+        var btnUndo = new ToolButton (null, _("Undo"));
+        btnUndo.icon_name = "edit-undo";
         btnUndo.set_sensitive (false);
         toolbar.add (btnUndo);
         btnUndo.set_tooltip_text (_("Undo last change"));
         btnUndo.clicked.connect (undo_change);
         project.undo_changed.connect (btnUndo.set_sensitive);
 
-        var btnRedo = new ToolButton.from_stock (Stock.REDO);
+        var btnRedo = new ToolButton (null, _("Redo"));
+        btnRedo.icon_name = "edit-redo";
         btnRedo.set_sensitive (false);
         toolbar.add (btnRedo);
         btnRedo.set_tooltip_text (_("Redo last change"));
@@ -530,17 +563,17 @@ public class MainWidget : Box {
         target_selector.active = IdeModes.to_int (project.idemode);
         toolbar.add (ti);
 
-        var btnBuild = new Gtk.MenuToolButton.from_stock (Stock.EXECUTE);
+        var btnBuild = new Gtk.MenuToolButton (null, _("Build"));
+        btnBuild.icon_name = "system-run";
         btnBuild.set_menu (build_build_menu());
-        btnBuild.label = _("Build");
         toolbar.add (btnBuild);
         btnBuild.set_tooltip_text (_("Save current file and build project"));
         btnBuild.clicked.connect (() => {
             project_builder.build_project();
         });
 
-        var btnRun = new Gtk.ToolButton.from_stock (Stock.MEDIA_PLAY);
-        btnRun.label = _("Execute");
+        var btnRun = new Gtk.ToolButton (null, _("Execute"));
+        btnRun.icon_name = "media-playback-start";
         toolbar.add (btnRun);
         btnRun.set_tooltip_text (_("Run application"));
         btnRun.clicked.connect (() => {
@@ -550,8 +583,8 @@ public class MainWidget : Box {
                 project_builder.launch();
         });
         project_builder.notify["app-running"].connect (() => {
-            btnRun.stock_id = (project_builder.app_running) ? Stock.MEDIA_STOP
-                                                            : Stock.MEDIA_PLAY;
+            btnRun.icon_name = (project_builder.app_running) ? "media-playback-stop"
+                                                             : "media-playback-start";
         });
 
         var separator_expand = new SeparatorToolItem();
@@ -559,7 +592,7 @@ public class MainWidget : Box {
         separator_expand.draw = false;
         toolbar.add (separator_expand);
 
-        add_view_toolbar_item (toolbar, wdg_search, null, "edit-find-symbolic");
+        add_view_toolbar_item (toolbar, wdg_search, "edit-find-symbolic");
 
         var btn_lock = new ToggleToolButton();
         btn_lock.icon_name = "changes-prevent-symbolic";
@@ -652,21 +685,13 @@ public class MainWidget : Box {
      *
      * @param toolbar Toolbar to add button.
      * @param element {@link UiElement} to connect toggle signals with.
-     * @param stock_id Stock item.
      * @param icon_name Icon from theme.
      */
     public void add_view_toolbar_item (Toolbar toolbar,
                                        UiElement element,
-                                       string? stock_id,
-                                       string? icon_name)
-                    requires (stock_id != null || icon_name != null) {
-        ToggleToolButton btn_element;
-        if (stock_id != null)
-            btn_element = new ToggleToolButton.from_stock (stock_id);
-        else {
-            btn_element = new ToggleToolButton();
-            btn_element.icon_name = icon_name;
-        }
+                                       string icon_name) {
+        var btn_element = new ToggleToolButton();
+        btn_element.icon_name = icon_name;
         toolbar.add (btn_element);
 
 #if !GDL_LESS_3_5_5

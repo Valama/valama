@@ -163,9 +163,9 @@ public class GuanakoCompletion : Gtk.SourceCompletionProvider, Object {
         if (this.icon == null) {
             Gtk.IconTheme theme = Gtk.IconTheme.get_default();
             try {
-                this.icon = theme.load_icon (Gtk.Stock.DIALOG_INFO, 16, 0);
+                this.icon = theme.load_icon ("dialog-information", 16, 0);
             } catch (GLib.Error e) {
-                errmsg (_("Could not load icon theme: %s\n"), e.message);
+                errmsg (_("Could not load theme icon: %s\n"), e.message);
             }
         }
         return this.icon;
