@@ -489,9 +489,12 @@ class UiSourceViewer : UiElement {
                                             (srcbuf.dirty) ? "gtk-new" : "gtk-edit",
                                             DockItemBehavior.LOCKED);
         srcbuf.notify["dirty"].connect (() => {
+#if GDL_3_8 || GDL_3_8_2
+            item.stock_id = (srcbuf.dirty) ? "gtk-new" : "gtk-edit";
+#else
             /* Work around #695972 to update icon. */
-            //item.stock_id = (srcbuf.dirty) ? Stock.NEW : Stock.EDIT;
             item.set ("stock-id", (srcbuf.dirty) ? "gtk-new" : "gtk-edit");
+#endif
         });
         item.add (vbox);
 

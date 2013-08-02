@@ -18,7 +18,11 @@
 				<package name="gdl-3.0" version="3.8.2" rel="since"/>
 			</extracheck>
 			<extracheck vapi="extravapi/gdl-3.0.vapi">
-				<package name="gdl-3.0" version="3.5.5" rel="since"/>
+				<package name="gdl-3.0" version="3.5.5" rel="since">
+					<extracheck define="GDL_3_8">
+						<package name="gdl-3.0" version="3.8" rel="since"/>
+					</extracheck>
+				</package>
 				<package name="libvala-0.18"/>
 			</extracheck>
 			<extracheck vapi="extravapi/gdl-3.0-old.vapi" define="GDL_LESS_3_5_5">
