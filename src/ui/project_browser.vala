@@ -325,9 +325,9 @@ public class ProjectBrowser : UiElement {
         Dialog dlg = new Dialog.with_buttons (_("Select new packages"),
                                               window_main,
                                               DialogFlags.MODAL,
-                                              "_" + _("Cancel"),
+                                              _("_Cancel"),
                                               ResponseType.REJECT,
-                                              "_" + _("Ok"),
+                                              _("_Ok"),
                                               ResponseType.ACCEPT);
 
         var tree_view = new TreeView();

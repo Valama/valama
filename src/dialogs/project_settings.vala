@@ -27,9 +27,9 @@ public void ui_load_project() {
     var dlg = new FileChooserDialog (_("Open project"),
                                      window_main,
                                      FileChooserAction.OPEN,
-                                     "_" + _("Cancel"),
+                                     _("_Cancel"),
                                      ResponseType.CANCEL,
-                                     "_" + _("Open"),
+                                     _("_Open"),
                                      ResponseType.ACCEPT,
                                      null);
     ValamaProject new_project = null;
@@ -101,11 +101,11 @@ public void ui_project_dialog (ValamaProject? project) {
     var dlg = new Dialog.with_buttons (_("Project settings"),
                                        window_main,
                                        DialogFlags.MODAL,
-                                       "_" + _("Discard"),
+                                       _("_Discard"),
                                        ResponseType.REJECT,
-                                       "_" + _("Cancel"),
+                                       _("_Cancel"),
                                        ResponseType.CANCEL,
-                                       "_" + _("Ok"),
+                                       _("_Ok"),
                                        ResponseType.OK,
                                        null);
     dlg.set_size_request (420, 200);

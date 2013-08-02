@@ -280,12 +280,12 @@ public class MainWidget : Box {
      */
     private void build_menu() {
         /* File */
-        var item_file = new Gtk.MenuItem.with_mnemonic ("_" + _("File"));
+        var item_file = new Gtk.MenuItem.with_mnemonic (_("_File"));
         menubar.add (item_file);
         var menu_file = new Gtk.Menu();
         item_file.set_submenu (menu_file);
 
-        var item_file_new = new ImageMenuItem.with_mnemonic ("_" + _("New"));
+        var item_file_new = new ImageMenuItem.with_mnemonic (_("_New"));
         var image_file_new = new Image();
         image_file_new.icon_name = "document-new";
         item_file_new.image = image_file_new;
@@ -293,7 +293,7 @@ public class MainWidget : Box {
         item_file_new.activate.connect (create_new_file);
         add_accel_activate (item_file_new, Gdk.Key.n);
 
-        var item_file_open = new ImageMenuItem.with_mnemonic ("_" + _("Open project"));
+        var item_file_open = new ImageMenuItem.with_mnemonic (_("_Open project"));
         var image_file_open = new Image();
         image_file_open.icon_name = "document-open";
         item_file_open.image = image_file_open;
@@ -303,7 +303,7 @@ public class MainWidget : Box {
         });
         add_accel_activate (item_file_open, Gdk.Key.o);
 
-        var item_file_save = new ImageMenuItem.with_mnemonic ("_" + _("Save all"));
+        var item_file_save = new ImageMenuItem.with_mnemonic (_("_Save all"));
         var image_file_save = new Image();
         image_file_save.icon_name = "document-save";
         item_file_save.image = image_file_save;
@@ -316,7 +316,7 @@ public class MainWidget : Box {
 
         menu_file.append (new SeparatorMenuItem());
 
-        var item_file_quit = new ImageMenuItem.with_mnemonic ("_" + _("Quit"));
+        var item_file_quit = new ImageMenuItem.with_mnemonic (_("_Quit"));
         var image_file_quit = new Image();
         image_file_quit.icon_name = "application-exit";
         item_file_quit.image = image_file_quit;
@@ -327,12 +327,12 @@ public class MainWidget : Box {
         add_accel_activate (item_file_quit, Gdk.Key.q);
 
         /* Edit */
-        var item_edit = new Gtk.MenuItem.with_mnemonic ("_" + _("Edit"));
+        var item_edit = new Gtk.MenuItem.with_mnemonic (_("_Edit"));
         menubar.add (item_edit);
         var menu_edit = new Gtk.Menu();
         item_edit.set_submenu (menu_edit);
 
-        var item_edit_undo = new ImageMenuItem.with_mnemonic ("_" + _("Undo"));
+        var item_edit_undo = new ImageMenuItem.with_mnemonic (_("_Undo"));
         var image_edit_undo = new Image();
         image_edit_undo.icon_name = "edit-undo";
         item_edit_undo.image = image_edit_undo;
@@ -342,7 +342,7 @@ public class MainWidget : Box {
         project.undo_changed.connect (item_edit_undo.set_sensitive);
         add_accel_activate (item_edit_undo, Gdk.Key.u);
 
-        var item_edit_redo = new ImageMenuItem.with_mnemonic ("_" + _("Redo"));
+        var item_edit_redo = new ImageMenuItem.with_mnemonic (_("_Redo"));
         var image_edit_redo = new Image();
         image_edit_redo.icon_name = "edit-redo";
         item_edit_redo.image = image_edit_redo;
@@ -353,7 +353,7 @@ public class MainWidget : Box {
         add_accel_activate (item_edit_redo, Gdk.Key.r);
 
         /* View */
-        var item_view = new Gtk.MenuItem.with_mnemonic ("_" + _("View"));
+        var item_view = new Gtk.MenuItem.with_mnemonic (_("_View"));
         menubar.add (item_view);
         var menu_view = new Gtk.Menu();
         item_view.set_submenu (menu_view);
@@ -370,7 +370,7 @@ public class MainWidget : Box {
         menu_view.append (new SeparatorMenuItem());
 
         // TRANSLATORS: Lock user interface elements to prevent moving them around.
-        var item_view_lockhide = new CheckMenuItem.with_mnemonic ("_" + _("Lock elements"));
+        var item_view_lockhide = new CheckMenuItem.with_mnemonic (_("_Lock elements"));
         menu_view.append (item_view_lockhide);
         item_view_lockhide.toggled.connect (() => {
             if (item_view_lockhide.active)
@@ -387,12 +387,12 @@ public class MainWidget : Box {
         add_accel_activate (item_view_lockhide, Gdk.Key.h);
 
         /* Project */
-        var item_project = new Gtk.MenuItem.with_mnemonic ("_" + _("Project"));
+        var item_project = new Gtk.MenuItem.with_mnemonic (_("_Project"));
         menubar.add (item_project);
         var menu_project = new Gtk.Menu();
         item_project.set_submenu (menu_project);
 
-        var item_project_settings = new ImageMenuItem.with_mnemonic ("_" + _("Settings"));
+        var item_project_settings = new ImageMenuItem.with_mnemonic (_("_Settings"));
         var image_project_settings = new Image();
         image_project_settings.icon_name = "preferences-system";
         item_project_settings.image = image_project_settings;
@@ -402,17 +402,17 @@ public class MainWidget : Box {
         });
 
         /* Build */
-        var item_build = new Gtk.MenuItem.with_mnemonic ("_" + _("Build"));
+        var item_build = new Gtk.MenuItem.with_mnemonic (_("_Build"));
         menubar.add (item_build);
         item_build.set_submenu (build_build_menu());
 
         /* Run */
-        var item_run = new Gtk.MenuItem.with_mnemonic ("_" + _("Run"));
+        var item_run = new Gtk.MenuItem.with_mnemonic (_("_Run"));
         menubar.add (item_run);
         var menu_run = new Gtk.Menu();
         item_run.set_submenu (menu_run);
 
-        var item_run_run = new ImageMenuItem.with_mnemonic ("_" + _("Execute"));
+        var item_run_run = new ImageMenuItem.with_mnemonic (_("_Execute"));
         var image_run_run = new Image();
         image_run_run.icon_name = "media-playback-start";
         item_run_run.image = image_run_run;
@@ -422,7 +422,7 @@ public class MainWidget : Box {
             project_builder.launch();
         });
 
-        var item_run_stop = new ImageMenuItem.with_mnemonic ("_" + _("Stop"));
+        var item_run_stop = new ImageMenuItem.with_mnemonic (_("_Stop"));
         var image_run_stop = new Image();
         image_run_stop.icon_name = "media-playback-stop";
         item_run_stop.image = image_run_stop;
@@ -443,12 +443,12 @@ public class MainWidget : Box {
         });
 
         /* Help */
-        var item_help = new Gtk.MenuItem.with_mnemonic ("_" + _("Help"));
+        var item_help = new Gtk.MenuItem.with_mnemonic (_("_Help"));
         menubar.add (item_help);
         var menu_help = new Gtk.Menu();
         item_help.set_submenu (menu_help);
 
-        var item_help_about = new ImageMenuItem.with_mnemonic ("_" + _("About"));
+        var item_help_about = new ImageMenuItem.with_mnemonic (_("_About"));
         var image_help_about = new Image();
         image_help_about.icon_name = "help-about";
         item_help_about.image = image_help_about;
@@ -461,7 +461,7 @@ public class MainWidget : Box {
     private Gtk.Menu build_build_menu () {
         var menu_build = new Gtk.Menu();
 
-        var item_build_build = new ImageMenuItem.with_mnemonic ("_" + _("Build"));
+        var item_build_build = new ImageMenuItem.with_mnemonic (_("_Build"));
         var image_build_build = new Image();
         image_build_build.icon_name = "system-run";
         item_build_build.image = image_build_build;
@@ -483,7 +483,7 @@ public class MainWidget : Box {
             project_builder.build_project (false, false, true);
         });
 
-        var item_build_clean = new ImageMenuItem.with_mnemonic ("_" + _("Clean"));
+        var item_build_clean = new ImageMenuItem.with_mnemonic (_("_Clean"));
         var image_build_clean = new Image();
         image_build_clean.icon_name = "edit-clear";
         item_build_clean.image = image_build_clean;

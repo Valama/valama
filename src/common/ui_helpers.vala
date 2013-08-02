@@ -210,9 +210,9 @@ public int ui_ask_file (string warn_msg, string? extra_text = null) {
         dlg.secondary_text = extra_text;
     }
 
-    dlg.add_button ("_" + _("Discard"), ResponseType.REJECT);
-    dlg.add_button ("_" + _("Save"), ResponseType.ACCEPT);
-    dlg.add_button ("_" + _("Cancel"), ResponseType.CANCEL);
+    dlg.add_button (_("_Discard"), ResponseType.REJECT);
+    dlg.add_button (_("_Save"), ResponseType.ACCEPT);
+    dlg.add_button (_("_Cancel"), ResponseType.CANCEL);
 
     int ret = dlg.run();
     dlg.destroy();

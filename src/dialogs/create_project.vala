@@ -553,9 +553,9 @@ public ValamaProject? ui_create_project_dialog() {
     var dlg = new Dialog.with_buttons (_("Choose project template"),
                                        window_main,
                                        DialogFlags.MODAL,
-                                       "_" + _("Cancel"),
+                                       _("_Cancel"),
                                        ResponseType.CANCEL,
-                                       "_" + _("Open"),
+                                       _("_Open"),
                                        ResponseType.ACCEPT,
                                        null);
 

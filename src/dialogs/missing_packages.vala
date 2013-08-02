@@ -27,7 +27,7 @@ public void ui_missing_packages_dialog (string[] missing_packages) {
     var dlg_missing_packages = new Dialog.with_buttons (_("Missing packages"),
                                                         window_main,
                                                         DialogFlags.MODAL,
-                                                        "_" + _("Ok"),
+                                                        _("_Ok"),
                                                         ResponseType.OK,
                                                         null);
     dlg_missing_packages.resizable = false;
