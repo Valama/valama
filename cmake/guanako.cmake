@@ -8,6 +8,7 @@ set(required_pkgs
 "gee-0.8"
 "libvala-0.18"
 "libvala-0.20"
+"libvala-0.22"
 "libxml-2.0"
 "posix {nocheck,nolink}"
 )

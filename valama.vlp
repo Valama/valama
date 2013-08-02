@@ -8,6 +8,7 @@
 	</version>
 	<packages>
 		<choice all="yes">
+			<package name="libvala-0.22" define="VALAC_0_20"/>
 			<package name="libvala-0.20" define="VALAC_0_20"/>
 			<package name="libvala-0.18"/>
 		</choice>
