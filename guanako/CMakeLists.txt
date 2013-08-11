@@ -33,14 +33,19 @@ set(bindir "bin")
 set(datarootdir "share")
 set(libdir "lib")
 set(includedir "include")
+set(datadir "${datarootdir}/${project_name_lower}")
+set(uidir "${datadir}/ui")
 if(NOT project_root OR NOT datadir)
   set(datadir "${datarootdir}/${project_name_lower}")
 endif()
 set(localedir "${datarootdir}/locale")
 set(appdir "${datarootdir}/applications")
-set(pixdir "${datarootdir}/pixmaps/${project_name_lower}")
+set(gsettingsdir "${datarootdir}/glib-2.0/schemas")
+set(pixrootdir "${datarootdir}/pixmaps")
+set(pixdir "${pixrootdir}/${project_name_lower}")
 set(docdir "${datadir}/doc")
 set(mandir "${datarootdir}/man")
+set(mimedir "${datarootdir}/mime/packages")
 if(CMAKE_INSTALL_PREFIX)
   set(install_prefix "${CMAKE_INSTALL_PREFIX}/")
 else()
@@ -159,7 +164,9 @@ else()
   add_definitions(-DGETTEXT_PACKAGE="${project_name_lower}")
 endif()
 add_definitions(-DPACKAGE_DATA_DIR="${install_prefix}${datadir}")
+add_definitions(-DPACKAGE_UI_DIR="${install_prefix}${uidir}")
 add_definitions(-DLOCALE_DIR="${install_prefix}${localedir}")
+add_definitions(-DPIXMAP_DIR="${install_prefix}${pixdir}")
 add_definitions(-DVALA_VERSION="${VALA_SHORTVER}")
 
 install(TARGETS "${project_name_lower}" DESTINATION "${libdir}")
@@ -170,5 +177,19 @@ install(FILES ${vapi_files} DESTINATION "${VALA_VAPIDIR}")
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${project_name}-${${project_name}_VERSION}.gir" DESTINATION "${datarootdir}/gir-1.0")
 install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/data/syntax" DESTINATION "${datadir}")
 install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/data/${project_name_lower}.lang" DESTINATION "${datarootdir}/gtksourceview-3.0/language-specs")
+
+# Install user interface files if used
+foreach(uifile ${uifiles})
+  install(FILES ${uifile} DESTINATION "${uidir}")
+endforeach()
+
+# Uninstall target
+add_custom_target(uninstall
+  COMMAND
+    ${CMAKE_COMMAND} -D "CUSTOM_SOURCE_DIR:FILEPATH=${CMAKE_SOURCE_DIR}"
+                     -D "POSTREMOVE_HOOK:BOOL=${POSTINSTALL_HOOK}"
+                     -D "GSETTINGSDIR:FILEPATH=${install_prefix}${gsettingsdir}"
+                     -P "${CMAKE_SOURCE_DIR}/cmake/SimpleUninstall.cmake"
+)
 
 # vim: set ai ts=2 sts=2 et sw=2

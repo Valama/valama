@@ -29,6 +29,7 @@ set(datarootdir "share")
 set(libdir "lib")
 set(includedir "include")
 set(datadir "${datarootdir}/${project_name_lower}")
+set(uidir "${datadir}/ui")
 set(localedir "${datarootdir}/locale")
 set(appdir "${datarootdir}/applications")
 set(gsettingsdir "${datarootdir}/glib-2.0/schemas")
@@ -86,6 +87,7 @@ else()
   add_definitions(-DGETTEXT_PACKAGE="${project_name_lower}")
 endif()
 add_definitions(-DPACKAGE_DATA_DIR="${install_prefix}${datadir}")
+add_definitions(-DPACKAGE_UI_DIR="${install_prefix}${uidir}")
 add_definitions(-DLOCALE_DIR="${install_prefix}${localedir}")
 add_definitions(-DPIXMAP_DIR="${install_prefix}${pixdir}")
 add_definitions(-DVALA_VERSION="${VALA_SHORTVER}")
@@ -95,6 +97,10 @@ target_link_libraries("${project_name_lower}" ${PROJECT_LDFLAGS})
 add_definitions(${PROJECT_C_FLAGS})
 install(TARGETS ${project_name_lower} DESTINATION "${bindir}")
 
+# Install user interface files if used
+foreach(uifile ${uifiles})
+  install(FILES ${uifile} DESTINATION "${uidir}")
+endforeach()
 
 # Uninstall target
 add_custom_target(uninstall
