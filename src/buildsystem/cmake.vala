@@ -64,9 +64,9 @@ public class BuilderCMake : BuildSystem {
         var strb_pkgs = new StringBuilder ("set(required_pkgs\n");
         foreach (var pkgmap in get_pkgmaps().values) {
             if (pkgmap.choice_pkg != null && !pkgmap.check)
-                strb_pkgs.append (@"\"$((pkgmap as PackageInfo))\"\n");
+                strb_pkgs.append (@"  \"$((pkgmap as PackageInfo))\"\n");
             else
-                strb_pkgs.append (@"\"$pkgmap\"\n");
+                strb_pkgs.append (@"  \"$pkgmap\"\n");
         }
         strb_pkgs.append (")\n");
 
@@ -75,16 +75,16 @@ public class BuilderCMake : BuildSystem {
         foreach (var filepath in project.files) {
             var fname = project.get_relative_path (filepath);
             if (filepath.has_suffix (".vapi"))
-                strb_vapis.append (@"\"$fname\"\n");
+                strb_vapis.append (@"  \"$fname\"\n");
             else
-                strb_files.append (@"\"$fname\"\n");
+                strb_files.append (@"  \"$fname\"\n");
         }
         strb_files.append (")\n");
         strb_vapis.append (")\n");
 
         var strb_uis = new StringBuilder ("set(uifiles\n");
         foreach (var filepath in project.u_files)
-            strb_uis.append (@"\"$(project.get_relative_path (filepath))\"\n");
+            strb_uis.append (@"  \"$(project.get_relative_path (filepath))\"\n");
         strb_uis.append (")\n");
 
         try {
