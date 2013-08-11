@@ -182,6 +182,12 @@ public class GuanakoCompletion : Gtk.SourceCompletionProvider, Object {
 
         source_viewer.current_srcbuffer.delete (ref start, ref iter);
         source_viewer.current_srcbuffer.insert (ref start, prop.symbol.name, prop.symbol.name.length);
+
+        /* After activating a proposal, immediately queue a new completion request (to keep the completion window open) */
+        GLib.Idle.add (()=>{
+            source_viewer.current_srcview.show_completion();
+            return false;
+        });
         return true;
     }
 
