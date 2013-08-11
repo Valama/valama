@@ -1049,7 +1049,7 @@ namespace Guanako {
                 if (type == "Parameter" && smb is Vala.Parameter)
                     return true;
                 // Simply treat LocalVariables as fields
-                if (type == "Field" && (smb is Field || smb is LocalVariable))
+                if (type == "Field" && (smb is Field || smb is LocalVariable || smb is Vala.Parameter))
                     return true;
                 if (type == "Method" && smb is Method)
                     return true;
