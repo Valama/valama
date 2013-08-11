@@ -229,6 +229,12 @@ public class ProjectBrowser : UiElement {
             else
                 update_needed = true;;
         });
+        project.ui_files_changed.connect (() => {
+            if (!project.add_multiple_files)
+                build();
+            else
+                update_needed = true;;
+        });
         project.buildsystem_files_changed.connect (() => {
             if (!project.add_multiple_files)
                 build();
@@ -261,6 +267,10 @@ public class ProjectBrowser : UiElement {
      */
     private Gee.HashMap<string, TreeIter?> pathmap;
     /**
+     * Same as {@link pathmap} for user interface files.
+     */
+    private Gee.HashMap<string, TreeIter?> u_pathmap;
+    /**
      * Same as {@link pathmap} for build system files.
      */
     private Gee.HashMap<string, TreeIter?> b_pathmap;
@@ -279,12 +289,17 @@ public class ProjectBrowser : UiElement {
         tree_view.set_model (store);
 
         pathmap = new Gee.HashMap<string, TreeIter?>();
+        u_pathmap = new Gee.HashMap<string, TreeIter?>();
         b_pathmap = new Gee.HashMap<string, TreeIter?>();
         d_pathmap = new Gee.HashMap<string, TreeIter?>();
 
         build_file_treestore (_("Sources"),
                               project.source_dirs.to_array(),
                               project.files.to_array(),
+                              ref store, ref u_pathmap);
+        build_file_treestore (_("User interface files"),
+                              project.ui_dirs.to_array(),
+                              project.u_files.to_array(),
                               ref store, ref pathmap);
         build_file_treestore (_("Build system files"),
                               project.buildsystem_dirs.to_array(),
@@ -292,7 +307,8 @@ public class ProjectBrowser : UiElement {
                               ref store, ref b_pathmap);
         // TRANSLATORS:
         // "Data files" means the file is neighter a (Vala) source file nor a
-        // build system file - it's an other file or data file.
+        // a build system file nor a user interface file - it's an other file
+        // or data file.
         build_file_treestore (_("Data files"),
                               project.data_dirs.to_array(),
                               project.d_files.to_array(),
@@ -401,9 +417,13 @@ public class ProjectBrowser : UiElement {
                         break;
                     case 1:
                         filename = ui_create_file_dialog (null, null, directory);
-                        project.add_buildsystem_file (filename, directory);
+                        project.add_ui_file (filename, directory);
                         break;
                     case 2:
+                        filename = ui_create_file_dialog (null, null, directory);
+                        project.add_buildsystem_file (filename, directory);
+                        break;
+                    case 3:
                         filename = ui_create_file_dialog (null, null, directory);
                         project.add_data_file (filename, directory);
                         break;
@@ -441,9 +461,13 @@ public class ProjectBrowser : UiElement {
                         break;
                     case 1:
                         filename = ui_create_file_dialog (filepath, null, directory);
-                        project.add_buildsystem_file (filename, directory);
+                        project.add_ui_file (filename, directory);
                         break;
                     case 2:
+                        filename = ui_create_file_dialog (filepath, null, directory);
+                        project.add_buildsystem_file (filename, directory);
+                        break;
+                    case 3:
                         filename = ui_create_file_dialog (filepath, null, directory);
                         project.add_data_file (filename, directory);
                         break;
@@ -524,9 +548,12 @@ public class ProjectBrowser : UiElement {
                             project.remove_source_file (abs_filepath);
                             break;
                         case 1:
-                            project.remove_buildsystem_file (abs_filepath);
+                            project.remove_ui_file (abs_filepath);
                             break;
                         case 2:
+                            project.remove_buildsystem_file (abs_filepath);
+                            break;
+                        case 3:
                             project.remove_data_file (abs_filepath);
                             break;
                         default:

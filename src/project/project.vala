@@ -182,6 +182,10 @@ public class ValamaProject : ProjectFile {
      */
     public signal void source_files_changed();
     /**
+     * Emit signal when user interface file was added or removed.
+     */
+    public signal void ui_files_changed();
+    /**
      * Emit signal when build system file was added or removed.
      */
     public signal void buildsystem_files_changed();
@@ -315,6 +319,10 @@ public class ValamaProject : ProjectFile {
         generate_file_list (ref _source_dirs,
                             ref _source_files,
                             add_source_file);
+
+        generate_file_list (ref _ui_dirs,
+                            ref _ui_files,
+                            add_ui_file);
 
         generate_file_list (ref _buildsystem_dirs,
                             ref _buildsystem_files,
@@ -678,7 +686,10 @@ public class ValamaProject : ProjectFile {
         if (!filename.has_suffix(".vapi"))
             msg (_("Found source file: %s\n"), filename_abs);
 
-        if (b_files.contains (filename_abs)) {
+        if (d_files.contains (filename_abs)) {
+            warning_msg (_("File already a user interface file. Skip it.\n"), filename_abs);
+            return;
+        } else if (b_files.contains (filename_abs)) {
             warning_msg (_("File already registered for build system. Skip it.\n"), filename_abs);
             return;
         } else if (d_files.contains (filename_abs)) {
@@ -720,6 +731,66 @@ public class ValamaProject : ProjectFile {
     }
 
     /**
+     * Add file to user interface list.
+     *
+     * @param filename Path to file.
+     * @param directory Add directory.
+     */
+    public void add_ui_file (string? filename, bool directory = false) {
+        if (filename == null || (!directory &&
+                !(filename.has_suffix (".ui") || filename.has_suffix (".glade") ||
+                  filename.has_suffix (".xml"))))
+            return;
+        var filename_abs = get_absolute_path (filename);
+
+        var f = File.new_for_path (filename_abs);
+        if (!f.query_exists()) {
+            if (!directory)
+                warning_msg (_("User interface file does not exist: %s\n"), filename_abs);
+            else
+                warning_msg (_("User interface directory does not exist: %s\n"), filename_abs);
+            return;
+        }
+
+        if (directory) {
+            ui_dirs.add (filename);
+            ui_files_changed();
+            return;
+        }
+
+        msg (_("Found user interface file: %s\n"), filename_abs);
+        if (files.contains (filename_abs)) {
+            warning_msg (_("File already a source file. Skip it.\n"), filename_abs);
+            return;
+        } else if (b_files.contains (filename_abs)) {
+            warning_msg (_("File already registered for build system. Skip it.\n"), filename_abs);
+            return;
+        } else if (d_files.contains (filename_abs)) {
+            warning_msg (_("File already registered for build system. Skip it.\n"), filename_abs);
+            return;
+        }
+        if (!this.u_files.add (filename_abs))
+            debug_msg (_("Skip already added file: %s\n"), filename_abs);
+        else
+            ui_files_changed();
+    }
+
+    /**
+     * Remove user interface file from project. Close buffer manually.
+     *
+     * @param filename Path to file to unregister.
+     * @return `true` on success else `false` (e.g. if file was not found).
+     */
+    public bool remove_ui_file (string filename) {
+        var filename_abs = get_absolute_path (filename);
+        debug_msg (_("Remove user interface file: %s\n"), filename_abs);
+        if (!u_files.remove (filename_abs))
+            return false;
+        ui_files_changed();
+        return true;
+    }
+
+    /**
      * Add file to build system list.
      *
      * @param filename Path to file.
@@ -749,6 +820,9 @@ public class ValamaProject : ProjectFile {
         msg (_("Found build system file: %s\n"), filename_abs);
         if (files.contains (filename_abs)) {
             warning_msg (_("File already a source file. Skip it.\n"), filename_abs);
+            return;
+        } else if (u_files.contains (filename_abs)) {
+            warning_msg (_("File already a user interface file. Skip it.\n"), filename_abs);
             return;
         } else if (d_files.contains (filename_abs)) {
             warning_msg (_("File already a data file. Skip it.\n"), filename_abs);
@@ -804,6 +878,9 @@ public class ValamaProject : ProjectFile {
         msg (_("Found data file: %s\n"), filename_abs);
         if (files.contains (filename_abs)) {
             warning_msg (_("File already a source file. Skip it.\n"), filename_abs);
+            return;
+        } else if (u_files.contains (filename_abs)) {
+            warning_msg (_("File already a user interface file. Skip it.\n"), filename_abs);
             return;
         } else if (b_files.contains (filename_abs)) {
             warning_msg (_("File already registered for build system. Skip it.\n"), filename_abs);
@@ -1178,6 +1255,8 @@ public class ValamaProject : ProjectFile {
             lang = langman.get_language ("vala");
         else if (Path.get_basename (filename) == "CMakeLists.txt")
             lang = langman.get_language ("cmake");
+        else if (filename.has_suffix (".ui"))
+            lang = langman.get_language ("xml");
         else
             lang = langman.guess_language (filename, null);
 

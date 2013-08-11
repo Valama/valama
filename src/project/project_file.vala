@@ -67,6 +67,12 @@ public class ProjectFile : Object {
     protected TreeSet<string> _source_files = new TreeSet<string>();
     public TreeSet<string> source_files { get { return _source_files; } protected set { _source_files = value; } }
 
+    protected TreeSet<string> _ui_dirs = new TreeSet<string>();
+    public TreeSet<string> ui_dirs { get { return _ui_dirs; } protected set { _ui_dirs = value; } }
+
+    protected TreeSet<string> _ui_files = new TreeSet<string>();
+    public TreeSet<string> ui_files { get { return _ui_files; } protected set { _ui_files = value; } }
+
     protected TreeSet<string> _buildsystem_dirs = new TreeSet<string>();
     public TreeSet<string> buildsystem_dirs { get { return _buildsystem_dirs; } protected set { _buildsystem_dirs = value; } }
 
@@ -83,6 +89,10 @@ public class ProjectFile : Object {
      * List of source files.
      */
     public TreeSet<string> files { get; private set; default = new TreeSet<string>(); }
+    /**
+     * List of user interface files.
+     */
+    public TreeSet<string> u_files { get; private set; default = new TreeSet<string>(); }
     /**
      * List of build system files.
      */
@@ -252,6 +262,34 @@ public class ProjectFile : Object {
                         }
                     }
                     break;
+                case "ui-directories":
+                    for (Xml.Node* p = i-> children; p != null; p = p->next) {
+                        if (p->type != ElementType.ELEMENT_NODE)
+                            continue;
+                        switch (p->name) {
+                            case "directory":
+                                ui_dirs.add (get_absolute_path (p->get_content()));
+                                break;
+                            default:
+                                warning_msg (_("Unknown configuration file value line %hu: %s\n"), p->line, p->name);
+                                break;
+                        }
+                    }
+                    break;
+                case "ui-files":
+                    for (Xml.Node* p = i-> children; p != null; p = p->next) {
+                        if (p->type != ElementType.ELEMENT_NODE)
+                            continue;
+                        switch (p->name) {
+                            case "file":
+                                ui_files.add (get_absolute_path (p->get_content()));
+                                break;
+                            default:
+                                warning_msg (_("Unknown configuration file value line %hu: %s\n"), p->line, p->name);
+                                break;
+                        }
+                    }
+                    break;
                 case "buildsystem-directories":
                     for (Xml.Node* p = i-> children; p != null; p = p->next) {
                         if (p->type != ElementType.ELEMENT_NODE)
@@ -388,6 +426,20 @@ public class ProjectFile : Object {
         if (source_files.size > 0) {
             writer.start_element ("source-files");
             foreach (var filename in source_files)
+                writer.write_element ("file", get_relative_path (filename));
+            writer.end_element();
+        }
+
+        if (ui_dirs.size > 0) {
+            writer.start_element ("ui-directories");
+            foreach (var directory in ui_dirs)
+                writer.write_element ("directory", get_relative_path (directory));
+            writer.end_element();
+        }
+
+        if (ui_files.size > 0) {
+            writer.start_element ("ui-files");
+            foreach (var filename in ui_files)
                 writer.write_element ("file", get_relative_path (filename));
             writer.end_element();
         }
@@ -589,6 +641,8 @@ public class ProjectFile : Object {
     public void balance_pfile_dirs (bool check = true) {
         var s_dirs_tmp = source_dirs;
         var s_files_tmp = files;
+        var u_dirs_tmp = ui_dirs;
+        var u_files_tmp = ui_files;
         var b_dirs_tmp = buildsystem_dirs;
         var b_files_tmp = b_files;
         var d_dirs_tmp = data_dirs;
@@ -596,6 +650,9 @@ public class ProjectFile : Object {
 
         balance_dir_file_sets (ref s_dirs_tmp, ref s_files_tmp,
                                new string[]{".vala", ".vapi"}, null,
+                               check);
+        balance_dir_file_sets (ref u_dirs_tmp, ref u_files_tmp,
+                               new string[]{".ui", ".glade", ".xml"}, null,
                                check);
         balance_dir_file_sets (ref b_dirs_tmp, ref b_files_tmp,
                                new string[]{".cmake"}, new string[]{"CMakeLists.txt"},
@@ -606,6 +663,8 @@ public class ProjectFile : Object {
 
         source_dirs = s_dirs_tmp;
         source_files = s_files_tmp;
+        ui_dirs = u_dirs_tmp;
+        ui_files = u_files_tmp;
         buildsystem_dirs = b_dirs_tmp;
         buildsystem_files = b_files_tmp;
         data_dirs = d_dirs_tmp;

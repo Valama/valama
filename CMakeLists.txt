@@ -28,6 +28,7 @@ set(datarootdir "share")
 set(libdir "lib")
 set(includedir "include")
 set(datadir "${datarootdir}/${project_name_lower}")
+set(uidir "${datadir}/ui")
 set(localedir "${datarootdir}/locale")
 set(appdir "${datarootdir}/applications")
 set(gsettingsdir "${datarootdir}/glib-2.0/schemas")
@@ -183,6 +184,7 @@ add_definitions(-DPACKAGE_NAME="${project_name}")
 add_definitions(-DPACKAGE_VERSION="${${project_name}_VERSION}")
 add_definitions(-DGETTEXT_PACKAGE="${project_name_lower}")
 add_definitions(-DPACKAGE_DATA_DIR="${install_prefix}${datadir}")
+add_definitions(-DPACKAGE_UI_DIR="${install_prefix}${uidir}")
 add_definitions(-DLOCALE_DIR="${install_prefix}${localedir}")
 add_definitions(-DPIXMAP_DIR="${install_prefix}${pixdir}")
 add_definitions(-DVALA_VERSION="${VALA_SHORTVER}")
@@ -327,6 +329,10 @@ install(DIRECTORY "data/templates" DESTINATION "${datadir}")
 install(DIRECTORY "data/buildsystems" DESTINATION "${datadir}")
 install(FILES "data/valama.xml" DESTINATION "${mimedir}")
 
+# Install user interface files if used
+foreach(uifile ${uifiles})
+  install(FILES ${uifile} DESTINATION "${uidir}")
+endforeach()
 
 # Uninstall target
 add_custom_target(uninstall

@@ -82,6 +82,11 @@ public class BuilderCMake : BuildSystem {
         strb_files.append (")\n");
         strb_vapis.append (")\n");
 
+        var strb_uis = new StringBuilder ("set(uifiles\n");
+        foreach (var filepath in project.u_files)
+            strb_uis.append (@"\"$(project.get_relative_path (filepath))\"\n");
+        strb_uis.append (")\n");
+
         try {
             var file_stream = File.new_for_path (projectinfo).replace (
                                                     null,
@@ -101,6 +106,7 @@ public class BuilderCMake : BuildSystem {
             data_stream.put_string (strb_pkgs.str);
             data_stream.put_string (strb_files.str);
             data_stream.put_string (strb_vapis.str);
+            data_stream.put_string (strb_uis.str);
 
             data_stream.close();
         } catch (GLib.IOError e) {
