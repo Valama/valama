@@ -183,13 +183,4 @@ foreach(uifile ${uifiles})
   install(FILES ${uifile} DESTINATION "${uidir}")
 endforeach()
 
-# Uninstall target
-add_custom_target(uninstall
-  COMMAND
-    ${CMAKE_COMMAND} -D "CUSTOM_SOURCE_DIR:FILEPATH=${CMAKE_SOURCE_DIR}"
-                     -D "POSTREMOVE_HOOK:BOOL=${POSTINSTALL_HOOK}"
-                     -D "GSETTINGSDIR:FILEPATH=${install_prefix}${gsettingsdir}"
-                     -P "${CMAKE_SOURCE_DIR}/cmake/SimpleUninstall.cmake"
-)
-
 # vim: set ai ts=2 sts=2 et sw=2
