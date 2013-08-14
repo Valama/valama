@@ -826,7 +826,7 @@ namespace Guanako {
                 }
 
                 if (current_rule.expr.has_prefix ("*string")) {
-                    Regex r = /^(?P<word>.*?)+(?=\")(?P<rest>.*)$/;
+                    Regex r = /^(?P<word>.*?)+(?=\")(?P<rest>.*)$/; //"// (This extra "// stuff is just to get gtksourceview's highlighting back on track...)
                     MatchInfo info;
                     if (!r.match (written, 0, out info))
                         return;
@@ -1253,28 +1253,26 @@ namespace Guanako {
                                         return IterCallbackReturns.CONTINUE;
 
                                     /*
-                                     * Check symbol's own source reference.
-                                     */
-                                    if (inside_source_ref (source_file, line, col, sref)) {
-                                        if (depth > last_depth) {  //Get symbol deepest in the tree
-                                            ret = smb;
-                                            last_depth = depth;
-                                        }
-                                    }
-
-                                    /*
                                      * If the symbol is a subroutine, check its body's source
                                      * reference.
                                      */
                                     if (smb is Subroutine) {
                                         var sr = (Subroutine) smb;
                                         if (sr.body != null)
-                                            if (inside_source_ref (source_file, line, col, sr.body.source_reference))
-                                                if (depth > last_depth) {  //Get symbol deepest in the tree
-                                                    ret = smb;
-                                                    last_depth = depth;
-                                                }
+                                            sref = sr.body.source_reference;
                                     }
+
+                                    /*
+                                     * Check source reference, do not check its children if outside
+                                     */
+                                    if (inside_source_ref (source_file, line, col, sref)) {
+                                        if (depth > last_depth) {  //Get symbol deepest in the tree
+                                            ret = smb;
+                                            last_depth = depth;
+                                        }
+                                    } else if (smb is Subroutine)
+                                        return IterCallbackReturns.ABORT_BRANCH;
+
                                 }
                                 return IterCallbackReturns.CONTINUE;
                              });
