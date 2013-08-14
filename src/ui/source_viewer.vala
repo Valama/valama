@@ -180,25 +180,28 @@ class UiSourceViewer : UiElement {
             bfr.get_end_iter (out iter_start);
         else {
             int linelength;
-            if (is_after_eol (bfr, err.source.begin, out linelength))
+            if (is_after_eol (bfr, err.source.begin, out linelength)) {
+                if (linelength == 0) //In case of empty line, fix length
+                    linelength = 1;
                 bfr.get_iter_at_line_offset (out iter_start,
                                              err.source.begin.line - 1,
                                              linelength - 1);
-            else
+            } else
                 bfr.get_iter_at_line_offset (out iter_start,
                                              err.source.begin.line - 1,
                                              err.source.begin.column - 1);
         }
-
         if (is_after_eof (bfr, err.source.end) || (err.source.end.line == 0 && err.source.end.column == 0))
             bfr.get_end_iter (out iter_end);
         else {
             int linelength;
-            if (is_after_eol (bfr, err.source.end, out linelength))
+            if (is_after_eol (bfr, err.source.end, out linelength)) {
+                if (linelength == 0) //In case of empty line, fix length
+                    linelength = 1;
                 bfr.get_iter_at_line_offset (out iter_end,
                                              err.source.end.line - 1,
                                              linelength - 1);
-            else
+            } else
                 bfr.get_iter_at_line_offset (out iter_end,
                                              err.source.end.line - 1,
                                              err.source.end.column);
