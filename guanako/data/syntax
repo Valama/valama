@@ -8,7 +8,7 @@ init_method
 ?_ $MetaLeftSide|$VarStatement|$IfStatement|$WhileStatement|$ForeachStatement
 
 init_deep_space
-?_ $UsingStatement
+?_ $UsingStatement|$NamespaceDeclaration|$ClassDeclaration
 
 # Using
 
@@ -18,6 +18,29 @@ using _ {@}>Namespace{child} ?$NamespaceChild{child} ?_ ;
 NamespaceChild : parent
 . {parent}>Namespace{child} ?$NamespaceChild{child}
 
+ClassDeclaration
+?$AccessModifier ?$ClassAbstract class _ *word
+
+ClassAbstract
+abstract _
+
+AccessModifier
+public|private|internal _
+
+
+NamespaceDeclaration
+namespace _ $NamespaceDeclarationNewName|$NamespaceDeclarationExisting
+
+NamespaceDeclarationNewName
+*word ?$NamespaceDeclarationNewNameChild
+NamespaceDeclarationNewNameChild
+. *word ?$NamespaceDeclarationNewNameChild
+
+NamespaceDeclarationExisting
+{@}>Namespace{child} ?$NamespaceDeclarationExistingChild{child}
+
+NamespaceDeclarationExistingChild : parent
+. {parent}>Namespace{child} ?$NamespaceDeclarationExistingChild{child}|?$NamespaceDeclarationNewNameChild
 
 # ==============
 # All kinds of statements

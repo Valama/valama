@@ -810,6 +810,8 @@ namespace Guanako {
                         return;
                     if (info.fetch_named ("word") == null)
                         return;
+                    if (rule.length == 1)
+                        return;
                     compare (rule[1:rule.length], info.fetch_named ("rest"), call_params, depth + 1, ref ret, ref private_cur_stack);
                     return;
                 }
@@ -820,6 +822,8 @@ namespace Guanako {
                     if (!r.match (written, 0, out info))
                         return;
                     if (info.fetch_named ("number") == null)
+                        return;
+                    if (rule.length == 1)
                         return;
                     compare (rule[1:rule.length], info.fetch_named ("rest"), call_params, depth + 1, ref ret, ref private_cur_stack);
                     return;
