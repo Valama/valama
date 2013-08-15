@@ -99,6 +99,12 @@ install(TARGETS ${project_name_lower} DESTINATION "${bindir}")
 
 # Install user interface files if used
 foreach(uifile ${uifiles})
+  add_custom_command(TARGET "${project_name_lower}"
+    COMMAND
+      "${CMAKE_COMMAND}" -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/${uifile}" "${CMAKE_CURRENT_BINARY_DIR}/${uifile}"
+    DEPENDS
+      "${CMAKE_CURRENT_SOURCE_DIR}/${uifile}"
+  )
   install(FILES ${uifile} DESTINATION "${uidir}")
 endforeach()
 
