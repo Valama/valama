@@ -178,15 +178,22 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${project_name}-${${project_name}_VER
 install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/data/syntax" DESTINATION "${datadir}")
 install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/data/${project_name_lower}.lang" DESTINATION "${datarootdir}/gtksourceview-3.0/language-specs")
 
-# Install user interface files if used
+# Install user interface files if used and copy them to build directory.
+set(uifiles_build)
 foreach(uifile ${uifiles})
-  add_custom_command(TARGET "${project_name_lower}"
+  add_custom_command(
+    OUTPUT
+      "${CMAKE_CURRENT_BINARY_DIR}/${uifile}"
     COMMAND
       "${CMAKE_COMMAND}" -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/${uifile}" "${CMAKE_CURRENT_BINARY_DIR}/${uifile}"
     DEPENDS
       "${CMAKE_CURRENT_SOURCE_DIR}/${uifile}"
+    COMMENT ""
   )
+  list(APPEND uifiles_build "${CMAKE_CURRENT_BINARY_DIR}/${uifile}")
   install(FILES ${uifile} DESTINATION "${uidir}")
 endforeach()
+add_custom_target("ui_copy_${project_name_lower}" DEPENDS ${uifiles_build})
+add_dependencies("${project_name_lower}" "ui_copy_${project_name_lower}")
 
 # vim: set ai ts=2 sts=2 et sw=2

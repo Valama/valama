@@ -329,17 +329,23 @@ install(DIRECTORY "data/templates" DESTINATION "${datadir}")
 install(DIRECTORY "data/buildsystems" DESTINATION "${datadir}")
 install(FILES "data/valama.xml" DESTINATION "${mimedir}")
 
-# Install user interface files if used
+# Install user interface files if used and copy them to build directory.
+set(uifiles_build)
 foreach(uifile ${uifiles})
   add_custom_command(
+    OUTPUT
+      "${CMAKE_CURRENT_BINARY_DIR}/${uifile}"
     COMMAND
       "${CMAKE_COMMAND}" -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/${uifile}" "${CMAKE_CURRENT_BINARY_DIR}/${uifile}"
     DEPENDS
       "${CMAKE_CURRENT_SOURCE_DIR}/${uifile}"
     COMMENT ""
   )
+  list(APPEND uifiles_build "${CMAKE_CURRENT_BINARY_DIR}/${uifile}")
   install(FILES ${uifile} DESTINATION "${uidir}")
 endforeach()
+add_custom_target("ui_copy_${project_name_lower}" DEPENDS ${uifiles_build})
+add_dependencies("${project_name_lower}" "ui_copy_${project_name_lower}")
 
 # Uninstall target
 add_custom_target(uninstall
