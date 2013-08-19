@@ -386,6 +386,20 @@ public class MainWidget : Box {
         });
         add_accel_activate (item_view_lockhide, Gdk.Key.h);
 
+        //TRANSLATORS: Toggle fullscreen mode of the window.
+        var item_view_fullscreen = new CheckMenuItem.with_mnemonic (_("Toggle _fullscreen"));
+        menu_view.append (item_view_fullscreen);
+        item_view_fullscreen.toggled.connect (() => {
+            if (item_view_fullscreen.active) {
+                toolbar.hide();
+                window_main.fullscreen();
+            } else {
+                toolbar.show_all();
+                window_main.unfullscreen();
+            }
+        });
+        add_accel_activate (item_view_fullscreen, Gdk.Key.F11, 0);
+
         /* Project */
         var item_project = new Gtk.MenuItem.with_mnemonic (_("_Project"));
         menubar.add (item_project);
