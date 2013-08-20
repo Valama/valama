@@ -65,8 +65,7 @@ endfunction()
 
 
 ##
-# Convert svg to png and set up installation places. convert tool from
-# imagemagick is required.
+# Convert svg to png and set up installation places. rsvg-convert is required.
 #
 # Usage:
 # The first parameter is set to all png files. Add them later to a custom
@@ -111,7 +110,7 @@ function(convert_svg_to_png output)
   set(png_list)
   if(ARGS_ICON)
     if(ARGS_PNG_NAME)
-      find_program(CONVERT convert)
+      find_program(CONVERT rsvg-convert)
       if(CONVERT)
         if(NOT datarootdir)
           set(datarootdir "share")
@@ -127,7 +126,7 @@ function(convert_svg_to_png output)
             DEPENDS
               "${ARGS_ICON}"
             COMMAND
-              "${CONVERT}" "-background" "none" "-resize" "${size}x${size}" "${ARGS_ICON}" "${iconpath}"
+              "${CONVERT}" "--background-color" "none" "--width" "${size}" "--height" "${size}" "${ARGS_ICON}" ">${iconpath}"
           )
           list(APPEND png_list "${iconpath}")
           if(ARGS_DESTINATION)
@@ -196,9 +195,11 @@ endmacro()
 
 
 ##
-# Install gsettings file and compile schemas.
+# Install/verify gsettings files and compile schemas.
 #
-# Depends on cmake/GlibCompileSchema.cmake.in.
+# Depends on cmake/GlibCompileSchema.cmake.in (for compiling) and
+# cmake/GlibCompileSchema_verify.cmake.in (for verifying, only wth local
+# option)
 #
 # Usage:
 #
@@ -228,6 +229,7 @@ endmacro()
 function(gsettings_install)
   include(CMakeParseArguments)
   cmake_parse_arguments(ARGS "LOCAL" "GSETTINGSDIR" "FILES" ${ARGN})
+  find_program(GLIBCOMPILESCHEMA "glib-compile-schemas" REQUIRED)
 
   if(NOT "" STREQUAL "${ARGS_FILES}")
     if(ARGS_LOCAL)
@@ -237,37 +239,49 @@ function(gsettings_install)
         "${CMAKE_BINARY_DIR}/GlibCompileSchema_local.cmake"
         @ONLY
       )
+      configure_file(
+        "${CMAKE_SOURCE_DIR}/cmake/GlibCompileSchema_verify.cmake.in"
+        "${CMAKE_BINARY_DIR}/GlibCompileSchema_verify.cmake"
+        COPYONLY
+      )
+      set(gfiles_copied)
       foreach(gfile ${ARGS_FILES})
         if(NOT IS_ABSOLUTE "${gfile}")
           set(gfile "${CMAKE_CURRENT_SOURCE_DIR}/${gfile}")
         endif()
         get_filename_component(filename "${gfile}" NAME)
+        set(gfile_copied "${CMAKE_CURRENT_BINARY_DIR}/glib-2.0/schemas/${filename}")
         add_custom_command(
             OUTPUT
-              "${GSETTINGSDIR}"
+              "${gfile_copied}"
             COMMAND
-              ${CMAKE_COMMAND} -E copy_if_different
-                                      "${gfile}"
-                                      "${CMAKE_CURRENT_BINARY_DIR}/glib-2.0/schemas/${filename}"
+            "${CMAKE_COMMAND}" -D "GLIBCOMPILESCHEMA:FILEPATH=${GLIBCOMPILESCHEMA}"
+                               -D "GLIB_SCHEMAFILE:FILEPATH=${gfile}"
+                               -P "${CMAKE_BINARY_DIR}/GlibCompileSchema_verify.cmake"
+            COMMAND
+              "${CMAKE_COMMAND}" -E copy_if_different "${gfile}" "${gfile_copied}"
+            DEPENDS
+              "${gfile}"
             COMMENT
-              "Install gsettings schemas locally." VERBATIM
+              "Install and verify gsettings schemas locally..."
         )
+        list(APPEND gfiles_copied "${gfile_copied}")
       endforeach()
       add_custom_command(
           OUTPUT
             "glib-2.0/schemas/gschemas.compiled"
           COMMAND
-            ${CMAKE_COMMAND} -P "${CMAKE_BINARY_DIR}/GlibCompileSchema_local.cmake"
+            "${CMAKE_COMMAND}" -P "${CMAKE_BINARY_DIR}/GlibCompileSchema_local.cmake"
           DEPENDS
-            "${GSETTINGSDIR}"
+            ${gfiles_copied}
           COMMENT
-            "Compile gsettings schemas." VERBATIM
+            "Compile gsettings schemas..."
       )
-      add_custom_target(gsettings
-        ALL
+      add_custom_target("gsettings_${project_name_lower}"
         DEPENDS
           "glib-2.0/schemas/gschemas.compiled"
       )
+      add_dependencies("${project_name_lower}" "gsettings_${project_name_lower}")
     endif()
 
     if(NOT ARGS_GSETTINGSDIR)
