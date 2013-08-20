@@ -8,7 +8,7 @@ init_method
 ?_ $MetaLeftSide|$VarStatement|$IfStatement|$WhileStatement|$ForeachStatement
 
 init_deep_space
-?_ $UsingStatement|$NamespaceDeclaration|$ClassDeclaration
+?_ $UsingStatement|$NamespaceDeclaration|$ClassDeclaration|$FieldDeclaration
 
 # Using
 
@@ -27,6 +27,8 @@ abstract _
 AccessModifier
 public|private|internal _
 
+FieldDeclaration
+?$AccessModifier $Type _ *word ?_ $AssgEndAssg|;
 
 NamespaceDeclaration
 namespace _ $NamespaceDeclarationNewName|$NamespaceDeclarationExisting

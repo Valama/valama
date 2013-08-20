@@ -808,7 +808,7 @@ namespace Guanako {
                     MatchInfo info;
                     if (!r.match (written, 0, out info))
                         return;
-                    if (info.fetch_named ("word") == null)
+                    if (info.fetch_named ("word") == "")
                         return;
                     if (rule.length == 1)
                         return;
