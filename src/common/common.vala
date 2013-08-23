@@ -518,54 +518,101 @@ public class FileTransfer : Object {
  */
 public bool remove_recursively (string path,
                                 bool recursively = true,
-                                bool with_parent = false)
-                                        throws GLib.IOError, GLib.Error {
+                                bool with_parent = false) throws GLib.IOError {
     var f = File.new_for_path (path);
     if (!f.query_exists())
-        throw new IOError.NOT_FOUND (_("file does not exist"));
+        throw new IOError.NOT_FOUND (_("file does not exist: %s"), path);
 
     var filetype = f.query_file_type (FileQueryInfoFlags.NONE, null);
     switch (filetype) {
         case FileType.REGULAR:
-            return f.delete();
+            try {
+                return f.delete();
+            } catch (GLib.Error e) {
+                throw new IOError.FAILED (_("cannot delete file '%s': %s"), f.get_path(), e.message);
+            }
         case FileType.DIRECTORY:
-            var enumerator = f.enumerate_children ("standard::*",
+            FileEnumerator enumerator;
+            try {
+                enumerator = f.enumerate_children ("standard::*",
                                                    FileQueryInfoFlags.NONE,
                                                    null);
+            } catch (GLib.Error e) {
+                throw new IOError.FAILED (_("cannot get children of '%s': %s"), f.get_path(), e.message);
+            }
+
             FileInfo? info = null;
-            while ((info = enumerator.next_file()) != null) {
-                var new_file = f.resolve_relative_path (info.get_name());
-                if (info.get_file_type() == FileType.DIRECTORY) {
-                    if (recursively) {
-                        remove_recursively_int (new_file);
-                        new_file.delete();
-                    }
-                } else
-                    new_file.delete();
+            try {
+                while ((info = enumerator.next_file()) != null) {
+                    var new_file = f.resolve_relative_path (info.get_name());
+                    if (info.get_file_type() == FileType.DIRECTORY) {
+                        if (recursively) {
+                            remove_recursively_int (new_file);
+                            try {
+                                new_file.delete();
+                            } catch (GLib.Error e) {
+                                throw new IOError.FAILED (_("cannot delete file '%s': %s"), new_file.get_path(), e.message);
+                            }
+                        }
+                    } else
+                        try {
+                            new_file.delete();
+                        } catch (GLib.Error e) {
+                            throw new IOError.FAILED (_("cannot delete file '%s': %s"), new_file.get_path(), e.message);
+                        }
+                }
+            } catch (GLib.IOError e) {
+                throw e;
+            } catch (GLib.Error e) {
+                throw new IOError.FAILED (_("cannot enumerate children of '%s': %s"), path, e.message);
             }
 
             if (with_parent)
-                return f.delete();
+                try {
+                    return f.delete();
+                } catch (GLib.Error e) {
+                    throw new IOError.FAILED (_("cannot delete file '%s': %s"), path, e.message);
+                }
             else
                 return true;
         default:
-            throw new IOError.NOT_SUPPORTED (_("no regular file or directory"));
+            throw new IOError.NOT_SUPPORTED (_("no regular file or directory: %s"), path);
     }
 }
 
 
-private void remove_recursively_int (File f) throws GLib.IOError, GLib.Error {
-    var enumerator = f.enumerate_children ("standard::*",
+private void remove_recursively_int (File f) throws GLib.IOError {
+    FileEnumerator enumerator;
+    try {
+        enumerator = f.enumerate_children ("standard::*",
                                            FileQueryInfoFlags.NONE,
                                            null);
+    } catch (GLib.Error e) {
+        throw new IOError.FAILED (_("cannot get children of '%s': %s"), f.get_path(), e.message);
+    }
+
     FileInfo? info = null;
-    while ((info = enumerator.next_file()) != null) {
-        var new_file = f.resolve_relative_path (info.get_name());
-        if (info.get_file_type() == FileType.DIRECTORY) {
-            remove_recursively_int (new_file);
-            new_file.delete();
-        } else
-            new_file.delete();
+    try {
+        while ((info = enumerator.next_file()) != null) {
+            var new_file = f.resolve_relative_path (info.get_name());
+            if (info.get_file_type() == FileType.DIRECTORY) {
+                remove_recursively_int (new_file);
+                try {
+                    new_file.delete();
+                } catch (GLib.Error e) {
+                    throw new IOError.FAILED (_("cannot delete file '%s': %s"), new_file.get_path(), e.message);
+                }
+            } else
+                try {
+                    new_file.delete();
+                } catch (GLib.Error e) {
+                    throw new IOError.FAILED (_("cannot delete file '%s': %s"), new_file.get_path(), e.message);
+                }
+        }
+    } catch (GLib.IOError e) {
+        throw e;
+    } catch (GLib.Error e) {
+        throw new IOError.FAILED (_("cannot enumerate children of '%s': %s"), f.get_path(), e.message);
     }
 }
 

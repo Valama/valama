@@ -264,7 +264,9 @@ public class BuilderCMake : BuildSystem {
             exit_status = 0;
         } catch (GLib.Error e) {
             exit_status = 1;
-            throw new BuildError.CLEAN_FAILED (_("distclean command failed: %s"), e.message);
+            var msg = _("distclean command failed: %s").printf (e.message);
+            build_output (msg + "\n");
+            throw new BuildError.CLEAN_FAILED (msg);
         }
 
         // distcleaned = true;
