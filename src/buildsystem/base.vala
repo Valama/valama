@@ -477,6 +477,7 @@ public abstract class BuildSystem : Object {
                                         throws BuildError.CLEAN_FAILED {
         exit_status = 0;
         cleaned = true;
+        project.enable_defines_all();
         return true;
     }
 

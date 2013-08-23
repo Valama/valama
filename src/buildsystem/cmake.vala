@@ -251,6 +251,7 @@ public class BuilderCMake : BuildSystem {
         exit_status = null;
         // distcleaned = false;
         distclean_started();
+        project.enable_defines_all();
 
         if (!check_existance()) {
             build_output (_("No data to clean.\n"));

@@ -1215,6 +1215,13 @@ public class ValamaProject : ProjectFile {
     }
 
     /**
+     * Mark all (disabled) defines as available.
+     */
+    public inline void enable_defines_all() {
+        disabled_defines.clear();
+    }
+
+    /**
      * Check if define is already enabled.
      *
      * @param define Name of define.
