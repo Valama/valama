@@ -154,12 +154,19 @@ public abstract class BuildSystem : Object {
     }
 
     protected virtual void register_define (string define) {
-        if (project.define_is_enabled (define))
+        if (project.define_is_enabled_emit (define)) {
+            debug_msg (_("Define already enabled: %s\n"), define);
             return;
+        } else if (project.define_is_not_available (define)) {
+            debug_msg (_("Define already checked (and not available): %s\n"), define);
+            return;
+        }
         string package;
         if (guess_pkg_by_define (define, out package)) {
             if (project.define_set (define))
                 debug_msg (_("Enable define for package '%s': %s\n"), package, define);
+            else
+                debug_msg (_("Define '%s' already enabled for package '%s'.\n"), define, package);
         } else
             project.define_set (define, false);
     }

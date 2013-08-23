@@ -178,6 +178,14 @@ public class ValamaProject : ProjectFile {
     public TreeMap<string, TreeSet<string>> used_defines { get; private set; }
 
     /**
+     * Checked but not enabled defines.
+     *
+     * Use {@link disable_define} or {@link enable_define} to disable or
+     * enable avaibility of defines.
+     */
+    public TreeSet<string> disabled_defines { get; private set; }
+
+    /**
      * Emit signal when source file was added or removed.
      */
     public signal void source_files_changed();
@@ -222,6 +230,7 @@ public class ValamaProject : ProjectFile {
      * @param found `true` to set define (`false` to don't set it).
      * @return `true` on success else `false`.
      */
+    //TODO: Return value needed?
     public signal bool define_set (string define, bool found = true);
 
 
@@ -263,6 +272,7 @@ public class ValamaProject : ProjectFile {
 
         defines = new TreeSet<string>();
         used_defines = new TreeMap<string, TreeSet<string>>();
+        disabled_defines = new TreeSet<string>();
 
         foreach (var pkg in packages.values)
             add_package (pkg, true);
@@ -396,8 +406,10 @@ public class ValamaProject : ProjectFile {
             missings.add (pkg);
 
         foreach (var pkg in packages.values)
-            if (pkg.define != null && !(pkg.name in missings) && guanako_project.add_define (pkg.define))
+            if (pkg.define != null && !(pkg.name in missings)) {
                 defines.add (pkg.define);
+                guanako_project.add_define (pkg.define);
+            }
         guanako_project.commit_defines();
 
         packages_changed();
@@ -432,15 +444,6 @@ public class ValamaProject : ProjectFile {
                 }
             used_defines = used_defines_new;
 
-            var removals = new TreeSet<string>();
-            foreach (var define in defines)
-                if (!(define in used_defines.keys))
-                    removals.add (define);
-            foreach (var define in removals) {
-                defines.remove (define);
-                defines_changed (false, define);
-            }
-
             if (init_define_signals == null) {
                 init_define_signals = () => {
                     define_set.connect ((define, found) => {
@@ -452,7 +455,11 @@ public class ValamaProject : ProjectFile {
                         } /*else if (unset_define (define)) {
                             defines_update();
                             return true;
-                        }*/
+                        }*/ else {
+                            unset_define (define);
+                            disabled_defines.add (define);
+                            return true;
+                        }
                         return false;
                     });
                     defines_update.connect (() => {
@@ -476,12 +483,14 @@ public class ValamaProject : ProjectFile {
                 };
 
                 var initial_defines = new TreeSet<string>();
-                initial_defines.add_all (used_defines.keys);
-                if (initial_defines.size > 0)
+                initial_defines.add_all (new_defines);
+                if (initial_defines.size > 0) {
                     define_handler_id = define_set.connect ((define, found) => {
                         var ret = initial_defines.remove (define);
                         if (found)
                             set_define (define);
+                        else
+                            disable_define (define);
                         if (initial_defines.size == 0) {
                             this.disconnect (define_handler_id);
                             init_define_signals();
@@ -489,12 +498,23 @@ public class ValamaProject : ProjectFile {
                         }
                         return ret;
                     });
-                else
+                    foreach (var define_new in new_defines)
+                        defines_changed (true, define_new);
+                } else
                     init_define_signals();
-            }
+            } else {
+                var removals = new TreeSet<string>();
+                foreach (var define in defines)
+                    if (!(define in used_defines.keys))
+                        removals.add (define);
+                foreach (var define in removals) {
+                    defines.remove (define);
+                    defines_changed (false, define);
+                }
 
-            foreach (var define in new_defines)
-                defines_changed (true, define);
+                foreach (var define in new_defines)
+                    defines_changed (true, define);
+            }
         });
 
         parsing = true;
@@ -1152,9 +1172,12 @@ public class ValamaProject : ProjectFile {
      * @return `true` on success.
      */
     public inline bool set_define (string define) {
-        if (used_defines.has_key (define) && guanako_project.add_define (define)) {
-            defines_update();
-            return true;
+        if (used_defines.has_key (define)) {
+            defines.add (define);
+            if (guanako_project.add_define (define)) {
+                defines_update();
+                return true;
+            }
         }
         return false;
     }
@@ -1166,7 +1189,29 @@ public class ValamaProject : ProjectFile {
      * @return `true` on success.
      */
     public inline bool unset_define (string define) {
+        defines.remove (define);
         return guanako_project.remove_define (define);
+    }
+
+    /**
+     * Mark define as not available (additionally disable it).
+     *
+     * @param define Define to enable.
+     * @return `true` on success.
+     */
+    public inline bool disable_define (string define) {
+        unset_define (define);
+        return disabled_defines.add (define);
+    }
+
+    /**
+     * Mark define as available again (don't disable it).
+     *
+     * @param define Define to enable.
+     * @return `true` on success.
+     */
+    public inline bool enable_define (string define) {
+        return disabled_defines.remove (define);
     }
 
     /**
@@ -1177,6 +1222,30 @@ public class ValamaProject : ProjectFile {
      */
     public inline bool define_is_enabled (string define) {
         return (define in guanako_project.defines);
+    }
+
+    /**
+     * Check if define is already enabled and if so emit define_set signal.
+     *
+     * @param define Name of define.
+     * @return `true` if enabled else `false`.
+     */
+    public inline bool define_is_enabled_emit (string define) {
+        if (define in guanako_project.defines) {
+            define_set (define, true);
+            return true;
+        } else
+            return false;
+    }
+
+    /**
+     * Check if define is marked as not available.
+     *
+     * @param define Name of define.
+     * @return `true` if ''not'' available.
+     */
+    public inline bool define_is_not_available (string define) {
+        return (define in disabled_defines);
     }
 
     /**
