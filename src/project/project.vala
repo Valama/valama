@@ -536,7 +536,7 @@ public class ValamaProject : ProjectFile {
      */
     public inline void save_to_recent() {
         debug_msg_level (3, _("Add project to recent manager: %s - %s\n"), project_name, project_file_path);
-        if (!recentmgr.add_full (project_file_path,
+        if (!recentmgr.add_full (Posix.realpath (project_file_path) ?? project_file_path,
                                  RecentData() { display_name = project_name,
                                                 mime_type = "application/octet-stream",
                                                 app_name = "Valama",  //TODO: Translatable?
