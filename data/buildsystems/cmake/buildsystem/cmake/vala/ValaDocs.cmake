@@ -109,11 +109,12 @@ if(VALADOC_FOUND)
         OUTPUT
           "${docdir}/index.html"
         COMMAND
-          ${CMAKE_COMMAND} -E remove_directory "${docdir}"
+          "${CMAKE_COMMAND}" -E remove_directory "${docdir}"
         COMMAND
-          ${VALADOC_EXECUTABLE} ${srcfiles} ${pkg_opts} ${valadoc_options}
+          "${VALADOC_EXECUTABLE}" ${srcfiles} ${pkg_opts} ${valadoc_options}
         DEPENDS
           ${srcfiles_abs}
+        VERBATIM
       )
 
       add_custom_target("docs-${package_name_lower}"
@@ -121,7 +122,7 @@ if(VALADOC_FOUND)
         DEPENDS
           "${docdir}/index.html"
         COMMENT
-          "Generating documentation with valadoc." VERBATIM
+          "Generating documentation with valadoc."
       )
 
       install(

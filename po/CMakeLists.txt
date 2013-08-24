@@ -42,3 +42,5 @@ if(XGETTEXT_FOUND)
   endif()
   gettext_create_translations("${potfile}" ALL ${NOUPDATE} ${DESKTOPFILES_INSTALL})
 endif()
+
+# vim: set ai ts=2 sts=2 et sw=2

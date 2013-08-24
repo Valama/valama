@@ -23,7 +23,7 @@ The next gen Vala IDE.
  * gthread-2.0
  * Intltool (required to generate .desktop and .xml files with localization)
  * GNOME desktop icon theme (symbolic icons) (only required to display icons properly)
- * rsvg-convert (only required to generate application icons from svg template) (recommended)
+ * rsvg-convert/imagemagick (only required to generate application icons from svg template) (recommended)
 
 On Debian based systems install following packages:
 

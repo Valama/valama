@@ -124,11 +124,11 @@ function(vala_precompile output)
       "SOURCES;PACKAGES;OPTIONS;CUSTOM_VAPIS" ${ARGN})
 
   if(ARGS_DIRECTORY)
-    set(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${ARGS_DIRECTORY})
+    set(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${ARGS_DIRECTORY}")
   else()
-    set(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+    set(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
   endif()
-  include_directories(${DIRECTORY})
+  include_directories("${DIRECTORY}")
   set(vala_pkg_opts)
   foreach(pkg ${ARGS_PACKAGES})
     list(APPEND vala_pkg_opts "--pkg=${pkg}")
@@ -138,8 +138,8 @@ function(vala_precompile output)
   set(out_files_rel)
   foreach(src ${ARGS_SOURCES} ${ARGS_UNPARSED_ARGUMENTS})
     list(APPEND in_files "${CMAKE_CURRENT_SOURCE_DIR}/${src}")
-    string(REPLACE ".vala" ".c" src ${src})
-    string(REPLACE ".gs" ".c" src ${src})
+    string(REPLACE ".vala" ".c" src "${src}")
+    string(REPLACE ".gs" ".c" src "${src}")
     set(out_file "${DIRECTORY}/${src}")
     list(APPEND out_files "${DIRECTORY}/${src}")
     set(out_files_rel "${out_files_rel}, ${src}")
@@ -149,10 +149,10 @@ function(vala_precompile output)
   set(custom_vapi_arguments)
   if(ARGS_CUSTOM_VAPIS)
     foreach(vapi ${ARGS_CUSTOM_VAPIS})
-      if(${vapi} MATCHES ${CMAKE_SOURCE_DIR} OR ${vapi} MATCHES ${CMAKE_BINARY_DIR})
-        list(APPEND custom_vapi_arguments ${vapi})
+      if("${vapi}" MATCHES "${CMAKE_SOURCE_DIR}" OR "${vapi}" MATCHES "${CMAKE_BINARY_DIR}")
+        list(APPEND custom_vapi_arguments "${vapi}")
       else()
-        list(APPEND custom_vapi_arguments ${CMAKE_CURRENT_SOURCE_DIR}/${vapi})
+        list(APPEND custom_vapi_arguments "${CMAKE_CURRENT_SOURCE_DIR}/${vapi}")
       endif()
     endforeach()
   endif()
@@ -170,7 +170,7 @@ function(vala_precompile output)
 
     # Header and internal header is needed to generate internal vapi
     if(NOT ARGS_PUBLIC AND NOT ARGS_GENERATE_HEADER)
-      set(ARGS_GENERATE_HEADER ${ARGS_GENERATE_VAPI})
+      set(ARGS_GENERATE_HEADER "${ARGS_GENERATE_VAPI}")
     endif()
   endif()
 
@@ -203,7 +203,7 @@ function(vala_precompile output)
     OUTPUT
       "vala.stamp"
     COMMAND
-      ${VALA_EXECUTABLE}
+      "${VALA_EXECUTABLE}"
         "-C"
         ${header_arguments}
         ${vapi_arguments}
@@ -215,11 +215,12 @@ function(vala_precompile output)
         ${in_files}
         ${custom_vapi_arguments}
     COMMAND
-      ${CMAKE_COMMAND} -E touch "vala.stamp"
+      "${CMAKE_COMMAND}" -E touch "vala.stamp"
     DEPENDS
       ${in_files}
       ${ARGS_CUSTOM_VAPIS}
-    COMMENT "Generating ${out_files_rel}" VERBATIM
+    COMMENT "Generating ${out_files_rel}"
+    VERBATIM
   )
   add_custom_command(
     OUTPUT
@@ -230,4 +231,5 @@ function(vala_precompile output)
   )
   set(${output} ${out_files} PARENT_SCOPE)
 endfunction()
+
 # vim: set ai ts=2 sts=2 et sw=2

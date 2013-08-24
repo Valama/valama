@@ -124,7 +124,7 @@ mark_as_advanced(XGETTEXT_EXECUTABLE)
 if(XGETTEXT_EXECUTABLE)
   execute_process(
     COMMAND
-      ${XGETTEXT_EXECUTABLE} "--version"
+      "${XGETTEXT_EXECUTABLE}" "--version"
     OUTPUT_VARIABLE
       gettext_version
     ERROR_QUIET
@@ -309,9 +309,10 @@ if(XGETTEXT_FOUND)
               OUTPUT
                 "${absFile_b}"
               COMMAND
-                ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/${relFile}" "${absFile_b}"
+                "${CMAKE_COMMAND}" -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/${relFile}" "${absFile_b}"
               DEPENDS
                 "${absFile}"
+              VERBATIM
             )
           endforeach()
         else()
@@ -330,9 +331,10 @@ if(XGETTEXT_FOUND)
             OUTPUT
               "${absFile_b}"
             COMMAND
-              ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/${relFile}" "${absFile_b}"
+              "${CMAKE_COMMAND}" -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/${relFile}" "${absFile_b}"
             DEPENDS
               "${absFile}"
+            VERBATIM
           )
         endif()
       endforeach()
@@ -368,9 +370,10 @@ if(XGETTEXT_FOUND)
               OUTPUT
                 "${absFile_b}"
               COMMAND
-                ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/${relFile}" "${absFile_b}"
+                "${CMAKE_COMMAND}" -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/${relFile}" "${absFile_b}"
               DEPENDS
                 "${absFile}"
+              VERBATIM
             )
           endforeach()
         else()
@@ -389,7 +392,8 @@ if(XGETTEXT_FOUND)
             OUTPUT
               "${absFile_b}"
             COMMAND
-              ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/${relFile}" "${absFile_b}"
+              "${CMAKE_COMMAND}" -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/${relFile}" "${absFile_b}"
+            VERBATIM
           )
         endif()
       endforeach()
@@ -399,22 +403,24 @@ if(XGETTEXT_FOUND)
         add_custom_command(
           OUTPUT
             "${CMAKE_CURRENT_BINARY_DIR}/_source.pot"
-        COMMAND
+          COMMAND
             "${XGETTEXT_EXECUTABLE}" ${xgettext_options} ${xgettext_vala_options} "-o" "${CMAKE_CURRENT_BINARY_DIR}/_source.pot" ${src_list}
-        COMMAND
+          COMMAND
             # Make sure file exists even if no translatable strings available.
-            ${CMAKE_COMMAND} -E touch "${CMAKE_CURRENT_BINARY_DIR}/_source.pot"
-        DEPENDS
-          ${src_list_abs}
-        WORKING_DIRECTORY
-          "${CMAKE_CURRENT_SOURCE_DIR}"
+            "${CMAKE_COMMAND}" -E touch "${CMAKE_CURRENT_BINARY_DIR}/_source.pot"
+          DEPENDS
+            ${src_list_abs}
+          WORKING_DIRECTORY
+            "${CMAKE_CURRENT_SOURCE_DIR}"
+          VERBATIM
       )
       else()
         add_custom_command(
           OUTPUT
             "${CMAKE_CURRENT_BINARY_DIR}/_source.pot"
           COMMAND
-            ${CMAKE_COMMAND} -E touch "${CMAKE_CURRENT_BINARY_DIR}/_source.pot"
+            "${CMAKE_COMMAND}" -E touch "${CMAKE_CURRENT_BINARY_DIR}/_source.pot"
+          VERBATIM
         )
       endif()
       if(ARGS_GLADEFILES)
@@ -424,18 +430,20 @@ if(XGETTEXT_FOUND)
           COMMAND
             "${XGETTEXT_EXECUTABLE}" ${xgettext_options} ${xgettext_glade_options} "-o" "${CMAKE_CURRENT_BINARY_DIR}/_glade.pot" ${glade_list}
           COMMAND
-            ${CMAKE_COMMAND} -E touch "${CMAKE_CURRENT_BINARY_DIR}/_glade.pot"
+            "${CMAKE_COMMAND}" -E touch "${CMAKE_CURRENT_BINARY_DIR}/_glade.pot"
           DEPENDS
             ${glade_list_abs}
           WORKING_DIRECTORY
             "${CMAKE_CURRENT_SOURCE_DIR}"
+          VERBATIM
         )
       else()
         add_custom_command(
           OUTPUT
             "${CMAKE_CURRENT_BINARY_DIR}/_glade.pot"
           COMMAND
-            ${CMAKE_COMMAND} -E touch "${CMAKE_CURRENT_BINARY_DIR}/_glade.pot"
+            "${CMAKE_COMMAND}" -E touch "${CMAKE_CURRENT_BINARY_DIR}/_glade.pot"
+          VERBATIM
         )
       endif()
       if(ARGS_DESKTOPFILES)
@@ -448,6 +456,7 @@ if(XGETTEXT_FOUND)
             ${desktop_list_b_abs}
           WORKING_DIRECTORY
             "${PROJECT_BINARY_DIR}"
+          VERBATIM
         )
         add_custom_command(
           OUTPUT
@@ -455,18 +464,20 @@ if(XGETTEXT_FOUND)
           COMMAND
             "${XGETTEXT_EXECUTABLE}" ${xgettext_options} ${XGETTEXT_INTLTOOL_OPTIONS} "-o" "${CMAKE_CURRENT_BINARY_DIR}/_desktop.pot" ${desktop_list_h}
           COMMAND
-            ${CMAKE_COMMAND} -E touch "${CMAKE_CURRENT_BINARY_DIR}/_desktop.pot"
+            "${CMAKE_COMMAND}" -E touch "${CMAKE_CURRENT_BINARY_DIR}/_desktop.pot"
           DEPENDS
             ${desktop_list_h_abs}
           WORKING_DIRECTORY
             "${CMAKE_CURRENT_SOURCE_DIR}"
+          VERBATIM
         )
       else()
         add_custom_command(
           OUTPUT
             "${CMAKE_CURRENT_BINARY_DIR}/_desktop.pot"
           COMMAND
-            ${CMAKE_COMMAND} -E touch "${CMAKE_CURRENT_BINARY_DIR}/_desktop.pot"
+            "${CMAKE_COMMAND}" -E touch "${CMAKE_CURRENT_BINARY_DIR}/_desktop.pot"
+          VERBATIM
         )
       endif()
       if(ARGS_GSETTINGSFILES)
@@ -479,6 +490,7 @@ if(XGETTEXT_FOUND)
             ${gsettings_list_b_abs}
           WORKING_DIRECTORY
             "${PROJECT_BINARY_DIR}"
+          VERBATIM
         )
         add_custom_command(
           OUTPUT
@@ -486,18 +498,20 @@ if(XGETTEXT_FOUND)
           COMMAND
             "${XGETTEXT_EXECUTABLE}" ${xgettext_options} ${XGETTEXT_INTLTOOL_OPTIONS} "-o" "${CMAKE_CURRENT_BINARY_DIR}/_gsettings.pot" ${gsettings_list_h}
           COMMAND
-            ${CMAKE_COMMAND} -E touch "${CMAKE_CURRENT_BINARY_DIR}/_gsettings.pot"
+            "${CMAKE_COMMAND}" -E touch "${CMAKE_CURRENT_BINARY_DIR}/_gsettings.pot"
           DEPENDS
             ${gsettings_list_h_abs}
           WORKING_DIRECTORY
             "${CMAKE_CURRENT_SOURCE_DIR}"
+          VERBATIM
         )
       else()
         add_custom_command(
           OUTPUT
             "${CMAKE_CURRENT_BINARY_DIR}/_gsettings.pot"
           COMMAND
-            ${CMAKE_COMMAND} -E touch "${CMAKE_CURRENT_BINARY_DIR}/_gsettings.pot"
+            "${CMAKE_COMMAND}" -E touch "${CMAKE_CURRENT_BINARY_DIR}/_gsettings.pot"
+          VERBATIM
         )
       endif()
 
@@ -513,6 +527,7 @@ if(XGETTEXT_FOUND)
           "${CMAKE_CURRENT_SOURCE_DIR}"
         COMMENT
           "Extract translatable messages to ${potfile}"
+        VERBATIM
       )
     endif()
   endmacro()
@@ -522,8 +537,8 @@ if(XGETTEXT_FOUND)
     cmake_parse_arguments(ARGS "ALL;NOUPDATE;DESKTOPFILES_INSTALL"
         "PODIR;LOCALEDIR" "LANGUAGES;POFILES" ${ARGN})
 
-    get_filename_component(_potBasename ${potfile} NAME_WE)
-    get_filename_component(_absPotFile ${potfile} ABSOLUTE)
+    get_filename_component(_potBasename "${potfile}" NAME_WE)
+    get_filename_component(_absPotFile "${potfile}" ABSOLUTE)
 
     if(ARGS_ALL)
       set(make_all "ALL")
@@ -584,10 +599,11 @@ if(XGETTEXT_FOUND)
           OUTPUT
             "${_absFile_new}"
           COMMAND
-            ${CMAKE_COMMAND} -E copy "${_absFile}" "${_absFile_new}"
+            "${CMAKE_COMMAND}" -E copy "${_absFile}" "${_absFile_new}"
           DEPENDS
             "${_absPotFile}"
             "${_absFile}"
+          VERBATIM
         )
         set(_absFile "${_absFile_new}")
       endif()
@@ -603,6 +619,7 @@ if(XGETTEXT_FOUND)
           "${_absFile}"
         WORKING_DIRECTORY
           "${CMAKE_CURRENT_BINARY_DIR}"
+        VERBATIM
       )
 
       install(
@@ -635,6 +652,7 @@ if(XGETTEXT_FOUND)
             "${INTLTOOL_MERGE_EXECUTABLE}" ${INTLTOOL_OPTIONS_DEFAULT} "--desktop-style" "${cursrcdir_rel}" "${desktopfiletmp_rel}" "${desktopfile_rel}"
           DEPENDS
             "${PROJECT_BINARY_DIR}/${desktopfiletmp}"
+          VERBATIM
         )
         if(ARGS_DESKTOPFILES_INSTALL AND NOT cursrcdir_rel STREQUAL ".")
           add_custom_command(
@@ -642,20 +660,22 @@ if(XGETTEXT_FOUND)
               "${CMAKE_SOURCE_DIR}/${desktopfile}"
               "desktopinstall.stamp"
             COMMAND
-              ${CMAKE_COMMAND} -E copy_if_different "${desktopfile_abs}" "${CMAKE_SOURCE_DIR}/${desktopfile}"
+              "${CMAKE_COMMAND}" -E copy_if_different "${desktopfile_abs}" "${CMAKE_SOURCE_DIR}/${desktopfile}"
             COMMAND
-              ${CMAKE_COMMAND} -E touch "desktopinstall.stamp"
+              "${CMAKE_COMMAND}" -E touch "desktopinstall.stamp"
             DEPENDS
               "${desktopfile_abs}"
+            VERBATIM
           )
         else()
           add_custom_command(
-              OUTPUT
-                "desktopinstall.stamp"
-              COMMAND
-                ${CMAKE_COMMAND} -E touch "desktopinstall.stamp"
-              DEPENDS
-                "${desktopfile_abs}"
+            OUTPUT
+              "desktopinstall.stamp"
+            COMMAND
+              "${CMAKE_COMMAND}" -E touch "desktopinstall.stamp"
+            DEPENDS
+              "${desktopfile_abs}"
+            VERBATIM
           )
         endif()
         list(APPEND desktopfiles "desktopinstall.stamp")
@@ -674,7 +694,7 @@ if(XGETTEXT_FOUND)
         ${_gmoFiles}
         ${desktopfiles}
       COMMENT
-        "Build translations." VERBATIM
+        "Build translations."
     )
   endfunction()
 endif()

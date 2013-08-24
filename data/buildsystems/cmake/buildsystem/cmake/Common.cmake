@@ -65,7 +65,8 @@ endfunction()
 
 
 ##
-# Convert svg to png and set up installation places. rsvg-convert is required.
+# Convert svg to png and set up installation places. rsvg-convert or
+# imagemagick (with svg support) is required.
 #
 # Usage:
 # The first parameter is set to all png files. Add them later to a custom
@@ -111,23 +112,43 @@ function(convert_svg_to_png output)
   if(ARGS_ICON)
     if(ARGS_PNG_NAME)
       find_program(CONVERT rsvg-convert)
-      if(CONVERT)
+      if(NOT CONVERT)
+        find_program(CONVERT_IMG convert)
+      endif()
+      if(CONVERT OR CONVERT_IMG)
         if(NOT datarootdir)
           set(datarootdir "share")
         endif()
 
         foreach(size ${ARGS_SIZES})
           set(tmppath "icons/hicolor/${size}x${size}/apps")
-          set(iconpath "${CMAKE_CURRENT_BINARY_DIR}/${tmppath}/${ARGS_PNG_NAME}.png")
-          execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/${tmppath}")
-          add_custom_command(
-            OUTPUT
-              "${iconpath}"
-            DEPENDS
-              "${ARGS_ICON}"
-            COMMAND
-              "${CONVERT}" "--background-color" "none" "--width" "${size}" "--height" "${size}" "${ARGS_ICON}" ">${iconpath}"
-          )
+          set(icondir "${CMAKE_CURRENT_BINARY_DIR}/${tmppath}")
+          set(iconpath "${icondir}/${ARGS_PNG_NAME}.png")
+          if(CONVERT)
+            add_custom_command(
+              OUTPUT
+                "${iconpath}"
+              COMMAND
+                "${CMAKE_COMMAND}" -E make_directory "${icondir}"
+              COMMAND
+                "${CONVERT}" "--background-color" "none" "--width" "${size}" "--height" "${size}" "${ARGS_ICON}" "--output" "${iconpath}"
+              DEPENDS
+                "${ARGS_ICON}"
+              VERBATIM
+            )
+          else()
+            add_custom_command(
+              OUTPUT
+                "${iconpath}"
+              COMMAND
+                "${CMAKE_COMMAND}" -E make_directory "${icondir}"
+              COMMAND
+                "${CONVERT_IMG}" "-background" "none" "-resize" "${size}x${size}" "${ARGS_ICON}" "${iconpath}"
+              DEPENDS
+                "${ARGS_ICON}"
+              VERBATIM
+            )
+          endif()
           list(APPEND png_list "${iconpath}")
           if(ARGS_DESTINATION)
             install(FILES "${iconpath}" DESTINATION "${ARGS_DESTINATION}")
@@ -255,15 +276,16 @@ function(gsettings_install)
             OUTPUT
               "${gfile_copied}"
             COMMAND
-            "${CMAKE_COMMAND}" -D "GLIBCOMPILESCHEMA:FILEPATH=${GLIBCOMPILESCHEMA}"
-                               -D "GLIB_SCHEMAFILE:FILEPATH=${gfile}"
-                               -P "${CMAKE_BINARY_DIR}/GlibCompileSchema_verify.cmake"
+              "${CMAKE_COMMAND}" -D "GLIBCOMPILESCHEMA:FILEPATH=${GLIBCOMPILESCHEMA}"
+                                 -D "GLIB_SCHEMAFILE:FILEPATH=${gfile}"
+                                 -P "${CMAKE_BINARY_DIR}/GlibCompileSchema_verify.cmake"
             COMMAND
               "${CMAKE_COMMAND}" -E copy_if_different "${gfile}" "${gfile_copied}"
             DEPENDS
               "${gfile}"
             COMMENT
               "Install and verify gsettings schemas locally..."
+            VERBATIM
         )
         list(APPEND gfiles_copied "${gfile_copied}")
       endforeach()
@@ -276,6 +298,7 @@ function(gsettings_install)
             ${gfiles_copied}
           COMMENT
             "Compile gsettings schemas..."
+          VERBATIM
       )
       add_custom_target("gsettings_${project_name_lower}"
         DEPENDS
@@ -348,7 +371,7 @@ endfunction()
 #       ALL
 #       DEPENDS
 #         "custom_target_name"
-#       COMMENT "Copy some files" VERBATIM
+#       COMMENT "Copy some files"
 #     )
 #
 function(copy_dirs)
@@ -387,9 +410,10 @@ function(copy_dirs)
       OUTPUT
         "${copyfile_d}"
       COMMAND
-        ${CMAKE_COMMAND} -E copy_if_different "${copyfile}" "${copyfile_d}"
+        "${CMAKE_COMMAND}" -E copy_if_different "${copyfile}" "${copyfile_d}"
       DEPENDS
         "${copyfile}"
+      VERBATIM
     )
     list(APPEND copyfiles_d "${copyfile_d}")
   endforeach()
@@ -397,7 +421,7 @@ function(copy_dirs)
   add_custom_target("${ARGS_TARGET}"
     DEPENDS
       ${copyfiles_d}
-    #COMMENT "Copy data files." VERBATIM
+    #COMMENT "Copy data files."
   )
 endfunction()
 

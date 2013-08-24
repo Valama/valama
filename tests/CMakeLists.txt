@@ -112,12 +112,13 @@ add_custom_command(
   COMMAND
     "tests"
   COMMAND
-    ${CMAKE_COMMAND} -E touch "tests.stamp"
+    "${CMAKE_COMMAND}" -E touch "tests.stamp"
   DEPENDS
     "tests"
     "copy_datafiles"
   COMMENT
-    "Run tests" VERBATIM
+    "Run tests"
+  VERBATIM
 )
 
 add_custom_target("run_tests"

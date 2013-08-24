@@ -39,15 +39,15 @@ foreach(file ${files})
   if(EXISTS "$ENV{DESTDIR}${file}")
     execute_process(
       COMMAND
-        ${CMAKE_COMMAND} -E remove "$ENV{DESTDIR}${file}"
+        "${CMAKE_COMMAND}" -E remove "$ENV{DESTDIR}${file}"
       OUTPUT_VARIABLE
         rm_out
       RESULT_VARIABLE
         rm_retval
-      )
-      if(NOT ${rm_retval} EQUAL 0)
-        message(FATAL_ERROR "Problem when removing \"$ENV{DESTDIR}${file}\"")
-      endif()
+    )
+    if(NOT ${rm_retval} EQUAL 0)
+      message(FATAL_ERROR "Problem when removing \"$ENV{DESTDIR}${file}\"")
+    endif()
   else()
     message(STATUS "File \"$ENV{DESTDIR}${file}\" does not exist.")
   endif()
@@ -69,6 +69,6 @@ if(NOT "$ENV{DESTDIR}" AND POSTREMOVE_HOOK)
   endif()
   execute_process(
     COMMAND
-    ${CMAKE_COMMAND} -P "${compile_schema_file}"
+    "${CMAKE_COMMAND}" -P "${compile_schema_file}"
   )
 endif()

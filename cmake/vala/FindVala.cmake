@@ -80,7 +80,7 @@ mark_as_advanced(VALA_EXECUTABLE)
 if(VALA_EXECUTABLE)
   execute_process(
     COMMAND
-      ${VALA_EXECUTABLE} "--version"
+      "${VALA_EXECUTABLE}" "--version"
     OUTPUT_VARIABLE
       VALA_VERSION
     OUTPUT_STRIP_TRAILING_WHITESPACE

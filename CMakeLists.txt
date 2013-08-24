@@ -61,7 +61,6 @@ else()
 endif()
 option(VALADOC_VERBOSE "Verbose (private/internal) document generation." OFF)
 option(VALADOC_EXTRA "Generate documentation also for all depending packages." OFF)
-option(COMPRESS_MANPAGE "Compress manpage" ON)
 option(CREATE_CHANGELOG "Create changelog from git log." OFF)
 option(LOCAL "Add some functionality to execute directly from source directory." ON)
 option(POSTINSTALL_HOOK "Execute hook scripts (gsettings update) after installation." ON)
@@ -247,7 +246,7 @@ if(VALADOC_FOUND)
       ${vapifiles}
     OPTIONS
       "--vapidir" "${VALA_VAPIDIR}"
-      #"--vapidir" "${VALA_DATADIR}/vapi"  # TODO: Support for multiple directories?
+      "--vapidir" "${VALA_DATADIR}/vapi"
       "--target-glib" "${GLIB2.0_VERSION}"
       ${extra_valadoc_opts}
       ${valadoc_debug}
@@ -279,35 +278,11 @@ else(CMAKE_BUILD_TYPE STREQUAL "Debug")
 endif()
 
 
-# Generate, compress and install manual page.
+# Generate and install manual page.
 datestring(MONTH_DATE "%B %Y")
 set(DATADIR "${install_prefix}${datadir}/")
 set(manfile "data/${project_name_lower}.1")
 configure_file("${manfile}.in" "${manfile}")
-if(COMPRESS_MANPAGE)
-  find_program(GZIP gzip)
-  if(NOT GZIP)
-    message(WARNING "Could not find gzip program. Disable manpage compression.")
-    set(COMPRESS_MANPAGE OFF)
-  else()
-    add_custom_command(
-      COMMAND
-        #TODO: Test this on Windows.
-        "${GZIP}" "-cf9" "${manfile}" > "${manfile}.gz"
-      OUTPUT
-        "${manfile}.gz"
-      COMMENT
-        "Compressing manpage." VERBATIM
-    )
-    set(manfile "${manfile}.gz")
-    add_custom_target(manpage
-      ALL
-      DEPENDS
-        "${manfile}"
-    )
-  endif()
-else()
-endif()
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${manfile}" DESTINATION "${mandir}/man1")
 
 
@@ -350,10 +325,10 @@ add_dependencies("${project_name_lower}" "ui_copy_${project_name_lower}")
 # Uninstall target
 add_custom_target(uninstall
   COMMAND
-    ${CMAKE_COMMAND} -D "CUSTOM_SOURCE_DIR:FILEPATH=${CMAKE_SOURCE_DIR}"
-                     -D "POSTREMOVE_HOOK:BOOL=${POSTINSTALL_HOOK}"
-                     -D "GSETTINGSDIR:FILEPATH=${install_prefix}${gsettingsdir}"
-                     -P "${CMAKE_SOURCE_DIR}/cmake/SimpleUninstall.cmake"
+    "${CMAKE_COMMAND}" -D "CUSTOM_SOURCE_DIR:FILEPATH=${CMAKE_SOURCE_DIR}"
+                       -D "POSTREMOVE_HOOK:BOOL=${POSTINSTALL_HOOK}"
+                       -D "GSETTINGSDIR:FILEPATH=${install_prefix}${gsettingsdir}"
+                       -P "${CMAKE_SOURCE_DIR}/cmake/SimpleUninstall.cmake"
 )
 
 
@@ -430,11 +405,6 @@ if(CMAKE_VERBOSE_MAKEFILE)
   message("Verbose build:          yes")
 else()
   message("Verbose build:          no")
-endif()
-if(COMPRESS_MANPAGE)
-  message("Compress manpage:       yes")
-else()
-  message("Compress manpage:       no")
 endif()
 message("")
 message("---------------------------------------------")

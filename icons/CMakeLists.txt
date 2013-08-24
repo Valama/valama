@@ -66,3 +66,5 @@ if(CONVERT)
       "${pixrootdir}"
   )
 endif()
+
+# vim: set ai ts=2 sts=2 et sw=2

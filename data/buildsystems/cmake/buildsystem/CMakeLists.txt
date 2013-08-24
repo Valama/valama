@@ -118,10 +118,10 @@ add_dependencies("${project_name_lower}" "ui_copy_${project_name_lower}")
 # Uninstall target
 add_custom_target(uninstall
   COMMAND
-    ${CMAKE_COMMAND} -D "CUSTOM_SOURCE_DIR:FILEPATH=${CMAKE_SOURCE_DIR}"
-                     -D "POSTREMOVE_HOOK:BOOL=${POSTINSTALL_HOOK}"
-                     -D "GSETTINGSDIR:FILEPATH=${install_prefix}${gsettingsdir}"
-                     -P "${CMAKE_SOURCE_DIR}/cmake/SimpleUninstall.cmake"
+    "${CMAKE_COMMAND}" -D "CUSTOM_SOURCE_DIR:FILEPATH=${CMAKE_SOURCE_DIR}"
+                       -D "POSTREMOVE_HOOK:BOOL=${POSTINSTALL_HOOK}"
+                       -D "GSETTINGSDIR:FILEPATH=${install_prefix}${gsettingsdir}"
+                       -P "${CMAKE_SOURCE_DIR}/cmake/SimpleUninstall.cmake"
 )
 
 

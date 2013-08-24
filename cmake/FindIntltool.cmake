@@ -24,7 +24,7 @@ mark_as_advanced(INTLTOOL_MERGE_EXECUTABLE)
 if(INTLTOOL_EXTRACT_EXECUTABLE)
   execute_process(
     COMMAND
-      ${INTLTOOL_EXTRACT_EXECUTABLE} "--version"
+      "${INTLTOOL_EXTRACT_EXECUTABLE}" "--version"
     OUTPUT_VARIABLE
       intltool_version
     ERROR_QUIET

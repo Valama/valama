@@ -73,14 +73,14 @@
 ##
 
 # Search for the valac executable in the usual system paths.
-find_program(VALA_EXECUTABLE "valac")
+find_program(VALA_EXECUTABLE "valac" "valac-0.22" "valac-0.20" "valac-0.18" "valac-0.16" "valac-0.14" "valac-0.12")
 mark_as_advanced(VALA_EXECUTABLE)
 
 # Determine the valac version
 if(VALA_EXECUTABLE)
   execute_process(
     COMMAND
-      ${VALA_EXECUTABLE} "--version"
+      "${VALA_EXECUTABLE}" "--version"
     OUTPUT_VARIABLE
       VALA_VERSION
     OUTPUT_STRIP_TRAILING_WHITESPACE
