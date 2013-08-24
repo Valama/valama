@@ -479,7 +479,13 @@ GtkGrid#grid_recent_projects > .button:hover {
                 lbl_proj_name.halign = Align.START;
                 lbl_proj_name.use_markup = true;
 
-                var lbl_proj_path = new Label ("<i>" + Markup.escape_text (info.get_uri_display()) + "</i>");
+                Label lbl_proj_path;
+                var uri = info.get_uri_display();
+                var home = Environment.get_home_dir();
+                if (uri.has_prefix (home))
+                    lbl_proj_path = new Label ("<i>" + Markup.escape_text ("~" + uri[home.length:uri.length]) + "</i>");
+                else
+                    lbl_proj_path = new Label ("<i>" + Markup.escape_text (uri) + "</i>");
                 grid_label.attach (lbl_proj_path, 0, 1, 1, 1);
                 lbl_proj_path.sensitive = false;
                 lbl_proj_path.ellipsize = Pango.EllipsizeMode.START;
