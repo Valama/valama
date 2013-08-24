@@ -92,7 +92,21 @@ public class UiTemplateSettings : TemplatePage {
         //TODO: Use in place dialog (FileChooserWidget).
         var chooser_location = new FileChooserButton (_("New project location"),
                                                       Gtk.FileChooserAction.SELECT_FOLDER);
+        chooser_location.set_current_folder (Environment.get_current_dir());
         grid_pinfo.attach (chooser_location, 1, 5, 1, 1);
+
+        chooser_location.file_set.connect (() => {
+            switch (chooser_location.get_file().query_file_type (FileQueryInfoFlags.NONE)) {
+                case FileType.REGULAR:
+                    chooser_location.set_current_folder (Path.get_dirname (chooser_location.get_filename()));
+                    break;
+                case FileType.DIRECTORY:
+                    chooser_location.set_current_folder (chooser_location.get_filename());
+                    break;
+                default:
+                    break;
+            }
+        });
 
         deselected.connect ((status) => {
             if (status && TemplatePage.template != null) {

@@ -595,7 +595,21 @@ public ValamaProject? ui_create_project_dialog() {
 
     var chooser_target = new FileChooserButton (_("New project location"),
                                                 Gtk.FileChooserAction.SELECT_FOLDER);
+    chooser_target.set_current_folder (Environment.get_current_dir());
     box_main.pack_start (chooser_target, false, false);
+
+    chooser_target.file_set.connect (() => {
+        switch (chooser_target.get_file().query_file_type (FileQueryInfoFlags.NONE)) {
+            case FileType.REGULAR:
+                chooser_target.set_current_folder (Path.get_dirname (chooser_target.get_filename()));
+                break;
+            case FileType.DIRECTORY:
+                chooser_target.set_current_folder (chooser_target.get_filename());
+                break;
+            default:
+                break;
+        }
+    });
 
     box_main.show_all();
     dlg.get_content_area().pack_start (box_main);
