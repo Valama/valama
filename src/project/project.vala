@@ -1329,12 +1329,10 @@ public class ValamaProject : ProjectFile {
         SourceLanguage lang;
         if (filename == "")
             lang = langman.get_language ("vala");
-        else if (Path.get_basename (filename) == "CMakeLists.txt")
-            lang = langman.get_language ("cmake");
-        else if (filename.has_suffix (".ui"))
-            lang = langman.get_language ("xml");
-        else
-            lang = langman.guess_language (filename, null);
+        else {
+            var basename = Path.get_basename (filename);
+            lang = langman.guess_language (basename, ContentType.guess (basename, null, null));
+        }
 
         if (lang != null) {
             bfr.set_language (lang);
