@@ -1,6 +1,8 @@
 # Valama #
 
-The next gen Vala IDE.
+#### *The next gen Vala IDE.* ####
+
+Discussion and support on IRC channel [#valama](http://webchat.freenode.net/?channels=#valama) (freenode).
 
 ![Valama 28.05.2013](https://raw.github.com/Valama/valama/gh-pages/images/valama_2013-05-28.png)
 
@@ -22,7 +24,7 @@ The next gen Vala IDE.
  * libxml-2.0
  * gthread-2.0
  * Intltool (required to generate .desktop and .xml files with localization)
- * GNOME desktop icon theme (symbolic icons) (only required to display icons properly)
+ * GNOME desktop icon theme (symbolic icons) (only required to display icons properly) (recommended)
  * rsvg-convert/imagemagick (only required to generate application icons from svg template) (recommended)
 
 On Debian based systems install following packages:
@@ -59,14 +61,14 @@ To build and install Valama for your distribution look at the [packaging](https:
 
 
 ## Contribution ##
-See the wiki page for some information: [Wiki](https://github.com/Valama/valama/wiki)
+See the wiki page for some information [Wiki](https://github.com/Valama/valama/wiki) or drop in on [#valama](http://webchat.freenode.net/?channels=#valama) (irc.freenode.net).
 
 ## License ##
 Valama is distributed under the terms of the GNU General Public License version 3 or later and published by:
  * Linus Seelinger
  * Dominique Lasserre
 
-For a full list of all contributors see [here](https://github.com/Valama/valama/graphs/contributors) and take a look at `AUTHORS` file.
+For a full list of all contributors see [here](https://github.com/Valama/valama/graphs/contributors) and take a look at [AUTHORS](https://github.com/Valama/valama/blob/master/AUTHORS) file.
 
 ## Credits ##
 element-\* icons from [Anjuta IDE](https://projects.gnome.org/anjuta/) (GPL2 licensed)
