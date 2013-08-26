@@ -292,7 +292,7 @@ if(LOCAL)
 else()
   set(local_build)
 endif()
-gsettings_install(${local_build} FILES "data/apps.valama.gschema.xml")
+gsettings_install(${local_build} FILES "data/org.valama.gschema.xml")
 
 
 install(TARGETS ${project_name_lower} DESTINATION "${bindir}")

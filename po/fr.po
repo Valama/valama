@@ -1060,7 +1060,7 @@ msgstr "Fichier de syntaxe Guanako."
 msgid "Help"
 msgstr "Aide"
 
-#: ../build/data/apps.valama.gschema.xml.h:1
+#: ../build/data/org.valama.gschema.xml.h:1
 msgid "Horizontal window size"
 msgstr "Taille horizontale de la fenêtre"
 
@@ -1858,7 +1858,7 @@ msgstr "Variable '%s' non trouvé ! >%s<\n"
 msgid "Version:"
 msgstr "Version : "
 
-#: ../build/data/apps.valama.gschema.xml.h:2
+#: ../build/data/org.valama.gschema.xml.h:2
 msgid "Vertical window size"
 msgstr "Taille verticale de la fenêtre"
 

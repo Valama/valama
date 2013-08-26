@@ -1055,7 +1055,7 @@ msgstr "Guanak-Syntaxdatei."
 msgid "Help"
 msgstr "Hilfe"
 
-#: ../build/data/apps.valama.gschema.xml.h:1
+#: ../build/data/org.valama.gschema.xml.h:1
 msgid "Horizontal window size"
 msgstr "Horizontale Fenstergröße"
 
@@ -1851,7 +1851,7 @@ msgstr "Variable '%s' nicht gefunden! >%s<\n"
 msgid "Version:"
 msgstr "Version:"
 
-#: ../build/data/apps.valama.gschema.xml.h:2
+#: ../build/data/org.valama.gschema.xml.h:2
 msgid "Vertical window size"
 msgstr "Vertikale Fenstergröße"
 
