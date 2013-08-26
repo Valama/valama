@@ -91,8 +91,7 @@ public class UiSearch : UiElement {
         build();
 
         source_viewer.current_sourceview_changed.connect (() => {
-            if (!btn_all_files.active)
-                search (entry_search.text);
+            search (entry_search.text);
         });
 
         widget = box_main;

@@ -83,7 +83,12 @@ public class GuanakoCompletion : Gtk.SourceCompletionProvider, Object {
                     if (current_line.strip() == "" && !source_viewer.current_srcbuffer.last_key_valid) {
                         if (context is SourceCompletionContext)
                             context.add_proposals (this, new GLib.List<Gtk.SourceCompletionItem>(), true);
-                        current_symbol_annotation = null;
+
+                        if (current_symbol_annotation != null) {
+                            current_symbol_annotation.finished = true;
+                            current_symbol_annotation = null;
+                        }
+
                         if (!completion_run_queued) {
                             completion_run = null;
                             break;
