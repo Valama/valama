@@ -15,6 +15,9 @@
 		<directory>src</directory>
 		<directory>vapi</directory>
 	</source-directories>
+	<ui-directories>
+		<directory>ui</directory>
+	</ui-directories>
 	<buildsystem-directories>
 		<directory></directory>
 		<directory>cmake</directory>
