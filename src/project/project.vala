@@ -965,16 +965,32 @@ public class ValamaProject : ProjectFile {
      * @param filelist List of files.
      * @param action Method to perform on each found file in directory or
      *               file list.
+     * @param checkfile Check file existence.
+     * @param checkdir Check directory existence.
      */
     public void generate_file_list (ref TreeSet<string> dirlist,
                                     ref TreeSet<string> filelist,
-                                    FileCallback? action = null) {
+                                    FileCallback? action = null,
+                                    bool checkfile = true,
+                                    bool checkdir = false) {
         File directory;
         FileEnumerator enumerator;
         FileInfo file_info;
 
-        var removals = new TreeSet<string>();
+        TreeSet<string> removals = null;
+        if (checkfile || checkdir)
+            removals = new TreeSet<string>();
+
         foreach (var dir in dirlist) {
+            if (!FileUtils.test (dir, FileTest.IS_DIR)) {
+                if (checkdir) {
+                    warning_msg (_("No such directory: %s\n"), dir);
+                    removals.add (dir);
+                } else {
+                    debug_msg (_("No such directory: %s\n"), dir);
+                    continue;
+                }
+            }
             try {
                 directory = File.new_for_path (dir);
                 enumerator = directory.enumerate_children (FileAttribute.STANDARD_NAME, 0);
@@ -987,24 +1003,34 @@ public class ValamaProject : ProjectFile {
                                              file_info.get_name()));
                 }
             } catch (GLib.Error e) {
-                errmsg (_("Could not open directory or file in '%s': %s\n"), dir, e.message);
+                errmsg (_("Could not open directory '%s': %s\n"), dir, e.message);
                 removals.add (dir);
             }
         }
-        foreach (var dir in removals)
-            dirlist.remove (dir);
-
-        removals.clear();
-        foreach (var filename in filelist) {
-            if (!FileUtils.test (filename, FileTest.IS_REGULAR)) {
-                errmsg (_("Will not add '%s' to file list: File not valid\n"), filename);
-                removals.add (filename);
-                continue;
-            }
-            action (filename);
+        if (checkdir) {
+            foreach (var dir in removals)
+                dirlist.remove (dir);
+            removals.clear();
         }
-        foreach (var file in removals)
-            filelist.remove (file);
+
+        foreach (var filename in filelist) {
+            var f = File.new_for_path (filename);
+            switch (f.query_file_type (FileQueryInfoFlags.NONE)) {
+                case FileType.REGULAR:
+                    action (filename);
+                    break;
+                default:
+                    if (checkfile) {
+                        warning_msg (_("No valid file: %s\n"), filename);
+                        removals.add (filename);
+                    } else
+                        debug_msg (_("No valid file: %s\n"), filename);
+                    break;
+            }
+        }
+        if (checkfile)
+            foreach (var file in removals)
+                filelist.remove (file);
     }
 
     private void save_meta() {

@@ -638,7 +638,17 @@ public class ProjectFile : Object {
         return path;
     }
 
-    public void balance_pfile_dirs (bool check = true) {
+    /**
+     * Reduce length of file list: Prefer directories and optionally remove
+     * directories without content.
+     *
+     * Balance source, ui, build system and data files/directories.
+     *
+     * @param checkfile Check file existence.
+     * @param rmdir Remove empty directories (from list). Implies checkdir.
+     * @param checkdir Check directory existence.
+     */
+    public void balance_pfile_dirs (bool checkfile = true, bool rmdir = false, bool checkdir = false) {
         var s_dirs_tmp = source_dirs;
         var s_files_tmp = files;
         var u_dirs_tmp = ui_dirs;
@@ -650,16 +660,16 @@ public class ProjectFile : Object {
 
         balance_dir_file_sets (ref s_dirs_tmp, ref s_files_tmp,
                                new string[]{".vala", ".vapi"}, null,
-                               check);
+                               checkfile, rmdir, checkdir);
         balance_dir_file_sets (ref u_dirs_tmp, ref u_files_tmp,
                                new string[]{".ui", ".glade", ".xml"}, null,
-                               check);
+                               checkfile, rmdir, checkdir);
         balance_dir_file_sets (ref b_dirs_tmp, ref b_files_tmp,
                                new string[]{".cmake"}, new string[]{"CMakeLists.txt"},
-                               check);
+                               checkfile, rmdir, checkdir);
         balance_dir_file_sets (ref d_dirs_tmp, ref d_files_tmp,
                                null, null,
-                               check);
+                               checkfile, rmdir, checkdir);
 
         source_dirs = s_dirs_tmp;
         source_files = s_files_tmp;
@@ -678,19 +688,21 @@ public class ProjectFile : Object {
      * @param c_dirs Directories.
      * @param c_files Files.
      * @param extensions Valid file extensions.
-     * @param check Check file/directory existence.
-     * @param rmdir Remove empty directories.
+     * @param checkfile Check file existence.
+     * @param rmdir Remove empty directories (from list). Implies checkdir.
+     * @param checkdir Check directory existence.
      */
     private void balance_dir_file_sets (ref TreeSet<string> c_dirs,
                                         ref TreeSet<string> c_files,
                                         string[]? extensions = null,
                                         string[]? filenames = null,
-                                        bool check = false,
-                                        bool rmdir = false) {
+                                        bool checkfile = true,
+                                        bool rmdir = false,
+                                        bool checkdir = false) {
         var visited_bad = new TreeSet<string>();
         var new_c_files = new TreeSet<string>();
 
-        if (check) {
+        if (checkdir || rmdir) {
             var removals = new TreeSet<string>();
             foreach (var dir in c_dirs)
                 if (!FileUtils.test (dir, FileTest.IS_DIR))
@@ -701,17 +713,17 @@ public class ProjectFile : Object {
         var new_c_dirs = (rmdir) ? new TreeSet<string>() : c_dirs;
 
         foreach (var filename in c_files) {
-            if (check && !FileUtils.test (filename, FileTest.IS_REGULAR))
+            if (checkfile && !FileUtils.test (filename, FileTest.IS_REGULAR))
                 continue;
 
             var dirname = Path.get_dirname (filename);
 
-            if (c_dirs.contains (dirname)) {
+            if (dirname in c_dirs) {
                 new_c_dirs.add (dirname);
                 continue;
             }
 
-            if (visited_bad.contains (dirname)) {
+            if (dirname in visited_bad) {
                 new_c_files.add (filename);
                 continue;
             }
@@ -766,7 +778,7 @@ public class ProjectFile : Object {
 
         if (rmdir) {
             foreach (var dirname in c_dirs) {
-                if (new_c_dirs.contains (dirname))
+                if (dirname in new_c_dirs)
                     continue;
                 try {
                     var enumerator = File.new_for_path (dirname).enumerate_children (
