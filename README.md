@@ -6,6 +6,8 @@ Discussion and support on IRC channel [#valama](http://webchat.freenode.net/?cha
 
 ![Valama 28.05.2013](https://raw.github.com/Valama/valama/gh-pages/images/valama_2013-05-28.png)
 
+[![Build Status](https://travis-ci.org/Valama/valama.png)](https://travis-ci.org/Valama/valama)
+
 ## Manual installation ##
 
 ### Requirements

@@ -1,0 +1,23 @@
+language: c
+compiler:
+  - gcc
+  - clang
+branches:
+  except:
+    - artwork
+    - debian
+    - gh-pages
+    - packaging
+before_install:
+  - sudo add-apt-repository -y ppa:vala-team/ppa
+  - sudo apt-get update -qq
+  - eval $(sed -n '/^On Debian based systems install/{n;n;p}' README.md) valadoc -qq
+script: mkdir build && cd build && cmake -DVALADOC_VERBOSE=ON .. && make && make docs-valama
+notifications:
+  irc:
+    channels:
+      - "irc.freenode.org#valama"
+    on_success: change
+    on_failure: always
+    use_notice: true
+    skip_join: true
