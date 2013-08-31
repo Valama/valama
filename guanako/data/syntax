@@ -111,10 +111,13 @@ AssgInstContinue : parent
 $ChildVariableInst{parent}>{a}|$ChildPropertyInst{parent}>{a} $AssgIterInst{a}|$AssgEndAssg
 
 AssgStat : parent
-$AssgChildStuffStat{parent}|$AssgChildVariablesStat{parent}|$AssgChildMethodStat{parent}
+$AssgChildTypeStat{parent}|$AssgChildNamespaceStat{parent}|$AssgChildVariablesStat{parent}|$AssgChildMethodStat{parent}
 
-AssgChildStuffStat : parent
-{parent}>Namespace{a}|{parent}>Class{a}|{parent}>Struct{a} $AssgIterStat{a}|$MLSdeclaration
+AssgChildNamespaceStat : parent
+{parent}>Namespace{a} $AssgIterStat{a}
+
+AssgChildTypeStat : parent
+{parent}>Class{a}|{parent}>Struct{a} $AssgIterStat{a}|$MLSdeclaration
 
 AssgChildVariablesStat : parent
 $ChildVariableStat{parent}>{a}|$ChildPropertyStat{parent}>{a} $AssgIterInst{a}|$AssgEndAssg
@@ -133,7 +136,7 @@ AssgEndAssg
 ?_ = ?_ $Value|$NewType ?_ ;
 
 MLSdeclaration
-?_ *word $AssgEndAssg
+?$ArrayBracketsOptContent ?_ *word $AssgEndAssg|;
 
 # ==============
 # Parameter brackets (e.g. for method calls)
@@ -196,7 +199,7 @@ ValChildMethodInst : parent
 
 # TODO: Correct struct initialization
 NewType
-new _ $Type>{a} $NewTypeCreationCall{a}|$NewTypeArrayInit
+new _ $Type>{a} $NewTypeCreationCall{a}|$ArrayBracketsWithContent
 
 NewTypeCreationCall : parent
 ?$NewTypeCreationMth{parent}>{parent} push_cur>{parent} ?_ $ParamBrackets pop_cur>{parent}
@@ -204,8 +207,18 @@ NewTypeCreationCall : parent
 NewTypeCreationMth : parent
 . {parent}>CreationMethod{ret}
 
-NewTypeArrayInit : parent
-?_ [ ?_ $Value ?_ ]
+
+ArrayBracketsWithContent
+?_ [ $ArrayBracketsContent ]
+
+ArrayBracketsOptContent
+?_ [ ?$ArrayBracketsContent ]
+
+ArrayBracketsContent
+?_ $Value ?$ArrayBracketsContentRep ?_
+
+ArrayBracketsContentRep
+?_ , ?_ $Value ?$ArrayBracketsContentRep
 
 # ==============
 # A class or a struct
@@ -250,25 +263,25 @@ MethodNameInst : parent
 ChildConst : parent
 {parent}>Constant<instance,array>{ret}|{parent}>Constant<instance,single>{ret}|$ChildConstArrEl{parent}>{ret}
 ChildConstArrEl : parent
-{parent}>Constant<instance,arr_el>{ret} ?_ [ ?_ $Value ?_ ]
+{parent}>Constant<instance,arr_el>{ret} $ArrayBracketsWithContent
 
 ChildVariableInst : parent
 {parent}>Field<instance,array>{ret}|{parent}>Field<instance,single>{ret}|$ChildVariableInstArrEl{parent}>{ret}
 ChildVariableInstArrEl : parent
-{parent}>Field<instance,arr_el>{ret} ?_ [ ?_ $Value ?_ ]
+{parent}>Field<instance,arr_el>{ret} $ArrayBracketsWithContent
 
 ChildVariableStat : parent
 {parent}>Field<static,array>{ret}|{parent}>Field<static,single>{ret}|$ChildVariableStatArrEl{parent}>{ret}
 ChildVariableStatArrEl : parent
-{parent}>Field<static,arr_el>{ret} ?_ [ ?_ $Value ?_ ]
+{parent}>Field<static,arr_el>{ret} $ArrayBracketsWithContent
 
 ChildPropertyInst : parent
 {parent}>Property<instance,array>{ret}|{parent}>Property<instance,single>{ret}|$ChildPropertyInstArrEl{parent}>{ret}
 ChildPropertyInstArrEl : parent
-{parent}>Property<instance,arr_el>{ret} ?_ [ ?_ $Value ?_ ]
+{parent}>Property<instance,arr_el>{ret} $ArrayBracketsWithContent
 
 ChildPropertyStat : parent
 {parent}>Property<static,array>{ret}|{parent}>Property<static,single>{ret}|$ChildPropertyStatArrEl{parent}>{ret}
 ChildPropertyStatArrEl : parent
-{parent}>Property<static,arr_el>{ret} ?_ [ ?_ $Value ?_ ]
+{parent}>Property<static,arr_el>{ret} $ArrayBracketsWithContent
 
