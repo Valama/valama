@@ -727,14 +727,14 @@ namespace Guanako {
 
             public TreeSet<CompletionProposal>[]? run (SourceFile file, int line, int col, string written) {
                 var inside_symbol = parent_project.get_symbol_at_pos (file, line, col);
+
                 string initial_rule_name = "";
-                if (inside_symbol == null) {
+                if (inside_symbol == null)
                     initial_rule_name = "init_deep_space";
-                    accessible = get_child_symbols (parent_project.root_symbol);
-                } else {
+                else
                     initial_rule_name = "init_method";
-                    accessible = parent_project.get_accessible_symbols (file, line, col);
-                }
+                accessible = parent_project.get_accessible_symbols (file, line, col);
+
                 if (!parent_project.map_syntax.has_key (initial_rule_name)) {
                     stderr.printf (_("Entry point '%s' not found in syntax file. Trying to segfault me, huh??"), initial_rule_name);
                     return null;
@@ -1170,7 +1170,7 @@ namespace Guanako {
             var current_symbol = get_symbol_at_pos (file, line, col);
 
             if (current_symbol == null)
-                return ret;
+                current_symbol = context.root;
 
             foreach (UsingDirective directive in file.current_using_directives) {
                 var children = get_child_symbols (directive.namespace_symbol);
