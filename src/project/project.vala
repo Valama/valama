@@ -602,7 +602,7 @@ public class ValamaProject : ProjectFile {
     /**
      * Add package to project by package name and update Guanako project.
      *
-     * @param pkg Package to add.
+     * @param pkgs Packages to add.
      * @return Not available packages or `null` if package was previously added.
      */
     public string[]? add_packages_by_names (string[] pkgs) {

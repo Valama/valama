@@ -347,22 +347,22 @@ public class ProjectBrowser : UiElement {
                                               ResponseType.ACCEPT);
 
         var tree_view = new TreeView();
-        var listmodel = new ListStore (2, typeof(bool), typeof (string));
+        var listmodel = new ListStore (2, typeof (bool), typeof (string));
         tree_view.set_model (listmodel);
-Gtk.CellRendererToggle toggle = new Gtk.CellRendererToggle ();
-toggle.toggled.connect ((toggle, path) => {
+		CellRendererToggle toggle = new CellRendererToggle();
+		toggle.toggled.connect ((toggle, path) => {
 			Gtk.TreePath tree_path = new Gtk.TreePath.from_string (path);
 			Gtk.TreeIter iter;
 			listmodel.get_iter (out iter, tree_path);
 			listmodel.set (iter, 0, !toggle.active);
 		});
-Gtk.TreeViewColumn column = new Gtk.TreeViewColumn ();
+		TreeViewColumn column = new TreeViewColumn();
 		column.pack_start (toggle, false);
 		column.add_attribute (toggle, "active", 0);
 		tree_view.append_column (column);
-       Gtk.CellRendererText text = new Gtk.CellRendererText ();
+		CellRendererText text = new CellRendererText();
 
-		column = new Gtk.TreeViewColumn ();
+		column = new TreeViewColumn();
 		column.pack_start (text, true);
 		column.add_attribute (text, "text",1);
 		tree_view.append_column (column);
