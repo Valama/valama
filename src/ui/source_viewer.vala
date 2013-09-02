@@ -110,7 +110,7 @@ class UiSourceViewer : UiElement {
         vbox.pack_start (this.srcdock, true, true);
         /* Mapping warnings may show up. See #697700 */
         this.srcdock.master.switcher_style = SwitcherStyle.TABS;
-#if GDL_3_8_2
+#if GDL_3_9_91
         this.srcdock.master.tab_pos = PositionType.TOP;
         this.srcdock.master.tab_reorderable = true;
 #endif
@@ -492,7 +492,7 @@ class UiSourceViewer : UiElement {
                                             (srcbuf.dirty) ? "gtk-new" : "gtk-edit",
                                             DockItemBehavior.LOCKED);
         srcbuf.notify["dirty"].connect (() => {
-#if GDL_3_8 || GDL_3_8_2
+#if GDL_3_8 || GDL_3_9_91
             item.stock_id = (srcbuf.dirty) ? "gtk-new" : "gtk-edit";
 #else
             /* Work around #695972 to update icon. */
@@ -527,7 +527,7 @@ class UiSourceViewer : UiElement {
                  * This will work properly with gdl-3.0 >= 3.5.5
                  */
                 item.show_item();
-#if !GDL_3_8_2
+#if !GDL_3_9_91
                 set_notebook_tabs (item);
 #endif
 
@@ -567,7 +567,7 @@ class UiSourceViewer : UiElement {
         /*
          * Set notebook tab properly if needed.
          */
-#if !GDL_3_8_2
+#if !GDL_3_9_91
         item.dock.connect (() => {
             set_notebook_tabs (item);
         });
@@ -594,7 +594,7 @@ class UiSourceViewer : UiElement {
      *
      * @param item {@link Gdl.DockItem} to setup.
      */
-#if !GDL_3_8_2
+#if !GDL_3_9_91
     private void set_notebook_tabs (DockItem item) {
         var pa = item.parent;
         if (pa is Notebook) {

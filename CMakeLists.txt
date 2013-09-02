@@ -122,10 +122,10 @@ endif()
 # gdl-3.0
 set(gdl_workarround OFF)
 pkg_check_modules(GDL3.0 REQUIRED "gdl-3.0")
-if(GDL3.0_VERSION STRGREATER "3.8.2")
-  list(APPEND valac_cond "-D;GDL_3_8_2")
+if(NOT "3.9.91" STRGREATER GDL3.0_VERSION)
+  list(APPEND valac_cond "-D;GDL_3_9_91")
   message(STATUS "Use enhanced gdl-3.0 vapi to support new "
-                 "features with gdl-3.0 >= 3.8.2.")
+                 "features with gdl-3.0 >= 3.9.91.")
   list(APPEND vapifiles "extravapi/gdl-3.0.vapi")
   list(REMOVE_ITEM required_pkgs "gdl-3.0 >= 3.4")
   set(gdl_workarround ON)

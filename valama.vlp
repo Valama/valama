@@ -14,8 +14,8 @@
 		</choice>
 		<package name="gdk-3.0"/>
 		<package name="gdl-3.0" version="3.4" rel="since">
-			<extracheck vapi="extravapi/gdl-3.0.vapi" define="GDL_3_8_2">
-				<package name="gdl-3.0" version="3.8.2" rel="since"/>
+			<extracheck vapi="extravapi/gdl-3.0.vapi" define="GDL_3_9_91">
+				<package name="gdl-3.0" version="3.9.91" rel="since"/>
 			</extracheck>
 			<extracheck vapi="extravapi/gdl-3.0.vapi">
 				<package name="gdl-3.0" version="3.5.5" rel="since">
