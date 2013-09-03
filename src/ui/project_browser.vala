@@ -367,7 +367,6 @@ public class ProjectBrowser : UiElement {
 		column.add_attribute (text, "text",1);
 		tree_view.append_column (column);
 
-        /* TODO: Implement this with checkbutton. */
         var avail_packages = Guanako.get_available_packages();
         var proposed_packages = new string[0];
 
@@ -381,7 +380,7 @@ public class ProjectBrowser : UiElement {
             proposed_packages += pkg;
             TreeIter iter;
             listmodel.append (out iter);
-            listmodel.set (iter, 0,false,1, pkg);
+            listmodel.set (iter, 0, false, 1, pkg);
         }
         scrw.add (tree_view);
         scrw.show_all();
