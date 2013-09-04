@@ -382,12 +382,19 @@ public abstract class BuildSystem : Object {
             throw new BuildError.LAUNCHING_FAILED (_("launching failed"));
 
         var chn = new IOChannel.unix_new (pstdout);
+        /*
+         *NOTE:
+         * Use smallest possible buffer size (in fact G_MAX_CHAR_SIZE = 10).
+         * Unfortunately this does not completely disable buffering. See #15.
+         */
+        chn.set_buffer_size (1);
         chn.add_watch (IOCondition.IN | IOCondition.HUP, (source, condition) => {
             bool ret;
             app_output (channel_output_read_line (source, condition, out ret));
             return ret;
         });
         var chnerr = new IOChannel.unix_new (pstderr);
+        chnerr.set_buffer_size (1);
         chnerr.add_watch (IOCondition.IN | IOCondition.HUP, (source, condition) => {
             bool ret;
             app_output (channel_output_read_line (source, condition, out ret));
@@ -549,12 +556,14 @@ public abstract class BuildSystem : Object {
 
         if (!manual) {
             var chn = new IOChannel.unix_new (pstdout);
+            chn.set_buffer_size (1);
             chn.add_watch (IOCondition.IN | IOCondition.HUP, (source, condition) => {
                 bool ret;
                 build_output (channel_output_read_line (source, condition, out ret));
                 return ret;
             });
             var chnerr = new IOChannel.unix_new (pstderr);
+            chnerr.set_buffer_size (1);
             chnerr.add_watch (IOCondition.IN | IOCondition.HUP, (source, condition) => {
                 bool ret;
                 build_output (channel_output_read_line (source, condition, out ret));

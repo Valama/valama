@@ -173,6 +173,7 @@ public class BuilderCMake : BuildSystem {
         }
 
         var chn = new IOChannel.unix_new (pstdout);
+        chn.set_buffer_size (1);
         chn.add_watch (IOCondition.IN | IOCondition.HUP, (source, condition) => {
             bool ret;
             var output = channel_output_read_line (source, condition, out ret);
@@ -187,6 +188,7 @@ public class BuilderCMake : BuildSystem {
         });
 
         var chnerr = new IOChannel.unix_new (pstderr);
+        chnerr.set_buffer_size (1);
         chnerr.add_watch (IOCondition.IN | IOCondition.HUP, (source, condition) => {
             bool ret;
             build_output (channel_output_read_line (source, condition, out ret));

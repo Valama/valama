@@ -1,6 +1,6 @@
 /*
  * src/ui/build_output.vala
- * Copyright (C) 2012, 2013, Valama development team
+ * Copyright (C) 2013, Valama development team
  *
  * Valama is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -18,12 +18,8 @@
  */
 
 using Gtk;
-using Vala;
 using GLib;
 
-/**
- * Browse source code.
- */
 public class AppOutput : UiElement {
     private TextView textview;
     private bool focused;
