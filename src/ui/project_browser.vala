@@ -336,7 +336,7 @@ public class ProjectBrowser : UiElement {
     /**
      * Select Vala packages to add/remove to/from build system (with valac).
      */
-    private static string? package_selection_dialog (ValamaProject project) {
+    private static string[] package_selection_dialog (ValamaProject project) {
 
         Dialog dlg = new Dialog.with_buttons (_("Select new packages"),
                                               window_main,
@@ -347,42 +347,56 @@ public class ProjectBrowser : UiElement {
                                               ResponseType.ACCEPT);
 
         var tree_view = new TreeView();
-        var listmodel = new ListStore (1, typeof (string));
+        var listmodel = new ListStore (2, typeof (bool), typeof (string));
         tree_view.set_model (listmodel);
+        CellRendererToggle toggle = new CellRendererToggle();
+        toggle.toggled.connect ((toggle, path) => {
+            TreePath tree_path = new TreePath.from_string (path);
+            TreeIter iter;
+            listmodel.get_iter (out iter, tree_path);
+            listmodel.set (iter, 0, !toggle.active);
+        });
+        TreeViewColumn column = new TreeViewColumn();
+        column.pack_start (toggle, false);
+        column.add_attribute (toggle, "active", 0);
+        tree_view.append_column (column);
+        CellRendererText text = new CellRendererText();
 
-        tree_view.insert_column_with_attributes (-1,
-                                                 _("Packages"),
-                                                 new CellRendererText(),
-                                                 "text",
-                                                 0);
+        column = new TreeViewColumn();
+        column.pack_start (text, true);
+        column.add_attribute (text, "text", 1);
+        tree_view.append_column (column);
 
-        /* TODO: Implement this with checkbutton. */
         var avail_packages = Guanako.get_available_packages();
         var proposed_packages = new string[0];
+
+        var scrw = new ScrolledWindow (null, null);
+        dlg.get_content_area().pack_start (scrw);
+        dlg.set_default_size (400, 600);
+
         foreach (var pkg in avail_packages) {
             if (pkg in project.packages.keys)  //Ignore packages that are already selected
                 continue;
             proposed_packages += pkg;
             TreeIter iter;
             listmodel.append (out iter);
-            listmodel.set (iter, 0, pkg);
+            listmodel.set (iter, 0, false, 1, pkg);
         }
-
-        var scrw = new ScrolledWindow (null, null);
         scrw.add (tree_view);
         scrw.show_all();
-        dlg.get_content_area().pack_start (scrw);
-        dlg.set_default_size (400, 600);
-
-        string? ret = null;
+        var glist = new Gee.ArrayList<string>();
         if (dlg.run() == ResponseType.ACCEPT) {
-            TreeModel mdl;
-            var selected_rows = tree_view.get_selection().get_selected_rows (out mdl);
-            foreach (TreePath path in selected_rows)
-                ret = proposed_packages[path.get_indices()[0]];
+            listmodel.foreach((m,p,i) => {
+                Value v1, v2;
+                m.get_value(i, 0, out v1);
+                m.get_value(i, 1, out v2);
+                if((bool)v1)
+                    glist.add((string)v2);
+                return false;
+            });
         }
         dlg.destroy();
-        return ret;
+        return glist.to_array();
     }
 
     private void on_add_button (bool directory = false) {
@@ -481,9 +495,9 @@ public class ProjectBrowser : UiElement {
             case StoreType.PACKAGE_TREE:
             case StoreType.PACKAGE:
                 if (!directory) {
-                    var pkg = package_selection_dialog (project);
-                    if (pkg != null) {
-                        string[]? missing_packages = project.add_package_by_name (pkg);
+                    var pkgs = package_selection_dialog (project);
+                    if (pkgs.length > 0) {
+                        string[]? missing_packages = project.add_packages_by_names (pkgs);
                         if (missing_packages != null && missing_packages.length > 0)
                             ui_missing_packages_dialog (missing_packages);
                     }
