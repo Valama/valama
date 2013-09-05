@@ -497,7 +497,7 @@ public class ProjectBrowser : UiElement {
                 if (!directory) {
                     var pkgs = package_selection_dialog (project);
                     if (pkgs != null) {
-                        string[]? missing_packages = project.add_packages_by_names (pkgs);
+                        string[] missing_packages = project.add_packages_by_names (pkgs);
                         if (missing_packages != null && missing_packages.length > 0)
                             ui_missing_packages_dialog (missing_packages);
                     }
