@@ -305,20 +305,18 @@ namespace Guanako {
     }
 
     private static string expression_to_string (Expression e) {
-        if (e is Literal)
-            return e.to_string();
-        else if (e is MemberAccess)
-            return "%s".printf (((MemberAccess) e).member_name);
-        else if (e is BinaryExpression) {
+        if (e is BinaryExpression) {
             var be = (BinaryExpression) e;
             return "%s %s %s".printf (expression_to_string (be.left),
                                       binary_operator_to_string (be.operator),
                                       expression_to_string (be.right));
-        } else if (e is UnaryExpression) {
+        }
+        if (e is UnaryExpression) {
             var ue = (UnaryExpression) e;
             return "%s%s".printf (unary_operator_to_string (ue.operator),
                                   expression_to_string (ue.inner));
-        } else if (e is ArrayCreationExpression) {
+        }
+        if (e is ArrayCreationExpression) {
             var ace = (ArrayCreationExpression) e;
             var str = datatype_to_string (ace.element_type, null);
             if (ace.initializer_list != null) {
@@ -335,11 +333,14 @@ namespace Guanako {
                 return "{}";
             else
                 return "new %s[%d]".printf (str, ace.rank-1);
-        } else {
-            stderr.printf (_("Unknown expression: %s\n"), e.type_name);
-            stderr.printf (_("Please report a bug!\n"));
-            return "";
         }
+        /*
+         *NOTE:
+         *  Best for: Literal, MemberAccess
+         *
+         * Others not verified.
+         */
+        return e.to_string();
     }
 
     private static string binary_operator_to_string (BinaryOperator op) {
