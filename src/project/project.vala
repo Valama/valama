@@ -603,20 +603,25 @@ public class ValamaProject : ProjectFile {
      * Add package to project by package name and update Guanako project.
      *
      * @param pkgs Packages to add.
-     * @return Not available packages or `null` if package was previously added.
+     * @return Not available packages or `null` if all packages were previously added.
      */
     public string[]? add_packages_by_names (string[] pkgs) {
+        var newpkgs = new string[0];
         foreach(string pkg in pkgs) {
-            debug_msg_level (2, _("Add package: %s\n"), pkg);
             if (!(pkg in packages.keys)) {
                 var pkginfo = new PackageInfo();
                 pkginfo.name = pkg;
                 packages[pkg] = pkginfo;
-                packages_changed();
+                newpkgs += pkg;
+                debug_msg_level (2, _("Add package: %s\n"), pkg);
             } else
-                return null;
+                debug_msg_level (2, _("Add package: %s (already added)\n"), pkg);
         }
-        return guanako_project.add_packages (pkgs, true);
+        if (newpkgs.length > 0) {
+            packages_changed();
+            return guanako_project.add_packages (newpkgs, true);
+        } else
+            return null;
     }
 
     /**
