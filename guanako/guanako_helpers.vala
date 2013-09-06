@@ -420,6 +420,12 @@ namespace Guanako {
     }
 
     private static string datatype_to_string (DataType? vt, string? relname) {
+        if (vt == null) {
+            stderr.printf (_("DataType is null: %s\n"), relname);
+            stderr.printf (_("Please report a bug!\n"));
+            return "UNKOWN";
+        }
+
         var lblstr = new StringBuilder();
         var shownull = true;
         if (vt.is_array()) {
@@ -460,8 +466,29 @@ namespace Guanako {
                     else
                         lblstr.append ("GLib.Error");
                 }
-            } else {  //TODO: Can this happen?
-                stderr.printf (_("Unknown type: %s\n"), vt.to_qualified_string());
+            } else if (vt is InvalidType) {  // happens if some vapi conflicts
+                lblstr.append ("INVALID");
+                //TODO; Communicate to UI.
+                stderr.printf (_("Should not happen, you might have problems with conflicting vapis: %s\n"),
+                               "InvalidType");
+            // } else if (vt is FieldPrototype) {
+            //     stdout.printf ("FieldPrototype\n");
+            // } else if (vt is MethodType) {
+            //     stdout.printf ("MethodType\n");
+            // } else if (vt is ReferenceType) {
+            //     stdout.printf ("ReferenceType\n");
+            // } else if (vt is SignalType) {
+            //     stdout.printf ("SignalType\n");
+            // } else if (vt is UnresolvedType) {
+            //     stdout.printf ("UnresolvedType\n");
+            // } else if (vt is ValueType) {
+            //     stdout.printf ("ValueType\n");
+            // } else if (vt is VoidType) {
+            //     stdout.printf ("VoidType\n");
+            // } else if (vt is CType) {
+            //     stdout.printf ("CType\n");
+            } else {
+                stderr.printf (_("Unknown type: %s (%s)\n"), vt.to_qualified_string(), relname);
                 stderr.printf (_("Please report a bug!\n"));
                 lblstr.append ("UNKOWN");
             }

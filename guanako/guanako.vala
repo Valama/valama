@@ -288,10 +288,14 @@ namespace Guanako {
                 string[] missing_packages = new string[0];
 
                 var old_deps = get_package_dependencies_int (context_internal, packages.to_array());
+                foreach (var pkg in packages)
+                    if (!(pkg in old_deps))
+                        old_deps += pkg;
 
-                var new_deps = package_names;
+                var new_deps = new string[0];
+
                 /* Collect all new dependencies coming with the new packages */
-                foreach (string pkg in get_package_dependencies_int (context_internal, package_names))
+                foreach (var pkg in get_package_dependencies_int (context_internal, package_names))
                     if (!(pkg in old_deps) && !(pkg in new_deps)) {
                         var vapi_path = context_internal.get_vapi_path (pkg);
                         if (vapi_path == null) {
@@ -300,25 +304,29 @@ namespace Guanako {
                             continue;
                         }
                         debug_msg (_("Vapi found: %s\n"), vapi_path);
+                        context_internal.add_external_package (pkg);
                         new_deps += pkg;
                     }
 
-                foreach (string package_name in package_names) {
-                    /* Add the new packages */
-                    var vapi_path = context_internal.get_vapi_path (package_name);
-                    if (vapi_path == null) {
-                        stderr.printf (_("Warning: Vapi for package %s not found.\n"), package_name);
-                        missing_packages += package_name;
-                        continue;
+                foreach (var pkg in package_names) {
+                    /* Add the new packages that aren't dependencies. */
+                    if (!(pkg in new_deps)) {
+                        var vapi_path = context_internal.get_vapi_path (pkg);
+                        if (vapi_path == null) {
+                            stderr.printf (_("Warning: Vapi for package %s not found.\n"), pkg);
+                            missing_packages += pkg;
+                            continue;
+                        }
+                        debug_msg (_("Vapi found: %s\n"), vapi_path);
+                        context_internal.add_external_package (pkg);
+                        new_deps += pkg;
                     }
-                    debug_msg (_("Vapi found: %s\n"), vapi_path);
-                    context_internal.add_external_package (package_name);
-                    packages.add (package_name);
+                    packages.add (pkg);
                 }
 
                 /* Update completion info of all the new packages */
                 if (auto_update)
-                    foreach (string pkg in new_deps) {
+                    foreach (var pkg in new_deps) {
                         var vapi_path = context_internal.get_vapi_path (pkg);
                         var pkg_file = get_source_file_int (context_internal, vapi_path);
                         if (pkg_file == null) {
@@ -1289,36 +1297,57 @@ namespace Guanako {
         }
 
         private string[] get_package_dependencies_int (CodeContext context, string[] package_names) {
-            string[] ret = new string[0];
-            foreach (string package_name in package_names) {
+            var deps = new ArrayQueue<string>();
+            var skip_pkgs = new string[0];  // circular dependencies
+
+            foreach (var package_name in package_names) {
+                if (package_name in skip_pkgs)
+                    continue;
+
                 var vapi_path = context.get_vapi_path (package_name);
                 if (vapi_path == null)
                     continue;
 
-                string deps_filename = vapi_path.substring (0, vapi_path.length - 5) + ".deps";
-
-                var deps_file = File.new_for_path (deps_filename);
+                var deps_file = File.new_for_path (vapi_path.substring (0, vapi_path.length - 5) + ".deps");
                 if (deps_file.query_exists()) {
                     try {
                         var dis = new DataInputStream (deps_file.read());
-                        string line;
-                        while ((line = dis.read_line (null)) != null) {
-                            if (!(line in ret))
-                                ret += line;
+                        string dep;
+                        var start = true;
+                        while ((dep = dis.read_line (null)) != null) {
+                            if (!(dep in deps)) {
+                                deps.offer_head (dep);
+                                if (start) {
+                                    start = false;
+                                    // TRANSLATORS:
+                                    // There will be a list appended:
+                                    // Dependencies of 'package': dep1, dep2, dep3...
+                                    debug_msg (_("Dependencies of '%s': %s"), package_name, dep);
+                                } else
+                                    debug_msg (", %s", dep);
+                            }
                         }
+                        if (!start)
+                            debug_msg ("\n");
                     } catch (IOError e) {
-                        stderr.printf (_("Could not read line: %s"), e.message);
+                        stderr.printf (_("Could not read line: %s\n"), e.message);
                     } catch (Error e) {
-                        stderr.printf (_("Could not read file: %s"), e.message);
+                        stderr.printf (_("Could not read file: %s\n"), e.message);
                     }
                 }
             }
-            if (ret.length > 0) {
-                var child_dep = get_package_dependencies_int (context, ret);
-                foreach (string dep in child_dep)
-                    ret += dep;
-            }
-            return ret;
+
+            var new_deps = new string[0];
+            foreach (var dep in deps)
+                if (dep in package_names)
+                    skip_pkgs += dep;
+                else if (!(dep in new_deps))
+                    new_deps += dep;
+            if (new_deps.length > 0)
+                foreach (var dep in get_package_dependencies_int (context, new_deps))
+                    deps.offer_head (dep);
+
+            return deps.to_array();
         }
 
         /**
