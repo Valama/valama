@@ -67,6 +67,7 @@ public class GuanakoCompletion : Gtk.SourceCompletionProvider, Object {
                 /* Get completion proposals from Guanako */
                 while (true) {
                     completion_run = new Project.CompletionRun (project.guanako_project);
+                    completion_run_queued = false;
 
                     /* Get current line */
                     completion_mark = source_viewer.current_srcbuffer.get_insert();
@@ -75,11 +76,21 @@ public class GuanakoCompletion : Gtk.SourceCompletionProvider, Object {
                     var line = iter.get_line() + 1;
                     var col = iter.get_line_offset();
 
-                    TextIter iter_start;
-                    source_viewer.current_srcbuffer.get_iter_at_line (out iter_start, line - 1);
-                    var current_line = source_viewer.current_srcbuffer.get_text (iter_start, iter, false);
+                    TextIter match_sem;
+                    iter.backward_search (";", TextSearchFlags.TEXT_ONLY, null, out match_sem, null);
+                    if (!iter.backward_search (";", TextSearchFlags.TEXT_ONLY, null, out match_sem, null))
+                        source_viewer.current_srcbuffer.get_iter_at_offset(out match_sem, 0);
 
-                    completion_run_queued = false;
+                    TextIter match_brk;
+                    if (iter.backward_search ("}", TextSearchFlags.TEXT_ONLY, null, out match_brk, null))
+                        if (match_brk.compare (match_sem) > 0)
+                            match_sem = match_brk;
+                    if (iter.backward_search ("{", TextSearchFlags.TEXT_ONLY, null, out match_brk, null))
+                        if (match_brk.compare (match_sem) > 0)
+                            match_sem = match_brk;
+
+                    var current_line = source_viewer.current_srcbuffer.get_text (match_sem, iter, false).replace("\n", "");
+
                     if (current_line.strip() == "" && !source_viewer.current_srcbuffer.last_key_valid) {
                         if (context is SourceCompletionContext)
                             context.add_proposals (this, new GLib.List<Gtk.SourceCompletionItem>(), true);
@@ -89,11 +100,13 @@ public class GuanakoCompletion : Gtk.SourceCompletionProvider, Object {
                             current_symbol_annotation = null;
                         }
 
-                        if (!completion_run_queued) {
-                            completion_run = null;
-                            break;
-                        } else
-                            continue;
+                        lock (completion_run) {
+                            if (!completion_run_queued) {
+                                completion_run = null;
+                                break;
+                            } else
+                                continue;
+                        }
                     }
 
                     var guanako_proposals = completion_run.run (project.guanako_project.get_source_file_by_name (source_viewer.current_srcfocus),

@@ -1045,9 +1045,9 @@ namespace Guanako {
                     type = ((Variable) smb).variable_type;
                 else if (smb is Method)
                     type = ((Method) smb).return_type;
-
-                if (type == null)
+                else
                     return null;
+
                 if (type is ArrayType) {
                     if (resolve_array)
                         return ((ArrayType)type).element_type.data_type;

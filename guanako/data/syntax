@@ -5,7 +5,7 @@
 #
 
 init_method
-?_ $MetaLeftSide|$VarStatement|$IfStatement|$WhileStatement|$ForeachStatement
+?_ $MetaLeftSide|$VarStatement|$IfStatement|$WhileStatement|$ForeachStatement|$ReturnStatement
 
 init_deep_space
 ?_ $UsingStatement|$NamespaceDeclaration|$ClassDeclaration|$FieldDeclaration
@@ -48,6 +48,9 @@ NamespaceDeclarationExistingChild : parent
 # All kinds of statements
 # ==============
 
+ReturnStatement
+return _ $Value
+
 IfStatement
 if ?_ ( ?_ $BoolExp ?_ )
 
@@ -59,7 +62,7 @@ foreach ?_ ( ?_ $Type _ *word _ in _ $Value ?_ )
 
 
 BoolExp
-$Value|$BoolExpComp|$BoolExpNeg|$BoolExpBrackets|$BoolExpAnd
+$Value|$BoolExpComp|$BoolExpNeg|$BoolExpBrackets|$BoolExpAnd|true|false
 # $Value should be limited to bool values
 #|$BoolExpOr
 

@@ -451,6 +451,14 @@ namespace Guanako {
                 foreach (Statement ch in st.body.get_statements())
                     if (!iter_statement (ch, callback, depth + 1, "try_statement"))
                         return false;
+            if (st.finally_body != null)
+                foreach (Statement ch in st.finally_body.get_statements())
+                    if (!iter_statement (ch, callback, depth + 1, "try_statement"))
+                        return false;
+            foreach (CatchClause cl in st.get_catch_clauses ())
+                foreach (Statement ch in st.finally_body.get_statements())
+                    if (!iter_statement (ch, callback, depth + 1, "try_statement"))
+                        return false;
         }
 
         return true;
