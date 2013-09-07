@@ -608,11 +608,11 @@ namespace Guanako {
                     }
                     if (prop != null) {
                         if (65 <= prop.symbol.name.data[0] <= 90)
-                            comp_sets[prop.symbol.name.data[0] - 65].add (prop);
+                            comp_sets[prop.symbol.name.data[0] - 64].add (prop);
                         else if (97 <= prop.symbol.name.data[0] <= 122)
-                            comp_sets[prop.symbol.name.data[0] - 97].add (prop);
+                            comp_sets[prop.symbol.name.data[0] - 96].add (prop);
                         else
-                            comp_sets[26].add (prop);
+                            comp_sets[0].add (prop);
                     }
                 }
                 return null;
