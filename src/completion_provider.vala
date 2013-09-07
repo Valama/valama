@@ -49,69 +49,70 @@ public class GuanakoCompletion : Gtk.SourceCompletionProvider, Object {
     bool completion_run_queued = false;
     SuperSourceView.LineAnnotation current_symbol_annotation = null;
     TextMark completion_mark; /* The mark at which the proposals were generated */
-    public void populate (Gtk.SourceCompletionContext context) {
+    string completion_stmt;
+    int completion_col;
+    int completion_line;
+    SourceCompletionContext completion_context;
+    public void populate (SourceCompletionContext context) {
         //TODO: Provide way to get completion for not saved content.
         if (is_new_document (source_viewer.current_srcfocus))
             return;
 
+        /* Get current line */
+        completion_mark = source_viewer.current_srcbuffer.get_insert();
+        TextIter iter;
+        source_viewer.current_srcbuffer.get_iter_at_mark (out iter, completion_mark);
+
+        TextIter match_sem;
+        iter.backward_search (";", TextSearchFlags.TEXT_ONLY, null, out match_sem, null);
+        if (!iter.backward_search (";", TextSearchFlags.TEXT_ONLY, null, out match_sem, null))
+            source_viewer.current_srcbuffer.get_iter_at_offset(out match_sem, 0);
+
+        TextIter match_brk;
+        if (iter.backward_search ("}", TextSearchFlags.TEXT_ONLY, null, out match_brk, null))
+            if (match_brk.compare (match_sem) > 0)
+                match_sem = match_brk;
+        if (iter.backward_search ("{", TextSearchFlags.TEXT_ONLY, null, out match_brk, null))
+            if (match_brk.compare (match_sem) > 0)
+                match_sem = match_brk;
+
         lock (completion_run) {
+            completion_line = iter.get_line() + 1;
+            completion_col = iter.get_line_offset();
+            completion_stmt = source_viewer.current_srcbuffer.get_text (match_sem, iter, false).replace("\n", "");
+            completion_context = context;
+
             completion_run_queued = true;
             if (completion_run != null) {
                 completion_run.abort_run();
                 return;
             }
+            if (completion_stmt.strip() == "" && !source_viewer.current_srcbuffer.last_key_valid) {
+                if (completion_context is SourceCompletionContext)
+                    completion_context.add_proposals (this, new GLib.List<Gtk.SourceCompletionItem>(), true);
+
+                if (current_symbol_annotation != null) {
+                    current_symbol_annotation.finished = true;
+                    current_symbol_annotation = null;
+                }
+                return;
+            }
             completion_run = new Project.CompletionRun (project.guanako_project);
         }
+
         try {
             new Thread<void*>.try (_("Completion"), () => {
                 /* Get completion proposals from Guanako */
                 while (true) {
                     completion_run = new Project.CompletionRun (project.guanako_project);
+
                     completion_run_queued = false;
-
-                    /* Get current line */
-                    completion_mark = source_viewer.current_srcbuffer.get_insert();
-                    TextIter iter;
-                    source_viewer.current_srcbuffer.get_iter_at_mark (out iter, completion_mark);
-                    var line = iter.get_line() + 1;
-                    var col = iter.get_line_offset();
-
-                    TextIter match_sem;
-                    iter.backward_search (";", TextSearchFlags.TEXT_ONLY, null, out match_sem, null);
-                    if (!iter.backward_search (";", TextSearchFlags.TEXT_ONLY, null, out match_sem, null))
-                        source_viewer.current_srcbuffer.get_iter_at_offset(out match_sem, 0);
-
-                    TextIter match_brk;
-                    if (iter.backward_search ("}", TextSearchFlags.TEXT_ONLY, null, out match_brk, null))
-                        if (match_brk.compare (match_sem) > 0)
-                            match_sem = match_brk;
-                    if (iter.backward_search ("{", TextSearchFlags.TEXT_ONLY, null, out match_brk, null))
-                        if (match_brk.compare (match_sem) > 0)
-                            match_sem = match_brk;
-
-                    var current_line = source_viewer.current_srcbuffer.get_text (match_sem, iter, false).replace("\n", "");
-
-                    if (current_line.strip() == "" && !source_viewer.current_srcbuffer.last_key_valid) {
-                        if (context is SourceCompletionContext)
-                            context.add_proposals (this, new GLib.List<Gtk.SourceCompletionItem>(), true);
-
-                        if (current_symbol_annotation != null) {
-                            current_symbol_annotation.finished = true;
-                            current_symbol_annotation = null;
-                        }
-
-                        lock (completion_run) {
-                            if (!completion_run_queued) {
-                                completion_run = null;
-                                break;
-                            } else
-                                continue;
-                        }
-                    }
-
                     var guanako_proposals = completion_run.run (project.guanako_project.get_source_file_by_name (source_viewer.current_srcfocus),
-                                        line, col, current_line);
+                                        completion_line, completion_col, completion_stmt);
+
                     lock (completion_run) {
+                        if (completion_run_queued)
+                            continue;
                         if (guanako_proposals == null) {
                             if (!completion_run_queued) {
                                 completion_run = null;
@@ -123,14 +124,13 @@ public class GuanakoCompletion : Gtk.SourceCompletionProvider, Object {
                     Symbol current_symbol = null;
                     if (completion_run.cur_stack.size > 0)
                         current_symbol = completion_run.cur_stack.last();
-                    else
-                        current_symbol = null;
+
                     if (current_symbol_annotation != null)
                         current_symbol_annotation.finished = true;
 
                     if (current_symbol != null)
                         current_symbol_annotation = source_viewer.current_srcview.annotate (
-                                                        line - 1,
+                                                        completion_line - 1,
                                                         Guanako.symbolsig_to_string (current_symbol),
                                                         0.5, 0.5, 0.5,
                                                         true,
@@ -159,8 +159,8 @@ public class GuanakoCompletion : Gtk.SourceCompletionProvider, Object {
                             }
                         }
                     GLib.Idle.add (() => {
-                        if (context is SourceCompletionContext)
-                            context.add_proposals (this, props, true);
+                        if (!completion_run_queued && completion_context is SourceCompletionContext)
+                            completion_context.add_proposals (this, props, true);
                         return false;
                     });
                     lock (completion_run) {
