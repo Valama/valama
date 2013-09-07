@@ -49,16 +49,16 @@ NamespaceDeclarationExistingChild : parent
 # ==============
 
 ReturnStatement
-return _ $Value
+return _ $Value ?_ ;
 
 IfStatement
-if ?_ ( ?_ $BoolExp ?_ )
+if ?_ ( ?_ $BoolExp ?_ ) $Block
 
 WhileStatement
-while ?_ ( ?_ $BoolExp ?_ )
+while ?_ ( ?_ $BoolExp ?_ ) $Block
 
 ForeachStatement
-foreach ?_ ( ?_ $Type _ *word _ in _ $Value ?_ )
+foreach ?_ ( ?_ $Type _ *word _ in _ $Value ?_ ) $Block
 
 
 BoolExp
@@ -86,6 +86,9 @@ $BoolExpComp|$BoolExpNeg|$BoolExpBrackets _ && _ $BoolExp
 
 BoolExpBrackets
 ( ?_ $BoolExp ?_ )
+
+Block
+?_ ~{|$init_method
 
 # ==============
 # var declaration

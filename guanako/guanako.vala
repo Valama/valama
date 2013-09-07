@@ -1018,10 +1018,13 @@ namespace Guanako {
                     return;
                 }
 
-                var mres = match (written, current_rule.expr);
+                var matchstr = current_rule.expr;
+                if (matchstr.has_prefix("~"))
+                    matchstr = matchstr.substring(1);
+                var mres = match (written, matchstr);
 
                 if (mres == MatchRes.COMPLETE) {
-                    written = written.substring (current_rule.expr.length);
+                    written = written.substring (matchstr.length);
                     if (rule.length == 1)
                         return;
                     compare (rule[1:rule.length], written, call_params, depth + 1, ref ret, ref private_cur_stack);
@@ -1029,7 +1032,7 @@ namespace Guanako {
                 else if (mres == MatchRes.STARTED) {
                     if (private_cur_stack.size > 0)
                         cur_stack = private_cur_stack;
-                    ret.add (new CompletionProposal (new Struct (current_rule.expr, null, null), written.length));
+                    ret.add (new CompletionProposal (new Struct (matchstr, null, null), written.length));
                 }
                 return;
             }
