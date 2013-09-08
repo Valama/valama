@@ -400,70 +400,256 @@ namespace Guanako {
         }
         if (statement is Loop) {
             var st = (Loop) statement;
-            foreach (Statement ch in st.body.get_statements())
-                if (!iter_statement (ch, callback, depth + 1, "loop"))
-                    return false;
-        }
-        if (statement is ForStatement) {
-            var st = (ForStatement) statement;
-            foreach (Statement ch in st.body.get_statements())
-                if (!iter_statement (ch, callback, depth + 1, "for_statement"))
-                    return false;
-        }
-        if (statement is ForeachStatement) {
-            var st = (ForeachStatement) statement;
-            foreach (Statement ch in st.body.get_statements())
-                if (!iter_statement (ch, callback, depth + 1, "foreach_statement"))
-                    return false;
+            if (!iter_statement (st.body, callback, depth + 1, "loop"))
+                return false;
         }
         if (statement is DoStatement) {
             var st = (DoStatement) statement;
-            foreach (Statement ch in st.body.get_statements())
-                if (!iter_statement (ch, callback, depth + 1, "do_statement"))
-                    return false;
+            if (!iter_statement (st.body, callback, depth + 1, "do_statement"))
+                return false;
+        }
+        if (statement is ForStatement) {
+            var st = (ForStatement) statement;
+            if (!iter_statement (st.body, callback, depth + 1, "for_statement"))
+                return false;
+        }
+        if (statement is ForeachStatement) {
+            var st = (ForeachStatement) statement;
+            if (!iter_statement (st.body, callback, depth + 1, "foreach_statement"))
+                return false;
+        }
+        if (statement is DoStatement) {
+            var st = (DoStatement) statement;
+            if (!iter_statement (st.body, callback, depth + 1, "do_statement"))
+                return false;
         }
         if (statement is WhileStatement) {
             var st = (WhileStatement) statement;
-            foreach (Statement ch in st.body.get_statements())
-                if (!iter_statement (ch, callback, depth + 1, "while_statement"))
+            if (!iter_statement (st.body, callback, depth + 1, "while_statement"))
+                return false;
+        }
+        if (statement is SwitchStatement) {
+            var st = (SwitchStatement) statement;
+            foreach (SwitchSection section in st.get_sections())
+                if (!iter_statement (section, callback, depth + 1, "switch_statement"))
                     return false;
         }
         if (statement is IfStatement) {
             var st = (IfStatement) statement;
-            foreach (Statement ch in st.true_statement.get_statements())
-                if (!iter_statement (ch, callback, depth + 1, "if_true_statement"))
-                    return false;
+            if (!iter_statement (st.true_statement, callback, depth + 1, "if_true_statement"))
+                return false;
             if (st.false_statement != null)
-                foreach (Statement ch in st.false_statement.get_statements())
-                    if (!iter_statement (ch, callback, depth + 1, "if_false_statement"))
-                        return false;
+                if (!iter_statement (st.false_statement, callback, depth + 1, "if_false_statement"))
+                    return false;
         }
         if (statement is LockStatement) {
             var st = (LockStatement) statement;
             if (st.body != null)
-                foreach (Statement ch in st.body.get_statements())
-                    if (!iter_statement (ch, callback, depth + 1, "lock_statement"))
-                        return false;
+                if (!iter_statement (st.body, callback, depth + 1, "lock_statement"))
+                    return false;
         }
         if (statement is TryStatement) {
             var st = (TryStatement) statement;
             if (st.body != null)
-                foreach (Statement ch in st.body.get_statements())
-                    if (!iter_statement (ch, callback, depth + 1, "try_statement"))
-                        return false;
+                if (!iter_statement (st.body, callback, depth + 1, "try_statement"))
+                    return false;
             if (st.finally_body != null)
-                foreach (Statement ch in st.finally_body.get_statements())
-                    if (!iter_statement (ch, callback, depth + 1, "try_statement"))
-                        return false;
+                if (!iter_statement (st.finally_body, callback, depth + 1, "try_statement"))
+                    return false;
             foreach (CatchClause cl in st.get_catch_clauses ())
-                foreach (Statement ch in st.finally_body.get_statements())
-                    if (!iter_statement (ch, callback, depth + 1, "try_statement"))
-                        return false;
+                if (!iter_statement (cl.body, callback, depth + 1, "try_statement"))
+                    return false;
         }
 
         return true;
     }
 
+    public delegate IterCallbackReturns iter_expression_callback (Expression expression,
+                                                                 int depth);
+
+    public static bool iter_expressions (Statement statement,
+                                       iter_expression_callback callback,
+                                       int depth = 0) {
+        if (statement is Vala.ExpressionStatement) {
+            var cv = statement as Vala.ExpressionStatement;
+            return iter_expressions_int (cv.expression, callback, depth + 1);
+        }
+        if (statement is Vala.DeleteStatement) {
+            var cv = statement as Vala.DeleteStatement;
+            return iter_expressions_int (cv.expression, callback, depth + 1);
+        }
+        if (statement is Vala.SwitchStatement) {
+            var cv = statement as Vala.SwitchStatement;
+            return iter_expressions_int (cv.expression, callback, depth + 1);
+        }
+        if (statement is Vala.WhileStatement) {
+            var cv = statement as Vala.WhileStatement;
+            return iter_expressions_int (cv.condition, callback, depth + 1);
+        }
+        if (statement is Vala.ThrowStatement) {
+            var cv = statement as Vala.ThrowStatement;
+            return iter_expressions_int (cv.error_expression, callback, depth + 1);
+        }
+        if (statement is Vala.DoStatement) {
+            var cv = statement as Vala.DoStatement;
+            return iter_expressions_int (cv.condition, callback, depth + 1);
+        }
+        if (statement is Vala.IfStatement) {
+            var cv = statement as Vala.IfStatement;
+            return iter_expressions_int (cv.condition, callback, depth + 1);
+        }
+        if (statement is Vala.LockStatement) {
+            var cv = statement as Vala.LockStatement;
+            return iter_expressions_int (cv.resource, callback, depth + 1);
+        }
+        if (statement is Vala.UnlockStatement) {
+            var cv = statement as Vala.UnlockStatement;
+            return iter_expressions_int (cv.resource, callback, depth + 1);
+        }
+        if (statement is Vala.YieldStatement) {
+            var cv = statement as Vala.YieldStatement;
+            if (cv.yield_expression != null)
+                return iter_expressions_int (cv.yield_expression, callback, depth + 1);
+        }
+        if (statement is Vala.ForStatement) {
+            var cv = statement as Vala.ForStatement;
+            if (cv.condition != null)
+                return iter_expressions_int (cv.condition, callback, depth + 1);
+        }
+        if (statement is Vala.ReturnStatement) {
+            var cv = statement as Vala.ReturnStatement;
+            if (cv.return_expression != null)
+                return iter_expressions_int (cv.return_expression, callback, depth + 1);
+        }
+        return true;
+    }
+    private static bool iter_expressions_int (Expression expression,
+                                       iter_expression_callback callback,
+                                       int depth) {
+        var ret = callback (expression, depth);
+        if (ret == IterCallbackReturns.ABORT_BRANCH)
+            return true;
+        else if (ret == IterCallbackReturns.ABORT_TREE)
+            return false;
+
+        // TODO: InitializerList?
+        if (expression is Assignment) {
+            var cv = expression as Assignment;
+            if (!iter_expressions_int (cv.left, callback, depth + 1))
+                return false;
+            if (!iter_expressions_int (cv.right, callback, depth + 1))
+                return false;
+        }
+        if (expression is BinaryExpression) {
+            var cv = expression as BinaryExpression;
+            if (!iter_expressions_int (cv.left, callback, depth + 1))
+                return false;
+            if (!iter_expressions_int (cv.right, callback, depth + 1))
+                return false;
+        }
+        if (expression is MemberAccess) {
+            var cv = expression as MemberAccess;
+            if (cv.inner != null)
+                if (!iter_expressions_int (cv.inner, callback, depth + 1))
+                    return false;
+        }
+        if (expression is AddressofExpression) {
+            var cv = expression as AddressofExpression;
+            if (cv.inner != null)
+                if (!iter_expressions_int (cv.inner, callback, depth + 1))
+                    return false;
+        }
+        if (expression is CastExpression) {
+            var cv = expression as AddressofExpression;
+            if (!iter_expressions_int (cv.inner, callback, depth + 1))
+                return false;
+        }
+        if (expression is ConditionalExpression) {
+            var cv = expression as ConditionalExpression;
+            if (!iter_expressions_int (cv.condition, callback, depth + 1))
+                return false;
+            if (!iter_expressions_int (cv.true_expression, callback, depth + 1))
+                return false;
+            if (!iter_expressions_int (cv.false_expression, callback, depth + 1))
+                return false;
+        }
+        if (expression is ElementAccess) {
+            var cv = expression as ElementAccess;
+            if (!iter_expressions_int (cv.container, callback, depth + 1))
+                return false;
+        }
+        if (expression is LambdaExpression) {
+            var cv = expression as LambdaExpression;
+            if (!iter_expressions (cv.statement_body, callback, depth + 1))
+                return false;
+        }
+        if (expression is MethodCall) {
+            var cv = expression as MethodCall;
+            if (!iter_expressions_int (cv.call, callback, depth + 1))
+                return false;
+            foreach (Expression e in cv.get_argument_list())
+                if (!iter_expressions_int (e, callback, depth + 1))
+                    return false;
+        }
+        if (expression is NamedArgument) {
+            var cv = expression as NamedArgument;
+            if (!iter_expressions_int (cv.inner, callback, depth + 1))
+                return false;
+        }
+        if (expression is ObjectCreationExpression) {
+            var cv = expression as ObjectCreationExpression;
+            foreach (Expression e in cv.get_argument_list())
+                if (!iter_expressions_int (e, callback, depth + 1))
+                    return false;
+        }
+        if (expression is PointerIndirection) {
+            var cv = expression as PointerIndirection;
+            if (!iter_expressions_int (cv.inner, callback, depth + 1))
+                return false;
+        }
+        if (expression is PostfixExpression) {
+            var cv = expression as PostfixExpression;
+            if (!iter_expressions_int (cv.inner, callback, depth + 1))
+                return false;
+        }
+        if (expression is ReferenceTransferExpression) {
+            var cv = expression as ReferenceTransferExpression;
+            if (!iter_expressions_int (cv.inner, callback, depth + 1))
+                return false;
+        }
+        if (expression is UnaryExpression) {
+            var cv = expression as UnaryExpression;
+            if (!iter_expressions_int (cv.inner, callback, depth + 1))
+                return false;
+        }
+        if (expression is SliceExpression) {
+            var cv = expression as SliceExpression;
+            if (!iter_expressions_int (cv.container, callback, depth + 1))
+                return false;
+            if (!iter_expressions_int (cv.start, callback, depth + 1))
+                return false;
+            if (!iter_expressions_int (cv.stop, callback, depth + 1))
+                return false;
+        }
+        if (expression is Template) {
+            var cv = expression as Template;
+            foreach (Expression e in cv.get_expressions())
+                if (!iter_expressions_int (e, callback, depth + 1))
+                    return false;
+        }
+        if (expression is Tuple) {
+            var cv = expression as Tuple;
+            foreach (Expression e in cv.get_expressions())
+                if (!iter_expressions_int (e, callback, depth + 1))
+                    return false;
+        }
+        if (expression is TypeCheck) {
+            var cv = expression as TypeCheck;
+            if (!iter_expressions_int (cv.expression, callback, depth + 1))
+                return false;
+        }
+        return true;
+    }
 }
 
 // vim: set ai ts=4 sts=4 et sw=4

@@ -79,7 +79,7 @@ BoolExpNeg
 ! ?_ $BoolExp
 
 #BoolExpOr
-#$BoolExp _ || _ $BoolExp
+#$BoolExpComp|$BoolExpNeg|$BoolExpBrackets _ || _ $BoolExp
 
 BoolExpAnd
 $BoolExpComp|$BoolExpNeg|$BoolExpBrackets _ && _ $BoolExp

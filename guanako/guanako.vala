@@ -1210,7 +1210,7 @@ namespace Guanako {
                     if (inside_source_ref (file, line, col, statement.source_reference)) {
                         if (depth > last_depth)
                             last_depth = depth;
-                        return IterCallbackReturns.ABORT_TREE;
+                        return IterCallbackReturns.CONTINUE;
                     }
                     if (before_source_ref (file, line, col, statement.source_reference)) {
                         if (depth > last_depth)

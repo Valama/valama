@@ -29,6 +29,9 @@ public class UiCurrentFileStructure : UiElement {
     ToggleToolButton btn_show_private;
     Gee.HashMap<string, Symbol> map_iter_symbols = new Gee.HashMap<string, Symbol>();
     TreeStore store;
+    ToolButton btn_jump_to_declaration;
+
+    Symbol current_symbol = null;
 
     public UiCurrentFileStructure () {
         var vbox = new Box (Orientation.VERTICAL, 0);
@@ -72,8 +75,33 @@ public class UiCurrentFileStructure : UiElement {
         scrw.add (tree_view);
         vbox.pack_start (scrw, true, true);
 
-        source_viewer.current_sourceview_changed.connect (build);
+        source_viewer.current_sourceview_changed.connect (()=>{
+            cursor_pos_signal_view.disconnect(cursor_pos_signal_id);
+            cursor_pos_signal_id = source_viewer.current_srcview.buffer.notify["cursor-position"].connect (text_cursor_moved);
+            build();
+        });
         project.guanako_update_finished.connect (build);
+        cursor_pos_signal_id = source_viewer.current_srcview.buffer.notify["cursor-position"].connect (text_cursor_moved);
+        cursor_pos_signal_view = source_viewer.current_srcview;
+
+        // Lower toolbar
+        var toolbar_current_symbol = new Toolbar();
+        toolbar_current_symbol.icon_size = 1;
+
+        btn_jump_to_declaration = new ToolButton (null, null);
+        btn_jump_to_declaration.icon_name = "edit-undo-symbolic";
+        btn_jump_to_declaration.is_important = true;
+        btn_jump_to_declaration.clicked.connect (()=>{
+            var smb = current_symbol; //Need to make a copy here, as current_symbol will change after jump
+            source_viewer.jump_to_position (smb.source_reference.file.filename,
+                                     smb.source_reference.begin.line - 1,
+                                     smb.source_reference.begin.column - 1);
+            source_viewer.current_srcview.highlight_line (smb.source_reference.begin.line - 1);
+        });
+        toolbar_current_symbol.add (btn_jump_to_declaration);
+
+        vbox.pack_start (toolbar_current_symbol, false, true);
+
 
         widget = vbox;
 
@@ -81,11 +109,36 @@ public class UiCurrentFileStructure : UiElement {
             build();
     }
 
+    ulong cursor_pos_signal_id;
+    SourceView cursor_pos_signal_view;
+
+    // Limit updating after cursor move to a reasonable interval
+    bool build_queued = false;
+    bool build_timeout = false;
+    void text_cursor_moved () {
+        if (!build_timeout) {
+            build();
+            update_current_symbol();
+            build_timeout = true;
+            Timeout.add (500, ()=>{
+                build_timeout = false;
+                if (build_queued) {
+                    build();
+                    update_current_symbol();
+                }
+                build_queued = false;
+                return false;
+            });
+        } else
+            build_queued = true;
+    }
+
     void on_tree_view_cursor_changed() {
         TreePath path;
         tree_view.get_cursor (out path, null);
         if (path == null)
             return;
+        donotbuild = true;
         Symbol smb = map_iter_symbols[path.to_string()];
         source_viewer.jump_to_position (source_viewer.current_srcfocus,
                                         smb.source_reference.begin.line - 1,
@@ -93,7 +146,13 @@ public class UiCurrentFileStructure : UiElement {
         source_viewer.current_srcview.highlight_line (smb.source_reference.begin.line - 1);
     }
 
+    bool donotbuild = false;
     protected override void build() {
+        if (donotbuild) {
+            donotbuild = false;
+            return;
+        }
+
         store = new TreeStore (2, typeof (string), typeof (Gdk.Pixbuf));
         tree_view.set_model (store);
 
@@ -115,8 +174,8 @@ public class UiCurrentFileStructure : UiElement {
         source_viewer.current_srcbuffer.get_iter_at_mark (out iter, mark_insert);
 
         var current_symbol = project.guanako_project.get_symbol_at_pos (focus_file,
-                                                                        iter.get_line(),
-                                                                        iter.get_line_offset());
+                                                                        iter.get_line() + 1,
+                                                                        iter.get_line_offset() + 1);
         TreeIter? current_iter = null;
         foreach (CodeNode node in focus_file.get_nodes()) {
             if (!(node is Namespace ||
@@ -174,6 +233,19 @@ public class UiCurrentFileStructure : UiElement {
         }
 
         debug_msg (_("%s update finished!\n"), get_name());
+    }
+
+    void update_current_symbol () {
+        TextIter iter;
+        source_viewer.current_srcbuffer.get_iter_at_mark (out iter, source_viewer.current_srcbuffer.get_insert());
+        var sf = project.guanako_project.get_source_file_by_name (source_viewer.current_srcfocus);
+        var line = iter.get_line() + 1;
+        var col = iter.get_line_offset() + 1;
+
+        current_symbol = Guanako.Refactoring.find_declaration(project.guanako_project, sf, line, col);
+        if (current_symbol != null)
+            btn_jump_to_declaration.label = current_symbol.name;
+        btn_jump_to_declaration.sensitive = current_symbol != null;
     }
 }
 

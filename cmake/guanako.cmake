@@ -13,12 +13,13 @@ set(required_pkgs
 "posix {nocheck,nolink}"
 )
 set(srcfiles
+"guanako.vala"
 "guanako_auto_indent.vala"
+"guanako_frankenstein.vala"
 "guanako_helpers.vala"
 "guanako_iterators.vala"
-"guanako.vala"
+"guanako_refactoring.vala"
 "guanako_vapi_discoverer.vala"
-"guanako_frankenstein.vala"
 "reporter.vala"
 "scanner/valascanner.vala"
 "scanner/valaparser.vala"
