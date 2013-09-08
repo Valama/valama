@@ -30,6 +30,7 @@ public class UiCurrentFileStructure : UiElement {
     Gee.HashMap<string, Symbol> map_iter_symbols = new Gee.HashMap<string, Symbol>();
     TreeStore store;
     ToolButton btn_jump_to_declaration;
+    ToolButton btn_find_references;
 
     Symbol current_symbol = null;
 
@@ -87,6 +88,26 @@ public class UiCurrentFileStructure : UiElement {
         // Lower toolbar
         var toolbar_current_symbol = new Toolbar();
         toolbar_current_symbol.icon_size = 1;
+
+        btn_find_references = new ToolButton (null, null);
+        btn_find_references.icon_name = "edit-redo-symbolic";
+        btn_find_references.is_important = true;
+        btn_find_references.clicked.connect (()=>{
+            TreeIter iter;
+            tree_view.get_selection().get_selected (null, out iter);
+            var path = store.get_path(iter);
+            if (path == null)
+                return;
+            Symbol smb = map_iter_symbols[path.to_string()];
+
+            var sf = project.guanako_project.get_source_file_by_name (source_viewer.current_srcfocus);
+            var refs = Guanako.Refactoring.find_references(project.guanako_project, sf, smb);
+            if (refs.length > 0) {
+                wdg_search.display_source_refs (refs);
+            }
+
+        });
+        toolbar_current_symbol.add (btn_find_references);
 
         btn_jump_to_declaration = new ToolButton (null, null);
         btn_jump_to_declaration.icon_name = "edit-undo-symbolic";
@@ -231,6 +252,7 @@ public class UiCurrentFileStructure : UiElement {
             var path = store.get_path (current_iter);
             tree_view.scroll_to_cell (path, null, true, 0.5f, 0);
         }
+        btn_find_references.sensitive = current_iter != null;
 
         debug_msg (_("%s update finished!\n"), get_name());
     }

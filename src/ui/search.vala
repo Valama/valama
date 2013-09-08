@@ -144,22 +144,22 @@ public class UiSearch : UiElement {
     void search (string search) {
         if (search == "" || source_viewer.current_srcbuffer == null)
             return;
-        map_paths_results = new Gee.HashMap<string, SearchResult?>();
 
-        var store = new TreeStore (2, typeof (string), typeof (string));
+        var files = new Gee.ArrayList<string>();
+        var starts = new Gee.ArrayList<TextIter?>();
+        var ends = new Gee.ArrayList<TextIter?>();
         if (!btn_all_files.active)
             search_buffer (search,
                            source_viewer.current_srcbuffer,
-                           store,
-                           source_viewer.current_srcfocus);
+                           source_viewer.current_srcfocus, ref files, ref starts, ref ends);
         else
             project.foreach_buffer ((filename, bfr) => {
-                search_buffer (search, bfr, store, filename);
+                search_buffer (search, bfr, filename, ref files, ref starts, ref ends);
             });
-        tree_view.set_model (store);
+        build_results_display (btn_all_files.active, files, starts, ends);
     }
 
-    void search_buffer (string search, SourceBuffer bfr, TreeStore store, string filename) {
+    void search_buffer (string search, SourceBuffer bfr, string filename, ref Gee.ArrayList<string> files, ref Gee.ArrayList<TextIter?> starts, ref Gee.ArrayList<TextIter?> ends) {
         TextIter first_iter;
         TextIter end_iter;
         bfr.get_start_iter (out first_iter);
@@ -169,49 +169,87 @@ public class UiSearch : UiElement {
         TextIter? match_start = null;
         TextIter? match_end = null;
         bfr.get_start_iter (out match_end);
-        TreeIter? iter_parent = null;
 
         while (match_end.forward_search (search,
                                          TextSearchFlags.CASE_INSENSITIVE,  //TODO: Make this an option.
-                                         out match_start,
-                                         out match_end,
-                                         null)) {
-
+                                         out match_start,  out match_end,  null)) {
+            files.add(filename);
+            starts.add(match_start);
+            ends.add(match_end);
             bfr.apply_tag_by_name ("search", match_start, match_end);
+        }
+    }
 
-            if (iter_parent == null && btn_all_files.active) {
+    public void display_source_refs (Vala.SourceReference[] refs) {
+        var files = new Gee.ArrayList<string>();
+        var starts = new Gee.ArrayList<TextIter?>();
+        var ends = new Gee.ArrayList<TextIter?>();
+        foreach (Vala.SourceReference reference in refs) {
+            var srcview = source_viewer.get_sourceview_by_file(reference.file.filename);
+            stdout.printf ("Found " + reference.file.filename + "\n");
+            if (srcview == null)
+                continue;
+            stdout.printf ("Continuing " + reference.file.filename + "\n");
+            files.add (reference.file.filename);
+            TextIter iter;
+            srcview.buffer.get_iter_at_line_offset (out iter, reference.begin.line - 1, reference.begin.column - 1);
+            starts.add (iter);
+            srcview.buffer.get_iter_at_line_offset (out iter, reference.end.line - 1, reference.end.column);
+            ends.add (iter);
+        }
+        build_results_display (true, files, starts, ends);
+
+        widget_main.focus_dock_item (this.dock_item);
+    }
+
+    void build_results_display (bool split_by_file, Gee.ArrayList<string> files, Gee.ArrayList<TextIter?> starts, Gee.ArrayList<TextIter?> ends) {
+        map_paths_results = new Gee.HashMap<string, SearchResult?>();
+
+        var store = new TreeStore (2, typeof (string), typeof (string));
+
+        var filemap = new Gee.HashMap <string, TreeIter?>();
+        for (int i = 0; i < files.size; i++) {
+
+            TreeIter? iter_parent;
+            if (!split_by_file)
+                iter_parent = null;
+            else if (files[i] in filemap.keys)
+                iter_parent = filemap[files[i]];
+            else {
                 store.append (out iter_parent, null);
-                store.set (iter_parent, 0, "", 1, project.get_relative_path (filename), -1);
+                filemap[files[i]] = iter_parent;
+                store.set (iter_parent, 0, "", 1, project.get_relative_path (files[i]), -1);
             }
             TreeIter iter_append;
             store.append (out iter_append, iter_parent);
 
-            var col_start = match_start.get_line();
-            // var col_end = match_end.get_line();
+            var bfr = source_viewer.get_sourceview_by_file (files[i]).buffer;
+
+            var col_start = starts[i].get_line();
 
             string lines_before = "";
             string matchline_before = "";
             string matchline_after = "";
             string lines_after = "";
 
-            var lines_before_start = match_start;
+            var lines_before_start = starts[i];
             if (lines_before_start.backward_lines (2) || lines_before_start.backward_line()) {
-                var lines_before_end = match_start;
+                var lines_before_end = starts[i];
                 if (lines_before_end.backward_line() && lines_before_end.forward_to_line_end())
                     lines_before = bfr.get_text (lines_before_start, lines_before_end, true);
             }
 
             TextIter matchline_before_start;
             bfr.get_iter_at_line (out matchline_before_start, col_start);
-            matchline_before = bfr.get_text (matchline_before_start, match_start, true);
+            matchline_before = bfr.get_text (matchline_before_start, starts[i], true);
 
-            var matchline_after_end = match_end;
+            var matchline_after_end = ends[i];
             if (!matchline_after_end.ends_line()) {
                 matchline_after_end.forward_to_line_end();
-                matchline_after = bfr.get_text (match_end, matchline_after_end, true);
+                matchline_after = bfr.get_text (ends[i], matchline_after_end, true);
             }
 
-            var lines_after_start = match_end;
+            var lines_after_start = ends[i];
             if (lines_after_start.forward_line()) {
                 var lines_after_end = lines_after_start;
                 lines_after_end.forward_lines (2);
@@ -223,7 +261,7 @@ public class UiSearch : UiElement {
                         + "</span>"
                         + Markup.escape_text (matchline_before)
                         + "<b>"
-                        + Markup.escape_text (bfr.get_text (match_start, match_end, true))
+                        + Markup.escape_text (bfr.get_text (starts[i], ends[i], true))
                         + "</b>"
                         + Markup.escape_text (matchline_after + "\n")
                         + """<span color="#A0A0A0">"""
@@ -231,13 +269,17 @@ public class UiSearch : UiElement {
                         + "</span></tt>";
 
             //TODO: Make <b> stuff case insensitive!
+
+            store.set (iter_append, 0, (ends[i].get_line() + 1).to_string(), 1, shown_text, -1);
+
             map_paths_results[store.get_path ((TreeIter)iter_append).to_string()]
-                                        = SearchResult() { line = match_end.get_line(),
-                                                           filename = filename };
-                                                           // col_start = col_start,
-                                                           // col_end = col_end };
-            store.set (iter_append, 0, (match_end.get_line() + 1).to_string(), 1, shown_text, -1);
+                                                    = SearchResult() { line = ends[i].get_line(),
+                                                                       filename = files[i] };
+                                                                       // col_start = col_start,
+                                                                       // col_end = col_end };
         }
+
+        tree_view.set_model (store);
     }
 
     public override void build() {

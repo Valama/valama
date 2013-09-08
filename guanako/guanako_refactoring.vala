@@ -49,6 +49,29 @@ namespace Guanako.Refactoring {
         }
         return null;
     }
+    public static SourceReference[] find_references (Project project, SourceFile sf, Symbol symbol) {
+        var ret = new SourceReference[0];
+        foreach (SourceFile file in project.sourcefiles)
+            foreach (CodeNode node in file.get_nodes())
+                Guanako.iter_symbol ((Symbol)node, (smb, depth) => {
+                    if (smb is Subroutine) {
+                        //stdout.printf("Checking subroutine:" + smb.name + "\n");
+                        Guanako.iter_subroutine ((Subroutine)smb, (stmt, depth)=>{
+
+                            Guanako.iter_expressions (stmt, (expr, depth)=>{
+                                if (expr.symbol_reference == symbol)
+                                    ret += expr.source_reference;
+                                return Guanako.IterCallbackReturns.CONTINUE;
+                            });
+
+                            return Guanako.IterCallbackReturns.CONTINUE;
+                        });
+                    }
+                    return Guanako.IterCallbackReturns.CONTINUE;
+                });
+
+        return ret;
+    }
 }
 
 // vim: set ai ts=4 sts=4 et sw=4
