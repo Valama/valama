@@ -35,11 +35,13 @@ class UiBreakpoints : UiElement {
     ToolButton btn_add;
     ToolButton btn_remove;
     ToolButton btn_resume;
+    ToggleToolButton btn_line_by_line;
 
     public UiBreakpoints (Guanako.FrankenStein frankenstein) {
         this.frankenstein = frankenstein;
         frankenstein.timer_finished.connect (timer_finished);
         frankenstein.stop_reached.connect (stop_reached);
+        frankenstein.line_reached.connect (line_reached);
         frankenstein.received_invalid_id.connect (()=> {
             info_bar.visible = true;
         });
@@ -97,6 +99,12 @@ class UiBreakpoints : UiElement {
         btn_resume.icon_name = "media-playback-start";
         btn_resume.clicked.connect (on_btn_resume_clicked);
         toolbar.add (btn_resume);
+
+        btn_line_by_line = new ToggleToolButton ();
+        btn_line_by_line.sensitive = true;
+        btn_line_by_line.icon_name = "format-indent-less-rtl-symbolic";
+        btn_line_by_line.toggled.connect (on_btn_line_by_line_toggled);
+        toolbar.add (btn_line_by_line);
 
         box_main.pack_start (toolbar, false, true);
 
@@ -159,6 +167,18 @@ class UiBreakpoints : UiElement {
         var view = source_viewer.get_sourceview_by_file (stop.file.filename);
         view.highlight_line (stop.line - 1);
         resume_wait_loop.run();
+    }
+
+    void line_reached (int line, string filename) {
+        var view = source_viewer.get_sourceview_by_file (filename);
+        source_viewer.jump_to_position (filename, line - 1, 0, false);
+        view.highlight_line (line - 1);
+        btn_resume.sensitive = true;
+        resume_wait_loop.run();
+    }
+
+    void on_btn_line_by_line_toggled() {
+        frankenstein.activate_frankenline = btn_line_by_line.active;
     }
 
     void on_btn_resume_clicked() {

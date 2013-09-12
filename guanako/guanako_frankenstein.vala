@@ -64,6 +64,9 @@ namespace Guanako {
                 else
                     parent.stop_reached (parent.frankenstops[stop_id], stop_id);
             }
+            public void line_reached (int line, string filename) {
+                parent.line_reached (line, filename);
+            }
         }
 
         public class FrankenTimer {
@@ -94,12 +97,42 @@ namespace Guanako {
         public Gee.ArrayList<FrankenStop?> frankenstops = new Gee.ArrayList<FrankenStop?>();
         public signal void timer_finished (FrankenTimer timer, int timer_id, double time);
         public signal void stop_reached (FrankenStop stop, int stop_id);
+        public signal void line_reached (int line, string filename);
         public signal void received_invalid_id ();
+        public bool activate_frankenline = false;
+        public Guanako.Project project = null;
 
         public string frankensteinify_sourcefile (SourceFile file) {
             //FIXME: Don't read entire file into memory.
             string[] lines = file.content.split ("\n");
             int cnt = 0;
+
+            if (activate_frankenline) {
+
+                foreach (CodeNode node in file.get_nodes()) {
+                    if (node is Subroutine) {
+                        var sr = (Subroutine)node;
+                        iter_subroutine (sr, (stmt, depth) => {
+                            var line = stmt.source_reference.begin.line;
+                            lines[line-1] = @"frankenline ($line, " + """"""" + file.filename + """"""" + ");" + lines[line-1];
+                            return Guanako.IterCallbackReturns.CONTINUE;
+                        });
+                    }
+                    Guanako.iter_symbol ((Symbol)node, (smb, depth) => {
+                        if (smb is Subroutine) {
+                            var sr = (Subroutine)smb;
+                            iter_subroutine (sr, (stmt, depth) => {
+                                var line = stmt.source_reference.begin.line;
+                                lines[line-1] = @"frankenline ($line, $(file.filename))" + lines[line];
+                                return Guanako.IterCallbackReturns.CONTINUE;
+                            });
+                        }
+                        return Guanako.IterCallbackReturns.CONTINUE;
+                    });
+                }
+
+            }
+
             foreach (FrankenTimer ftime in frankentimers) {
                 lines[ftime.start_line - 1] = @"var frankentimer_$cnt = new GLib.Timer();\n"
                                                 + @"frankentimer_$cnt.start();\n"
@@ -127,6 +160,7 @@ namespace Guanako {
 interface FrankenDBUS : Object {
     public abstract void timer_finished (int timer_id, double time) throws IOError;
     public abstract void stop_reached (int stop_id) throws IOError;
+    public abstract void line_reached (int line, string filename) throws IOError;
 }
 
 static FrankenDBUS frankenstein_client = null;
@@ -143,6 +177,22 @@ static void frankentimer_callback (int timer_id, double time) {
         frankenstein_client.timer_finished (timer_id, time);
     } catch (GLib.IOError e) {
         stderr.printf ("Failed to send Frankentimer finished signal: %s\n", e.message);
+    }
+}
+
+static void frankenline (int line, string filename) {
+    if (frankenstein_client == null) {
+        try {
+            frankenstein_client = Bus.get_proxy_sync (BusType.SESSION,
+                                                      """" + dbus_name + """", """" + dbus_path + """");
+        } catch (GLib.IOError e) {
+            stderr.printf ("Failed to connect to DBus server: %s\n", e.message);
+        }
+    }
+    try {
+        frankenstein_client.line_reached (line, filename);
+    } catch (GLib.IOError e) {
+        stderr.printf ("Failed to send Frankenline reached signal: %s\n", e.message);
     }
 }
 
