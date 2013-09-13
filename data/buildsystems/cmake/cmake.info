@@ -1,4 +1,4 @@
-<buildsystem>
+<buildsystem version="0.1">
     <author>
         <name>Dominique Lasserre</name>
         <mail>lasserre.d@gmail.com</mail>

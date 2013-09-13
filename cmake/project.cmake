@@ -25,6 +25,7 @@ set(required_pkgs
 )
 set(srcfiles
   "src/buildsystem/base.vala"
+  "src/buildsystem/buildsystem_template.vala"
   "src/buildsystem/cmake.vala"
   "src/buildsystem/plain.vala"
   "src/common/args.vala"

@@ -256,6 +256,35 @@ public class ValamaProject : ProjectFile {
             throw e;
         }
 
+        constructor_init (syntaxfile, fully, save_recent);
+    }
+
+    /**
+     * Create {@link ValamaProject} and load it from project file.
+     *
+     * It is possible to fully load a partial loaded project with {@link init}.
+     *
+     * @param project_file_data Load project from data.
+     * @param syntaxfile Load Guanako syntax definitions from this file.
+     * @param fully If `false` only load project file information.
+     * @param save_recent Update recent project files catalogue.
+     * @throws LoadingError Throw on error while loading project file.
+     */
+    public ValamaProject.from_data (string project_file_data,
+                                    string? syntaxfile = null,
+                                    bool fully = true,
+                                    bool save_recent = true) throws LoadingError {
+        try {
+            base.from_data (project_file_data);
+        } catch (LoadingError e) {
+            errmsg (_("Error loading project file from data: %s\n"), e.message);
+            throw e;
+        }
+
+        constructor_init (syntaxfile, fully, save_recent);
+    }
+
+    private void constructor_init (string? syntaxfile, bool fully, bool save_recent) throws LoadingError {
         add_builder (buildsystem);
 
         if (fully)

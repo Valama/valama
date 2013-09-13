@@ -26,7 +26,7 @@ using Gee;
  */
 public class UiTemplateSelector : TemplatePage {
     private TreeView tree_view;
-    private ProjectTemplate[] available_templates;
+    private ListStore store;
     private ToggleToolButton btn_credits;
     private ToggleToolButton btn_vlpinfo;
     private ToggleToolButton btn_info;
@@ -135,6 +135,14 @@ public class UiTemplateSelector : TemplatePage {
                                                  new CellRendererText(),
                                                  "markup",
                                                  0);
+        var column_id = new TreeViewColumn.with_attributes (
+                                                 null,
+                                                 new CellRendererText(),
+                                                 "text",
+                                                 2,
+                                                 null);
+        column_id.visible = false;
+        tree_view.append_column (column_id);
 
         tree_view.row_activated.connect (() => {
             btn_info.active = true;
@@ -179,24 +187,20 @@ public class UiTemplateSelector : TemplatePage {
     protected override void init() {
         initialized = true;
 
-        var store = new ListStore (2, typeof (string), typeof (Gdk.Pixbuf));
+        store = new ListStore (3, typeof (string), typeof (Gdk.Pixbuf), typeof (string));
         tree_view.set_model (store);
 
-        available_templates = load_templates();
-        if (available_templates.length == 0)
+        load_templates();
+        if (get_templates().size == 0)
             return;
 
         bool first_entry = true;
-        string[] available_packages = new string[0];
-        foreach (string av_pkg in Guanako.get_available_packages())
-            available_packages += av_pkg;
-
-        foreach (var template in available_templates) {
+        foreach (var template in get_templates().values) {
             TreeIter iter;
             store.append (out iter);
 
             try {
-                template.init (available_packages);
+                template.init();
             } catch (LoadingError e) {
                 warning_msg (_("Could not load project template: %s\n"), e.message);
                 continue;
@@ -226,7 +230,7 @@ public class UiTemplateSelector : TemplatePage {
                 }
                 strb_tlabel.append ("</span>");
             }
-            store.set (iter, 0, strb_tlabel.str, 1, template.icon, -1);
+            store.set (iter, 0, strb_tlabel.str, 1, template.icon, 2, template.name, -1);
 
             /* Select first entry */
             if (first_entry) {
@@ -238,10 +242,16 @@ public class UiTemplateSelector : TemplatePage {
 
     public ProjectTemplate? get_selected_template() {
         TreeModel model;
-        var paths = tree_view.get_selection().get_selected_rows (out model);
-        foreach (TreePath path in paths) {
-            var indices = path.get_indices();
-            return available_templates[indices[0]];
+        TreeIter iter;
+        if (tree_view.get_selection().get_selected (out model, out iter)) {
+            Value template_id_val;
+            store.get_value (iter, 2, out template_id_val);
+            var template_id = template_id_val as string;
+            if (template_id != null)
+                return get_templates()[template_id];
+            else
+                bug_msg (_("Could not get %s from %s: %s\n"),
+                         "ProjectTemplate", "ListStore", "get_selected_template");
         }
         return null;
     }
@@ -633,33 +643,53 @@ public static ValamaProject? create_project_from_template (ProjectTemplate templ
     try { //TODO: Separate different error catchings to provide differentiate error messages.
         //TODO: Add progress bar and at least warn on overwrite (don't skip
         //      without warning).
-        new FileTransfer (template.path,
-                          target_folder,
-                          CopyRecursiveFlags.SKIP_EXISTENT).copy();
-        new FileTransfer (Path.build_path (Path.DIR_SEPARATOR_S,
+        if (template.path.length > 0) {
+            new FileTransfer (template.path,
+                              target_folder,
+                              CopyRecursiveFlags.SKIP_EXISTENT).copy();
+            new FileTransfer (Path.build_path (Path.DIR_SEPARATOR_S,
+                                               target_folder,
+                                               "template.vlp"),
+                              Path.build_path (Path.DIR_SEPARATOR_S,
+                                               target_folder,
+                                               project_name + ".vlp"),
+                              CopyRecursiveFlags.SKIP_EXISTENT).move();
+        } else {
+            var vlppath = Path.build_path (Path.DIR_SEPARATOR_S,
                                            target_folder,
-                                           "template.vlp"),
-                          Path.build_path (Path.DIR_SEPARATOR_S,
-                                           target_folder,
-                                           project_name + ".vlp"),
-                          CopyRecursiveFlags.SKIP_EXISTENT).move();
+                                           project_name + ".vlp") ;
+            var f = File.new_for_path (vlppath);
+            var parent = f.get_parent();
+            if (!parent.query_exists())
+                try {
+                    parent.make_directory_with_parents();
+                } catch (GLib.Error e) {
+                    errmsg (_("Cannot create project root directory '%s': %s\n"),
+                            parent.get_path(), e.message);
+                }
 
-        //TODO: Do this with cmake buildsystem plugin.
-        string buildsystem_path;
-        if (Args.buildsystemsdir == null)
-            buildsystem_path = Path.build_path (Path.DIR_SEPARATOR_S,
-                                                Config.PACKAGE_DATA_DIR,
-                                                "buildsystems",
-                                                "cmake",
-                                                "buildsystem");
-        else
-            buildsystem_path = Path.build_path (Path.DIR_SEPARATOR_S,
-                                                Args.buildsystemsdir,
-                                                "cmake",
-                                                "buildsystem");
-        new FileTransfer (buildsystem_path,
-                          target_folder,
-                          CopyRecursiveFlags.SKIP_EXISTENT).copy();
+            if (f.query_exists())
+                debug_msg (_("Skip %s\n"), vlppath);
+            else {
+                try {
+                    var os = f.create (FileCreateFlags.NONE);
+                    os.write (template.vproject.project_file_data.data);
+                } catch (GLib.IOError e) {
+                    errmsg (_("Cannot write to project file '%s': %s\n"), vlppath, e.message);
+                    // return null;
+                } catch (GLib.Error e) {
+                    errmsg (_("Cannot create project file '%s': %s\n"), vlppath, e.message);
+                    // return null;
+                }
+            }
+        }
+
+        BuildSystemTemplate.load_buildsystems();
+        if (template.vproject.builder.get_name_id() in get_buildsystems().keys) {
+            new FileTransfer (get_buildsystems()[template.vproject.builder.get_name_id()].path,
+                              target_folder,
+                              CopyRecursiveFlags.SKIP_EXISTENT).copy();
+        }
 
         /* Substitutions. */
         var tsh = new TempSubsHelper (template.substitutions, target_folder);

@@ -22,8 +22,10 @@ using GLib;
 namespace Args {
     public bool version = false;
     public string? syntaxfile = null;
-    public string? templatesdir = null;
-    public string? buildsystemsdir = null;
+    [CCode (array_length = false, array_null_terminated = true)]
+    public string[]? templatesdirs = null;
+    [CCode (array_length = false, array_null_terminated = true)]
+    public string[]? buildsystemsdirs = null;
     public int debuglevel = 0;
     public bool forceold = false;
     public string? layoutfile = null;
@@ -34,10 +36,10 @@ namespace Args {
     private const OptionEntry[] options = {
         {"version", 'v', 0, OptionArg.NONE, ref version, N_("Display version number."), null},
         {"syntax", 0, 0, OptionArg.FILENAME, ref syntaxfile, N_("Guanako syntax file."), N_("FILE")},
-        {"templates", 0, 0, OptionArg.FILENAME, ref templatesdir, N_("Templates directory."),
+        {"templates", 0, 0, OptionArg.FILENAME_ARRAY, ref templatesdirs, N_("Templates directory."),
         // TRANSLATORS: Uppercase for variables in command line options.
                                                             N_("DIRECTORY")},
-        {"buildsystems", 0, 0, OptionArg.FILENAME, ref buildsystemsdir, N_("Build systems directory."), N_("DIRECTORY")},
+        {"buildsystems", 0, 0, OptionArg.FILENAME_ARRAY, ref buildsystemsdirs, N_("Build systems directory."), N_("DIRECTORY")},
         {"debug", 'd', OptionFlags.OPTIONAL_ARG, OptionArg.CALLBACK, (void*) debuglevel_parse, N_("Output debug information."), N_("[DEBUGLEVEL]")},
         {"force-old", 0, 0, OptionArg.NONE, ref forceold, N_("Force loading of possibly incompatible template or project files."), null},
         {"layout", 0, 0, OptionArg.FILENAME, ref layoutfile, N_("Path to layout file."), N_("FILE")},

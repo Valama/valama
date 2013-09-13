@@ -34,7 +34,19 @@ public class ProjectFile : Object {
         load_project_file();
     }
 
+    /**
+     * Load project data from string.
+     *
+     * When turning this into real project don't forget to update
+     * {@link project_file_path}, {@link proj_file} and {@link project_path}.
+     */
+    public ProjectFile.from_data (string project_file_data) throws LoadingError {
+        this.project_file_data = project_file_data;
+        load_project_file (project_file_data);
+    }
+
     public string project_file_path  { get; private set; }
+    public string project_file_data { get; private set; }
 
     //TODO: eliminate one of these two...
     public File project_path_file { get; private set; }
@@ -122,8 +134,12 @@ public class ProjectFile : Object {
      *                      does not exist or does not contain enough
      *                      information.
      */
-    private void load_project_file() throws LoadingError {
-        Xml.Doc* doc = Xml.Parser.parse_file (project_file_path);
+    private void load_project_file (string? buffer = null) throws LoadingError {
+        Xml.Doc* doc;
+        if (buffer == null)
+            doc = Xml.Parser.parse_file (project_file_path);
+        else
+            doc = Xml.Parser.parse_doc (buffer);
 
         if (doc == null) {
             delete doc;

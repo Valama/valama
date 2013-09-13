@@ -21,6 +21,13 @@ using GLib;
 using Vala;
 
 namespace Guanako {
+    static Gee.TreeMultiMap<string, string>? available_packages = null;
+    public static Gee.MultiMap<string, string> get_available_packages() {
+        if (available_packages == null)
+            return new Gee.TreeMultiMap<string, string>().read_only_view;
+        return available_packages.read_only_view;
+    }
+
     public static inline string? get_vapi_path (string pkg, string[]? directories = null) {
         return get_file_path (pkg, ".vapi", directories);
     }
@@ -31,15 +38,15 @@ namespace Guanako {
 
     private static string? get_file_path (string pkg, string ext, string[]? directories) {
         if  (directories != null)
-            //TRANSLATORS: E.g.: Checking .vapi dir: /usr/share/vala/vapi
+            //TRANSLATORS: E.g.: Checking .vapi directory: /usr/share/vala/vapi
             foreach (var dir in directories) {
-                debug_msg ("Checking %s dir: %s\n", ext, dir);
+                debug_msg ("Checking %s directory: %s\n", ext, dir);
                 var filename = Path.build_path (Path.DIR_SEPARATOR_S, dir, pkg + ext);
                 if (FileUtils.test (filename, FileTest.EXISTS))
                     return filename;
             }
         foreach (var dir in get_vapi_dirs()) {
-            debug_msg ("Checking %s dir: %s\n", ext, dir);
+            debug_msg ("Checking %s directory: %s\n", ext, dir);
             var filename = Path.build_path (Path.DIR_SEPARATOR_S, dir, pkg + ext);
             if (FileUtils.test (filename, FileTest.EXISTS))
                 return filename;
@@ -59,28 +66,36 @@ namespace Guanako {
     }
 
     /**
-     * Get Vala packages from filenames and sort them.
+     * Load Vala packages from filenames and sort them.
+     *
+     * @return `true` if actually (re)load packages else `false`.
      */
-    public static GLib.List<string>? get_available_packages() {
-        GLib.List<string> list = null;
-        foreach (string path in get_vapi_dirs()) {
+    public static bool load_available_packages (bool reload = false) {
+        if (available_packages == null)
+            available_packages = new Gee.TreeMultiMap<string, string>();
+        else if (reload)
+            available_packages.clear();
+        else
+            return false;
+
+        foreach (var path in get_vapi_dirs()) {
             if (!FileUtils.test (path, FileTest.IS_DIR))
                 continue;
-            debug_msg ("Checking %s dir: %s\n", ".vapi", path);
+            debug_msg ("Checking %s directory: %s\n", ".vapi", path);
             try {
                 var enumerator = File.new_for_path (path).enumerate_children (FileAttribute.STANDARD_NAME, 0);
                 FileInfo file_info;
                 while ((file_info = enumerator.next_file()) != null) {
                     var filename = file_info.get_name();
                     if (filename.has_suffix (".vapi"))
-                        list.insert_sorted (filename.substring (0, filename.length - 5), strcmp);
+                        available_packages[filename.substring (0, filename.length - 5)] = filename;
                 }
             } catch (GLib.Error e) {
                 stdout.printf (_("Could not update vapi files: %s\n"), e.message);
-                return null;
             }
         }
-        return list;
+
+        return true;
     }
 
      //Helper function for checking whether a given source location is inside a SourceReference

@@ -20,6 +20,7 @@
 using Gtk;
 using Gdl;
 using Vala;
+using Gee;
 using GLib;
 using Guanako;
 
@@ -30,6 +31,11 @@ static WelcomeScreen? vscreen = null;
 static Valama gtk_app;
 static ValamaSettings settings;
 
+static TreeMap<string, BuildSystemTemplate>? buildsystems = null;
+static TreeMap<string, ProjectTemplate>? templates = null;
+
+static Gee.ArrayList<string>? locales = null;
+
 public static int main (string[] args) {
     Intl.textdomain (Config.GETTEXT_PACKAGE);
     Intl.bindtextdomain (Config.GETTEXT_PACKAGE, Config.LOCALE_DIR);
@@ -38,6 +44,7 @@ public static int main (string[] args) {
                                        Environment.get_user_cache_dir(),
                                        "valama",
                                        "recent_projects.xml"));
+    load_locales();
 
     settings = new ValamaSettings ();
 
@@ -77,6 +84,38 @@ public static int main (string[] args) {
 
     gtk_app = new Valama ();
     return gtk_app.run();
+}
+
+static bool load_locales (bool reload = false) {
+    if (locales == null)
+        locales = new Gee.ArrayList<string>();
+    else if (reload)
+        locales.clear();
+    else
+        return false;
+
+    foreach (var lang in Intl.get_language_names())
+        locales.add (lang);
+
+    return true;
+}
+
+static Gee.BidirList<string> get_locales() {
+    if (locales == null)
+        return new Gee.ArrayList<string>().read_only_view;
+    return locales.read_only_view;
+}
+
+static Gee.BidirSortedMap<string, BuildSystemTemplate> get_buildsystems() {
+    if (buildsystems == null)
+        return new Gee.TreeMap<string, BuildSystemTemplate>().read_only_view;
+    return buildsystems.read_only_view;
+}
+
+static Gee.BidirSortedMap<string, ProjectTemplate> get_templates() {
+    if (templates == null)
+        return new Gee.TreeMap<string, ProjectTemplate>().read_only_view;
+    return templates.read_only_view;
 }
 
 static bool quit_valama() {
