@@ -51,7 +51,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 find_package(Vala "0.17" REQUIRED)
 
 # Custom library version checks.
-set(valac_cond)
+set(definitions)
 find_package(PkgConfig)
 # glib-2.0
 pkg_check_modules(GLIB2.0 REQUIRED "glib-2.0")
@@ -60,13 +60,14 @@ pkg_check_modules(GLIB2.0 REQUIRED "glib-2.0")
 set(default_vala_flags
   "--thread"
   "--target-glib" "${GLIB2.0_VERSION}"
-  ${valac_cond}
 )
 
 include(ValaPkgs)
 vala_pkgs(VALA_C
   PACKAGES
     ${required_pkgs}
+  DEFINITIONS
+    ${definitions}
   OPTIONAL
     ${optional_pkgs}
   SRCFILES

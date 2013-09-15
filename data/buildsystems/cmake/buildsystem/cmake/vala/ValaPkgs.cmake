@@ -28,6 +28,9 @@
 #   checking with pkg-config or to suppress --cflags and --libs of pkg-config.
 #   To use those options append {option,option,...}.
 #
+# DEFINITIONS
+#   A list of symbols for conditional compilation. (optional)
+#
 # OPTIONAL
 #   A list of vala packages that are optional to build the target. (optional)
 #
@@ -70,7 +73,7 @@
 #
 include(CMakeParseArguments)
 function(vala_pkgs output)
-  cmake_parse_arguments(ARGS "" "LIBRARY;GIRFILE" "PACKAGES;OPTIONAL;SRCFILES;VAPIS;OPTIONS" ${ARGN})
+  cmake_parse_arguments(ARGS "" "LIBRARY;GIRFILE" "PACKAGES;DEFINITIONS;OPTIONAL;SRCFILES;VAPIS;OPTIONS" ${ARGN})
 
 
   if(ARGS_PACKAGES OR ARGS_OPTIONAL)
@@ -183,6 +186,8 @@ function(vala_pkgs output)
         ${srcfiles}
       PACKAGES
         ${pkglist}
+      DEFINITIONS
+        "${ARGS_DEFINITIONS}"
       CUSTOM_VAPIS
         ${vapifiles}
       GENERATE_VAPI
