@@ -84,16 +84,16 @@ endif()
 
 
 # Custom library version checks.
-set(valac_cond)
+set(definitions)
 find_package(PkgConfig)
 # Unix or Windows
 if(WIN32)
-  list(APPEND valac_cond "-D;WIN32")
+  list(APPEND definitions "WIN32")
 elseif(UNIX)
-  list(APPEND valac_cond "-D;UNIX")
+  list(APPEND definitions "UNIX")
 else()
-  list(APPEND valac_cond "-D;NOT_UNIX")
-  list(APPEND valac_cond "-D;NOT_WIN32")
+  list(APPEND definitions "NOT_UNIX")
+  list(APPEND definitions "NOT_WIN32")
 endif()
 # libvala-X.Y
 if(VALA_SHORTVER STREQUAL "0.18")
@@ -102,28 +102,28 @@ if(VALA_SHORTVER STREQUAL "0.18")
 elseif(VALA_SHORTVER STREQUAL "0.20")
   list(REMOVE_ITEM required_pkgs "libvala-0.18")
   list(REMOVE_ITEM required_pkgs "libvala-0.22")
-  list(APPEND valac_cond "-D;VALAC_0_20")
+  list(APPEND definitions "VALAC_0_20")
 elseif(VALA_SHORTVER STREQUAL "0.22")
   list(REMOVE_ITEM required_pkgs "libvala-0.18")
   list(REMOVE_ITEM required_pkgs "libvala-0.20")
-  list(APPEND valac_cond "-D;VALAC_0_20")
+  list(APPEND definitions "VALAC_0_20")
 else()
   list(REMOVE_ITEM required_pkgs "libvala-0.18")
   list(REMOVE_ITEM required_pkgs "libvala-0.20")
   list(REMOVE_ITEM required_pkgs "libvala-0.22")
   list(APPEND required_pkgs "libvala-${VALA_SHORTVER}")
-  list(APPEND valac_cond "-D;VALAC_0_20")
+  list(APPEND definitions "VALAC_0_20")
 endif()
 # gtk+-3.0
 pkg_check_modules(GTK3.0 REQUIRED "gtk+-3.0")
 if(NOT("3.6" STRGREATER GTK3.0_VERSION))
-  list(APPEND valac_cond "-D;GTK_3_6")
+  list(APPEND definitions "GTK_3_6")
 endif()
 # gdl-3.0
 set(gdl_workarround OFF)
 pkg_check_modules(GDL3.0 REQUIRED "gdl-3.0")
 if(NOT "3.9.91" STRGREATER GDL3.0_VERSION)
-  list(APPEND valac_cond "-D;GDL_3_9_91")
+  list(APPEND definitions "GDL_3_9_91")
   message(STATUS "Use enhanced gdl-3.0 vapi to support new "
                  "features with gdl-3.0 >= 3.9.91.")
   list(APPEND vapifiles "extravapi/gdl-3.0.vapi")
@@ -131,7 +131,7 @@ if(NOT "3.9.91" STRGREATER GDL3.0_VERSION)
   set(gdl_workarround ON)
 elseif(NOT "3.5.5" STRGREATER GDL3.0_VERSION)
   if(NOT "3.8.1" STRGREATER GDL3.0_VERSION)
-    list(APPEND valac_cond "-D;GDL_3_8")
+    list(APPEND definitions "GDL_3_8")
   endif()
   if("0.20" STRGREATER "${VALA_SHORTVER}")
     message(STATUS "Use enhanced gdl-3.0 vapi from valac 0.20 to support new "
@@ -141,7 +141,7 @@ elseif(NOT "3.5.5" STRGREATER GDL3.0_VERSION)
     set(gdl_workarround ON)
   endif()
 else()
-  list(APPEND valac_cond "-D;GDL_LESS_3_5_5")
+  list(APPEND definitions "GDL_LESS_3_5_5")
   message(WARNING "With gdl-3.0 ${GDL3.0_VERSION} < 3.5.5 dock item "
                   "behaviour is poor: Hidden docks aren't saved in layout "
                   "and will open detached.\n"
@@ -163,13 +163,14 @@ set(default_vala_flags
   "--target-glib" "${GLIB2.0_VERSION}"
   "--enable-experimental"
   "--fatal-warnings"
-  ${valac_cond}
 )
 
 include(ValaPkgs)
 vala_pkgs(VALA_C
   PACKAGES
     ${required_pkgs}
+  DEFINITIONS
+    ${definitions}
   OPTIONAL
     ${optional_pkgs}
   SRCFILES
@@ -244,6 +245,8 @@ if(VALADOC_FOUND)
     ${make_all}
     PACKAGES
       ${valadoc_pkgs}
+    DEFINITIONS
+      ${definitions}
     SRCFILES
       ${srcfiles}
       ${vapifiles}
@@ -253,7 +256,6 @@ if(VALADOC_FOUND)
       "--target-glib" "${GLIB2.0_VERSION}"
       ${extra_valadoc_opts}
       ${valadoc_debug}
-      ${valac_cond}
   )
   if(GUANAKO)
     add_dependencies("docs-${project_name_lower}" "guanako")

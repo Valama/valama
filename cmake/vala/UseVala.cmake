@@ -30,6 +30,10 @@
 #   A list of optional options to be passed to the valac executable. This can be
 #   used to pass "--thread" for example to enable multi-threading support.
 #
+# DEFINITIONS
+#   A list of symbols to be used for conditional compilation. They are the same
+#   as they would be passed using the valac "--define=" option.
+#
 # CUSTOM_VAPIS
 #   A list of custom vapi files to be included for compilation. This can be
 #   useful to include freshly created vala libraries without having to install
@@ -58,7 +62,7 @@
 # an example to every of the optional sections:
 #
 #   find_package(Vala "0.12" REQUIRED)
-#   inlcude(${VALA_USE_FILE})
+#   include(${VALA_USE_FILE})
 #
 #   vala_precompile(VALA_C
 #     SOURCES
@@ -121,18 +125,25 @@ include(CMakeParseArguments)
 
 function(vala_precompile output)
   cmake_parse_arguments(ARGS "PUBLIC" "DIRECTORY;GENERATE_HEADER;GENERATE_VAPI;GENERATE_GIR"
-      "SOURCES;PACKAGES;OPTIONS;CUSTOM_VAPIS" ${ARGN})
+      "SOURCES;PACKAGES;OPTIONS;DEFINITIONS;CUSTOM_VAPIS" ${ARGN})
 
   if(ARGS_DIRECTORY)
-    set(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${ARGS_DIRECTORY}")
+    get_filename_component(DIRECTORY "${ARGS_DIRECTORY}" ABSOLUTE)
   else()
     set(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
   endif()
   include_directories("${DIRECTORY}")
+
   set(vala_pkg_opts)
   foreach(pkg ${ARGS_PACKAGES})
     list(APPEND vala_pkg_opts "--pkg=${pkg}")
   endforeach()
+
+  set(vala_define_opts)
+  foreach(def ${ARGS_DEFINITIONS})
+    list(APPEND vala_define_opts "--define=${def}")
+  endforeach()
+
   set(in_files)
   set(out_files)
   set(out_files_rel)
@@ -211,6 +222,7 @@ function(vala_precompile output)
         "-b" "${CMAKE_CURRENT_SOURCE_DIR}"
         "-d" "${DIRECTORY}"
         ${vala_pkg_opts}
+        ${vala_define_opts}
         ${ARGS_OPTIONS}
         ${in_files}
         ${custom_vapi_arguments}

@@ -69,7 +69,7 @@ set(pc_version "${${project_name}_VERSION}")
 
 
 # Custom library version checks.
-set(valac_cond)
+set(definitions)
 find_package(PkgConfig)
 # libvala-X.Y
 if(VALA_SHORTVER STREQUAL "0.18")
@@ -78,17 +78,17 @@ if(VALA_SHORTVER STREQUAL "0.18")
 elseif(VALA_SHORTVER STREQUAL "0.20")
   list(REMOVE_ITEM required_pkgs "libvala-0.18")
   list(REMOVE_ITEM required_pkgs "libvala-0.22")
-  list(APPEND valac_cond "-D;VALAC_0_20")
+  list(APPEND definitions "VALAC_0_20")
 elseif(VALA_SHORTVER STREQUAL "0.22")
   list(REMOVE_ITEM required_pkgs "libvala-0.18")
   list(REMOVE_ITEM required_pkgs "libvala-0.20")
-  list(APPEND valac_cond "-D;VALAC_0_20")
+  list(APPEND definitions "VALAC_0_20")
 else()
   list(REMOVE_ITEM required_pkgs "libvala-0.18")
   list(REMOVE_ITEM required_pkgs "libvala-0.20")
   list(REMOVE_ITEM required_pkgs "libvala-0.22")
   list(APPEND required_pkgs "libvala-${VALA_SHORTVER}")
-  list(APPEND valac_cond "-D;VALAC_0_20")
+  list(APPEND definitions "VALAC_0_20")
 endif()
 # glib-2.0
 pkg_check_modules(GLIB2.0 REQUIRED "glib-2.0")
@@ -126,13 +126,14 @@ set(default_vala_flags
   "--target-glib" "${GLIB2.0_VERSION}"
   "--enable-experimental"
   #"--fatal-warnings"
-  ${valac_cond}
 )
 
 include(ValaPkgs)
 vala_pkgs(VALA_C
   PACKAGES
     ${required_pkgs}
+  DEFINITIONS
+    ${definitions}
   OPTIONAL
     ${optional_pkgs}
   SRCFILES

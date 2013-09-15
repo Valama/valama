@@ -39,6 +39,9 @@
 # PACKAGES (in general mandatory)
 #   List of all Vala packages the project depends on.
 #
+# DEFINITIONS (optional)
+#   A list of symbols for conditional compilation.
+#
 # SRCFILES
 #   List of all project files. Globbing is supported.
 #
@@ -47,7 +50,7 @@
 
 if(VALADOC_FOUND)
   function(valadoc_gen package_name)
-    cmake_parse_arguments(ARGS "ALL" "INSTALLDIR;DOCDIR" "PACKAGES;SRCFILES;OPTIONS" ${ARGN})
+    cmake_parse_arguments(ARGS "ALL" "INSTALLDIR;DOCDIR" "PACKAGES;DEFINITIONS;SRCFILES;OPTIONS" ${ARGN})
 
     if(ARGS_SRCFILES)
       if(ARGS_ALL)
@@ -101,6 +104,9 @@ if(VALADOC_FOUND)
           "-o" "${docdir}"
           "--package-name" "${package_name}"
       )
+      foreach(def ${ARGS_DEFINITIONS})
+        list(APPEND valadoc_options "--define=${def}")
+      endforeach()
       if(ARGS_OPTIONS)
         list(APPEND valadoc_options ${ARGS_OPTIONS})
       endif()
