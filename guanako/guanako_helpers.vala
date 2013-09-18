@@ -21,6 +21,13 @@ using GLib;
 using Vala;
 
 namespace Guanako {
+    static Gee.ArrayList<string>? vapi_dirs = null;
+    public static Gee.BidirList<string> get_vapi_dirs() {
+        if (vapi_dirs == null)
+            return new Gee.ArrayList<string>().read_only_view;
+        return vapi_dirs.read_only_view;
+    }
+
     static Gee.TreeMultiMap<string, string>? available_packages = null;
     public static Gee.MultiMap<string, string> get_available_packages() {
         if (available_packages == null)
@@ -45,6 +52,7 @@ namespace Guanako {
                 if (FileUtils.test (filename, FileTest.EXISTS))
                     return filename;
             }
+        load_vapi_dirs();
         foreach (var dir in get_vapi_dirs()) {
             debug_msg ("Checking %s directory: %s\n", ext, dir);
             var filename = Path.build_path (Path.DIR_SEPARATOR_S, dir, pkg + ext);
@@ -54,15 +62,24 @@ namespace Guanako {
         return null;
     }
 
-    public static string[] get_vapi_dirs() {
-        var dirs = new string[0];
+    public static bool load_vapi_dirs (bool reload = false) {
+        if (vapi_dirs == null)
+            vapi_dirs = new Gee.ArrayList<string>();
+        else if (reload)
+            vapi_dirs.clear();
+        else
+            return false;
+
+        /* Same order as in Vala.CodeContext.get_file_path . */
         foreach (var dir in Environment.get_system_data_dirs())
-            dirs += Path.build_path (Path.DIR_SEPARATOR_S, dir, "vala/vapi");
+            vapi_dirs.add (Path.build_path (Path.DIR_SEPARATOR_S, dir, "vala/vapi"));
         foreach (var dir in Environment.get_system_data_dirs())
-            dirs += Path.build_path (Path.DIR_SEPARATOR_S, dir,
-                                     "vala-" + Config.VALA_VERSION,
-                                     "vapi");
-        return dirs;
+            vapi_dirs.add (Path.build_path (Path.DIR_SEPARATOR_S,
+                                            dir,
+                                            "vala-" + Config.VALA_VERSION,
+                                            "vapi"));
+
+        return true;
     }
 
     /**
@@ -78,6 +95,7 @@ namespace Guanako {
         else
             return false;
 
+        load_vapi_dirs();
         foreach (var path in get_vapi_dirs()) {
             if (!FileUtils.test (path, FileTest.IS_DIR))
                 continue;
