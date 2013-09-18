@@ -49,8 +49,6 @@ public class ProjectTemplate {
      * and get unmet dependencies.
      */
     public void init() throws LoadingError requires (path != null) {
-        Guanako.load_available_packages();
-
         if (path.length > 0)
             vproject = new ValamaProject (Path.build_path (Path.DIR_SEPARATOR_S, path, "template.vlp"), null, false);
         else {

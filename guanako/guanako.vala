@@ -27,6 +27,11 @@ namespace Guanako {
      */
     public bool debug = false;
 
+    public static void init (bool reload = false) {
+        load_vapi_dirs (reload);
+        load_available_packages (reload);
+    }
+
     public class CompletionProposal {
         public CompletionProposal (Symbol smb, int rep_length) {
             this.symbol = smb;

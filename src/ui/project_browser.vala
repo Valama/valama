@@ -376,7 +376,6 @@ public class ProjectBrowser : UiElement {
         dlg.get_content_area().pack_start (scrw);
         dlg.set_default_size (400, 600);
 
-        Guanako.load_available_packages();
         var proposed_packages = new string[0];
         foreach (var pkg in Guanako.get_available_packages().get_keys()) {
             if (pkg in project.packages.keys)  //Ignore packages that are already selected

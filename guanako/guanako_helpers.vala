@@ -52,7 +52,6 @@ namespace Guanako {
                 if (FileUtils.test (filename, FileTest.EXISTS))
                     return filename;
             }
-        load_vapi_dirs();
         foreach (var dir in get_vapi_dirs()) {
             debug_msg ("Checking %s directory: %s\n", ext, dir);
             var filename = Path.build_path (Path.DIR_SEPARATOR_S, dir, pkg + ext);
@@ -95,7 +94,6 @@ namespace Guanako {
         else
             return false;
 
-        load_vapi_dirs();
         foreach (var path in get_vapi_dirs()) {
             if (!FileUtils.test (path, FileTest.IS_DIR))
                 continue;

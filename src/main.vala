@@ -72,6 +72,8 @@ public static int main (string[] args) {
     if (Args.debuglevel >= 1)
         Guanako.debug = true;
 
+    Guanako.init();
+
     if (Args.projectfiles.length > 0)
         try {
             project = new ValamaProject (Args.projectfiles[0], Args.syntaxfile);
