@@ -115,8 +115,8 @@ public class ProjectFile : Object {
     public TreeSet<string> d_files { get; private set; default = new TreeSet<string>(); }
 
 
-    public TreeMap<string, PackageInfo?> packages { get; private set;
-        default = new TreeMap<string, PackageInfo?> (null, (EqualDataFunc<PackageInfo?>?) PackageInfo.compare_func);
+    public TreeMap<string, PackageInfo> packages { get; private set;
+        default = new TreeMap<string, PackageInfo> (Guanako.compare_string_case_insensitive, PackageInfo.compare_data_func);
     }
 
     /**

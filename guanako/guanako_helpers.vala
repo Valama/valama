@@ -81,6 +81,10 @@ namespace Guanako {
         return true;
     }
 
+    public inline static int compare_string_case_insensitive (string a, string b) {
+        return strcmp (a.down(), b.down());
+    }
+
     /**
      * Load Vala packages from filenames and sort them.
      *
@@ -88,7 +92,7 @@ namespace Guanako {
      */
     public static bool load_available_packages (bool reload = false) {
         if (available_packages == null)
-            available_packages = new Gee.TreeMultiMap<string, string>();
+            available_packages = new Gee.TreeMultiMap<string, string> (compare_string_case_insensitive);
         else if (reload)
             available_packages.clear();
         else

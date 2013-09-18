@@ -468,6 +468,10 @@ public class PackageInfo {
 
         return 0;
     }
+
+    public inline static bool compare_data_func (PackageInfo pkg1, PackageInfo pkg2) {
+        return (compare_func (pkg1, pkg2) == 0);
+    }
 }
 
 
