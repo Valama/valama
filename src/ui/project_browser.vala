@@ -37,12 +37,16 @@ public class ProjectBrowser : UiElement {
 
         tree_view = new TreeView();
         tree_view.headers_visible = false;
-        tree_view.insert_column_with_attributes (-1,
-                                                 _("Project"),
-                                                 new CellRendererText(),
-                                                 "text",
-                                                 0,
-                                                 null);
+
+        var filename_column = new TreeViewColumn();
+        var filename_column_icon_renderer = new CellRendererPixbuf();
+        var filename_column_text_renderer = new CellRendererText();
+        filename_column.pack_start (filename_column_icon_renderer, false);
+        filename_column.pack_start (filename_column_text_renderer, false);
+        filename_column.set_attributes (filename_column_icon_renderer, "icon-name", 0, null);
+        filename_column.set_attributes (filename_column_text_renderer, "text", 1, null);
+        tree_view.append_column (filename_column);
+
         tree_view_expanded = new Gee.ArrayList<TreePath>();
         build();
 
@@ -118,7 +122,7 @@ public class ProjectBrowser : UiElement {
 
             StoreType store_type;
             string val;
-            tree_view.model.get (iter, 0, out val, 1, out store_type, -1);
+            tree_view.model.get (iter, 1, out val, 2, out store_type, -1);
             switch (store_type) {
                 case StoreType.FILE:
                     string filepath = val;
@@ -127,7 +131,7 @@ public class ProjectBrowser : UiElement {
                             bug_msg (_("Could not get iterator in TreeView: %s\n"), path.to_string());
                             return;
                         }
-                        tree_view.model.get (iter, 0, out val, 1, out store_type, -1);
+                        tree_view.model.get (iter, 1, out val, 2, out store_type, -1);
                         if (store_type == StoreType.FILE_TREE)
                             break;
                         filepath = Path.build_path (Path.DIR_SEPARATOR_S, val, filepath);
@@ -169,7 +173,7 @@ public class ProjectBrowser : UiElement {
 
             StoreType store_type;
             string val;
-            tree_view.model.get (iter, 0, out val, 1, out store_type, -1);
+            tree_view.model.get (iter, 1, out val, 2, out store_type, -1);
 
             switch (store_type) {
                 case StoreType.PACKAGE_TREE:
@@ -285,7 +289,7 @@ public class ProjectBrowser : UiElement {
         debug_msg (_("Run %s update!\n"), get_name());
         update_needed = false;
 
-        var store = new TreeStore (2, typeof (string), typeof (int));
+        var store = new TreeStore (3, typeof (string), typeof (string), typeof (int));
         tree_view.set_model (store);
 
         pathmap = new Gee.HashMap<string, TreeIter?>();
@@ -419,7 +423,7 @@ public class ProjectBrowser : UiElement {
 
         StoreType store_type;
         string val;
-        tree_view.model.get (iter, 0, out val, 1, out store_type, -1);
+        tree_view.model.get (iter, 1, out val, 2, out store_type, -1);
 
         switch (store_type) {
             case StoreType.FILE_TREE:
@@ -459,7 +463,7 @@ public class ProjectBrowser : UiElement {
                         bug_msg (_("Could not get iterator in TreeView: %s\n"), path.to_string());
                         return;
                     }
-                    tree_view.model.get (iter, 0, out val, 1, out stype, -1);
+                    tree_view.model.get (iter, 1, out val, 2, out stype, -1);
                     if (stype == StoreType.FILE_TREE)
                         break;
                     filepath = Path.build_path (Path.DIR_SEPARATOR_S, val, filepath);
@@ -528,7 +532,7 @@ public class ProjectBrowser : UiElement {
 
         StoreType store_type;
         string val;
-        tree_view.model.get (iter, 0, out val, 1, out store_type, -1);
+        tree_view.model.get (iter, 1, out val, 2, out store_type, -1);
 
         switch (store_type) {
             case StoreType.PACKAGE_TREE:
@@ -543,7 +547,7 @@ public class ProjectBrowser : UiElement {
                         bug_msg (_("Could not get iterator in TreeView: %s\n"), path.to_string());
                         return;
                     }
-                    tree_view.model.get (iter, 0, out val, 1, out stype, -1);
+                    tree_view.model.get (iter, 1, out val, 2, out stype, -1);
                     if (stype == StoreType.FILE_TREE)
                         break;
                     filepath = Path.build_path (Path.DIR_SEPARATOR_S, val, filepath);

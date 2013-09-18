@@ -251,7 +251,7 @@ public void build_file_treestore (string storename,
                                   ref Gee.HashMap<string, TreeIter?> pathmap) {
         TreeIter iter_base;
         store.append (out iter_base, null);
-        store.set (iter_base, 0, storename, 1, StoreType.FILE_TREE, -1);
+        store.set (iter_base, 1, storename, 2, StoreType.FILE_TREE, -1);
 
         /* Filename -> filetype mappings. Value is `true` for directories. */
         var tmap = new Gee.TreeMap<string, bool>();
@@ -278,11 +278,16 @@ public void build_file_treestore (string storename,
                     store.append (out iter, pathmap[Path.get_dirname (pathparts[depth])]);
 
                 StoreType store_type;
-                if (entry.value || depth < pathparts.length - 1)
+                string? icon_name = null;
+                if (entry.value || depth < pathparts.length - 1) {
                     store_type = StoreType.DIRECTORY;
-                else
+                    icon_name = "folder";
+                } else {
                     store_type = StoreType.FILE;
-                store.set (iter, 0, Path.get_basename (pathparts[depth]), 1, store_type, -1);
+                    icon_name = "document";
+                }
+
+                store.set (iter, 0, icon_name, 1, Path.get_basename (pathparts[depth]), 2, store_type, -1);
 
                 pathmap[pathparts[depth]] = iter;
             }
@@ -302,12 +307,12 @@ public void build_file_treestore (string storename,
 public void build_plain_treestore (string storename, string[] elements, ref TreeStore store) {
     TreeIter iter_base;
     store.append (out iter_base, null);
-    store.set (iter_base, 0, storename, 1, StoreType.PACKAGE_TREE, -1);
+    store.set (iter_base, 1, storename, 2, StoreType.PACKAGE_TREE, -1);
 
     foreach (string element in elements) {
         TreeIter iter;
         store.append (out iter, iter_base);
-        store.set (iter, 0, element, 1, StoreType.PACKAGE, -1);
+        store.set (iter, 1, element, 2, StoreType.PACKAGE, -1);
     }
 }
 
