@@ -17,7 +17,7 @@ Discussion and support on IRC channel [#valama](http://webchat.freenode.net/?cha
  * gobject-2.0
  * glib-2.0
  * gio-2.0
- * gee-0.8
+ * gee-0.8 (>= 0.10.5)
  * at least libvala-0.22 (recommended) or libvala-0.20 or libvala-0.18
  * gdk-3.0
  * gdl-3.0 (>= 3.5.5 is recommended)
