@@ -201,7 +201,7 @@ add_definitions(-DPIXMAP_DIR="${install_prefix}${pixdir}")
 add_definitions(-DVALA_VERSION="${VALA_SHORTVER}")
 
 add_executable("${project_name_lower}" ${VALA_C})
-target_link_libraries("${project_name_lower}" ${PROJECT_LDFLAGS})
+target_link_libraries("${project_name_lower}" ${PROJECT_LDFLAGS} "-lm")
 add_definitions(${PROJECT_C_FLAGS})
 if(GUANAKO)
   include_directories("${PROJECT_BINARY_DIR}/guanako")

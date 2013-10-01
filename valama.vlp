@@ -12,6 +12,7 @@
 			<package name="libvala-0.20" define="VALAC_0_20"/>
 			<package name="libvala-0.18"/>
 		</choice>
+		<package name="clutter-gtk-1.0"/>
 		<package name="gdk-3.0"/>
 		<package name="gdl-3.0" version="3.3.91" rel="since">
 			<extracheck vapi="extravapi/gdl-3.0.vapi" define="GDL_3_9_91">

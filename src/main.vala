@@ -37,6 +37,8 @@ static TreeMap<string, ProjectTemplate>? templates = null;
 static Gee.ArrayList<string>? locales = null;
 
 public static int main (string[] args) {
+    GtkClutter.init (ref args);
+
     Intl.textdomain (Config.GETTEXT_PACKAGE);
     Intl.bindtextdomain (Config.GETTEXT_PACKAGE, Config.LOCALE_DIR);
     recentmgr = (RecentManager) GLib.Object.new (typeof(RecentManager),

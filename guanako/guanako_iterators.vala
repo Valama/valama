@@ -178,6 +178,125 @@ namespace Guanako {
         return null;
     }
 
+    public class SymbolVisitor : CodeVisitor {
+        public SymbolVisitor (iter_callback callback) {
+            this.callback = callback;
+        }
+        iter_callback callback;
+        bool abort_tree = false;
+        public override void visit_source_file (SourceFile source_file) {
+            source_file.accept_children (this);
+        }
+        public override void visit_namespace  (Vala.Namespace ns) {
+            if (abort_tree)
+                return;
+            var ret = callback (ns, 0);
+            if (ret == IterCallbackReturns.ABORT_TREE)
+                abort_tree = true;
+            else if (ret == IterCallbackReturns.CONTINUE)
+                ns.accept_children(this);
+        }
+        public override void visit_class (Class cl) {
+            if (abort_tree)
+                return;
+            var ret = callback (cl, 0);
+            if (ret == IterCallbackReturns.ABORT_TREE)
+                abort_tree = true;
+            else if (ret == IterCallbackReturns.CONTINUE)
+                cl.accept_children(this);
+        }
+        public override void visit_struct (Struct st) {
+            if (abort_tree)
+                return;
+            var ret = callback (st, 0);
+            if (ret == IterCallbackReturns.ABORT_TREE)
+                abort_tree = true;
+            else if (ret == IterCallbackReturns.CONTINUE)
+                st.accept_children(this);
+        }
+        public override void visit_interface (Interface iface) {
+            if (abort_tree)
+                return;
+            var ret = callback (iface, 0);
+            if (ret == IterCallbackReturns.ABORT_TREE)
+                abort_tree = true;
+            else if (ret == IterCallbackReturns.CONTINUE)
+                iface.accept_children(this);
+        }
+        public override void visit_enum (Vala.Enum en) {
+            if (abort_tree)
+                return;
+            var ret = callback (en, 0);
+            if (ret == IterCallbackReturns.ABORT_TREE)
+                abort_tree = true;
+            else if (ret == IterCallbackReturns.CONTINUE)
+                en.accept_children(this);
+        }
+        public override void visit_error_domain (ErrorDomain edomain) {
+            if (abort_tree)
+                return;
+            var ret = callback (edomain, 0);
+            if (ret == IterCallbackReturns.ABORT_TREE)
+                abort_tree = true;
+            else if (ret == IterCallbackReturns.CONTINUE)
+                edomain.accept_children(this);
+        }
+        public override void visit_enum_value (Vala.EnumValue ev) {
+            if (abort_tree)
+                return;
+            if (callback (ev, 0) == IterCallbackReturns.ABORT_TREE)
+                abort_tree = true;
+        }
+        public override void visit_error_code (ErrorCode ecode) {
+            if (abort_tree)
+                return;
+            if (callback (ecode, 0) == IterCallbackReturns.ABORT_TREE)
+                abort_tree = true;
+        }
+        public override void visit_delegate (Delegate d) {
+            if (abort_tree)
+                return;
+            if (callback (d, 0) == IterCallbackReturns.ABORT_TREE)
+                abort_tree = true;
+        }
+        public override void visit_signal (Vala.Signal sig) {
+            if (abort_tree)
+                return;
+            if (callback (sig, 0) == IterCallbackReturns.ABORT_TREE)
+                abort_tree = true;
+        }
+        public override void visit_field (Field f) {
+            if (abort_tree)
+                return;
+            if (callback (f, 0) == IterCallbackReturns.ABORT_TREE)
+                abort_tree = true;
+        }
+        public override void visit_constant (Constant c) {
+            if (abort_tree)
+                return;
+            if (callback (c, 0) == IterCallbackReturns.ABORT_TREE)
+                abort_tree = true;
+        }
+        public override void visit_property (Property prop) {
+            if (abort_tree)
+                return;
+            if (callback (prop, 0) == IterCallbackReturns.ABORT_TREE)
+                abort_tree = true;
+        }
+        public override void visit_method (Method m) {
+            if (abort_tree)
+                return;
+            if (callback (m, 0) == IterCallbackReturns.ABORT_TREE)
+                abort_tree = true;
+        }
+        public override void visit_local_variable (LocalVariable local) {
+            if (abort_tree)
+                return;
+            if (callback (local, 0) == IterCallbackReturns.ABORT_TREE)
+                abort_tree = true;
+        }
+    }
+
     /*
      * Generic callback for iteration functions.
      */
@@ -194,17 +313,16 @@ namespace Guanako {
     public static bool iter_symbol (Symbol smb,
                                     iter_callback callback,
                                     int depth = 0) {
-        if (depth > 0) {
-            if (smb.name != null)  //TODO: This is a part of a nasty workaround to ignore old symbols left after re-parsing.
-                if (smb.name == "")
-                    return true;
 
-            var ret = callback (smb, depth);
-            if (ret == IterCallbackReturns.ABORT_BRANCH)
+        if (smb.name != null)  //TODO: This is a part of a nasty workaround to ignore old symbols left after re-parsing.
+            if (smb.name == "")
                 return true;
-            else if (ret == IterCallbackReturns.ABORT_TREE)
-                return false;
-        }
+
+        var ret = callback (smb, depth);
+        if (ret == IterCallbackReturns.ABORT_BRANCH)
+            return true;
+        else if (ret == IterCallbackReturns.ABORT_TREE)
+            return false;
 
         if (smb is Namespace) {
             var cv = (Namespace) smb;

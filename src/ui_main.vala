@@ -39,6 +39,7 @@ static UiCurrentFileStructure wdg_current_file_structure;
 static UiBreakpoints wdg_breakpoints;
 static UiSearch wdg_search;
 static SymbolBrowser wdg_smb_browser;
+static UiStructureView wdg_structure_view;
 // static UiStyleChecker wdg_stylechecker;
 
 static Gee.HashMap<string, Gdk.Pixbuf> map_icons;
@@ -157,6 +158,7 @@ public class MainWidget : Box {
         wdg_app_output = new AppOutput();
         wdg_current_file_structure = new UiCurrentFileStructure();
         wdg_search = new UiSearch();
+        wdg_structure_view = new UiStructureView();
         // wdg_stylechecker = new UiStyleChecker();
 
         /* Gdl elements. */
@@ -198,6 +200,10 @@ public class MainWidget : Box {
         //                       DockPlacement.LEFT);
         add_item ("SymbolBrowser", _("Symbol browser"), wdg_smb_browser,
                               "gtk-convert",
+                              DockItemBehavior.NORMAL,
+                              DockPlacement.RIGHT);
+        add_item ("StructureView", _("Structure view"), wdg_structure_view,
+                              "gtk-file",
                               DockItemBehavior.NORMAL,
                               DockPlacement.RIGHT);
 
@@ -367,6 +373,7 @@ public class MainWidget : Box {
         add_view_menu_item (menu_view, wdg_current_file_structure, _("Show current file structure"));
         // add_view_menu_item (menu_view, wdg_stylechecker, _("Show style checker"));
         add_view_menu_item (menu_view, wdg_smb_browser, _("Show symbol browser"));
+        add_view_menu_item (menu_view, wdg_structure_view, _("Show structure viewer"));
         menu_view.append (new SeparatorMenuItem());
 
         // TRANSLATORS: Lock user interface elements to prevent moving them around.

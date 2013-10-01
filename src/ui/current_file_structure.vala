@@ -217,6 +217,9 @@ public class UiCurrentFileStructure : UiElement {
 
             TreeIter[] iters = new TreeIter[0];
             Guanako.iter_symbol ((Symbol)node, (smb, depth) => {
+                if (depth == 0)
+                    return Guanako.IterCallbackReturns.CONTINUE;
+
                 if (smb.name != null && (smb is Constant ||
                                          smb is Namespace ||
                                          smb is Property ||
@@ -224,6 +227,7 @@ public class UiCurrentFileStructure : UiElement {
                                          smb is Subroutine ||
                                          smb is Variable ||
                                          smb is TypeSymbol)) {
+
                     if (smb.access == SymbolAccessibility.PRIVATE)
                         if (!btn_show_private.active)
                             return Guanako.IterCallbackReturns.ABORT_BRANCH;
