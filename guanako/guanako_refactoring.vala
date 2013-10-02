@@ -25,23 +25,37 @@ namespace Guanako.Refactoring {
         if (smb is Vala.Subroutine) {
             var sr = smb as Vala.Subroutine;
             Vala.Statement st = null;
+            int old_depth = 0;
             Guanako.iter_subroutine (sr, (stmt, depth)=>{
+                //if (!Guanako.inside_source_ref (sf, line, col, stmt.source_reference))
+                //    return Guanako.IterCallbackReturns.ABORT_BRANCH;
+                //st = stmt;
+                //return Guanako.IterCallbackReturns.CONTINUE;
                 if (!Guanako.inside_source_ref (sf, line, col, stmt.source_reference))
-                    return Guanako.IterCallbackReturns.ABORT_BRANCH;
-                st = stmt;
+                    return Guanako.IterCallbackReturns.CONTINUE;
+                if (depth > old_depth) {
+                    old_depth = depth;
+                    st = stmt;
+                }
                 return Guanako.IterCallbackReturns.CONTINUE;
             });
             //if (st == null)
             //    stdout.printf("Statement null\n");
             if (st != null) {
                 Vala.Expression expression = null;
+                //old_depth = 0;
                 Guanako.iter_expressions (st, (expr, depth)=>{
                     if (!Guanako.inside_source_ref (sf, line, col, expr.source_reference))
                         return Guanako.IterCallbackReturns.ABORT_BRANCH;
-                    //stdout.printf("!expr:" + expression.to_string() + "\n");
-                    //stdout.printf("!src ref:" + expression.source_reference.to_string() + "\n");
                     expression = expr;
                     return Guanako.IterCallbackReturns.CONTINUE;
+                    /*if (!Guanako.inside_source_ref (sf, line, col, expr.source_reference))
+                        return Guanako.IterCallbackReturns.CONTINUE;
+                    if (depth > old_depth) {
+                        old_depth = depth;
+                        expression = expr;
+                    }
+                    return Guanako.IterCallbackReturns.CONTINUE;*/
                 });
                 //stdout.printf("smb ref:" + expression.symbol_reference.to_string() + "\n");
                 return expression.symbol_reference;

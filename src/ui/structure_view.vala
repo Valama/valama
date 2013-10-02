@@ -161,7 +161,6 @@ public class UiStructureView : UiElement {
             var text = new Clutter.Text.full ("Bitstream Vera Sans 12",
                               splt[splt.length-1],
                               Clutter.Color.from_string ("white"));
-            text.z_position = 1;
 
             box.reactive = true;
             box.enter_event.connect(()=>{
@@ -203,7 +202,6 @@ public class UiStructureView : UiElement {
                               smb.name, color_of_symbol(smb));
 
             text.x = depth * 20;
-            text.z_position = 1;
 
             if (smb.access == SymbolAccessibility.PUBLIC)
                 vbox_public.add_child (text);
@@ -234,7 +232,6 @@ public class UiStructureView : UiElement {
                 r.rotation_angle_z = -Math.asinf ((x2 - x1) / dist) / Math.PI * 180;
             else
                 r.rotation_angle_z = Math.asinf ((x2 - x1) / dist) / Math.PI * 180 + 180;
-            r.z_position = 0.5f;
             r.set_easing_mode (Clutter.AnimationMode.EASE_OUT_QUAD);
             r.set_easing_duration (250);
             r.opacity = 25;
