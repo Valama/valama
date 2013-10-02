@@ -146,23 +146,27 @@ namespace Guanako {
     /*
      * Get parent's children.
      */
-    Symbol[] get_child_symbols (Symbol parent) {
-        Symbol[] ret = new Symbol[0];
+    Gee.LinkedList<Symbol> get_child_symbols (Symbol parent) {
+        var ret = new Gee.LinkedList<Symbol>();
         if (parent is Class) {
             //If parent is a Class, add its base class and types (i.e. interfaces it implements etc)
             var p = (Class) parent;
             if (p.base_class != null)
                 ret = get_child_symbols (p.base_class);
             foreach (DataType type in p.get_base_types()) {
-                iter_symbol (type.data_type, (s) => {
-                    ret += s;
+                iter_symbol (type.data_type, (s, depth) => {
+                    if (depth == 0)
+                        return IterCallbackReturns.CONTINUE;
+                    ret.add(s);
                     return IterCallbackReturns.ABORT_BRANCH;
                 });
             }
         }
 
-        iter_symbol (parent, (s) => {
-            ret += s;
+        iter_symbol (parent, (s, depth) => {
+            if (depth == 0)
+                return IterCallbackReturns.CONTINUE;
+            ret.add(s);
             return IterCallbackReturns.ABORT_BRANCH;
         });
         return ret;
