@@ -514,12 +514,6 @@ namespace Guanako {
         else if (ret == IterCallbackReturns.ABORT_TREE)
             return false;
 
-        if (statement is Block) {
-            var st = (Block) statement;
-            foreach (Statement ch in st.get_statements())
-                if (!iter_statement (ch, callback, depth + 1, "block"))
-                    return false;
-        }
         if (statement is Loop) {
             var st = (Loop) statement;
             if (!iter_statement (st.body, callback, depth + 1, "loop"))
@@ -582,6 +576,12 @@ namespace Guanako {
                 if (!iter_statement (cl.body, callback, depth + 1, "try_statement"))
                     return false;
         }
+        if (statement is Block) {
+            var st = (Block) statement;
+            foreach (Statement ch in st.get_statements())
+                if (!iter_statement (ch, callback, depth + 1, "block"))
+                    return false;
+        }
 
         return true;
     }
@@ -592,6 +592,11 @@ namespace Guanako {
     public static bool iter_expressions (Statement statement,
                                        iter_expression_callback callback,
                                        int depth = 0) {
+        if (statement is SwitchSection) {
+            var st = (SwitchSection) statement;
+            foreach (SwitchLabel lbl in st.get_labels())
+                return iter_expressions_int (lbl.expression, callback, depth + 1);
+        }
         if (statement is Vala.ExpressionStatement) {
             var cv = statement as Vala.ExpressionStatement;
             return iter_expressions_int (cv.expression, callback, depth + 1);
@@ -635,8 +640,16 @@ namespace Guanako {
         }
         if (statement is Vala.ForStatement) {
             var cv = statement as Vala.ForStatement;
+            foreach (Expression expr in cv.get_initializer())
+                return iter_expressions_int (expr, callback, depth + 1);
+            foreach (Expression expr in cv.get_iterator())
+                return iter_expressions_int (expr, callback, depth + 1);
             if (cv.condition != null)
                 return iter_expressions_int (cv.condition, callback, depth + 1);
+        }
+        if (statement is Vala.ForeachStatement) {
+            var cv = statement as Vala.ForeachStatement;
+            return iter_expressions_int (cv.collection, callback, depth + 1);
         }
         if (statement is Vala.ReturnStatement) {
             var cv = statement as Vala.ReturnStatement;
