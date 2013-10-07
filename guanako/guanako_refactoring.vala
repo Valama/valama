@@ -28,7 +28,7 @@ namespace Guanako.Refactoring {
             int old_depth = -1;
             Guanako.iter_subroutine (sr, (stmt, depth)=>{
                 if (!Guanako.inside_source_ref (sf, line, col, stmt.source_reference))
-                    return Guanako.IterCallbackReturns.CONTINUE;
+                    return Guanako.IterCallbackReturns.CONTINUE; //TODO: abort here?
                 if (depth > old_depth) {
                     old_depth = depth;
                     st = stmt;

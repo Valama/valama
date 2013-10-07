@@ -1360,7 +1360,7 @@ public class ValamaProject : ProjectFile {
         view.key_press_event.connect ((key)=>{
             bfr.last_key_valid = !(key.keyval == Gdk.Key.space || key.keyval == Gdk.Key.Delete
                                    || key.keyval == Gdk.Key.Tab || key.keyval == Gdk.Key.BackSpace
-                                   || key.keyval == 65293); // That's Enter
+                                   || key.keyval == Gdk.Key.semicolon || key.keyval == 65293); // That's Enter
             return false;
         });
 
