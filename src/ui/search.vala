@@ -98,12 +98,7 @@ public class UiSearch : UiElement {
     }
 
     protected override void on_element_show() {
-        if (source_viewer.current_srcbuffer != null) {
-            TextIter sel_start, sel_end;
-            source_viewer.current_srcbuffer.get_selection_bounds (out sel_start, out sel_end);
-            entry_search.text = source_viewer.current_srcbuffer.get_text (sel_start, sel_end, true);
-        }
-        focus_entry_search();
+        search_for_current_selection();
     }
 
     protected override void on_element_hide() {}
@@ -141,7 +136,20 @@ public class UiSearch : UiElement {
         source_view.highlight_line (result.line);
     }
 
-    void search (string search) {
+    public void search_for_current_selection() {
+        if (source_viewer.current_srcbuffer != null) {
+            TextIter sel_start, sel_end;
+            source_viewer.current_srcbuffer.get_selection_bounds (out sel_start, out sel_end);
+            entry_search.text = source_viewer.current_srcbuffer.get_text (sel_start, sel_end, true);
+            search (entry_search.text);
+        }
+        show_element (true);
+        widget_main.focus_dock_item (dock_item);
+        focus_entry_search();
+
+    }
+
+    public void search (string search) {
         if (search == "" || source_viewer.current_srcbuffer == null)
             return;
 
