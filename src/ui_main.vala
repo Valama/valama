@@ -352,13 +352,22 @@ public class MainWidget : Box {
         project.redo_changed.connect (item_edit_redo.set_sensitive);
         add_accel_activate (item_edit_redo, Gdk.Key.r);
 
+        var item_edit_search = new ImageMenuItem.with_mnemonic (_("_Search"));
+        var image_edit_search = new Image();
+        image_edit_search.icon_name = "edit-search";
+        item_edit_search.image = image_edit_search;
+        item_edit_search.set_sensitive (true);
+        menu_edit.append (item_edit_search);
+        item_edit_search.activate.connect (wdg_search.search_for_current_selection);
+        add_accel_activate (item_edit_search, Gdk.Key.f);
+
         /* View */
         var item_view = new Gtk.MenuItem.with_mnemonic (_("_View"));
         menubar.add (item_view);
         var menu_view = new Gtk.Menu();
         item_view.set_submenu (menu_view);
 
-        add_view_menu_item (menu_view, wdg_search, _("Show search"), true, Gdk.Key.f);
+        add_view_menu_item (menu_view, wdg_search, _("Show search"));
         add_view_menu_item (menu_view, wdg_report, _("Show reports"));
         add_view_menu_item (menu_view, wdg_pbrw, _("Show project browser"));
         add_view_menu_item (menu_view, wdg_build_output, _("Show build output"));
