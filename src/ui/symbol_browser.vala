@@ -239,7 +239,6 @@ public class SymbolBrowser : UiElement {
     }
 
     public override void build() {
-        new Thread<void*> (_("Symbol browser update"), () => {
             update_needed = false;
             debug_msg (_("Run %s update!\n"), get_name());
             var store = new TreeStore (6, typeof (string), typeof (string), typeof (uint),
@@ -284,8 +283,6 @@ public class SymbolBrowser : UiElement {
             tree_view.set_model (store);
 
             debug_msg (_("%s update finished!\n"), get_name());
-            return null;
-        });
     }
 }
 
