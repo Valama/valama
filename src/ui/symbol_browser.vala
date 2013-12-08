@@ -239,6 +239,7 @@ public class SymbolBrowser : UiElement {
     }
 
     public override void build() {
+        new Thread<void*> (_("Symbol browser update"), () => {
             update_needed = false;
             debug_msg (_("Run %s update!\n"), get_name());
             var store = new TreeStore (6, typeof (string), typeof (string), typeof (uint),
@@ -275,14 +276,19 @@ public class SymbolBrowser : UiElement {
                 return Guanako.IterCallbackReturns.CONTINUE;
             });
 
-            if (!init_done) {
-                init_done = true;
-                Source.remove (timer_id);
-                tree_view.sensitive = true;
-            }
-            tree_view.set_model (store);
+			Idle.add (() => {
+				if (!init_done) {
+					init_done = true;
+					Source.remove (timer_id);
+					tree_view.sensitive = true;
+				}
+				tree_view.set_model (store);
+				return true;
+			});
 
             debug_msg (_("%s update finished!\n"), get_name());
+            return null;
+        });
     }
 }
 
