@@ -276,12 +276,15 @@ public class SymbolBrowser : UiElement {
                 return Guanako.IterCallbackReturns.CONTINUE;
             });
 
-            if (!init_done) {
-                init_done = true;
-                Source.remove (timer_id);
-                tree_view.sensitive = true;
-            }
-            tree_view.set_model (store);
+			Idle.add (() => {
+				if (!init_done) {
+					init_done = true;
+					Source.remove (timer_id);
+					tree_view.sensitive = true;
+				}
+				tree_view.set_model (store);
+				return false;
+			});
 
             debug_msg (_("%s update finished!\n"), get_name());
             return null;
