@@ -283,7 +283,7 @@ public class SymbolBrowser : UiElement {
 					tree_view.sensitive = true;
 				}
 				tree_view.set_model (store);
-				return true;
+				return false;
 			});
 
             debug_msg (_("%s update finished!\n"), get_name());
