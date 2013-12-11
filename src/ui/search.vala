@@ -150,8 +150,12 @@ public class UiSearch : UiElement {
     }
 
     public void search (string search) {
-        if (search == "" || source_viewer.current_srcbuffer == null)
+        remove_search_marks();
+
+        if (search == "" || source_viewer.current_srcbuffer == null) {
+            build_results_display (false, new Gee.ArrayList<string>(), new Gee.ArrayList<TextIter?>(), new Gee.ArrayList<TextIter?>());
             return;
+        }
 
         var files = new Gee.ArrayList<string>();
         var starts = new Gee.ArrayList<TextIter?>();
@@ -167,13 +171,17 @@ public class UiSearch : UiElement {
         build_results_display (btn_all_files.active, files, starts, ends);
     }
 
-    void search_buffer (string search, SourceBuffer bfr, string filename, ref Gee.ArrayList<string> files, ref Gee.ArrayList<TextIter?> starts, ref Gee.ArrayList<TextIter?> ends) {
-        TextIter first_iter;
-        TextIter end_iter;
-        bfr.get_start_iter (out first_iter);
-        bfr.get_end_iter (out end_iter);
-        bfr.remove_tag_by_name ("search", first_iter, end_iter);
+    void remove_search_marks() {
+        project.foreach_buffer ((filename, bfr) => {
+            TextIter first_iter;
+            TextIter end_iter;
+            bfr.get_start_iter (out first_iter);
+            bfr.get_end_iter (out end_iter);
+            bfr.remove_tag_by_name ("search", first_iter, end_iter);
+        });
+    }
 
+    void search_buffer (string search, SourceBuffer bfr, string filename, ref Gee.ArrayList<string> files, ref Gee.ArrayList<TextIter?> starts, ref Gee.ArrayList<TextIter?> ends) {
         TextIter? match_start = null;
         TextIter? match_end = null;
         bfr.get_start_iter (out match_end);
