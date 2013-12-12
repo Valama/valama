@@ -1,0 +1,19 @@
+valama (0.1.2+ppa1-1) trusty; urgency=low
+
+  * new git snapshot.
+    [eb8e4d3]: Valama: Removed old dialog, clearing search entry clears marks and results.
+    [7113fd6]: Valama: fix #114
+  
+ -- Yannick Inizan <inizan.yannick@gmail.com>  Thu, 12 Dec 2013 21:15:00 +0100
+
+valama (0.1.1-1) unstable; urgency=low
+
+  * New Bugfix release.
+
+ -- Dominique Lasserre <lasserre.d@gmail.com>  Mon, 10 Sep 2012 23:56:56 +0200
+
+valama (0.1-1) unstable; urgency=low
+
+  * Initial release.
+
+ -- Dominique Lasserre <lasserre.d@gmail.com>  Mon, 10 Sep 2012 22:44:36 +0200
