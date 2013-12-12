@@ -1,4 +1,4 @@
-valama (0.1.2+ppa1-1) trusty; urgency=low
+valama (0.1.2+ppa2-1) trusty; urgency=low
 
   * new git snapshot.
     [eb8e4d3]: Valama: Removed old dialog, clearing search entry clears marks and results.
