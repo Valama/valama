@@ -13,7 +13,7 @@ override_dh_auto_configure:
 
 override_dh_install:
 	dh_install
-	install -m644 valama.xpm debian/valama/usr/share/pixmaps/
+	install -m644 debian/valama.xpm debian/valama/usr/share/pixmaps/
 
 override_dh_installchangelogs:
 	dh_installchangelogs Changelog
