@@ -1,6 +1,0 @@
-?package(valama): \
-  needs="X11" \
-  section="Applications/Programming" \
-  title="Valama" \
-  icon="/usr/share/pixmaps/valama.xpm" \
-  command="/usr/bin/valama"
