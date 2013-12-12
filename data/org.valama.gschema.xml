@@ -1,0 +1,19 @@
+<schemalist>
+  <schema id="org.valama" path="/org/valama/" gettext-domain="valama">
+
+    <key name="window-size-x" type="i">
+      <default>950</default>
+      <summary>Horizontal window size</summary>
+      <description>
+      </description>
+    </key>
+
+    <key name="window-size-y" type="i">
+      <default>700</default>
+      <summary>Vertical window size</summary>
+      <description>
+      </description>
+    </key>
+
+  </schema>
+</schemalist>

@@ -1,9 +1,0 @@
-<template>
-    <author>Linus Seelinger S.Linus@quantentunnel.de</author>
-    <name>
-        <en>Plain vala</en>
-    </name>
-    <description>
-        <en>Simple vala project</en>
-    </description>
-</template>

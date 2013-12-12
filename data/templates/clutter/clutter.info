@@ -1,0 +1,16 @@
+<template version="0.1">
+    <author>
+        <name>Linus Seelinger</name>
+        <mail>S.Linus@quantentunnel.de</mail>
+    </author>
+    <name>
+        <en>Clutter</en>
+        <de>Clutter</de>
+        <fr>Clutter</fr>
+    </name>
+    <description>
+        <en>Simple Clutter animation example</en>
+        <de>Einfaches Clutter-Animationsbeispiel</de>
+        <fr>Exemple simple d'animation Clutter</fr>
+    </description>
+</template>

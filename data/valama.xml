@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
+  <mime-type type="application/x-valama">
+    <comment>Valama project file</comment>
+    <comment xml:lang="de">Valama Projektdatei</comment>
+    <glob pattern="*.vlp"/>
+    <magic priority="60">
+        <match type="string" offset="0" value="&lt;project version="/>
+    </magic>
+  </mime-type>
+</mime-info>

@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<dock-layout>
+  <layout name="__default__">
+    <dock name="__dock_1" floating="no" width="-1" height="-1" floatx="0" floaty="0" skip-taskbar="yes">
+      <paned orientation="horizontal" locked="no" iconified="no" closed="no" position="333">
+        <paned orientation="vertical" locked="no" iconified="no" closed="no" position="573">
+          <item name="ProjectBrowser" orientation="vertical" locked="no" iconified="no" closed="no"/>
+          <item name="ReportWrapper" orientation="vertical" locked="no" iconified="no" closed="no"/>
+        </paned>
+        <paned orientation="horizontal" locked="no" iconified="no" closed="no" position="1363">
+          <paned orientation="horizontal" locked="no" iconified="no" closed="no" position="1170">
+            <item name="SourceView" orientation="vertical" locked="yes" iconified="no" closed="no"/>
+            <paned orientation="vertical" locked="no" iconified="no" closed="no" position="408">
+              <item name="CurrentFileStructure" orientation="vertical" locked="no" iconified="no" closed="no"/>
+              <notebook orientation="vertical" locked="no" iconified="no" closed="no" page="1">
+                <item name="BuildOutput" orientation="vertical" locked="no" iconified="no" closed="no"/>
+                <item name="AppOutput" orientation="vertical" locked="no" iconified="no" closed="no"/>
+                <item name="Breakpoints" orientation="vertical" locked="no" iconified="no" closed="no"/>
+                <item name="Search" orientation="vertical" locked="no" iconified="no" closed="no"/>
+                <item name="StyleChecker" orientation="vertical" locked="no" iconified="no" closed="no"/>
+              </notebook>
+            </paned>
+          </paned>
+          <item name="SymbolBrowser" orientation="vertical" locked="no" iconified="yes" closed="yes"/>
+        </paned>
+      </paned>
+    </dock>
+  </layout>
+</dock-layout>
