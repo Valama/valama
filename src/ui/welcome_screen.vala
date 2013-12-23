@@ -96,11 +96,6 @@ namespace WelcomeScreen {
             this.xscale = 0.0f;
             this.yscale = 0.0f;
 
-            // TODO: More elegant solution
-            //var style = window_main.get_style_context();
-            //box_main.override_background_color (StateFlags.NORMAL, style.get_background_color(StateFlags.NORMAL));
-            //window_main.override_background_color (StateFlags.NORMAL, style.get_background_color(StateFlags.INSENSITIVE));
-
             this.add(box_main);
             this.show_all();
             show_main_screen();

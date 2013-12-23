@@ -36,19 +36,28 @@ public void ui_project_dialog (ValamaProject? project) {
                                        _("_Ok"),
                                        ResponseType.OK,
                                        null);
-    dlg.set_size_request (420, 200);
+    dlg.set_size_request (600, 400);
     dlg.resizable = false;
+
+    var headerbar = new HeaderBar();
+    headerbar.title = _("Project settings");
+    headerbar.show_all();
+    dlg.set_titlebar(headerbar);
 
     var box_main = new Box (Orientation.VERTICAL, 0);
 
-    var frame_project = new Frame (_("Project"));
-    var box_project = new Box (Orientation.VERTICAL, 10);
-    frame_project.add (box_project);
-
+    var list = new Gtk.ListBox ();
+    list.selection_mode = SelectionMode.NONE;
+    list.row_selected.connect((row)=>{row.activate();}); //TODO: Possibly unnecessary in future GTK versions
 
     /* Set project name. */
-    var box_project_name = new Box (Orientation.VERTICAL, 0);
-    box_project_name.pack_start (new Label (_("Project name:")), false, false);
+    var row = new ListBoxRow();
+    var box = new Box(Orientation.HORIZONTAL, 0);
+
+    var lbl = new Label (_("Project name"));
+    lbl.halign = Align.START;
+    box.pack_start (lbl, true, true);
+
     var ent_proj_name_err = new Label ("");
     ent_proj_name_err.sensitive = false;
 
@@ -63,10 +72,11 @@ public void ui_project_dialog (ValamaProject? project) {
         dlg.set_response_sensitive (ResponseType.OK, false);
     });
 
-    box_project_name.pack_start (ent_proj_name, false, false);
-    box_project_name.pack_start (ent_proj_name_err, false, false);
-    box_project.pack_start (box_project_name, false, false);
-    //box_project.pack_start (new Separator (Orientation.HORIZONTAL), false, false);
+    box.pack_start (ent_proj_name, false, true);
+
+    row.add (box);
+    standardize_listbox_row (row);
+    list.add (row);
 
 
     /*
@@ -74,30 +84,28 @@ public void ui_project_dialog (ValamaProject? project) {
      * Format: X.Y.Z (major version, minor version, patch version)
      * Restrict major and minor version number to 999 which should be enough.
      */
-    var box_version = new Box (Orientation.VERTICAL, 0);
-    var box_version_types = new Box (Orientation.HORIZONTAL, 0);
-    box_version.pack_start (new Label (_("Version:")), false, false);
+    row = new ListBoxRow();
+    box = new Box(Orientation.HORIZONTAL, 0);
+
+    lbl = new Label (_("Version:"));
+    lbl.halign = Align.START;
+    box.pack_start (lbl, true, true);
 
     var ent_major = new SpinButton.with_range (0, 999, 1);
     ent_major.value = (double) project.version_major;
-    box_version_types.pack_start (ent_major, false, false);
+    box.pack_start (ent_major, false, false);
 
     var ent_minor = new SpinButton.with_range (0, 999, 1);
     ent_minor.value = (double) project.version_minor;
-    box_version_types.pack_start (ent_minor, false, false);
+    box.pack_start (ent_minor, false, false);
 
     var ent_patch = new SpinButton.with_range (0, 9999, 1);
     ent_patch.value = (double) project.version_patch;
-    box_version_types.pack_start (ent_patch, false, false);
+    box.pack_start (ent_patch, false, false);
 
-    //TODO: Freely customizable version string (perhaps expert settings?).
-    //var ent_version_special = new Entry();
-    //ent_version_special.text = project.version_special;
-    //box_version_types.pack_start (ent_version_special, false, false);
-
-    box_version.pack_start (box_version_types, false, false);
-    box_project.pack_start (box_version, false, false);
-
+    row.add (box);
+    standardize_listbox_row (row);
+    list.add (row);
 
     /* Save changes only when "OK" button is clicked. Reset on "Discard". */
     dlg.response.connect ((response_id) => {
@@ -140,7 +148,11 @@ public void ui_project_dialog (ValamaProject? project) {
 
 
     /* Raise window. */
-    box_main.pack_start (frame_project, true, true);
+    var frame = new Frame(null);
+    frame.add (list);
+    var align = new Alignment (0.0f, 0.5f, 1.0f, 0.0f);
+    align.add (frame);
+    box_main.pack_start (align, true, true);
     box_main.show_all();
 
     dlg.get_content_area().pack_start (box_main);
