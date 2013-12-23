@@ -38,11 +38,8 @@ set(srcfiles
   "src/completion_provider.vala"
   "src/dialogs/about.vala"
   "src/dialogs/create_file.vala"
-  "src/dialogs/create_project.vala"
   "src/dialogs/missing_packages.vala"
-  "src/dialogs/open_file.vala"
   "src/dialogs/project_settings.vala"
-  "src/dialogs/simple_settings.vala"
   "src/main.vala"
   "src/project/build_project.vala"
   "src/project/package_management.vala"
@@ -63,6 +60,11 @@ set(srcfiles
   "src/ui/symbol_browser.vala"
   "src/ui/ui_elements.vala"
   "src/ui/welcome_screen.vala"
+  "src/ui/welcome_screen/create_project_buildsystem.vala"
+  "src/ui/welcome_screen/create_project_location.vala"
+  "src/ui/welcome_screen/create_project_template.vala"
+  "src/ui/welcome_screen/load_project.vala"
+  "src/ui/welcome_screen/main_screen.vala"
   "src/ui_main.vala"
 )
 set(vapifiles

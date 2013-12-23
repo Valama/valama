@@ -53,6 +53,7 @@
 		<directory>src/dialogs</directory>
 		<directory>src/project</directory>
 		<directory>src/ui</directory>
+		<directory>src/ui/welcome_screen</directory>
 		<directory>vapi</directory>
 	</source-directories>
 	<ui-directories>

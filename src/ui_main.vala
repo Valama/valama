@@ -299,16 +299,6 @@ public class MainWidget : Box {
         item_file_new.activate.connect (create_new_file);
         add_accel_activate (item_file_new, Gdk.Key.n);
 
-        var item_file_open = new ImageMenuItem.with_mnemonic (_("_Open project"));
-        var image_file_open = new Image();
-        image_file_open.icon_name = "document-open";
-        item_file_open.image = image_file_open;
-        menu_file.append (item_file_open);
-        item_file_open.activate.connect (() => {
-            ui_load_project();
-        });
-        add_accel_activate (item_file_open, Gdk.Key.o);
-
         var item_file_save = new ImageMenuItem.with_mnemonic (_("_Save all"));
         var image_file_save = new Image();
         image_file_save.icon_name = "document-save";

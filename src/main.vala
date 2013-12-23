@@ -25,9 +25,10 @@ using GLib;
 using Guanako;
 
 static Window window_main;
+static HeaderBar window_main_header;
 static MainWidget? widget_main = null;
 static RecentManager recentmgr;
-static WelcomeScreen? vscreen = null;
+static WelcomeScreen.WelcomeScreen? vscreen = null;
 static Valama gtk_app;
 static ValamaSettings settings;
 
@@ -144,7 +145,17 @@ public class Valama : Gtk.Application {
 
     public override void activate () {
         window_main = new ApplicationWindow(gtk_app);
-        window_main.title = _("Valama");
+
+        window_main_header = new HeaderBar();
+        window_main_header.title = _("Valama");
+        window_main_header.show_close_button = true;
+        window_main_header.show_all();
+        window_main.set_titlebar (window_main_header);
+
+        // Set background color
+        //var style = window_main.get_style_context();
+        //window_main.override_background_color (StateFlags.NORMAL, style.get_background_color(StateFlags.INSENSITIVE));
+
         window_main.hide_titlebar_when_maximized = true;
         window_main.set_default_size (settings.window_size_x, settings.window_size_y);
 
@@ -153,12 +164,10 @@ public class Valama : Gtk.Application {
         });
 
         window_main.show();
-        vscreen = new WelcomeScreen();
+        vscreen = new WelcomeScreen.WelcomeScreen();
         vscreen.project_loaded.connect ((project) => {
-            if (project != null) {
-                window_main.remove (vscreen);
-                show_main_screen (project);
-            }
+            window_main.remove (vscreen);
+            show_main_screen (project);
         });
         if (project != null)
             show_main_screen (project);

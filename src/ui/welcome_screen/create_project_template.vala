@@ -1,6 +1,6 @@
 /*
- * src/dialogs/create_project.vala
- * Copyright (C) 2012, 2013, Valama development team
+ * src/ui/welcome_screen/create_project_location.vala
+ * Copyright (C) 2013, Valama development team
  *
  * Valama is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -17,37 +17,42 @@
  *
  */
 
+
+// Project creation: Template
+
+using Gtk;
+
+namespace WelcomeScreen {
+
 using GLib;
 using Gtk;
 using Gee;
 
-/**
- * Template selection widget; Can return selected item
- */
-public class UiTemplateSelector : TemplatePage {
+public class CreateProjectTemplate : TemplatePageWithHeader {
     private TreeView tree_view;
     private ListStore store;
     private ToggleToolButton btn_credits;
     private ToggleToolButton btn_vlpinfo;
     private ToggleToolButton btn_info;
 
-    private bool initialized;
-    private bool accel_added;
     private bool has_content;
 
     private Widget tinfo;
 
-    public UiTemplateSelector (string? nextpage = null, string? prevpage = null) {
-        if (nextpage != null)
-            default_next = nextpage;
-        if (prevpage != null)
-            default_prev = prevpage;
+    private AccelGroup accel_group = new AccelGroup();
 
+    private ProjectCreationInfo info;
+    public CreateProjectTemplate (ref ProjectCreationInfo info) {
+        this.info = info;
+    }
+
+    protected override void clean_up() {
+        window_main.remove_accel_group (accel_group);
+        info.template = get_selected_template();
+    }
+    protected override Gtk.Widget build_inner_widget() {
+        heading = _("Create project");
         description = _("Select template");
-
-        initialized = false;
-        var accel_group = new AccelGroup();
-        accel_added = false;
 
         var vbox = new Box (Orientation.VERTICAL, 0);
         vbox.expand = true;
@@ -105,6 +110,7 @@ public class UiTemplateSelector : TemplatePage {
             btn_info.active = false;
             return true;
         });
+        window_main.add_accel_group (accel_group);
 
         btn_info.toggled.connect (() => {
             if (btn_info.active) {
@@ -148,99 +154,64 @@ public class UiTemplateSelector : TemplatePage {
             btn_info.active = true;
         });
 
-        /* Take care not to make those global accelerators permanent. */
-        this.selected.connect (() => {
-            if (!initialized) {
-                //TODO: Fill TreeView async.
-                init();
-            }
-            if (!accel_added) {
-                window_main.add_accel_group (accel_group);
-                accel_added = true;
-            }
-            Idle.add (() => {
-                if (has_content)
-                    next (true);
-                prev (true);
-                tree_view.grab_focus();
-                return false;
-            });
-        });
-        this.deselected.connect ((status) => {
-            if (accel_added) {
-                window_main.remove_accel_group (accel_group);
-                accel_added = false;
-            }
-            btn_info.active = false;
-            if (status)
-                TemplatePage.template = get_selected_template();
-        });
 
         vbox.show_all();
-        this.widget = vbox;
-    }
 
-    public override string get_id() {
-        return "UiTemplateSelector";
-    }
-
-    protected override void init() {
-        initialized = true;
 
         store = new ListStore (3, typeof (string), typeof (Gdk.Pixbuf), typeof (string));
         tree_view.set_model (store);
 
         load_templates();
-        if (get_templates().size == 0)
-            return;
+        if (get_templates().size > 0) {
+            bool first_entry = true;
+            foreach (var template in get_templates().values) {
+                TreeIter iter;
+                store.append (out iter);
 
-        bool first_entry = true;
-        foreach (var template in get_templates().values) {
-            TreeIter iter;
-            store.append (out iter);
-
-            try {
-                template.init();
-            } catch (LoadingError e) {
-                warning_msg (_("Could not load project template: %s\n"), e.message);
-                continue;
-            }
-            btn_info.sensitive = true;
-            has_content = true;
-
-            var strb_tlabel = new StringBuilder();
-            if (template.unmet_deps.size > 0)
-                strb_tlabel.append ("""<span foreground="grey">""");
-            strb_tlabel.append ("<b>" + Markup.escape_text (template.name) + "</b>\n"
-                                + Markup.escape_text (template.description));
-
-            if (template.unmet_deps.size > 0) {
-                strb_tlabel.append ("\n" + Markup.escape_text (_("Missing packages: ")));
-                strb_tlabel.append (Markup.escape_text (template.unmet_deps[0].to_string()));
-                if (template.unmet_deps[0].choice != null)
-                    foreach (var pkg in template.unmet_deps[0].choice.packages)
-                        if (pkg != template.unmet_deps[0])
-                            strb_tlabel.append (Markup.escape_text (@", $pkg"));
-                for (var i = 1; i < template.unmet_deps.size; ++i) {
-                    strb_tlabel.append (Markup.escape_text (@", $(template.unmet_deps[i])"));
-                    if (template.unmet_deps[i].choice != null)
-                        foreach (var pkg in template.unmet_deps[i].choice.packages)
-                            if (pkg != template.unmet_deps[i])
-                                strb_tlabel.append (Markup.escape_text (@"/$pkg"));
+                try {
+                    template.init();
+                } catch (LoadingError e) {
+                    warning_msg (_("Could not load project template: %s\n"), e.message);
+                    continue;
                 }
-                strb_tlabel.append ("</span>");
-            }
-            store.set (iter, 0, strb_tlabel.str, 1, template.icon, 2, template.name, -1);
+                btn_info.sensitive = true;
+                has_content = true;
 
-            /* Select first entry */
-            if (first_entry) {
-                tree_view.get_selection().select_iter(iter);
-                first_entry = false;
+                var strb_tlabel = new StringBuilder();
+                if (template.unmet_deps.size > 0)
+                    strb_tlabel.append ("""<span foreground="grey">""");
+                strb_tlabel.append ("<b>" + Markup.escape_text (template.name) + "</b>\n"
+                                    + Markup.escape_text (template.description));
+
+                if (template.unmet_deps.size > 0) {
+                    strb_tlabel.append ("\n" + Markup.escape_text (_("Missing packages: ")));
+                    strb_tlabel.append (Markup.escape_text (template.unmet_deps[0].to_string()));
+                    if (template.unmet_deps[0].choice != null)
+                        foreach (var pkg in template.unmet_deps[0].choice.packages)
+                            if (pkg != template.unmet_deps[0])
+                                strb_tlabel.append (Markup.escape_text (@", $pkg"));
+                    for (var i = 1; i < template.unmet_deps.size; ++i) {
+                        strb_tlabel.append (Markup.escape_text (@", $(template.unmet_deps[i])"));
+                        if (template.unmet_deps[i].choice != null)
+                            foreach (var pkg in template.unmet_deps[i].choice.packages)
+                                if (pkg != template.unmet_deps[i])
+                                    strb_tlabel.append (Markup.escape_text (@"/$pkg"));
+                    }
+                    strb_tlabel.append ("</span>");
+                }
+                store.set (iter, 0, strb_tlabel.str, 1, template.icon, 2, template.name, -1);
+
+                // Select first entry
+                if (first_entry) {
+                    tree_view.get_selection().select_iter(iter);
+                    first_entry = false;
+                }
             }
         }
+        return vbox;
     }
 
-    public ProjectTemplate? get_selected_template() {
+    private ProjectTemplate? get_selected_template() {
         TreeModel model;
         TreeIter iter;
         if (tree_view.get_selection().get_selected (out model, out iter)) {
@@ -271,27 +242,27 @@ public class UiTemplateSelector : TemplatePage {
         var hbox = new Box (Orientation.HORIZONTAL, 0);
         vbox.pack_start (hbox, false, false);
 
-        /* Icon. */
+        // Icon.
         var img = new Image.from_pixbuf (template.icon);
         hbox.pack_start (img, false, true);
 
-        /* Name. */
+        // Name.
         var name_lbl = new Label ("""<span size="xx-large" font_weight="bold">"""
                                   + Markup.escape_text (template.name) + "</span>");
         name_lbl.use_markup = true;
         hbox.pack_start (name_lbl, true, true);
 
-        /* Description. */
+        // Description.
         var desc_lbl = new Label ("""<span size="large">"""
                                   + Markup.escape_text (template.description) + "</span>");
         desc_lbl.use_markup = true;
         vbox.pack_start (desc_lbl, false, false);
 
-        /* Content area. */
+        // Content area
         var hldescbox = new Box (Orientation.HORIZONTAL, 20);
         vbox.pack_start (hldescbox, true, true);
 
-        /* Placeholder left. */
+        // Placeholder left.
         hldescbox.pack_start (new Box (Orientation.HORIZONTAL, 0), false, true);
 
         var extrainfo_nbook = new Notebook();
@@ -300,11 +271,11 @@ public class UiTemplateSelector : TemplatePage {
         extrainfo_nbook.show_border = false;
         var extrainfo_nbook_max_pages = 0;
 
-        /* Placeholder right. */
+        // Placeholder right.
         hldescbox.pack_start (new Box (Orientation.HORIZONTAL, 0), false, true);
 
 
-        /* Long description. */
+        // Long description.
         var longdesc_scrw = new ScrolledWindow (null, null);
         extrainfo_nbook.append_page (longdesc_scrw);
         longdesc_scrw.border_width = 5;
@@ -326,7 +297,7 @@ public class UiTemplateSelector : TemplatePage {
         longdesc_lbl.use_markup = true;
         longdesc_grid.attach (longdesc_lbl, 0, 0, 1, 1);
 
-        /* Credits. */
+        // Credits.
         if (template.authors.size > 0) {
             var credits_scrw = new ScrolledWindow (null, null);
             extrainfo_nbook.append_page (credits_scrw);
@@ -381,7 +352,7 @@ public class UiTemplateSelector : TemplatePage {
             btn_credits.visible = false;
 
 
-        /* Template detailed information. */
+        // Template detailed information.
         var detailed_scrw = new ScrolledWindow (null, null);
         extrainfo_nbook.append_page (detailed_scrw);
         ++extrainfo_nbook_max_pages;
@@ -398,7 +369,7 @@ public class UiTemplateSelector : TemplatePage {
 
         int detailed_line = 0;
 
-        /* Vala version. */
+        // Vala version.
         if (template.versions.size > 0) {
             var detailed_vala_info = new Label ("""<span font_size="large">"""
                                                 + Markup.escape_text (_("Supported Vala versions"))
@@ -452,7 +423,7 @@ public class UiTemplateSelector : TemplatePage {
             }
         }
 
-        /* Packages. */
+        // Packages.
         if (template.versions.size > 0)
             detailed_grid.attach (new Label (""), 0, detailed_line++, 2, 1);
 
@@ -507,7 +478,7 @@ public class UiTemplateSelector : TemplatePage {
             detailed_grid.attach (pkg_lbl, 1, detailed_line++, 1, 1);
         }
 
-        /* Source files. */
+        // Source files.
         detailed_grid.attach (new Label (""), 0, detailed_line++, 2, 1);
 
         var detailed_file_info = new Label ("""<span font_size="large">"""
@@ -550,242 +521,241 @@ public class UiTemplateSelector : TemplatePage {
     }
 }
 
-public static ValamaProject? create_project_from_template (ProjectTemplate template,
-                                                           string target_folder,
-                                                           string project_name) {
-    try { //TODO: Separate different error catchings to provide differentiate error messages.
-        //TODO: Add progress bar and at least warn on overwrite (don't skip
-        //      without warning).
-        if (template.path.length > 0) {
-            new FileTransfer (template.path,
-                              target_folder,
-                              CopyRecursiveFlags.SKIP_EXISTENT).copy();
-            new FileTransfer (Path.build_path (Path.DIR_SEPARATOR_S,
-                                               target_folder,
-                                               "template.vlp"),
-                              Path.build_path (Path.DIR_SEPARATOR_S,
-                                               target_folder,
-                                               project_name + ".vlp"),
-                              CopyRecursiveFlags.SKIP_EXISTENT).move();
-        } else {
-            var vlppath = Path.build_path (Path.DIR_SEPARATOR_S,
-                                           target_folder,
-                                           project_name + ".vlp") ;
-            var f = File.new_for_path (vlppath);
-            var parent = f.get_parent();
-            if (!parent.query_exists())
-                try {
-                    parent.make_directory_with_parents();
-                } catch (GLib.Error e) {
-                    errmsg (_("Cannot create project root directory '%s': %s\n"),
-                            parent.get_path(), e.message);
+    public static ValamaProject? create_project_from_template (ProjectCreationInfo info) {
+        try { //TODO: Separate different error catchings to provide differentiate error messages.
+            //TODO: Add progress bar and at least warn on overwrite (don't skip
+            //      without warning).
+            if (info.template.path.length > 0) {
+                new FileTransfer (info.template.path,
+                                  info.directory,
+                                  CopyRecursiveFlags.SKIP_EXISTENT).copy();
+                new FileTransfer (Path.build_path (Path.DIR_SEPARATOR_S,
+                                                   info.directory,
+                                                   "template.vlp"),
+                                  Path.build_path (Path.DIR_SEPARATOR_S,
+                                                   info.directory,
+                                                   info.name + ".vlp"),
+                                  CopyRecursiveFlags.SKIP_EXISTENT).move();
+            } else {
+                var vlppath = Path.build_path (Path.DIR_SEPARATOR_S,
+                                               info.directory,
+                                               info.name + ".vlp") ;
+                var f = File.new_for_path (vlppath);
+                var parent = f.get_parent();
+                if (!parent.query_exists())
+                    try {
+                        parent.make_directory_with_parents();
+                    } catch (GLib.Error e) {
+                        errmsg (_("Cannot create project root directory '%s': %s\n"),
+                                parent.get_path(), e.message);
+                    }
+
+                if (f.query_exists())
+                    debug_msg (_("Skip %s\n"), vlppath);
+                else {
+                    try {
+                        var os = f.create (FileCreateFlags.NONE);
+                        os.write (info.template.vproject.project_file_data.data);
+                    } catch (GLib.IOError e) {
+                        errmsg (_("Cannot write to project file '%s': %s\n"), vlppath, e.message);
+                        // return null;
+                    } catch (GLib.Error e) {
+                        errmsg (_("Cannot create project file '%s': %s\n"), vlppath, e.message);
+                        // return null;
+                    }
+                }
+            }
+
+            BuildSystemTemplate.load_buildsystems();
+            if (info.template.vproject.builder.get_name_id() in get_buildsystems().keys) {
+                new FileTransfer (get_buildsystems()[info.template.vproject.builder.get_name_id()].path,
+                                  info.directory,
+                                  CopyRecursiveFlags.SKIP_EXISTENT).copy();
+            }
+
+            // Substitutions.
+            var tsh = new TempSubsHelper (info.template.substitutions, info.directory);
+            tsh.substitute();
+        } catch (GLib.Error e) {
+            errmsg (_("Could not copy templates for new project: %s\n"), e.message);
+        }
+
+
+        ValamaProject? new_proj = null;
+        try {
+            new_proj = new ValamaProject (Path.build_path (Path.DIR_SEPARATOR_S,
+                                                           info.directory,
+                                                           info.name + ".vlp"),
+                                          null,
+                                          true,
+                                          false);
+            new_proj.project_name = info.name;
+            new_proj.save_to_recent();
+            new_proj.save_project_file();
+        } catch (LoadingError e) {
+            errmsg (_("Couldn't load new project: %s\n"), e.message);
+        }
+        return new_proj;
+    }
+
+
+    public class TempSubsHelper {
+        /**
+         * Files with list of substitutions to seek only one time through a file.
+         */
+        private HashMap<string, ArrayList<TemplateSubstition?>?> acc_subst;
+
+        /**
+         * Initialize list of files. To apply substitutions run
+         * {@link substitutions}.
+         *
+         * @param substitutions List of all substitutions.
+         * @param basedir Base directory for relative paths.
+         */
+        public TempSubsHelper (Iterable<TemplateSubstition?> substitutions, string basedir) {
+            acc_subst = new HashMap<string, ArrayList<TemplateSubstition?>?>();
+
+            foreach (var sub in substitutions) {
+                var target = Path.build_path (Path.DIR_SEPARATOR_S,
+                                              basedir,
+                                              sub.file);
+                var f = File.new_for_path (target);
+                if (!f.query_exists()) {
+                    // TRANSLATORS:
+                    // Context: "Cannot apply substitution @foobar@ (line) -> 'barfoo'"... or
+                    //          "Cannot apply substitution @foobar@ -> 'barfoo'"...
+                    warning_msg (_("Cannot apply substitution '@%s@'%s -> '%s': %s does not exist\n"),
+                    // TRANSLATORS:
+                    // Context: "Cannot apply substitution @foobar@->>> (line)<<<- -> 'barfoo'"...
+                                 sub.match, (sub.line) ? _(" (line)") : "", sub.replace, target);
+                    continue;
                 }
 
-            if (f.query_exists())
-                debug_msg (_("Skip %s\n"), vlppath);
-            else {
-                try {
-                    var os = f.create (FileCreateFlags.NONE);
-                    os.write (template.vproject.project_file_data.data);
-                } catch (GLib.IOError e) {
-                    errmsg (_("Cannot write to project file '%s': %s\n"), vlppath, e.message);
-                    // return null;
-                } catch (GLib.Error e) {
-                    errmsg (_("Cannot create project file '%s': %s\n"), vlppath, e.message);
-                    // return null;
-                }
+                temp_substitute (sub, f);
             }
         }
 
-        BuildSystemTemplate.load_buildsystems();
-        if (template.vproject.builder.get_name_id() in get_buildsystems().keys) {
-            new FileTransfer (get_buildsystems()[template.vproject.builder.get_name_id()].path,
-                              target_folder,
-                              CopyRecursiveFlags.SKIP_EXISTENT).copy();
-        }
-
-        /* Substitutions. */
-        var tsh = new TempSubsHelper (template.substitutions, target_folder);
-        tsh.substitute();
-    } catch (GLib.Error e) {
-        errmsg (_("Could not copy templates for new project: %s\n"), e.message);
-    }
-
-
-    ValamaProject? new_proj = null;
-    try {
-        new_proj = new ValamaProject (Path.build_path (Path.DIR_SEPARATOR_S,
-                                                       target_folder,
-                                                       project_name + ".vlp"),
-                                      null,
-                                      true,
-                                      false);
-        new_proj.project_name = project_name;
-        new_proj.save_to_recent();
-        new_proj.save_project_file();
-    } catch (LoadingError e) {
-        errmsg (_("Couldn't load new project: %s\n"), e.message);
-    }
-    return new_proj;
-}
-
-
-public class TempSubsHelper {
-    /**
-     * Files with list of substitutions to seek only one time through a file.
-     */
-    private HashMap<string, ArrayList<TemplateSubstition?>?> acc_subst;
-
-    /**
-     * Initialize list of files. To apply substitutions run
-     * {@link substitutions}.
-     *
-     * @param substitutions List of all substitutions.
-     * @param basedir Base directory for relative paths.
-     */
-    public TempSubsHelper (Iterable<TemplateSubstition?> substitutions, string basedir) {
-        acc_subst = new HashMap<string, ArrayList<TemplateSubstition?>?>();
-
-        foreach (var sub in substitutions) {
-            var target = Path.build_path (Path.DIR_SEPARATOR_S,
-                                          basedir,
-                                          sub.file);
-            var f = File.new_for_path (target);
-            if (!f.query_exists()) {
-                // TRANSLATORS:
-                // Context: "Cannot apply substitution @foobar@ (line) -> 'barfoo'"... or
-                //          "Cannot apply substitution @foobar@ -> 'barfoo'"...
-                warning_msg (_("Cannot apply substitution '@%s@'%s -> '%s': %s does not exist\n"),
-                // TRANSLATORS:
-                // Context: "Cannot apply substitution @foobar@->>> (line)<<<- -> 'barfoo'"...
-                             sub.match, (sub.line) ? _(" (line)") : "", sub.replace, target);
-                continue;
-            }
-
-            temp_substitute (sub, f);
-        }
-    }
-
-    /**
-     * Apply substitutions to template code.
-     *
-     * @param sub Information what to substitute.
-     * @param f {@link GLib.File} object to apply substitution to.
-     */
-    private void temp_substitute (TemplateSubstition sub, File f) {
-        string fpath = f.get_path();
-        if (fpath == null) {
-            warning_msg (_("Could not determine file path: %s\n"), f.get_parse_name());
-            return;
-        }
-        if (f.query_file_type (FileQueryInfoFlags.NONE) == FileType.DIRECTORY) {
-            /* Recursion. */
-            try {
-                var enumerator = f.enumerate_children ("standard::*", FileQueryInfoFlags.NONE);
-                FileInfo info = null;
-                while ((info = enumerator.next_file()) != null)
-                    temp_substitute (sub, f.resolve_relative_path (info.get_name()));
-            } catch (GLib.Error e) {
-                warning_msg (_("Could not list or iterate through directory content of '%s': %s\n"),
-                             fpath, e.message);
-            }
-        } else {
-            ArrayList<TemplateSubstition?> suba;
-            if (acc_subst.has_key (fpath))
-                suba = acc_subst.get (fpath);
-            else
-                suba = new ArrayList<TemplateSubstition?>();
-            suba.add (sub);
-            acc_subst.set (fpath, suba);
-        }
-    }
-
-    /**
-     * Apply accumulated substitutions to temporary file (.valama-new) then
-     * overwrite old file.
-     */
-    //TODO: Don't do anything where nothing is to substitute.
-    public void substitute() {
-        foreach (var entry in acc_subst.entries) {
-            var filename = entry.key;
-            var sublist = entry.value;
-
-            foreach (var sub in sublist)
-                debug_msg (_("Substitute: '@%s@'%s -> '%s': %s\n"),
-                           sub.match, (sub.line) ? _(" (line)") : "", sub.replace, filename);
-
-
-            var fi = File.new_for_path (filename);
-            FileInputStream fis;
-            try {
-                fis = fi.read();
-            } catch (GLib.Error e) {
-                warning_msg (_("Cannot read file '%s': %s\n"), filename, e.message);
+        /**
+         * Apply substitutions to template code.
+         *
+         * @param sub Information what to substitute.
+         * @param f {@link GLib.File} object to apply substitution to.
+         */
+        private void temp_substitute (TemplateSubstition sub, File f) {
+            string fpath = f.get_path();
+            if (fpath == null) {
+                warning_msg (_("Could not determine file path: %s\n"), f.get_parse_name());
                 return;
             }
-
-            var filename_new = @"$(filename).valama-new";
-            var fo = File.new_for_path (filename_new);
-            uint i = 0;
-            while (fo.query_exists()) {
-                if (i++ == 0)
-                    filename_new = filename_new + i.to_string();
-                else
-                    filename_new = filename_new.slice (0, -1) + i.to_string();
-                fo = File.new_for_path (filename_new);
-            }
-
-            FileOutputStream fos;
-            try {
-                fos = fo.create (FileCreateFlags.PRIVATE);
-            } catch (GLib.Error e) {
-                warning_msg (_("Cannot create temporary file '%s' to apply substitutions: %s\n"),
-                             filename_new, e.message);
+            if (f.query_file_type (FileQueryInfoFlags.NONE) == FileType.DIRECTORY) {
+                // Recursion.
                 try {
-                    fis.close();
+                    var enumerator = f.enumerate_children ("standard::*", FileQueryInfoFlags.NONE);
+                    FileInfo info = null;
+                    while ((info = enumerator.next_file()) != null)
+                        temp_substitute (sub, f.resolve_relative_path (info.get_name()));
+                } catch (GLib.Error e) {
+                    warning_msg (_("Could not list or iterate through directory content of '%s': %s\n"),
+                                 fpath, e.message);
+                }
+            } else {
+                ArrayList<TemplateSubstition?> suba;
+                if (acc_subst.has_key (fpath))
+                    suba = acc_subst.get (fpath);
+                else
+                    suba = new ArrayList<TemplateSubstition?>();
+                suba.add (sub);
+                acc_subst.set (fpath, suba);
+            }
+        }
+
+        /**
+         * Apply accumulated substitutions to temporary file (.valama-new) then
+         * overwrite old file.
+         */
+        //TODO: Don't do anything where nothing is to substitute.
+        public void substitute() {
+            foreach (var entry in acc_subst.entries) {
+                var filename = entry.key;
+                var sublist = entry.value;
+
+                foreach (var sub in sublist)
+                    debug_msg (_("Substitute: '@%s@'%s -> '%s': %s\n"),
+                               sub.match, (sub.line) ? _(" (line)") : "", sub.replace, filename);
+
+
+                var fi = File.new_for_path (filename);
+                FileInputStream fis;
+                try {
+                    fis = fi.read();
+                } catch (GLib.Error e) {
+                    warning_msg (_("Cannot read file '%s': %s\n"), filename, e.message);
+                    return;
+                }
+
+                var filename_new = @"$(filename).valama-new";
+                var fo = File.new_for_path (filename_new);
+                uint i = 0;
+                while (fo.query_exists()) {
+                    if (i++ == 0)
+                        filename_new = filename_new + i.to_string();
+                    else
+                        filename_new = filename_new.slice (0, -1) + i.to_string();
+                    fo = File.new_for_path (filename_new);
+                }
+
+                FileOutputStream fos;
+                try {
+                    fos = fo.create (FileCreateFlags.PRIVATE);
+                } catch (GLib.Error e) {
+                    warning_msg (_("Cannot create temporary file '%s' to apply substitutions: %s\n"),
+                                 filename_new, e.message);
+                    try {
+                        fis.close();
+                    } catch (GLib.IOError e) {
+                        warning_msg (_("Could not close file descriptor for '%s': %s\n"),
+                                     filename, e.message);
+                    }
+                    return;
+                }
+
+                var dis = new DataInputStream (fis);
+                var dos = new DataOutputStream (fos);
+
+                string? line = null;
+                try {
+                    while ((line = dis.read_line()) != null) {
+                        try {
+                            // Apply all accumulated substitutions.
+                            foreach (var sub in sublist) {
+                                if (!sub.line)
+                                    line = line.replace (@"@$(sub.match)@", sub.replace);
+                                else if (line.index_of (@"@$(sub.match)@") > -1)
+                                    line = sub.replace;
+                            }
+                            dos.put_string (line + "\n");
+                        } catch (GLib.IOError e) {
+                            warning_msg (_("Could not write to temporary file '%s': %s\n"),
+                                         filename_new, e.message);
+                        }
+                     }
+                } catch (GLib.IOError e) {
+                    warning_msg (_("Could not read file '%s' properly: %s\n"), filename, e.message);
+                }
+                try {
+                    dos.close();
+                    fo.move (fi, FileCopyFlags.OVERWRITE);  //TODO: Are timestamps an issue?
                 } catch (GLib.IOError e) {
                     warning_msg (_("Could not close file descriptor for '%s': %s\n"),
-                                 filename, e.message);
+                                 filename_new, e.message);
+                    return;
+                } catch (GLib.Error e) {
+                    warning_msg (_("Could not update file '%s' with '%s' (temporary file may still exist): %s\n"),
+                                 filename, filename_new, e.message);
                 }
-                return;
-            }
-
-            var dis = new DataInputStream (fis);
-            var dos = new DataOutputStream (fos);
-
-            string? line = null;
-            try {
-                while ((line = dis.read_line()) != null) {
-                    try {
-                        /* Apply all accumulated substitutions. */
-                        foreach (var sub in sublist) {
-                            if (!sub.line)
-                                line = line.replace (@"@$(sub.match)@", sub.replace);
-                            else if (line.index_of (@"@$(sub.match)@") > -1)
-                                line = sub.replace;
-                        }
-                        dos.put_string (line + "\n");
-                    } catch (GLib.IOError e) {
-                        warning_msg (_("Could not write to temporary file '%s': %s\n"),
-                                     filename_new, e.message);
-                    }
-                 }
-            } catch (GLib.IOError e) {
-                warning_msg (_("Could not read file '%s' properly: %s\n"), filename, e.message);
-            }
-            try {
-                dos.close();
-                fo.move (fi, FileCopyFlags.OVERWRITE);  //TODO: Are timestamps an issue?
-            } catch (GLib.IOError e) {
-                warning_msg (_("Could not close file descriptor for '%s': %s\n"),
-                             filename_new, e.message);
-                return;
-            } catch (GLib.Error e) {
-                warning_msg (_("Could not update file '%s' with '%s' (temporary file may still exist): %s\n"),
-                             filename, filename_new, e.message);
             }
         }
     }
-}
 
-// vim: set ai ts=4 sts=4 et sw=4
+
+}

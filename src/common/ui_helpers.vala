@@ -20,6 +20,14 @@
 using Gtk;
 using GLib;
 
+public void standardize_listbox_row (ListBoxRow row) {
+    row.set_size_request (0, 40);
+    row.margin_left = 20;
+    row.margin_right = 20;
+    row.margin_top = 6;
+    row.margin_bottom = 6;
+}
+
 /**
  * Custom {@link Gtk.Entry} class.
  *
