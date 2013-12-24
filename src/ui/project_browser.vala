@@ -54,7 +54,7 @@ public class ProjectBrowser : UiElement {
         scrw.add (tree_view);
 
         var toolbar = new Toolbar();
-        toolbar.icon_size = 1;
+        toolbar.icon_size = IconSize.MENU;
 
         var btn_add = new ToolButton (null, null);
         btn_add.icon_name = "list-add-symbolic";
