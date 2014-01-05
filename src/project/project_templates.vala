@@ -218,14 +218,7 @@ public bool load_templates (bool reload = false) {
                                                      dirpath,
                                                      new_template.name,
                                                      "template");
-                foreach (var filetype in new string[] {"png","jpg","jpeg","svg",
-#if UNIX  //TODO: Better solution for case insensitive file extension?
-          "Png","pNg","pnG","PNg","PnG","pNG","PNG",
-          "Jpg","jPg","jpG","JPg","JpG","jPG","JPG",
-          "Jpeg","jPeg","jpEg","jpeG","JPeg","JpEg","JpeG","jPEg","jPeG","jpEG","JPEg","JPeG","JpEG","jPEG","JPEG",
-          "Svg","sVg","svG","SVg","SvG","sVG","SVG"
-#endif
-                                                      }) {
+                foreach (var filetype in get_insensitive_cases({"png","jpg","jpeg","svg"})) {
                     var icon_path = Path.build_path (Path.DIR_SEPARATOR_S,
                                                      dirpath,
                                                      new_template.name,

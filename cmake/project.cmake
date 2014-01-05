@@ -8,6 +8,7 @@ set(required_pkgs
   "clutter-gtk-1.0"
   "cogl-1.0 {nolink}"
   "gdk-3.0"
+  "gladeui-2.0"
   "gdk-pixbuf-2.0 {nolink}"
   "gdl-3.0 >= 3.3.91"
   "gee-0.8 >= 0.10.5"
@@ -30,6 +31,7 @@ set(required_pkgs
 set(srcfiles
   "src/buildsystem/base.vala"
   "src/buildsystem/buildsystem_template.vala"
+  "src/buildsystem/autotools.vala"
   "src/buildsystem/cmake.vala"
   "src/buildsystem/plain.vala"
   "src/common/args.vala"
@@ -56,6 +58,7 @@ set(srcfiles
   "src/ui/search.vala"
   "src/ui/source_viewer.vala"
   "src/ui/structure_view.vala"
+  "src/ui/glade_viewer.vala"
   "src/ui/super_source_view.vala"
   "src/ui/symbol_browser.vala"
   "src/ui/ui_elements.vala"

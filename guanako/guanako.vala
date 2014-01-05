@@ -464,7 +464,7 @@ namespace Guanako {
         }
 
         void vanish_file (SourceFile file) {
-            var nodes = new Vala.ArrayList<Vala.CodeNode>();
+            var nodes = new Gee.LinkedList<Vala.CodeNode>();
             foreach (var node in file.get_nodes())
                 nodes.add (node);
             foreach (var node in nodes) {
@@ -632,7 +632,7 @@ namespace Guanako {
             }
 
             MainLoop loop_thread = new MainLoop();
-            Gee.ArrayList<CompletionProposal> queue = new Gee.ArrayList<CompletionProposal>();
+            Gee.LinkedList<CompletionProposal> queue = new Gee.LinkedList<CompletionProposal>();
             Thread<void*> thread_add_items;
 
             public void add (CompletionProposal prop) {
@@ -657,7 +657,7 @@ namespace Guanako {
                 universal_parameter = new CallParameter();
                 universal_parameter.name = "@";
             }
-            public Gee.ArrayList<Symbol> cur_stack = new Gee.ArrayList<Symbol>();
+            public Gee.LinkedList<Symbol> cur_stack = new Gee.LinkedList<Symbol>();
             Project parent_project;
             int rule_id_count = 0;
             Symbol[] accessible;
@@ -693,8 +693,8 @@ namespace Guanako {
             /*
             * Clones a list of CallParameter's, including return dependencies
             */
-            Gee.ArrayList<CallParameter> clone_param_list (Gee.ArrayList<CallParameter> param) {
-                var ret = new Gee.ArrayList<CallParameter>();
+            Gee.LinkedList<CallParameter> clone_param_list (Gee.LinkedList<CallParameter> param) {
+                var ret = new Gee.LinkedList<CallParameter>();
                 foreach (CallParameter p in param) {
                     var new_param = new CallParameter();
                     new_param.for_rule_id = p.for_rule_id;
@@ -710,8 +710,8 @@ namespace Guanako {
                 return ret;
             }
 
-            private Gee.ArrayList<Symbol> clone_symbol_list (Gee.ArrayList<Symbol> list) {
-                var ret = new Gee.ArrayList<Symbol>();
+            private Gee.LinkedList<Symbol> clone_symbol_list (Gee.LinkedList<Symbol> list) {
+                var ret = new Gee.LinkedList<Symbol>();
                 ret.add_all(list);
                 return ret;
             }
@@ -723,7 +723,7 @@ namespace Guanako {
                 return rule;
             }
 
-            private CallParameter? find_param (Gee.ArrayList<CallParameter> array,
+            private CallParameter? find_param (Gee.LinkedList<CallParameter> array,
                                     string name,
                                     int rule_id) {
                 if (name == "@")
@@ -752,10 +752,10 @@ namespace Guanako {
                     stderr.printf (_("Entry point '%s' not found in syntax file. Trying to segfault me, huh??"), initial_rule_name);
                     return null;
                 }
-                Gee.ArrayList<Symbol> init_private_cur_stack = new Gee.ArrayList<Symbol>();
+                Gee.LinkedList<Symbol> init_private_cur_stack = new Gee.LinkedList<Symbol>();
 
                 var ret = new ProposalSet();
-                compare (parent_project.map_syntax[initial_rule_name].rule, written, new Gee.ArrayList<CallParameter>(), 0, ref ret, ref init_private_cur_stack);
+                compare (parent_project.map_syntax[initial_rule_name].rule, written, new Gee.LinkedList<CallParameter>(), 0, ref ret, ref init_private_cur_stack);
                 ret.wait_for_finish();
                 if (abort_flag)
                     return null;
@@ -763,9 +763,9 @@ namespace Guanako {
             }
             private void compare (RuleExpression[] compare_rule,
                                 string written2,
-                                Gee.ArrayList<CallParameter> call_params,
+                                Gee.LinkedList<CallParameter> call_params,
                                 int depth, ref ProposalSet ret,
-                                ref Gee.ArrayList<Symbol> private_cur_stack) {
+                                ref Gee.LinkedList<Symbol> private_cur_stack) {
                 if (abort_flag)
                     return;
                 /*
@@ -1145,9 +1145,9 @@ namespace Guanako {
             Thread<void*> compare_threaded (CompletionRun comp_run,
                                             RuleExpression[] compare_rule,
                                             string written,
-                                            Gee.ArrayList<CallParameter> call_params,
+                                            Gee.LinkedList<CallParameter> call_params,
                                             int depth,
-                                            ref ProposalSet ret, ref Gee.ArrayList<Symbol> private_cur_stack) {
+                                            ref ProposalSet ret, ref Gee.LinkedList<Symbol> private_cur_stack) {
                 var compare_thd = new CompareThread (comp_run, compare_rule, written, call_params, depth, ref ret, ref private_cur_stack);
                 return new Thread<void*> (_("Guanako Completion"), compare_thd.run);
             }
@@ -1156,9 +1156,9 @@ namespace Guanako {
                 public CompareThread (CompletionRun comp_run,
                                     RuleExpression[] compare_rule,
                                     string written,
-                                    Gee.ArrayList<CallParameter> call_params,
+                                    Gee.LinkedList<CallParameter> call_params,
                                     int depth,
-                                    ref ProposalSet ret, ref Gee.ArrayList<Symbol> private_cur_stack) {
+                                    ref ProposalSet ret, ref Gee.LinkedList<Symbol> private_cur_stack) {
                     this.comp_run = comp_run;
                     this.compare_rule = compare_rule;
                     this.call_params = call_params;
@@ -1169,11 +1169,11 @@ namespace Guanako {
                 }
                 CompletionRun comp_run;
                 RuleExpression[] compare_rule;
-                Gee.ArrayList<CallParameter> call_params;
+                Gee.LinkedList<CallParameter> call_params;
                 ProposalSet ret;
                 int depth;
                 string written;
-                Gee.ArrayList<Symbol> private_cur_stack;
+                Gee.LinkedList<Symbol> private_cur_stack;
                 public void* run() {
                     comp_run.compare (compare_rule, written, call_params, depth + 1, ref ret, ref private_cur_stack);
                     return null;
