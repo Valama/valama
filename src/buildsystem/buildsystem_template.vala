@@ -31,6 +31,8 @@ public class BuildSystemTemplate : Object {
     public string? long_description = null;
 
     public BuildSystem? system = null;
+    
+    
 
     public static bool load_buildsystems (bool reload = false) {
         if (buildsystems == null)
@@ -78,14 +80,7 @@ public class BuildSystemTemplate : Object {
                                                             dirpath,
                                                             new_buildsystem.name,
                                                             "buildsystem");
-                    foreach (var filetype in new string[] {"png","jpg","jpeg","svg",
-#if UNIX  //TODO: Better solution for case insensitive file extension?
-          "Png","pNg","pnG","PNg","PnG","pNG","PNG",
-          "Jpg","jPg","jpG","JPg","JpG","jPG","JPG",
-          "Jpeg","jPeg","jpEg","jpeG","JPeg","JpEg","JpeG","jPEg","jPeG","jpEG","JPEg","JPeG","JpEG","jPEG","JPEG",
-          "Svg","sVg","svG","SVg","SvG","sVG","SVG"
-#endif
-                                                          }) {
+                    foreach (var filetype in get_insensitive_cases({"png","jpg","jpeg","svg"})) {
                         var icon_path = Path.build_path (Path.DIR_SEPARATOR_S,
                                                          dirpath,
                                                          new_buildsystem.name,

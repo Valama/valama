@@ -82,7 +82,6 @@ if(TRANSLATION)
   add_subdirectory("po")
 endif()
 
-
 # Custom library version checks.
 set(definitions)
 find_package(PkgConfig)
@@ -165,12 +164,15 @@ endif()
 # glib-2.0
 pkg_check_modules(GLIB2.0 REQUIRED "glib-2.0")
 
-
+# gladeui-2.0
+pkg_check_modules(GLADEUI2.0 REQUIRED "gladeui-2.0")
+# vapidir option added, for custom gladeui-2.0 vapi
 set(default_vala_flags
   "--thread"
   "--target-glib" "${GLIB2.0_VERSION}"
   "--enable-experimental"
   "--fatal-warnings"
+  "--vapidir=${CMAKE_SOURCE_DIR}/vapi"
 )
 
 include(ValaPkgs)

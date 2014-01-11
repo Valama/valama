@@ -40,6 +40,7 @@ static UiBreakpoints wdg_breakpoints;
 static UiSearch wdg_search;
 static SymbolBrowser wdg_smb_browser;
 static UiStructureView wdg_structure_view;
+static GladeViewer wdg_glade_viewer;
 // static UiStyleChecker wdg_stylechecker;
 
 static Gee.HashMap<string, Gdk.Pixbuf> map_icons;
@@ -159,6 +160,7 @@ public class MainWidget : Box {
         wdg_current_file_structure = new UiCurrentFileStructure();
         wdg_search = new UiSearch();
         wdg_structure_view = new UiStructureView();
+        wdg_glade_viewer = new GladeViewer();
         // wdg_stylechecker = new UiStyleChecker();
 
         /* Gdl elements. */
@@ -203,6 +205,10 @@ public class MainWidget : Box {
                               DockItemBehavior.NORMAL,
                               DockPlacement.RIGHT);
         add_item ("StructureView", _("Structure view"), wdg_structure_view,
+                              "gtk-file",
+                              DockItemBehavior.NORMAL,
+                              DockPlacement.RIGHT);
+        add_item ("GladeViewer", _("Glade viewer"), wdg_glade_viewer,
                               "gtk-file",
                               DockItemBehavior.NORMAL,
                               DockPlacement.RIGHT);
@@ -372,6 +378,7 @@ public class MainWidget : Box {
         add_view_menu_item (menu_view, wdg_current_file_structure, _("Show current file structure"));
         // add_view_menu_item (menu_view, wdg_stylechecker, _("Show style checker"));
         add_view_menu_item (menu_view, wdg_smb_browser, _("Show symbol browser"));
+        add_view_menu_item (menu_view, wdg_glade_viewer, _("Show glade viewer"));
         add_view_menu_item (menu_view, wdg_structure_view, _("Show structure viewer"));
         menu_view.append (new SeparatorMenuItem());
 

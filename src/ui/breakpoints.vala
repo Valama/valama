@@ -80,7 +80,7 @@ class UiBreakpoints : UiElement {
         box_main.pack_start (scrw, true, true);
 
         var toolbar = new Toolbar();
-        toolbar.icon_size = 1;
+        toolbar.icon_size = IconSize.MENU;
 
         btn_add = new ToolButton (null, null);
         btn_add.sensitive = false;

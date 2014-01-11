@@ -1191,6 +1191,9 @@ public class ValamaProject : ProjectFile {
             case "cmake":
                 builder = new BuilderCMake();
                 break;
+            case "autotools":
+				builder = new BuilderAutotools();
+				break;
             default:
                 warning_msg (_("Build system '%s' not supported.\n"), buildsystem);
                 return false;

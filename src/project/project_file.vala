@@ -27,7 +27,6 @@ const string VLP_VERSION_MIN = "0.1";
 public class ProjectFile : Object {
     public ProjectFile (string project_file) throws LoadingError {
         this.project_file_path = project_file;
-
         var proj_file = File.new_for_path (project_file);
         project_path = proj_file.get_parent().get_path(); //TODO: Check valid path?
 
@@ -326,6 +325,7 @@ public class ProjectFile : Object {
                             continue;
                         switch (p->name) {
                             case "file":
+								print(get_absolute_path (p->get_content())+"\n");
                                 buildsystem_files.add (get_absolute_path (p->get_content()));
                                 break;
                             default:

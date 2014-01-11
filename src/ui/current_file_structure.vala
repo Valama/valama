@@ -87,7 +87,7 @@ public class UiCurrentFileStructure : UiElement {
 
         // Lower toolbar
         var toolbar_current_symbol = new Toolbar();
-        toolbar_current_symbol.icon_size = 1;
+        toolbar_current_symbol.icon_size = IconSize.MENU;
 
         btn_find_references = new ToolButton (null, null);
         btn_find_references.icon_name = "edit-redo-symbolic";

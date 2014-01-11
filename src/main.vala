@@ -324,7 +324,13 @@ static bool on_file_selected (string filename, bool focus = true) {
     if (source_viewer.current_srcfocus == filename ||
             (!focus && source_viewer.get_sourceview_by_file (filename) != null))
         return true;
-
+	if (!FileUtils.test (filename, FileTest.EXISTS))
+		return false;
+	if (filename.has_suffix (".glade") || filename.has_suffix (".ui"))
+	{
+		wdg_glade_viewer.load (filename);
+		return true;
+	}
     string txt = "";
     try {
         FileUtils.get_contents (filename, out txt);
