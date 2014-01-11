@@ -25,11 +25,7 @@ using Gtk;
 public class UiSearch : UiElement {
     TreeView tree_view;
     ToggleToolButton btn_all_files;
-#if GTK_3_6
     SearchEntry entry_search;
-#else
-    Entry entry_search;
-#endif
 
     public UiSearch () {
         tree_view = new TreeView();
@@ -73,11 +69,7 @@ public class UiSearch : UiElement {
         toolbar_title.add (btn_all_files);
         box_main.pack_start (toolbar_title, false, true);
 
-#if GTK_3_6
         entry_search = new SearchEntry();
-#else
-        entry_search = new Entry();
-#endif
 
         entry_search.changed.connect(() => {
             search (entry_search.text);

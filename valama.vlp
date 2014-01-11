@@ -14,11 +14,6 @@
 		</choice>
 		<package name="clutter-gtk-1.0"/>
 		<package name="gdk-3.0"/>
-		<package name="gladeui-2.0">
-			<extracheck vapi="extravapi/gladeui-2.0.vapi">
-				<package name="gladeui-2.0" />
-			</extracheck>
-		</package>
 		<package name="gdl-3.0" version="3.3.91" rel="since">
 			<extracheck vapi="extravapi/gdl-3.0.vapi" define="GDL_3_9_91">
 				<package name="gdl-3.0" version="3.9.91" rel="since"/>
@@ -39,13 +34,14 @@
 		</package>
 		<package name="gee-0.8"/>
 		<package name="gio-2.0"/>
-		<package name="glib-2.0" version="2.32" rel="since"/>
-		<package name="gobject-2.0"/>
-		<package name="gtk+-3.0" version="3.4" rel="since">
-			<extracheck define="GTK_3_6">
-				<package name="gtk+-3.0" version="3.6" rel="since"/>
+		<package name="gladeui-2.0">
+			<extracheck vapi="extravapi/gladeui-2.0.vapi">
+				<package name="gladeui-2.0"/>
 			</extracheck>
 		</package>
+		<package name="glib-2.0" version="2.32" rel="since"/>
+		<package name="gobject-2.0"/>
+		<package name="gtk+-3.0" version="3.9" rel="since"/>
 		<package name="gtksourceview-3.0"/>
 		<package name="guanako"/>
 		<package name="libxml-2.0"/>
