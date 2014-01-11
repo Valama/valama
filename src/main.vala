@@ -135,6 +135,7 @@ static bool quit_valama() {
     if (widget_main != null)
         widget_main.close();
     window_main.destroy();
+    gtk_app.quit();
     return true;
 }
 
