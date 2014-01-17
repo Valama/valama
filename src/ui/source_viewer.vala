@@ -397,12 +397,15 @@ class UiSourceViewer : UiElement {
         attr2.icon_name = "media-seek-stop";
         view.set_mark_attributes ("stop", attr2, 0);
         view.show_line_marks = true;
+
         TextTag tag = srcbuf.create_tag ("error_bg", null);
         tag.underline = Pango.Underline.ERROR;
         tag = srcbuf.create_tag ("warning_bg", null);
-        tag.background_rgba = Gdk.RGBA() { red = 1.0, green = 1.0, blue = 0, alpha = 0.8 };
-        tag = srcbuf.create_tag ("search", null);
         tag.background_rgba = Gdk.RGBA() { red = 1.0, green = 1.0, blue = 0.8, alpha = 1.0 };
+        tag = srcbuf.create_tag ("search", null);
+        tag.background_rgba = Gdk.RGBA() { red = 1.0, green = 1.0, blue = 0, alpha = 0.8 };
+        tag = srcbuf.create_tag ("symbol_used", null);
+        tag.background_rgba = Gdk.RGBA() { red = 0, green = 0, blue = 0, alpha = 0.2 };
 
         if (project != null)
             foreach (var err in project.get_errorlist())

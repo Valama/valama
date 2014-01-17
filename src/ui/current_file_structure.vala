@@ -269,8 +269,25 @@ public class UiCurrentFileStructure : UiElement {
         var col = iter.get_line_offset() + 1;
 
         current_symbol = Guanako.Refactoring.find_declaration(project.guanako_project, sf, line, col);
-        if (current_symbol != null)
+
+        TextIter first_iter;
+        TextIter end_iter;
+        source_viewer.current_srcbuffer.get_start_iter (out first_iter);
+        source_viewer.current_srcbuffer.get_end_iter (out end_iter);
+        source_viewer.current_srcbuffer.remove_tag_by_name ("symbol_used", first_iter, end_iter);
+
+        if (current_symbol != null) {
             btn_jump_to_declaration.label = current_symbol.name;
+
+            var srefs = Guanako.Refactoring.find_references (project.guanako_project, sf, current_symbol);
+            foreach (SourceReference sref in srefs) {
+                TextIter? match_start = null;
+                TextIter? match_end = null;
+                source_viewer.current_srcbuffer.get_iter_at_line_offset (out match_start, sref.begin.line - 1, sref.begin.column - 1);
+                source_viewer.current_srcbuffer.get_iter_at_line_offset (out match_end, sref.end.line - 1, sref.end.column);
+                source_viewer.current_srcbuffer.apply_tag_by_name ("symbol_used", match_start, match_end);
+            }
+        }
         btn_jump_to_declaration.sensitive = current_symbol != null;
     }
 }
