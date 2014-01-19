@@ -28,6 +28,57 @@ public void standardize_listbox_row (ListBoxRow row) {
     row.margin_bottom = 6;
 }
 
+private bool is_after_eof (TextBuffer buffer, Vala.SourceLocation location) {
+    TextIter iter_end;
+
+    buffer.get_end_iter (out iter_end);
+    int last_line = iter_end.get_line() + 1;
+    int last_column = iter_end.get_chars_in_line();
+
+    return location.line > last_line || (location.line == last_line && location.column > last_column);
+}
+
+private bool is_after_eol (TextBuffer buffer, Vala.SourceLocation location, out int linelength) {
+    TextIter iter_end;
+    buffer.get_iter_at_line (out iter_end, location.line - 1);
+    linelength = iter_end.get_chars_in_line();
+    return location.column >= linelength;
+}
+
+public void get_safe_iters_from_source_ref (TextBuffer bfr, Vala.SourceReference source_ref, ref TextIter? iter_start, ref TextIter? iter_end) {
+    if (is_after_eof (bfr, source_ref.begin))
+        bfr.get_end_iter (out iter_start);
+    else {
+        int linelength;
+        if (is_after_eol (bfr, source_ref.begin, out linelength)) {
+            if (linelength == 0) //In case of empty line, fix length
+                linelength = 1;
+            bfr.get_iter_at_line_offset (out iter_start,
+                                         source_ref.begin.line - 1,
+                                         linelength - 1);
+        } else
+            bfr.get_iter_at_line_offset (out iter_start,
+                                         source_ref.begin.line - 1,
+                                         source_ref.begin.column - 1);
+    }
+    if (is_after_eof (bfr, source_ref.end) || (source_ref.end.line == 0 && source_ref.end.column == 0))
+        bfr.get_end_iter (out iter_end);
+    else {
+        int linelength;
+        if (is_after_eol (bfr, source_ref.end, out linelength)) {
+            if (linelength == 0) //In case of empty line, fix length
+                linelength = 1;
+            bfr.get_iter_at_line_offset (out iter_end,
+                                         source_ref.end.line - 1,
+                                         linelength - 1);
+        } else
+            bfr.get_iter_at_line_offset (out iter_end,
+                                         source_ref.end.line - 1,
+                                         source_ref.end.column);
+    }
+}
+
+
 /**
  * Custom {@link Gtk.Entry} class.
  *

@@ -176,36 +176,7 @@ class UiSourceViewer : UiElement {
         TextIter? iter_end = null;
 
         // We have broken message positions in some cases ...
-        if (is_after_eof (bfr, err.source.begin))
-            bfr.get_end_iter (out iter_start);
-        else {
-            int linelength;
-            if (is_after_eol (bfr, err.source.begin, out linelength)) {
-                if (linelength == 0) //In case of empty line, fix length
-                    linelength = 1;
-                bfr.get_iter_at_line_offset (out iter_start,
-                                             err.source.begin.line - 1,
-                                             linelength - 1);
-            } else
-                bfr.get_iter_at_line_offset (out iter_start,
-                                             err.source.begin.line - 1,
-                                             err.source.begin.column - 1);
-        }
-        if (is_after_eof (bfr, err.source.end) || (err.source.end.line == 0 && err.source.end.column == 0))
-            bfr.get_end_iter (out iter_end);
-        else {
-            int linelength;
-            if (is_after_eol (bfr, err.source.end, out linelength)) {
-                if (linelength == 0) //In case of empty line, fix length
-                    linelength = 1;
-                bfr.get_iter_at_line_offset (out iter_end,
-                                             err.source.end.line - 1,
-                                             linelength - 1);
-            } else
-                bfr.get_iter_at_line_offset (out iter_end,
-                                             err.source.end.line - 1,
-                                             err.source.end.column);
-        }
+        get_safe_iters_from_source_ref (bfr, err.source, ref iter_start, ref iter_end);
 
         // end == begin -> we want to make sure that the error is visible
         // There is also a case where end > begin but I can't remember
@@ -251,23 +222,6 @@ class UiSourceViewer : UiElement {
                 bug_msg (_("Unknown ReportType: %s\n"), err.type.to_string());
                 break;
         }
-    }
-
-    private bool is_after_eol (TextBuffer buffer, Vala.SourceLocation location, out int linelength) {
-        TextIter iter_end;
-        buffer.get_iter_at_line (out iter_end, location.line - 1);
-        linelength = iter_end.get_chars_in_line();
-        return location.column >= linelength;
-    }
-
-    private bool is_after_eof (TextBuffer buffer, Vala.SourceLocation location) {
-        TextIter iter_end;
-
-        buffer.get_end_iter (out iter_end);
-        int last_line = iter_end.get_line() + 1;
-        int last_column = iter_end.get_chars_in_line();
-
-        return location.line > last_line || (location.line == last_line && location.column > last_column);
     }
 
     private inline bool contains_invisible_char (TextIter start, TextIter end) {

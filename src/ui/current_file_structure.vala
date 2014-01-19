@@ -283,8 +283,7 @@ public class UiCurrentFileStructure : UiElement {
             foreach (SourceReference sref in srefs) {
                 TextIter? match_start = null;
                 TextIter? match_end = null;
-                source_viewer.current_srcbuffer.get_iter_at_line_offset (out match_start, sref.begin.line - 1, sref.begin.column - 1);
-                source_viewer.current_srcbuffer.get_iter_at_line_offset (out match_end, sref.end.line - 1, sref.end.column);
+                get_safe_iters_from_source_ref (source_viewer.current_srcbuffer, sref, ref match_start, ref match_end);
                 source_viewer.current_srcbuffer.apply_tag_by_name ("symbol_used", match_start, match_end);
             }
         }
