@@ -336,7 +336,27 @@ public class ProjectBrowser : UiElement {
         // TRANSLATORS: E.g. "Project browser update finished!"
         debug_msg (_("%s update finished!\n"), get_name());
     }
-
+    
+    /**
+     * Get descriptions of packages. 
+     */
+	Gee.Map<string,string> list_all_pkg_config ()
+	{
+		var map = new Gee.HashMap<string, string>();
+		string output;
+		try {
+			Process.spawn_command_line_sync ("pkg-config --list-all", out output);
+			var lines = output.split ("\n");
+			foreach (var line in lines)
+			{
+				map[line.split (" ", 2)[0]] = line.split (" ", 2)[1];
+			}
+		} catch {
+		
+		}
+		return map.read_only_view;
+	}
+	
     /**
      * Select Vala packages to add/remove to/from build system (with valac).
      */
@@ -351,7 +371,7 @@ public class ProjectBrowser : UiElement {
                                               ResponseType.ACCEPT);
 
         var tree_view = new TreeView();
-        var listmodel = new ListStore (2, typeof (bool), typeof (string));
+        var listmodel = new ListStore (3, typeof (bool), typeof (string), typeof (string));
         tree_view.set_model (listmodel);
         CellRendererToggle toggle = new CellRendererToggle();
         toggle.toggled.connect ((toggle, path) => {
@@ -364,11 +384,19 @@ public class ProjectBrowser : UiElement {
         column.pack_start (toggle, false);
         column.add_attribute (toggle, "active", 0);
         tree_view.append_column (column);
+        
         CellRendererText text = new CellRendererText();
-
         column = new TreeViewColumn();
+        column.title = "Package";
         column.pack_start (text, true);
         column.add_attribute (text, "text", 1);
+        tree_view.append_column (column);
+        
+        CellRendererText desc_text = new CellRendererText();
+        column = new TreeViewColumn();
+        column.title = "Description";
+        column.pack_start (desc_text, true);
+        column.add_attribute (desc_text, "text", 2);
         tree_view.append_column (column);
 
 
@@ -376,14 +404,20 @@ public class ProjectBrowser : UiElement {
         dlg.get_content_area().pack_start (scrw);
         dlg.set_default_size (400, 600);
 
-        var proposed_packages = new string[0];
+        var pkg_infos = list_all_pkg_config();
+        
         foreach (var pkg in Guanako.get_available_packages().get_keys()) {
             if (pkg in project.packages.keys)  //Ignore packages that are already selected
                 continue;
-            proposed_packages += pkg;
             TreeIter iter;
-            listmodel.append (out iter);
-            listmodel.set (iter, 0, false, 1, pkg);
+            /*
+                Don't include package in store if .pc file is missing.
+            */
+            if (pkg_infos[pkg] != null)
+            {
+                listmodel.append (out iter);
+                listmodel.set (iter, 0, false, 1, pkg, 2, pkg_infos[pkg]);
+            }
         }
         scrw.add (tree_view);
         scrw.show_all();
