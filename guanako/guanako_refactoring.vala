@@ -64,7 +64,8 @@ namespace Guanako.Refactoring {
 
                             Guanako.iter_expressions (stmt, (expr, depth)=>{
                                 if (expr.symbol_reference == symbol)
-                                    ret += expr.source_reference;
+                                    if (expr.source_reference != null)
+                                        ret += expr.source_reference;
                                 return Guanako.IterCallbackReturns.CONTINUE;
                             });
 
