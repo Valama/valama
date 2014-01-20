@@ -26,8 +26,17 @@ namespace WelcomeScreen {
     protected class CreateProjectBuildsystem : TemplatePageWithHeader {
         public CreateProjectBuildsystem (ref ProjectCreationInfo info) {
             this.info = info;
+            bs = new BuilderCMake();
+            check_btn = new Gtk.CheckButton.with_label ("make library");
+            go_to_next_clicked.connect (() => { 
+		this.info.template.vproject.builder = bs; 
+		this.info.buildsystem = bs.get_name_id();
+		this.info.make_library = check_btn.active;
+            });
         }
         private ProjectCreationInfo info;
+        BuildSystem bs;
+        Gtk.CheckButton check_btn;
 
         protected override void clean_up() {
 
@@ -37,13 +46,14 @@ namespace WelcomeScreen {
             description = _("Buildsystem");
             BuildSystemTemplate.load_buildsystems (true);
             var frame = new Frame(null);
+            var box = new Gtk.Box (Orientation.VERTICAL, 20);
             var list = new Gtk.ListBox ();
             list.row_activated.connect (row => {
 				string label = (row.get_child() as Gtk.Label).label;
 				if (label == "cmake")
-					info.template.vproject.builder = new BuilderCMake();
+					bs = new BuilderCMake(check_btn.active);
 				else
-					info.template.vproject.builder = new BuilderAutotools();
+					bs = new BuilderAutotools(check_btn.active);
 			});
             buildsystems.foreach (entry => {
 				var row = new Gtk.ListBoxRow();
@@ -52,7 +62,9 @@ namespace WelcomeScreen {
 				list.add (row);
 				return true;
 			});
-            frame.add(list);
+			box.pack_start (list);
+			box.pack_start (check_btn);
+            frame.add(box);
             var align = new Alignment (0.5f, 0.1f, 1.0f, 0.0f);
             align.add (frame);
             return align;

@@ -336,26 +336,6 @@ public class ProjectBrowser : UiElement {
         // TRANSLATORS: E.g. "Project browser update finished!"
         debug_msg (_("%s update finished!\n"), get_name());
     }
-    
-    /**
-     * Get descriptions of packages. 
-     */
-	static Gee.Map<string,string> list_all_pkg_config ()
-	{
-		var map = new Gee.HashMap<string, string>();
-		string output;
-		try {
-			Process.spawn_command_line_sync ("pkg-config --list-all", out output);
-			var lines = output.split ("\n");
-			foreach (var line in lines)
-			{
-				map[line.split (" ", 2)[0]] = line.split (" ", 2)[1];
-			}
-		} catch {
-		
-		}
-		return map.read_only_view;
-	}
 	
     /**
      * Select Vala packages to add/remove to/from build system (with valac).

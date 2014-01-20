@@ -77,8 +77,30 @@ public void ui_project_dialog (ValamaProject? project) {
     row.add (box);
     standardize_listbox_row (row);
     list.add (row);
+    
+    /*
+     * Set project type : library/binary.
+     */
 
-
+    row = new ListBoxRow();
+    var check_btn = new CheckButton.with_label ("is library project");
+    row.add (check_btn);
+    list.add (row);
+    
+    /*
+     * Set build system type.
+     */
+    
+    row = new ListBoxRow();
+    var bslist = new ComboBoxText();
+    BuildSystemTemplate.load_buildsystems();
+    buildsystems.foreach (entry => {
+        bslist.append_text (entry.key);
+        return true;
+    });
+    row.add (bslist);
+    list.add (row);
+    
     /*
      * Set project version.
      * Format: X.Y.Z (major version, minor version, patch version)
@@ -119,6 +141,9 @@ public void ui_project_dialog (ValamaProject? project) {
                 project.version_minor = (int) ent_minor.value;
                 project.version_patch = (int) ent_patch.value;
                 //project.version_special = ent_version_special;
+                project.library = check_btn.active;
+                if (bslist.active >= 0)
+                    project.buildsystem = bslist.get_active_text();
                 project.save_project_file();
                 dlg.destroy();
                 break;

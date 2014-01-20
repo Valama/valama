@@ -1,6 +1,6 @@
 <project version="0.1">
 	<name>Valama</name>
-	<buildsystem>cmake</buildsystem>
+	<buildsystem library="false">cmake</buildsystem>
 	<version>
 		<major>0</major>
 		<minor>1</minor>

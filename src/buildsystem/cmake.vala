@@ -21,6 +21,11 @@ using GLib;
 
 public class BuilderCMake : BuildSystem {
     string projectinfo;
+    
+    public BuilderCMake (bool make_lib = false)
+	{
+		Object(library: make_lib);
+	}
 
     public override string get_executable() {
         return project.project_name.down();

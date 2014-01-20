@@ -124,7 +124,7 @@ namespace WelcomeScreen {
         private void show_create_project_location() {
             var page = new CreateProjectLocation(ref info);
             page.go_to_prev_clicked.connect(()=>{show_create_project_template();});
-            page.go_to_next_clicked.connect(()=>{show_create_project_buildsystem();});
+            page.go_to_next_clicked.connect(()=>{show_create_project_packages();});
             switch_to_page(page);
         }
         private void show_create_project_template() {
@@ -134,9 +134,15 @@ namespace WelcomeScreen {
             page.go_to_next_clicked.connect(()=>{show_create_project_location();});
             switch_to_page(page);
         }
+        private void show_create_project_packages() {
+	    var page = new CreateProjectPackages(ref info);
+	    page.go_to_prev_clicked.connect(()=>{ show_create_project_location(); });
+            page.go_to_next_clicked.connect(()=>{ show_create_project_buildsystem(); });
+            switch_to_page(page);
+	}
         private void show_create_project_buildsystem() {
             var page = new CreateProjectBuildsystem(ref info);
-            page.go_to_prev_clicked.connect(()=>{show_create_project_location();});
+            page.go_to_prev_clicked.connect(()=>{show_create_project_packages();});
             page.go_to_next_clicked.connect(()=>{project_loaded (create_project_from_template (info));});
             switch_to_page(page);
         }

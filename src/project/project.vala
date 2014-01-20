@@ -245,6 +245,12 @@ public class ValamaProject : ProjectFile {
      * @param save_recent Update recent project files catalogue.
      * @throws LoadingError Throw on error while loading project file.
      */
+    internal ValamaProject.empty(string project_file) throws LoadingError
+    {
+		base.empty(project_file);
+		constructor_init (null, true, false);
+	} 
+    
     public ValamaProject (string project_file,
                           string? syntaxfile = null,
                           bool fully = true,
@@ -285,7 +291,7 @@ public class ValamaProject : ProjectFile {
     }
 
     private void constructor_init (string? syntaxfile, bool fully, bool save_recent) throws LoadingError {
-        add_builder (buildsystem);
+        add_builder (buildsystem, library);
 
         if (fully)
             try {                       //TODO: Allow changing glib version.
@@ -1178,7 +1184,7 @@ public class ValamaProject : ProjectFile {
     /**
      * Load build system.
      */
-    public bool add_builder (string? buildsystem) {
+    public bool add_builder (string? buildsystem, bool lib = false) {
         if (buildsystem == null) {
             builder = null;
             return true;
@@ -1189,10 +1195,10 @@ public class ValamaProject : ProjectFile {
                 builder = new BuilderPlain();
                 break;
             case "cmake":
-                builder = new BuilderCMake();
+                builder = new BuilderCMake(lib);
                 break;
             case "autotools":
-				builder = new BuilderAutotools();
+				builder = new BuilderAutotools(lib);
 				break;
             default:
                 warning_msg (_("Build system '%s' not supported.\n"), buildsystem);

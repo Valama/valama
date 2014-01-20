@@ -27,7 +27,10 @@ namespace WelcomeScreen {
     // Class to hold all information on the new project across pages
     protected class ProjectCreationInfo {
         public string name = "";
+        public string buildsystem = "";
+        public bool make_library = false;
         public string directory = "";
+        public string[] packages = new string[0];
         public ProjectTemplate template;
     }
 

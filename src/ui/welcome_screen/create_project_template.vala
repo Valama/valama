@@ -590,6 +590,11 @@ public class CreateProjectTemplate : TemplatePageWithHeader {
                                           true,
                                           false);
             new_proj.project_name = info.name;
+            new_proj.buildsystem = info.buildsystem;
+            new_proj.library = info.make_library;
+            if (info.buildsystem == "autotools")
+                new_proj.buildsystem_dirs.remove ("cmake");
+            new_proj.add_packages_by_names (info.packages);
             new_proj.save_to_recent();
             new_proj.save_project_file();
         } catch (LoadingError e) {

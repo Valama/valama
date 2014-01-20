@@ -25,6 +25,14 @@ using Xml;
 const string VLP_VERSION_MIN = "0.1";
 
 public class ProjectFile : Object {
+    internal ProjectFile.empty(string project_file)
+    {
+        this.project_file_path = project_file;
+        var proj_file = File.new_for_path (project_file);
+        project_path = proj_file.get_parent().get_path(); //TODO: Check valid path?
+	
+    }
+	
     public ProjectFile (string project_file) throws LoadingError {
         this.project_file_path = project_file;
         var proj_file = File.new_for_path (project_file);
@@ -124,7 +132,8 @@ public class ProjectFile : Object {
     //TODO: Support only for templates and not normal projects.
     public ArrayList<string> files_opened { get; protected set; default = new ArrayList<string>(); }
 
-    public string buildsystem { get; protected set; default = ""; }
+    public string buildsystem { get; set; default = ""; }
+    public bool library { get; set; default = false; }
 
      /**
      * Load Valama project from .vlp (xml) file.
@@ -172,6 +181,8 @@ public class ProjectFile : Object {
                     break;
                 case "buildsystem":
                     buildsystem = i->get_content();
+                    if (i->get_prop ("library") == "true")
+						library = true;
                     break;
                 case "version":
                     for (Xml.Node* p = i->children; p != null; p = p->next) {
@@ -404,9 +415,12 @@ public class ProjectFile : Object {
         writer.start_element ("project");
         writer.write_attribute ("version", project_file_version);
         writer.write_element ("name", project_name);
-        if (buildsystem != "")
-            writer.write_element ("buildsystem", buildsystem);
-
+        if (buildsystem != ""){
+            writer.start_element ("buildsystem");
+            writer.write_attribute ("library", library.to_string());
+            writer.write_string (buildsystem);
+            writer.end_element();
+        }
         writer.start_element ("version");
         writer.write_element ("major", version_major.to_string());
         writer.write_element ("minor", version_minor.to_string());
