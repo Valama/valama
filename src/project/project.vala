@@ -142,7 +142,7 @@ public class ValamaProject : ProjectFile {
     /**
      * Attached build system.
      */
-    public BuildSystem? builder { get; private set; default = null; }
+    public BuildSystem? builder { get; set; default = null; }
 
     /**
      * Identifier to provide context state to plug-ins.

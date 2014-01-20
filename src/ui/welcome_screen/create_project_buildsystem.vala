@@ -35,18 +35,27 @@ namespace WelcomeScreen {
         protected override Gtk.Widget build_inner_widget() {
             heading = _("Create project");
             description = _("Buildsystem");
-
-            var grid_pinfo = new Grid();
-            grid_pinfo.column_spacing = 10;
-            grid_pinfo.row_spacing = 15;
-            grid_pinfo.row_homogeneous = false;
-            grid_pinfo.column_homogeneous = true;
-
-            var lbl_pname = new Label ("Not implemented yet");
-            grid_pinfo.attach (lbl_pname, 0, 0, 1, 1);
-            lbl_pname.halign = Align.END;
-
-            return grid_pinfo;
+            BuildSystemTemplate.load_buildsystems (true);
+            var frame = new Frame(null);
+            var list = new Gtk.ListBox ();
+            list.row_activated.connect (row => {
+				string label = (row.get_child() as Gtk.Label).label;
+				if (label == "cmake")
+					info.template.vproject.builder = new BuilderCMake();
+				else
+					info.template.vproject.builder = new BuilderAutotools();
+			});
+            buildsystems.foreach (entry => {
+				var row = new Gtk.ListBoxRow();
+				var lbl = new Gtk.Label (entry.key);
+				row.add (lbl);
+				list.add (row);
+				return true;
+			});
+            frame.add(list);
+            var align = new Alignment (0.5f, 0.1f, 1.0f, 0.0f);
+            align.add (frame);
+            return align;
         }
     }
 }

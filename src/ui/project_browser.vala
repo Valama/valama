@@ -340,7 +340,7 @@ public class ProjectBrowser : UiElement {
     /**
      * Get descriptions of packages. 
      */
-	Gee.Map<string,string> list_all_pkg_config ()
+	static Gee.Map<string,string> list_all_pkg_config ()
 	{
 		var map = new Gee.HashMap<string, string>();
 		string output;
