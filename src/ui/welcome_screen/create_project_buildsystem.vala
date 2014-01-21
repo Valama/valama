@@ -26,8 +26,17 @@ namespace WelcomeScreen {
     protected class CreateProjectBuildsystem : TemplatePageWithHeader {
         public CreateProjectBuildsystem (ref ProjectCreationInfo info) {
             this.info = info;
+            bs = new BuilderCMake();
+            check_btn = new Gtk.CheckButton.with_label ("make library");
+            go_to_next_clicked.connect (() => { 
+		this.info.template.vproject.builder = bs; 
+		this.info.buildsystem = bs.get_name_id();
+		this.info.make_library = check_btn.active;
+            });
         }
         private ProjectCreationInfo info;
+        BuildSystem bs;
+        Gtk.CheckButton check_btn;
 
         protected override void clean_up() {
 
@@ -35,18 +44,30 @@ namespace WelcomeScreen {
         protected override Gtk.Widget build_inner_widget() {
             heading = _("Create project");
             description = _("Buildsystem");
-
-            var grid_pinfo = new Grid();
-            grid_pinfo.column_spacing = 10;
-            grid_pinfo.row_spacing = 15;
-            grid_pinfo.row_homogeneous = false;
-            grid_pinfo.column_homogeneous = true;
-
-            var lbl_pname = new Label ("Not implemented yet");
-            grid_pinfo.attach (lbl_pname, 0, 0, 1, 1);
-            lbl_pname.halign = Align.END;
-
-            return grid_pinfo;
+            BuildSystemTemplate.load_buildsystems (true);
+            var frame = new Frame(null);
+            var box = new Gtk.Box (Orientation.VERTICAL, 20);
+            var list = new Gtk.ListBox ();
+            list.row_activated.connect (row => {
+				string label = (row.get_child() as Gtk.Label).label;
+				if (label == "cmake")
+					bs = new BuilderCMake(check_btn.active);
+				else
+					bs = new BuilderAutotools(check_btn.active);
+			});
+            buildsystems.foreach (entry => {
+				var row = new Gtk.ListBoxRow();
+				var lbl = new Gtk.Label (entry.key);
+				row.add (lbl);
+				list.add (row);
+				return true;
+			});
+			box.pack_start (list);
+			box.pack_start (check_btn);
+            frame.add(box);
+            var align = new Alignment (0.5f, 0.1f, 1.0f, 0.0f);
+            align.add (frame);
+            return align;
         }
     }
 }

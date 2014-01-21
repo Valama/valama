@@ -5,6 +5,11 @@ public class BuilderAutotools : BuildSystem
 	bool prepared;
 	bool autoreconfigured;
 	
+	public BuilderAutotools (bool make_lib = false)
+	{
+		Object(library: make_lib);
+	}
+	
 	public override string get_executable() {
 		return project.project_name.down();
 	}
@@ -138,16 +143,16 @@ public class BuilderAutotools : BuildSystem
             data_stream.put_string ("\n");
             var str_pkgs = new StringBuilder ("pkg_modules=\"");
             foreach (var pkgmap in get_pkgmaps().values) {
-				if (pkgmap.choice_pkg != null && !pkgmap.check)
-					str_pkgs.append (@"$(pkgmap as PackageInfo)\n");
-				else
-					str_pkgs.append (@"$pkgmap\n");
-			}
-			str_pkgs.append ("\"\n");
-			data_stream.put_string (str_pkgs.str);
-			data_stream.put_string ("PKG_CHECK_MODULES("+str_name.up()+", [$pkg_modules])\n");
-			data_stream.put_string (@"AC_SUBST($(str_name.up())_CFLAGS)\n");
-			data_stream.put_string (@"AC_SUBST($(str_name.up())_LIBS)\n");
+            if (pkgmap.choice_pkg != null && !pkgmap.check)
+                str_pkgs.append (@"$(pkgmap as PackageInfo)\n");
+            else
+                str_pkgs.append (@"$pkgmap\n");
+            }
+            str_pkgs.append ("\"\n");
+	    data_stream.put_string (str_pkgs.str);
+	    data_stream.put_string ("PKG_CHECK_MODULES("+str_name.up()+", [$pkg_modules])\n");
+	    data_stream.put_string (@"AC_SUBST($(str_name.up())_CFLAGS)\n");
+	    data_stream.put_string (@"AC_SUBST($(str_name.up())_LIBS)\n");
             data_stream.put_string ("\n");
             data_stream.put_string ("AC_CONFIG_FILES([Makefile])\n");
             data_stream.put_string ("AC_OUTPUT\n");
@@ -161,26 +166,93 @@ public class BuilderAutotools : BuildSystem
                                                     
 			data_stream = new DataOutputStream (file_stream);
 			data_stream.put_string ("AM_CFLAGS = $("+str_name.up()+"_CFLAGS)\n\n");
-			data_stream.put_string ("bin_PROGRAMS = "+project.project_name+"\n\n");
-			data_stream.put_string (str_name+"_LDADD = $("+str_name.up()+"_LIBS)\n\n");
-			var str_files = new StringBuilder (str_name+"_SOURCES = ");
+			string lower_libname = null;
+			if (library)
+			{
+				string libname = project.project_name.has_prefix ("lib") ? project.project_name : "lib"+project.project_name;
+				libname += ".la";
+				lower_libname = libname.replace ("-","_").replace (".","_");
+				data_stream.put_string ("lib_LTLIBRARIES = "+libname+"\n\n");
+				data_stream.put_string (lower_libname+"_LIBADD = $("+str_name.up()+"_LIBS)\n\n");
+				data_stream.put_string (str_name.down()+"includedir = $(includedir)\n");
+				data_stream.put_string (str_name.down()+@"include_HEADERS = $(str_name.down()).h\n\n");
+				data_stream.put_string ("pkgconfigdir = $(libdir)/pkgconfig\n");
+				data_stream.put_string (@"pkgconfig_DATA = $(str_name.down()).pc\n\n");
+				data_stream.put_string ("vapidir = $(datadir)/vala/vapi\n");
+				data_stream.put_string (@"dist_vapi_DATA = $(str_name.down()).vapi $(str_name.down()).deps\n\n");
+			}
+			else {
+			    data_stream.put_string ("bin_PROGRAMS = "+project.project_name+"\n\n");
+			    data_stream.put_string (str_name+"_LDADD = $("+str_name.up()+"_LIBS)\n\n");
+			}
+			var str_files = new StringBuilder ((library ? lower_libname : str_name.down())+"_SOURCES = ");
 			foreach (var filepath in project.files) {
 				var fname = project.get_relative_path (filepath);
 				str_files.append (@"$fname ");
 			}
 			str_files.append ("\n\n");
 			data_stream.put_string (str_files.str);
-			str_pkgs = new StringBuilder (str_name.down()+"_VALAFLAGS = ");
+			str_pkgs = new StringBuilder ((library ? lower_libname : str_name.down())+"_VALAFLAGS = ");
 			foreach (var pkgmap in get_pkgmaps().values) {
 				if (pkgmap.choice_pkg != null && !pkgmap.check)
 					str_pkgs.append (@"--pkg $(pkgmap as PackageInfo) ");
 				else
 					str_pkgs.append (@"--pkg $pkgmap ");
 			}
+			if (library)
+			{
+				str_pkgs.append (" --vapi %s.vapi -H %s.h --library %s".printf(str_name.down(),str_name.down(),str_name.down()));
+			}
 			str_pkgs.append ("\n\n");
 			data_stream.put_string (str_pkgs.str);
 			data_stream.put_string ("CLEANFILES = *.c *.o "+str_name.down()+"\n");
 			data_stream.close();
+			
+			if (library)
+			{
+				var str_deps = Path.build_path (Path.DIR_SEPARATOR_S,
+                                       project.project_path,
+                                       str_name.down()+".deps");
+			    file_stream = File.new_for_path (str_deps).create (FileCreateFlags.REPLACE_DESTINATION);
+			    data_stream = new DataOutputStream (file_stream);
+			    foreach (var pkgmap in get_pkgmaps().values) {
+				    if (pkgmap.choice_pkg != null && !pkgmap.check)
+					    data_stream.put_string (@"$(pkgmap as PackageInfo)\n");
+					else
+					    data_stream.put_string (@"$pkgmap\n");
+				}
+			    data_stream.close();
+			    
+				var str_pc = Path.build_path (Path.DIR_SEPARATOR_S,
+                                       project.project_path,
+                                       str_name.down()+".pc");
+			    file_stream = File.new_for_path (str_pc).create (FileCreateFlags.REPLACE_DESTINATION);
+			    data_stream = new DataOutputStream (file_stream);
+			    var short_name = project.project_name.has_prefix ("lib") ? 
+					project.project_name.substring (3) : 
+					project.project_name;
+				var req = "";
+				foreach (var pkgmap in get_pkgmaps().values) {
+				    if (pkgmap.choice_pkg != null && !pkgmap.check)
+					    req += @"$(pkgmap as PackageInfo) ";
+					else
+					    req += @"$pkgmap ";
+				}
+			    data_stream.put_string ("""prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+datarootdir=@datarootdir@
+datadir=@datadir@
+includedir=@includedir@/%s
+
+Name: Mee
+Description: .pc file created by Valama.
+Version: @VERSION@
+Requires: %s
+Libs: -L${libdir} -l%s
+Cflags: -I${includedir}""".printf (project.project_name, req, short_name));
+			    data_stream.close();
+			}
 			
         } catch (GLib.IOError e) {
             throw new BuildError.INITIALIZATION_FAILED (_("Could not read file: %s\n"), e.message);

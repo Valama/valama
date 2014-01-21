@@ -28,6 +28,8 @@ public abstract class BuildSystem : Object {
     public bool built { get; protected set; default = false; }
     public bool cleaned { get; protected set; default = false; }
     public bool launched { get; protected set; default = false; }
+    
+    public bool library { get; construct; }
 
     protected Pid? app_pid;
     public ProcessSignal? ps { get; protected set; default = null; }
@@ -53,7 +55,7 @@ public abstract class BuildSystem : Object {
     protected MainLoop builder_loop;
 
 
-    public BuildSystem() {
+    construct {
         builder_loop = new MainLoop();
 
         initialize_started.connect (() => {
