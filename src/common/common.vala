@@ -860,16 +860,17 @@ public inline void errmsg (string format, ...) {
 
 public static Gee.SortedMap<string,string> list_all_pkg_config ()
 {
-        var map = new Gee.TreeMap<string, string>();
-        string output;
-        try {
-            Process.spawn_command_line_sync ("pkg-config --list-all", out output);
-            var lines = output.split ("\n");
-            foreach (var line in lines)
-                map[line.split (" ", 2)[0]] = line.split (" ", 2)[1];
-        } catch {
+    var map = new Gee.TreeMap<string, string>();
+    string output;
+    try {
+        Process.spawn_command_line_sync ("pkg-config --list-all", out output);
+        var lines = output.split ("\n");
+        foreach (var line in lines)
+            map[line.split (" ", 2)[0]] = line.split (" ", 2)[1];
+        map["posix"] = "POSIX";
+    } catch {
 
-        }
+    }
     return map.read_only_view;
 }
 

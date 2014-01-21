@@ -48,16 +48,16 @@ public class BuilderAutotools : BuildSystem
         exit_status = null;
         if (!initialized && !initialize (out exit_status))
             return false;
-
+		
         exit_status = null;
-        configured = false;
+        autoreconfigured = false;
         configure_started();
 
         var cmdline = new string[] {"autoreconf", "-f", "-i"};
         Pid? pid;
         if (!call_cmd (cmdline, out pid)) {
             configure_finished();
-            throw new BuildError.CONFIGURATION_FAILED (_("configure command failed"));
+            throw new BuildError.CONFIGURATION_FAILED (_("autoreconf command failed"));
         }
         
         int? exit = null;
@@ -69,7 +69,7 @@ public class BuilderAutotools : BuildSystem
         
         builder_loop.run();
         exit_status = exit;
-        configured = true;
+        autoreconfigured = true;
         configure_finished();
         return exit_status == 0;
     }
@@ -141,18 +141,19 @@ public class BuilderAutotools : BuildSystem
             data_stream.put_string ("AC_PROG_CC\n");
             data_stream.put_string ("AM_PROG_VALAC\n");
             data_stream.put_string ("\n");
-            var str_pkgs = new StringBuilder ("pkg_modules=\"");
-            foreach (var pkgmap in get_pkgmaps().values) {
-            if (pkgmap.choice_pkg != null && !pkgmap.check)
-                str_pkgs.append (@"$(pkgmap as PackageInfo)\n");
-            else
-                str_pkgs.append (@"$pkgmap\n");
+	        data_stream.put_string ("PKG_CHECK_MODULES("+str_name.up()+", [");
+	        foreach (var pkgmap in get_pkgmaps().values) {
+				var pkg = "";
+                if (pkgmap.choice_pkg != null && !pkgmap.check)
+				    pkg = @"$(pkgmap as PackageInfo)".split (" ")[0];
+                else
+				    pkg = @"$(pkgmap)".split (" ")[0];
+				if (pkg != "posix")
+			        data_stream.put_string (pkg + " ");
             }
-            str_pkgs.append ("\"\n");
-	    data_stream.put_string (str_pkgs.str);
-	    data_stream.put_string ("PKG_CHECK_MODULES("+str_name.up()+", [$pkg_modules])\n");
-	    data_stream.put_string (@"AC_SUBST($(str_name.up())_CFLAGS)\n");
-	    data_stream.put_string (@"AC_SUBST($(str_name.up())_LIBS)\n");
+	        data_stream.put_string ("])\n");
+	        data_stream.put_string (@"AC_SUBST($(str_name.up())_CFLAGS)\n");
+	        data_stream.put_string (@"AC_SUBST($(str_name.up())_LIBS)\n");
             data_stream.put_string ("\n");
             data_stream.put_string ("AC_CONFIG_FILES([Makefile])\n");
             data_stream.put_string ("AC_OUTPUT\n");
@@ -192,13 +193,15 @@ public class BuilderAutotools : BuildSystem
 			}
 			str_files.append ("\n\n");
 			data_stream.put_string (str_files.str);
-			str_pkgs = new StringBuilder ((library ? lower_libname : str_name.down())+"_VALAFLAGS = ");
+			var str_pkgs = new StringBuilder ((library ? lower_libname : str_name.down())+"_VALAFLAGS = ");
 			foreach (var pkgmap in get_pkgmaps().values) {
-				if (pkgmap.choice_pkg != null && !pkgmap.check)
-					str_pkgs.append (@"--pkg $(pkgmap as PackageInfo) ");
-				else
-					str_pkgs.append (@"--pkg $pkgmap ");
-			}
+				var pkg = "";
+                if (pkgmap.choice_pkg != null && !pkgmap.check)
+				    pkg = @"$(pkgmap as PackageInfo)".split (" ")[0];
+                else
+				    pkg = @"$(pkgmap)".split (" ")[0];
+			        str_pkgs.append ("--pkg " + pkg + " ");
+            }
 			if (library)
 			{
 				str_pkgs.append (" --vapi %s.vapi -H %s.h --library %s".printf(str_name.down(),str_name.down(),str_name.down()));
