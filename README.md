@@ -39,7 +39,7 @@ On Ubuntu versions under Raring, you have to include the [Vala Team PPA](https:/
 
 On Fedora based systems install following packages:
 
-    sudo yum install vala-devel cmake gtksourceview3-devel glade3-libgladeui-devel libgee-devel libxml2-devel libgdl-devel clutter-gtk-devel intltool gnome-icon-theme-symbolic librsvg2
+    sudo yum install vala-devel cmake gtksourceview3-devel glade3-libgladeui-devel glade-devel libgee-devel libxml2-devel libgdl-devel clutter-gtk-devel intltool gnome-icon-theme-symbolic librsvg2
 
 ### Building ###
  1. `mkdir build && cd build`
