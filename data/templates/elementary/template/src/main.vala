@@ -36,7 +36,7 @@ public class Hello : Granite.Application{
 	// here you can proudly list your own name and the names of 
 	// those who helped you
 	about_authors = {""};
-	about_documenters = {"Mario Marcec <mario.marce42@googlmail.com>"};
+	about_documenters = {"Mario Marcec <mariomarce42@googlmail.com>"};
 	// if you got an icon or a nice mockup from someone
 	// you can list him here
 	about_artists = {"Mario Marcec"};  
