@@ -29,7 +29,7 @@ public class Hello : Granite.Application{
 	// those urls will be shown in the automatically
 	// generated about dialog
 	main_url = "https://github.com/august0815/valama";
-	bug_url = "https://github.com/august0815/valama/issues/new";
+	bug_url = "";
 	help_url = "https://github.com/august0815/valama/issues/new";
 	translate_url = "https://github.com/august0815/valama/issues/new";
 	
