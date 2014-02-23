@@ -17,6 +17,8 @@
 
 	<source-directories>
 		<directory>src</directory>
+		<directory>data</directory>
+		<directory>data</directory>
 		<directory>vapi</directory>
 	</source-directories>
 	<ui-directories>

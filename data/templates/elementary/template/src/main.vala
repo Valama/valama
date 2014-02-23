@@ -20,7 +20,7 @@ public class Hello : Granite.Application{
 	You don't include file endings here
 	(you can also use one of the default icons as I'm doing here)
 	*/ 
-	app_icon = "hello";
+	app_icon = "hello.png";
 	// the .desktop file for your app, also in data directory
 	app_launcher = "hello.desktop";
 	// an unique id which will identify your application
