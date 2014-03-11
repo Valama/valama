@@ -1,3 +1,7 @@
+usr/share/glib-2.0
+usr/share/locale
+usr/share/man
+usr/share/mime
 usr/share/icons
 usr/share/pixmaps
 usr/share/applications

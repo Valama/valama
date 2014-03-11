@@ -1,2 +1,3 @@
 usr/lib/libguanako.so.*
-usr/share/valama/syntax
+usr/share/guanako/syntax
+usr/share/gtksourceview-3.0
