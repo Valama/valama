@@ -93,7 +93,7 @@ public class ProjectFile : Object {
     public TreeSet<string> ui_files { get { return _ui_files; } protected set { _ui_files = value; } }
 
     protected TreeSet<string> _buildsystem_dirs = new TreeSet<string>();
-    public TreeSet<string> buildsystem_dirs { get { return _buildsystem_dirs; } protected set { _buildsystem_dirs = value; } }
+    public TreeSet<string> buildsystem_dirs { get { return _buildsystem_dirs; } set { _buildsystem_dirs = value; } }
 
     protected TreeSet<string> _buildsystem_files = new TreeSet<string>();
     public TreeSet<string> buildsystem_files { get { return _buildsystem_files; } protected set { _buildsystem_files = value; } }
