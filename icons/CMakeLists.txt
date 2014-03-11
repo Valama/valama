@@ -1,6 +1,6 @@
 #
 # icons/CMakeLists.txt
-# Copyright (C) 2012, Dominique Lasserre <lasserre.d@gmail.com>
+# Copyright (C) 2012, 2013, Valama development team
 #
 # Valama is free software: you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the
@@ -16,22 +16,55 @@
 # with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-set(sizeslist 24 32 48 64 72 96 128 256)
+include("${CMAKE_SOURCE_DIR}/cmake/Common.cmake")
+
+# Generate usable application icons.
+set(sizeslist "24" "32" "48" "64" "72" "96" "128" "256")
 convert_svg_to_png(png_list
   ICON
     "${CMAKE_CURRENT_SOURCE_DIR}/V4_logo.svg"
   SIZES
-    "${sizeslist}"
+    ${sizeslist}
   PNG_NAME
     "valama"
 )
-add_custom_target(icons ALL DEPENDS ${png_list})
+add_custom_target(icons
+  ALL
+  DEPENDS
+    ${png_list}
+  COMMENT
+    "Generate application icons." VERBATIM
+)
+
+# Generate logo with text.
+set(sizeslist "128")
+convert_svg_to_png(textlogo
+  ICON
+    "${CMAKE_CURRENT_SOURCE_DIR}/V4.svg"
+  SIZES
+    ${sizeslist}
+  PNG_NAME
+    "valama-text"
+  DESTINATION
+    "${datadir}"
+)
+add_custom_target(icons_text
+  ALL
+  DEPENDS
+    ${textlogo}
+  COMMENT
+    "Generate text logo." VERBATIM
+)
+
 
 # Install application icon.
-install(
-  FILES
-    "${CMAKE_CURRENT_BINARY_DIR}/icons/hicolor/24x24/apps/valama.png"
-  DESTINATION
-    "share/pixmaps"
+if(CONVERT)
+  install(
+    FILES
+      "${CMAKE_CURRENT_BINARY_DIR}/icons/hicolor/32x32/apps/valama.png"
+    DESTINATION
+      "${pixrootdir}"
+  )
+endif()
 
-)
+# vim: set ai ts=2 sts=2 et sw=2

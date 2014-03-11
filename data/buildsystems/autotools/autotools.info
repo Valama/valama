@@ -1,0 +1,12 @@
+<buildsystem version="0.1">
+    <author>
+        <name>Yannick Inizan</name>
+        <mail>inizan.yannick@gmail.com</mail>
+    </author>
+    <name>
+        <en>Autotools</en>
+    </name>
+    <description>
+        <en>Autotools buildsystem.</en>
+    </description>
+</buildsystem>

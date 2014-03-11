@@ -1,6 +1,6 @@
-/**
- * src/ui_project_browser.vala
- * Copyright (C) 2012, Linus Seelinger <S.Linus@gmx.de>
+/*
+ * guanako/guanako_auto_indent.vala
+ * Copyright (C) 2012, 2013, Valama development team
  *
  * Valama is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -18,11 +18,10 @@
  */
 
 using GLib;
-using Gtk;
 using Vala;
 
 namespace Guanako {
-    public static string auto_indent_buffer (project project, SourceFile file) {
+    public static string auto_indent_buffer (Project project, SourceFile file) {
         string[] lines = file.content.split ("\n");
         for (int q = 0; q < lines.length; q++)
             lines[q] = lines[q].strip();
@@ -30,21 +29,17 @@ namespace Guanako {
         foreach (var node in file.get_nodes()) {
             if (node is Symbol) {
                 var cls = node as Symbol;
-                iter_symbol(cls, (smb, depth) => {
+                iter_symbol (cls, (smb, depth) => {
                     if (smb is Subroutine) {
                         var sr = smb as Subroutine;
                         iter_subroutine (sr, (s, depth2) => {
-#if VALA_LESS_0_18
-                            for (int q = s.source_reference.first_line - 1; q <= s.source_reference.last_line - 1; q++)
-#else
                             for (int q = s.source_reference.begin.line - 1; q <= s.source_reference.end.line - 1; q++)
-#endif
                                 for (int i = 0; i < 1 + depth2; i++)
                                     lines[q] = "    " + lines[q];
-                            return iter_callback_returns.continue;
+                            return IterCallbackReturns.CONTINUE;
                         });
                     }
-                    return iter_callback_returns.continue;
+                    return IterCallbackReturns.CONTINUE;
                 });
             }
         }
