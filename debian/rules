@@ -6,15 +6,17 @@ export DH_VERBOSE=1
 
 override_dh_clean:
 	-rm build -r
-	dh_clean config.vala debian/valama.xpm
+	dh_clean config.vala debian/valama.xpm debian/valama-text.png
 
 override_dh_auto_configure:
 	dh_auto_configure -- -DCMAKE_BUILD_TYPE=Release
 	convert -background none icons/V4_logo.svg -resize 32x32 debian/valama.xpm
+	convert -background none icons/V4_logo.svg -resize 128x128 debian/valama-text.png
 
 override_dh_install:
 	dh_install
 	install -m644 debian/valama.xpm debian/valama/usr/share/pixmaps/
+	install -m644 debian/valama-text.png debian/valama/usr/share/valama/
 
 override_dh_installchangelogs:
 	dh_installchangelogs Changelog

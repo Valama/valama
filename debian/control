@@ -46,3 +46,13 @@ Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: Guanako runtime files
  Guanako is a Vala code completion library.
+
+Package: valama-doc
+Section: doc
+Architecture: any
+Description: Vala IDE
+ Valama is the next generation Vala IDE.
+ It comes with the guanako Vala autocompletion library and provides easy symbol
+ lookups and supports cmake build system.
+ .
+ This package contains IDE and Guanako library documentation.
