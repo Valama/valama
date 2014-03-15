@@ -1,4 +1,4 @@
-valama (0.1.2-1) trusty; urgency=low
+valama (0.1.2+ppa25-1) trusty; urgency=low
 
   [ Mario ]
   * Elementary template
