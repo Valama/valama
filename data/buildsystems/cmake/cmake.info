@@ -1,0 +1,12 @@
+<buildsystem version="0.1">
+    <author>
+        <name>Dominique Lasserre</name>
+        <mail>lasserre.d@gmail.com</mail>
+    </author>
+    <name>
+        <en>CMake</en>
+    </name>
+    <description>
+        <en>CMake buildsystem.</en>
+    </description>
+</buildsystem>

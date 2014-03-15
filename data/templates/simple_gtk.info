@@ -1,9 +1,0 @@
-<template>
-    <author>Linus Seelinger S.Linus@quantentunnel.de</author>
-    <name>
-        <en>Simple GTK</en>
-    </name>
-    <description>
-        <en>Simple GTK+ 3 project</en>
-    </description>
-</template>
