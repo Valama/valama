@@ -100,10 +100,6 @@ public abstract class BuildSystem : Object {
         var tmp_project = (vproject != null) ? vproject : project;
         if (tmp_project == null)
                 throw new BuildError.INITIALIZATION_FAILED (_("Valama project not initialized"));
-        if (buildpath == null)
-            buildpath = Path.build_path (Path.DIR_SEPARATOR_S,
-                                         tmp_project.project_path,
-                                         "build");
         tmp_project.defines_changed.connect ((added, define) => {
             if (added)
                 register_define (define);
