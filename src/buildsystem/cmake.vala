@@ -45,10 +45,11 @@ public class BuilderCMake : BuildSystem {
     }
 
     public override bool preparate() throws BuildError.INITIALIZATION_FAILED {
-        if (buildpath == null)
-            throw new BuildError.INITIALIZATION_FAILED (_("Build directory not set."));
         if (project == null)
             throw new BuildError.INITIALIZATION_FAILED (_("Valama project not initialized."));
+        buildpath = Path.build_path (Path.DIR_SEPARATOR_S,
+                                       project.project_path,
+                                       "build");
         projectinfo = Path.build_path (Path.DIR_SEPARATOR_S,
                                        project.project_path,
                                        "cmake",
