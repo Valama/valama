@@ -13,6 +13,7 @@ override_dh_auto_configure:
 
 override_dh_install:
 	cp -R debian/icons debian/tmp/usr/share/icons
+	cp debian/valama-text.png debian/tmp/usr/share/valama
 	dh_install
 	install -m644 debian/valama.xpm debian/valama/usr/share/pixmaps/
 
