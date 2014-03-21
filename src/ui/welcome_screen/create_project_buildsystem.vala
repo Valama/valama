@@ -27,7 +27,7 @@ namespace WelcomeScreen {
         public CreateProjectBuildsystem (ref ProjectCreationInfo info) {
             this.info = info;
             bs = new BuilderCMake();
-            check_btn = new Gtk.CheckButton.with_label ("make library");
+            check_btn = new Gtk.CheckButton.with_label (_("make library"));
             go_to_next_clicked.connect (() => { 
 		this.info.template.vproject.builder = bs; 
 		this.info.buildsystem = bs.get_name_id();
@@ -42,8 +42,8 @@ namespace WelcomeScreen {
 
         }
         protected override Gtk.Widget build_inner_widget() {
-            heading = _("Create project");
-            description = _("Buildsystem");
+            heading = _("Choose Buildsystem");
+            description = _("Choose a buildsystem for current project.");
             BuildSystemTemplate.load_buildsystems (true);
             var frame = new Frame(null);
             var box = new Gtk.Box (Orientation.VERTICAL, 20);

@@ -2029,3 +2029,53 @@ msgstr ""
 #: ../build/data/org.valama.gschema.xml.h:2
 msgid "Vertical window size"
 msgstr ""
+
+#: ../src/ui/welcome_screen/main_screen.vala:108
+msgid "Other project..."
+msgstr ""
+
+#: ../src/ui/welcome_screen/create_project_location.vala:69
+msgid "project name"
+msgstr ""
+
+#: ../src/ui/welcome_screen/create_project_packages.vala:31
+msgid "Choose packages"
+msgstr ""
+
+#: ../src/ui/welcome_screen/create_project_packages.vala:32
+msgid "packages for current project"
+msgstr ""
+
+#: ../src/ui/welcome_screen/create_project_buildsystem.vala:45
+msgid "Choose Buildsystem"
+msgstr ""
+
+#: ../src/ui/welcome_screen/create_project_buildsystem.vala:46
+msgid "Choose a buildsystem for current project."
+msgstr ""
+
+#: ../src/ui/welcome_screen/create_project_buildsystem.vala:30
+msgid "make library"
+msgstr ""
+
+#: ../src/ui_main.vala:432
+msgid "_Build"
+msgstr ""
+
+#: ../src/ui_main.vala:513
+msgid "_Clean"
+msgstr ""
+
+#: ../src/ui_main.vala:417
+msgid "_Project"
+msgstr ""
+
+#: ../src/ui_main.vala:422
+msgid "_Settings"
+msgstr ""
+
+#: ../src/ui/project_browser.vala:304
+msgid "User interface files"
+msgstr ""
+
+
