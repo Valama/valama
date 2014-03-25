@@ -8,9 +8,10 @@
 	</version>
 	<packages>
 		<choice all="yes">
-			<package name="libvala-0.22" define="VALAC_0_20"/>
-			<package name="libvala-0.20" define="VALAC_0_20"/>
-			<package name="libvala-0.18"/>
+			<package name="libvala-0.26"/>
+			<package name="libvala-0.24"/>
+			<package name="libvala-0.22"/>
+			<package name="libvala-0.20"/>
 		</choice>
 		<package name="clutter-gtk-1.0"/>
 		<package name="gdk-3.0"/>

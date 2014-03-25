@@ -49,7 +49,7 @@ public class BuilderCMake : BuildSystem {
             throw new BuildError.INITIALIZATION_FAILED (_("Valama project not initialized."));
         buildpath = Path.build_path (Path.DIR_SEPARATOR_S,
                                        project.project_path,
-                                         "build");
+                                       "build");
         projectinfo = Path.build_path (Path.DIR_SEPARATOR_S,
                                        project.project_path,
                                        "cmake",

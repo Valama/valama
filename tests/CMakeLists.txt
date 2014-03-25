@@ -41,7 +41,7 @@ set(datadirs
 
 if(GUANAKO)
   list(REMOVE_ITEM required_pkgs "guanako")
-  list(APPEND vapifiles "../vapi/guanako.vapi")
+  list(APPEND vapifiles "${CMAKE_BINARY_DIR}/guanako/guanako.vapi")
   list(APPEND required_pkgs "libvala-${VALA_SHORTVER}")
 endif()
 

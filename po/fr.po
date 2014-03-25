@@ -61,7 +61,7 @@ msgstr "Construction de '%s' échouée : %s\n"
 #: ../src/project/build_project.vala:222
 #, c-format
 msgid "'%s' cleaning failed: %s\n"
-msgstr "cleaning de '%s' échoué : %s\n"
+msgstr "nettoyage de '%s' échoué : %s\n"
 
 #: ../src/project/build_project.vala:139
 #, c-format
@@ -103,18 +103,18 @@ msgstr "'Configure' échoué avec le statut : %d\n"
 #: ../src/project/build_project.vala:213
 #, c-format
 msgid "'Distclean' failed with exit status: %d\n"
-msgstr "'Distclean' échoué avec le statut : %d\n"
+msgstr "'Nettoyage clair' échoué avec le statut : %d\n"
 
 #: ../src/project/build_project.vala:97 ../src/project/build_project.vala:171
 #: ../src/project/build_project.vala:208
 #, c-format
 msgid "'Initialization' failed with exit status: %d\n"
-msgstr "'Initialization' échoué avec le statut : %d\n"
+msgstr "'Initialisation' échouée avec le statut : %d\n"
 
 #: ../src/project/build_project.vala:115
 #, c-format
 msgid "'Tests' failed with exit status: %d\n"
-msgstr "'Tests' échoué avec le statut : %d\n"
+msgstr "'Tests' échoués avec le statut : %d\n"
 
 #: ../src/project/project.vala:1801
 msgid "(new file)"
@@ -122,15 +122,15 @@ msgstr "(nouveau fichier)"
 
 #: ../src/common/args.vala:52
 msgid "- Valama: next generation Vala IDE"
-msgstr "- Valama: next generation Vala IDE"
+msgstr "- Valama: L' EDI Vala nouvelle génération"
 
 #: ../src/ui/project_browser.vala:190 ../src/ui/project_browser.vala:206
 msgid "Add new directory"
-msgstr "Ajouter nouveau répertoire"
+msgstr "Ajouter un nouveau répertoire"
 
 #: ../src/ui/project_browser.vala:185 ../src/ui/project_browser.vala:202
 msgid "Add new file"
-msgstr "Ajouter nouveau fichier"
+msgstr "Ajouter un nouveau fichier"
 
 #. TRANSLATORS:
 #. E.g.: "Add new file to project (inside 'src/' directory)"
@@ -171,7 +171,7 @@ msgstr ""
 
 #: ../src/ui/app_output.vala:39 ../src/ui_main.vala:181
 msgid "Application output"
-msgstr "Sortie application"
+msgstr "Sortie de l'application"
 
 #: ../src/project/build_project.vala:250
 #, c-format
@@ -180,7 +180,7 @@ msgstr "L'application a reçu le signal : %s\n"
 
 #: ../src/project/build_project.vala:235
 msgid "Application still running. Quit it manually.\n"
-msgstr "L'application est toujours en cours. Quitter la manuellement.\n"
+msgstr "L'application est toujours en cours. Quittez la manuellement.\n"
 
 #: ../src/project/build_project.vala:266
 #, c-format
@@ -207,7 +207,7 @@ msgstr "Retour"
 
 #: ../src/ui_main.vala:189
 msgid "Breakpoints / Timers"
-msgstr "Points d'arrêt / Timers"
+msgstr "Points d'arrêt / minuteurs"
 
 #: ../src/project/project.vala:1911
 msgid "Buffer loaded.\n"
@@ -231,7 +231,7 @@ msgstr "La commande construire a reçu le signal : %s\n"
 #. so it might be undefined.
 #: ../src/buildsystem/base.vala:429 ../src/buildsystem/cmake.vala:44
 msgid "Build directory not set."
-msgstr "Répertoire de construction non paramètré."
+msgstr "Répertoire de construction non paramétré."
 
 #: ../src/ui_main.vala:177
 msgid "Build output"
@@ -252,12 +252,12 @@ msgstr "Système de construction '%s' non supporté.\n"
 #: ../src/project/project.vala:1078
 #, c-format
 msgid "Build system directory does not exist: %s\n"
-msgstr "Répertoire du système de construction n'existe pas : %s\n"
+msgstr "Le répertoire du système de construction n'existe pas : %s\n"
 
 #: ../src/project/project.vala:1076
 #, c-format
 msgid "Build system file does not exist: %s\n"
-msgstr "Fichier du système de construction n'existe pas : %s\n"
+msgstr "Le fichier du système de construction n'existe pas : %s\n"
 
 #: ../src/ui/project_browser.vala:289
 msgid "Build system files"
@@ -275,7 +275,7 @@ msgstr "Construction du système de construction terminé : %s\n"
 #: ../src/buildsystem/base.vala:72
 #, c-format
 msgid "Buildsystem build started: %s\n"
-msgstr "Construction du système de buils démarré : %s\n"
+msgstr "Construction du système de construction démarré : %s\n"
 
 #: ../src/buildsystem/base.vala:81
 #, c-format
@@ -300,12 +300,12 @@ msgstr "Configuration du système de construction démarrée : %s\n"
 #: ../src/buildsystem/base.vala:87
 #, c-format
 msgid "Buildsystem distcleaning finished: %s\n"
-msgstr "Distcleaning du système de construction terminé : %s\n"
+msgstr "Nettoyage clair du système de construction terminé : %s\n"
 
 #: ../src/buildsystem/base.vala:84
 #, c-format
 msgid "Buildsystem distcleaning started: %s\n"
-msgstr "Distcleaning du système de construction démarré : %s\n"
+msgstr "Nettoyage clair du système de construction démarré : %s\n"
 
 #: ../src/buildsystem/base.vala:63
 #, c-format
@@ -330,7 +330,7 @@ msgstr "Tests du système de construction démarrés : %s\n"
 #: ../guanako/guanako.vala:943
 #, c-format
 msgid "Call '%s' not found in '%s'\n"
-msgstr "Appel '%s' non trouvé dans '%s'\n"
+msgstr "L'appel de '%s' non trouvé dans '%s'\n"
 
 #. TRANSLATORS:
 #. Context: "Cannot apply substitution @foobar@ (line) -> 'barfoo'"... or
@@ -374,6 +374,14 @@ msgstr "Vérificateur chargé.\n"
 msgid "Choose '%s' package.\n"
 msgstr "Choisir le paquet '%s'.\n"
 
+#: ../src/ui/welcome_screen/create_project_buildsystem.vala:45
+msgid "Choose Buildsystem"
+msgstr "Choisissez le système de construction"
+
+#: ../src/ui/welcome_screen/create_project_buildsystem.vala:46
+msgid "Choose a buildsystem for current project."
+msgstr "Choisissez un système de construction pour le projet actuel"
+
 #: ../src/dialogs/create_file.vala:36
 msgid "Choose directory name"
 msgstr "Choisissez un nom de répertoire"
@@ -382,17 +390,21 @@ msgstr "Choisissez un nom de répertoire"
 msgid "Choose filename"
 msgstr "Choisissez un fichier"
 
+#: ../src/ui/welcome_screen/create_project_packages.vala:31
+msgid "Choose packages"
+msgstr "Choisissez les paquets"
+
 #: ../src/dialogs/create_project.vala:522
 msgid "Choose project template"
 msgstr "Choisissez un modèle de projet"
 
 #: ../src/ui_main.vala:419
 msgid "Clean"
-msgstr "Clean"
+msgstr "Nettoyer"
 
 #: ../src/ui_main.vala:425
 msgid "Clean all"
-msgstr "Clean all"
+msgstr "Tout nettoyer"
 
 #: ../src/ui_main.vala:412
 msgid "Clean build"
@@ -438,7 +450,7 @@ msgstr "Copie terminée.\n"
 
 #: ../src/dialogs/about.vala:50
 msgid "Copyright © 2012, 2013 Valama development team"
-msgstr "Copyright © 2012, 2013 Valama development team"
+msgstr "Copyright © 2012, 2013 L'équipe de développement Valama"
 
 #: ../guanako/guanako_frankenstein.vala:31
 #, c-format
@@ -548,14 +560,14 @@ msgstr "Impossible de trouver le widget ScrolledWindow : %s\n"
 #: ../src/buildsystem/base.vala:316
 #, c-format
 msgid "Could not find pkg-config file for '%s'. "
-msgstr "Impossible de touver le fichier pkg-config pour '%s'. "
+msgstr "Impossible de trouver le fichier pkg-config pour '%s'. "
 
 #. TRANSLATORS: This is a technical information. You might not want
 #. to translate "TreePath".
 #: ../src/ui/project_browser.vala:378 ../src/ui/project_browser.vala:481
 #, c-format
 msgid "Could not get current TreePath: %s\n"
-msgstr "Impossible d'obtenir le TreePath courant : %s\n"
+msgstr "Impossible d'obtenir le chemin de l'arborescence courant : %s\n"
 
 #. TRANSLATORS: This is a technical information. You might not want
 #. to translate "TreeView".
@@ -565,7 +577,7 @@ msgstr "Impossible d'obtenir le TreePath courant : %s\n"
 #: ../src/ui/project_browser.vala:505
 #, c-format
 msgid "Could not get iterator in TreeView: %s\n"
-msgstr "Impossible d'obtenir l'itérateur dans TreeView : %s\n"
+msgstr "Impossible d'obtenir l'itérateur dans la vue de l'arborescence : %s\n"
 
 #: ../src/project/project.vala:595
 #, c-format
@@ -610,7 +622,7 @@ msgstr "Impossible de charger le fichier : %s\n"
 #: ../src/completion_provider.vala:185
 #, c-format
 msgid "Could not load icon theme: %s\n"
-msgstr "Impossible de charger le thème d'icones : %s\n"
+msgstr "Impossible de charger le thème d'icônes : %s\n"
 
 #: ../src/project/project.vala:575 ../src/ui_main.vala:241
 #, c-format
@@ -803,7 +815,7 @@ msgstr "Impossible de sauvegarder le fichier projet : %s\n"
 
 #: ../build/data/valama.desktop.in.h:3
 msgid "Create Vala projects."
-msgstr "Créer projet Vala."
+msgstr "Créer un projet Vala."
 
 #: ../src/ui_main.vala:492
 msgid "Create new file"
@@ -811,7 +823,7 @@ msgstr "Créer nouveau fichier"
 
 #: ../src/ui/welcome_screen.vala:287
 msgid "Create new project"
-msgstr "Créer nouveau projet"
+msgstr "Créer un nouveau projet"
 
 #. TRANSLATORS:
 #. E.g.: "Create new subdirectory (inside 'src/' directory)"
@@ -822,7 +834,7 @@ msgstr "Créer nouveau répertoire (%s)"
 
 #: ../src/ui/welcome_screen.vala:293
 msgid "Create project"
-msgstr "Créer projet"
+msgstr "Créer un projet"
 
 #: ../src/ui/current_file_structure.vala:39 ../src/ui_main.vala:193
 msgid "Current file"
@@ -875,7 +887,7 @@ msgstr "Information détaillée"
 #: ../src/buildsystem/base.vala:170
 #, c-format
 msgid "Disable define: %s\n"
-msgstr "Désactiver define : %s\n"
+msgstr "Désactiver une définition : %s\n"
 
 #: ../src/ui/reports.vala:116
 msgid "Display all"
@@ -883,7 +895,7 @@ msgstr "Afficher tout"
 
 #: ../src/common/args.vala:35
 msgid "Display version number."
-msgstr "Afficher numéro de version."
+msgstr "Afficher le numéro de version."
 
 #: ../src/ui/project_browser.vala:517
 msgid "Do you want to delete this file?"
@@ -900,14 +912,14 @@ msgstr "Edition"
 #: ../src/buildsystem/base.vala:160
 #, c-format
 msgid "Enable define for package '%s': %s\n"
-msgstr "Activer define pour le paquet '%s' : %s\n"
+msgstr "Activer une définition pour le paquet '%s' : %s\n"
 
 #: ../guanako/guanako.vala:723
 #, c-format
 msgid "Entry point '%s' not found in syntax file. Trying to segfault me, huh??"
 msgstr ""
-"Point d'entrée '%s' introuvable dans le fichier de syntaxe. Tentative de me "
-"segfaulter, hein ?"
+"Le point d'entrée '%s' introuvable dans le fichier de syntaxe. Tentative de "
+"me segfaulter, hein ?"
 
 #: ../src/ui/reports.vala:79 ../guanako/reporter.vala:37
 msgid "Error"
@@ -930,8 +942,8 @@ msgid ""
 "Errors: %d, Warnings: %d, Deprecated: %d, Experimental: %d, Notes: %d  -  "
 "%d\n"
 msgstr ""
-"Erreurs : %d, Attentions : %d, Obsolète : %d, Expérimental : %d, Notes : %d "
-"- %d\n"
+"Erreurs : %d, Alertes : %d, Obsolète : %d, Expérimental : %d, Notes : %d - "
+"%d\n"
 
 #: ../src/ui_main.vala:438 ../src/ui_main.vala:550
 msgid "Execute"
@@ -1322,6 +1334,10 @@ msgstr "REMPL"
 msgid "Open project"
 msgstr "Ouvrir projet"
 
+#: ../src/ui/welcome_screen/main_screen.vala:108
+msgid "Other project..."
+msgstr "Autre projet..."
+
 #: ../src/common/args.vala:41
 msgid "Output debug information."
 msgstr "Afficher information de debug."
@@ -1660,7 +1676,7 @@ msgstr "Vue source"
 
 #: ../src/ui/source_viewer.vala:470
 msgid "Source view id out of range.\n"
-msgstr "Id de vue source est hors de portée.\n"
+msgstr "Id de vue source hors de portée.\n"
 
 #: ../src/ui/project_browser.vala:285
 msgid "Sources"
@@ -1730,7 +1746,7 @@ msgstr "Type"
 #: ../guanako/stylecheck.vala:575 ../guanako/stylecheck.vala:616
 #, c-format
 msgid "Type not implemented yet: %s\n"
-msgstr "Type non implémenter actuellement : %s\n"
+msgstr "Type pas encore implémenté : %s\n"
 
 #: ../src/ui/project_browser.vala:546
 #, c-format
@@ -1740,22 +1756,22 @@ msgstr "Impossible d'effacer le fichier source '%s' : %s\n"
 #: ../src/buildsystem/base.vala:361
 #, c-format
 msgid "Unable to guess package for define: %s\n"
-msgstr "Impossible de deviner le paquet pour le define : %s\n"
+msgstr "Impossible de deviner le paquet pour la définition : %s\n"
 
 #: ../src/ui_main.vala:515
 msgid "Undo last change"
-msgstr "Annuler"
+msgstr "Annuler le dernier changement"
 
 #: ../src/dialogs/create_project.vala:397
 #: ../src/dialogs/project_settings.vala:207
 #, c-format
 msgid "Unexpected enum value: %s: %d\n"
-msgstr "Valeur enum inatendue : %s : %d\n"
+msgstr "énumération inattendue : %s : %d\n"
 
 #: ../src/ui/project_browser.vala:467
 #, c-format
 msgid "Unexpected enum value: %s: %s\n"
-msgstr "Valeur enum inatendue : %s : %s\n"
+msgstr "énumération inattendue : %s : %s\n"
 
 #: ../src/common/common.vala:500 ../src/dialogs/about.vala:66
 #: ../src/project/project.vala:274 ../src/project/project_templates.vala:108
@@ -1763,7 +1779,7 @@ msgstr "Valeur enum inatendue : %s : %s\n"
 #: ../src/ui/project_browser.vala:471 ../src/ui/project_browser.vala:554
 #, c-format
 msgid "Unexpected enum value: %s: %u\n"
-msgstr "Valeur enum inatendue : %s : %u\n"
+msgstr "énumération inattendue : %s : %u\n"
 
 #: ../src/project/project.vala:1690 ../src/project/project.vala:2057
 #, c-format
@@ -1781,7 +1797,8 @@ msgstr "ReportType inconnu : %s\n"
 #: ../src/ui/project_browser.vala:533
 #, c-format
 msgid "Unknown TreePath start to add a new file: %s\n"
-msgstr "Début de Treepath inconnu pour ajouter un nouveau fichier : %s\n"
+msgstr ""
+"Début de chemin d'arborescence inconnu pour ajouter un nouveau fichier : %s\n"
 
 #: ../src/project/project.vala:1650 ../src/ui_main.vala:776
 #, c-format
@@ -1824,6 +1841,10 @@ msgstr ""
 "Valeur de propriété de substitution '%s' inconnue ligne %hu (suppose '%s') : "
 "%s"
 
+#: ../src/ui/project_browser.vala:304
+msgid "User interface files"
+msgstr "Interfaces utilisateur"
+
 #: ../build/data/valama.desktop.in.h:4
 msgid "Vala;IDE;Development;"
 msgstr "Vala;EDI;Développement"
@@ -1847,7 +1868,7 @@ msgstr "Projet Valama non initialisé."
 #: ../guanako/guanako.vala:287 ../guanako/guanako.vala:300
 #, c-format
 msgid "Vapi found: %s\n"
-msgstr "Trouvé Vapi : %s\n"
+msgstr "Vapi trouvée : %s\n"
 
 #: ../guanako/guanako.vala:876
 #, c-format
@@ -1884,7 +1905,7 @@ msgstr "Attention : "
 #: ../guanako/stylecheck.vala:473
 #, c-format
 msgid "Warning: No CheckType found, assume 'GLOBAL'.\n"
-msgstr "Attention : pas de CheckType trouvé, suppose 'GLOBAL'.\n"
+msgstr "Attention : pas de type de contrôle trouvé, suppose 'GLOBAL'.\n"
 
 #: ../guanako/stylecheck.vala:467
 #, c-format
@@ -1919,7 +1940,7 @@ msgstr "Attention : ignore differents types : '%s' - '%s'\n"
 #: ../guanako/stylecheck.vala:408
 #, c-format
 msgid "Warning: Unknown CheckType '%s', assume 'GLOBAL'.\n"
-msgstr "Attention : CheckType '%s' inconnu, suppose 'GLOBAL'.\n"
+msgstr "Attention : type de contrôle '%s' inconnu, suppose 'GLOBAL'.\n"
 
 #: ../guanako/stylecheck.vala:619
 #, c-format
@@ -1930,7 +1951,7 @@ msgstr "Attention : type de vérification inconnu : %s\n"
 #, c-format
 msgid "Warning: Unknown configuration file value line %hu: %s\n"
 msgstr ""
-"Attention : valeur de fichier de configuration inconnue ligne %hu : %s\n"
+"Attention : valeur de fichier de configuration inconnue à la ligne %hu : %s\n"
 
 #: ../guanako/guanako.vala:283 ../guanako/guanako.vala:296
 #, c-format
@@ -1944,11 +1965,27 @@ msgstr "'%s' non ajouté à la liste des fichiers : fichier non valide\n"
 
 #: ../src/common/args.vala:41
 msgid "[DEBUGLEVEL]"
-msgstr "[DEBUGLEVEL]"
+msgstr "[NIVEAU DE DEBOGAGE]"
 
 #: ../src/common/args.vala:45
 msgid "[FILE...]"
-msgstr "[FILE...]"
+msgstr "[FICHIER...]"
+
+#: ../src/ui_main.vala:432
+msgid "_Build"
+msgstr "Construire"
+
+#: ../src/ui_main.vala:513
+msgid "_Clean"
+msgstr "Nettoyer"
+
+#: ../src/ui_main.vala:417
+msgid "_Project"
+msgstr "Projet"
+
+#: ../src/ui_main.vala:422
+msgid "_Settings"
+msgstr "Réglages"
 
 #. TRANSLATORS: Version relation: X > Y
 #: ../src/dialogs/create_project.vala:375
@@ -2013,6 +2050,10 @@ msgstr "dans le répertoire racine du projet"
 msgid "launching failed"
 msgstr "lancement échoué"
 
+#: ../src/ui/welcome_screen/create_project_buildsystem.vala:30
+msgid "make library"
+msgstr "construire une bibliothèque"
+
 #: ../src/dialogs/create_project.vala:284
 msgid "no long description"
 msgstr "pas de description longue"
@@ -2043,10 +2084,18 @@ msgstr "indisponible"
 msgid "not supported"
 msgstr "non supporté"
 
+#: ../src/ui/welcome_screen/create_project_packages.vala:32
+msgid "packages for current project"
+msgstr "paquets pour le projet courant"
+
 #: ../guanako/guanako.vala:857
 #, c-format
 msgid "pop_cur symbol not found! '%s'\n"
 msgstr "Symbole pop_cur non trouvé : '%s'\n"
+
+#: ../src/ui/welcome_screen/create_project_location.vala:69
+msgid "project name"
+msgstr "nom du projet"
 
 #. TRANSLATORS: Version relation: X >= Y
 #: ../src/dialogs/create_project.vala:379
