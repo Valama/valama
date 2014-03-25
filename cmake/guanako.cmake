@@ -6,9 +6,10 @@ set(required_pkgs
   "glib-2.0"
   "gio-2.0"
   "gee-0.8 >= 0.10.5"
-  "libvala-0.18"
   "libvala-0.20"
   "libvala-0.22"
+  "libvala-0.24"
+  "libvala-0.26"
   "libxml-2.0"
   "posix {nocheck,nolink}"
 )

@@ -1836,6 +1836,10 @@ msgstr ""
 "Unbekannter Wert für Ersetzungseigenschaft '%s' in Zeile %hu (vermute '%s'): "
 "%s"
 
+#: ../src/ui/project_browser.vala:304
+msgid "User interface files"
+msgstr ""
+
 #: ../build/data/valama.desktop.in.h:4
 msgid "Vala;IDE;Development;"
 msgstr "Vala;IDE;Entwicklung;Entwicklungsumgebung;"

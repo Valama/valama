@@ -1841,6 +1841,10 @@ msgstr ""
 "Valeur de propriété de substitution '%s' inconnue ligne %hu (suppose '%s') : "
 "%s"
 
+#: ../src/ui/project_browser.vala:304
+msgid "User interface files"
+msgstr "Interfaces utilisateur"
+
 #: ../build/data/valama.desktop.in.h:4
 msgid "Vala;IDE;Development;"
 msgstr "Vala;EDI;Développement"
@@ -2106,7 +2110,3 @@ msgstr "jusqu'à"
 #: ../src/project/project.vala:396
 msgid "valama_project"
 msgstr "projet_valama"
-
-#: ../src/ui/project_browser.vala:304
-msgid "User interface files"
-msgstr "Interfaces utilisateur"
