@@ -149,7 +149,7 @@ public class SuperSourceView : SourceView {
             view.get_line_yrange (iter, out y, out height);
             view.buffer_to_window_coords (TextWindowType.WIDGET, 0, y, out wx, out wy);
             var gutter_width = 
-            #if GTK_3_12
+            #if GTK_SOURCE_VIEW_3_12
 				this.view.get_window (TextWindowType.LEFT).get_width();
 			#else
 				this.view.get_gutter (TextWindowType.LEFT).get_window().get_width();
