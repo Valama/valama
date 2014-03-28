@@ -48,7 +48,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/vala")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 
-find_package(Vala "0.17" REQUIRED)
+find_package(Vala "0.20" REQUIRED)
 
 # Custom library version checks.
 set(definitions)

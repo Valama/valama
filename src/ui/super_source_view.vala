@@ -148,7 +148,12 @@ public class SuperSourceView : SourceView {
             view.buffer.get_iter_at_line (out iter, line);
             view.get_line_yrange (iter, out y, out height);
             view.buffer_to_window_coords (TextWindowType.WIDGET, 0, y, out wx, out wy);
-            var gutter_width = this.view.get_gutter (TextWindowType.LEFT).get_window().get_width();
+            var gutter_width = 
+            #if GTK_SOURCE_VIEW_3_12
+				this.view.get_window (TextWindowType.LEFT).get_width();
+			#else
+				this.view.get_gutter (TextWindowType.LEFT).get_window().get_width();
+			#endif
 
             cr.select_font_face ("Monospace", Cairo.FontSlant.NORMAL, Cairo.FontWeight.NORMAL);
             cr.set_font_size (10);

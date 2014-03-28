@@ -574,7 +574,7 @@ class UiSourceViewer : UiElement {
      *       objects at creation of new source views.
      */
     private inline SuperSourceView get_sourceview (DockItem item) {
-#if VALAC_0_20 && !GDL_LESS_3_5_5
+#if !GDL_LESS_3_5_5
         return (SuperSourceView) ((ScrolledWindow) ((Box) item.get_child()).get_children().nth_data (0)).get_child();
 #else
         /*

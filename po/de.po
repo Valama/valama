@@ -371,6 +371,15 @@ msgstr "Checker geladen.\n"
 msgid "Choose '%s' package.\n"
 msgstr "Wähle Paket '%s'.\n"
 
+#: ../src/ui/welcome_screen/create_project_buildsystem.vala:45
+#, fuzzy
+msgid "Choose Buildsystem"
+msgstr "Dateinamen wählen"
+
+#: ../src/ui/welcome_screen/create_project_buildsystem.vala:46
+msgid "Choose a buildsystem for current project."
+msgstr ""
+
 #: ../src/dialogs/create_file.vala:36
 msgid "Choose directory name"
 msgstr "Verzeichnisnamen wählen"
@@ -378,6 +387,11 @@ msgstr "Verzeichnisnamen wählen"
 #: ../src/dialogs/create_file.vala:35
 msgid "Choose filename"
 msgstr "Dateinamen wählen"
+
+#: ../src/ui/welcome_screen/create_project_packages.vala:31
+#, fuzzy
+msgid "Choose packages"
+msgstr "Wähle Paket '%s'.\n"
 
 #: ../src/dialogs/create_project.vala:522
 msgid "Choose project template"
@@ -1315,6 +1329,11 @@ msgstr "ÜBS"
 msgid "Open project"
 msgstr "Projekt öffnen"
 
+#: ../src/ui/welcome_screen/main_screen.vala:108
+#, fuzzy
+msgid "Other project..."
+msgstr "Projekt öffnen"
+
 #: ../src/common/args.vala:41
 msgid "Output debug information."
 msgstr "Debug-Information ausgeben."
@@ -1817,6 +1836,10 @@ msgstr ""
 "Unbekannter Wert für Ersetzungseigenschaft '%s' in Zeile %hu (vermute '%s'): "
 "%s"
 
+#: ../src/ui/project_browser.vala:304
+msgid "User interface files"
+msgstr ""
+
 #: ../build/data/valama.desktop.in.h:4
 msgid "Vala;IDE;Development;"
 msgstr "Vala;IDE;Entwicklung;Entwicklungsumgebung;"
@@ -1943,6 +1966,26 @@ msgstr "[DEBUGLEVEL]"
 msgid "[FILE...]"
 msgstr "[DATEI...]"
 
+#: ../src/ui_main.vala:432
+#, fuzzy
+msgid "_Build"
+msgstr "Kompiliere"
+
+#: ../src/ui_main.vala:513
+#, fuzzy
+msgid "_Clean"
+msgstr "Aufräumen"
+
+#: ../src/ui_main.vala:417
+#, fuzzy
+msgid "_Project"
+msgstr "Projekt"
+
+#: ../src/ui_main.vala:422
+#, fuzzy
+msgid "_Settings"
+msgstr "Einstellungen"
+
 #. TRANSLATORS: Version relation: X > Y
 #: ../src/dialogs/create_project.vala:375
 msgid "after"
@@ -2005,6 +2048,10 @@ msgstr "in Projekt-Wurzelverzeichnis"
 msgid "launching failed"
 msgstr "Starten fehlgeschlagen"
 
+#: ../src/ui/welcome_screen/create_project_buildsystem.vala:30
+msgid "make library"
+msgstr ""
+
 #: ../src/dialogs/create_project.vala:284
 msgid "no long description"
 msgstr "keine ausführliche Beschreibung"
@@ -2035,10 +2082,20 @@ msgstr "nicht verfügbar"
 msgid "not supported"
 msgstr "nicht unterstützt"
 
+#: ../src/ui/welcome_screen/create_project_packages.vala:32
+#, fuzzy
+msgid "packages for current project"
+msgstr "Keine zuletzt geöffneten Projekte"
+
 #: ../guanako/guanako.vala:857
 #, c-format
 msgid "pop_cur symbol not found! '%s'\n"
 msgstr "pop_cur-Symbol nicht gefunden! '%s'\n"
+
+#: ../src/ui/welcome_screen/create_project_location.vala:69
+#, fuzzy
+msgid "project name"
+msgstr "Projektname"
 
 #. TRANSLATORS: Version relation: X >= Y
 #: ../src/dialogs/create_project.vala:379
