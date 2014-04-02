@@ -512,7 +512,11 @@ public class Vala.ParserExt : CodeVisitor {
 
 		// inline-allocated array
 		if (type != null && accept (TokenType.OPEN_BRACKET)) {
-			int array_length = -1;
+			#if VALAC_0_26
+				Vala.Expression? array_length = null;
+			#else
+				int array_length = -1;
+			#endif
 
 			if (current () != TokenType.CLOSE_BRACKET) {
 				if (current () != TokenType.INTEGER_LITERAL) {
@@ -520,16 +524,24 @@ public class Vala.ParserExt : CodeVisitor {
 				}
 
 				var length_literal = (IntegerLiteral) parse_literal ();
-				array_length = int.parse (length_literal.value);
+				#if VALAC_0_26
+					array_length = length_literal;
+				#else
+					array_length = int.parse (length_literal.value);
+				#endif
 			}
 			expect (TokenType.CLOSE_BRACKET);
 
 			var array_type = new ArrayType (type, 1, get_src (begin));
 			array_type.inline_allocated = true;
-			if (array_length > 0) {
-				array_type.fixed_length = true;
-				array_type.length = array_length;
-			}
+			#if VALAC_0_26
+				if (array_length != null) {
+			#else
+				if (array_length > 0) {
+			#endif
+					array_type.fixed_length = true;
+					array_type.length = array_length;
+				}
 			array_type.value_owned = type.value_owned;
 
 			return array_type;
