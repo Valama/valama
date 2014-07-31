@@ -9,7 +9,6 @@ branches:
     - gh-pages
     - packaging
 before_install:
-  - sudo add-apt-repository -y ppa:inizan-yannick/development
   - sudo add-apt-repository -y ppa:vala-team/ppa
   - sudo apt-get update -qq
   - eval $(sed -n '/^On Debian based systems install/{n;n;p}' README.md) valadoc
