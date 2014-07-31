@@ -131,7 +131,7 @@ public class UiCurrentFileStructure : UiElement {
     }
 
     ulong cursor_pos_signal_id;
-    SourceView cursor_pos_signal_view;
+    Gtk.SourceView cursor_pos_signal_view;
 
     // Limit updating after cursor move to a reasonable interval
     bool build_queued = false;

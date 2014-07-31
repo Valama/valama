@@ -1593,7 +1593,7 @@ public class ValamaProject : ProjectFile {
      * @param filename Name of file to close.
      * @return Return `true` to indicate buffer can now closed safely.
      */
-    public bool close_buffer (SourceView view, string? filename) {
+    public bool close_buffer (Gtk.SourceView view, string? filename) {
         var bfr = (SourceBuffer) view.buffer;
         if (bfr.dirty) {
             var ret = ui_ask_file (_("File is modified. Do you want to save it?"),
@@ -1621,12 +1621,12 @@ public class ValamaProject : ProjectFile {
      * Hold filename -> view/dirty mappings for {@link vieworder}.
      */
     private class ViewMap : Object {
-        public ViewMap (SourceView view, string filename) {
+        public ViewMap (Gtk.SourceView view, string filename) {
             this.view = view;
             this.filename = filename;
         }
 
-        public SourceView view;
+        public Gtk.SourceView view;
         public string filename;
         /**
          * Use unique id to support multiple views for same file.

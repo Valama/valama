@@ -19,11 +19,11 @@ Discussion and support on IRC channel [#valama](http://webchat.freenode.net/?cha
  * gio-2.0
  * gladeui-2.0 (for glade files)
  * gee-0.8 (>= 0.10.5)
- * at least libvala-0.22 (recommended) or libvala-0.20
+ * at least libvala-0.24 (recommended) or libvala-0.20
  * gdk-3.0
- * gdl-3.0 (>= 3.5.5 is recommended)
- * gtk+-3.0 (>= 3.6) 
- * gtksourceview-3.0, 3.12 is recommended for new features in SourceView
+ * gdl-3.0 (>= 3.10 is recommended)
+ * gtk+-3.0 (>= 3.10) 
+ * gtksourceview-3.0 (>= 3.10), 3.12 is recommended for new features in SourceView
  * clutter-gtk-1.0
  * libxml-2.0
  * gthread-2.0

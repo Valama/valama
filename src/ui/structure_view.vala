@@ -74,7 +74,7 @@ public class UiStructureView : UiElement {
     void update_stuff() {
         float countx = 0;
         float county = 0;
-        foreach (SourceFile file in project.guanako_project.sourcefiles) {
+        foreach (Vala.SourceFile file in project.guanako_project.sourcefiles) {
             var vs_file = new vsFile(file);
             vs_files[file] = vs_file;
 
@@ -153,9 +153,9 @@ public class UiStructureView : UiElement {
             return Clutter.Color.from_string ("white");
     }
 
-    internal Gee.HashMap <SourceFile, vsFile> vs_files = new Gee.HashMap <SourceFile, vsFile>();
+    internal Gee.HashMap <Vala.SourceFile, vsFile> vs_files = new Gee.HashMap <Vala.SourceFile, vsFile>();
     internal class vsFile : Object {
-        public vsFile (SourceFile file) {
+        public vsFile (Vala.SourceFile file) {
 
             var splt = file.filename.split ("/");
             var text = new Clutter.Text.full ("Bitstream Vera Sans 12",

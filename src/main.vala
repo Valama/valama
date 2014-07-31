@@ -146,7 +146,7 @@ public class Valama : Gtk.Application {
 
     public override void activate () {
         window_main = new ApplicationWindow(gtk_app);
-
+		window_main.set_size_request (400, 300);
         window_main_header = new HeaderBar();
         window_main_header.title = _("Valama");
         window_main_header.show_close_button = true;

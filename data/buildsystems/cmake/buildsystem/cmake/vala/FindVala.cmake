@@ -73,7 +73,7 @@
 ##
 
 # Search for the valac executable in the usual system paths.
-find_program(VALA_EXECUTABLE NAMES "valac" "valac-0.26" "valac-0.24" "valac-0.22" "valac-0.20" "valac-0.18")
+find_program(VALA_EXECUTABLE NAMES "valac-0.26" "valac-0.24" "valac-0.22" "valac-0.20" "valac")
 mark_as_advanced(VALA_EXECUTABLE)
 
 # Determine the valac version
@@ -86,12 +86,16 @@ if(VALA_EXECUTABLE)
     OUTPUT_STRIP_TRAILING_WHITESPACE
   )
   string(REPLACE "Vala " "" VALA_VERSION "${VALA_VERSION}")
-
-  string(REGEX REPLACE "^([0-9]+).*" "\\1" maj_ver "${VALA_VERSION}")
-  string(REGEX REPLACE "^[0-9]+\\.([0-9]+).*" "\\1" min_ver "${VALA_VERSION}")
+  string(REPLACE "." ";" VALA_LIST "${VALA_VERSION}")
+  list(GET VALA_LIST 0 maj_ver)
+  list(GET VALA_LIST 1 min_ver)
+  list(GET VALA_LIST 2 rev_ver)
   math(EXPR is_odd "${min_ver} % 2")
-  if(${is_odd} EQUAL 1)
+  list(LENGTH VALA_LIST len)
+  if((${is_odd} EQUAL 1))
     math(EXPR min_ver "${min_ver} + 1")
+  elseif(len GREATER 3)
+	math(EXPR min_ver "${min_ver} + 2")
   endif()
   set(VALA_SHORTVER "${maj_ver}.${min_ver}" CACHE INTERNAL "")
   if(NOT "${maj_ver}" STREQUAL "" AND NOT "${min_ver}" STREQUAL "")
