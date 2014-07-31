@@ -12,18 +12,18 @@ Discussion and support on IRC channel [#valama](http://webchat.freenode.net/?cha
 
 ### Requirements
  * cmake (>= 2.8.4)
- * valac (>= 0.20), valac-0.24 or valac-0.26 is recommended
+ * valac (>= 0.24), valac-0.24 or valac-0.26 is recommended
  * pkg-config
  * gobject-2.0
  * glib-2.0
  * gio-2.0
  * gladeui-2.0 (for glade files)
  * gee-0.8 (>= 0.10.5)
- * at least libvala-0.22 (recommended) or libvala-0.20
+ * at least libvala-0.24 (recommended) or libvala-0.26
  * gdk-3.0
- * gdl-3.0 (>= 3.5.5 is recommended)
- * gtk+-3.0 (>= 3.6) 
- * gtksourceview-3.0, 3.12 is recommended for new features in SourceView
+ * gdl-3.0 (>= 3.10 is recommended)
+ * gtk+-3.0 (>= 3.10) 
+ * gtksourceview-3.0 (>= 3.10), 3.12 is recommended for new features in SourceView
  * clutter-gtk-1.0
  * libxml-2.0
  * gthread-2.0
@@ -33,7 +33,7 @@ Discussion and support on IRC channel [#valama](http://webchat.freenode.net/?cha
 
 On Debian based systems install following packages:
 
-    sudo apt-get install build-essential valac-0.20 libvala-0.20-dev cmake pkg-config libgtksourceview-3.0-dev libgee-0.8-dev libxml2-dev libgdl-3-dev libgladeui-dev libclutter-gtk-1.0-dev intltool gnome-icon-theme-symbolic librsvg2-bin
+    sudo apt-get install build-essential valac-0.24 libvala-0.24-dev cmake pkg-config libgtksourceview-3.0-dev libgee-0.8-dev libxml2-dev libgdl-3-dev libgladeui-dev libclutter-gtk-1.0-dev intltool gnome-icon-theme-symbolic librsvg2-bin
 
 For a newer vala version, you have to include the [Vala Team PPA](https://launchpad.net/~vala-team/+archive/ppa) first.
 
