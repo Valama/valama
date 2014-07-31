@@ -102,7 +102,17 @@ public string? ui_create_file_dialog (string? path = null, string? extension = n
                             errmsg (_("Could not create parent directory: %s\n"), e.message);
                         }
                     try {
-                        f.create (FileCreateFlags.NONE).close();
+                        var output_stream = f.create (FileCreateFlags.NONE);
+                        print ("ext: %s\n", extension);
+                        //  add minimal xml data to ui file, otherwise libgladeui throws critical errors !
+                        if (extension == "ui")
+							output_stream.write ("""<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with Valama 0.1.2 -->
+<interface>
+	<requires lib="gtk+" version="3.12"/>
+</interface>""".data);
+                        output_stream.close();
+                        
                     } catch (GLib.IOError e) {
                         errmsg (_("Could not write to new file: %s\n"), e.message);
                         filename = null;

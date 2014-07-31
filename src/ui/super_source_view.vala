@@ -23,7 +23,7 @@ using Vala;
 /**
  * Enhanced GtkSourceView
  */
-public class SuperSourceView : SourceView {
+public class SuperSourceView : Gtk.SourceView {
     public SuperSourceView(SourceBuffer bfr) {
         this.buffer = bfr;
         int old_line = -1;
@@ -160,7 +160,7 @@ public class SuperSourceView : SourceView {
             Cairo.TextExtents extents;
             cr.text_extents (text, out extents);
 
-            rounded_rectanlge (cr, gutter_width, wy + offset * height, extents.width + 6, extents.height + 3, 7);
+            rounded_rectangle (cr, gutter_width, wy + offset * height, extents.width + 6, extents.height + 3, 7);
             cr.set_source_rgba (r, g, b, 1.0 * proc);
             cr.set_line_width (2);
             cr.stroke_preserve();
@@ -171,7 +171,7 @@ public class SuperSourceView : SourceView {
             cr.set_source_rgba (0.0, 0.0, 0.0, 1.0 * proc);
             cr.show_text (text);
         }
-        void rounded_rectanlge (Cairo.Context cr, double x, double y, double width, double height, double r) {
+        void rounded_rectangle (Cairo.Context cr, double x, double y, double width, double height, double r) {
             cr.move_to (x, y);
             cr.line_to (x + width - r, y);
             cr.curve_to(x + width, y, x + width, y, x + width, y + r);

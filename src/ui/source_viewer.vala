@@ -279,7 +279,7 @@ class UiSourceViewer : UiElement {
      * @param filename Name of file to close.
      * @return Return `false` to interrupt or return `true` to proceed.
      */
-    public signal bool buffer_close (SourceView view, string? filename);
+    public signal bool buffer_close (Gtk.SourceView view, string? filename);
 
     /**
      * Close {@link Gdl.DockItem} with {@link Gtk.SourceView} by
@@ -537,7 +537,7 @@ class UiSourceViewer : UiElement {
      * @param view Corresponding view with {@link Gtk.TextBuffer}.
      * @return Row and column info.
      */
-    private inline string get_label_row_col (SourceView view) {
+    private inline string get_label_row_col (Gtk.SourceView view) {
         TextIter iter;
         view.buffer.get_iter_at_mark (out iter, view.buffer.get_insert());
         var row = iter.get_line();
@@ -556,6 +556,7 @@ class UiSourceViewer : UiElement {
         var pa = item.parent;
         if (pa is Notebook) {
             var nbook = (Notebook) pa;
+            nbook.scrollable = true;
             nbook.set_tab_pos (PositionType.TOP);
             foreach (var child in nbook.get_children())
                 nbook.set_tab_reorderable (child, true);
