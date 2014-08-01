@@ -156,32 +156,6 @@ if(gdlres LESS 1)
                    "gdl-3.0 >= 3.9.91.")
     list(APPEND vapidirs "--vapidir=${CMAKE_SOURCE_DIR}/extravapi/gdl-3.0")
   endif()
-else()
-  compare_version_strings("3.5.5" "${GDL3.0_VERSION}" gdlres)
-  if(gdlres LESS 1)
-    compare_version_strings("3.8.1" "${GDL3.0_VERSION}" gdlres)
-    if(gdlres LESS 1)
-      list(APPEND definitions "GDL_3_8")
-    endif()
-    compare_version_strings("0.20" "${VALA_SHORTVER}" valares)
-    if(valares EQUAL 1)
-      message(STATUS "Use enhanced gdl-3.0 vapi from valac 0.20 to support new "
-                     "features with gdl-3.0 >= 3.5.5.")
-      list(APPEND vapidirs "--vapidir=${CMAKE_SOURCE_DIR}/extravapi/gdl-3.0")
-    endif()
-  else()
-    list(APPEND definitions "GDL_LESS_3_5_5")
-    message(WARNING "With gdl-3.0 ${GDL3.0_VERSION} < 3.5.5 dock item "
-                    "behaviour is poor: Hidden docks aren't saved in layout "
-                    "and will open detached.\n"
-                    "Please upgrade your gdl version or live with it.")
-    compare_version_strings("0.20" "${VALA_SHORTVER}" valares)
-    if(valares LESS 1)
-      message(STATUS "Use gdl-3.0 vapi from valac 0.18 to support old "
-                     "library gdl-3.0 < 3.5.5.")
-      list(APPEND vapidirs "--vapidir=${CMAKE_SOURCE_DIR}/extravapi/gdl-3.0-old")
-    endif()
-  endif()
 endif()
 # glib-2.0
 pkg_check_modules(GLIB2.0 REQUIRED "glib-2.0")

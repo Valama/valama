@@ -21,7 +21,7 @@ Discussion and support on IRC channel [#valama](http://webchat.freenode.net/?cha
  * gee-0.8 (>= 0.10.5)
  * at least libvala-0.20, libvala-0.24 or libvala-0.26 is recommended
  * gdk-3.0
- * gdl-3.0 (>= 3.10 is recommended)
+ * gdl-3.0 (>= 3.8), 3.10 or newer is recommended
  * gtk+-3.0 (>= 3.10)
  * gtksourceview-3.0 (>= 3.10), 3.12 or newer is recommended
  * clutter-gtk-1.0

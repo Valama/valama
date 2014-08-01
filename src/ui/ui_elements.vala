@@ -131,11 +131,7 @@ public abstract class UiElement : Object{
                 dock_item.notify["master"].connect (() => {
                     if (dock_item.master != null)
                         dock_item.master.layout_changed.connect (() => {
-#if !GDL_LESS_3_5_5
                             show = !dock_item.is_closed();
-#else
-                            show = ((dock_item.flags & Gdl.DockObjectFlags.ATTACHED) != 0);
-#endif
                         });
                 });
             }
@@ -151,27 +147,13 @@ public abstract class UiElement : Object{
                 this.show = show;
                 if (show) {
                     modehide = true;
-#if !GDL_LESS_3_5_5
                     dock_item.show_item();
-#else
-                    /*
-                     * TODO: Avoid latest_item and instead use solution with
-                     *       focussed element. Perhaps use Dock.toplevel_docks
-                     *       or Dock.dock_objects.
-                     */
-                    if (dock_item != latest_item)
-                        dock_item.dock_to (latest_item, Gdl.DockPlacement.CENTER, -1);
-                    else
-                        dock_item.show_item();
-#endif
                     widget_main.focus_dock_item (dock_item);
                     on_element_show();
                 } else {
-// #if !GDL_LESS_3_5_5
 //                     /* Hide also iconified item by making it visible first. */
 //                     if (dock_item.is_iconified())
 //                         dock_item.show_item();
-// #endif
                     modehide = false;
                     on_element_hide();
                     dock_item.hide_item();
@@ -246,16 +228,10 @@ public abstract class UiElement : Object{
             if (dock_item != null) {
                 if ((project.idemode & mode) != 0) {
                     if (modehide) {
-#if !GDL_LESS_3_5_5
                         if (initialized) {
                             dock_item.show_item();
                             dock_item.show_all();
                         }
-#else
-                        if (initialized && (latest_item != dock_item) &&
-                                    ((dock_item.flags & Gdl.DockObjectFlags.ATTACHED) == 0))
-                            dock_item.dock_to (latest_item, Gdl.DockPlacement.CENTER, -1);
-#endif
                     }
                 } else
                     dock_item.hide_item();

@@ -688,11 +688,7 @@ public class MainWidget : Box {
             item_view_element = new CheckMenuItem.with_mnemonic (@"_$label");
         else
             item_view_element = new CheckMenuItem.with_label (label);
-#if !GDL_LESS_3_5_5
         item_view_element.active = !element.dock_item.is_closed();
-#else
-        item_view_element.active = ((element.dock_item.flags & DockObjectFlags.ATTACHED) != 0);
-#endif
         menu_view.append (item_view_element);
 
         item_view_element.toggled.connect (() => {
@@ -721,11 +717,7 @@ public class MainWidget : Box {
         btn_element.icon_name = icon_name;
         toolbar.add (btn_element);
 
-#if !GDL_LESS_3_5_5
         btn_element.active = !element.dock_item.is_closed();
-#else
-        btn_element.active = ((element.dock_item.flags & DockObjectFlags.ATTACHED) != 0);
-#endif
         btn_element.toggled.connect (() => {
             element.show_element (btn_element.active);
         });

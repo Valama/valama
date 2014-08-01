@@ -449,12 +449,7 @@ class UiSourceViewer : UiElement {
                                             (srcbuf.dirty) ? "gtk-new" : "gtk-edit",
                                             DockItemBehavior.LOCKED);
         srcbuf.notify["dirty"].connect (() => {
-#if GDL_3_8 || GDL_3_9_91
             item.stock_id = (srcbuf.dirty) ? "gtk-new" : "gtk-edit";
-#else
-            /* Work around #695972 to update icon. */
-            item.set ("stock-id", (srcbuf.dirty) ? "gtk-new" : "gtk-edit");
-#endif
         });
         item.add (vbox);
 
@@ -575,23 +570,7 @@ class UiSourceViewer : UiElement {
      *       objects at creation of new source views.
      */
     private inline SuperSourceView get_sourceview (DockItem item) {
-#if !GDL_LESS_3_5_5
         return (SuperSourceView) ((ScrolledWindow) ((Box) item.get_child()).get_children().nth_data (0)).get_child();
-#else
-        /*
-         * Work arround GNOME #693127.
-         */
-        ScrolledWindow? scroll_widget = null;
-        item.forall ((child) => {
-            if (child is Box && ((Box) child).get_children().nth_data (0) is ScrolledWindow)
-                scroll_widget = ((Box) child).get_children().nth_data (0) as ScrolledWindow;
-        });
-        if (scroll_widget == null)
-            // TRANSLATORS: This is an technical information. You might not want
-            // to translate "ScrolledWindow".
-            bug_msg (_("Could not find ScrolledWindow widget: %s\n"), item.name);
-        return (SuperSourceView) scroll_widget.get_child();
-#endif
     }
 
     /**

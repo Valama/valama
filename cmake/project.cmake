@@ -10,7 +10,7 @@ set(required_pkgs
   "gdk-3.0"
   "gladeui-2.0"
   "gdk-pixbuf-2.0 {nolink}"
-  "gdl-3.0 >= 3.3.91"
+  "gdl-3.0 >= 3.8"
   "gee-0.8 >= 0.10.5"
   "gio-2.0"
   "glib-2.0 >= 2.32"
