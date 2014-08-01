@@ -84,6 +84,7 @@ endif()
 
 # Custom library version checks.
 set(definitions)
+set(vapidirs)
 find_package(PkgConfig)
 # Unix or Windows
 if(WIN32)
@@ -125,9 +126,11 @@ else()
 endif()
 # gtk+-3.0
 pkg_check_modules(GTK3.0 REQUIRED "gtk+-3.0 >= 3.10")
-compare_version_strings("3.10" "${GTK3.0_VERSION}" gtkres)
-if(gtkres LESS 1)
-  list(APPEND definitions "GTK_3_10")
+compare_version_strings("${VALA_SHORTVER}" "0.20" valares)
+if(valares LESS 1)
+  message(STATUS "Use gtk+-3.0 vapi from valac 0.22 to support new gtk+-3.0 "
+                 "3.10 symbols.")
+  list(APPEND vapidirs "--vapidir=${CMAKE_SOURCE_DIR}/extravapi/gtk+-3.0")
 endif()
 #gtksourceview-3.0
 pkg_check_modules(GTKSV3.0 REQUIRED "gtksourceview-3.0 >= 3.10")
@@ -135,12 +138,16 @@ if((${GTKSV3.0_VERSION} GREATER 3.12) OR (${GTKSV3.0_VERSION} EQUAL 3.12))
 	list(APPEND definitions "GTK_SOURCE_VIEW_3_12")
 endif()
 # gdl-3.0
-set(gdl_workarround OFF)
 pkg_check_modules(GDL3.0 REQUIRED "gdl-3.0 >= 3.3.91")
 compare_version_strings("3.9.91" "${GDL3.0_VERSION}" gdlres)
 if(gdlres LESS 1)
   list(APPEND definitions "GDL_3_9_91")
-  set(gdl_workarround ON)
+  compare_version_strings("0.20" "${VALA_SHORTVER}" valares)
+  if(valares LESS 1)
+    message(STATUS "Use enhanced gdl-3.0 vapi to support new features with "
+                   "gdl-3.0 >= 3.9.91.")
+    list(APPEND vapidirs "--vapidir=${CMAKE_SOURCE_DIR}/extravapi/gdl-3.0")
+  endif()
 else()
   compare_version_strings("3.5.5" "${GDL3.0_VERSION}" gdlres)
   if(gdlres LESS 1)
@@ -150,7 +157,9 @@ else()
     endif()
     compare_version_strings("0.20" "${VALA_SHORTVER}" valares)
     if(valares EQUAL 1)
-      set(gdl_workarround ON)
+      message(STATUS "Use enhanced gdl-3.0 vapi from valac 0.20 to support new "
+                     "features with gdl-3.0 >= 3.5.5.")
+      list(APPEND vapidirs "--vapidir=${CMAKE_SOURCE_DIR}/extravapi/gdl-3.0")
     endif()
   else()
     list(APPEND definitions "GDL_LESS_3_5_5")
@@ -162,9 +171,7 @@ else()
     if(valares LESS 1)
       message(STATUS "Use gdl-3.0 vapi from valac 0.18 to support old "
                      "library gdl-3.0 < 3.5.5.")
-      list(APPEND vapifiles "extravapi/gdl-3.0-old.vapi")
-      list(REMOVE_ITEM required_pkgs "gdl-3.0 >= 3.3.91")
-      set(gdl_workarround ON)
+      list(APPEND vapidirs "--vapidir=${CMAKE_SOURCE_DIR}/extravapi/gdl-3.0-old")
     endif()
   endif()
 endif()
@@ -174,12 +181,13 @@ pkg_check_modules(GLIB2.0 REQUIRED "glib-2.0")
 # gladeui-2.0
 pkg_check_modules(GLADEUI2.0 REQUIRED "gladeui-2.0")
 # vapidir option added, for custom gladeui-2.0 vapi
+list(APPEND vapidirs "--vapidir=${CMAKE_SOURCE_DIR}/vapi")
+
 set(default_vala_flags
   "--thread"
   "--target-glib" "${GLIB2.0_VERSION}"
   "--enable-experimental"
   "--fatal-warnings"
-  "--vapidir=${CMAKE_SOURCE_DIR}/vapi"
 )
 
 include(ValaPkgs)
@@ -196,6 +204,7 @@ vala_pkgs(VALA_C
     ${vapifiles}
   OPTIONS
     ${default_vala_flags}
+    ${vapidirs}
 )
 
 
@@ -215,11 +224,6 @@ add_definitions(${PROJECT_C_FLAGS})
 if(GUANAKO)
   include_directories("${PROJECT_BINARY_DIR}/guanako")
   target_link_libraries("${project_name_lower}" "guanako")
-endif()
-
-if(gdl_workarround)
-  target_link_libraries("${project_name_lower}" ${GDL3.0_LDFLAGS})
-  add_definitions(${GDL3.0_CFLAGS})
 endif()
 
 
@@ -268,6 +272,7 @@ if(VALADOC_FOUND)
       ${srcfiles}
       ${vapifiles}
     OPTIONS
+      ${vapidirs}
       "--vapidir" "${VALA_VAPIDIR}"
       "--vapidir" "${VALA_DATADIR}/vapi"
       "--vapidir" "${CMAKE_SOURCE_DIR}/vapi"
