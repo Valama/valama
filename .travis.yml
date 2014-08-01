@@ -13,6 +13,7 @@ before_install:
   - sudo apt-get install update-manager-core
   - sudo sed -i 's/^\(Prompt=\).*/\1lts/' /etc/update-manager/release-upgrades
   - sudo do-release-upgrade -d -f DistUpgradeViewNonInteractive
+  - sudo add-apt-repository -y ppa:vala-team/ppa
   - sudo apt-get update -qq
   - eval $(sed -n '/^On Debian based systems install/{n;n;p}' README.md) valadoc
 script: mkdir build && cd build && cmake -DVALADOC_VERBOSE=ON .. && make && make docs-valama
