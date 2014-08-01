@@ -134,8 +134,16 @@ if(valares LESS 1)
 endif()
 #gtksourceview-3.0
 pkg_check_modules(GTKSV3.0 REQUIRED "gtksourceview-3.0 >= 3.10")
-if((${GTKSV3.0_VERSION} GREATER 3.12) OR (${GTKSV3.0_VERSION} EQUAL 3.12))
-	list(APPEND definitions "GTK_SOURCE_VIEW_3_12")
+compare_version_strings("3.12" "${GTKSV3.0_VERSION}" gtksvres)
+if(gtksvres LESS 1)
+  list(APPEND definitions "GTK_SOURCE_VIEW_3_12")
+else()
+  compare_version_strings("0.24" "${VALA_SHORTVER}" valares)
+  if(valares LESS 1)
+    message(STATUS "Use gtksourceview-3.0 vapi from valac 0.22 to not fail"
+                   "with deprecated symbols with gtksourceview-3.0 < 3.12.")
+    list(APPEND vapidirs "--vapidir=${CMAKE_SOURCE_DIR}/extravapi/gtksourceview-3.0")
+  endif()
 endif()
 # gdl-3.0
 pkg_check_modules(GDL3.0 REQUIRED "gdl-3.0 >= 3.3.91")

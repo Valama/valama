@@ -49,6 +49,14 @@
 			<extracheck define="GTK_SOURCE_VIEW_3_12">
 				<package name="gtksourceview-3.0" version="3.11" rel="since"/>
 			</extracheck>
+			<extracheck vapi="extravapi/gtksourceview-3.0/gtksourceview-3.0.vapi">
+				<package name="gtksourceview-3.0" version="3.11" rel="before"/>
+				<package name="libvala-0.26"/>
+			</extracheck>
+			<extracheck vapi="extravapi/gtksourceview-3.0/gtksourceview-3.0.vapi">
+				<package name="gtksourceview-3.0" version="3.11" rel="before"/>
+				<package name="libvala-0.24"/>
+			</extracheck>
 		</package>
 		<package name="guanako"/>
 		<package name="libxml-2.0"/>
