@@ -10,7 +10,7 @@ branches:
     - packaging
 before_install:
   - sudo apt-get update -qq
-  - sudo apt-get install update-manager-core
+  - sudo apt-get install update-manager-core software-properties-common
   - sudo sed -i 's/^\(Prompt=\).*/\1lts/' /etc/update-manager/release-upgrades
   - sudo do-release-upgrade -d -f DistUpgradeViewNonInteractive
   - sudo add-apt-repository -y ppa:vala-team/ppa
