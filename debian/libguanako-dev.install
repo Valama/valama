@@ -1,0 +1,5 @@
+usr/lib/libguanako.so
+usr/lib/pkgconfig
+usr/include
+usr/share/vala*/vapi
+usr/share/gir-1.0

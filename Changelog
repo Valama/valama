@@ -1,0 +1,40 @@
+valama (0.1.2~git20140802.9998689-1) utopic; urgency=low
+
+  [ Dominique Lasserre ]
+  * Project file: Support choices in extrachecks. Simplify valama.vlp a bit. No nested choices supported yet.
+  * Drop gdl < 3.8 support.
+  * Support libvala >= 0.24 with gtksourceview 3.10.
+  * Update installation description.
+  * CMake: Search for global valac first.
+  
+ -- Yannick Inizan <inizan.yannick@gmail.com>  Sat, 02 Aug 2014 14:30:00 +0200
+
+valama (0.1.2~git20140407.2d21e33+ppa6-1) trusty; urgency=low
+
+  * define VALA_0_26 for Vala.ArrayType
+  * fix debian/control for vala-0.26
+  * fix findVala.cmake correctly
+  * Remove unsupported vala versions
+  
+ -- Yannick Inizan <inizan.yannick@gmail.com>  Mon, 07 Apr 2014 00:49:00 +0200
+
+valama (0.1.2-1) trusty; urgency=low
+
+  [ Mario ]
+  * Elementary template
+  [ Linus Seelinger ]
+  * Valama: Do not complete after curly brackets
+  
+ -- Yannick Inizan <inizan.yannick@gmail.com>  Tue, 04 Mar 2014 18:20:00 +0100
+
+valama (0.1.1-1) unstable; urgency=low
+
+  * New Bugfix release.
+
+ -- Dominique Lasserre <lasserre.d@gmail.com>  Mon, 10 Sep 2012 23:56:56 +0200
+
+valama (0.1-1) unstable; urgency=low
+
+  * Initial release.
+
+ -- Dominique Lasserre <lasserre.d@gmail.com>  Mon, 10 Sep 2012 22:44:36 +0200
