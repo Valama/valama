@@ -38,12 +38,11 @@
 				<package name="gtksourceview-3.0" version="3.11" rel="since"/>
 			</extracheck>
 			<extracheck vapi="extravapi/gtksourceview-3.0/gtksourceview-3.0.vapi">
+				<choice all="no">
+					<package name="libvala-0.26"/>
+					<package name="libvala-0.24"/>
+				</choice>
 				<package name="gtksourceview-3.0" version="3.11" rel="before"/>
-				<package name="libvala-0.26"/>
-			</extracheck>
-			<extracheck vapi="extravapi/gtksourceview-3.0/gtksourceview-3.0.vapi">
-				<package name="gtksourceview-3.0" version="3.11" rel="before"/>
-				<package name="libvala-0.24"/>
 			</extracheck>
 		</package>
 		<package name="guanako"/>

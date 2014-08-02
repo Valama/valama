@@ -178,16 +178,22 @@ public class PkgChoice {
 
 public class PkgCheck {
     public Gee.ArrayList<PackageInfo> packages { get; private set; }
+    public Gee.ArrayList<PkgChoice> choices { get; private set; }
     public string? custom_vapi { get; set; default = null; }
     public string? define { get; set; default = null; }
     public string? description { get; set; default = null; }
 
     public PkgCheck() {
         packages = new Gee.ArrayList<PackageInfo>();
+        choices = new Gee.ArrayList<PkgChoice>();
     }
 
     public inline void add_package (PackageInfo package) {
         packages.add (package);
+    }
+
+    public inline void add_choice (PkgChoice choice) {
+        choices.add (choice);
     }
 
     public inline bool remove_package (PackageInfo package) {
@@ -197,32 +203,58 @@ public class PkgCheck {
         return true;
     }
 
+    public inline bool remove_choice (PkgChoice choice) {
+        choices.remove (choice);
+        if (choices.size == 0)
+            return false;
+        return true;
+    }
+
     public bool check (ProjectFile project, ref string? custom_vapi, ref TreeSet<string> defines) {
+        foreach (var choice in choices) {
+            bool found = false;
+            foreach (var pkg in choice.packages)
+                if (pkg.check_available (project)) {
+                    found = true;
+                    if (!process_pkg_check (project, ref custom_vapi, ref defines, pkg))
+                        return false;
+                    break;
+                }
+            if (!found)
+                return false;
+        }
+
         foreach (var pkg in packages) {
             if (!pkg.check_available (project))
                 return false;
-            if (this.custom_vapi != null)
-                //TODO: Support for multiple custom vapis? Could be done with
-                //      multiple checks/pkgs though.
-                custom_vapi = this.custom_vapi;
-            if (define != null)
-                defines.add (define);
-            /*
-             *NOTE: Currently extrachecks are optional and if no check at all
-             * succeeds it won't result to failure.
-             */
-            // bool found = true;
-            if (pkg.extrachecks != null) {
-                // found = false;
-                foreach (var check in pkg.extrachecks)
-                    if (check.check (project, ref custom_vapi, ref defines)) {
-                        // found = true;
-                        break;
-                    }
-            }
-            // if (!found)
-            //     return false;
+            if (!process_pkg_check (project, ref custom_vapi, ref defines, pkg))
+                return false;
         }
+        return true;
+    }
+
+    private bool process_pkg_check (ProjectFile project, ref string? custom_vapi, ref TreeSet<string> defines, PackageInfo pkg) {
+        if (this.custom_vapi != null)
+            //TODO: Support for multiple custom vapis? Could be done with
+            //      multiple checks/pkgs though.
+            custom_vapi = this.custom_vapi;
+        if (define != null)
+            defines.add (define);
+        /*
+         *NOTE: Currently extrachecks are optional and if no check at all
+         * succeeds it won't result to failure.
+         */
+        // bool found = true;
+        if (pkg.extrachecks != null) {
+            // found = false;
+            foreach (var check in pkg.extrachecks)
+                if (check.check (project, ref custom_vapi, ref defines)) {
+                    // found = true;
+                    break;
+                }
+        }
+        // if (!found)
+        //     return false;
         return true;
     }
 

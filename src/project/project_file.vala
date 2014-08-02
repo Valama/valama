@@ -211,41 +211,11 @@ public class ProjectFile : Object {
                             continue;
                         switch (p->name) {
                             case "choice":
-                                var choice = new PkgChoice();
-                                if (p->has_prop ("all") != null)
-                                    switch (p->get_prop ("all")) {
-                                        case "yes":
-                                            choice.all = true;
-                                            break;
-                                        case "no":
-                                            choice.all = false;
-                                            break;
-                                        default:
-                                            warning_msg (_("Unknown property for '%s' line %hu: %s\n"
-                                                                + "Will choose '%s'\n"),
-                                                         "rel", p->line, p->get_prop ("all"), "no");
-                                            choice.all = false;
-                                            break;
-                                    }
-                                for (Xml.Node* pp = p->children; pp != null; pp = pp->next) {
-                                    if (pp->type != ElementType.ELEMENT_NODE)
-                                        continue;
-                                    switch (pp->name) {
-                                        case "description":
-                                            choice.description = pp->get_content();
-                                            break;
-                                        case "package":
-                                            var pkg = get_package_info (pp);
-                                            if (pkg != null)
-                                                choice.add_package (pkg);
-                                            break;
-                                        default:
-                                            warning_msg (_("Unknown configuration file value line %hu: %s\n"), pp->line, pp->name);
-                                            break;
-                                    }
-                                }
-                                if (choice.packages.size > 0)
+                                var choice = get_package_choice (p);
+                                if (choice.packages.size > 1)
                                     package_choices.add (choice);
+                                else if (choice.packages.size == 1)
+                                    packages[choice.packages[0].name] = choice.packages[0];
                                 else
                                     warning_msg (_("No packages to choose between: line %hu\n"), p->line);
                                 break;
@@ -429,15 +399,8 @@ public class ProjectFile : Object {
 
         if (packages.size > 0 || package_choices.size > 0) {
             writer.start_element ("packages");
-            foreach (var choice in package_choices) {
-                writer.start_element ("choice");
-                writer.write_attribute ("all", (choice.all) ? "yes" : "no");
-                if (choice.description != null)
-                    writer.write_element ("description", choice.description);
-                foreach (var pkg in choice.packages)
-                    write_pkg (writer, pkg);
-                writer.end_element();
-            }
+            foreach (var choice in package_choices)
+                write_choice (writer, choice);
             foreach (var pkg in packages.values) {
                 if (pkg.choice != null)
                     continue;
@@ -504,6 +467,53 @@ public class ProjectFile : Object {
 
         writer.end_element();
     }
+
+    /**
+     * Load package choice information from {@link Xml.Node}.
+     *
+     * Can return empty {@link PkgChoice}. Verify with
+     * {@link PkgChoice.packages.size} > 0.
+     *
+     * @param node Package choice {@link Xml.Node} to search for infos.
+     * @return Return {@link PkgChoice}.
+     */
+    private PkgChoice get_package_choice (Xml.Node* node) {
+        var choice = new PkgChoice();
+        if (node->has_prop ("all") != null)
+            switch (node->get_prop ("all")) {
+                case "yes":
+                    choice.all = true;
+                    break;
+                case "no":
+                    choice.all = false;
+                    break;
+                default:
+                    warning_msg (_("Unknown property for '%s' line %hu: %s\n"
+                                        + "Will choose '%s'\n"),
+                                 "rel", node->line, node->get_prop ("all"), "no");
+                    choice.all = false;
+                    break;
+            }
+        for (Xml.Node* p = node->children; p != null; p = p->next) {
+            if (p->type != ElementType.ELEMENT_NODE)
+                continue;
+            switch (p->name) {
+                case "description":
+                    choice.description = p->get_content();
+                    break;
+                case "package":
+                    var pkg = get_package_info (p);
+                    if (pkg != null)
+                        choice.add_package (pkg);
+                    break;
+                default:
+                    warning_msg (_("Unknown configuration file value line %hu: %s\n"), p->line, p->name);
+                    break;
+            }
+        }
+        return choice;
+    }
+
     /**
      * Load package information from {@link Xml.Node}.
      *
@@ -581,6 +591,13 @@ public class ProjectFile : Object {
                             case "description":
                                 pkgcheck.description = pp->get_content();
                                 break;
+                            case "choice":
+                                var choice = get_package_choice (pp);
+                                if (choice.packages.size > 1)
+                                    pkgcheck.add_choice (choice);
+                                else if (choice.packages.size == 1)
+                                    pkgcheck.add_package (choice.packages[0]);
+                                break;
                             case "package":
                                 var pkg = get_package_info (pp);
                                 if (pkg != null)
@@ -607,6 +624,16 @@ public class ProjectFile : Object {
         return package;
     }
 
+    private void write_choice (TextWriter writer, PkgChoice choice) {
+        writer.start_element ("choice");
+        writer.write_attribute ("all", (choice.all) ? "yes" : "no");
+        if (choice.description != null)
+            writer.write_element ("description", choice.description);
+        foreach (var pkg in choice.packages)
+            write_pkg (writer, pkg);
+        writer.end_element();
+    }
+
     private void write_pkg (TextWriter writer, PackageInfo pkg) {
         writer.start_element ("package");
         writer.write_attribute ("name", pkg.name);
@@ -629,6 +656,8 @@ public class ProjectFile : Object {
                     writer.write_attribute ("vapi", extracheck.custom_vapi);
                 if (extracheck.define != null)
                     writer.write_attribute ("define", extracheck.define);
+                foreach (var checkchoice in extracheck.choices)
+                    write_choice (writer, checkchoice);
                 foreach (var checkpkg in extracheck.packages)
                     write_pkg (writer, checkpkg);
                 writer.end_element();
