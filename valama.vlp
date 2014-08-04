@@ -21,7 +21,7 @@
 				<package name="libvala-0.20"/>
 			</extracheck>
 		</package>
-		<package name="gee-0.8"/>
+		<package name="gee-0.8" version="0.10.5" rel="since"/>
 		<package name="gio-2.0"/>
 		<package name="gladeui-2.0">
 			<extracheck vapi="vapi/gladeui-2.0.vapi"/>
