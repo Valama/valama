@@ -52,6 +52,7 @@ find_package(Vala "0.20" REQUIRED)
 
 # Custom library version checks.
 set(definitions)
+set(vapidirs)
 find_package(PkgConfig)
 # glib-2.0
 pkg_check_modules(GLIB2.0 REQUIRED "glib-2.0")
@@ -60,6 +61,8 @@ pkg_check_modules(GLIB2.0 REQUIRED "glib-2.0")
 set(default_vala_flags
   "--thread"
   "--target-glib" "${GLIB2.0_VERSION}"
+  #"--enable-experimental"
+  #"--fatal-warnings"
 )
 
 include(ValaPkgs)
@@ -76,6 +79,7 @@ vala_pkgs(VALA_C
     ${vapifiles}
   OPTIONS
     ${default_vala_flags}
+    ${vapidirs}
 )
 
 
@@ -143,9 +147,13 @@ else()
 endif()
 message("")
 message("Installation prefix:    ${CMAKE_INSTALL_PREFIX}")
+foreach(def ${definitions})
+  list(APPEND default_vala_flags "-D;${def}")
+endforeach()
 base_list_to_delimited_string(vala_flags
   DELIM " "
-  BASE_LIST "${default_vala_flags}")
+  BASE_LIST "${default_vala_flags}"
+)
 message("C compiler:             ${CMAKE_C_COMPILER}")
 message("C compiler version      ${CMAKE_C_COMPILER_VERSION}")
 if("${c_flags}" STREQUAL "")

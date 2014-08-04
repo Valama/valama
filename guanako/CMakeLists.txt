@@ -70,6 +70,7 @@ set(pc_version "${${project_name}_VERSION}")
 
 # Custom library version checks.
 set(definitions)
+set(vapidirs)
 find_package(PkgConfig)
 # libvala-X.Y
 if(VALA_SHORTVER STREQUAL "0.20")
@@ -156,6 +157,7 @@ vala_pkgs(VALA_C
     "${project_name}-${${project_name}_VERSION}"
   OPTIONS
     ${default_vala_flags}
+    ${vapidirs}
 )
 
 add_library("${project_name_lower}" SHARED ${VALA_C})
