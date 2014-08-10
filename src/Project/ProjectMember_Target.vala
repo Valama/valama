@@ -5,6 +5,8 @@ namespace Project {
     
     public Gee.ArrayList<string> included_sources = new Gee.ArrayList<string>();
   
+    public Gee.LinkedList<MetaDependency> metadependencies = new Gee.LinkedList<MetaDependency>();
+
     internal override void load_internal (Xml.Node* node) throws ProjectError {
       // Read binary name
       for (Xml.Attr* prop = node->properties; prop != null; prop = prop->next) {
@@ -20,6 +22,11 @@ namespace Project {
             if (prop->name == "id")
               included_sources.add(prop->children->content);
           }
+        }
+        if (iter->name == "metadependency") {
+          var dep = new MetaDependency();
+          dep.load (iter);
+          metadependencies.add (dep);
         }
       }
       if (binary_name == null)
@@ -41,6 +48,11 @@ namespace Project {
       foreach (string source_id in included_sources) {
         writer.start_element ("source");
         writer.write_attribute ("id", source_id);
+        writer.end_element();
+      }
+      foreach (var dep in metadependencies) {
+        writer.start_element ("metadependency");
+        dep.save (writer);
         writer.end_element();
       }
     }

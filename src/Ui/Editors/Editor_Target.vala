@@ -36,11 +36,19 @@ namespace Ui {
       grid.attach (new Gtk.Label ("Active sources"), 0, 1, 1, 1);
       grid.attach (build_sources_list(), 0, 2, 2, 1);
       grid.show();
+
+      grid.attach (new Gtk.Label ("Dependencies"), 0, 3, 1, 1);
+      grid.attach (build_dependencies_list(), 0, 4, 2, 1);
+      grid.show();
       
       grid.show_all();
       widget = grid;
     }
     
+
+    // Sources list
+    // ============
+
     private Gtk.ListBox sources_list;
     private inline Gtk.Widget build_sources_list() {
       sources_list = new Gtk.ListBox();
@@ -81,11 +89,94 @@ namespace Ui {
       }
       sources_list.show_all();
     }
-    
-    public override void dispose() {
-    
+
+    // Dependencies list
+    // =================
+
+    Gtk.ToolButton dependencies_list_btn_remove = null;
+    Gtk.ToolButton dependencies_list_btn_edit = null;
+    private Gtk.ListBox dependencies_list;
+    private inline Gtk.Widget build_dependencies_list() {
+      dependencies_list = new Gtk.ListBox();
+
+      var box = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
+
+      var scrw_list = new Gtk.ScrolledWindow (null, null);
+      scrw_list.add (dependencies_list);
+      scrw_list.hexpand = true;
+      scrw_list.vexpand = true;
+      box.add (scrw_list);
+
+      var toolbar = new Gtk.Toolbar();
+      toolbar.icon_size = Gtk.IconSize.MENU;
+
+      var btn_add = new Gtk.ToolButton (null, null);
+      btn_add.icon_name = "list-add-symbolic";
+      btn_add.clicked.connect (() => {
+        var my_member = member as Project.ProjectMemberTarget;
+        var new_dep = new Project.MetaDependency();
+        new_dep.name = "New dependency";
+        my_member.metadependencies.add (new_dep);
+        update_dependencies_list ();
+      });
+      toolbar.add (btn_add);
+
+      dependencies_list_btn_remove = new Gtk.ToolButton (null, null);
+      dependencies_list_btn_remove.icon_name = "list-remove-symbolic";
+      dependencies_list_btn_remove.clicked.connect (() => {
+        if (dependencies_list.get_selected_row() == null)
+          return;
+        var my_member = member as Project.ProjectMemberTarget;
+        var dep = dependencies_list.get_selected_row().get_data<Project.MetaDependency>("metadependency");
+        my_member.metadependencies.remove (dep);
+        update_dependencies_list ();
+      });
+      toolbar.add (dependencies_list_btn_remove);
+
+      dependencies_list_btn_edit = new Gtk.ToolButton (null, null);
+      dependencies_list_btn_edit.icon_name = "emblem-system-symbolic";
+      dependencies_list_btn_edit.clicked.connect (() => {
+        if (dependencies_list.get_selected_row() == null)
+          return;
+        var my_member = member as Project.ProjectMemberTarget;
+        var dep = dependencies_list.get_selected_row().get_data<Project.MetaDependency>("metadependency");
+        dep.show_edit_dialog();
+        update_dependencies_list ();
+      });
+      toolbar.add (dependencies_list_btn_edit);
+
+      box.add (toolbar);
+
+      box.show_all();
+      dependencies_list.row_selected.connect(dependencies_list_row_selected);
+      update_dependencies_list();
+      return box;
     }
-  
+
+    private void dependencies_list_row_selected (Gtk.ListBoxRow? row) {
+      dependencies_list_btn_remove.sensitive = row != null;
+      dependencies_list_btn_edit.sensitive = row != null;
+    }
+
+    private inline void update_dependencies_list() {
+      foreach (Gtk.Widget widget in dependencies_list.get_children())
+        dependencies_list.remove (widget);
+
+      var my_member = member as Project.ProjectMemberTarget;
+
+      foreach (var metadep in my_member.metadependencies) {
+        var row = new Gtk.ListBoxRow();
+        row.set_data<Project.MetaDependency> ("metadependency", metadep);
+        row.add (new Gtk.Label(metadep.name));
+        dependencies_list.add (row);
+      }
+      dependencies_list.show_all();
+    }
+
+    public override void dispose() {
+
+    }
+
   }
 
 }
