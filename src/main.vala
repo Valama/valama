@@ -1,7 +1,7 @@
 static int main (string[] args) {
 
   var project = new Project.Project();
-  project.load ("/home/linus/source/valamang/valama.vlp");
+  project.load ("valama.vlp");
 
   Gtk.init (ref args);
   
