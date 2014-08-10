@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<project format_version="1" project_id="300720142332">
+	<info id="1" name="ValamaNG" major="0" minor="5" patch="0">
+		<author name="Linus Seelinger" mail="S.Linus@gmx.de"/>
+	</info>
+	<valasource id="2" filename="src/main.vala"/>
+	<target id="3" buildsystem="valama" binary_name="valama">
+		<source id="16"/>
+		<source id="14"/>
+		<source id="9"/>
+		<source id="12"/>
+		<source id="15"/>
+		<source id="10"/>
+		<source id="8"/>
+		<source id="5"/>
+		<source id="13"/>
+		<source id="11"/>
+		<source id="6"/>
+		<source id="2"/>
+		<source id="17"/>
+		<source id="7"/>
+		<source id="4"/>
+		<source id="19"/>
+	</target>
+	<target id="18" buildsystem="valama" binary_name="testtarget">
+		<source id="16"/>
+		<source id="14"/>
+		<source id="9"/>
+		<source id="15"/>
+		<source id="4"/>
+		<source id="13"/>
+		<source id="6"/>
+		<source id="2"/>
+		<source id="17"/>
+		<source id="7"/>
+	</target>
+	<valasource id="6" filename="src/Project/ProjectMember.vala"/>
+	<valasource id="4" filename="src/Project/Project.vala"/>
+	<valasource id="5" filename="src/Project/ProjectMemberFactory.vala"/>
+	<valasource id="7" filename="src/Project/ProjectMember_Info.vala"/>
+	<valasource id="8" filename="src/Project/ProjectMember_Target.vala"/>
+	<valasource id="9" filename="src/Project/ProjectMember_ValaSource.vala"/>
+	<valasource id="10" filename="src/Ui/EditorViewer.vala"/>
+	<valasource id="11" filename="src/Ui/Element.vala"/>
+	<valasource id="12" filename="src/Ui/MainWidget.vala"/>
+	<valasource id="13" filename="src/Ui/ProjectStructure.vala"/>
+	<valasource id="14" filename="src/Ui/Editors/Editor.vala"/>
+	<valasource id="15" filename="src/Ui/Editors/Editor_Info.vala"/>
+	<valasource id="16" filename="src/Ui/Editors/Editor_Target.vala"/>
+	<valasource id="17" filename="src/Ui/Editors/Editor_ValaSource.vala"/>
+	<valasource id="19" filename="src/Ui/MainToolbar.vala"/>
+</project>

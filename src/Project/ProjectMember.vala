@@ -1,0 +1,36 @@
+namespace Project {
+
+  public abstract class ProjectMember : Object {
+  
+    //public string name;
+    public string id = null;
+    public EnumProjectMember type;
+    public Project project;
+
+    //public signal void data_changed (Object sender);
+
+    public void load (Xml.Node* node) throws ProjectError {
+      type = EnumProjectMember.fromString(node->name);
+      for (Xml.Attr* prop = node->properties; prop != null; prop = prop->next) {
+        if (prop->name == "id")
+          id = prop->children->content;
+      }
+      if (id == null)
+        throw new ProjectError.CORRUPT_MEMBER("id attribute missing in member");
+      load_internal (node);
+    }
+    public void save (Xml.TextWriter writer) {
+      writer.start_element (type.toString());
+      writer.write_attribute ("id", id);
+      save_internal (writer);
+      writer.end_element();
+    }
+    internal abstract void load_internal (Xml.Node* node) throws ProjectError;
+    internal abstract void save_internal (Xml.TextWriter writer);
+    public abstract bool create ();
+    
+    public abstract Ui.Editor createEditor();
+    public abstract string getTitle();
+  }
+
+} 
