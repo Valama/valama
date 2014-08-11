@@ -211,6 +211,8 @@ public class PkgCheck {
     }
 
     public bool check (ProjectFile project, ref string? custom_vapi, ref TreeSet<string> defines) {
+        set_vapi_define (project, ref custom_vapi, ref defines);
+
         foreach (var choice in choices) {
             bool found = false;
             foreach (var pkg in choice.packages)
@@ -233,13 +235,17 @@ public class PkgCheck {
         return true;
     }
 
-    private bool process_pkg_check (ProjectFile project, ref string? custom_vapi, ref TreeSet<string> defines, PackageInfo pkg) {
+    private inline void set_vapi_define (ProjectFile project, ref string? custom_vapi, ref TreeSet<string> defines) {
         if (this.custom_vapi != null)
             //TODO: Support for multiple custom vapis? Could be done with
             //      multiple checks/pkgs though.
             custom_vapi = this.custom_vapi;
         if (define != null)
             defines.add (define);
+    }
+
+    private bool process_pkg_check (ProjectFile project, ref string? custom_vapi, ref TreeSet<string> defines, PackageInfo pkg) {
+        set_vapi_define (project, ref custom_vapi, ref defines);
         /*
          *NOTE: Currently extrachecks are optional and if no check at all
          * succeeds it won't result to failure.
