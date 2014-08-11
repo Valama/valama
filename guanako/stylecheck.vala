@@ -394,8 +394,8 @@ namespace Guanako {
                                     else {
                                         var new_desc = p->get_content();
                                         if (description != new_desc)
-                                            stderr.printf (_("Warning: Skip different description: '%s' - '%s'\n"),
-                                                           description, new_desc);
+                                            warning_msg (_("Skip different description: '%s' - '%s'\n"),
+                                                         description, new_desc);
                                     }
                                     break;
                                 case "type":
@@ -405,9 +405,9 @@ namespace Guanako {
                                         CheckType new_type;
                                         string name = p->get_content();
                                         if (!CheckType.parse_name (name, out new_type))
-                                            stderr.printf (_("Warning: Unknown CheckType '%s', assume 'GLOBAL'.\n"), name);
+                                            warning_msg (_("Unknown CheckType '%s', assume 'GLOBAL'.\n"), name);
                                         if (type != new_type)
-                                            stderr.printf (_("Warning: Skip different type: '%s' - '%s'\n"),
+                                            warning_msg (_("Skip different type: '%s' - '%s'\n"),
                                                            type, new_type);
                                     }
                                     break;
@@ -424,8 +424,8 @@ namespace Guanako {
                                                 else {
                                                     var new_regex = p->get_content();
                                                     if (regex != new_regex)
-                                                        stderr.printf (_("Warning: Skip different regexes: '%s' - '%s'\n"),
-                                                                       regex , new_regex);
+                                                        warning_msg (_("Skip different regexes: '%s' - '%s'\n"),
+                                                                     regex , new_regex);
                                                 }
                                                 break;
                                             case "matchgroup":
@@ -434,17 +434,17 @@ namespace Guanako {
                                                 else {
                                                     var new_match_num = int.parse (p->get_content());
                                                     if (match_num != new_match_num)
-                                                        stderr.printf (_("Warning: Skip different match groups: '%d' - '%d'\n"),
-                                                                       match_num , new_match_num);
+                                                        warning_msg (_("Skip different match groups: '%d' - '%d'\n"),
+                                                                     match_num , new_match_num);
                                                 }
                                                 break;
                                             default:
-                                                stderr.printf (_("Warning: Unknown configuration file value line %hu: %s\n"), pp->line, pp->name);
+                                                warning_msg (_("Unknown configuration file value line %hu: %s\n"), pp->line, pp->name);
                                                 break;
                                         }
                                     }
                                     if (regex == null) {
-                                        stderr.printf (_("Warning: No regex to check.\n"));
+                                        warning_msg (_("No regex to check.\n"));
                                         break;
                                     }
                                     if (match_num == null) {
@@ -458,24 +458,24 @@ namespace Guanako {
                                     rchecks.add (new RegexCheck.str (regex, match_num));
                                     break;
                                 default:
-                                    stderr.printf (_("Warning: Unknown configuration file value line %hu: %s\n"), p->line, p->name);
+                                    warning_msg (_("Unknown configuration file value line %hu: %s\n"), p->line, p->name);
                                     break;
                             }
                         }
                         if (description == null) {
                             description = "";
-                            stderr.printf (_("Warning: No description found.\n"));
+                            warning_msg (_("No description found.\n"));
                         }
                         if (type == null) {
                             type = CheckType.GLOBAL;
                             // TRANSLATORS: This is a technical information. You migth not
                             // want to translate "CheckType".
-                            stderr.printf (_("Warning: No CheckType found, assume 'GLOBAL'.\n"));
+                            warning_msg (_("No CheckType found, assume 'GLOBAL'.\n"));
                         }
                         add_checks (description, rchecks, type);
                         break;
                     default:
-                        stderr.printf ("Warning: Unknown configuration file value line %hu: %s\n", i->line, i->name);
+                        warning_msg ("Unknown configuration file value line %hu: %s\n", i->line, i->name);
                         break;
                 }
             }
@@ -572,7 +572,7 @@ namespace Guanako {
                 switch (checkmap.type) {
                     case CheckType.GLOBAL:
                     case CheckType.NAMESPACE_DECLARATION:
-                        stdout.printf (_("Type not implemented yet: %s\n"), checkmap.type.to_string());
+                        errmsg (_("Type not implemented yet: %s\n"), checkmap.type.to_string());
                         break;
                     case CheckType.CLASS_DECLARACTION:
                         loopcond = node is Namespace || node is Class;
@@ -613,10 +613,10 @@ namespace Guanako {
                     case CheckType.BLOCK_COMMENT:
                     case CheckType.LINE_COMMENT:
                     case CheckType.COMMENT:
-                        stdout.printf (_("Type not implemented yet: %s\n"), checkmap.type.to_string());
+                        errmsg (_("Type not implemented yet: %s\n"), checkmap.type.to_string());
                         break;
                     default:
-                        stderr.printf (_("Warning: Unknown CheckType: %s\n"), checkmap.type.to_string());
+                        warning_msg (_("Unknown CheckType: %s\n"), checkmap.type.to_string());
                         break;
                 }
                 // if (!loopcond)

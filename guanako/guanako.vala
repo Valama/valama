@@ -121,7 +121,7 @@ namespace Guanako {
                             action (define);
                     }
             else
-                stderr.printf (_("Not a valid Vala version, will  not set VALA_X_Y defines: %s\n"),
+                errmsg (_("Not a valid Vala version, will  not set VALA_X_Y defines: %s\n"),
                                Config.VALA_VERSION);
             context.profile = Profile.GOBJECT;
             context.add_define ("GOBJECT");
@@ -304,7 +304,7 @@ namespace Guanako {
                     if (!(pkg in old_deps) && !(pkg in new_deps)) {
                         var vapi_path = context_internal.get_vapi_path (pkg);
                         if (vapi_path == null) {
-                            stderr.printf (_("Warning: Vapi for package %s not found.\n"), pkg);
+                            warning_msg (_("Vapi for package %s not found.\n"), pkg);
                             missing_packages += pkg;
                             continue;
                         }
@@ -318,7 +318,7 @@ namespace Guanako {
                     if (!(pkg in new_deps)) {
                         var vapi_path = context_internal.get_vapi_path (pkg);
                         if (vapi_path == null) {
-                            stderr.printf (_("Warning: Vapi for package %s not found.\n"), pkg);
+                            warning_msg (_("Vapi for package %s not found.\n"), pkg);
                             missing_packages += pkg;
                             continue;
                         }
@@ -335,7 +335,7 @@ namespace Guanako {
                         var vapi_path = context_internal.get_vapi_path (pkg);
                         var pkg_file = get_source_file_int (context_internal, vapi_path);
                         if (pkg_file == null) {
-                            stderr.printf (_("Could not load vapi: %s\n"), vapi_path);
+                            errmsg (_("Could not load vapi: %s\n"), vapi_path);
                             missing_packages += pkg;
                             packages.remove (pkg);
                             continue;
@@ -749,7 +749,7 @@ namespace Guanako {
                 accessible = parent_project.get_accessible_symbols (file, line, col);
 
                 if (!parent_project.map_syntax.has_key (initial_rule_name)) {
-                    stderr.printf (_("Entry point '%s' not found in syntax file. Trying to segfault me, huh??"), initial_rule_name);
+                    error_msg (_("Entry point '%s' not found in syntax file. Trying to segfault me, huh??"), initial_rule_name);
                     return null;
                 }
                 Gee.LinkedList<Symbol> init_private_cur_stack = new Gee.LinkedList<Symbol>();
@@ -865,7 +865,7 @@ namespace Guanako {
                     Regex r = /^push_cur\>\{(?P<param>\w*)\}$/;
                     MatchInfo info;
                     if (!r.match (current_rule.expr, 0, out info)) {
-                        stdout.printf (_("Malformed rule: '%s'\n"), compare_rule[0].expr);
+                        errmsg (_("Malformed rule: '%s'\n"), compare_rule[0].expr);
                         return;
                     }
                     var push_param = find_param (call_params, info.fetch_named ("param"), current_rule.rule_id);
@@ -877,7 +877,7 @@ namespace Guanako {
                     Regex r = /^pop_cur\>\{(?P<param>\w*)\}$/;
                     MatchInfo info;
                     if (!r.match (current_rule.expr, 0, out info)) {
-                        stdout.printf (_("Malformed rule: '%s'\n"), compare_rule[0].expr);
+                        errmsg (_("Malformed rule: '%s'\n"), compare_rule[0].expr);
                         return;
                     }
                     var pop_param = find_param (call_params, info.fetch_named ("param"), current_rule.rule_id);
@@ -887,7 +887,7 @@ namespace Guanako {
                             compare (rule[1:rule.length], written, call_params, depth + 1, ref ret, ref private_cur_stack);
                             return;
                         }
-                    stdout.printf (_("pop_cur symbol not found! '%s'\n"), compare_rule[0].expr);
+                    warning_msg (_("pop_cur symbol not found! '%s'\n"), compare_rule[0].expr);
                     return;
                 }
 
@@ -895,7 +895,7 @@ namespace Guanako {
                     Regex r = /^\{(?P<parent>.*)\}\>(?P<child>\w*)(\<(?P<binding>.*)\>)?(\{(?P<write_to>\w*)\})?$/;
                     MatchInfo info;
                     if (!r.match (current_rule.expr, 0, out info)) {
-                        stdout.printf (_("Malformed rule: '%s'\n"), compare_rule[0].expr);
+                        errmsg (_("Malformed rule: '%s'\n"), compare_rule[0].expr);
                         return;
                     }
 
@@ -906,7 +906,7 @@ namespace Guanako {
 
                     var parent_param = find_param (call_params, parent_param_name, current_rule.rule_id);
                     if (parent_param == null) {
-                        stdout.printf (_("Variable '%s' not found! >%s<\n"), parent_param_name, compare_rule[0].expr);
+                        errmsg (_("Variable '%s' not found! >%s<\n"), parent_param_name, compare_rule[0].expr);
                         return;
                     }
                     Vala.List<Symbol>[] children;
@@ -965,7 +965,7 @@ namespace Guanako {
                     Regex r = /^\$(?P<call>\w*)(\{(?P<pass>(\w*|\@))\})?(\>\{(?P<ret>.*)\})?$/;
                     MatchInfo info;
                     if (!r.match (current_rule.expr, 0, out info)) {
-                        stderr.printf (_("Malformed rule: '%s'\n"), compare_rule[0].expr);
+                        errmsg (_("Malformed rule: '%s'\n"), compare_rule[0].expr);
                         return;
                     }
                     var call = info.fetch_named ("call");
@@ -973,7 +973,7 @@ namespace Guanako {
                     var ret_param = info.fetch_named ("ret");
 
                     if (!parent_project.map_syntax.has_key (call)) {
-                        stderr.printf (_("Call '%s' not found in '%s'\n"), call, compare_rule[0].expr);
+                        errmsg (_("Call '%s' not found in '%s'\n"), call, compare_rule[0].expr);
                         return;
                     }
 
@@ -996,7 +996,7 @@ namespace Guanako {
                         child_param.for_rule_id = local_rule_id_count;
                         var param = find_param (call_params, pass_param, current_rule.rule_id);
                         if (param == null) {
-                            stderr.printf (_("Parameter '%s' not found in '%s'\n"), pass_param, compare_rule[0].expr);
+                            errmsg (_("Parameter '%s' not found in '%s'\n"), pass_param, compare_rule[0].expr);
                             return;
                         }
                         child_param.symbol = param.symbol;
@@ -1331,16 +1331,16 @@ namespace Guanako {
                                     // There will be a list appended:
                                     // Dependencies of 'package': dep1, dep2, dep3...
                                     debug_msg (_("Dependencies of '%s': %s"), package_name, dep);
-                                } else
-                                    debug_msg (", %s", dep);
+                                } else if (debug)
+                                    stdout.printf (", %s", dep);
                             }
                         }
-                        if (!start)
-                            debug_msg ("\n");
+                        if (!start && debug)
+                            stdout.printf ("\n");
                     } catch (IOError e) {
-                        stderr.printf (_("Could not read line: %s\n"), e.message);
+                        errmsg (_("Could not read line: %s\n"), e.message);
                     } catch (Error e) {
-                        stderr.printf (_("Could not read file: %s\n"), e.message);
+                        errmsg (_("Could not read file: %s\n"), e.message);
                     }
                 }
             }
@@ -1386,10 +1386,26 @@ namespace Guanako {
      * @param format Format string.
      * @param ... Arguments for format string.
      */
-    private void debug_msg (string format, ...) {
+    private inline void debug_msg (string format, ...) {
         if (debug)
-            stdout.printf (format.vprintf (va_list()));
+            stdout.printf (_("Guanako: ") + format.vprintf (va_list()));
 
+    }
+
+    public inline void warning_msg (string format, ...) {
+        stdout.printf (_("Guanako: ") + _("Warning: ") + format.vprintf (va_list()));
+    }
+
+    public inline void error_msg (string format, ...) {
+        stderr.printf (_("Guanako: ") + _("Error: ") + format.vprintf (va_list()));
+    }
+
+    public inline void msg (string format, ...) {
+        stdout.printf (_("Guanako: ") + format.vprintf (va_list()));
+    }
+
+    public inline void errmsg (string format, ...) {
+        stderr.printf (_("Guanako: ") + format.vprintf (va_list()));
     }
 }
 

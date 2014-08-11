@@ -111,7 +111,7 @@ namespace Guanako {
                         available_packages[filename.substring (0, filename.length - 5)] = filename;
                 }
             } catch (GLib.Error e) {
-                stdout.printf (_("Could not update vapi files: %s\n"), e.message);
+                msg (_("Could not update vapi files: %s\n"), e.message);
             }
         }
 
@@ -192,10 +192,10 @@ namespace Guanako {
                         lblstr.append ("public ");
                         break;
                     default:
-                        stderr.printf (_("No valid %s type: %u - %s\n"),
-                                 "SymbolAccessibility", mth.access,
-                                 "CompletionProposal.proposal");
-                        stderr.printf (_("Please report a bug!\n"));
+                        errmsg (_("No valid %s type: %u - %s\n"),
+                                "SymbolAccessibility", mth.access,
+                                "CompletionProposal.proposal");
+                        errmsg (_("Please report a bug!\n"));
                         break;
                 }
                 if (mth.binding == MemberBinding.STATIC)
@@ -456,8 +456,8 @@ namespace Guanako {
 
     private static string datatype_to_string (DataType? vt, string? relname) {
         if (vt == null) {
-            stderr.printf (_("DataType is null: %s\n"), relname);
-            stderr.printf (_("Please report a bug!\n"));
+            errmsg (_("DataType is null: %s\n"), relname);
+            errmsg (_("Please report a bug!\n"));
             return "UNKOWN";
         }
 
@@ -504,8 +504,8 @@ namespace Guanako {
             } else if (vt is InvalidType) {  // happens if some vapi conflicts
                 lblstr.append ("INVALID");
                 //TODO; Communicate to UI.
-                stderr.printf (_("Should not happen, you might have problems with conflicting vapis: %s\n"),
-                               "InvalidType");
+                errmsg (_("Should not happen, you might have problems with conflicting vapis: %s\n"),
+                        "InvalidType");
             // } else if (vt is FieldPrototype) {
             //     stdout.printf ("FieldPrototype\n");
             // } else if (vt is MethodType) {
@@ -523,8 +523,8 @@ namespace Guanako {
             // } else if (vt is CType) {
             //     stdout.printf ("CType\n");
             } else {
-                stderr.printf (_("Unknown type: %s (%s)\n"), vt.to_qualified_string(), relname);
-                stderr.printf (_("Please report a bug!\n"));
+                errmsg (_("Unknown type: %s (%s)\n"), vt.to_qualified_string(), relname);
+                errmsg (_("Please report a bug!\n"));
                 lblstr.append ("UNKOWN");
             }
 
@@ -666,7 +666,7 @@ namespace Guanako {
         if (smb is UnresolvedSymbol)
             return _("Unresolved symbol");
 
-        stderr.printf (_("Could not get type name of: %s\n"), smb.name);
+        errmsg (_("Could not get type name of: %s\n"), smb.name);
         return "";
     }
 }

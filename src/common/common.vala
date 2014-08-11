@@ -834,15 +834,15 @@ public inline void debug_msg (string format, ...) {
 
 public inline void debug_msg_level (int level, string format, ...) {
     if (Args.debuglevel >= level)
-        stdout.printf (format.vprintf (va_list()));
+        stdout.printf (_("Valama: ") + format.vprintf (va_list()));
 }
 
 public inline void warning_msg (string format, ...) {
-    stdout.printf (_("Warning: ") + format.vprintf (va_list()));
+    stdout.printf (_("Valama: ") + _("Warning: ") + format.vprintf (va_list()));
 }
 
 public inline void error_msg (string format, ...) {
-    stderr.printf (_("Error: ") + format.vprintf (va_list()));
+    stderr.printf (_("Valama: ") + _("Error: ") + format.vprintf (va_list()));
 }
 
 public inline void bug_msg (string format, ...) {
@@ -851,11 +851,11 @@ public inline void bug_msg (string format, ...) {
 }
 
 public inline void msg (string format, ...) {
-    stdout.printf (format.vprintf (va_list()));
+    stdout.printf (_("Valama: ") + format.vprintf (va_list()));
 }
 
 public inline void errmsg (string format, ...) {
-    stderr.printf (format.vprintf (va_list()));
+    stderr.printf (_("Valama: ") + format.vprintf (va_list()));
 }
 
 public static Gee.SortedMap<string,string> list_all_pkg_config ()

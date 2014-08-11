@@ -28,7 +28,7 @@ namespace Guanako {
             owner_id = Bus.own_name (BusType.SESSION, dbus_name, BusNameOwnerFlags.NONE,
                   on_bus_aquired,
                   () => {},
-                  () => stderr.printf (_("Could not acquire name.\n")));
+                  () => errmsg (_("Could not acquire name.\n")));
         }
         string dbus_name;
         string dbus_path;
@@ -42,7 +42,7 @@ namespace Guanako {
             try {
                 conn.register_object (dbus_path, new FrankenDBUS (this));
             } catch (IOError e) {
-                stderr.printf (_("Could not register service.\n"));
+                errmsg (_("Could not register service.\n"));
             }
         }
 

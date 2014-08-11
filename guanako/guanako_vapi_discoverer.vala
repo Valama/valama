@@ -42,9 +42,9 @@ namespace Guanako {
                     }
                 }
             } catch (GLib.IOError e) {
-                stderr.printf (_("Could not read file: %s"), e.message);
+                errmsg (_("Could not read file: %s"), e.message);
             } catch (GLib.Error e) {
-                stderr.printf (_("Could not operate on directory: %s"), e.message);
+                errmsg (_("Could not operate on directory: %s"), e.message);
             }
         }
         return null;
