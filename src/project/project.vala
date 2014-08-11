@@ -611,7 +611,7 @@ public class ValamaProject : ProjectFile {
                         strb.append ("vapi: %s".printf (custom_vapi));
                         space = true;
                     }
-                    if (space)
+                    if (space && custom_defines.size > 0)
                         strb.append (", ");
                     if (custom_defines.size == 1)
                         strb.append (_("define:"));
