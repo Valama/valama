@@ -357,6 +357,21 @@ namespace Guanako {
             }
         }
 
+        public inline SourceFile? search_pkg (string pkg) {
+            lock (context)
+                return search_pkg_int (context, pkg);
+        }
+
+        private SourceFile? search_pkg_int (CodeContext context, string pkg) {
+            foreach (var file in context.get_source_files())
+                if (file.file_type == SourceFileType.PACKAGE) {
+                    var basename = Path.get_basename (file.filename);
+                    if (basename.substring (0, basename.length - 5) == pkg)
+                        return file;
+                }
+            return null;
+        }
+
         public inline SourceFile? get_source_file (string filename) {
             lock (context)
                 return get_source_file_int (context, filename);
