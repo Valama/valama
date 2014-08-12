@@ -95,6 +95,8 @@ else()
   list(APPEND definitions "NOT_UNIX")
   list(APPEND definitions "NOT_WIN32")
 endif()
+# config
+list(REMOVE_ITEM required_pkgs "config {nocheck,nolink}")
 # libvala-X.Y
 if(VALA_SHORTVER STREQUAL "0.20")
   list(REMOVE_ITEM required_pkgs "libvala-0.22")
@@ -159,11 +161,9 @@ if(gdlres LESS 1)
 endif()
 # glib-2.0
 pkg_check_modules(GLIB2.0 REQUIRED "glib-2.0")
-
 # gladeui-2.0
 pkg_check_modules(GLADEUI2.0 REQUIRED "gladeui-2.0")
-# vapidir option added, for custom gladeui-2.0 vapi
-list(APPEND vapidirs "--vapidir=${CMAKE_SOURCE_DIR}/vapi")
+list(REMOVE_ITEM required_pkgs "gladeui-2.0")
 
 set(default_vala_flags
   "--thread"
@@ -201,8 +201,15 @@ add_definitions(-DPIXMAP_DIR="${install_prefix}${pixdir}")
 add_definitions(-DVALA_VERSION="${VALA_SHORTVER}")
 
 add_executable("${project_name_lower}" ${VALA_C})
-target_link_libraries("${project_name_lower}" ${PROJECT_LDFLAGS} "-lm")
-add_definitions(${PROJECT_C_FLAGS})
+target_link_libraries("${project_name_lower}"
+  ${PROJECT_LDFLAGS}
+  ${GLADEUI2.0_LDFLAGS}
+  "-lm"
+)
+add_definitions(
+  ${PROJECT_C_FLAGS}
+  ${GLADEUI2.0_CFLAGS}
+)
 if(GUANAKO)
   include_directories("${PROJECT_BINARY_DIR}/guanako")
   target_link_libraries("${project_name_lower}" "guanako")

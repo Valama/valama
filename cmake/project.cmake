@@ -7,16 +7,18 @@ set(required_pkgs
   "clutter-1.0 {nolink}"
   "clutter-gtk-1.0"
   "cogl-1.0 {nolink}"
+  "config {nocheck,nolink}"
   "gdk-3.0"
-  "gladeui-2.0"
   "gdk-pixbuf-2.0 {nolink}"
   "gdl-3.0 >= 3.8"
   "gee-0.8 >= 0.10.5"
   "gio-2.0"
+  "gladeui-2.0"
   "glib-2.0 >= 2.32"
+  "gmodule-2.0 {nolink}"
   "gobject-2.0"
-  "gtk+-3.0 >= 3.10"
-  "gtksourceview-3.0 >= 3.10"
+  "gtk+-3.0 >= 3.9"
+  "gtksourceview-3.0 >= 3.9"
   "guanako"
   "json-glib-1.0 {nolink}"
   "libvala-0.20"
@@ -30,9 +32,9 @@ set(required_pkgs
   "x11 {nolink}"
 )
 set(srcfiles
+  "src/buildsystem/autotools.vala"
   "src/buildsystem/base.vala"
   "src/buildsystem/buildsystem_template.vala"
-  "src/buildsystem/autotools.vala"
   "src/buildsystem/cmake.vala"
   "src/buildsystem/plain.vala"
   "src/common/args.vala"
@@ -54,12 +56,12 @@ set(srcfiles
   "src/ui/breakpoints.vala"
   "src/ui/build_output.vala"
   "src/ui/current_file_structure.vala"
+  "src/ui/glade_viewer.vala"
   "src/ui/project_browser.vala"
   "src/ui/reports.vala"
   "src/ui/search.vala"
   "src/ui/source_viewer.vala"
   "src/ui/structure_view.vala"
-  "src/ui/glade_viewer.vala"
   "src/ui/super_source_view.vala"
   "src/ui/symbol_browser.vala"
   "src/ui/ui_elements.vala"
@@ -74,6 +76,7 @@ set(srcfiles
 )
 set(vapifiles
   "vapi/config.vapi"
+  "vapi/gladeui-2.0.vapi"
 )
 set(uifiles
 )
