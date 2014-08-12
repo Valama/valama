@@ -138,19 +138,19 @@ namespace Guanako {
             return new int[] {glib_major, glib_minor};
         }
 
-        public inline SourceFile[] get_source_files() {
+        public inline SourceFile[] get_source_files (bool vapis = false) {
             lock (context)
-                return get_source_files_int (context);
+                return get_source_files_int (context, vapis);
         }
 
         /*
          * Not a beautiful piece of code, but necessary to convert from
          * Vala.List.
          */
-        private SourceFile[] get_source_files_int (CodeContext context) {
+        private SourceFile[] get_source_files_int (CodeContext context, bool vapis = false) {
             SourceFile[] files = new SourceFile[0];
             foreach (SourceFile file in context.get_source_files())
-                if (file.file_type == SourceFileType.SOURCE)
+                if (vapis || file.file_type == SourceFileType.SOURCE)
                     files += file;
             return files;
         }
@@ -169,14 +169,22 @@ namespace Guanako {
         }
 
         private bool add_source_file_int (SourceFile source_file) {
-            foreach (SourceFile file in get_source_files_int (context_internal))
+            foreach (SourceFile file in get_source_files_int (context_internal, true))
                 if (file.filename == source_file.filename)
                     return false;
 
-            if (source_file.file_type == SourceFileType.SOURCE) {
-                var ns_ref = new UsingDirective (new UnresolvedSymbol (null, "GLib"));
-                source_file.add_using_directive (ns_ref);
-                context_internal.root.add_using_directive (ns_ref);
+            switch (source_file.file_type) {
+                case SourceFileType.SOURCE:
+                    var ns_ref = new UsingDirective (new UnresolvedSymbol (null, "GLib"));
+                    source_file.add_using_directive (ns_ref);
+                    context_internal.root.add_using_directive (ns_ref);
+                    break;
+                case SourceFileType.PACKAGE:
+                    var basename = Path.get_basename (source_file.filename);
+                    context_internal.add_package (basename.substring(0, basename.length - 5));
+                    break;
+                default:
+                    break;
             }
 
             context_internal.add_source_file (source_file);
@@ -415,10 +423,18 @@ namespace Guanako {
                                                  sf.filename,
                                                  sf.content,
                                                  sf.from_commandline);
-                    if (sf.file_type == SourceFileType.SOURCE) {
-                        var ns_ref = new UsingDirective (new UnresolvedSymbol (null, "GLib"));
-                        sf_new.add_using_directive (ns_ref);
-                        context_internal.root.add_using_directive (ns_ref);
+                    switch (sf.file_type) {
+                        case SourceFileType.SOURCE:
+                            var ns_ref = new UsingDirective (new UnresolvedSymbol (null, "GLib"));
+                            sf_new.add_using_directive (ns_ref);
+                            context_internal.root.add_using_directive (ns_ref);
+                            break;
+                        case SourceFileType.PACKAGE:
+                            var basename = Path.get_basename (sf.filename);
+                            context_internal.add_package (basename.substring(0, basename.length - 5));
+                            break;
+                        default:
+                            break;
                     }
                     context_internal.add_source_file (sf_new);
                     sourcefiles.add (sf_new);
