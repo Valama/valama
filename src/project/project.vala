@@ -381,6 +381,7 @@ public class ValamaProject : ProjectFile {
 
         var extrapkgs = new TreeSet<PackageInfo>();
         var normpkgs = new TreeSet<string>();
+        var custompkgs = new TreeSet<string>();
         foreach (var pkg in packages.values)
             if ((pkg.custom_vapi != null) || (pkg.nodeps != null && pkg.nodeps))
                 extrapkgs.add (pkg);
@@ -407,7 +408,7 @@ public class ValamaProject : ProjectFile {
                             FileUtils.get_contents (depsfile, out contents);
                             foreach (var pkgname in contents.split ("\n")) {
                                 pkgname = pkgname.strip();
-                                if (pkgname != "")
+                                if (pkgname != "" && !(pkgname in custompkgs))
                                     normpkgs.add (pkgname);
                             }
                         } catch (FileError e) {
@@ -418,20 +419,24 @@ public class ValamaProject : ProjectFile {
                         debug_msg (_("No dependency file (.deps) for package '%s' found.\n"),
                                    pkg.name);
                 }
-                if (guanako_project.add_source_file_by_name (get_absolute_path (pkg.custom_vapi), true) == null) {
+                if (!search_file_in_guanako (pkg.custom_vapi) && guanako_project.add_source_file_by_name (get_absolute_path (pkg.custom_vapi), true) == null) {
                     missings.add (pkg.custom_vapi);
                     warning_msg (_("Could not add custom vapi for %s: %s\n"),
                                  pkg.name, pkg.custom_vapi);
-                } else
+                } else {
                     normpkgs.remove (pkg.name);
+                    custompkgs.add (pkg.name);
+                }
             } else if (pkg.nodeps != null && pkg.nodeps) {
                 var vapifile = guanako_project.get_context_vapi_path (pkg.name);
-                if (vapifile == null || guanako_project.add_source_file_by_name (vapifile, true) == null) {
+                if (vapifile == null || (!search_file_in_guanako (vapifile) && guanako_project.add_source_file_by_name (vapifile, true) == null)) {
                     missings.add (pkg.name);
                     warning_msg (_("Could not add custom vapi for %s: %s\n"),
                                  pkg.name, pkg.custom_vapi);
-                } else
+                } else {
                     normpkgs.remove (pkg.name);
+                    custompkgs.add (pkg.name);
+                }
             } else
                 bug_msg (_("Unknown situation: %s\n"), "project.vala - extrapkgs");
         }
@@ -565,6 +570,13 @@ public class ValamaProject : ProjectFile {
     }
 
     private delegate void VoidDelegate();
+
+    private inline bool search_file_in_guanako (string filename) {
+        foreach (var file in guanako_project.get_source_files (true))
+            if (get_absolute_path (filename) == file.filename)
+                return true;
+        return false;
+    }
 
     /**
      * Update list of recent projects.
