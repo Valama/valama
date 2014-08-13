@@ -54,6 +54,8 @@ find_package(Vala "0.20" REQUIRED)
 set(definitions)
 set(vapidirs)
 find_package(PkgConfig)
+# config
+list(REMOVE_ITEM required_pkgs "config {nocheck,nolink}")
 # glib-2.0
 pkg_check_modules(GLIB2.0 REQUIRED "glib-2.0")
 
@@ -98,8 +100,12 @@ add_definitions(-DPIXMAP_DIR="${install_prefix}${pixdir}")
 add_definitions(-DVALA_VERSION="${VALA_SHORTVER}")
 
 add_executable("${project_name_lower}" ${VALA_C})
-target_link_libraries("${project_name_lower}" ${PROJECT_LDFLAGS})
-add_definitions(${PROJECT_C_FLAGS})
+target_link_libraries("${project_name_lower}"
+  ${PROJECT_LDFLAGS}
+)
+add_definitions(
+  ${PROJECT_C_FLAGS}
+)
 install(TARGETS ${project_name_lower} DESTINATION "${bindir}")
 
 # Install user interface files if used and copy them to build directory.

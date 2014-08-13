@@ -72,6 +72,8 @@ set(pc_version "${${project_name}_VERSION}")
 set(definitions)
 set(vapidirs)
 find_package(PkgConfig)
+# config
+list(REMOVE_ITEM required_pkgs "config {nocheck,nolink}")
 # libvala-X.Y
 if(VALA_SHORTVER STREQUAL "0.20")
   list(REMOVE_ITEM required_pkgs "libvala-0.22")

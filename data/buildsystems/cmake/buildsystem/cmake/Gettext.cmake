@@ -161,7 +161,7 @@ endif()
 set(XGETTEXT_OPTIONS_DEFAULT
   "-s"
   "--escape"
-  "--add-comments=\"TRANSLATORS:\""  #TODO: Make this configurable.
+  "--add-comments=TRANSLATORS:"  #TODO: Make this configurable.
   "--from-code=UTF-8"
 )
 set(XGETTEXT_VALA_OPTIONS_DEFAULT

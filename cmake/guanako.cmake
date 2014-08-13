@@ -2,6 +2,7 @@ set(project_name "Guanako")
 set(Guanako_VERSION "1.0")
 set(soversion "1")
 set(required_pkgs
+  "config {nocheck,nolink}"
   "gobject-2.0"
   "glib-2.0"
   "gio-2.0"
