@@ -83,8 +83,8 @@ public void ui_project_dialog (ValamaProject? project) {
      */
 
     row = new ListBoxRow();
-    var check_btn = new CheckButton.with_label ("is library project");
-    row.add (check_btn);
+    var library_chekbtn = new CheckButton.with_label ("is library project");
+    row.add (library_chekbtn);
     list.add (row);
     
     /*
@@ -94,10 +94,18 @@ public void ui_project_dialog (ValamaProject? project) {
     row = new ListBoxRow();
     var bslist = new ComboBoxText();
     BuildSystemTemplate.load_buildsystems();
-    buildsystems.foreach (entry => {
-        bslist.append_text (entry.key);
-        return true;
-    });
+    int i = 1;
+    bool found = false;
+    foreach (var bs in buildsystems.keys) {
+        bslist.append_text (bs);
+        if (!found) {
+            if (bs == project.buildsystem)
+                found = true;
+        } else
+            ++i;
+    }
+    if (found)
+        bslist.active = i;
     row.add (bslist);
     list.add (row);
     
@@ -141,7 +149,7 @@ public void ui_project_dialog (ValamaProject? project) {
                 project.version_minor = (int) ent_minor.value;
                 project.version_patch = (int) ent_patch.value;
                 //project.version_special = ent_version_special;
-                project.library = check_btn.active;
+                project.library = library_chekbtn.active;
                 if (bslist.active >= 0)
                     project.buildsystem = bslist.get_active_text();
                 project.save_project_file();
@@ -163,6 +171,25 @@ public void ui_project_dialog (ValamaProject? project) {
                 ent_minor.value = (double) project.version_minor;
                 ent_patch.value = (double) project.version_patch;
                 //ent_version_special.text = project.version_special;
+                library_chekbtn.active = project.library;
+                if (project.buildsystem != "") {
+                    int j = 0;
+                    bool found2 = false;
+                    TreeIter iter;
+                    if (bslist.model.get_iter_first (out iter))
+                        do {
+                            Value bs;
+                            bslist.model.get_value (iter, 0, out bs);
+                            if ((string) bs == project.buildsystem) {
+                                found2 = true;
+                                bslist.active = j;
+                                break;
+                            }
+                            ++j;
+                        } while (bslist.model.iter_next (ref iter));
+                    if (!found2)
+                        bslist.active = -1;
+                }
                 break;
             default:
                 bug_msg (_("Unexpected enum value: %s: %d\n"), "project_dialog - dlg.response.connect", response_id);
