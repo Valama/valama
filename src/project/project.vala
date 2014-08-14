@@ -1204,7 +1204,7 @@ public class ValamaProject : ProjectFile {
         switch (buildsystem) {
             case "plain":
             case "valama":
-                builder = new BuilderPlain();
+                builder = new BuilderPlain (lib);
                 break;
             case "cmake":
                 builder = new BuilderCMake(lib);

@@ -22,6 +22,10 @@ using GLib;
 public class BuilderPlain : BuildSystem {
     private string[]? cmdline = null;
 
+    public BuilderPlain (bool make_lib = false) {
+        Object (library: make_lib);
+    }
+
     public override string get_executable() {
         return project.project_name.casefold();
     }

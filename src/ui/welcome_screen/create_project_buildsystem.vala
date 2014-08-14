@@ -26,16 +26,29 @@ namespace WelcomeScreen {
     protected class CreateProjectBuildsystem : TemplatePageWithHeader {
         public CreateProjectBuildsystem (ref ProjectCreationInfo info) {
             this.info = info;
-            bs = new BuilderCMake();
             check_btn = new Gtk.CheckButton.with_label (_("make library"));
             go_to_next_clicked.connect (() => { 
-		this.info.template.vproject.builder = bs; 
-		this.info.buildsystem = bs.get_name_id();
-		this.info.make_library = check_btn.active;
+                switch (bs) {
+                    case "plain":
+                        this.info.template.vproject.builder = new BuilderPlain (check_btn.active);
+                        break;
+                    case "cmake":
+                        this.info.template.vproject.builder = new BuilderCMake(check_btn.active);
+                        break;
+                    case "autotools":
+                        this.info.template.vproject.builder = new BuilderAutotools(check_btn.active);
+                        break;
+                    default:
+                        this.info.template.vproject.builder = new BuilderPlain (check_btn.active);
+                        bug_msg (_("Buildsystem '%s' not recognized."), bs);
+                        break;
+                }
+                this.info.buildsystem = this.info.template.vproject.builder.get_name_id();
+                this.info.make_library = check_btn.active;
             });
         }
         private ProjectCreationInfo info;
-        BuildSystem bs;
+        private string bs;
         Gtk.CheckButton check_btn;
 
         protected override void clean_up() {
@@ -49,21 +62,29 @@ namespace WelcomeScreen {
             var box = new Gtk.Box (Orientation.VERTICAL, 20);
             var list = new Gtk.ListBox ();
             list.row_activated.connect (row => {
-				string label = (row.get_child() as Gtk.Label).label;
-				if (label == "cmake")
-					bs = new BuilderCMake(check_btn.active);
-				else
-					bs = new BuilderAutotools(check_btn.active);
+                bs = (row.get_child() as Gtk.Label).label;
 			});
+            var row = new ListBoxRow();
+            var lbl = new Label ("plain");
+            row.add (lbl);
+            list.add (row);
+            ListBoxRow? row_selected = null;
             buildsystems.foreach (entry => {
-				var row = new Gtk.ListBoxRow();
-				var lbl = new Gtk.Label (entry.key);
+				row = new Gtk.ListBoxRow();
+				lbl = new Gtk.Label (entry.key);
 				row.add (lbl);
 				list.add (row);
+                if (row_selected == null) {
+                    if (entry.key == info.template.vproject.buildsystem) {
+                        row_selected = row;
+                    }
+                }
 				return true;
 			});
+            list.select_row (row_selected);
 			box.pack_start (list);
 			box.pack_start (check_btn);
+            check_btn.active = info.template.vproject.library;
             frame.add(box);
             var align = new Alignment (0.5f, 0.1f, 1.0f, 0.0f);
             align.add (frame);
