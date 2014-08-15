@@ -91,6 +91,8 @@ public class MainWidget : Box {
      */
     public Box tbox_right { get; private set; }
 
+    private ToggleButton fullsc_tbut;
+
     /**
      * Global shortcut object.
      */
@@ -421,21 +423,37 @@ public class MainWidget : Box {
         });
         add_accel_activate (item_view_lockhide, Gdk.Key.h);
 
-        //TRANSLATORS: Toggle fullscreen mode of the window.
-        var item_view_fullscreen = new CheckMenuItem.with_mnemonic (_("Toggle _fullscreen"));
+        var item_view_fullscreen = new CheckMenuItem.with_mnemonic (_("_Fullscreen"));
         this.viewmenu.append (item_view_fullscreen);
         item_view_fullscreen.toggled.connect (() => {
             if (item_view_fullscreen.active) {
-                toolbar_left.hide();
-                toolbar_right.hide();
+                if (!fullsc_tbut.active)
+                    fullsc_tbut.active = true;
+            } else {
+                if (fullsc_tbut.active)
+                    fullsc_tbut.active = false;
+            }
+        });
+        /**
+         * FIXME: Use hidden button to get out of fullscreen mode via
+         *        keybinding. Menu item doesn't work when header bar is
+         *        hidden.
+         */
+        fullsc_tbut = new ToggleButton();
+        fullsc_tbut.toggled.connect (() => {
+            if (fullsc_tbut.active) {
+                if (!item_view_fullscreen.active)
+                    item_view_fullscreen.active = true;
                 window_main.fullscreen();
             } else {
-                toolbar_left.show_all();
-                toolbar_right.show_all();
+                if (item_view_fullscreen.active)
+                    item_view_fullscreen.active = false;
                 window_main.unfullscreen();
             }
         });
-        add_accel_activate (item_view_fullscreen, Gdk.Key.F11, 0);
+        this.add (fullsc_tbut);
+        fullsc_tbut.show_all();
+        add_accel_activate (fullsc_tbut, Gdk.Key.F11, 0);
 
         /* Project */
         var item_project_settings = new ImageMenuItem.with_mnemonic (_("Project _settings"));
