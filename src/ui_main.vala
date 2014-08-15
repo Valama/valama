@@ -59,13 +59,21 @@ public class MainWidget : Box {
      */
     private DockLayout layout;
     /**
-     * Menu. Fill with {@link add_menu}.
+     * View settings menu.
+     */
+    private Gtk.Menu viewmenu;
+    /**
+     * Settings menu.
      */
     private Gtk.Menu menu;
     /**
-     * Menu button. Fill with {@link add_menu}.
+     * View settings menu button.
      */
-    public MenuButton menubut { get; private set; }
+    public MenuButton views { get; private set; }
+    /**
+     * Settings menu button.
+     */
+    public MenuButton settings { get; private set; }
     /**
      * Toolbar. Fill with {@link add_button}.
      */
@@ -126,15 +134,20 @@ public class MainWidget : Box {
         this.orientation = Orientation.VERTICAL;
         this.spacing = 0;
 
-        /* Menu. */
+        /* Menus. */
         this.menu = new Gtk.Menu();
+        this.viewmenu = new Gtk.Menu();
 
-        /* Menu button */
-        this.menubut = new MenuButton();
-        this.menubut.image = new Image.from_icon_name ("emblem-system-symbolic", IconSize.BUTTON);
-        this.menubut.set_tooltip_text (_("Settings"));
-        this.menubut.popup = menu;
-        this.menubut.show_all();
+        /* Setting buttons. */
+        this.views = new MenuButton();
+        this.views.set_tooltip_text (_("Views"));
+        this.views.popup = this.viewmenu;
+        this.views.show_all();
+        this.settings = new MenuButton();
+        this.settings.image = new Image.from_icon_name ("emblem-system-symbolic", IconSize.BUTTON);
+        this.settings.set_tooltip_text (_("Settings"));
+        this.settings.popup = this.menu;
+        this.settings.show_all();
 
         /* Toolbars. */
         this.toolbar_left = new Toolbar();
@@ -324,16 +337,11 @@ public class MainWidget : Box {
      */
     private void build_menu() {
         /* File */
-        var item_file = new Gtk.MenuItem.with_mnemonic (_("_File"));
-        menu.add (item_file);
-        var menu_file = new Gtk.Menu();
-        item_file.set_submenu (menu_file);
-
         var item_file_new = new ImageMenuItem.with_mnemonic (_("_New"));
         var image_file_new = new Image();
         image_file_new.icon_name = "document-new";
         item_file_new.image = image_file_new;
-        menu_file.append (item_file_new);
+        this.menu.append (item_file_new);
         item_file_new.activate.connect (create_new_file);
         add_accel_activate (item_file_new, Gdk.Key.n);
 
@@ -341,37 +349,22 @@ public class MainWidget : Box {
         var image_file_save = new Image();
         image_file_save.icon_name = "document-save";
         item_file_save.image = image_file_save;
-        menu_file.append (item_file_save);
+        this.menu.append (item_file_save);
         item_file_save.activate.connect (() => {
             project.buffer_save();
         });
         project.buffer_changed.connect (item_file_save.set_sensitive);
         add_accel_activate (item_file_save, Gdk.Key.s);
 
-        menu_file.append (new SeparatorMenuItem());
-
-        var item_file_quit = new ImageMenuItem.with_mnemonic (_("_Quit"));
-        var image_file_quit = new Image();
-        image_file_quit.icon_name = "application-exit";
-        item_file_quit.image = image_file_quit;
-        menu_file.append (item_file_quit);
-        item_file_quit.activate.connect (() => {
-            quit_valama();
-        });
-        add_accel_activate (item_file_quit, Gdk.Key.q);
+        this.menu.append (new SeparatorMenuItem());
 
         /* Edit */
-        var item_edit = new Gtk.MenuItem.with_mnemonic (_("_Edit"));
-        menu.add (item_edit);
-        var menu_edit = new Gtk.Menu();
-        item_edit.set_submenu (menu_edit);
-
         var item_edit_undo = new ImageMenuItem.with_mnemonic (_("_Undo"));
         var image_edit_undo = new Image();
         image_edit_undo.icon_name = "edit-undo";
         item_edit_undo.image = image_edit_undo;
         item_edit_undo.set_sensitive (false);
-        menu_edit.append (item_edit_undo);
+        this.menu.append (item_edit_undo);
         item_edit_undo.activate.connect (undo_change);
         project.undo_changed.connect (item_edit_undo.set_sensitive);
         add_accel_activate (item_edit_undo, Gdk.Key.u);
@@ -381,7 +374,7 @@ public class MainWidget : Box {
         image_edit_redo.icon_name = "edit-redo";
         item_edit_redo.image = image_edit_redo;
         item_edit_redo.set_sensitive (false);
-        menu_edit.append (item_edit_redo);
+        this.menu.append (item_edit_redo);
         item_edit_redo.activate.connect (redo_change);
         project.redo_changed.connect (item_edit_redo.set_sensitive);
         add_accel_activate (item_edit_redo, Gdk.Key.r);
@@ -391,32 +384,29 @@ public class MainWidget : Box {
         image_edit_search.icon_name = "edit-search";
         item_edit_search.image = image_edit_search;
         item_edit_search.set_sensitive (true);
-        menu_edit.append (item_edit_search);
+        this.menu.append (item_edit_search);
         item_edit_search.activate.connect (wdg_search.search_for_current_selection);
         add_accel_activate (item_edit_search, Gdk.Key.f);
 
-        /* View */
-        var item_view = new Gtk.MenuItem.with_mnemonic (_("_View"));
-        menu.add (item_view);
-        var menu_view = new Gtk.Menu();
-        item_view.set_submenu (menu_view);
+        this.menu.append (new SeparatorMenuItem());
 
-        add_view_menu_item (menu_view, wdg_search, _("Show search"));
-        add_view_menu_item (menu_view, wdg_report, _("Show reports"));
-        add_view_menu_item (menu_view, wdg_pbrw, _("Show project browser"));
-        add_view_menu_item (menu_view, wdg_build_output, _("Show build output"));
-        add_view_menu_item (menu_view, wdg_app_output, _("Show application output"));
-        add_view_menu_item (menu_view, wdg_breakpoints, _("Show breakpoints"));
-        add_view_menu_item (menu_view, wdg_current_file_structure, _("Show current file structure"));
-        // add_view_menu_item (menu_view, wdg_stylechecker, _("Show style checker"));
-        add_view_menu_item (menu_view, wdg_smb_browser, _("Show symbol browser"));
-        add_view_menu_item (menu_view, wdg_glade_viewer, _("Show glade viewer"));
-        add_view_menu_item (menu_view, wdg_structure_view, _("Show structure viewer"));
-        menu_view.append (new SeparatorMenuItem());
+        /* View */
+        add_view_menu_item (wdg_search, _("Show search"));
+        add_view_menu_item (wdg_report, _("Show reports"));
+        add_view_menu_item (wdg_pbrw, _("Show project browser"));
+        add_view_menu_item (wdg_build_output, _("Show build output"));
+        add_view_menu_item (wdg_app_output, _("Show application output"));
+        add_view_menu_item (wdg_breakpoints, _("Show breakpoints"));
+        add_view_menu_item (wdg_current_file_structure, _("Show current file structure"));
+        // add_view_menu_item (wdg_stylechecker, _("Show style checker"));
+        add_view_menu_item (wdg_smb_browser, _("Show symbol browser"));
+        add_view_menu_item (wdg_glade_viewer, _("Show glade viewer"));
+        add_view_menu_item (wdg_structure_view, _("Show structure viewer"));
+        this.viewmenu.append (new SeparatorMenuItem());
 
         // TRANSLATORS: Lock user interface elements to prevent moving them around.
         var item_view_lockhide = new CheckMenuItem.with_mnemonic (_("_Lock elements"));
-        menu_view.append (item_view_lockhide);
+        this.viewmenu.append (item_view_lockhide);
         item_view_lockhide.toggled.connect (() => {
             if (item_view_lockhide.active)
                 lock_items();
@@ -433,7 +423,7 @@ public class MainWidget : Box {
 
         //TRANSLATORS: Toggle fullscreen mode of the window.
         var item_view_fullscreen = new CheckMenuItem.with_mnemonic (_("Toggle _fullscreen"));
-        menu_view.append (item_view_fullscreen);
+        this.viewmenu.append (item_view_fullscreen);
         item_view_fullscreen.toggled.connect (() => {
             if (item_view_fullscreen.active) {
                 toolbar_left.hide();
@@ -448,37 +438,31 @@ public class MainWidget : Box {
         add_accel_activate (item_view_fullscreen, Gdk.Key.F11, 0);
 
         /* Project */
-        var item_project = new Gtk.MenuItem.with_mnemonic (_("_Project"));
-        menu.add (item_project);
-        var menu_project = new Gtk.Menu();
-        item_project.set_submenu (menu_project);
-
-        var item_project_settings = new ImageMenuItem.with_mnemonic (_("_Settings"));
+        var item_project_settings = new ImageMenuItem.with_mnemonic (_("Project _settings"));
         var image_project_settings = new Image();
         image_project_settings.icon_name = "preferences-system";
         item_project_settings.image = image_project_settings;
-        menu_project.append (item_project_settings);
+        this.menu.append (item_project_settings);
         item_project_settings.activate.connect (() => {
             ui_project_dialog (project);
         });
 
+        this.menu.append (new SeparatorMenuItem());
+
         /* Build */
         var item_build = new Gtk.MenuItem.with_mnemonic (_("_Build"));
-        menu.add (item_build);
+        this.menu.add (item_build);
         item_build.set_submenu (build_build_menu());
 
-        /* Run */
-        var item_run = new Gtk.MenuItem.with_mnemonic (_("_Run"));
-        menu.add (item_run);
-        var menu_run = new Gtk.Menu();
-        item_run.set_submenu (menu_run);
+        this.menu.append (new SeparatorMenuItem());
 
+        /* Run */
         var item_run_run = new ImageMenuItem.with_mnemonic (_("_Execute"));
         var image_run_run = new Image();
         image_run_run.icon_name = "media-playback-start";
         item_run_run.image = image_run_run;
         add_accel_activate (item_run_run, Gdk.Key.F5, 0);
-        menu_run.append (item_run_run);
+        this.menu.append (item_run_run);
         item_run_run.activate.connect (() => {
             project_builder.launch();
         });
@@ -489,7 +473,7 @@ public class MainWidget : Box {
         item_run_stop.image = image_run_stop;
         item_run_stop.sensitive = false;
         add_accel_activate (item_run_run, Gdk.Key.F5, Gdk.ModifierType.SHIFT_MASK);
-        menu_run.append (item_run_stop);
+        this.menu.append (item_run_stop);
         item_run_stop.activate.connect (() => {
             project_builder.quit();
         });
@@ -503,19 +487,28 @@ public class MainWidget : Box {
             }
         });
 
-        /* Help */
-        var item_help = new Gtk.MenuItem.with_mnemonic (_("_Help"));
-        menu.add (item_help);
-        var menu_help = new Gtk.Menu();
-        item_help.set_submenu (menu_help);
+        this.menu.append (new SeparatorMenuItem());
 
+        /* Help */
         var item_help_about = new ImageMenuItem.with_mnemonic (_("_About"));
         var image_help_about = new Image();
         image_help_about.icon_name = "help-about";
         item_help_about.image = image_help_about;
-        menu_help.append (item_help_about);
+        this.menu.append (item_help_about);
         item_help_about.activate.connect (ui_about_dialog);
 
+        /* Quit */
+        var item_file_quit = new ImageMenuItem.with_mnemonic (_("_Quit"));
+        var image_file_quit = new Image();
+        image_file_quit.icon_name = "application-exit";
+        item_file_quit.image = image_file_quit;
+        this.menu.append (item_file_quit);
+        item_file_quit.activate.connect (() => {
+            quit_valama();
+        });
+        add_accel_activate (item_file_quit, Gdk.Key.q);
+
+        this.viewmenu.show_all();
         this.menu.show_all();
     }
 
@@ -700,15 +693,13 @@ public class MainWidget : Box {
     /**
      * Add {@link UiElement} toggle item to menu.
      *
-     * @param menu_view View (sub)menu.
      * @param element {@link UiElement} to connect toggle signals with.
      * @param label Description to show in menu.
      * @param with_mnemonic If `true` enable mnemonic.
      * @param key Accelerator {@link Gdk.Key} or null if none.
      * @param modtype Modifier type e.g. {@link Gdk.ModifierType.CONTROL_MASK} for ctrl.
      */
-    public void add_view_menu_item (Gtk.Menu menu_view,
-                                    UiElement element,
+    public void add_view_menu_item (UiElement element,
                                     string label,
                                     bool with_mnemonic = false,
                                     int? key = null,
@@ -719,7 +710,7 @@ public class MainWidget : Box {
         else
             item_view_element = new CheckMenuItem.with_label (label);
         item_view_element.active = !element.dock_item.is_closed();
-        menu_view.append (item_view_element);
+        this.viewmenu.append (item_view_element);
 
         item_view_element.toggled.connect (() => {
             element.show_element (item_view_element.active);

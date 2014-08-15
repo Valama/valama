@@ -182,7 +182,8 @@ static void show_main_screen (ValamaProject load_project) {
     widget_main = new MainWidget();
     widget_main.init();
     window_main_header.pack_start(widget_main.tbox_left);
-    window_main_header.pack_end (widget_main.menubut);
+    window_main_header.pack_end (widget_main.settings);
+    window_main_header.pack_end (widget_main.views);
     window_main_header.pack_end(widget_main.tbox_right);
     window_main.add (widget_main);
     window_main.add_accel_group (widget_main.accel_group);
@@ -190,7 +191,8 @@ static void show_main_screen (ValamaProject load_project) {
     widget_main.request_close.connect (() => {
         widget_main.close();
         window_main_header.remove (widget_main.tbox_right);
-        window_main_header.remove (widget_main.menubut);
+        window_main_header.remove (widget_main.views);
+        window_main_header.remove (widget_main.settings);
         window_main_header.remove (widget_main.tbox_left);
         window_main.remove (widget_main);
         project = null;
