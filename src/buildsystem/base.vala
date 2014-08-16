@@ -424,12 +424,14 @@ public abstract class BuildSystem : Object {
     }
 
     public virtual bool preparate() throws BuildError.INITIALIZATION_FAILED {
-        if (buildpath == null)
-            // TRANSLATORS:
-            // The user has to choose a directory where to build the application
-            // so it might be undefined.
-            throw new BuildError.INITIALIZATION_FAILED (_("Build directory not set."));
-        init_dir (buildpath);
+        if (buildpath == null) {
+            if (project == null)
+                throw new BuildError.INITIALIZATION_FAILED (_("Valama project not initialized."));
+            buildpath = Path.build_path (Path.DIR_SEPARATOR_S,
+                                         project.project_path,
+                                         "build");
+            init_dir (buildpath);
+        }
         return true;
     }
 

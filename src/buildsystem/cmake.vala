@@ -45,16 +45,12 @@ public class BuilderCMake : BuildSystem {
     }
 
     public override bool preparate() throws BuildError.INITIALIZATION_FAILED {
-        if (project == null)
-            throw new BuildError.INITIALIZATION_FAILED (_("Valama project not initialized."));
-        buildpath = Path.build_path (Path.DIR_SEPARATOR_S,
-                                       project.project_path,
-                                       "build");
+        if (!base.preparate())
+            return false;
         projectinfo = Path.build_path (Path.DIR_SEPARATOR_S,
                                        project.project_path,
                                        "cmake",
                                        "project.cmake");
-        init_dir (buildpath);
         init_dir (Path.get_dirname (projectinfo));
         return true;
     }
