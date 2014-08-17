@@ -26,14 +26,16 @@ public class BuilderAutotools : BuildSystem
 	}
 	
 	public override bool preparate() throws BuildError.INITIALIZATION_FAILED {
-        if (!base.preparate())
-            return false;
+        if (project == null)
+            throw new BuildError.INITIALIZATION_FAILED (_("Valama project not initialized."));
+        buildpath = project.project_path;
         configure_ac = Path.build_path (Path.DIR_SEPARATOR_S,
                                        project.project_path,
                                        "configure.ac");
         makefile_am = Path.build_path (Path.DIR_SEPARATOR_S,
                                        project.project_path,
                                        "Makefile.am");
+        init_dir (buildpath);
         init_dir (Path.build_path (Path.DIR_SEPARATOR_S, buildpath, "m4"));
         return true;
 	}
