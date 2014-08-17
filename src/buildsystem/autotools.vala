@@ -2,7 +2,6 @@ public class BuilderAutotools : BuildSystem
 {
 	string configure_ac;
 	string makefile_am;
-	bool prepared;
 	bool autoreconfigured;
 	
 	public BuilderAutotools (bool make_lib = false)
@@ -35,10 +34,7 @@ public class BuilderAutotools : BuildSystem
         makefile_am = Path.build_path (Path.DIR_SEPARATOR_S,
                                        project.project_path,
                                        "Makefile.am");
-        if (prepared)
-			return true;
         init_dir (Path.build_path (Path.DIR_SEPARATOR_S, buildpath, "m4"));
-        prepared = true;
         return true;
 	}
 	
@@ -110,9 +106,8 @@ public class BuilderAutotools : BuildSystem
                                         throws BuildError.INITIALIZATION_FAILED {
         exit_status = null;
         initialized = false;
-        if (!prepared)
-			if(!preparate())
-				return false;
+        if(!preparate())
+            return false;
         initialize_started();
 
         try {
