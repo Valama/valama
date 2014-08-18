@@ -22,7 +22,7 @@ using Gee;
 
 public abstract class BuildSystem : Object {
     public string? buildpath { get; protected set; default = null; }
-    /**
+    /*
      * NOTE: string type to support -j without argument for infite parallel
      *       threads.
      */
