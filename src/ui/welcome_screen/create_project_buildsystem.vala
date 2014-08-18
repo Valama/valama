@@ -74,10 +74,9 @@ namespace WelcomeScreen {
 				lbl = new Gtk.Label (entry.key);
 				row.add (lbl);
 				list.add (row);
-                if (row_selected == null) {
-                    if (entry.key == info.template.vproject.buildsystem) {
-                        row_selected = row;
-                    }
+                if (row_selected == null && entry.key == info.template.vproject.buildsystem) {
+                    row_selected = row;
+                    bs = entry.key;
                 }
 				return true;
 			});
