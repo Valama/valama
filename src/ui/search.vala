@@ -188,16 +188,19 @@ public class UiSearch : UiElement {
         }
     }
 
-    public void display_source_refs (Vala.SourceReference[] refs) {
+    public void display_source_refs (Vala.SourceReference[] refs, string? searchtext = null) {
+        if (searchtext != null)
+            entry_search.text = searchtext;
+
         var files = new Gee.ArrayList<string>();
         var starts = new Gee.ArrayList<TextIter?>();
         var ends = new Gee.ArrayList<TextIter?>();
         foreach (Vala.SourceReference reference in refs) {
             var srcview = source_viewer.get_sourceview_by_file(reference.file.filename);
-            stdout.printf ("Found " + reference.file.filename + "\n");
+            // stdout.printf ("Found " + reference.file.filename + "\n");
             if (srcview == null)
                 continue;
-            stdout.printf ("Continuing " + reference.file.filename + "\n");
+            // stdout.printf ("Continuing " + reference.file.filename + "\n");
             files.add (reference.file.filename);
             TextIter iter;
             srcview.buffer.get_iter_at_line_offset (out iter, reference.begin.line - 1, reference.begin.column - 1);

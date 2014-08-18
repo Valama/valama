@@ -91,6 +91,7 @@ public class UiCurrentFileStructure : UiElement {
 
         btn_find_references = new ToolButton (null, null);
         btn_find_references.icon_name = "edit-redo-symbolic";
+        btn_find_references.tooltip_text = _("find references");
         btn_find_references.is_important = true;
         btn_find_references.clicked.connect (()=>{
             TreeIter iter;
@@ -103,7 +104,7 @@ public class UiCurrentFileStructure : UiElement {
             var sf = project.guanako_project.get_source_file_by_name (source_viewer.current_srcfocus);
             var refs = Guanako.Refactoring.find_references(project.guanako_project, sf, smb);
             if (refs.length > 0) {
-                wdg_search.display_source_refs (refs);
+                wdg_search.display_source_refs (refs, smb.name);
             }
 
         });
@@ -111,6 +112,7 @@ public class UiCurrentFileStructure : UiElement {
 
         btn_jump_to_declaration = new ToolButton (null, null);
         btn_jump_to_declaration.icon_name = "edit-undo-symbolic";
+        btn_jump_to_declaration.tooltip_text = _("jump to declaration");
         btn_jump_to_declaration.is_important = true;
         btn_jump_to_declaration.clicked.connect (()=>{
             var smb = current_symbol; //Need to make a copy here, as current_symbol will change after jump
