@@ -165,7 +165,7 @@ public class BuilderCMake : BuildSystem {
         exit_status = null;
         built = false;
         build_started();
-        var cmdline = new string[] {"make", "-j2"};
+        var cmdline = new string[] {"make", @"-j$(BuildSystem.threads)"};
 
         Pid? pid;
         int? pstdout, pstderr;

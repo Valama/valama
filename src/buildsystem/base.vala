@@ -22,6 +22,12 @@ using Gee;
 
 public abstract class BuildSystem : Object {
     public string? buildpath { get; protected set; default = null; }
+    /**
+     * NOTE: string type to support -j without argument for infite parallel
+     *       threads.
+     */
+    //TODO: Make it a global configuration option.
+    public static string threads { get; protected set; default = "2"; }
 
     public bool initialized { get; protected set; default = false; }
     public bool configured { get; protected set; default = false; }

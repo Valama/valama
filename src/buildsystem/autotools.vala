@@ -265,7 +265,7 @@ Cflags: -I${includedir}""".printf (project.project_name, req, short_name));
         exit_status = null;
         built = false;
         build_started();
-        var cmdline = new string[] {"make"};
+        var cmdline = new string[] {"make", @"-j$(BuildSystem.threads)"};
 
         Pid? pid;
         int? pstdout, pstderr;
