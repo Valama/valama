@@ -312,8 +312,10 @@ Cflags: -I${includedir}""".printf (project.project_name, req, short_name));
     }
     
     public override bool check_existance() {
-        var f = File.new_for_path (buildpath);
-        return f.query_exists();
+        var makefile = File.new_for_path (Path.build_path (Path.DIR_SEPARATOR_S,
+                                                           buildpath,
+                                                           "Makefile"));
+        return makefile.query_exists();
     }
     
     public override bool clean (out int? exit_status = null)

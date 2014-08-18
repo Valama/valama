@@ -212,8 +212,10 @@ public class BuilderCMake : BuildSystem {
     }
 
     public override bool check_existance() {
-        var f = File.new_for_path (buildpath);
-        return f.query_exists();
+        var makefile = File.new_for_path (Path.build_path (Path.DIR_SEPARATOR_S,
+                                                           buildpath,
+                                                           "Makefile"));
+        return makefile.query_exists();
     }
 
     public override bool clean (out int? exit_status = null)
@@ -257,7 +259,7 @@ public class BuilderCMake : BuildSystem {
         distclean_started();
         project.enable_defines_all();
 
-        if (!check_existance()) {
+        if (!FileUtils.test (buildpath, FileTest.EXISTS)) {
             build_output (_("No data to clean.\n"));
             clean_finished();
             return true;
