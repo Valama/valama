@@ -864,9 +864,10 @@ public static Gee.SortedMap<string,string> list_all_pkg_config ()
     string output;
     try {
         Process.spawn_command_line_sync ("pkg-config --list-all", out output);
-        var lines = output.split ("\n");
-        foreach (var line in lines)
-            map[line.split (" ", 2)[0]] = line.split (" ", 2)[1];
+        foreach (var line in output.split ("\n")) {
+            var splitline = line.split (" ", 2);
+            map[splitline[0]] = splitline[1].chug();
+        }
         map["posix"] = "POSIX";
     } catch {
 
