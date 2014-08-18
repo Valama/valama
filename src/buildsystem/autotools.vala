@@ -138,16 +138,10 @@ public class BuilderAutotools : BuildSystem
             data_stream.put_string ("AC_PROG_CC\n");
             data_stream.put_string ("AM_PROG_VALAC\n");
             data_stream.put_string ("\n");
-	        data_stream.put_string ("PKG_CHECK_MODULES("+str_name.up()+", [");
-	        foreach (var pkgmap in get_pkgmaps().values) {
-				var pkg = "";
-                if (pkgmap.choice_pkg != null && !pkgmap.check)
-				    pkg = @"$(pkgmap as PackageInfo)".split (" ")[0];
-                else
-				    pkg = @"$(pkgmap)".split (" ")[0];
-				if (pkg != "posix")
-			        data_stream.put_string (pkg + " ");
-            }
+	        data_stream.put_string (@"PKG_CHECK_MODULES($(str_name.up()), [");
+	        foreach (var pkgmap in get_pkgmaps().values)
+                if (pkgmap.check)
+                    data_stream.put_string (@"$(pkgmap as PackageInfo) ");
 	        data_stream.put_string ("])\n");
 	        data_stream.put_string (@"AC_SUBST($(str_name.up())_CFLAGS)\n");
 	        data_stream.put_string (@"AC_SUBST($(str_name.up())_LIBS)\n");
@@ -191,14 +185,9 @@ public class BuilderAutotools : BuildSystem
 			str_files.append ("\n\n");
 			data_stream.put_string (str_files.str);
 			var str_pkgs = new StringBuilder ((library ? lower_libname : str_name.down())+"_VALAFLAGS = ");
-			foreach (var pkgmap in get_pkgmaps().values) {
-				var pkg = "";
-                if (pkgmap.choice_pkg != null && !pkgmap.check)
-				    pkg = @"$(pkgmap as PackageInfo)".split (" ")[0];
-                else
-				    pkg = @"$(pkgmap)".split (" ")[0];
-			        str_pkgs.append ("--pkg " + pkg + " ");
-            }
+			foreach (var pkgmap in get_pkgmaps().values)
+                if (pkgmap.check)
+                    str_pkgs.append ("--pkg " + pkgmap.name + " ");
 			if (library)
 			{
 				str_pkgs.append (" --vapi %s.vapi -H %s.h --library %s".printf(str_name.down(),str_name.down(),str_name.down()));
