@@ -48,7 +48,15 @@
 		<package name="guanako"/>
 		<package name="libxml-2.0"/>
 		<package name="posix"/>
-		<package name="webkit2gtk-3.0"/>
+		<package name="webkit2gtk-3.0">
+			<extracheck vapi="extravapi/webkit2gtk-3.0/webkit2gtk-3.0.vapi">
+				<choice all="no">
+					<package name="libvala-0.24"/>
+					<package name="libvala-0.22"/>
+					<package name="libvala-0.20"/>
+				</choice>
+			</extracheck>
+		</package>
 	</packages>
 	<source-directories>
 		<directory>src</directory>

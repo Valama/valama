@@ -21,6 +21,7 @@ set(required_pkgs
   "gtksourceview-3.0 >= 3.9"
   "guanako"
   "json-glib-1.0 {nolink}"
+  "libsoup-2.4 {nolink}"
   "libvala-0.20"
   "libvala-0.22"
   "libvala-0.24"
