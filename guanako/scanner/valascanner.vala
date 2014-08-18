@@ -220,13 +220,30 @@ public class Vala.ScannerExt {
 							current++;
 							token_length_in_chars++;
 							break;
-						case 'x':
-							// hexadecimal escape character
+						case 'u':
+							// u escape character has four hex digits
 							current++;
 							token_length_in_chars++;
-							while (current < end && current[0].isxdigit ()) {
+							int digit_length;
+							for (digit_length = 0; digit_length < 4 && current < end && current[0].isxdigit (); digit_length++) {
 								current++;
 								token_length_in_chars++;
+							}
+							if (digit_length != 4) {
+								Report.error (get_source_reference (token_length_in_chars), "\\u requires four hex digits");
+							}
+							break;
+						case 'x':
+							// hexadecimal escape character requires two hex digits
+							current++;
+							token_length_in_chars++;
+							int digit_length;
+							for (digit_length = 0; current < end && current[0].isxdigit (); digit_length++) {
+								current++;
+								token_length_in_chars++;
+							}
+							if (digit_length < 1) {
+								Report.error (get_source_reference (token_length_in_chars), "\\x requires at least one hex digit");
 							}
 							break;
 						default:
@@ -701,13 +718,30 @@ public class Vala.ScannerExt {
 							current++;
 							token_length_in_chars++;
 							break;
-						case 'x':
-							// hexadecimal escape character
+						case 'u':
+							// u escape character has four hex digits
 							current++;
 							token_length_in_chars++;
-							while (current < end && current[0].isxdigit ()) {
+							int digit_length;
+							for (digit_length = 0; digit_length < 4 && current < end && current[0].isxdigit (); digit_length++) {
 								current++;
 								token_length_in_chars++;
+							}
+							if (digit_length != 4) {
+								Report.error (get_source_reference (token_length_in_chars), "\\u requires four hex digits");
+							}
+							break;
+						case 'x':
+							// hexadecimal escape character requires two hex digits
+							current++;
+							token_length_in_chars++;
+							int digit_length;
+							for (digit_length = 0; current < end && current[0].isxdigit (); digit_length++) {
+								current++;
+								token_length_in_chars++;
+							}
+							if (digit_length < 1) {
+								Report.error (get_source_reference (token_length_in_chars), "\\x requires at least one hex digit");
 							}
 							break;
 						default:
@@ -1118,13 +1152,30 @@ public class Vala.ScannerExt {
 							current++;
 							token_length_in_chars++;
 							break;
-						case 'x':
-							// hexadecimal escape character
+						case 'u':
+							// u escape character has four hex digits
 							current++;
 							token_length_in_chars++;
-							while (current < end && current[0].isxdigit ()) {
+							int digit_length;
+							for (digit_length = 0; digit_length < 4 && current < end && current[0].isxdigit (); digit_length++) {
 								current++;
 								token_length_in_chars++;
+							}
+							if (digit_length != 4) {
+								Report.error (get_source_reference (token_length_in_chars), "\\u requires four hex digits");
+							}
+							break;
+						case 'x':
+							// hexadecimal escape character requires two hex digits
+							current++;
+							token_length_in_chars++;
+							int digit_length;
+							for (digit_length = 0; current < end && current[0].isxdigit (); digit_length++) {
+								current++;
+								token_length_in_chars++;
+							}
+							if (digit_length < 1) {
+								Report.error (get_source_reference (token_length_in_chars), "\\x requires at least one hex digit");
 							}
 							break;
 						default:

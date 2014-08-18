@@ -392,14 +392,29 @@ public class Vala.ParserExt : CodeVisitor {
 		accept (TokenType.OWNED);
 		accept (TokenType.UNOWNED);
 		accept (TokenType.WEAK);
-		if (accept (TokenType.VOID)) {
+#if VALAC_0_26
+
+		if (is_inner_array_type ()) {
+			expect (TokenType.OPEN_PARENS);
+			expect (TokenType.UNOWNED);
+			skip_type ();
+			expect (TokenType.CLOSE_PARENS);
+			expect (TokenType.OPEN_BRACKET);
+			prev ();
 		} else {
-			skip_symbol_name ();
-			skip_type_argument_list ();
+#endif
+			if (accept (TokenType.VOID)) {
+			} else {
+				skip_symbol_name ();
+				skip_type_argument_list ();
+			}
+			while (accept (TokenType.STAR)) {
+			}
+			accept (TokenType.INTERR);
+#if VALAC_0_26
 		}
-		while (accept (TokenType.STAR)) {
-		}
-		accept (TokenType.INTERR);
+#endif
+		
 		while (accept (TokenType.OPEN_BRACKET)) {
 			do {
 				// required for decision between expression and declaration statement
@@ -414,50 +429,85 @@ public class Vala.ParserExt : CodeVisitor {
 		accept (TokenType.HASH);
 	}
 
+#if VALAC_0_26
+	bool is_inner_array_type () {
+		var begin = get_location ();
+		
+		var result = accept (TokenType.OPEN_PARENS) && accept (TokenType.UNOWNED) && current() != TokenType.CLOSE_PARENS;
+		rollback (begin);
+		return result;
+	}
+	
+	DataType parse_type (bool owned_by_default, bool can_weak_ref, bool require_unowned = false) throws ParseError {
+#else
 	DataType parse_type (bool owned_by_default, bool can_weak_ref) throws ParseError {
+#endif
 		var begin = get_location ();
 
 		bool is_dynamic = accept (TokenType.DYNAMIC);
 
 		bool value_owned = owned_by_default;
 
-		if (owned_by_default) {
-			if (accept (TokenType.UNOWNED)) {
-				value_owned = false;
-			} else if (accept (TokenType.WEAK)) {
-				if (!can_weak_ref && !context.deprecated) {
-					Report.warning (get_last_src (), "deprecated syntax, use `unowned` modifier");
-				}
-				value_owned = false;
-			}
+#if VALAC_0_26
+		if (require_unowned) {
+			expect (TokenType.UNOWNED);
 		} else {
-			value_owned = accept (TokenType.OWNED);
+#endif
+			if (owned_by_default) {
+				if (accept (TokenType.UNOWNED)) {
+					value_owned = false;
+				} else if (accept (TokenType.WEAK)) {
+					if (!can_weak_ref && !context.deprecated) {
+						Report.warning (get_last_src (), "deprecated syntax, use `unowned` modifier");
+					}
+					value_owned = false;
+				}
+			} else {
+				value_owned = accept (TokenType.OWNED);
+			}
+#if VALAC_0_26
 		}
+#endif
 
 		DataType type;
 
-		if (!is_dynamic && value_owned == owned_by_default && accept (TokenType.VOID)) {
-			type = new VoidType (get_src (begin));
-		} else {
-			var sym = parse_symbol_name ();
-			List<DataType> type_arg_list = parse_type_argument_list (false);
+#if VALAC_0_26
+		bool inner_type_owned = true;
+		if (accept (TokenType.OPEN_PARENS)) {
+			type = parse_type (false, false, true);
+			expect (TokenType.CLOSE_PARENS);
+			
+			inner_type_owned = false;
 
-			type = new UnresolvedType.from_symbol (sym, get_src (begin));
-			if (type_arg_list != null) {
-				foreach (DataType type_arg in type_arg_list) {
-					type.add_type_argument (type_arg);
+			expect (TokenType.OPEN_BRACKET);
+			prev ();
+		} else {
+#endif
+			if (!is_dynamic && value_owned == owned_by_default && accept (TokenType.VOID)) {
+				type = new VoidType (get_src (begin));
+			} else {
+				var sym = parse_symbol_name ();
+				List<DataType> type_arg_list = parse_type_argument_list (false);
+				
+				type = new UnresolvedType.from_symbol (sym, get_src (begin));
+				if (type_arg_list != null) {
+					foreach (DataType type_arg in type_arg_list) {
+						type.add_type_argument (type_arg);
+					}
 				}
 			}
-		}
+			
+			while (accept (TokenType.STAR)) {
+				type = new PointerType (type, get_src (begin));
+			}
 
-		while (accept (TokenType.STAR)) {
-			type = new PointerType (type, get_src (begin));
+			if (!(type is PointerType)) {
+				type.nullable = accept (TokenType.INTERR);
+			}
+#if VALAC_0_26
 		}
-
-		if (!(type is PointerType)) {
-			type.nullable = accept (TokenType.INTERR);
-		}
-
+#endif
+			
 		// array brackets in types are read from right to left,
 		// this is more logical, especially when nullable arrays
 		// or pointers are involved
@@ -475,8 +525,12 @@ public class Vala.ParserExt : CodeVisitor {
 			} while (accept (TokenType.COMMA));
 			expect (TokenType.CLOSE_BRACKET);
 
+#if VALAC_0_26
+			type.value_owned = inner_type_owned;
+#else
 			// arrays contain strong references by default
 			type.value_owned = true;
+#endif
 
 			var array_type = new ArrayType (type, array_rank, get_src (begin));
 			array_type.nullable = accept (TokenType.INTERR);
@@ -512,36 +566,36 @@ public class Vala.ParserExt : CodeVisitor {
 
 		// inline-allocated array
 		if (type != null && accept (TokenType.OPEN_BRACKET)) {
-			#if VALAC_0_26
-				Vala.Expression? array_length = null;
-			#else
-				int array_length = -1;
-			#endif
+#if VALAC_0_26
+			Expression array_length = null;
+#else
+			int array_length = -1;
+#endif
 
 			if (current () != TokenType.CLOSE_BRACKET) {
+#if VALAC_0_26
+				array_length = parse_expression ();
+#else
 				if (current () != TokenType.INTEGER_LITERAL) {
 					throw new ParseError.SYNTAX (get_error ("expected `]' or integer literal"));
 				}
 
 				var length_literal = (IntegerLiteral) parse_literal ();
-				#if VALAC_0_26
-					array_length = length_literal;
-				#else
-					array_length = int.parse (length_literal.value);
-				#endif
+				array_length = int.parse (length_literal.value);
+#endif
 			}
 			expect (TokenType.CLOSE_BRACKET);
 
 			var array_type = new ArrayType (type, 1, get_src (begin));
 			array_type.inline_allocated = true;
-			#if VALAC_0_26
-				if (array_length != null) {
-			#else
-				if (array_length > 0) {
-			#endif
-					array_type.fixed_length = true;
-					array_type.length = array_length;
-				}
+#if VALAC_0_26
+			if (array_length != null) {
+#else
+			if (array_length > 0) {
+#endif
+				array_type.fixed_length = true;
+				array_type.length = array_length;
+			}
 			array_type.value_owned = type.value_owned;
 
 			return array_type;
@@ -840,6 +894,14 @@ public class Vala.ParserExt : CodeVisitor {
 	Expression parse_object_or_array_creation_expression () throws ParseError {
 		var begin = get_location ();
 		expect (TokenType.NEW);
+
+#if VALAC_0_26
+		if (is_inner_array_type ()) {
+			rollback (begin);
+			return parse_array_creation_expression ();
+		}
+#endif
+
 		var member = parse_member_name ();
 		if (accept (TokenType.OPEN_PARENS)) {
 			var expr = parse_object_creation_expression (begin, member);
@@ -881,6 +943,15 @@ public class Vala.ParserExt : CodeVisitor {
 	Expression parse_array_creation_expression () throws ParseError {
 		var begin = get_location ();
 		expect (TokenType.NEW);
+
+#if VALAC_0_26
+		bool inner_array_type = is_inner_array_type ();
+		if (inner_array_type) {
+			expect (TokenType.OPEN_PARENS);
+			expect (TokenType.UNOWNED);
+		}
+#endif
+		
 		var member = parse_member_name ();
 		DataType element_type = UnresolvedType.new_from_expression (member);
 		bool is_pointer_type = false;
@@ -893,6 +964,16 @@ public class Vala.ParserExt : CodeVisitor {
 				element_type.nullable = true;
 			}
 		}
+		
+#if VALAC_0_26
+		if (inner_array_type) {
+			expect (TokenType.CLOSE_PARENS);
+			element_type.value_owned = false;
+		} else {
+			element_type.value_owned = true;
+		}
+#endif
+		
 		expect (TokenType.OPEN_BRACKET);
 
 		bool size_specified = false;
@@ -1028,6 +1109,11 @@ public class Vala.ParserExt : CodeVisitor {
 		case TokenType.OPEN_PARENS:
 			next ();
 			switch (current ()) {
+#if VALAC_0_26
+			case TokenType.UNOWNED:
+				// inner array type
+				break;
+#endif
 			case TokenType.OWNED:
 				// (owned) foo
 				next ();
@@ -1038,38 +1124,47 @@ public class Vala.ParserExt : CodeVisitor {
 				break;
 			case TokenType.VOID:
 			case TokenType.DYNAMIC:
+#if VALAC_0_26
+			case TokenType.OPEN_PARENS:
+#endif
 			case TokenType.IDENTIFIER:
-				var type = parse_type (true, false);
-				if (accept (TokenType.CLOSE_PARENS)) {
-					// check follower to decide whether to create cast expression
-					switch (current ()) {
-					case TokenType.OP_NEG:
-					case TokenType.TILDE:
-					case TokenType.OPEN_PARENS:
-					case TokenType.TRUE:
-					case TokenType.FALSE:
-					case TokenType.INTEGER_LITERAL:
-					case TokenType.REAL_LITERAL:
-					case TokenType.CHARACTER_LITERAL:
-					case TokenType.STRING_LITERAL:
-					case TokenType.TEMPLATE_STRING_LITERAL:
-					case TokenType.VERBATIM_STRING_LITERAL:
-					case TokenType.REGEX_LITERAL:
-					case TokenType.NULL:
-					case TokenType.THIS:
-					case TokenType.BASE:
-					case TokenType.NEW:
-					case TokenType.YIELD:
-					case TokenType.SIZEOF:
-					case TokenType.TYPEOF:
-					case TokenType.IDENTIFIER:
-					case TokenType.PARAMS:
-						var inner = parse_unary_expression ();
-						return new CastExpression (inner, type, get_src (begin), false);
-					default:
-						break;
+#if VALAC_0_26
+				if (current () != TokenType.OPEN_PARENS || is_inner_array_type ()) {
+#endif
+					var type = parse_type (true, false);
+					if (accept (TokenType.CLOSE_PARENS)) {
+						// check follower to decide whether to create cast expression
+						switch (current ()) {
+						case TokenType.OP_NEG:
+						case TokenType.TILDE:
+						case TokenType.OPEN_PARENS:
+						case TokenType.TRUE:
+						case TokenType.FALSE:
+						case TokenType.INTEGER_LITERAL:
+						case TokenType.REAL_LITERAL:
+						case TokenType.CHARACTER_LITERAL:
+						case TokenType.STRING_LITERAL:
+						case TokenType.TEMPLATE_STRING_LITERAL:
+						case TokenType.VERBATIM_STRING_LITERAL:
+						case TokenType.REGEX_LITERAL:
+						case TokenType.NULL:
+						case TokenType.THIS:
+						case TokenType.BASE:
+						case TokenType.NEW:
+						case TokenType.YIELD:
+						case TokenType.SIZEOF:
+						case TokenType.TYPEOF:
+						case TokenType.IDENTIFIER:
+						case TokenType.PARAMS:
+							var inner = parse_unary_expression ();
+							return new CastExpression (inner, type, get_src (begin), false);
+						default:
+							break;
+						}
 					}
+#if VALAC_0_26
 				}
+#endif
 				break;
 			case TokenType.OP_NEG:
 				next ();
@@ -1531,7 +1626,9 @@ public class Vala.ParserExt : CodeVisitor {
 				case TokenType.OP_DEC:
 				case TokenType.BASE:
 				case TokenType.THIS:
+#if !VALAC_0_26
 				case TokenType.OPEN_PARENS:
+#endif
 				case TokenType.STAR:
 				case TokenType.NEW:
 					stmt = parse_expression_statement ();
@@ -1561,6 +1658,12 @@ public class Vala.ParserExt : CodeVisitor {
 	}
 
 	bool is_expression () throws ParseError {
+#if VALAC_0_26
+		if (current () == TokenType.OPEN_PARENS) {
+			return !is_inner_array_type ();
+		}
+#endif
+		
 		var begin = get_location ();
 
 		// decide between declaration and expression statement
@@ -2199,7 +2302,9 @@ public class Vala.ParserExt : CodeVisitor {
 		case TokenType.OP_DEC:
 		case TokenType.BASE:
 		case TokenType.THIS:
+#if !VALAC_0_26
 		case TokenType.OPEN_PARENS:
+#endif
 		case TokenType.STAR:
 		case TokenType.NEW:
 			// statement
@@ -2537,7 +2642,6 @@ public class Vala.ParserExt : CodeVisitor {
 		var flags = parse_member_declaration_modifiers ();
 		var type = parse_type (true, true);
 		string id = parse_identifier ();
-
 		type = parse_inline_array_type (type);
 
 		var f = new Field (id, type, null, get_src (begin), comment);
@@ -2588,9 +2692,20 @@ public class Vala.ParserExt : CodeVisitor {
 		var access = parse_access_modifier ();
 		var flags = parse_member_declaration_modifiers ();
 		var type = parse_type (true, false);
+#if VALAC_0_26
+		var sym = parse_symbol_name ();
+#else
 		string id = parse_identifier ();
+#endif
 		var type_param_list = parse_type_parameter_list ();
+#if VALAC_0_26
+		var method = new Method (sym.name, type, get_src (begin), comment);
+		if (sym.inner != null) {
+			method.base_interface_type = new UnresolvedType.from_symbol (sym.inner, sym.inner.source_reference);
+		}
+#else
 		var method = new Method (id, type, get_src (begin), comment);
+#endif
 		method.access = access;
 		set_attributes (method, attrs);
 		foreach (TypeParameter type_param in type_param_list) {
