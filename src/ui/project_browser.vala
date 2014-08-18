@@ -382,7 +382,11 @@ public class ProjectBrowser : UiElement {
 
         var scrw = new ScrolledWindow (null, null);
         dlg.get_content_area().pack_start (scrw);
-        dlg.set_default_size (400, 600);
+        /*
+         * TODO: Include dialog into main window or find a solution to don't
+         *       hardcore window size.
+         */
+        dlg.set_default_size (800, 600);
 
         var pkg_infos = list_all_pkg_config();
         
