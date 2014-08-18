@@ -95,6 +95,11 @@
 		<directory>data/templates/simple_gtk/template</directory>
 		<directory>data/templates/simple_gtk/template/src</directory>
 		<directory>data/templates/simple_gtk/template/vapi</directory>
+		<directory>extravapi</directory>
+		<directory>extravapi/gdl-3.0</directory>
+		<directory>extravapi/gtk+-3.0</directory>
+		<directory>extravapi/gtksourceview-3.0</directory>
+		<directory>extravapi/webkit2gtk-3.0</directory>
 		<directory>guanako</directory>
 		<directory>guanako/data</directory>
 		<directory>guanako/scanner</directory>
