@@ -48,6 +48,7 @@
 		<package name="guanako"/>
 		<package name="libxml-2.0"/>
 		<package name="posix"/>
+		<package name="webkit2gtk-3.0"/>
 	</packages>
 	<source-directories>
 		<directory>src</directory>

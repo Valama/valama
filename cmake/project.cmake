@@ -29,6 +29,7 @@ set(required_pkgs
   "pango {nolink}"
   "pangocairo {nolink}"
   "posix {nocheck,nolink}"
+  "webkit2gtk-3.0"
   "x11 {nolink}"
 )
 set(srcfiles
@@ -65,6 +66,7 @@ set(srcfiles
   "src/ui/super_source_view.vala"
   "src/ui/symbol_browser.vala"
   "src/ui/ui_elements.vala"
+  "src/ui/valadoc_browser.vala"
   "src/ui/welcome_screen.vala"
   "src/ui/welcome_screen/create_project_buildsystem.vala"
   "src/ui/welcome_screen/create_project_location.vala"

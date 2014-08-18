@@ -27,19 +27,20 @@ Discussion and support on IRC channel [#valama](http://webchat.freenode.net/?cha
  * clutter-gtk-1.0
  * libxml-2.0
  * gthread-2.0
+ * webkit2gtk-3.0
  * Intltool (required to generate .desktop and .xml files with localization)
  * GNOME desktop icon theme (symbolic icons) (only required to display icons properly) (recommended)
  * rsvg-convert/imagemagick (only required to generate application icons from svg template) (recommended)
 
 On Debian based systems install following packages:
 
-    sudo apt-get install build-essential valac-0.24 libvala-0.24-dev cmake pkg-config libgtksourceview-3.0-dev libgee-0.8-dev libxml2-dev libgdl-3-dev libgladeui-dev libclutter-gtk-1.0-dev intltool gnome-icon-theme-symbolic librsvg2-bin
+    sudo apt-get install build-essential valac-0.24 libvala-0.24-dev cmake pkg-config libgtksourceview-3.0-dev libgee-0.8-dev libxml2-dev libgdl-3-dev libgladeui-dev libclutter-gtk-1.0-dev libwebkit2gtk-3.0-dev intltool gnome-icon-theme-symbolic librsvg2-bin
 
 For a newer Vala version on Ubuntu based systems, you have to include the [Vala Team PPA](https://launchpad.net/~vala-team/+archive/ppa) first.
 
 On Fedora based systems install following packages:
 
-    sudo yum install vala-devel cmake gtksourceview3-devel glade3-libgladeui-devel glade-devel libgee-devel libxml2-devel libgdl-devel clutter-gtk-devel intltool gnome-icon-theme-symbolic librsvg2 librsvg2-tools
+    sudo yum install vala-devel cmake gtksourceview3-devel glade3-libgladeui-devel glade-devel libgee-devel libxml2-devel libgdl-devel clutter-gtk-devel webkitgtk-devel intltool gnome-icon-theme-symbolic librsvg2 librsvg2-tools
 
 ### Building ###
  1. `mkdir build && cd build`

@@ -41,6 +41,7 @@ static UiSearch wdg_search;
 static SymbolBrowser wdg_smb_browser;
 static UiStructureView wdg_structure_view;
 static GladeViewer wdg_glade_viewer;
+static UiValadocBrowser wdg_valadoc_browser;
 // static UiStyleChecker wdg_stylechecker;
 
 static Gee.HashMap<string, Gdk.Pixbuf> map_icons;
@@ -208,6 +209,7 @@ public class MainWidget : Box {
         wdg_search = new UiSearch();
         wdg_structure_view = new UiStructureView();
         wdg_glade_viewer = new GladeViewer();
+        wdg_valadoc_browser = new UiValadocBrowser();
         // wdg_stylechecker = new UiStyleChecker();
 
         /* Gdl elements. */
@@ -256,6 +258,10 @@ public class MainWidget : Box {
                               DockItemBehavior.NORMAL,
                               DockPlacement.RIGHT);
         add_item ("GladeViewer", _("Glade viewer"), wdg_glade_viewer,
+                              "gtk-file",
+                              DockItemBehavior.NORMAL,
+                              DockPlacement.RIGHT);
+        add_item ("ValadocBrowser", _("Valadoc browser"), wdg_valadoc_browser,
                               "gtk-file",
                               DockItemBehavior.NORMAL,
                               DockPlacement.RIGHT);
@@ -404,6 +410,7 @@ public class MainWidget : Box {
         add_view_menu_item (wdg_smb_browser, _("Show symbol browser"));
         add_view_menu_item (wdg_glade_viewer, _("Show glade viewer"));
         add_view_menu_item (wdg_structure_view, _("Show structure viewer"));
+        add_view_menu_item (wdg_valadoc_browser, _("Show Valadoc browser"));
         this.viewmenu.append (new SeparatorMenuItem());
 
         // TRANSLATORS: Lock user interface elements to prevent moving them around.
