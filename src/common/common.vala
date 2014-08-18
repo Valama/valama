@@ -860,12 +860,14 @@ public inline void errmsg (string format, ...) {
 
 public static Gee.SortedMap<string,string> list_all_pkg_config ()
 {
-    var map = new Gee.TreeMap<string, string>();
+    var map = new Gee.TreeMap<string, string> (Guanako.compare_string_case_insensitive);
     string output;
     try {
         Process.spawn_command_line_sync ("pkg-config --list-all", out output);
-        foreach (var line in output.split ("\n")) {
-            var splitline = line.split (" ", 2);
+        var splitlines = output.split ("\n");
+        // Don't include the last empty line.
+        for (int i = 1; i < splitlines.length; ++i) {
+            var splitline = splitlines[i-1].split (" ", 2);
             map[splitline[0]] = splitline[1].chug();
         }
         map["posix"] = "POSIX";
