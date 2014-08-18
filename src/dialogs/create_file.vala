@@ -63,7 +63,7 @@ public string? ui_create_file_dialog (string? path = null, string? extension = n
     var ent_filename_err = new Label ("");
     ent_filename_err.sensitive = false;
 
-    Regex valid_chars = /^[a-z0-9.:_\\\/-]+$/i;  // keep "-" at the end!
+    Regex valid_chars = /^[a-z0-9.:_\\\/+-]+$/i;  // keep "-" at the end!
     var ent_filename = new Entry.with_inputcheck (ent_filename_err, valid_chars);
     ent_filename.set_placeholder_text (_("filename"));  // this is e.g. not visible
 
