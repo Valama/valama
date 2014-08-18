@@ -357,8 +357,32 @@ Cflags: -I${includedir}""".printf (project.project_name, req, short_name));
         exit_status = null;
         // distcleaned = false;
         distclean_started();
-        project.enable_defines_all();
-		exit_status = 0;
+
+        if (!check_existance()) {
+            build_output (_("No data to clean.\n"));
+            distclean_finished();
+            return true;
+        }
+
+        var cmdline = new string[] {"make", "distclean"};
+
+        Pid? pid;
+        if (!call_cmd (cmdline, out pid)) {
+            clean_finished();
+            throw new BuildError.CLEAN_FAILED (_("distclean command failed"));
+        }
+
+        int? exit = null;
+        ChildWatch.add (pid, (intpid, status) => {
+            exit = get_exit (status);
+            Process.close_pid (intpid);
+            builder_loop.quit();
+        });
+
+        builder_loop.run();
+        exit_status = exit;
+        // distcleaned = true;
+        distclean_finished();
         return exit_status == 0;
     }
 }
