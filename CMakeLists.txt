@@ -290,9 +290,12 @@ endif()
 
 
 if(CREATE_CHANGELOG)
-  execute_process(COMMAND git log
-                  WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
-                  OUTPUT_FILE "Changelog")
+  find_package(Perl)
+  if(PERL_EXECUTABLE)
+    execute_process(COMMAND "${PERL_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/cmake/gitlog-to-changelog.pl"
+                    WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
+                    OUTPUT_FILE "Changelog")
+  endif()
 endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release")

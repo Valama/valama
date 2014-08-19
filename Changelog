@@ -1,0 +1,3625 @@
+2014-08-19  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Include Valama Changelog.
+
+	CMake: Create Changelog with FSF gitlog-to-changelog.
+
+	Valama: Add extravapi directory to project.
+
+	Valama: Allow + in file names.
+
+2014-08-18  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Valama file structure: Add missing tooltips.
+	 * Add tooltips and set search entry text to symbol name (so a "all-files"
+	   button doesn't clear the search).
+	 * Disable some debug messages.
+
+	Guanako: Synchronize parser and scanner from upstream.
+	 * Unfortunately versions are incompatible between 0.26 (and before)
+	   maintaining both versions until 0.24 support drops.
+
+	CMake: Add webkit2gtk-3.0 vapi to support vala < 0.26
+	 * Update valama.vlp.
+	 * Add libsoup-2.4 as dependency.
+
+	Valama: Add rudimental valadoc browser.
+
+	Guanako: Fix package listing.
+	 * Sort package names case insensitive.
+	 * Don't include last (empty) line from pkg-config output (null string).
+
+	Valama: Increase package dialog window size.
+
+	Valama: Fix alignment of package list.
+	 * Remove leading whitespaces from pkg-config package list descriptions.
+
+	Valama: Fix valadoc comment.
+
+	Valama Autotools: Fix distclean.
+	 * Copy clean, just with distclean target this time.
+
+	Valama: Check for Makefile existance for clean command.
+	 * For make clean command obviously the Makefile needs to exist.
+	 * Update CMake distclean check.
+
+	Valama: Add global threads option for make commands.
+	 * Add configurable (no config implemented yet) option to control make options
+	   in one place.
+
+	Valama: Fix first build system selection.
+	 * Set default build system in welcome_screen (according to template).
+
+	Valama Autotools: Don't add packages without pc file.
+
+	Valama Autotools: Remove creation date from configure.ac.
+	 * Synchronize this with CMake build system. As long as there is no check for
+	   same content a time doesn't make sense (only shows when you compile the
+	   project).
+
+	Valama Autotools: Fix build path.
+	 * Bug introduced by f3fcc1e.
+
+	Valama Autotools: Drop prepared flag.
+
+2014-08-16  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Valama: Fix plain build system.
+	 * Set buildpath in preparation method.
+	 * Use base method in BuilderCMake and BuilderAutotools as well.
+
+2014-08-15  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Valama: Workaround to support fullscreen again.
+	 * Workaround via hidden button to fix regression introduced by a720b9a.
+	   It's now possible to get out of the fullscreen mode again (keybinding
+	   only).
+
+	Valama: Simplify menu.
+	 * Remove most nested parts.
+	 * Use new menu button for extra widgets (reporter, search, etc.).
+
+2014-08-14  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Valama: Fix build system selection in welcome screen.
+	 * Support plain build system.
+	 * Select default build system from template and enable library checkbox.
+	 * Create less new objects (reuse and avoid unnecessary creation).
+
+2014-08-13  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Valama: Fix resetting of project settings.
+	 * Support reset of is-library and buildsystem selections.
+
+	CMake: Synchronize buildsystem files.
+
+	CMake: Fix xgettext comment extraction.
+	 * Adjust changed gschema.xml path.
+
+2014-08-12  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Valama: Move toolbar and menu into window header.
+	 * Saves some space at the top but menu is too clunky, needs to go into
+	   more buttons and a larger drop down menu, less nested menu items.
+	 * Split into left and right toolbar.
+
+	Support Valama building Valama
+	 * Remove packages with custom vapis (config, gladeui-2.0) from package
+	   list and add compiler flags manually.
+
+	Travis: Exclude valamang branch from testing.
+
+	Guanako: Search for pkg by name.
+
+	Valama: Don't add same vapi twice.
+
+	Guanako: Support custom vapis as packages.
+
+	Support custom vapi for package.
+	 * Support empty extracheck with just a custom vapi.
+
+	Fix debug output (remove comma at EOL)
+
+	Add prefix (Guanako/Valama) to console messages.
+	 * Fix some message types (error, warning).
+
+2014-08-04  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Synchronize CMake buildsystem.
+
+	Fix gee versioned dependency in valama.vlp.
+
+2014-08-02  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Project file: Support choices in extrachecks
+	 * Simplify valama.vlp a bit.
+	 * No nested choices supported yet.
+
+2014-08-01  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Drop gdl < 3.8 support.
+	 - Current version in Debian unstable is 3.8 so still keep support for this
+	   version (current gtk+-3.0 version is 3.12).
+
+	CMake: New libvala, old gtksourceview support
+	 * Support libvala >= 0.24 with gtksourceview 3.10.
+
+	travis-ci: Easily add PPA
+	 - Install software-properties-common to use add-apt-repository command.
+
+	Update installation description.
+	 - Use libvala-0.24 as default, update travis-ci accordingly (use PPA again).
+
+	Update Valama vlp file.
+	 - Set defines according to CMakeLists.txt.
+	 - Update extra vapi paths.
+
+	Update versioned dependencies.
+	 - gtk+-3.0 and gtksourcview-3.0 >= 3.10 (from 3.4)
+
+	CMake: Search for global valac first.
+	 - Fix regression introduced by 19347ef. Don't try to find a smarter solution
+	   than the OS.
+
+	Fix travis build and some gdl CMake checks.
+	 - Use Ubuntu 14.04 to test build (run distribution upgrade before test).
+	 - Add gtk+-3.10 support for valac 0.20.
+	    - Use vapidir option to overwrite system vapis (instead of custom vapi
+	      which may conflict with system vapi coming as dependency).
+	    - Use own directory for each extra vapi to not pull in all vapis.
+	 - Support old gdl versions again (fix regression introduced by 9177d13).
+
+2014-07-31  Linus Seelinger  <S.Linus@gmx.de>
+
+	Merge pull request #152 from inizan-yannick/master
+	Specify Gtk.SourceView in code to avoid conflicts with new Vala.SourceView
+
+2014-07-31  inizan-yannick  <inizan.yannick@gmail.com>
+
+	update .travis.yml
+
+	update .travis.yml
+
+	update README.md with newer packages. update .travis.yml with newer repository.
+
+	Specify Gtk.SourceView in code to avoid conflicts with new Vala.SourceView.
+
+2014-05-28  Linus Seelinger  <S.Linus@gmx.de>
+
+	Merge pull request #147 from inizan-yannick/master
+	Update Guanako for vala-0.26
+
+2014-04-02  inizan-yannick  <inizan.yannick@gmail.com>
+
+	define VALA_0_26 for Vala.ArrayType
+
+2014-03-31  inizan-yannick  <inizan.yannick@gmail.com>
+
+	fix findVala.cmake correctly
+
+2014-03-28  Linus Seelinger  <S.Linus@gmx.de>
+
+	Merge pull request #144 from inizan-yannick/master
+	remove unsupported vala versions
+
+2014-03-26  inizan-yannick  <inizan.yannick@gmail.com>
+
+	fix define variables
+
+2014-03-25  inizan-yannick  <inizan.yannick@gmail.com>
+
+	remove unsupported vala version, vala-0.26 added. fix #128. fix super source view for Gtk >= 3.12. translations updated.
+
+2014-03-21  inizan-yannick  <inizan.yannick@gmail.com>
+
+	update french translations.
+
+2014-03-20  Linus Seelinger  <S.Linus@gmx.de>
+
+	Merge pull request #142 from inizan-yannick/master
+	Initialize buildpath for each buildsystem
+
+2014-03-15  inizan-yannick  <inizan.yannick@gmail.com>
+
+	Initialize buildpath for each buildsystem, fix the bug in cmake.vala, at preparate function.
+
+2014-03-11  inizan-yannick  <inizan.yannick@gmail.com>
+
+	Merge remote-tracking branch 'upstream/master'
+
+2014-03-07  Linus Seelinger  <S.Linus@gmx.de>
+
+	Merge pull request #139 from august0815/elemntary
+	Elementary template
+
+2014-02-23  Mario  <augustulus\freenet.de>
+
+	ver. 0.1a
+
+	.
+
+	.
+
+	Ver.0.1
+
+	Elementary Template
+
+2014-02-10  Linus Seelinger  <S.Linus@gmx.de>
+
+	Valama: Do not complete after curly brackets
+
+2014-01-26  Linus Seelinger  <S.Linus@gmx.de>
+
+	Merge pull request #135 from steveno/master
+	Add some missing dependencies on Fedora 20
+
+2014-01-26  Steven Oliver  <oliver.steven@icloud.com>
+
+	Add missing dep to Fedora instructions
+	Need package to convert icons
+
+	Add missing dep to Fedora instructions
+
+2014-01-21  inizan-yannick  <inizan.yannick@gmail.com>
+
+	consider posix as package. fix build system choice: builder is correctly set.
+
+2014-01-21  Linus Seelinger  <S.Linus@gmx.de>
+
+	Merge pull request #134 from inizan-yannick/master
+	package selection dialog updated.
+
+2014-01-21  inizan-yannick  <inizan.yannick@gmail.com>
+
+	fix CMakeLists.txt for valadoc
+
+	Add library support for Autotools (no for cmake), with a template. ProjectSettings: add a CheckButton for library project, and a ComboBoxText for build system selection. WelcomeScreen: add a package selection dialog.
+
+2014-01-20  inizan-yannick  <inizan.yannick@gmail.com>
+
+	choose build system in project wizard.
+
+	package selection dialog updated. don't include package if .pc file is missing.
+
+2014-01-20  Linus Seelinger  <S.Linus@gmx.de>
+
+	Guanako: No null sourcerefs in refactoring method
+
+2014-01-19  Linus Seelinger  <S.Linus@gmx.de>
+
+	Valama: Fixed instability caused by last commit
+
+2014-01-17  Linus Seelinger  <S.Linus@gmx.de>
+
+	Valama: Highlight other references of symbol at cursor
+
+2014-01-11  Linus Seelinger  <S.Linus@gmx.de>
+
+	Valama: Hopefully fix incomplete quit (#133)
+
+	Valama: Remove GTK < 3.10 support
+
+	Merge pull request #130 from inizan-yannick/master
+	'icon_size' properties must be set with an enum, not int with lastest vala versions.
+
+2014-01-05  inizan-yannick  <inizan.yannick@gmail.com>
+
+	Support of GladeUI construction. Support of Autotools. Addition of templates for Gst Audio/Video.
+
+2013-12-25  Linus Seelinger  <S.Linus@gmx.de>
+
+	Guanako: Use LinkedList instead of ArrayList where possible
+
+2013-12-24  inizan-yannick  <inizan.yannick@gmail.com>
+
+	'icon_size' properties must be set with an enum, not int with lastest vala versions.
+
+2013-12-23  Linus Seelinger  <S.Linus@gmx.de>
+
+	Valama: Redesigned project settings
+
+	Valama: Lots of cleaning up, introducing GTK 3.10
+	 * Reworked welcome screen (clean internal structure), new design using GTK 3.10
+	 * Removed old dialogs
+	 * Using GtkHeaderBar
+	 * Preparing build system selection
+
+2013-12-16  Linus Seelinger  <S.Linus@gmx.de>
+
+	Guanako: Improved boolean expression completion
+
+2013-12-11  Linus Seelinger  <S.Linus@gmx.de>
+
+	Valama: Removed old dialog, clearing search entry clears marks and results
+
+2013-12-09  Linus Seelinger  <S.Linus@gmx.de>
+
+	Valama: fix #114, thanks to inizan-yannick
+
+2013-10-12  Linus Seelinger  <S.Linus@gmx.de>
+
+	Merge pull request #118 from ppareit/master
+	Fix search for selected text when search window is already open #42
+
+2013-10-11  Pieter Pareit  <pieter.pareit@gmail.com>
+
+	Fix issue #42, search for selected text when search window is already open.
+
+2013-10-07  Linus Seelinger  <S.Linus@gmx.de>
+
+	Further work on reference finding
+
+	Valama: Do not autocomplete after semicolon (Fixes #119)
+
+2013-10-04  Linus Seelinger  <S.Linus@gmx.de>
+
+	Guanako: Improved reference finding
+
+2013-10-02  Linus Seelinger  <S.Linus@gmx.de>
+
+	Little reference fix, removed obsolete z_position from clutter display
+
+	Fixed some collateral damage of earlier changes
+
+2013-10-02  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Update README: clutter-gtk-1.0 dependency
+
+2013-10-01  Linus Seelinger  <S.Linus@gmx.de>
+
+	Forgot a file. Well done, linus, well done.
+
+	Experimental project structure viewer using Clutter
+	 * Added clutter-gtk dependency (uncritical, as llvmpipe can kick in if there is no gpu acceleration)
+	 * Added experimental structure viewer (shows (some) references, drag&drop)
+	 * Experimental CodeVisitor implementation
+
+2013-09-29  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Fix build on gdl < 3.5.5, valac >= 0.20 systems (travis).
+	 * Fix compare_version_strings handling for gdl/gtk.
+
+	Fix gdl and gtk version checks.
+	 * Adjust gdl check to 3.3.91 because of post release bump to 3.4.
+	 * Fix check for valac >= 0.20 and gdl < 3.5.5 (regression).
+
+	CMake: Fix version string comparison (by James Bigler).
+	 * Fix compilation on gtk+ >= 3.10, gdl >= 3.10, etc.
+
+	Update CMake checks for gee-0.8 >= 0.10.5.
+
+	Merge pull request #117 from inizan-yannick/patch-1
+	Version 0.10.5 of gee-0.8 or newer is needed (read_only_view of MultiMap).
+	Thanks to Yannick Inizan!
+
+2013-09-28  inizan-yannick  <inizan.yannick@gmail.com>
+
+	Update README.md
+	version 0.10.5 of gee-0.8 or newer is needed
+
+2013-09-23  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Add Ubuntu installation instruction. Closes #116
+
+2013-09-19  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Case insensitive ordering of packages list.
+
+	Guanako: Add initialization method for static members.
+
+	Guanako: Cache vapi dirs.
+
+	ProjectBrowser: Display directory and document icons.
+	 * Just a little eye candy, project browser needs to be reworked.
+
+2013-09-16  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	CMake: Synchronize  build system.
+
+	Merge jakobwesthoff/Vala_CMake
+	 * Add option for conditional compilation. (Jörg Thalheim)
+	    - Update CMakeLists and guanako/CMakeLists.txt accordingly.
+	 * Fix ARGS_DIRECTORY handling. (Gary Kramlich)
+
+2013-09-13  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Template, build system caching and improved loading.
+	 * Support multiple template and build system directories.
+	 * Also search in $USERDATADIR/valama/{templates,buildsystems} for templates /
+	   build systems.
+	 * Cache available packages (Guanako), locales, templates and build systems
+	   and provide read only view on them. (There is a bug for maps, related to
+	   #666728)
+	 * Provide default (builtin) empty template.
+	 * Support creating ValamaProject/ProjectFile from data string.
+
+2013-09-12  Linus Seelinger  <S.Linus@gmx.de>
+
+	Initial line-by-line execution support
+	 * Guanako: Frankenstein: Line-by-line breakpoints. Still a little stupid, but works unless there are multiple statements per line.
+	 * Valama: GUI for line-by-line execution
+
+	Initial reference finding support
+	 * Guanako: Support finding references of an object
+	 * Valama: Made search widget more flexible, show reference finding results
+
+	Initial refactoring support
+	 * Guanako: Support iterating through expressions
+	 * Valama: Allow jumping to a symbol's declaration
+	 * Valama: Improved current file structure behaviour
+
+	Guanako: Non-alphabetic prefixed proposals first
+
+	Guanako: Initial support for embedded statements, escaped values
+
+	Valama: Made completion thread more reliable
+
+	Completion improvements
+	 * Guanako: Support return statements, various minor improvements
+	 * Valama: Determine current line in a more intelligent way (supports multiple statements in one line etc)
+
+2013-09-06  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Guanako: Don't crash on circular deps, keep ordering of deps. Closes #113
+	 * No performance optimizations. get_package_dependencies_int could include
+	   package_name in deps list to save some runtime performance. Additionally
+	   add_packages code could be cleaned up. Shouldn't be a bottleneck though
+	   because package list + deps are not that big.
+	 * datatype_to_string: Track InvalidType with conflicting vapis.
+	   Currently no hint on user interface.
+
+	Run SymbolBrowser update only once when multiple pkgs were added.
+
+2013-09-06  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Merge pull request #110 from inizan-yannick/master
+	Use combobox to add (multiple) new packages. Thanks to Yannick Inizan!
+
+	Runtime of selecting ("commiting") new packages is always O(n) (where n is
+	maximum number of packages). This shouldn't be an issue because there aren't
+	too much packages but can be improved by keeping a list of selected packages
+	with O(mlog(m)) performance costs by inserting/deleting (where m is number of
+	currently selected packages) and O(1) costs with "commiting" new packages.
+
+2013-09-06  inizan-yannick  <inizan.yannick@gmail.com>
+
+	package selection by checkbox, change accordingly project.vala
+
+2013-09-05  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Guanako: expression_to_string(..) fallback to to_string()
+	 * Fixes subset of #112.
+
+2013-09-04  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Reduce buffering of application/build output.
+	 * Use smallest possible buffer size which is G_MAX_CHAR_SIZE = 10.
+	   Unfortunately this does not completely disable buffering. Related to #15.
+
+	   Possibly it's better to use a vte-terminal instead of spawn-async +
+	   textview. Additional advantage is to directly have a terminal available on
+	   build errors.
+
+2013-09-02  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	New gdl-3.0 release: 3.9.91 (update defines)
+
+	Merge pull request #111 from placidrage/master
+	Fixed finding valac with version in filename. Thanks to Joe R. Nassimian!
+
+2013-09-01  Joe R. Nassimian  <nassimian.joseph@gmail.com>
+
+	Fixed finding vala with version in filenames
+	Build failed on systems when version was appended to valac-.
+
+	The problem was solved by using the second and more complete definition of the find_program command.
+	http://cmake.org/cmake/help/v2.8.8/cmake.html#command:find_program
+
+2013-09-01  Linus Seelinger  <S.Linus@gmx.de>
+
+	Guanako: Improved array completion
+
+2013-08-31  Linus Seelinger  <S.Linus@gmx.de>
+
+	Guanako: Fixed symbol accessibility outside methods
+
+2013-08-29  Linus Seelinger  <S.Linus@gmx.de>
+
+	Valama:
+	 * Fixed method signature remaining visible
+	 * Update search results even if all files are included (newly openend files must be included, too!)
+
+2013-08-27  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Push transifex configuration.
+
+	CMake: Enable DOCS with VALADOC_* enabled implicitly.
+
+	travis-ci: Remove quiet options to see build failure.
+
+	Add travis-ci hook.
+
+	Use ui directory for ui files by default.
+
+	Support empty directories by default.
+	 * Already support it while parsing vlp file.
+
+2013-08-26  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Fix deprecated gsettings path. Closes #108
+
+2013-08-25  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Update README: Name IRC channel
+
+	Fix guessing of source language. Thanks to Julien Legras.
+
+2013-08-24  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	WelcomeScreen: Use ~ as abbreviation for home directory.
+
+	Use absolute path to save recent project files.
+
+	CMake: Support imagemagick, drop manpage compression, quoting, VERBATIM
+	 * Support imagmagick's convert as fallback if rsvg-convert is not available.
+	 * Drop manual page compression.
+	 * Quote all strings.
+	 * Use VERBATIM for all custom commands.
+	 * Use additional (version independent) vala/vapi vapidir for valadoc
+
+	Fix UiTemplateSettings FileChooserButton bookmarked locations.
+	 * Fix also deprecated ui_create_project_dialog.
+
+	Update cmake/project.cmake (only indentations).
+
+	remove_recursively: Improve error messages.
+	 * Show exactly which file failed with which error.
+	 * Cmake buildsystem: Show distclean error in build output window.
+
+	Reset cached not available defines with distclean target.
+
+	Remember new and already checked but not enabled defines.
+	 * Recognize already enabled defines from bare Ganako CodeContext.
+	 * Remember already checked (but not enabled) defines. Currently no
+	   possibility to force recheck (which e.g. makes sense after installing
+	   some libraries on system after launching Valama).
+
+2013-08-21  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	CMake: Synchronize buildsystem.
+
+2013-08-20  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	CMake: Improve gsettings installation.
+	 * Verify schemas (only with LOCAL option).
+	 * Copy schemas to build directory when origian schemas changed (only with
+	   LOCAL option).
+
+2013-08-20  Linus Seelinger  <S.Linus@gmx.de>
+
+	Guanako: *word does not allow empty string any more; work on completion outside methods
+
+2013-08-19  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Merge pull request #107 from juliomino/master
+	Add fullscreen support. Closes #89. Thanks to Julien Legras!
+
+2013-08-19  Julien Legras  <juliomino@gmail.com>
+
+	Add fullscreen support (valama Issue #89)
+
+2013-08-17  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	CMake: Copy ui files to build directory whenever they changed.
+
+2013-08-15  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	CMake: Copy ui files to build directory.
+
+2013-08-15  Linus Seelinger  <S.Linus@gmx.de>
+
+	Guanako: Completion for classes and namespaces declaration; Fixed a possible crash
+
+2013-08-14  Linus Seelinger  <S.Linus@gmx.de>
+
+	Valama: Fix occasional crash caused by invalid error positions
+
+	Guanako: Little performance tuning/cleanup in get_symbol_at_pos
+
+2013-08-12  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Fix build error: Remove uninstall target of Guanako
+
+2013-08-11  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Indent cmake/project.cmake
+
+	Merge jakobwesthoff/Vala_CMake
+	 * Check for valac-Major.Minor too so this work on more distros.
+	   (Tomáš Chvátal)
+
+	Synchronize CMake templates.
+
+	Basic support for ui/glade files.
+
+2013-08-11  Linus Seelinger  <S.Linus@gmx.de>
+
+	Valama: Keep completion proposals open after selecting one
+
+	Guanako: Little fix for autocompletion of subroutine parameters
+
+2013-08-02  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Update README (new libvala version supported)
+	 * Remove hint to edit cmake/project.cmake and cmake/guanako.cmake manually because this should now work without any changes.
+
+	Use proper solution for #695972 since gdl >= 3.8.
+	 * stock-id update works well since gdl 3.8.1 (add new define GDL_3_8).
+
+	Include mnemonic strings fully into gettext string.
+	 * Important because difference of word starting is locale dependant.
+
+2013-08-02  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	GTK_STOCK transition (partially).
+	 * Since Gtk 3.10 GTK_STOCK is deprecated so replace it. See also migration
+	   document[1].
+	   Some stock values are currently hardcoded (only transitional):
+	    - libgdl has not deprecated stock items yet so keep using
+	      Gdl.DockItem.with_stock. There is Gdl.DockItem.with_pixbuf_icon but
+	      perhaps there will come an icon_name property.
+	    - libgtksourceview has changed with 3.9.3 which is currently not
+	      installed on my system, so wait for proper transition.
+
+	    Some icons are gone from dialogs. If they are important they have to
+	    be added manually.
+
+	 NOTE: Do not forget to track theme changes and change icons loaded by
+	       Gtk.IconTheme.load_icon.
+
+	[1]: https://docs.google.com/document/d/1KCVPoYQBqMbDP11tHPpjW6uaEHrvLUmcDPqKAppCY8o/pub
+
+2013-08-02  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Support Vala 0.21.1 (libvala-0.22).
+	 * Fix recognition of odd minor version numbers.
+
+	Tests: Invalid project files.
+
+2013-07-31  Linus Seelinger  <S.Linus@gmx.de>
+
+	Valama: Working on menus
+	 * Added compile dropdown menu in toolbar
+	 * Added a separator in view menu
+	 * Cut out some middleman functions
+
+2013-07-24  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	CMake: Vala compile rules improvement.
+	 * Neither recompile all Vala source files twice nor recompile all C files
+	   every time only a single Vala file has changed.
+
+2013-07-21  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Merge pull request #102 from Overscore/master
+	Update French translation. Thanks to Overscore!
+
+2013-07-21  Overscore  <github@lorang.net>
+
+	Update fr.po
+
+2013-07-20  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Drop FixedTreeSet.
+	 * Every distribution should no provide a fixed libgee version.
+
+	Drop gee-1.0 support.
+
+2013-07-20  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Extend symbolsig_to_string (no failures with all vapis).
+	 * No failures with currently supported symbols (methods and classes). Full
+	   coverage of distributed vapis for those symbols.
+
+	 NOTE: Though the symbolsig_to_string method (and submethods) becomes
+	       difficult to maintain for different (atm 3) outputs (and we support
+	       currently only a limited subset of symbols) a small AST (per symbol)
+	       could be a scalable solution.
+	       A small parser can then format the symbol's AST representation with
+	       markup etc.
+
+2013-07-20  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	WelcomeScreen: Place logo with CSS. Fix double click event.
+	 * Use CSS definition to place logo to easily add additional UI elements at
+	   the same place (e.g. buttons etc.).
+	 * Open project with button release not already press event.
+
+2013-07-19  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	WelcomeScreen: Completely work with ids to switch creation steps.
+
+2013-07-12  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Fix po files.
+
+	WelcomeScreen refactoring (2).
+	 * Use TemplatePage class for project settings.
+	 * Remove deprecated and unused WelcomeScreen.add_page. All new template pages
+	   now has to use TemplatePage as base class.
+
+	WelcomeScreen refactoring.
+	 * Use TemplatePage class for file chooser (opener).
+	 * Add some symbols to TemplatePage.
+
+	Handle request_close in main routine.
+	 * Don't save project file twice.
+
+2013-07-09  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Update README: ldconfig call on system wide installation
+
+2013-07-09  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Cover multy byte chars for root path.
+	 * Add some tests:
+	    - utf8_paths
+	    - bytecharindex
+	 * Make some public methods static.
+
+	 * Case insensitive file extension for template images. (Manually permute
+	   possibilities.)
+
+2013-07-08  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Run symbol update threaded.
+
+2013-07-06  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Move symbol to string conversion to Guanako.
+	 * Build complete symbol (e.g. method) signature from Vala.Symbol. Don't use
+	   Vala.DataType.to_qualified_string() to be more flexible. E.g. add some
+	   markup or line breaks later etc.
+	 * Currently only method signature is complete.
+
+2013-07-02  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Use rsvg-convert instead of imagemagick to convert svg to png.
+
+	Synchronize CMake build system files.
+
+2013-06-30  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Fix crash introduced by 8c0cd64.
+	 * Possibility that SourceLocation.column is after EOL so check it too.
+
+	Support sorting in symbol browser.
+
+2013-06-29  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	UiSourceViewer: Workaround if error bounds out of (visible) range.
+	 * Thanks to Florian Brosch. Code is copied from a vala editor draft.
+
+	UiReport: Fix source code jump.
+	 * Fix regression introduced by 2c1ff3b. Get rid of duplicate data structure
+	   (list of errors) and store Reporter.Error directly in ListStore (which
+	   requires the Reporter.Error to be an GObject).
+
+2013-06-28  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Fix tests if guanako is not already installed.
+
+	Add one missing project file test to cover all relevant branches.
+
+	Synchronize valaparser from 6747b2f7.
+
+2013-06-28  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Add some ProjectFile tests.
+	 * ProjectFile tests:
+	    - get_absolute_path
+	    - get_relative_path
+	    - Loading different project file versions.
+	 * Note: Those tests require the test program to be executed directly from
+	         tests/ directory.
+
+	 * ProjectFile constructor now throws LoadingError on failure.
+
+	 * CMake:
+	    - copy_dirs: Recursively copy directory content.
+	    - get_files_recursively: Recursively list all file content in specified
+	                             directory
+
+2013-06-27  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Continue restructuring project management related files.
+	 * project.vala | project_file    | package_managment | buildsystem/base
+	    ------------|-------------------------------------|-----------
+	                |                 | package_exists   <|------
+	                |                 | package_flags    <|------
+	         -------|-----------------|>VersionRelation   |
+	         -------|>VLP_VERSION_MIN |                   |
+	         -------|>LoadingError    |                   |
+
+	ProjectBuilder: Fix exit code.
+
+2013-06-27  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Almost full support for plain build system.
+	 * Defining (and lookup) of const strings (e.g. PACKAGE_NAME, etc.) is not
+	   implemented yet. The lookup is perhaps a Guanako feature.
+
+	 * NOTE: Plain build system does not cache anything at all so it's not
+	         recommended for anything than very small projects.
+
+2013-06-25  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	UiReport: Fix synchronized sorting.
+
+	Valama: guess_pkg_by_define: Don't display error on false try.
+
+	CMake: gsettings_install: Fix LOCAL option. Closes #94
+	 * Fix "improvement" of ed53979a.
+
+2013-06-24  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	UiReport: Support sorting of columns.
+
+	Disable stylechecker.
+
+2013-06-22  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Gettext.cmake: Use parent directory as default working dir.
+
+	Fix build system file display.
+
+2013-06-22  Linus Seelinger  <S.Linus@gmx.de>
+
+	Valama: Set buildsystem after loading
+
+2013-06-22  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Fix project file update on package changes.
+	 * Fix object permissions for ProjectFile. Though those are not perfect
+	   because Collection.add, Collection.remove etc. is still (and was already)
+	   possible. So in future use read_only_view to only allow read only access
+	   (for plugins) to some collections.
+	 * Use TreeMap<string, PackageInfo> instead of TreeMultiMap for packages map.
+	   No hints in source code found why a multimap is necessary. It does not make
+	   sense because package names are distinct. Multiple same packages with
+	   different versions won't work anyway (name clashes).
+	 * Project.add_package_by_name now returns null if package was already added
+	   to project.
+
+	Fix docstrings. Closes #93
+
+2013-06-21  Linus Seelinger  <S.Linus@gmx.de>
+
+	Valama: Major clean-up in project.vala. Looked like Sauerkraut before. Writing back package changes will be fixed later.
+
+	Valama: Removed obsolete current symbol widget (completely, i hope)
+
+2013-06-21  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	CMake: Make tests target dependent of guanako and valama targets.
+	 * Fixes parallel build issue but not problems with single source files used
+	   by multiple targets.
+
+	Reduce clutter template deprecated warnings.
+	 * One warning is still remaining: Actor.animate
+
+2013-06-20  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Add tests (based on libgee tests).
+	 * Add tests for following methods:
+	     - comp_version
+	     - split_path (already fix some issues)
+	 * Use libgee's testcase.vala for some GLib.Tests abstractions.
+
+	 * CMake integration not completed because some files are required both for
+	   tests and also Valama executable itself. And some source files currently
+	   are compiled twice. This leads to some unnecessary recompile issues.
+
+	 * NOTE: Build system test features aren't used at all to keep tests
+	         independent of build system (but functionality is limited therefore).
+	         E.g. tests will completely fail on a single failure and it's not
+	         possible to disable tests without modifying source code (it's easy
+	         though).
+
+2013-06-18  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Some string <-> VersionRelation abstractions.
+
+2013-06-17  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Don't try to guess already enabled defines.
+
+	Don't save custom_vapis back to project file if enabled by extracheck.
+
+	Valama: Support custom vapis (project file).
+	 * Support package checks to enable defines based on package version and/or
+	   use custom vapis based on version (or independent of it).
+	 * Allow to disable dependency tracking for packages/vapis (project format
+	   change).
+	 * Guanako:
+	    - Add static method to get list of vapi/deps directories: get_vapi_dirs
+	    - Add static method to look for vapi/deps file:
+	      get_vapi_path, get_deps_path
+	    - Add get_vapis method to get used vapis (analogous to get_source_files).
+	 * Drop some macros: PIXMAP_DIR, VALA_VAPI_DIR, VALA_DATA_DIR
+
+	Valama: Extend project format: defines, custom vapis
+	 * Incompatible with previous format.
+
+2013-06-13  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	CMake: Gettext (desktop files): Support build in source directory.
+
+2013-06-11  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	CMake: FindVala: Fix if no suitable vala version found.
+
+2013-06-10  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Merge pull request #90 from cicku/patch-1
+	Fix Fedora dependency in README.md. Thanks to Christopher Meng!
+
+2013-06-10  Christopher Meng  <cickumqt@gmail.com>
+
+	Update README.md
+	Fix the incorrect dep name.
+	
+	Note I'll package it soon.
+
+2013-06-07  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Update image URL.
+
+2013-06-02  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	CMake: Support whitespaces in source path for intltool command.
+	 * Just use relative paths...
+
+2013-06-01  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	CMake: Gettext: Don't fail on if no desktop files or po files exist.
+
+2013-05-30  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Update German translation.
+
+	Update pot file.
+
+	Update Readme.
+
+	CMake: Fix gsettings file with non-absolute filename.
+
+	CMake: Finish intltool gsettings/desktop file support.
+
+	CMake: gsettings/gettext support. Requires intltool.
+
+	Gsettings: Rename app.valama to apps.valama.
+
+	CMake: .desktop file i18n support. Requires intltool.
+
+2013-05-29  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Merge pull request #88 from Overscore/master
+	French translation update. Thanks to Overscore!
+
+2013-05-28  Overscore  <github@lorang.net>
+
+	Update fr.po
+
+2013-05-28  Linus Seelinger  <S.Linus@gmx.de>
+
+	Guanako: Some completion def improvements (especially creation methods)
+
+2013-05-28  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Fix build for gee-1.0.
+
+2013-05-25  Linus Seelinger  <S.Linus@gmx.de>
+
+	Guanako: Fixed local variables
+
+	Guanako: Minor syntax def fixes; Propose all base types
+
+	Guanako: Fixed variable completion
+
+2013-05-25  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Update CMake buildsystem files.
+
+2013-05-24  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Fixup German string.
+
+	Add .gitignore.
+	 * Currently only ignore CMake build directory: build
+
+	Merge pull request #84 from Overscore/master
+	Update French translation. Thanks to Overscore!
+
+2013-05-24  Overscore  <github@lorang.net>
+
+	Fix up French translation
+
+2013-05-24  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	CMake: Improve Gettext support.
+	 * Fix some minor issues and make customization with xgettext options easier.
+
+2013-05-23  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Guanako: Sync valaparser from upstream libvala.
+
+2013-05-22  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Fix toolbar build and execute button labels. Closes #86
+
+	Update German translation.
+	 * Fixes one issue and merge into other files.
+
+	Update pot file and add some gettext comments.
+	 * Merge translation files.
+
+	CMake: Use pot target instead of pot_file.
+
+	Guanako: Fix pkgconfig file.
+	 * Don't include {nocheck} packages.
+	 * CMake: Don't replace ${} vars in .pc file.
+
+2013-05-21  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Update Readme: "Added" image
+
+2013-05-20  Linus Seelinger  <S.Linus@gmx.de>
+
+	Improved and solidified Frankenstein
+	 * GUI warning instead of crash when receiving wrong ID's from client
+	 * Force rebuild when changing stuff
+
+2013-05-19  Linus Seelinger  <S.Linus@gmx.de>
+
+	Various Frankenstein improvements
+	 * Highlight reached stops and timers
+	 * Remember selection
+	 * Avoid duplicate stops/timers
+	 * Unown DBus name on destructor (destructor does not get called on
+	   project change though)
+
+2013-05-19  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Fix valadoc generation (strip {...} from pkg). Closes #82
+
+	Merge pull request #79 from Overscore/master
+	French translation updates (eliminate fuzzies and fix mistakes). Thanks to
+	Overscore! (multiple revisions rebased)
+
+2013-05-19  Overscore  <github@lorang.net>
+
+	Update fr.po
+	Corrected fuzzies and other mistakes
+
+2013-05-18  Linus Seelinger  <S.Linus@gmx.de>
+
+	Guanako: Fixed FrankenTimers, corrected some stderrs
+
+2013-05-18  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Fix project save/load cycle on non-en systems.
+	 * Make VersionRelation.to_string method return values locale independent.
+
+	New version relations: AFTER (>) and BEFORE (<)
+
+2013-05-18  Linus Seelinger  <S.Linus@gmx.de>
+
+	Valama: Make Frankenstein instance dependent (using PIDs) fixes #75
+
+2013-05-18  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Move fixup vapis from cmake/vapi to more general extravapi/.
+	 * Preparations to use custom vapis not only with cmake.
+
+2013-05-18  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	FrankenStein and plain build system improvements.
+	 * FrankenStein:
+	    - Catch all exceptions.
+	    - Use StringBuilder.
+	    - Use constant string for main block.
+	 * Plain build system:
+	    - Support defines and vapis.
+	    - Dynamically set glib target version.
+	    - Support "plain" as identifier (additionally to "valama").
+
+	 * TODO: - Don't read entire files into memory on frankensteinification. This
+	           takes a lot of time (and memory). Only act on files where an action
+	           is required.
+	         - Run frankenstein initialization asynchronously.
+
+2013-05-17  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	CMake: Update gsettings_install documentation.
+	 * Btw.: uninstall target was added with 06ba881 .
+
+	Update README (local gsettings installation).
+
+	CMake: Install and compile gsettings schemas.
+	 * Execute installation/removal hooks (option).
+	 * Compile gsettings schema locally. (Use XDG_DATA_DIRS environment variable.)
+
+	Fixup German translation string.
+
+	Show error tags only for correct file. Closes #77
+
+2013-05-16  Linus Seelinger  <S.Linus@gmx.de>
+
+	Valama: Set Gtk Application to NON_UNIQUE (fixes #74)
+
+	Valama: Added GSettings file, install target
+
+	Valama: Introduce GSettings support; Remember window size
+
+2013-05-16  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Update po/fr.po (unfuzzy some fuzzies).
+
+	Handle error annotations with SourceViewer. Closes #66
+	 * Move annotation code from Reporter to SourceViewer.
+	 * Draw on Guanako update and on new file.
+	 * Use init method in SourceViewer to connect signals.
+
+	More descriptive label for project open and save menu items.
+
+	Revert "Valama: Show error annotations immediately (closes #66)"
+	This reverts commit d60c8501915404c9a1ad2878c36b5dd1f83d808a.
+
+2013-05-16  Linus Seelinger  <S.Linus@gmx.de>
+
+	Forgot a file
+
+	Improved completion performance
+
+	Valama: Show error annotations immediately (closes #66)
+
+2013-05-15  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Build output: Intelligent auto scroll.
+
+2013-05-13  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Valama: Improve build system integration over UI
+	 * Implement clean and distclean for cmake build system.
+	 * Add remove_recursively method (rm -rf).
+	 * Menu changes:
+	     * Project menu
+	        - Settings
+	     * Build menu:
+	        - Build: make
+	        - Rebuild: make clean && make
+	        - Clean build: make distclean && make
+	        - Clean: make clean
+	        - Clean all: make distclean
+	     * Run menu:
+	        - Execute
+	        - Stop
+
+2013-05-10  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Merge pull request #69 from Overscore/master
+	Fix French translation file.
+
+	Update German translation and add some gettext comments.
+	 * CMake: Fix the comment feature. Use // TRANSLATOR: ...
+
+2013-05-08  Overscore  <github@lorang.net>
+
+	Update fr.po
+
+	Update fr.po
+
+2013-05-08  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Merge pull request #67 from Overscore/master
+	French translation update. Thanks to Overscore!
+
+	cmake: Add option "UPDATE_PO" to disable .po update.
+	 * Option is enabled as default. Turn it off with: cmake -DUPDATE_PO=OFF ..
+	 * gettext_create_translations: Add boolean config value NOUPDATE to handle
+	   this functionality.
+
+2013-05-08  Overscore  <github@lorang.net>
+
+	Update fr.po
+
+2013-05-07  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Set key bindings to F5, F7 to run/compile. Closes #65
+
+	Update .pot file.
+
+	Support directory creation in project browser.
+	 * Set tooltips to project browser buttons.
+
+2013-05-06  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Update pot file.
+
+2013-05-05  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Detach dock layout handling from MainWidget instance.
+	 * Preparation for #64.
+
+	Improve file creation dialog and removal of files.
+	 * Create file dialog:
+	    - Name directory where to create file. Fixes #61 (2).
+	    - Support path in filename (create missing directories Automatically).
+	    - Directly open created file.
+	 * File removal:
+	    - Run guanako source file removal threaded.
+	    - Don't try to close buffers multiple times.
+
+2013-05-04  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Valama: Support default files to open at initial project loading.
+	 * "opened-files" key is supported for project files but won't get rewritten
+	   to file. So this is only relevant on very first project load up (which is
+	   loading from template). Partly solution for #61 (1).
+	   TODO: Support this for templates only and not for normal projects.
+	 * No layout support for srcdock at the moment but this would fully fix the
+	   #61 (1) issue.
+
+2013-05-02  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Guanako: Allow parallel read-only access to context. Closes #50
+	 * Use internal CodeContext to a allow parallel read-only access.
+	 * refs are not necessary to modify context so don't use them.
+
+2013-04-30  Linus Seelinger  <S.Linus@gmx.de>
+
+	Valama: Remove loop_update; Guanako: Fixed a loop in proposal sorting
+
+	Guanako: Support numbers and strings as parameters
+
+	Valama: Improved current symbol source annotation
+
+	Guanako: Initial commit of rebuilt syntax file
+
+2013-04-30  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Quit MainLoop loop_update on quitting application. Close #55
+
+	CMake fine tuning. Fix some issues with valadoc and CMake.
+	 * Enable documentation as default for release builds (if valadoc is
+	   available).
+	 * Support multiple independent documentation builds inside a single CMake
+	   project.
+	 * Avoid manual valac arguments and add library functionality to
+	   UseVala.cmake.
+
+2013-04-29  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Update README and don't fail if imagemagick is not installed.
+	 * Add Fedora dependencies.
+
+	Add mime file (.vlp).
+	 * Run e.g. `update-mime-database /usr/share/mime` to update the mime
+	   database.
+
+	Add manpage.
+
+	Run flow analyzer also on file update.
+	 * Does not fix #49 fully but all warnings are shown.
+	   Existing problem: Due to the vanish_file limitations methods not used in
+	   updated file but in other files are treated as 'unused methods'. Old
+	   symbols don't get removed from Vala AST so with a file update the old new
+	   methods aren't used (apparently).
+
+	Fix Pair.
+	 * Correctly inherit Pair from Gee.Map.Entry and not Gtk.Entry...
+
+2013-04-28  Linus Seelinger  <S.Linus@gmx.de>
+
+	Valama: Allow variable offset in source annotations.
+	 * Used to avoid overlapping error annotations.
+
+	Valama: Fixed wrong insertion if the user is faster than the autocompletion
+
+2013-04-28  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Fix comp_version and also check for epochs.
+	 * Rename comp_proj_version to comp_version.
+
+2013-04-26  Linus Seelinger  <S.Linus@gmx.de>
+
+	Valama: Show completion proposals on whitespaces if the line is not empty
+
+2013-04-26  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Run flow analyzer check on initial run. Closes: #49
+
+2013-04-25  Linus Seelinger  <S.Linus@gmx.de>
+
+	Valama: Made completion run thread more reliable
+
+	Valama: Source annotations horizontally follow the scrolled view
+
+2013-04-23  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Fix setting of defines.
+	 * Guanako: New method commit_defines() to commit new defines to context.
+	   (Might be not useful at all.)
+
+2013-04-22  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Guanako: set_reporter: Fix regression for Reporter subclasses.
+
+	Guanako: set_reporter: Typechecking enabled.
+
+2013-04-21  Linus Seelinger  <S.Linus@gmx.de>
+
+	Valama: Source annotations: Fixed a warning, calculate height from actual text size
+
+2013-04-21  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Reporter: Make errlist virtual.
+	 * Use GObject class constructors to make this working (we use GObject.new to
+	   create new instances).
+
+2013-04-20  Linus Seelinger  <S.Linus@gmx.de>
+
+	Valama: Show current symbol info as annotation. Allow persistent annotations.
+
+2013-04-20  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Add row and column information to source view.
+
+	Reporter: Reset errlist with new instance. Closes: #48
+
+2013-04-19  Linus Seelinger  <S.Linus@gmx.de>
+
+	Valama: Animated SuperSourceView annotations, allow different colors
+
+	Valama: Show highlight animation when jumping to an error/warning
+
+	Valama: Support source code annotations (e.g. for error texts)
+	 * Abstracted animations in SuperSourceView
+	 * New animation type: Annotation
+	 * Integrated in error reports
+
+2013-04-18  Linus Seelinger  <S.Linus@gmx.de>
+
+	Valama: SuperSourceView: Draw animations on top of the text
+
+	Valama: Introduced SuperSourceView to enhance GtkSourceView
+	 * Currently, SuperSourceView can show a cairo-based highlighting animation
+	   on specific line.
+	 * Integrated this in the search widget
+
+2013-04-16  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Fix 3.6.2 > gdl-3.0 >= 3.5.5 with valac < 0.19.
+	 * Gdl API should now fully supported since 3.4 with valac >= 0.18.
+
+	Improve defines heuristic.
+	 * Now usable (works for all defines in Valama project).
+	 * Still issues after enabling new defines (and after remove defines).
+
+2013-04-15  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Fix gdl defines. Closes #47
+	 * gdl API change came with 3.5.5 and not with 3.6.2.
+
+	Fix compilation for valac >= 0.19 and gdl < 3.5.5.
+
+	Versioned defines guessing preparations.
+	 * Guess OS platform (Unix/Windows). Set during compile time with CMake.
+
+	Support for gdl switcher hacks with new upstream version.
+	 * New gdl version currently not released (only in master).
+	 * Switcher hacks are grip showing/hiding and some tab style properties.
+
+2013-04-12  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Fix valadoc generation.
+	 * Forgot to enable defines also for valadoc...
+
+2013-04-08  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Merge pull request #46 from uzytkownik/master
+	Don't force installation into /usr. Thanks to uzytkownik.
+
+2013-04-08  Maciej Piechotka  <uzytkownik2@gmail.com>
+
+	Don't force the installation into /usr
+
+2013-04-08  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Support gee-1.0 again.
+
+	Remove deprecated Thread.set_priority.
+	 * Deprecated since glib 2.32.
+
+2013-04-07  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Guanako: Make it more thread-safe.
+	 * Lock context on public read/write operations.
+
+	Cmake: Extend find_package(Vala) macro and setup useful vars.
+	 * Setup with pkg-config information: - VALA_SHORTVER
+	                                      - VALA_LIBPKG
+	                                      - VALA_VAPIDIR
+	                                      - VALA_DATADIR
+	                                      - VALA_VAPIGEN
+	                                      - VALA_GEN_INTROSPECT
+	                                      - VALA_VALA_GEN_INTROSPECT
+	 * Use those variables to set Valama and Guanako constants to make build more
+	   generic.
+	 * Valama: Drop Config.VALA_DATADIR (if it is necessary use the value from
+	           Guanako directly).
+
+2013-04-06  Linus Seelinger  <S.Linus@gmx.de>
+
+	Guanako: Finally fixed array handling (I hope)
+
+2013-04-06  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Guanako: Use own Vala.Reporter, support complete context update.
+	 * Move Valama.ReportWrapper to Guanako.Reporter and use derived Reporter
+	   class within Valama to display errors immediately (debug output).
+	   Guanako.Reporter holds persistent list of all Errors.
+	 * Fix complete update of context.
+	 * Guanako: Allow changing glib version (use set_glib_version then call
+	   update).
+	 * Valama: Update context after all defines were processed after initial
+	   buffer update.
+
+2013-04-02  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Guanako: Set glib version with constructor.
+
+2013-03-31  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Fix saving/loading ui/project meta information.
+
+2013-03-28  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	ReportWrapper: Add experimental warnings also to exp list.
+
+	ReportWrapper: Support experimental warning type (workaround).
+	 * Dirty workaround by string lookup (for "are experimental" at the end).
+	 * ReportWrapper: Don't call Report.set_verbose_errors because verbosity is
+	   not used anyway.
+	 * Guanako: Support if set_report_wrapper was not called.
+
+	SymbolBrowser: Simplify previous change.
+
+	SymbolBrowser: Disconnect initial update handler correctly.
+	 * Note: Does not update new project symbols (after buffer changes). See: #40
+
+2013-03-27  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Start Guanako update after setting new define (not working).
+
+	UiSourceViewer: Add status bar to source items.
+	 * Syntax highlighting customization possible (not remembered over different
+	   sessions or even a buffer close/open cycles).
+
+2013-03-27  Linus Seelinger  <S.Linus@gmx.de>
+
+	Valama: Hide completion proposals on non-valid keys
+
+2013-03-27  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Fix forgotten package_list and replace with packages.get_keys().
+
+2013-03-27  Linus Seelinger  <S.Linus@gmx.de>
+
+	Merge branch 'master' of https://github.com/Valama/valama
+
+	Valama: Don't show completion proposals on space, delete etc.
+
+2013-03-27  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Check package versions with pkg-config.
+	 * Check package versions with pkg-config and display detailed information in
+	   template selector.
+	 * Support removal of package choices (only individual packages at the
+	   moment).
+	    - Clear choice if empty.
+	 * Use TreeMultiMap for ValamaProject.packages list. That makes
+	   ValamaProject.package_list obsolete so remove it.
+	 * Escape all variable text in markup labels and use StringBuilder.
+
+2013-03-26  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	BuildSystem: Enable defines based on heuristic.
+	 * Currently very basic check only based on package name. No version and
+	   version relation check at the moment.
+	 * Guanako: Fix return value of add_define.
+	 * ValamaProject: Add helper method for guanko_project.get_context_packages().
+
+2013-03-26  Linus Seelinger  <S.Linus@gmx.de>
+
+	Valama: Unified quit method
+
+2013-03-26  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Add ValamaProject.buildsystem BuildSystem object.
+	 * Share the same build system over all modules.
+
+2013-03-25  Linus Seelinger  <S.Linus@gmx.de>
+
+	Valama: Made Valama a Gtk.Application
+
+2013-03-25  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Fix removal of used defines.
+	 * Vala.Parser now builds separate define list for each Vala.SourceFile from
+	   scratch.
+
+	BuildOutput: Hide info_bar at startup.
+
+2013-03-25  Linus Seelinger  <S.Linus@gmx.de>
+
+	Merge branch 'master' of https://github.com/Valama/valama
+
+	Valama: Added an InfoBar to build output
+
+2013-03-25  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	ValamaProject: Update used defines and emit signal on changes.
+	 * Note: Due to a bug in Guanako added defines won't get removed.
+
+2013-03-25  Linus Seelinger  <S.Linus@gmx.de>
+
+	Valama: Setting completion threads' priority to LOW
+
+	Merge branch 'master' of https://github.com/Valama/valama
+
+	Valama: Fixed search highlights
+
+2013-03-25  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	BuilderCMake: Fix issue when choice is not available on system.
+
+2013-03-24  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Use Posix.kill to kill launched application.
+
+	BuildOutput: Display application exit code correctly now.
+	 * BuildSystem: Show when command received signal.
+
+2013-03-24  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Almost completed BuildSystem transition (regression).
+	 * Note: Application launch does not fully work with new design yet
+	         (regression).
+
+	 * BuilderPlain not tested at all.
+	 * Exit status fully supported (beside application launcher).
+	 * Error handling vs. return status not completed yet.
+	 * Minor fixes (e.g. close launched application when quitting Valama).
+
+2013-03-23  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	BuildOutput: Don't replace complete buffer with each newline.
+	 * Also only focus element one time.
+
+2013-03-22  Linus Seelinger  <S.Linus@gmx.de>
+
+	Valama: ARGH, NEVER USE STRUCTS!!!  Syncing breakpoint sourcemarks and frankenstein line values finally works.
+	 * I simply replaced the struct I had used before by a class.
+	   Now assigning values back to Frankenstein works.
+	   No idea why. Structs are evil.
+
+2013-03-22  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Build system abstraction: initialization
+	 * Only CMake initialization done.
+
+2013-03-22  Linus Seelinger  <S.Linus@gmx.de>
+
+	Valama: Keep breakpoint marks in sync with guanako's data
+
+2013-03-21  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Guanako: Get list of all defines in source code.
+	 * NOTE: Heavy overhead by including a modified version of Vala.Parser and
+	         Vala.Scanner. See also #696325
+
+2013-03-21  Linus Seelinger  <S.Linus@gmx.de>
+
+	Forgot to add the file.
+
+	Guanako: Added FixedTreeSet to work around a memory leak
+
+2013-03-21  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Guanako add default defines (GLIB_X_Y, VALA_X_Y).
+
+	Set LD_LIBRARY_PATH for local installation to find Guanako.
+
+2013-03-21  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Save and load project meta information.
+	 * Save IdeModes state. Not fully working (hidden dock items due to state
+	   aren't restored after loading). Perhaps this should really go to the ui
+	   stuff.
+
+	   The xml loading (and saving) procedure is always the same so it would make
+	   sense to have an abstraction of it (entry point, etc.) or some helper
+	   methods.
+
+2013-03-21  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Save user interface meta information.
+	 * Currently only locked state. Perhaps this should better go directly to
+	   layout.xml.
+
+	Make Valama again compatible for gee-1.0.
+
+2013-03-21  Linus Seelinger  <S.Linus@gmx.de>
+
+	Merge branch 'master' of https://github.com/Valama/valama
+	Conflicts:
+		guanako/guanako.vala
+
+	Guanako: Allow aborting the old completion run (Should improve performance when typing on slower systems)
+
+2013-03-21  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Replace deprecated contains with has_key.
+
+2013-03-20  Linus Seelinger  <S.Linus@gmx.de>
+
+	Merge branch 'master' of https://github.com/Valama/valama
+
+	Guanako: Completion runs packed in a class (Valama: Small symbol browser fix)
+
+2013-03-20  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	WelcomeScreen: Move clicked project to top.
+
+2013-03-20  Linus Seelinger  <S.Linus@gmx.de>
+
+	Merge branch 'master' of https://github.com/Valama/valama
+
+	Valama: Fixed and simplified symbol icon handling
+
+2013-03-20  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Fix markup in Label.label issue.
+
+	UiCurrentSymbol: Fix container removal of internal_widget.
+
+	Sort recent manager list.
+
+	Fix grid row of project folder location.
+
+	Entry: Make error label optional.
+	 * Don't use label for project name in creation step.
+	   Later change the background color / border color of the entry. I didn't got
+	   this atm with css "background-color" (does only affect selected text
+	   background) or "border-color" does not change anything.
+
+	Current symbol: Always display a label.
+	 * Show label before Guanako update finished.
+	 * Update display without delay (after computation is finished).
+
+	Escape unknown markup input.
+
+	Add view menu item for current symbol.
+
+	WelcomeScreen: Allow opening of projects always.
+	 * Not only when recent list is not empty.
+
+2013-03-20  Linus Seelinger  <S.Linus@gmx.de>
+
+	Guanako: Working on arrays vs current symbol fix. Sorry for merge screw-up -.-
+
+	Merge branch 'master' of https://github.com/Valama/valama
+
+2013-03-20  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Add valadoc comments to WelcomeScreen.
+
+	Refactoring WelcomeScreen: Make it modular.
+	 * WelcomeScreen is now completely modular.
+	    - Use a notebook for new project creation steps.
+	    - Fix some minor issues.
+	    - Change initial layout a bit (make it more compact).
+	    - Last page with project name and project location not optimal (doesn't
+	      look nice). Moved error label in own grid row to not extend the whole
+	      grid with an invalid character.
+	    - At the moment it is possible to add new pages with helper class
+	      TemplatePage or add widgets directly. The latter is more complicated
+	      because all the low level signal stuff has to be done manually and there
+	      are also other drawbacks regarding selection state. So most likely the
+	      widget possibility will be removed later.
+	 * Save/update recent manager information immediately (after project name
+	   change). Update list in WelcomeScreen screen.
+	    - Save information to ~/.cache/valama/recent_projects.xml (add .xml
+	      extension).
+	 * Order list of templates by name.
+	 * Scale template icon to 33x33.
+	 * Entry: Make default text of error label customizable.
+
+2013-03-19  Linus Seelinger  <S.Linus@gmx.de>
+
+	Merge branch 'master' of https://github.com/Valama/valama
+	Conflicts:
+		cmake/project.cmake
+
+	Introduced current symbol info widget; Fixed array completion
+	 * Guanako: Introduce current symbol stack
+	 * Guanako: Array handling fixed
+	 * Valama: Current symbol widget
+
+2013-03-19  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Use stricter compiler settings withing Valama to don't miss warnings.
+
+2013-03-18  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Build symbol browser after first Guanako update.
+	 * Show simple loading animation before Guanako update has finished.
+
+2013-03-17  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Catch all errors.
+
+	Don't hardcode element-*-16.png icons.
+
+	Don't save project twice after switching back to welcome screen.
+
+	ui_load_project: Save current project before loading new one.
+
+	Show save dialog also when closing application.
+	 * Does silently save all buffers when close with window manager.
+
+	Add show save dialog for modified buffers.
+	 * Only show dialog when gdl element is closed not with application quit.
+
+	Use proper workaround for stock-id changes.
+	 * Thanks to Evan Nemerson for the proper solution:
+	   https://bugzilla.gnome.org/show_bug.cgi?id=695972#c1
+
+2013-03-16  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Fix stock_id changes not recognized with new gdl-vapi.
+	 * Also add some comments which GNOME bug is involved where.
+
+2013-03-15  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Fix closing and reopening of source items.
+
+	Make first source item not closable.
+
+	Fix closing of buffers and add some debug output.
+
+2013-03-14  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Allow removal of all file types (source, build system, data).
+
+	Reset welcome_screen to first grid when project load succeeded.
+
+	Run the VIM syntax checker over comments and strings.
+
+	Reduce I/O load.
+	 * Accumulate files for substitutions to seek only one time.
+	 * Also make sure the temporary file for the substitution does not exist
+	   already.
+
+	Support substitutions in template.
+	 * Substitution is NOT save and can cause lots of unnecessary io operations.
+	    - At the moment only the basics are implemented. Necessary checks to
+	      generate temporary file and intelligent substitution accumulation for
+	      single files is missing but will come soon (see the new two FIXMEs).
+	 * Initialize all private setters in ValamaProject with constructor.
+
+2013-03-13  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Don't update complete report widget on non-source files.
+	 * Reduce debug output on source_viewer.current_srcfocus changes.
+	 * Use current_sourceview_changed consequently instead of property emission.
+
+	Generate dirs/files to save (automatically) only before saving.
+	 * Add lots of data files to .vlp.
+	   - Currently there is no check for valid plaintext files.
+	 * Allow creation of (sub)directories with ui_create_project (allow / and \).
+	 * Recursive directory lookup would be nice and shorten .vlp.
+
+2013-03-12  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	vlp: Automatically reduce separate files and prefer directories.
+	 * Try to avoid <foobar-files> and use <foobar-directories> instead to shorten
+	   project file.
+	 * Fix get_relative_path null issue.
+	 * Use private _foo fields because ref is not allowed with properties.
+
+	symbols and project browser: Use signals on package changes.
+
+	Support data files. Closes #9
+	 * Add support for data files.
+	 * All kind of files can now be added (newly created).
+
+	Synchronize cmake buildsystem data files.
+
+2013-03-12  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	cmake: Distinguish between libs to link and to check. Closes #39
+	 * Extend cmake integration and cmake code itself (ValaPkgs):
+	   Support {nolink} and {nocheck} options (and combinations {nolink,nocheck}).
+	    - nolink: Do not compile with cflags and libs.
+	    - nocheck: Do not check with pkg-config (implies nolink).
+
+	   Manually added packages have no option but the nocheck option will be added
+	   if there is no .pc file for those packages (exact_package_name.pc).
+	   Packages added as dependency of manually added packages have the option
+	   nolink except there is no .pc file. In that case the nocheck option is
+	   added.
+
+	 * List all packages in cmake/project.cmake.
+
+2013-03-12  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Replace deprecated Map.contains with Map.has_key.
+
+	Allow removal and adding of new packages over UI.
+
+2013-03-11  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Correctly quote search patterns.
+
+	Fix internal visibility state of dock elements and don't lock items.
+
+2013-03-10  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	UiSearch: Fix edge case if current buffer is null (no opened buffer).
+
+	Differentiate between IdeMode hiding and manual hiding.
+
+	Add workaround for gdl <= 3.5.5 for hidden (attached) dock elements.
+
+2013-03-09  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Reload gdl-element visibility on layout changes.
+
+2013-03-05  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Improve PkgChoice and PackageInfo correlation.
+	 * Add PkgChoice field in PackageInfo to easily switch between both data
+	   structures.
+	 * Again split up project loading in two parts:
+	    - Loading of project file.
+	    - Initilizing of project data (source files, completion etc.).
+	 * Make the partly loaded ValamaProject a field in ProjectTemplate. Later this
+	   will be used to fully load the project when selected.
+	 * Add (optional) description to package choice.
+	 * Fix ordering of PackageInfo objects (use custom compare_func).
+	 * get_choice: Also usable if Guanako project is not initialized.
+	   Version checks are still missing and CodeContext check is not necessary.
+
+2013-03-04  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Use %u for formatted enum value output (bug_msg).
+
+	Allow versioned package dependencies (at the moment only internal).
+
+	cmake: Dynamically set glib version.
+
+	cmake: Add gdl-3.0 vapi from valac 0.20.
+	 * Fix issue with old vapi and new gdl version: gdl >= 3.6.2 and valac <= 0.18
+	 * Only use local vapi if necessary.
+
+	Make CopyRecursiveFlags enum a Flags enum and fix a size count issue.
+
+	Remove debuglevel option and allow optional argument for --debug/-d.
+
+2013-03-03  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Detailed template information in UiTemplateSelector.
+	 * Add accels to UiTemplateSelector: "i" to show info and "Esc" to go back to
+	   template list.
+	 * Add Vala version information to template (optional).
+	 * Add long description to template (optional). Long description supports
+	   Pango markdown formatting.
+
+	 * Hide build output progressbar at the beginning (fixes dirty workarround).
+	 * Wrap long lines and add some comments.
+
+2013-03-03  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Hide build output progressbar and stretch it to dock item width.
+
+2013-03-02  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Display text output with monospace font.
+
+	Fix some hide/locking issues and save layout before Gtk.main_quit.
+
+	Improve xml file parsing, better error catching.
+	 * Easily use locales in template file.
+	 * Fix package display if started directly with .vlp.
+	 * Add option --force-old to don't fail immediately if .vlp or .info file
+	   version is too old.
+	 * Template info widget (inplace) is in progress.
+
+2013-03-02  Linus Seelinger  <S.Linus@gmx.de>
+
+	Merge branch 'master' of https://github.com/Valama/valama
+
+	Valama: Moved get_available_packages to Guanako; Show missing packages in template selector
+
+2013-03-02  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Reduce line length in source file.
+
+	Valac warnings reduced (unused variables removed).
+
+	Fixup docstrings.
+
+	UiElement: Track visibility and share status over connected items.
+	 * Add menu and toolbar helper methods for UiElement show/hide elements.
+	 * Add all items to view menu.
+	 * Allow all items to close.
+
+	Track visibility of dock_item (UiElement).
+	 * Use this with UiSearch and toggle elements.
+
+2013-03-01  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Reset from lock/unlock signals with saved state.
+
+	Don't execute show_search signal handler multiple times. Closes #33
+	 * Handler gets only executed if status really has changed. Use internal state
+	   variable to track dock_item state.
+
+	Readme: no need to manually edit cmake files for gee/libvala.
+
+2013-03-01  Linus Seelinger  <S.Linus@gmx.de>
+
+	Valama: App output uses unified channel readed
+
+	Merge branch 'master' of https://github.com/Valama/valama
+
+	Valama: Improved/simplified build output
+
+2013-03-01  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Replace built-in-directive VALA_X_Y with custom VALAC_X_Y
+	 * Because built-in is only for one version (==) and custom variant is >=.
+
+2013-02-28  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Allow package alternatives (extend vlp).
+	 * Currently only under the hood (no gui option).
+	 * Allow gee-0.8 or gee-1.0 and libvala-0.18 or libvala-0.20.
+	 * Fix cmake issues with local Guanako vapi (globbing and relative path
+	   issues).
+
+2013-02-28  Linus Seelinger  <S.Linus@gmx.de>
+
+	Valama: Search: Selected text as default search
+
+	Merge branch 'master' of https://github.com/Valama/valama
+	Conflicts:
+		src/ui/search.vala
+
+	Valama: Improved search, added current_sourceview_changed signal
+	 * Search: Added title toolbar and current/all files button
+	 * SourceViewer: Added current_sourceview_changed signal that only gets
+	   emitted when the current source file is actually changed
+
+2013-02-28  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Update required version information.
+
+	Clean up preprocessor directives and some obsolete cmake options.
+	 * Make use of built in defines VALA_X_Y.
+	 * Use LIB_X_Y instead of LIB_LESS_X_Y (now >= X_Y instead of < X_Y).
+	 * Output some warnings in special not recommended library version situations.
+	 * Fix gdl-3.0 <= 3.6.2 and vala <= 0.20 issue.
+
+2013-02-27  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Make search widget toggable with menu item or toolbutton.
+	 * Add new signal "show_search" in UiSearch to synchronize Button and menu
+	   item.
+	 * Add menu item for gdl grip hide/locking.
+	 * Add accelerators for gdl grip hide/locking and search show/hide.
+	 * Add -DGDL_LESS_3_6 to decide between new is_closed() or old flags field.
+	 * Standardize menu naming (item_MENUPART_NAME).
+
+2013-02-27  Linus Seelinger  <S.Linus@gmx.de>
+
+	Valama: Added application output widget
+
+2013-02-27  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Name gnome-icon-theme-symbolic as dependency.
+
+2013-02-27  Linus Seelinger  <S.Linus@gmx.de>
+
+	Valama: Added search button. Accelerator does not work yet.
+
+2013-02-27  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Make GLib a standard using directive (guanako).
+
+2013-02-27  Linus Seelinger  <S.Linus@gmx.de>
+
+	Valama: Recompile after mode change
+
+	Valama: Improved build handling (auto-build before launch if necessary)
+
+	Valama: Switched accelerators to GDL constants; Added accelerators for building/launching (F keys don't seem to work??)
+
+	Valama: Cured Valama's paranoia by correctly handling .vala vs .vapi; minor warning fixes
+
+2013-02-26  Linus Seelinger  <S.Linus@gmx.de>
+
+	Valama: Added method to focus a Gdl.DockItem; Auto-focus build output
+
+	Valama: Fixed welcome/main screen switching
+
+2013-02-26  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	curfilestruct: Check all for all accessibility types (e.g. protected).
+
+2013-02-26  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Improve UiReport.
+	 * Add toolbutton to switch between errors of single file and errors of whole
+	   project. Rebuild list only if needed.
+	 * ReportWrapper: Also track deprecated elements and notes. Use two lists: One
+	   internal list to build up new results and one public list. This will keep
+	   the public list in consistent state.
+	 * Add new signal guanako_update_started and emit right before guanako update.
+	 * Add new (temporary) option --debuglevel. Currently valac errors have
+	   level 2.
+
+	 * Todo items:
+	    - Currently there is no difference between experimental and normal
+	      warnings. Could be difficult to map SourceReference to CodeNode (which
+	      is needed to get exp info).
+	    - Result may not be sorted (by lines or files). Set or Hash->Set may help.
+	    - Currently no gui element to filter (possibility is provided with flags
+	      enum).
+	    - Use -d/--debug with an optional argument and replace --debuglevel.
+
+	 * Problems:
+	    - Vala context update behaves very differently in producing errors when
+	      doing small changes in a single file.
+
+2013-02-26  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Improve gdl (un)locking capatibility integration.
+	 * Improve UiElement class.
+	    - Drop element_name field and replace it with generic get_name() method.
+	    - Connect locking and unlocking signals directly within base constructor.
+	    - Add (un)locking signals to MainWidget. In order to connect from
+	      UiElement to MainWidget, split initialization in two parts:
+	        * The first part builds up base stuff like main dock, main menu, main
+	          toolbar.
+	        * The second part initialize alle UiElements, menu items and tool
+	          buttons. This step will be the plugin loading part in future.
+	    - Add option to disable (un)/locking capatibility by setting locking
+	      field (use this with UiSourceViewer);
+	 * Make IdeModes enum a flag enum to combine multiple values easily. Add some
+	   helper methods.
+	 * Change ProjectBrowser label to currently used project.
+	 * Drop no longer needed UiElementPool.
+	 * Work arround gtk issue with Widget.remove assertion.
+	 * Reanable menu.
+	 * Use standardized names for gdl items (wdg_*).
+	 * Add some docstrings.
+
+2013-02-25  Linus Seelinger  <S.Linus@gmx.de>
+
+	Valama: Hide breakpoints widget when not in DEBUG mode
+
+	Valama: Improved GUI - general gnomeification ;) (Loosely following design proposal https://live.gnome.org/Design/Apps/IDE)
+	 * Deactivated menu bar (Once the about dialog is added to the welcome screen, it should be obsolete)
+	 * Allow returning to welcome screen (Makes open project button obsolete)
+	 * Initial work on a GUI lock (GDL still causes some drawing trouble)
+	 * Abstracted UIElements' public widget (Necessary for lock), UIElements now hold a reference to their Gdl.DockItems
+
+2013-02-24  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Fix race condition with g_type_check_instance_is_a.
+
+	Catch all errors and remove unused var.
+
+2013-02-23  Linus Seelinger  <S.Linus@gmx.de>
+
+	Valama: Improved recent projects display
+
+	Valama: Allow opening existing projects via welcome screen
+
+	Valama: Improved welcome screen
+
+2013-02-22  Linus Seelinger  <S.Linus@gmx.de>
+
+	Valama: Focus fixes
+
+2013-02-22  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Minor null check, don't use stdxxx.printf within Valama.
+
+	jump_to_position will jump to column and open file if necessary.
+	 * Focus grabbing does not work.
+
+2013-02-22  Linus Seelinger  <S.Linus@gmx.de>
+
+	Valama: Threaded initial guanako update
+	 * Significantly speeds up project loading and should be safe. In case of crashes directly after opening a project, this might need some more work ;)
+
+	Valama: Fixed guanako update signal; Current file structure jumps to current symbol
+
+2013-02-22  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Catch all errors/warnings; reload current structure on Guanako update.
+	 * Add new project signal guanako_update_started which is emitted on start of
+	   Guanako update.
+
+2013-02-22  Linus Seelinger  <S.Linus@gmx.de>
+
+	Valama: One more little recent files fix
+
+	Valama: Little recent projects fix
+
+	Valama: Initial work on a welcome screen
+
+2013-02-21  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Fix no-update issue of current_file_structure (by Linus).
+	 * Make wdg_current_file_structure static and global to fix update issue.
+	 * Add some debug output to current_file_structure.
+
+	Fix CMakeLists.txt typo (gtk-3.0 -> gtk+-3.0).
+
+	Fix gdl appearance (fixes by Linus) and handle --layout as ro.
+	 * Gdl appearance fixes:
+	   - Show all widgets before laoding layout. Otherwise only closed items would
+	     be visible.
+	   - Show main window before adding widgets to open it full screen to not
+	     screw up gdl layout.
+	 * Make --layout file read only again.
+	 * Show some better debug and error messages (gdl layout loading).
+
+2013-02-21  Linus Seelinger  <S.Linus@gmx.de>
+
+	Valama: Moving GDL stuff to widget
+
+	Valama: Fixed undo/redo buttons
+
+2013-02-20  Linus Seelinger  <S.Linus@gmx.de>
+
+	Valama: Further moving to main widget
+
+2013-02-20  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Fixup missing type -> map_icon mappings. Remove some debug output.
+
+	Complete symbol iterations and add lots of icons.
+	 * Note: Some private/public icons are identical. They are copied from Anjuta.
+
+2013-02-19  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Display also enum, errordomain etc. in current_file_structure widget.
+
+	Add typename string attribute to Guanako iterators.
+	 * Note: iter_symbol has the current type name. iter_statement_callback has
+	         the previous type name (type of statement).
+	 * Add string to pixmap method.
+	 * Use icons in symbolbrowser.
+	 * Rename iter_callback_return to IterCallbackReturns and make all enum values
+	   uppercase.
+
+2013-02-19  Linus Seelinger  <S.Linus@gmx.de>
+
+	Valama: Initial work on turning the current UI into a widget
+
+2013-02-19  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Code cleanup. Added command line options to all files/dirs.
+	 * Guanako:
+	    - Remove gtk dependency. Guanako.Project constructor can now throw erros.
+	    - Possibility to load syntax from custom file.
+	    - Move debug_msg in Guanako namespace.
+	 * Valama:
+	    - New options: syntax, templates, buildsystems, layout to pass custom
+	      files / dirs locations. This will make a local run directly from source
+	      code possible (no installation required anymore).
+	    - Separate window_main completely from source_viewer. source_viewer is
+	      docked as all other widgets.
+	    - Move IDEModes to project context and rename it to IdeModes. Field is
+	      renamed from IDEMode to idemode.
+	    - Update some valadoc comments.
+	    - Update README.
+
+2013-02-18  Linus Seelinger  <S.Linus@gmx.de>
+
+	Valama: Unified method for jumping to a specific location
+
+2013-02-18  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Add lock to private build of symbols.
+
+	Make breakpoint buttons more sensitive. Capture some edge cases.
+
+2013-02-18  Linus Seelinger  <S.Linus@gmx.de>
+
+	Valama: Improved current file structure usability
+
+2013-02-17  Linus Seelinger  <S.Linus@gmx.de>
+
+	Valama: Activate current symbol in current file structure
+
+2013-02-17  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Add option --reset-layout to load system layout.
+
+	Use TreeSet as sorted list for files and packages.
+	 * Guanako: Add sourcefiles property for manually added source files.
+
+2013-02-17  Linus Seelinger  <S.Linus@gmx.de>
+
+	Valama: Minor GUI improvements
+
+	Valama: Forgot to remove unnecessary stuff
+
+	Valama: Added icons to current file structure stuff
+
+2013-02-16  Linus Seelinger  <S.Linus@gmx.de>
+
+	Merge branch 'master' of https://github.com/Valama/valama
+
+	Valama: Improved text tags
+
+2013-02-16  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Don't try to unlink files not associated with guanako project.
+
+	Make it < gtk 3.6 compatible again.
+
+2013-02-16  Linus Seelinger  <S.Linus@gmx.de>
+
+	Merge branch 'master' of https://github.com/Valama/valama
+	Conflicts:
+		src/ui/search.vala
+
+	Valama: Further work on search widget
+
+2013-02-16  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Merge and fix other absolute/relative path issues.
+
+	Use absolute paths.
+
+2013-02-16  Linus Seelinger  <S.Linus@gmx.de>
+
+	Merge branch 'master' of https://github.com/Valama/valama
+
+	Valama: Search: Improved results viewer, allow jumping to result
+
+2013-02-16  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	cmake: Regenerate docs only on source file changes.
+
+2013-02-15  Linus Seelinger  <S.Linus@gmx.de>
+
+	Valama: Initial work on a (threaded) search widget
+
+2013-02-15  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Remove localization of autogenerated project.cmake.
+
+2013-02-15  Linus Seelinger  <S.Linus@gmx.de>
+
+	Valama: Little fix in breaktpoints UI
+
+2013-02-14  Linus Seelinger  <S.Linus@gmx.de>
+
+	Valama: Separating source viewer from WindowMain
+
+2013-02-14  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Fix command line parsing -> project load.
+
+	Reorganize source file structure.
+
+	Update layout.
+
+2013-02-14  Linus Seelinger  <S.Linus@gmx.de>
+
+	Valama: Fixed a few Gtk warnings
+
+	Valama: Current file structure browser (need a good name for it :) ) allows jumping to the selected symbol
+
+	Merge branch 'master' of https://github.com/Valama/valama
+	Conflicts:
+		guanako/guanako.vala
+
+2013-02-13  Linus Seelinger  <S.Linus@gmx.de>
+
+	Valama: Added bookmark-like display of current source file (Not completed yet)
+
+2013-02-13  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Catch missing errors and replace deprecated VBox.
+
+	Work arround #693127 and make vapi fix obsolete.
+
+2013-02-13  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Merge branch 'catchemall'
+	Conflicts:
+		guanako/guanako_frankenstein.vala
+		src/build_project.vala
+		src/main.vala
+		src/project.vala
+		src/ui_main.vala
+
+	Clean up some other whitespace code issues and use *msg methods in Valama.
+
+2013-02-13  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Catch all errors, add debug_msg to Guanako and add debug parameter.
+	 * Also clean up the code (incl. templates) a bit.
+	 * Set buildsystem of templates to cmake.
+
+2013-02-13  Linus Seelinger  <S.Linus@gmx.de>
+
+	Valama: Initial support for IDE modes
+
+2013-02-13  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Use debug option instead of "macro" in Valama part.
+
+2013-02-13  Linus Seelinger  <S.Linus@gmx.de>
+
+	Merge branch 'master' of https://github.com/Valama/valama
+
+	Forgot to add a file.
+
+2013-02-13  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Update project file directly after first load and after setting changes.
+	 * Make sure to save project name / other settings immediately to prevent data
+	   loss if Valama crashes etc.
+
+2013-02-13  Linus Seelinger  <S.Linus@gmx.de>
+
+	Merge branch 'master' of https://github.com/Valama/valama
+
+	Guanako/Valama: FrankenStein works now!
+	 * Still only valama buildsystem
+	 * Added GUI for handling FrankenStops and FrankenTimers
+	 * FrankenStein might fail to compile in case of invalid stop/timer positions
+
+2013-02-13  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Fix cmake missing target issue of templates.
+
+	Update template project files with version info.
+
+	Add version information to project file. Closes #31
+
+	Disable doc generation by default. Closes #30
+	 * This is a bug in valadoc which ignores conditionals.
+
+2013-02-12  Linus Seelinger  <S.Linus@gmx.de>
+
+	Adjusted a disclaimer
+
+	Guanako: Began work on Frankenstein (DBus-based breakpoints, performance measurement etc)
+
+	Guanako: Fixed upper/lower case sorting
+
+	Guanako: Improved performance (more efficient sorting). Eats CPU cores for breakfast now.
+
+2013-02-11  Linus Seelinger  <S.Linus@gmx.de>
+
+	Valama: Initial work on abstracting the buildsystem
+
+2013-02-10  Linus Seelinger  <S.Linus@gmx.de>
+
+	Valama: Stopping the application works now
+
+2013-02-09  Linus Seelinger  <S.Linus@gmx.de>
+
+	Valama: Starting application via GUI and added an output signal (stopping does not work yet)
+
+2013-02-09  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Use getter method for gdl item child.
+	 * This fix will be released with valac 0.19+.
+	   Unfortunately older vapis has to be updated manually. Any workarround to
+	   resolve this without too much effort (e.g. inherit gdl classes) within
+	   Valama code is welcome.
+	 * Cut some long lines.
+
+	Fix file names in disclaimer.
+
+2013-02-08  linus  <linus@Zuse.(none)>
+
+	Valama: Added (useful) compiling via GUI, show progress (cmake based)
+
+2013-02-07  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Enable threading as default.
+	 * No changes in application behaviour because this flag isn't used anywhere.
+
+	Build docs by default if valadoc was found.
+
+	valac-0.16 no longer supported.
+
+2013-02-07  linus  <linus@Zuse.(none)>
+
+	Valama: Threaded building of completion proposals
+
+	Guanako: Made a lock smaller
+
+	Guanako: Fixed threading crashes / freezes, cleaner structure
+
+	Guanako: Initial multithreaded autocompletion
+
+2013-02-05  linus  <linus@Zuse.(none)>
+
+	Valama: Improved guanako update timeout; path fix
+
+2013-02-04  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Build paths with correct seperator.
+
+2013-02-04  linus  <linus@Zuse.(none)>
+
+	Valama: Error report works correctly with multiple source files
+
+2013-02-04  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Make docking gdl 3.4 compatible.
+	 * There are still some warnings but it doesn't seem there are any drawbacks.
+	   gdl 3.6 and higher still works fine.
+
+	Make it 0.16 compatible again (text iterators).
+
+	Install text icon correctly.
+	 * Add new DESTINATION argument to convert_svg_to_png.
+	 * On buffer iteration foreach_buffer use SourceBuffer (and not only
+	   buffertext).
+
+	Reporter: Don't update if no valid buffer exists (e.g. at the beginning).
+
+	Merge branch 'cmdline'
+
+	Add command line parsing functionality.
+
+2013-02-04  linus  <linus@Zuse.(none)>
+
+	Valama: Fixed repeated guanako updates
+
+	Valama: Initial real-time error highlighting (Still needs support for all opened SourceViews)
+
+	Merge branch 'master' of https://github.com/Valama/valama
+
+	Valama: Cleaned up the completion provider, proposals should now be positioned correctly. Really should go to bed now.
+
+2013-02-03  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Update README and some comments regarding gdl issues.
+
+	Fix cmake < 0.20 compatibility. And make 0.16 fully compatible.
+	 * Fix 0.16 gdl issue. Invalid cast from Gdl.DockNotebook to Gtk.Notebook
+	   necessary.
+
+	Make Valama compilable with valac < 0.20
+
+	Synchronize cmake buildsystem template.
+
+	Merge branch 'staging'
+
+	Add valama text logo to about dialog. Improve cmake.
+	 * C file generation now only on Vala file changes.
+	 * Add some debug output for buffer change.
+
+2013-02-02  Linus Seelinger  <S.Linus@gmx.de>
+
+	Valama: Do not update completion info when changes occur within the current line (improves completion performance)
+
+2013-01-29  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Update pot file and German translation.
+	 * Re-add guanako files to translation system.
+
+	Don't generate .c files each time (touch them).
+
+2013-01-28  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Merge branch 'valadocs'
+	Conflicts:
+		src/main.vala
+		src/ui_main.vala
+
+	 * Drop unnecessary CodeView class (wrapper for Gtk.SourceView and
+	   Gtk.SourceBuffer).
+
+2013-01-28  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Simplify signal connection and fix warning on first opened buffer.
+	 * Remove srcfocus_changed signal and instead use property notification signal.
+
+	Remove dependency from window to project.
+
+2013-01-26  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Update code documentation.
+	 * All but Guanako and UiElement derived classes completed.
+	 * Work forward to fix #6.
+
+	Strictly separate app from window. Add some valadocs documentation.
+	 * Add wrapper for SourceView to add dirty flag.
+	 * Get rid of some valac warnings (access with this to static members).
+	 * Some minor fixes.
+
+2013-01-24  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Fix dirty flag of new document.
+	 * Simplify current_* properties.
+
+	Mark unsaved files (change gdl icon accordingly). Closes #20
+
+	Fix scope error (try,finally block).
+
+2013-01-23  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Add dirty flag to all buffers.
+	 * Remove guanako again  from Valama project file (it is not working so far).
+
+2013-01-22  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Make cmake code more generic (name all source/vapi files explicitly).
+	 * Add guanako/ to Valama project.
+
+	Add about dialog.
+
+	Add menu, accels and mnemorics; redo and undo implementations.
+
+	Focus newly opened files.
+
+2013-01-21  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Split build system files from templates.
+	 * Template path has changed. New installation of Valama is required to use
+	   templates.
+
+2013-01-19  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Merge branch 'project-browser-iters'
+
+	Fix add and remove button behavior (project browser).
+	 * Improve iterator handling.
+	 * Problems:
+	    - Removal of files does not work (project browser vs. project objects not
+	      synchronised).
+	    - How to differentiate between project and buildsystem files?
+	      In future implementations the buildsystem is a plugin so project browser
+	      has only to care about source files. Therefore hardcoded workaround is
+	      ok to fix this until buildsystem plugin comes.
+	 * There are some duplicate code parts (TreePath and TreeIter stuff).
+
+	Bump required cmake version to 2.8.4 to make it more Windows compatible.
+
+2013-01-19  Linus Seelinger  <S.Linus@gmx.de>
+
+	Fixed the fix (wrong path used -.-)
+
+	Merge branch 'master' of https://github.com/Valama/valama
+
+	Valama: Fixed TextIter related crashes when running guanako updates threaded (Always update threaded, now that it works); Fixed wrong usage of guanako's update_file (Runs far smoother now, doesn't duplicate symbols); Fixed a segfault related to proposal selection
+
+2013-01-18  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Omit directories on file selector (project browser).
+	 * Also set sensitivity of add and remove buttons correctly.
+
+	Build up file tree in project browser with nodes.
+
+2013-01-15  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Use Path.build_path in Guanako project.
+
+	Replace join_paths method by GLib.Path.build_path.
+
+2013-01-14  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Remove file types from project file.
+	 * This should be done later with special plugins (every plugin has to know
+	   which file types are valid.).
+
+2013-01-12  Linus Seelinger  <S.Linus@gmx.de>
+
+	Project Browser: Only set add/remove buttons to sensitive when an action is defined
+
+2013-01-11  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Simplify opening of project/buildsystem file.
+
+	Make buildsystem files available in project browser and sort it.
+	 * Dirty solution to sort lists at the end and not at time of insertion. But
+	   with a few items it does not hurt.
+
+	Update readme (add license paragraph).
+
+	Update copyright years and set author to Valama development team.
+	 * See AUTHORS (or git blame) for all authors/contributors.
+
+	Update pot and po files (relative paths).
+
+	Fix cmake and gettext to work with relative paths.
+
+2013-01-10  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Preserve expansion of Project browser. Add new config items.
+	 * New config items (not really used atm):
+	   - source-directories
+	   - source-files
+	   - file-types
+	   - buildsystem-directories
+	   - buildsystem-files
+	   - buildsystem-file-types
+
+2013-01-07  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Update Readme
+	 * gee-0.8 supported
+	 * Packaging branch hint.
+
+	Code cleanup (pushed for LSenf).
+
+	Switch back to gee-1.0.
+	 * Switch back because Debian currently hasn't gee-0.8 in repository.
+	   See #695982
+	 * Project is still and will be compatible to gee-0.8 .
+
+	Proper implementation of method for all opened views (delegate).
+
+	Merge branch 'master' into multiple-buffers
+	Conflicts:
+		src/main.vala
+		src/project.vala
+
+	Don't overwrite files with false content. Closes #25
+	 * Dirty hack but with ViewMap in 8fe440b55f4a323d85514837f0499829b2b35e74
+	   this can be done the smart way.
+	 * App might crash. Workarround: Disable completion provider.
+
+2013-01-06  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Fix vapi paths in project browser.
+	 * Thanks to august0815 for reporting!
+
+2013-01-05  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Handle source file focus detection completely with MainWindow.
+	 * Completion provider will crash the app.
+	 * Newly opened tabs aren't automatically selected.
+	 * New tabs aren't opened right beside the previous selected tab.
+
+	Switch to gee-0.8 and use custom struct for vieworder (no HashMap).
+
+2013-01-04  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Add join_paths method to join paths together.
+
+2013-01-02  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	cmake: Remove debug output.
+
+	cmake: Support custom library paths (options) from pkgconfig.
+	 * This will support all non-trivial library flags. E.g.
+	    $ pkg-config --libs mylib
+	    -L/usr/local/lib -lmylib
+
+	Update Readme. gdl recommendation and libvala-0.16 hint.
+
+	Merge branch 'multiple-buffers'
+	Conflicts:
+		src/ui_main.vala
+
+	Set default windowed size. Gdl tabs work properly with >= 3.6.
+
+2013-01-02  Linus Seelinger  <S.Linus@gmx.de>
+
+	Update README.md
+	Added GDL to deps
+
+	Little GDL fix
+
+	Project browser: Always expand
+
+2013-01-02  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Merge branch 'multiple-buffers'
+	Conflicts:
+		src/project.vala
+
+	Support multiple independent source file buffers. Closes #14
+	 * Basic implementation:
+	    - All source files belong to an extra Gdl.Dock.
+	    - Currently there is no proper buffer_close signal handling (check if buffer
+	      is dirty -> dialog). Atm closing doesn't do anything.
+	    - "Interrupt" of closing a buffer is not properly implemented (tab
+	      position can change).
+	    - Not saved ("New document") view is not usable (completion and saving is
+	      not working)
+	 * Some minor improvements.
+
+2013-01-01  Linus Seelinger  <S.Linus@gmx.de>
+
+	Fixed adding packages via project_browser
+
+2012-12-31  Linus Seelinger  <S.Linus@gmx.de>
+
+	Added a missing ui file
+
+	Fixed a vala 0.16 compatibility issue. Building still does not work though (issue reported)
+
+	Guanako: Fixed dependency handling in remove_package; Valama: Show a warning dialog when vapis are not found
+
+2012-12-30  Linus Seelinger  <S.Linus@gmx.de>
+
+	Fixed UiReport error counting (Funny segfaults...)
+
+	Removed threads from UI updates
+
+2012-12-29  Linus Seelinger  <S.Linus@gmx.de>
+
+	First After-Christmas-Commit! :) Guanako: Support interfaces implemented by classes; Syntax rules: Simplified signal rules
+
+2012-12-23  Linus Seelinger  <S.Linus@gmx.de>
+
+	Merge branch 'master' of https://github.com/Valama/valama
+
+	Include config.vapi in sources, do not allow removing it via project_browser
+
+2012-12-23  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Make symbol browser and report element not-closable.
+	 * Temporary solution because there is no possibility to open/add those ui
+	   elements once closed.
+
+	Merge branch 'gdl'
+
+2012-12-23  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Implement Gdl elements. Closes #13
+	 * All four ui elements are now gdl items so it is possible to move them
+	   arround.
+	   An exception is the source view item which is locked to make sure at least
+	   one item is connected to the main window (only a design decision). With
+	   multiple supported source buffers this can be extended to only be locked if
+	   one single source buffer is open.
+
+	   New class MainWindow now replaces Window class and provides an abstract
+	   docking interface.
+
+	   - Layout is saved on window close to ~/.config/valama/layout.xml;
+	     global layout is available as a fallback in share/valama/layout.xml
+
+	   On window resize the layout gets screwed up. A layout reload could fix that
+	   in some cases. So in future revisions this could be done. (But even in
+	   Anjuta this isn't implemented.)
+
+	   Current solution is probably not very extendable (for new ui elements)
+	   (plugin support).
+
+2012-12-22  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Merge pull request #18 from Overscore/master
+	French translation update. Thanks to Overscore!
+
+2012-12-22  Overscore  <github@lorang.net>
+
+	French translation update
+
+2012-12-21  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Fix coding style.
+	 * Also remove some no longer needed comments.
+
+2012-12-21  Linus Seelinger  <S.Linus@gmx.de>
+
+	Guanako: Clone call parameters for "?" options
+
+	Merge branch 'master' of github.com:Valama/valama
+
+	Guanako: Simplified CallParameter class
+
+	Guanako: Fixed return values; Switch compare from bool back to void
+
+	Guanako: Support array / array element access
+
+2012-12-21  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Merge pull request #16 from Overscore/master
+	French translation update. Thanks to Overscore!
+
+2012-12-21  Linus Seelinger  <S.Linus@gmx.de>
+
+	Guanako: Array stuff
+
+2012-12-20  Overscore  <github@lorang.net>
+
+	French translation update
+
+2012-12-20  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Abstract cmake valadocs generation. Add i18n support to Guanako.
+	 * Currently there is no check if documentation is complete so once added to
+	   target all (or invoked manually via docs target) it will build docs from
+	   scratch.
+	   Same issue for translations.
+
+	Merge branch 'overscore-i18n-fr'
+	French translation added. Thanks to Overscore!
+
+2012-12-20  Overscore  <github@lorang.net>
+
+	French translation
+
+2012-12-20  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Rearrange cmake stuff. Complete gettext integration.
+	 * FYI: In last commit I forgot to add cmake/Gettext.cmake (which is now
+	   completely redesigend to fit in Valama cmake system).
+
+2012-12-19  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Add sample German translation.
+	 * Especially cmake macro is not well configured to work smoothly with Valama.
+	   (Some unneeded functionality provided by macro and some dirty hacks in
+	   Valama CMakeLists.txt to make it work.) Hardcoded paths etc.
+	   At this point localization is in theory possible (in fact it is probably to
+	   early in development to start with i18n) but there won't be any bigger
+	   changes for translators (only cmake integration will change a bit or more).
+
+	Make all related strings translateable.
+
+	Prepare gettext transition. Improve cmake stuff.
+
+2012-12-16  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Merge pull request #6 from Overscore/master
+	valama.desktop fix. Thanks to Overscore.
+
+	FileTransfeR: Don't move each file in tree on same filesystem.
+	 * Also error if not enough space is available (and transfer goes to different
+	   filesystem).
+
+2012-12-16  Overscore  <github@lorang.net>
+
+	Added 2 semicolon to meet freedesktop standard
+
+2012-12-15  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Allow compilation without guanako already installed.
+	 * Thanks to Overscore to report this issue.
+
+2012-12-06  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Support # comments in guanako.lang for gtksourceview.
+
+2012-12-04  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Disable threads for now and enable compiler debug flag.
+	 * There are some problem with gtksourceview and Guanako completion speed so
+	   disable all threads per default (which actually means only run one other
+	   thread at the same time).
+	 * Enable debug compiler flag.
+
+2012-12-03  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Outsource report wrapper and widget.
+
+	Set target glib version to 2.32 for guanako.
+
+	Update docs: UiElement and FileTransfer
+
+2012-12-02  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Also install all icons etc. with docs.
+
+	Auto doc generation (Valadoc). Enhances: #5
+	 * Optional target "doc". Build with `make doc` and install normally.
+
+	Add basic guanako syntax highlighting (gtksourceview).
+	 * Basic means basic.
+
+2012-12-01  Linus Seelinger  <S.Linus@gmx.de>
+
+	Guanako: Support return values in syntax rules; Support arrays
+
+2012-11-30  Linus Seelinger  <S.Linus@gmx.de>
+
+	Syntax rules: Fix in static / instance handling
+
+2012-11-30  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Don't remove original file object after copying.
+
+2012-11-30  Linus Seelinger  <S.Linus@gmx.de>
+
+	Guanako: Do not add source files that already exist
+
+	Guanako: Sorting function case sensitive
+
+	Syntax rules: Slight loss of control over git -.-
+
+	Merge branch 'master' of https://github.com/Valama/valama
+
+	Syntax rules: Fixed assignment and call of static symbols
+
+	Syntax rules: Fixed assignment to static variables
+
+2012-11-30  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Close project dialog properly with window manager exit button.
+
+2012-11-29  Linus Seelinger  <S.Linus@gmx.de>
+
+	Valama: Removed auto indent button, as auto indent is not functional at the moment
+
+	Valama: Fixed broken error report
+
+	Guanako: Eliminate direct access to CodeContext
+
+2012-11-29  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Merge branch 'ui'
+
+	Finish recursive movements.
+	 * Note: The movement method is only interesting on movements on different
+	         filesystems. It is sligthly? slower on movements on same filesystem
+	         because it moves every file object an not only original file object.
+	         The only advantage over the File.move is to provide a counter for
+	         processed files.
+
+	m
+
+2012-11-29  Linus Seelinger  <S.Linus@gmx.de>
+
+	Guanako: Optimized sorting performance (Each object is only sorted once)
+
+	Guanako: Sorting results, avoiding duplications
+
+2012-11-29  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Maximize window to resolve small window problem temporarily.
+
+	Fix copyright headers and add some missing vim modelines.
+
+	Merge pull request #3 from Baldrs/master
+	Monospaced font for editor. Thanks to Baldrs. Closes #3
+
+2012-11-29  baldrs  <Manwe64@gmail.com>
+
+	Changed font to Monospace, removed useless lines from pervious commit
+
+2012-11-29  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Change annyoing small window size to a more appropriate one.
+
+	Provide new FileTransfer class to copy and move files.
+	 * FileTransfer class provides two signal to easily connect progress bar
+	   (number of files and count of bytes transferred).
+	   Be careful: Currently it is not possible to move file trees (original
+	               directories aren't removed.)
+
+2012-11-28  baldrs  <Manwe64@gmail.com>
+
+	Monospaced font, indent
+
+2012-11-28  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Don't remove manually added package automatically if vapi wasn't found.
+
+2012-11-27  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Use (in)valid_input signals on project settings dialog.
+
+	Make custom Edit class rely on non empty text.
+	 * Add two signals valid_input and invalid_input to signal if text is empty or
+	   not. This allows to control sensivity of buttons.
+	   Closes: #2
+
+	Add recursive copy operation.
+
+	Catch unhandled errors.
+
+	Merge branch 'master' into ui
+
+	Only add vapi to context if file exists.
+
+2012-11-26  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Support threads with valac 0.16.
+	 * Possible fix for #1.
+	   But it introduces (at least for me) a new bug on project change. See
+	   discussion: https://github.com/Valama/valama/issues/1
+
+	Merge branch 'master' into ui
+
+2012-11-26  Linus Seelinger  <S.Linus@gmx.de>
+
+	Removed a binary added by mistake
+
+	Templates: E-Mail fix that broke XML parsing
+
+	Merge branch 'master' of https://github.com/Valama/valama
+
+	Templates: Added clutter template
+
+2012-11-26  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Remove SymbolBrowser update on source file save.
+
+2012-11-26  Linus Seelinger  <S.Linus@gmx.de>
+
+	Templates: Added simple_gtk template
+
+2012-11-26  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Exit properly on cancelled create_project dialog.
+
+2012-11-25  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Merge branch 'ui'
+	Update class names and change some minor whitespaces issues.
+
+	Conflicts:
+		src/main.vala
+
+2012-11-25  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Add threading support for ui elements.
+	 * Introduce new base class: UiElement
+	   Other UI classes like ProjectBrowser or SymbolBrowser are now derived from
+	   this class.
+	   The base class provides basic dependency support (only threaded not
+	   sequentially atm).
+	   Public functionality is given over update() call. The derived classes has to
+	   implement a custom build() method to update their own interface. The
+	   update() method then calls all build() methods of all dependencies of all
+	   dependencies etc.
+	   So if the interface (reverse) depends on others, register those reverse
+	   dependencies with connect(UiElement) method.
+
+	   Dependency resolution is very basic so be careful to avoid circular
+	   dependencies.
+
+	   To change shared ValamaProject of these elements, call update(ValamaProject)
+	   with a new project.
+
+	   There exists a pool for all toplevel elements (independent elements) but
+	   this will probably go or change with GDL.
+
+	 * Some naming conventions: classes are written the "camel" way:
+	   ValamaProject, ProjectBrowser, SymbolBrowser
+
+	 * New macro is supported: DEBUG
+	   This is enabled by default and there is atm no cmake option that turns it
+	   off. This will change later (DEBUG off and an cmake option).
+
+2012-11-25  Linus Seelinger  <S.Linus@gmx.de>
+
+	Templates: Added cmake structure to Plain Vala template, should be fully functional now
+
+	Creating projects based on templates works; Show project creation dialog if valama is called without arguments
+
+2012-11-25  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Install app icon to share/pixmaps/.
+
+2012-11-25  Linus Seelinger  <S.Linus@gmx.de>
+
+	cmake: install templates
+
+	Deleted a temp file
+
+	Initial work on project templates
+
+2012-11-24  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Merge branch 'master' into ui
+
+	Let valama_project.load_project_file() throw LoadingError.
+	 * valama_project can no throw a LoadingErorr which is thrown by
+	   load_project_file method if xml file (.vlp) parsing does not succeed.
+	   This is not properly handled if Valama is started with an invalid project
+	   file. But this should be done with an easier interface for all GUI elements
+	   because all of them needs the valama_project class.
+	   So fixing this issue is related to roadmap 1.0: 4. GDL
+	 * Additionally check inode on Unix systems (disable with NOT_UNIX macro) to
+	   prevent opening same file.
+
+	Let valama_project.load_project_file() throw LoadingError.
+	 * valama_project can now throw a LoadingErorr which is thrown by
+	   load_project_file method if xml file (.vlp) parsing does not succeed.
+	   This is not properly handled if Valama is started with an invalid project
+	   file. But this should be done with an easier interface for all GUI elements
+	   because all of them needs the valama_project class.
+	   So fixing this issue is related to roadmap 1.0: 4. GDL
+	 * Additionally check inode on Unix systems (disable with NOT_UNIX macro) to
+	   prevent opening same file.
+
+	Set some regexes to ignorecase.
+
+	Abstract project dirs and supported source file suffixes.
+	 * valama_project class:
+	   - project_source_dirs and project_file_types are string[] properties which
+	     include project dirs (default: src/) and source file suffixes (default:
+	     .vala).
+	 * Furthermore compare file name on new project load. This does not check
+	   if projects are *really* different (e.g. because links, mounts).
+
+	Fix project syntax.
+
+2012-11-23  Linus Seelinger  <S.Linus@gmx.de>
+
+	Clean completion proposal insertion; Syntax rules: Support ref / out when passing parameters
+
+	Support structs
+
+2012-11-23  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Merge branch 'ui'
+
+	Open existing projects.
+
+2012-11-23  Linus Seelinger  <S.Linus@gmx.de>
+
+	Syntax rules: Support templates and loops
+
+2012-11-23  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Install .desktop file.
+
+	Fix file header description.
+
+	Generate thumbnail icons.
+	 * Note: There is no postinst hook to update icon cache. Let the distros decide
+	   how to manage this.
+
+2012-11-22  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Initial commit.
+
+	Finish guanako transition.
+
+2012-11-22  Linus Seelinger  <S.Linus@gmx.de>
+
+	Syntax rules: Unified method call parameters
+
+	Avoid huge terminal output when loading a project caused by superfluous completion info updates
+
+	Syntax rules: Eliminate $Object, $Value improved
+
+	Syntax rules: Improved assignments and method calls; Guanako: Fixed a segfault
+
+2012-11-20  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Fix guanako soname (1 vs. version 1.0).
+
+	Fix ftbfs with debhelper 9 (hardening flags).
+
+	Separate Guanako as separate library.
+
+2012-11-17  Linus Seelinger  <S.Linus@gmx.de>
+
+	Syntax rules: Improved if statements and signal connections
+
+2012-11-16  Linus Seelinger  <S.Linus@gmx.de>
+
+	Parser: Also differentiate member binding type INSTANCE
+
+	Parser: Support exclusively getting static symbols (<static> modifier for syntax rules); Syntax rules: initial differentiation of member binding
+
+2012-11-13  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Smooth exception handling for all thrown errors.
+	 * Many code style fixes. Name conventions have to be done separately.
+
+2012-11-12  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Manual corrections to be 100% compatible with master.
+
+	Merge branch 'master' into exception_handling
+
+2012-11-12  Linus Seelinger  <S.Linus@gmx.de>
+
+	Improved syntax rules
+
+2012-11-11  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Merge branch 'master' into exception_handling
+	Conflicts:
+		src/main.vala
+
+	Readd open new file button.
+
+	Allow adding to toplevel and switch to other file on removal.
+
+	Merge branch 'master' of github.com:Valama/valama
+
+	File creator dialog: Catch if filename length is zero.
+
+2012-11-11  Linus Seelinger  <S.Linus@gmx.de>
+
+	Allow creating/deleting files from project_browser
+
+2012-11-10  Linus Seelinger  <S.Linus@gmx.de>
+
+	Moved insert_text handler into Entry class
+
+2012-11-10  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	With previous changes in guanako project browser works fine!
+
+	Merge branch 'ui'
+
+	Improve file dialog. Swap valid input check to ui_helpers.
+
+2012-11-10  Linus Seelinger  <S.Linus@gmx.de>
+
+	Parser: One more little name matching fix
+
+	Parser: Fixed name parsing, using regexes
+
+	Better handling of loaded source files
+
+2012-11-10  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Add new file button.
+
+2012-11-10  Linus Seelinger  <S.Linus@gmx.de>
+
+	Package dialog: Do not show packages that are already selected
+
+2012-11-10  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Merge branch 'ui' into exception_handling
+	Conflicts:
+		src/main.vala
+		src/ui_project_browser.vala
+		src/ui_project_dialog.vala
+
+	Add new file button.
+
+	Add tooltips.
+
+	Update README.md over webinterface (minor)
+
+	Sort Vala packages in package dialog.
+
+	Settings dialog: Use SpinButtons for project version.
+
+2012-11-09  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Setup all main.vala error catchers.
+
+2012-11-09  Linus Seelinger  <S.Linus@gmx.de>
+
+	Parser: Ignore empty words; Syntax rules: Completed declarations inside functions
+
+	Removed a little code dinosaur
+
+	Parser: support arbitrary words; Syntax rules: Support var declarations
+
+2012-11-09  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Settings dialog: Control hint label only with timer.
+	 * Label if user input (project name) was invalid now now longer disappears if
+	   valid character was inserted (or removed).
+
+	Merge branch 'master' into exception_handling
+	Conflicts:
+		src/ui_project_dialog.vala
+
+	Add discard button to reset settings and group boxes properly.
+
+	Add cancel option to settings dialog.
+
+	Merge branch 'master' of github.com:Valama/valama
+
+	Catch all thrown exceptions and replace deprecated stuff.
+	 * Gkt.Box is used instead of HBox or VBox. But this will be deprecated soon?
+	   Gtk.Grid is the way to go in future.
+	 * GLib.Thread.create was not replaced.
+	 * Exception catchers are only pseudo catchers atm.
+
+	Fix README spelling mistake and set Valama version to 0.1.2.
+
+	Update README over webinterface.
+
+	Update README (requirements).
+
+	Only save settings if ok is clicked. Check for valid project name.
+	 * Xml file input (.vlp) has to be checked too.
+
+2012-11-07  Linus Seelinger  <S.Linus@gmx.de>
+
+	Parser: Syntax error report in case of missing parameters
+
+	Parser: Use regex; Syntax errors reported instead of some possible segfaults
+
+	Fixed segfault in using directive completion
+
+	Merge branch 'master' of https://github.com/Valama/valama
+
+	Completion: Completed using statements
+
+	Completion: Completed using statements
+
+2012-11-06  Linus Seelinger  <S.Linus@gmx.de>
+
+	Syntax: Whitespace fix; Added using statements
+
+2012-11-04  Linus Seelinger  <S.Linus@gmx.de>
+
+	Vala 0.16 compatibility fix
+
+2012-11-03  Linus Seelinger  <S.Linus@gmx.de>
+
+	Completion: Support "new" expressions and namespaces
+
+2012-11-02  Linus Seelinger  <S.Linus@gmx.de>
+
+	Working on syntax rules and supported types
+
+	Completion: Fixed segfault at end of syntax rule; Fixed passing written text inside completion engine
+
+2012-11-01  Linus Seelinger  <S.Linus@gmx.de>
+
+	Correct parameter handling
+
+2012-10-28  Linus Seelinger  <S.Linus@gmx.de>
+
+	Reworking completion syntax
+
+2012-09-17  Linus Seelinger  <S.Linus@gmx.de>
+
+	Experimental auto-indentation based on libvala
+
+2012-09-15  Linus Seelinger  <S.Linus@gmx.de>
+
+	Handle Enums correctly; GUI version setting
+
+2012-09-14  Linus Seelinger  <S.Linus@gmx.de>
+
+	Complete outsourcing of syntax rules; auto-complete return statements
+
+2012-09-13  Linus Seelinger  <S.Linus@gmx.de>
+
+	Added missing file ( O:-) )
+
+	Multithreaded completion updates (Still slightly aggressive)
+
+2012-09-12  Linus Seelinger  <S.Linus@gmx.de>
+
+	Manage project version via IDE; Introduced project config dialog; Fixed early autocompletion abortion
+
+	Keep project name in project file; write to cmake
+
+	Pass on selected packages to cmake
+
+	Initial info for methods
+
+2012-09-11  Linus Seelinger  <S.Linus@gmx.de>
+
+	Outsourcing cmake packages list
+
+2012-09-11  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	ValaPkgs.cmake: Support compiler options.
+
+2012-09-11  Linus Seelinger  <S.Linus@gmx.de>
+
+	removed a funny code dinosaur
+
+	Ignore missing packages when resolving package dependencies
+
+	Switching to conditional compilation
+
+	Introduce config file
+
+2012-09-11  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Replace syntax depending on Vala version 0.16 or 0.17+
+
+2012-09-11  Linus Seelinger  <S.Linus@gmx.de>
+
+	libvala 0.16/0.18 compatibility fix
+
+2012-09-10  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Fix Ubuntu 12.04 gthread issue and set Vala version to exactly 0.16.
+
+	Update README.md
+	Add missing build dependency libgee-dev.
+
+	Merge branch 'master' of github.com:Valama/valama
+
+	Add new function vala_pkgs to simplify vala integration and pkg-config checks.
+
+2012-09-10  Linus Seelinger  <S.Linus@gmx.de>
+
+	Autocompletion: Added constants; Improved iterators
+
+	Minor deprecation fix
+
+	Use Gee.Set when building completion proposals to avoid duplicates
+
+	Added icons from Anjuta and use them for autocompletion proposals
+
+	Take project file as cli argument
+
+	Package handling: Include child dependencies
+
+	Correctly handle package dependencies
+
+2012-09-09  Linus Seelinger  <S.Linus@gmx.de>
+
+	Added package selection dialog
+
+	Packages can be removed now, symbols are updated
+
+	Working on adding/removing packages
+
+2012-09-08  Linus Seelinger  <S.Linus@gmx.de>
+
+	Proposals can be used now. (wahey!!); Added out/ref to parameters
+
+2012-09-06  Linus Seelinger  <S.Linus@gmx.de>
+
+	Added project saving routine
+
+	Display included packages in GUI; load packages from project file
+
+	Outsourced project class; enhanced completion rules; simplified symbol resolver
+
+2012-09-05  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	cmake: install data/syntax to /usr/share/valama/syntax
+
+2012-09-05  Linus Seelinger  <S.Linus@gmx.de>
+
+	Added comments to syntax file
+
+	Read syntax templates from file
+
+	Working on completion rules
+
+	Added options to syntax templates; Fixed a little whitespace bug
+
+	Using recursive syntax templates for autocompletion; propose keywords
+
+2012-08-27  Linus Seelinger  <S.Linus@gmx.de>
+
+	Initial auto indentation
+
+2012-08-27  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Fix trailing whitespaces.
+	  * It is recommended to use the pre-commit git sample hook if the
+	    editor does not detect such issues.
+
+2012-08-25  Linus Seelinger  <S.Linus@gmx.de>
+
+	Regard using directives in autocompletion
+
+2012-08-24  Linus Seelinger  <S.Linus@gmx.de>
+
+	Improved error report; Autocompletion based on current environment; Make use of scopes for getting accessible symbols
+
+2012-08-23  Linus Seelinger  <S.Linus@gmx.de>
+
+	Introducing template-based autocompletion
+
+2012-08-19  Linus Seelinger  <S.Linus@gmx.de>
+
+	Fixed auto-update symbol and completion infos with nasty workaround
+
+2012-08-17  Linus Seelinger  <S.Linus@gmx.de>
+
+	Symbol browser updates on file saves
+
+2012-08-17  Linus Seelinger  <linus@linus-K52F.(none)>
+
+	Fixed SemanticAnalyzer usage in guanako
+
+2012-08-10  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Add copyright disclaimers and GPLv3 copyright file. Fix indents.
+
+2012-08-08  Linus Seelinger  <S.Linus@gmx.de>
+
+	Fixed foreach iterator visibility
+
+	Save before building
+
+	Fixed a funny completion problem
+
+	Fixed error output
+
+	Fixed build directory creation
+
+	Merge branch 'master' of github.com:Valama/valama
+
+	Include base classes in proposals; Outsourcing; experimental vapi discoverer (voodoo...)
+
+2012-08-08  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Update README.md
+	Add missing deps.
+
+2012-08-08  Linus Seelinger  <S.Linus@gmx.de>
+
+	Autocompletion: Handle new statements
+
+	Propose non-local namespace, symbols and stuff
+
+	Found the @!€++###§ gremlins.
+
+2012-08-07  Linus Seelinger  <linus@linus-K52F.(none)>
+
+	Improved project browser; Save and build function; finding strange gremlins inside vala
+
+	Working on project browser
+
+2012-08-07  Linus Seelinger  <S.Linus@gmx.de>
+
+	Added file update function
+
+	Improved bracket handling in autocompletion
+
+2012-08-06  Linus Seelinger  <S.Linus@gmx.de>
+
+	Added C dependency; removed old compile script
+
+2012-08-06  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Add cmake integration and move source files to src/ directory.
+
+2012-08-06  Linus Seelinger  <S.Linus@gmx.de>
+
+	Working on bracket handling in resolve_symbol
+
+	Merge branch 'master' of github.com:Valama/valama
+
+	Killed some warnings
+
+2012-08-06  Linus Seelinger  <linus@linus-medion.(none)>
+
+	Killed some warnings
+
+2012-08-06  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Update README.md
+
+2012-08-06  Linus Seelinger  <linus@linus-K52F.(none)>
+
+	Replaced tabs with whitespaces; working on completion
+
+	First running version ;)
+
+	Initial commit
+
+2012-08-06  Dominique Lasserre  <lasserre.d@gmail.com>
+
+	Initial commit
