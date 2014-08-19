@@ -165,11 +165,8 @@ pkg_check_modules(GLIB2.0 REQUIRED "glib-2.0")
 pkg_check_modules(GLADEUI2.0 REQUIRED "gladeui-2.0")
 list(REMOVE_ITEM required_pkgs "gladeui-2.0")
 #webkit2gtk-3.0
-compare_version_strings("0.26" "${VALA_SHORTVER}" valares)
-if(valares EQUAL 1)
-  message(STATUS "Use webkit2gtk-3.0 vapi from valac 0.26")
-  list(APPEND vapidirs "--vapidir=${CMAKE_SOURCE_DIR}/extravapi/webkit2gtk-3.0")
-endif()
+message(STATUS "Use webkit2gtk-3.0 vapi from valac 0.25.1")
+list(APPEND vapidirs "--vapidir=${CMAKE_SOURCE_DIR}/extravapi/webkit2gtk-3.0")
 
 set(default_vala_flags
   "--thread"
