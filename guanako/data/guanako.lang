@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+ This file is part of Guanako.
+
+ Copyright (C) 2012, 2013, Valama development team
+
+ Guanako is free software: you can redistribute it and/or modify it
+ under the terms of the GNU General Public License as published by the
+ Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ Guanako is distributed in the hope that it will be useful, but
+ WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ See the GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License along
+ with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
+<language id="guanako" _name="Guanko" version="2.0" _section="Others">
+    <metadata>
+        <property name="line-comment-start">#</property>
+    </metadata>
+    <styles>
+        <style id="comment" _name="Comment" map-to="def:comment"/>
+        <style id="entry-point" _name="Entry Point" map-to="def:function"/>
+        <style id="operator" _name="Operator" map-to="def:keyword"/>
+        <style id="whitespace" _name="Whitespace Keyword" map-to="def:string"/>
+        <style id="variable" _name="Variable" map-to="sh:variable"/>
+        <style id="inline-var" _name="Inline Variable" map-to="def:type"/>
+        <style id="function" _name="Function" map-to="def:preprocessor"/>
+        <style id="names" _name="Names" map-to="def:type"/>
+        <!-- <style id="extra-info" _name="Extra Information" map-to="def:builtin"/> -->
+    </styles>
+
+    <definitions>
+
+        <!-- Use this from sh.lang. -->
+        <!-- we cannot use def:shell-like-comment, because
+             m4.lang needs to replace this context -->
+        <context id="comment" style-ref="comment" end-at-line-end="true" class="comment" class-disabled="no-spell-check">
+          <start>(?&lt;!\S)#</start>
+          <include>
+            <context ref="def:in-comment"/>
+          </include>
+        </context>
+
+        <context id="entry-point" style-ref="entry-point">
+            <match>\b^init_[a-zA-Z_]+[ \t]*$</match>
+        </context>
+
+        <context id="function" style-ref="function">
+            <match>\b^[A-Z][a-zA-Z_]+[ \t]*(:[ \t]*[a-zA-Z_]+[ \t]*)?$</match>
+        </context>
+
+        <context id="operator" style-ref="operator">
+            <!-- <keyword>\|</keyword> -->
+            <match>[\|]</match>
+        </context>
+
+        <context id="whitespace" style-ref="whitespace">
+            <match>\??[_]+</match>
+        </context>
+
+        <context id="inline-var" style-ref="inline-var" end-at-line-end="true">
+            <start>\{</start><end>\}\>?</end>
+        </context>
+
+        <context id="variable" style-ref="variable">
+            <match>\??\$[a-zA-Z0-9_]+</match>
+        </context>
+
+        <context id="names" style-ref="names">
+            <match>\*word</match>
+        </context>
+
+        <!-- <context id="extra-info" style-ref="extra-info"> -->
+        <!--     <start>\<</start><end>\></end> -->
+        <!-- </context> -->
+
+        <context id="guanako" class="no-spell-check">
+            <include>
+                <context ref="comment"/>
+                <context ref="entry-point"/>
+                <context ref="function"/>
+                <context ref="operator"/>
+                <context ref="inline-var"/>
+                <context ref="variable"/>
+                <context ref="whitespace"/>
+                <context ref="names"/>
+                <!-- <context ref="extra-info"/> -->
+            </include>
+        </context>
+
+    </definitions>
+</language>

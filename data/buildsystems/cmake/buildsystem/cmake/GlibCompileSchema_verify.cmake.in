@@ -1,0 +1,33 @@
+#
+# cmake/GlibCompileSchema.cmake.in
+# Copyright (C) 2013, Valama development team
+#
+# Valama is free software: you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by the
+# Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Valama is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+execute_process(
+  COMMAND
+    "${GLIBCOMPILESCHEMA}" "--dry-run" "--schema-file=${GLIB_SCHEMAFILE}"
+  ERROR_VARIABLE
+    stderr
+  OUTPUT_VARIABLE
+    stderr
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+  ERROR_STRIP_TRAILING_WHITESPACE
+)
+if(NOT "${stderr}" STREQUAL "")
+  message(FATAL_ERROR "Schema validation error: ${stderr}")
+endif()
+
+# vim: set ai ts=2 sts=2 et sw=2

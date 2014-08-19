@@ -1,20 +1,115 @@
-<project>
+<project version="0.1">
 	<name>Valama</name>
+	<buildsystem library="false">cmake</buildsystem>
 	<version>
 		<major>0</major>
 		<minor>1</minor>
 		<patch>2</patch>
 	</version>
 	<packages>
-		<package>gobject-2.0</package>
-		<package>glib-2.0</package>
-		<package>gio-2.0</package>
-		<package>gee-1.0</package>
-		<package>libvala-0.18</package>
-		<package>gdk-3.0</package>
-		<package>gtk+-3.0</package>
-		<package>gtksourceview-3.0</package>
-		<package>libxml-2.0</package>
-		<package>guanako</package>
+		<choice all="yes">
+			<package name="libvala-0.26"/>
+			<package name="libvala-0.24"/>
+			<package name="libvala-0.22"/>
+			<package name="libvala-0.20"/>
+		</choice>
+		<package name="clutter-gtk-1.0"/>
+		<package name="gdk-3.0"/>
+		<package name="gdl-3.0" version="3.8" rel="since">
+			<extracheck vapi="extravapi/gdl-3.0/gdl-3.0.vapi" define="GDL_3_9_91">
+				<package name="gdl-3.0" version="3.9.91" rel="since"/>
+				<package name="libvala-0.20"/>
+			</extracheck>
+		</package>
+		<package name="gee-0.8" version="0.10.5" rel="since"/>
+		<package name="gio-2.0"/>
+		<package name="gladeui-2.0">
+			<extracheck vapi="vapi/gladeui-2.0.vapi"/>
+		</package>
+		<package name="glib-2.0" version="2.32" rel="since"/>
+		<package name="gobject-2.0"/>
+		<package name="gtk+-3.0" version="3.9" rel="since">
+			<extracheck vapi="extravapi/gtk+-3.0/gtk+-3.0.vapi">
+				<package name="libvala-0.20"/>
+			</extracheck>
+		</package>
+		<package name="gtksourceview-3.0" version="3.9" rel="since">
+			<extracheck define="GTK_SOURCE_VIEW_3_12">
+				<package name="gtksourceview-3.0" version="3.11" rel="since"/>
+			</extracheck>
+			<extracheck vapi="extravapi/gtksourceview-3.0/gtksourceview-3.0.vapi">
+				<choice all="no">
+					<package name="libvala-0.26"/>
+					<package name="libvala-0.24"/>
+				</choice>
+				<package name="gtksourceview-3.0" version="3.11" rel="before"/>
+			</extracheck>
+		</package>
+		<package name="guanako"/>
+		<package name="libxml-2.0"/>
+		<package name="posix"/>
+		<package name="webkit2gtk-3.0">
+			<extracheck vapi="extravapi/webkit2gtk-3.0/webkit2gtk-3.0.vapi">
+				<choice all="no">
+					<package name="libvala-0.24"/>
+					<package name="libvala-0.22"/>
+					<package name="libvala-0.20"/>
+				</choice>
+			</extracheck>
+		</package>
 	</packages>
+	<source-directories>
+		<directory>src</directory>
+		<directory>src/buildsystem</directory>
+		<directory>src/common</directory>
+		<directory>src/dialogs</directory>
+		<directory>src/project</directory>
+		<directory>src/ui</directory>
+		<directory>src/ui/welcome_screen</directory>
+		<directory>vapi</directory>
+	</source-directories>
+	<ui-directories>
+		<directory>ui</directory>
+	</ui-directories>
+	<buildsystem-directories>
+		<directory></directory>
+		<directory>cmake</directory>
+		<directory>cmake/vala</directory>
+		<directory>po</directory>
+	</buildsystem-directories>
+	<data-directories>
+		<directory>data</directory>
+		<directory>data/buildsystems/cmake</directory>
+		<directory>data/buildsystems/cmake/buildsystem</directory>
+		<directory>data/buildsystems/cmake/buildsystem/cmake</directory>
+		<directory>data/buildsystems/cmake/buildsystem/cmake/vala</directory>
+		<directory>data/templates/clutter</directory>
+		<directory>data/templates/clutter/template</directory>
+		<directory>data/templates/clutter/template/src</directory>
+		<directory>data/templates/clutter/template/vapi</directory>
+		<directory>data/templates/plain_vala</directory>
+		<directory>data/templates/plain_vala/template</directory>
+		<directory>data/templates/plain_vala/template/src</directory>
+		<directory>data/templates/plain_vala/template/vapi</directory>
+		<directory>data/templates/simple_gtk</directory>
+		<directory>data/templates/simple_gtk/template</directory>
+		<directory>data/templates/simple_gtk/template/src</directory>
+		<directory>data/templates/simple_gtk/template/vapi</directory>
+		<directory>extravapi</directory>
+		<directory>extravapi/gdl-3.0</directory>
+		<directory>extravapi/gtk+-3.0</directory>
+		<directory>extravapi/gtksourceview-3.0</directory>
+		<directory>extravapi/webkit2gtk-3.0</directory>
+		<directory>guanako</directory>
+		<directory>guanako/data</directory>
+		<directory>guanako/scanner</directory>
+		<directory>icons</directory>
+	</data-directories>
+	<data-files>
+		<file>AUTHORS</file>
+		<file>COPYING</file>
+		<file>README.md</file>
+		<file>po/de.po</file>
+		<file>po/fr.po</file>
+	</data-files>
 </project>

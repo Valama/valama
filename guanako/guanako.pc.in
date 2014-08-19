@@ -1,13 +1,13 @@
-prefix=@prefix@
-exec_prefix=@exec_prefix@
-libdir=@libdir@
-includedir=@includedir@
-datarootdir=@datarootdir@
-vapidir=@vapidir@
+prefix=@pc_prefix@
+exec_prefix=@pc_exec_prefix@
+libdir=@pc_libdir@
+includedir=@pc_includedir@
+datarootdir=@pc_datarootdir@
+vapidir=@pc_vapidir@
 
 Name: Guanako
 Description: Guanako library
-Version: @version@
-Requires: @guanako_pc_requirements@
+Version: @pc_version@
+Requires: @pc_requirements@
 Libs: -L${libdir} -lguanako
 Cflags: -I${includedir}/

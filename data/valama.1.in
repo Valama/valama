@@ -1,0 +1,72 @@
+.TH VALAMA "1" "@MONTH_DATE@" "Valama @Valama_VERSION@" "User Commands"
+.SH NAME
+Valama \- Next generation Vala IDE
+.SH SYNOPSIS
+\fBvalama\fR
+[\fB-h\fR|\fB--help\fR]
+[\fB-v\fR|\fB--version\fR]
+[\fB--syntax\fR \fIfile\fR]
+[\fB--templates\fR \fIdirectory\fR]
+[\fB--buildsystems\fR \fIdirectory\fR]
+[{\fB-d\fR|\fB--debug\fR} [\fIlevel\fR]]
+[\fB--force\-old\fR]
+[\fB--layout\fR \fIfile\fR]
+[\fB--reset\-layout\fR]
+[\fIfile\fR ...]
+.SH DESCRIPTION
+\fBValama\fR is an integrated development environment (IDE) to support
+creation of Vala applications. Some features:
+.IP
+\(bu intelligent code completion (easily extendible syntax definition file)
+.IP
+\(bu live error checking
+.IP
+\(bu project templates
+.SH OPTIONS
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+Show help.
+.TP
+\fB\-v\fR, \fB\-\-version\fR
+Display version number.
+.TP
+\fB\-\-syntax\fR \fIfile\fR
+Guanako syntax file (used for code completion).
+.TP
+\fB\-\-templates\fR \fIdirectory\fR
+Templates directory.
+.TP
+\fB\-\-buildsystems\fR \fIdirectory\fR
+Build systems directory.
+.TP
+\fB\-d\fR, \fB\-\-debug\fR \fI[debuglevel]\fR
+Output debug information. Be more verbose on higher debug level.
+.TP
+\fB\-\-force\-old\fR
+Force loading of possibly incompatible template or project files.
+.TP
+\fB\-\-layout\fR \fIfile\fR
+Path to GUI layout file.
+.TP
+\fB\-\-reset\-layout\fR
+Load default layout.
+.SH FILES
+.TP
+\fI@DATADIR@syntax\fR
+Default Guanako syntax definition file.
+.TP
+\fI@DATADIR@templates\fR
+Default templates directory. Each template has its own subdirectory with a
+\fItesttemplate.info\fR file for meta information like supported Vala
+versions, package dependencies, etc. In the sub-subdirectory \fItemplate\fR is
+the actual template source code.
+.TP
+\fI@DATADIR@buildsystems\fR
+Default build system plug-in directory. Each build system plug-in has its own
+subdirectory with a \fItestbuildsystem.info\fR file for meta information. In
+the sub-subdirectory \fIbuildsystem\fR is the actual buildsystem template
+code.
+.TP
+\fI@DATADIR@layout.xml\fR
+Default GUI layout file to place widgets like the project browser, reporter,
+etc.
