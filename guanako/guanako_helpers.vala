@@ -458,7 +458,7 @@ namespace Guanako {
         if (vt == null) {
             errmsg (_("DataType is null: %s\n"), relname);
             errmsg (_("Please report a bug!\n"));
-            return "UNKOWN";
+            return "UNKNOWN";
         }
 
         var lblstr = new StringBuilder();
@@ -525,7 +525,7 @@ namespace Guanako {
             } else {
                 errmsg (_("Unknown type: %s (%s)\n"), vt.to_qualified_string(), relname);
                 errmsg (_("Please report a bug!\n"));
-                lblstr.append ("UNKOWN");
+                lblstr.append ("UNKNOWN");
             }
 
             lblstr.append (type_arguments_to_string (vt.get_type_arguments(), relname));
