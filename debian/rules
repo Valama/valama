@@ -17,6 +17,7 @@ override_dh_install:
 	dh_install
 	install -m644 debian/valama.xpm debian/valama/usr/share/pixmaps/
 	install -m644 debian/valama-text.png debian/valama/usr/share/valama/
+	chmod 755 debian/valama/usr/share/valama/buildsystems/autotools/buildsystem/autogen.sh
 
 override_dh_installchangelogs:
 	dh_installchangelogs Changelog

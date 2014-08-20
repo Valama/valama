@@ -4,8 +4,8 @@ Priority: optional
 Maintainer: Dominique Lasserre <lasserre.d@gmail.com>
 Build-Depends: debhelper (>= 9),
          cmake,
-         valac-0.22 | valac-0.20,
-         libvala-0.22-dev | libvala-0.20-dev,
+         valac-0.24 | valac-0.22 | valac-0.20,
+         libvala-0.24-dev | libvala-0.22-dev | libvala-0.20-dev,
          pkg-config,
          libgtk-3-dev,
          libgladeui-dev,
@@ -15,10 +15,12 @@ Build-Depends: debhelper (>= 9),
          libjson-glib-dev,
          libgtksourceview-3.0-dev,
          libgee-0.8-dev,
+         libwebkit2gtk-3.0-dev,
          imagemagick,
+         librsvg2-bin,
          intltool,
          valadoc
-Standards-Version: 3.9.4
+Standards-Version: 3.9.5
 Homepage: https://github.com/Valama
 Vcs-Git: git://github.com/Valama/valama.git
 Vcs-Browser: https://github.com/Valama/valama
@@ -49,8 +51,9 @@ Description: Guanako runtime files
 
 Package: valama-doc
 Section: doc
-Architecture: any
-Description: Vala IDE
+Architecture: all
+Depends: ${misc:Depends}
+Description: Vala IDE documentation
  Valama is the next generation Vala IDE.
  It comes with the guanako Vala autocompletion library and provides easy symbol
  lookups and supports cmake build system.

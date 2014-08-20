@@ -1,0 +1,2 @@
+# Build system data file. Empty template.
+valama: extra-license-file usr/share/valama/buildsystems/autotools/buildsystem/COPYING
