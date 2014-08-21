@@ -27,7 +27,10 @@ Vcs-Browser: https://github.com/Valama/valama
 
 Package: valama
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, libguanako1 (= ${binary:Version})
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+         libguanako1 (= ${binary:Version}),
+         valac
 Description: Vala IDE
  Valama is the next generation Vala IDE.
  It comes with the guanako Vala autocompletion library and provides easy symbol
