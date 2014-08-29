@@ -454,7 +454,7 @@ public class ProjectBrowser : UiElement {
                         project.add_source_file (filename, directory);
                         break;
                     case 1:
-                        filename = ui_create_file_dialog (null, null, directory);
+                        filename = ui_create_file_dialog (null, "ui", directory);
                         project.add_ui_file (filename, directory);
                         break;
                     case 2:
@@ -502,7 +502,7 @@ public class ProjectBrowser : UiElement {
                         project.add_source_file (filename, directory);
                         break;
                     case BrowserPathType.UI:
-                        filename = ui_create_file_dialog (filepath, null, directory);
+                        filename = ui_create_file_dialog (filepath, "ui", directory);
                         project.add_ui_file (filename, directory);
                         break;
                     case BrowserPathType.BUILDSYSTEM:
