@@ -63,26 +63,26 @@ namespace WelcomeScreen {
             var list = new Gtk.ListBox ();
             list.row_activated.connect (row => {
                 bs = (row.get_child() as Gtk.Label).label;
-			});
+            });
             var row = new ListBoxRow();
             var lbl = new Label ("plain");
             row.add (lbl);
             list.add (row);
             ListBoxRow? row_selected = null;
             buildsystems.foreach (entry => {
-				row = new Gtk.ListBoxRow();
-				lbl = new Gtk.Label (entry.key);
-				row.add (lbl);
-				list.add (row);
+                row = new Gtk.ListBoxRow();
+                lbl = new Gtk.Label (entry.key);
+                row.add (lbl);
+                list.add (row);
                 if (row_selected == null && entry.key == info.template.vproject.buildsystem) {
                     row_selected = row;
                     bs = entry.key;
                 }
-				return true;
-			});
+                return true;
+            });
             list.select_row (row_selected);
-			box.pack_start (list);
-			box.pack_start (check_btn);
+            box.pack_start (list);
+            box.pack_start (check_btn);
             check_btn.active = info.template.vproject.library;
             frame.add(box);
             var align = new Alignment (0.5f, 0.1f, 1.0f, 0.0f);

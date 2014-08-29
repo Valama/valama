@@ -247,9 +247,9 @@ public class ValamaProject : ProjectFile {
      */
     internal ValamaProject.empty(string project_file) throws LoadingError
     {
-		base.empty(project_file);
-		constructor_init (null, true, false);
-	} 
+        base.empty(project_file);
+        constructor_init (null, true, false);
+    } 
     
     public ValamaProject (string project_file,
                           string? syntaxfile = null,
@@ -1095,7 +1095,7 @@ public class ValamaProject : ProjectFile {
         debug_msg (_("Save project meta information: %s\n"), path);
         var writer = new TextWriter.filename (path);
         writer.set_indent (true);
-        writer.set_indent_string ("\t");
+        writer.set_indent_string ("    ");
 
         //TODO: Meta file version.
         writer.start_element ("project-meta");
@@ -1210,8 +1210,8 @@ public class ValamaProject : ProjectFile {
                 builder = new BuilderCMake(lib);
                 break;
             case "autotools":
-				builder = new BuilderAutotools(lib);
-				break;
+                builder = new BuilderAutotools(lib);
+                break;
             default:
                 warning_msg (_("Build system '%s' not supported.\n"), buildsystem);
                 return false;

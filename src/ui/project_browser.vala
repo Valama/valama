@@ -336,7 +336,7 @@ public class ProjectBrowser : UiElement {
         // TRANSLATORS: E.g. "Project browser update finished!"
         debug_msg (_("%s update finished!\n"), get_name());
     }
-	
+    
     /**
      * Select Vala packages to add/remove to/from build system (with valac).
      */
@@ -437,6 +437,9 @@ public class ProjectBrowser : UiElement {
             bug_msg (_("Could not get iterator in TreeView: %s\n"), path.to_string());
             return;
         }
+        
+        // save current path to prevent future iteration.
+        BrowserPath current_path = new BrowserPath (path);
 
         StoreType store_type;
         string val;
@@ -487,22 +490,26 @@ public class ProjectBrowser : UiElement {
                 }
                 if (store_type == StoreType.FILE)
                     filepath = Path.get_dirname (filepath);
-
+                    
                 string? filename = null;
-                switch (path.get_indices()[0]) {
-                    case 0:
+                switch (current_path.path_type) {
+                    case BrowserPathType.SOURCE:
                         filename = ui_create_file_dialog (filepath, "vala", directory);
                         project.add_source_file (filename, directory);
                         break;
-                    case 1:
+                    case BrowserPathType.PACKAGE:
+                        filename = ui_create_file_dialog (filepath, "vapi", directory);
+                        project.add_source_file (filename, directory);
+                        break;
+                    case BrowserPathType.UI:
                         filename = ui_create_file_dialog (filepath, null, directory);
                         project.add_ui_file (filename, directory);
                         break;
-                    case 2:
+                    case BrowserPathType.BUILDSYSTEM:
                         filename = ui_create_file_dialog (filepath, null, directory);
                         project.add_buildsystem_file (filename, directory);
                         break;
-                    case 3:
+                    case BrowserPathType.DATA:
                         filename = ui_create_file_dialog (filepath, null, directory);
                         project.add_data_file (filename, directory);
                         break;
