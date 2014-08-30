@@ -37,7 +37,7 @@ namespace Project {
           var member_source = member as ProjectMemberValaSource;
           if (member_source.id in included_sources) {
             included_sources.remove (member_source.id);
-            member.project.member_data_changed (this, this);
+            project.member_data_changed (this, this);
           }
         }
       });
@@ -59,8 +59,8 @@ namespace Project {
     public override bool create () {
       return false;
     }
-    public override Ui.Editor createEditor() {
-      return new Ui.EditorTarget(this);
+    internal override Ui.Editor createEditor_internal(Ui.MainWidget main_widget) {
+      return new Ui.EditorTarget(this, main_widget);
     }
     public override string getTitle() {
       return binary_name;

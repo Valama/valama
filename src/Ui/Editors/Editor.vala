@@ -1,14 +1,14 @@
 namespace Ui {
 
-  public abstract class Editor : Object {
+  public abstract class Editor : Viewer {
   
-    public string title;
-  
-    public Gtk.Widget widget;
-    
     public Project.ProjectMember member;
-    
-    public abstract void dispose();
+    public override void save (Xml.TextWriter writer) {
+      writer.start_element ("editor");
+      writer.write_attribute ("memberid", member.id);
+      save_internal (writer);
+      writer.end_element();
+    }
   
   }
 

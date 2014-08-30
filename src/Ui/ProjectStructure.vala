@@ -2,8 +2,6 @@ namespace Ui {
 
   public class ProjectStructure : Element {
   
-    public Gtk.Widget widget;
-  
     private Gtk.ListBox list;
     
     private Gtk.ToolButton btn_add;
@@ -87,7 +85,7 @@ namespace Ui {
       list.show_all();
     }
     
-    public override void dispose() {
+    public override void destroy() {
     
     }
   }

@@ -2,7 +2,8 @@ namespace Ui {
 
   public class EditorTarget : Editor {
   
-    public EditorTarget(Project.ProjectMemberTarget member) {
+    public EditorTarget(Project.ProjectMemberTarget member, Ui.MainWidget main_widget) {
+      this.main_widget = main_widget;
       this.member = member;
       title = "Target";
 
@@ -21,7 +22,6 @@ namespace Ui {
       });
 
       var grid = new Gtk.Grid();
-
 
       var txt_bin_name = new Gtk.Entry();
       txt_bin_name.text = member.binary_name;
@@ -82,6 +82,7 @@ namespace Ui {
             my_member.included_sources.add (m.id);
           else
             my_member.included_sources.remove (m.id);
+          my_member.project.member_data_changed (this, my_member);
         });
         
         row.add (check);
@@ -138,7 +139,7 @@ namespace Ui {
       dependencies_list_btn_edit.clicked.connect (() => {
         if (dependencies_list.get_selected_row() == null)
           return;
-        var my_member = member as Project.ProjectMemberTarget;
+
         var dep = dependencies_list.get_selected_row().get_data<Project.MetaDependency>("metadependency");
         dep.show_edit_dialog();
         update_dependencies_list ();
@@ -152,7 +153,12 @@ namespace Ui {
       update_dependencies_list();
       return box;
     }
+    public override void load_internal (Xml.TextWriter writer) {
 
+    }
+    public override void save_internal (Xml.TextWriter writer) {
+
+    }
     private void dependencies_list_row_selected (Gtk.ListBoxRow? row) {
       dependencies_list_btn_remove.sensitive = row != null;
       dependencies_list_btn_edit.sensitive = row != null;
@@ -173,7 +179,7 @@ namespace Ui {
       dependencies_list.show_all();
     }
 
-    public override void dispose() {
+    internal override void destroy_internal() {
 
     }
 

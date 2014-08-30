@@ -1,12 +1,7 @@
 namespace Ui {
 
   public class MainToolbar : Element {
-  
-    public Gtk.Widget widget;
     
-    private Gtk.ToolButton btn_add;
-    private Gtk.ToolButton btn_remove;
-  
     private Gtk.ComboBoxText target_selector;
   
     public signal void selected_target_changed ();
@@ -72,8 +67,10 @@ namespace Ui {
       foreach (var member in main_widget.project.members) {
         if (!(member is Project.ProjectMemberTarget))
           continue;
-        if (selected_target == null)
+        if (selected_target == null) {
           selected_target = member as Project.ProjectMemberTarget;
+          selected_target_changed ();
+        }
         target_selector.append (member.id, member.getTitle());
       }
       target_selector.set_active_id (selected_target.id);
@@ -82,26 +79,10 @@ namespace Ui {
     private Gtk.Menu build_build_menu () {
         var menu_build = new Gtk.Menu();
 
-        var item_build_build = new Gtk.ImageMenuItem.with_mnemonic ("_Build");
-        /*var image_build_build = new Image();
-        image_build_build.icon_name = "system-run";
-        item_build_build.image = image_build_build;*/
-        //add_accel_activate (item_build_build, Gdk.Key.F7, 0);
-        menu_build.append (item_build_build);
-        item_build_build.activate.connect (() => {
-            //project_builder.build_project();
-        });
-
         var item_build_rebuild = new Gtk.ImageMenuItem.with_label ("Rebuild");
         menu_build.append (item_build_rebuild);
         item_build_rebuild.activate.connect (() => {
             //project_builder.build_project (true);
-        });
-
-        var item_build_cleanbuild = new Gtk.ImageMenuItem.with_label ("Clean build");
-        menu_build.append (item_build_cleanbuild);
-        item_build_cleanbuild.activate.connect (() => {
-            //project_builder.build_project (false, false, true);
         });
 
         var item_build_clean = new Gtk.ImageMenuItem.with_mnemonic ("_Clean");
@@ -112,17 +93,11 @@ namespace Ui {
         item_build_clean.activate.connect (() => {
             //project_builder.clean_project();
         });
-
-        var item_build_distclean = new Gtk.ImageMenuItem.with_label ("Clean all");
-        menu_build.append (item_build_distclean);
-        item_build_distclean.activate.connect (() => {
-            //project_builder.distclean_project();
-        });
         menu_build.show_all();
         return menu_build;
     }
     
-    public override void dispose() {
+    public override void destroy() {
     
     }
   }

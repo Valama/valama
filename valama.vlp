@@ -5,15 +5,11 @@
 	</info>
 	<valasource id="2" filename="src/main.vala"/>
 	<target id="3" buildsystem="valama" binary_name="valama">
-		<source id="16"/>
 		<source id="14"/>
 		<source id="12"/>
-		<source id="15"/>
 		<source id="10"/>
 		<source id="8"/>
-		<source id="5"/>
 		<source id="13"/>
-		<source id="11"/>
 		<source id="6"/>
 		<source id="2"/>
 		<source id="17"/>
@@ -21,6 +17,27 @@
 		<source id="4"/>
 		<source id="19"/>
 		<source id="9"/>
+		<source id="20"/>
+		<source id="23"/>
+		<source id="24"/>
+		<source id="25"/>
+		<source id="27"/>
+		<source id="26"/>
+		<source id="15"/>
+		<source id="16"/>
+		<source id="28"/>
+		<source id="11"/>
+		<source id="5"/>
+		<source id="21"/>
+		<source id="22"/>
+		<source id="30"/>
+		<source id="31"/>
+		<source id="32"/>
+		<source id="33"/>
+		<source id="34"/>
+		<source id="35"/>
+		<source id="36"/>
+		<source id="37"/>
 		<metadependency name="New dependency"/>
 	</target>
 	<target id="18" buildsystem="valama" binary_name="testtarget">
@@ -50,4 +67,33 @@
 	<valasource id="16" filename="src/Ui/Editors/Editor_Target.vala"/>
 	<valasource id="17" filename="src/Ui/Editors/Editor_ValaSource.vala"/>
 	<valasource id="19" filename="src/Ui/MainToolbar.vala"/>
+	<valasource id="20" filename="src/Units/CodeContextProvider.vala"/>
+	<valasource id="21" filename="src/Units/Unit.vala"/>
+	<valasource id="22" filename="src/Ui/Viewer.vala"/>
+	<valasource id="23" filename="src/Project/MetaDependency.vala"/>
+	<valasource id="24" filename="src/Project/Dependency.vala"/>
+	<valasource id="25" filename="src/Project/DependencyPackage.vala"/>
+	<valasource id="26" filename="src/Project/DependencyVapi.vala"/>
+	<valasource id="27" filename="src/Ui/ViewerFactory.vala"/>
+	<valasource id="28" filename="src/Ui/ViewerClassDiagram.vala"/>
+	<classdiagram id="29" name="Grasses Diagramm2">
+		<class name="Ui.Editor" x="305" y="5"/>
+		<class name="Ui.EditorClassDiagram" x="5" y="205"/>
+		<class name="Ui.EditorTarget" x="305" y="205"/>
+		<class name="Ui.EditorValaSource" x="605" y="205"/>
+		<class name="Project.Project" x="5" y="605"/>
+		<class name="Project.ProjectMember" x="305" y="505"/>
+		<class name="Ui.EditorViewer" x="5" y="5"/>
+		<class name="Project.ProjectMemberValaSource" x="605" y="305"/>
+		<class name="Project.ProjectMemberTarget" x="305" y="305"/>
+		<class name="Project.ProjectMemberClassDiagram" x="5" y="305"/>
+	</classdiagram>
+	<valasource id="30" filename="src/Project/ProjectMember_ClassDiagram.vala"/>
+	<valasource id="31" filename="src/Units/SymbolByName.vala"/>
+	<valasource id="32" filename="src/Ui/Editors/Editor_ClassDiagram.vala"/>
+	<valasource id="33" filename="src/Units/TraverseTypes.vala"/>
+	<valasource id="34" filename="src/Ui/ErrorList.vala"/>
+	<valasource id="35" filename="src/Units/Report.vala"/>
+	<valasource id="36" filename="src/Units/ErrorMarker.vala"/>
+	<valasource id="37" filename="src/Units/SourceBufferManager.vala"/>
 </project>

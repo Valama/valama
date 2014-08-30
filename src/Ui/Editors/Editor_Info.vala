@@ -2,7 +2,8 @@ namespace Ui {
 
   public class EditorInfo : Editor {
   
-    public EditorInfo(Project.ProjectMemberInfo member) {
+    public EditorInfo(Project.ProjectMemberInfo member, Ui.MainWidget main_widget) {
+      this.main_widget = main_widget;
       this.member = member;
       title = "Info";
       
@@ -45,15 +46,21 @@ namespace Ui {
       grid.show_all();
       widget = grid;
     }
-    
+    public override void load_internal (Xml.TextWriter writer) {
+
+    }
+    public override void save_internal (Xml.TextWriter writer) {
+
+    }
     private inline Gtk.Label descriptionLabel (string text) {
       var label = new Gtk.Label (text);
       label.xalign = 1.0f;
       return label;
     }
-    public override void dispose() {
+    internal override void destroy_internal() {
     
     }
   }
 
 }
+

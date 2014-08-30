@@ -59,8 +59,8 @@ namespace Project {
     public override bool create () {
       return false;
     }
-    public override Ui.Editor createEditor() {
-      return new Ui.EditorInfo(this);
+    internal override Ui.Editor createEditor_internal(Ui.MainWidget main_widget) {
+      return new Ui.EditorInfo(this, main_widget);
     }
     public override string getTitle() {
       return name;

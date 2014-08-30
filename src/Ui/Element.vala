@@ -1,8 +1,9 @@
 namespace Ui {
 
-  public abstract class Element {
-    public MainWidget main_widget;
-    public abstract void init();
-    public abstract void dispose();
+  public abstract class Element : Units.Unit {
+
+    public Gtk.Widget widget;
+
+
   }
 }

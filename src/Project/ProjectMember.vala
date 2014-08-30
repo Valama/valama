@@ -29,7 +29,18 @@ namespace Project {
     internal abstract void save_internal (Xml.TextWriter writer);
     public abstract bool create ();
     
-    public abstract Ui.Editor createEditor();
+    internal abstract Ui.Editor createEditor_internal(Ui.MainWidget main_widget);
+    public Ui.Editor? createEditor(Ui.MainWidget main_widget) {
+      if (editor != null) {
+        return null;
+      }
+      editor = createEditor_internal (main_widget);
+      editor.destroyed.connect (()=>{
+        editor = null;
+      });
+      return editor;
+    }
+    public Ui.Editor editor {public get; private set; default = null;}
     public abstract string getTitle();
   }
 

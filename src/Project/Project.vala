@@ -15,7 +15,7 @@ namespace Project {
     public Gee.ArrayList<ProjectMember> members = new Gee.ArrayList<ProjectMember>();
     
     public string filename;
-    
+
     public signal void member_added (ProjectMember member);
     public signal void member_removed (ProjectMember member);
     public signal void member_data_changed (Object sender, ProjectMember member);
@@ -66,7 +66,7 @@ namespace Project {
       delete doc;
     }
     
-    public ProjectMember getMemberFromId (string id) {
+    public ProjectMember? getMemberFromId (string id) {
       foreach (var member in members) {
         if (member.id == id)
           return member;
@@ -125,3 +125,4 @@ namespace Project {
   }
 
 } 
+

@@ -3,7 +3,7 @@ static int main (string[] args) {
   var project = new Project.Project();
   project.load ("valama.vlp");
 
-  Gtk.init (ref args);
+  GtkClutter.init (ref args);
   
   var main_widget = new Ui.MainWidget(project);
 
@@ -13,7 +13,7 @@ static int main (string[] args) {
 
 
   window.destroy.connect(()=>{
-    main_widget.dispose();
+    main_widget.destroy();
     Gtk.main_quit();
   });
 
@@ -23,5 +23,5 @@ static int main (string[] args) {
 
   project.save ();
   
-	return 0;
+  return 0;
 }

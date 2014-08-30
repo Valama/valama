@@ -9,32 +9,41 @@ namespace Ui {
     public EditorViewer editor_viewer = new EditorViewer();
     public ProjectStructure project_structure = new ProjectStructure();
     public MainToolbar main_toolbar = new MainToolbar();
-    private Gee.ArrayList<Element> elements = new Gee.ArrayList<Element>();
+    public ErrorList error_list = new ErrorList();
+    public Units.CodeContextProvider code_context_provider = new Units.CodeContextProvider();
+    public Units.ErrorMarker error_marker = new Units.ErrorMarker();
+    public Units.SourceBufferManager source_buffer_manager = new Units.SourceBufferManager();
+    private Gee.ArrayList<Units.Unit> units = new Gee.ArrayList<Units.Unit>();
     
     public MainWidget(Project.Project project) {
       this.project = project;
 
       // Initialize all elements
-      elements.add (main_toolbar);
-      elements.add (editor_viewer);
-      elements.add (project_structure);
+      units.add (main_toolbar);
+      units.add (editor_viewer);
+      units.add (project_structure);
+      units.add (code_context_provider);
+      units.add (error_list);
+      units.add (error_marker);
+      units.add (source_buffer_manager);
       
-      foreach (var element in elements) {
-        element.main_widget = this;
-        element.init();
+      foreach (var unit in units) {
+        unit.main_widget = this;
+        unit.init();
       }
       
       // Build main UI out of elements
       var grid = new Gtk.Grid();
       grid.attach (main_toolbar.widget, 0, 0, 2, 1);
-      grid.attach (project_structure.widget, 0, 1, 1, 1);
+      grid.attach (project_structure.widget, 0, 1, 1, 2);
       grid.attach (editor_viewer.widget, 1, 1, 1, 1);
+      grid.attach (error_list.widget, 1, 2, 1, 1);
       grid.show();
       widget = grid;
     }
-    public void dispose() {
-      foreach (var element in elements)
-        element.dispose();
+    public void destroy() {
+      foreach (var unit in units)
+        unit.destroy();
     }
   }
 
