@@ -8,7 +8,6 @@
 		<source id="14"/>
 		<source id="12"/>
 		<source id="10"/>
-		<source id="8"/>
 		<source id="13"/>
 		<source id="6"/>
 		<source id="2"/>
@@ -38,6 +37,12 @@
 		<source id="35"/>
 		<source id="36"/>
 		<source id="37"/>
+		<source id="38"/>
+		<source id="8"/>
+		<source id="39"/>
+		<source id="40"/>
+		<source id="41"/>
+		<source id="42"/>
 		<metadependency name="New dependency"/>
 	</target>
 	<target id="18" buildsystem="valama" binary_name="testtarget">
@@ -96,4 +101,9 @@
 	<valasource id="35" filename="src/Units/Report.vala"/>
 	<valasource id="36" filename="src/Units/ErrorMarker.vala"/>
 	<valasource id="37" filename="src/Units/SourceBufferManager.vala"/>
+	<valasource id="38" filename="src/Units/Completion/CompletionProvider.vala"/>
+	<valasource id="39" filename="src/Units/Completion/guanako.vala"/>
+	<valasource id="40" filename="src/Units/Completion/guanako_iterators.vala"/>
+	<valasource id="41" filename="src/Units/Completion/guanako_completion.vala"/>
+	<valasource id="42" filename="src/Units/Completion/guanako_helpers.vala"/>
 </project>

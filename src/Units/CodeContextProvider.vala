@@ -1,8 +1,8 @@
 namespace Units {
 
   public class CodeContextProvider : Unit {
-    //public Vala.CodeContext context;
-    public Vala.Symbol root = null;
+    public Vala.CodeContext context;
+    //public Vala.Symbol root = null;
     public Report report = new Report();
     
     public signal void context_updated();
@@ -10,9 +10,12 @@ namespace Units {
     public override void init() {
       main_widget.main_toolbar.selected_target_changed.connect(update_code_context);
       main_widget.project.member_data_changed.connect((sender, member)=>{
-        if (member == current_target)
-          update_code_context();
+        if (member == current_target) {
+          stdout.printf ("target changed -> update context\n");
+          queue_update();
+        }
       });
+      
       update_code_context();
     }
     public override void destroy() {
@@ -33,6 +36,14 @@ namespace Units {
       update_queued = false;
 
       new Thread<int> ("Context updater", update_code_context_work);
+    }
+
+    public Vala.SourceFile? get_sourcefile_by_name (string filename) {
+      foreach (var file in context.get_source_files()) {
+        if (file.filename == filename)
+          return file;
+      }
+      return null;
     }
 
     private int update_code_context_work() {
@@ -79,13 +90,13 @@ namespace Units {
       //context = context_internal;
       report = report_internal;
       //stdout.printf ("old refcound: " + root.ref_count + "\n");
-      root = context_internal.root;
+      context = context_internal;
 
       GLib.Idle.add (()=>{
         context_updated();
         return false;
       });
-     
+
       GLib.Timeout.add_seconds (5, ()=> {
         if (update_queued)
           update_code_context();

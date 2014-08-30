@@ -2,7 +2,7 @@ namespace Ui {
 
   public class EditorValaSource : Editor {
   
-    private Gtk.SourceView sourceview = new Gtk.SourceView ();
+    public Gtk.SourceView sourceview = new Gtk.SourceView ();
   
     private Project.ProjectMemberValaSource my_member = null;
   

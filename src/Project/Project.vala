@@ -19,6 +19,7 @@ namespace Project {
     public signal void member_added (ProjectMember member);
     public signal void member_removed (ProjectMember member);
     public signal void member_data_changed (Object sender, ProjectMember member);
+    public signal void member_editor_created (ProjectMember member, Ui.Editor editor);
     
     public void load (string filename) throws ProjectError {
     

@@ -38,6 +38,7 @@ namespace Project {
       editor.destroyed.connect (()=>{
         editor = null;
       });
+      project.member_editor_created (this, editor);
       return editor;
     }
     public Ui.Editor editor {public get; private set; default = null;}

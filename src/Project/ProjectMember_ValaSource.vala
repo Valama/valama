@@ -28,8 +28,14 @@ namespace Project {
                                     Gtk.Stock.CANCEL, Gtk.ResponseType.CANCEL,
                                     Gtk.Stock.OPEN, Gtk.ResponseType.ACCEPT);
       if (file_chooser.run () == Gtk.ResponseType.ACCEPT) {
-          var projectfolder = File.new_for_path (project.filename).get_parent();
-          filename = projectfolder.get_relative_path (file_chooser.get_file());
+        var projectfolder = File.new_for_path (project.filename).get_parent();
+        filename = projectfolder.get_relative_path (file_chooser.get_file());
+
+        string content = null;
+        FileUtils.get_contents (filename, out content);
+        buffer.begin_not_undoable_action();
+        buffer.text = content;
+        buffer.end_not_undoable_action();
       }
       file_chooser.destroy ();
       return filename != null;

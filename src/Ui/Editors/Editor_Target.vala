@@ -82,7 +82,7 @@ namespace Ui {
             my_member.included_sources.add (m.id);
           else
             my_member.included_sources.remove (m.id);
-          my_member.project.member_data_changed (this, my_member);
+          main_widget.project.member_data_changed (this, my_member);
         });
         
         row.add (check);

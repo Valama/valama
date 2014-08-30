@@ -58,7 +58,7 @@ namespace Ui {
     private void update_diagram() {
       var my_member = member as Project.ProjectMemberClassDiagram;
       foreach (var display in my_member.displays) {
-        display.update (main_widget.code_context_provider.root, embed.get_stage());
+        display.update (main_widget.code_context_provider.context.root, embed.get_stage());
       }
     }
     
@@ -69,7 +69,7 @@ namespace Ui {
       var my_member = member as Project.ProjectMemberClassDiagram;
 
       var typeiterator = new CodeContextHelpers.TraverseTypes();
-      typeiterator.traverse (main_widget.code_context_provider.root, (symbol)=>{
+      typeiterator.traverse (main_widget.code_context_provider.context.root, (symbol)=>{
         var row = new Gtk.ListBoxRow();
         var check = new Gtk.CheckButton();
         
