@@ -20,7 +20,12 @@ cmake_minimum_required(VERSION "2.8.4")
 
 include("${CMAKE_SOURCE_DIR}/cmake/project.cmake")
 
-project("${project_name}" C)
+if(CMAKE_MAJOR_VERSION GREATER "2")
+  cmake_policy(SET CMP0048 NEW)
+  project("${project_name}" VERSION "${${project_name}_VERSION}" LANGUAGES "C")
+else()
+  project("${project_name}" "C")
+endif()
 string(TOLOWER "${project_name}" project_name_lower)
 
 set(bindir "bin")
