@@ -75,6 +75,7 @@ set(srcfiles
   "src/ui/welcome_screen/create_project_template.vala"
   "src/ui/welcome_screen/load_project.vala"
   "src/ui/welcome_screen/main_screen.vala"
+  "src/ui/widgets/browser_path.vala"
   "src/ui_main.vala"
 )
 set(vapifiles

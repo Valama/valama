@@ -335,9 +335,11 @@ public void build_file_treestore (string storename,
                     store.append (out iter, iter_base);
                 else
                     store.append (out iter, pathmap[Path.get_dirname (pathparts[depth])]);
-
+                
                 StoreType store_type;
                 string? icon_name = null;
+                string ext = pathparts[pathparts.length - 1];
+                ext = ext.substring (ext.last_index_of (".") + 1);
                 if (entry.value || depth < pathparts.length - 1) {
                     store_type = StoreType.DIRECTORY;
                     icon_name = "folder";
