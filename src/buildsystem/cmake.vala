@@ -280,8 +280,8 @@ Name: %s
 Description: %s
 Version: @pc_version@
 Requires: @pc_requirements@
-Libs: -L${libdir} -lguanako
-Cflags: -I${includedir}/""".printf (project.project_name, project.project_name));
+Libs: -L${libdir} -l%s
+Cflags: -I${includedir}/""".printf (project.project_name, project.project_name, project.project_name));
                 data_stream.close();
             }
            
