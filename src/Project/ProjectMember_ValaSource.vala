@@ -32,6 +32,7 @@ namespace Project {
         filename = projectfolder.get_relative_path (file_chooser.get_file());
 
         string content = null;
+        // Set initial buffer content
         FileUtils.get_contents (filename, out content);
         buffer.begin_not_undoable_action();
         buffer.text = content;

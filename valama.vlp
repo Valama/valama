@@ -15,7 +15,6 @@
 		<source id="7"/>
 		<source id="4"/>
 		<source id="19"/>
-		<source id="9"/>
 		<source id="20"/>
 		<source id="23"/>
 		<source id="24"/>
@@ -43,6 +42,7 @@
 		<source id="40"/>
 		<source id="41"/>
 		<source id="42"/>
+		<source id="9"/>
 		<metadependency name="New dependency"/>
 	</target>
 	<target id="18" buildsystem="valama" binary_name="testtarget">

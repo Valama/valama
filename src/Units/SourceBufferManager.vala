@@ -3,7 +3,7 @@ namespace Units {
   public class SourceBufferManager : Unit {
     
     public override void init() {
-      // Setub buffers on existing and following source members
+      // Setup buffers on existing and newly added source members
       foreach (var member in main_widget.project.members) {
         if (member is Project.ProjectMemberValaSource) {
           var source_member = member as Project.ProjectMemberValaSource;
@@ -19,7 +19,7 @@ namespace Units {
     }
 
 
-    // Registers all needed tags on buffer
+    // Basic settings for all source buffer
     private void setup_buffer (Gtk.SourceBuffer buffer) {
       buffer.set_highlight_syntax (true);
       var langman = new Gtk.SourceLanguageManager();

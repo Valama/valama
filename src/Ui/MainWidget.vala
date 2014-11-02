@@ -14,6 +14,8 @@ namespace Ui {
     public Units.ErrorMarker error_marker = new Units.ErrorMarker();
     public Units.SourceBufferManager source_buffer_manager = new Units.SourceBufferManager();
     public Units.CompletionProvider completion_provider = new Units.CompletionProvider();
+    public Units.Builder builder = new Units.Builder();
+
     private Gee.ArrayList<Units.Unit> units = new Gee.ArrayList<Units.Unit>();
     
     public MainWidget(Project.Project project) {
@@ -28,6 +30,7 @@ namespace Ui {
       units.add (error_marker);
       units.add (source_buffer_manager);
       units.add (completion_provider);
+      units.add (builder);
       
       foreach (var unit in units) {
         unit.main_widget = this;

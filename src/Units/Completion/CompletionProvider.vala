@@ -9,7 +9,6 @@ namespace Units {
       guanako_project = new Guanako.Project(main_widget.code_context_provider.context, "/usr/local/share/guanako/syntax");
 
       // Register provider on existing and following source members
-          stdout.printf ("***\n");
       main_widget.project.member_editor_created.connect((member, new_editor)=>{
         if (member is Project.ProjectMemberValaSource) {
           var source_member = member as Project.ProjectMemberValaSource;
