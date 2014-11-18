@@ -177,7 +177,7 @@ public class GuanakoCompletion : Gtk.SourceCompletionProvider, Object {
         }
     }
 
-    public unowned Gdk.Pixbuf? get_icon() {
+    public unowned Gdk.Pixbuf get_icon() {
         if (this.icon == null) {
             Gtk.IconTheme theme = Gtk.IconTheme.get_default();
             try {
@@ -216,7 +216,7 @@ public class GuanakoCompletion : Gtk.SourceCompletionProvider, Object {
 
     Box box_info_frame = new Box (Orientation.VERTICAL, 0);
     Widget info_inner_widget = null;
-    public unowned Gtk.Widget? get_info_widget (Gtk.SourceCompletionProposal proposal) {
+    public unowned Gtk.Widget get_info_widget (Gtk.SourceCompletionProposal proposal) {
         return box_info_frame;
     }
 
