@@ -106,4 +106,5 @@
 	<valasource id="40" filename="src/Units/Completion/guanako_iterators.vala"/>
 	<valasource id="41" filename="src/Units/Completion/guanako_completion.vala"/>
 	<valasource id="42" filename="src/Units/Completion/guanako_helpers.vala"/>
+	<gladeui id="43" filename="src/mywidget.ui"/>
 </project>

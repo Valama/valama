@@ -14,13 +14,14 @@ namespace Ui {
       widget.hexpand = true;
       widget.vexpand = true;
 
-      // Load document
+      // Load viewer state file
       Xml.Doc* doc = Xml.Parser.parse_file (GLib.Environment.get_home_dir() + "/.config/valama/" + main_widget.project.id + ".xml");
-      //if (doc == null)
-      //  throw new ProjectError.FILE("Project file not found or permissions missing");
+      if (doc == null)
+        return;
 
       Xml.Node* root = doc->get_root_element ();
-      //if (root == null)
+      if (root == null)
+        return;
       //  throw new ProjectError.FILE("Config file empty");
 
       // Iterate first level of config file, pass on to viewers / editors
