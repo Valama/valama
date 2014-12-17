@@ -30,9 +30,9 @@ public class ProjectFile : Object {
         this.project_file_path = project_file;
         var proj_file = File.new_for_path (project_file);
         project_path = proj_file.get_parent().get_path(); //TODO: Check valid path?
-	
+    
     }
-	
+    
     public ProjectFile (string project_file) throws LoadingError {
         this.project_file_path = project_file;
         var proj_file = File.new_for_path (project_file);
@@ -182,7 +182,7 @@ public class ProjectFile : Object {
                 case "buildsystem":
                     buildsystem = i->get_content();
                     if (i->get_prop ("library") == "true")
-						library = true;
+                        library = true;
                     break;
                 case "version":
                     for (Xml.Node* p = i->children; p != null; p = p->next) {
@@ -306,7 +306,7 @@ public class ProjectFile : Object {
                             continue;
                         switch (p->name) {
                             case "file":
-								print(get_absolute_path (p->get_content())+"\n");
+                                print(get_absolute_path (p->get_content())+"\n");
                                 buildsystem_files.add (get_absolute_path (p->get_content()));
                                 break;
                             default:
@@ -380,7 +380,7 @@ public class ProjectFile : Object {
 
         var writer = new TextWriter.filename (project_file_path);
         writer.set_indent (true);
-        writer.set_indent_string ("\t");
+        writer.set_indent_string ("    ");
 
         writer.start_element ("project");
         writer.write_attribute ("version", project_file_version);

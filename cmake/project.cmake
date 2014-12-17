@@ -26,6 +26,7 @@ set(required_pkgs
   "libvala-0.22"
   "libvala-0.24"
   "libvala-0.26"
+  "libvala-0.28"
   "libxml-2.0"
   "pango {nolink}"
   "pangocairo {nolink}"
@@ -75,6 +76,7 @@ set(srcfiles
   "src/ui/welcome_screen/create_project_template.vala"
   "src/ui/welcome_screen/load_project.vala"
   "src/ui/welcome_screen/main_screen.vala"
+  "src/ui/widgets/browser_path.vala"
   "src/ui_main.vala"
 )
 set(vapifiles
