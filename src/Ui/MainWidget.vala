@@ -3,6 +3,7 @@ namespace Ui {
   public class MainWidget : Object {
   
     public Gtk.Widget widget;
+    public weak Gtk.Window window;
 
     public Project.Project project;
     
@@ -18,8 +19,9 @@ namespace Ui {
 
     private Gee.ArrayList<Units.Unit> units = new Gee.ArrayList<Units.Unit>();
     
-    public MainWidget(Project.Project project) {
+    public MainWidget(Project.Project project, Gtk.Window window) {
       this.project = project;
+      this.window = window;
 
       // Initialize all elements
       units.add (main_toolbar);

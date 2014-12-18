@@ -5,10 +5,12 @@ static int main (string[] args) {
 
   GtkClutter.init (ref args);
   
-  var main_widget = new Ui.MainWidget(project);
 
   var window = new Gtk.Window ();
   window.set_default_size (600, 500);
+
+  var main_widget = new Ui.MainWidget(project, window);
+
   window.add (main_widget.widget);
 
 
