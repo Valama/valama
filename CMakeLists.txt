@@ -290,9 +290,9 @@ if(VALADOC_FOUND)
       ${vapifiles}
     OPTIONS
       ${vapidirs}
-      "--vapidir" "${VALA_VAPIDIR}"
       "--vapidir" "${VALA_DATADIR}/vapi"
       "--vapidir" "${CMAKE_SOURCE_DIR}/vapi"
+      "--vapidir" "${VALA_VAPIDIR}"
       "--target-glib" "${GLIB2.0_VERSION}"
       ${extra_valadoc_opts}
       ${valadoc_debug}
