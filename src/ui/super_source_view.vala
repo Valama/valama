@@ -153,6 +153,8 @@ public class SuperSourceView : Gtk.SourceView {
                 this.view.get_window (TextWindowType.LEFT).get_width();
             #elif GTK_SOURCE_VIEW_3_14
                 this.view.get_window (TextWindowType.LEFT).get_width();
+            #elif GTK_SOURCE_VIEW_3_15_4
+                this.view.get_window (TextWindowType.LEFT).get_width();
             #else
                 this.view.get_gutter (TextWindowType.LEFT).get_window().get_width();
             #endif
