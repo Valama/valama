@@ -97,4 +97,8 @@
 	<valasource id="40" filename="src/Units/Completion/guanako_iterators.vala"/>
 	<valasource id="41" filename="src/Units/Completion/guanako_completion.vala"/>
 	<valasource id="42" filename="src/Units/Completion/guanako_helpers.vala"/>
+	<gladeui id="20" filename="src/Ui/NewProjectMember.glade"/>
+	<gladeui id="31" filename="src/Ui/ProjectStructure.glade"/>
+	<gladeui id="33" filename="src/Ui/Editors/Editor_Info.glade"/>
+	<gladeui id="35" filename="src/Ui/Editors/Editor_Target.glade"/>
 </project>

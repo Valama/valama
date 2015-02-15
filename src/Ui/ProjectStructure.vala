@@ -24,6 +24,8 @@ namespace Ui {
   	public ListBoxRow row_open_source;
   	[GtkChild]
   	public ListBoxRow row_new_target;
+  	[GtkChild]
+  	public ListBoxRow row_open_gladeui;
   }
 
   public class ProjectStructure : Element {
@@ -68,8 +70,10 @@ namespace Ui {
         if (ret == ResponseType.OK) {
           if (dlg_template.get_selected_row() == dlg_template.row_open_source)
             main_widget.project.createMember (Project.EnumProjectMember.VALASOURCE);
-          if (dlg_template.get_selected_row() == dlg_template.row_new_target)
+          else if (dlg_template.get_selected_row() == dlg_template.row_new_target)
             main_widget.project.createMember (Project.EnumProjectMember.TARGET);
+          else if (dlg_template.get_selected_row() == dlg_template.row_open_gladeui)
+            main_widget.project.createMember (Project.EnumProjectMember.GLADEUI);
         }
         new_member_dialog.destroy();
       });
@@ -105,8 +109,8 @@ namespace Ui {
         if (listbox != row.parent)
           listbox.select_row (null);
 
-      var member = row.get_data<Project.ProjectMember>("member");
-      template.btn_remove.sensitive = member is Project.ProjectMemberValaSource || member is Project.ProjectMemberTarget;
+      //var member = row.get_data<Project.ProjectMember>("member");
+      template.btn_remove.sensitive = true;//member is Project.ProjectMemberValaSource || member is Project.ProjectMemberTarget;
     }
     
     private void fill_list(Project.EnumProjectMember type) {

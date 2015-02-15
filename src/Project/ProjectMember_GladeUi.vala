@@ -21,24 +21,16 @@ namespace Project {
       writer.write_attribute ("filename", filename);
     }
     public override bool create () {
-      /*var file_chooser = new Gtk.FileChooserDialog ("Open File", null,
+      var file_chooser = new Gtk.FileChooserDialog ("Open File", null,
                                     Gtk.FileChooserAction.OPEN,
                                     Gtk.Stock.CANCEL, Gtk.ResponseType.CANCEL,
                                     Gtk.Stock.OPEN, Gtk.ResponseType.ACCEPT);
       if (file_chooser.run () == Gtk.ResponseType.ACCEPT) {
         var projectfolder = File.new_for_path (project.filename).get_parent();
         filename = projectfolder.get_relative_path (file_chooser.get_file());
-
-        string content = null;
-        // Set initial buffer content
-        FileUtils.get_contents (filename, out content);
-        buffer.begin_not_undoable_action();
-        buffer.text = content;
-        buffer.end_not_undoable_action();
       }
       file_chooser.destroy ();
-      return filename != null;*/
-      return false;
+      return filename != null;
     }
     internal override Ui.Editor createEditor_internal(Ui.MainWidget main_widget) {
       return new Ui.EditorGladeUi(this, main_widget);
