@@ -1,6 +1,10 @@
 namespace Project {
   public class ProjectMemberGladeUi : ProjectMember {
 
+    public override EnumProjectMember get_project_member_type() {
+      return EnumProjectMember.GLADEUI;
+    }
+
     public string filename = null;
 
     internal override void load_internal (Xml.Node* node) throws ProjectError {

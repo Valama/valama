@@ -6,7 +6,8 @@ namespace Units {
     
     public override void init() {
 
-      guanako_project = new Guanako.Project(main_widget.code_context_provider.context, "/usr/local/share/guanako/syntax");
+      // ################
+      //guanako_project = new Guanako.Project(main_widget.code_context_provider.context, "/usr/local/share/guanako/syntax");
 
       // Register provider on existing and following source members
       main_widget.project.member_editor_created.connect((member, new_editor)=>{
@@ -33,13 +34,13 @@ namespace Units {
     }
 
     private void completify_editor (Project.ProjectMemberValaSource member, Ui.EditorValaSource editor) {
-      var sourcefile = main_widget.code_context_provider.get_sourcefile_by_name (member.filename);
+      /*var sourcefile = main_widget.code_context_provider.get_sourcefile_by_name (member.filename);
       var comp_provider = new Guanako.GuanakoCompletion();
       comp_provider.srcview = editor.sourceview;
       comp_provider.srcbuffer = member.buffer;
       comp_provider.guanako_project = guanako_project;
       comp_provider.source_file = sourcefile;
-      editor.sourceview.completion.add_provider (comp_provider);
+      editor.sourceview.completion.add_provider (comp_provider);*/
     }
 
     private void update() {

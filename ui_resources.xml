@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+  <gresource prefix="/">
+    <file compressed="true" preprocess="xml-stripblanks">src/Ui/ProjectStructure.glade</file>
+    <file compressed="true" preprocess="xml-stripblanks">src/Ui/Editors/Editor_Info.glade</file>
+    <file compressed="true" preprocess="xml-stripblanks">src/Ui/Editors/Editor_Target.glade</file>
+    <file compressed="true" preprocess="xml-stripblanks">src/Ui/NewProjectMember.glade</file>
+  </gresource>
+</gresources>

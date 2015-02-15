@@ -1,6 +1,10 @@
 namespace Project {
   public class ProjectMemberTarget : ProjectMember {
-  
+
+    public override EnumProjectMember get_project_member_type() {
+      return EnumProjectMember.TARGET;
+    }
+
     public string binary_name = null;
     
     public Gee.ArrayList<string> included_sources = new Gee.ArrayList<string>();
@@ -57,7 +61,8 @@ namespace Project {
       }
     }
     public override bool create () {
-      return false;
+      binary_name = "NewTarget";
+      return true;
     }
     internal override Ui.Editor createEditor_internal(Ui.MainWidget main_widget) {
       return new Ui.EditorTarget(this, main_widget);

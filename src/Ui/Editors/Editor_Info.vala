@@ -1,50 +1,59 @@
+using Gtk;
+
 namespace Ui {
 
+  [GtkTemplate (ui = "/src/Ui/Editors/Editor_Info.glade")]
+  private class ProjectInfoTemplate : Box {
+  	[GtkChild]
+  	public ListBox listbox_authors;
+  	[GtkChild]
+  	public ToolButton tb_add;
+  	[GtkChild]
+  	public ToolButton tb_remove;
+  	[GtkChild]
+  	public SpinButton spn_version_patch;
+  	[GtkChild]
+  	public SpinButton spn_version_minor;
+  	[GtkChild]
+  	public SpinButton spn_version_major;
+  	[GtkChild]
+  	public Entry ent_name;
+  }
+
   public class EditorInfo : Editor {
-  
+
+    private ProjectInfoTemplate template = new ProjectInfoTemplate();
+
     public EditorInfo(Project.ProjectMemberInfo member, Ui.MainWidget main_widget) {
       this.main_widget = main_widget;
       this.member = member;
       title = "Info";
       
-      var txt_name = new Gtk.Entry();
-      txt_name.text = member.name;
-      txt_name.changed.connect (()=>{
-        member.name = txt_name.text;
+      template.ent_name.text = member.name;
+      template.ent_name.changed.connect (()=>{
+        member.name = template.ent_name.text;
         member.project.member_data_changed (this, member);
       });
       
-      var spn_version_major = new Gtk.SpinButton.with_range(0,1000,1);
-      spn_version_major.value = member.major;
-      spn_version_major.value_changed.connect(()=>{
-        member.major = (int)spn_version_major.value;
+      template.spn_version_major.value = member.major;
+      template.spn_version_major.value_changed.connect(()=>{
+        member.major = (int)template.spn_version_major.value;
         member.project.member_data_changed (this, member);
       });
-      var spn_version_minor = new Gtk.SpinButton.with_range(0,1000,1);
-      spn_version_minor.value = member.minor;
-      spn_version_minor.value_changed.connect(()=>{
-        member.minor = (int)spn_version_minor.value;
-        member.project.member_data_changed (this, member);
-      });
-      var spn_version_patch = new Gtk.SpinButton.with_range(0,1000,1);
-      spn_version_patch.value = member.patch;
-      spn_version_patch.value_changed.connect(()=>{
-        member.patch = (int)spn_version_patch.value;
-        member.project.member_data_changed (this, member);
-      });
-      
-      
-      var grid = new Gtk.Grid();
-      grid.attach (descriptionLabel("Project name"), 0, 0, 1, 1);
-      grid.attach (txt_name, 1, 0, 3, 1);
-      grid.attach (descriptionLabel("Version"), 0, 1, 1, 1);
-      grid.attach (spn_version_major, 1, 1, 1, 1);
-      grid.attach (spn_version_minor, 2, 1, 1, 1);
-      grid.attach (spn_version_patch, 3, 1, 1, 1);
-      
 
-      grid.show_all();
-      widget = grid;
+      template.spn_version_minor.value = member.minor;
+      template.spn_version_minor.value_changed.connect(()=>{
+        member.minor = (int)template.spn_version_minor.value;
+        member.project.member_data_changed (this, member);
+      });
+
+      template.spn_version_patch.value = member.patch;
+      template.spn_version_patch.value_changed.connect(()=>{
+        member.patch = (int)template.spn_version_patch.value;
+        member.project.member_data_changed (this, member);
+      });
+
+      widget = template;
     }
     public override void load_internal (Xml.TextWriter writer) {
 

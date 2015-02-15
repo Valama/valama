@@ -1,7 +1,11 @@
 namespace Project {
 
   public class ProjectMemberClassDiagram : ProjectMember {
-  
+
+    public override EnumProjectMember get_project_member_type() {
+      return EnumProjectMember.CLASS_DIAGRAM;
+    }
+
     public abstract class Display : Object {
       public abstract void destroy ();
       public abstract void save (Xml.TextWriter writer);

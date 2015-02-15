@@ -4,6 +4,10 @@ namespace Project {
     public string filename = null;
     public Gtk.SourceBuffer buffer = new Gtk.SourceBuffer(null);
 
+    public override EnumProjectMember get_project_member_type() {
+      return EnumProjectMember.VALASOURCE;
+    }
+
     internal override void load_internal (Xml.Node* node) throws ProjectError {
       for (Xml.Attr* prop = node->properties; prop != null; prop = prop->next) {
         if (prop->name == "filename")

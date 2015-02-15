@@ -38,7 +38,7 @@ namespace Ui {
         unit.main_widget = this;
         unit.init();
       }
-      
+
       // Build main UI out of elements
       var grid = new Gtk.Grid();
       grid.attach (main_toolbar.widget, 0, 0, 2, 1);

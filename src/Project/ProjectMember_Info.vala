@@ -7,6 +7,10 @@ namespace Project {
 
   public class ProjectMemberInfo : ProjectMember {
   
+    public override EnumProjectMember get_project_member_type() {
+      return EnumProjectMember.INFO;
+    }
+  
     public string name = null;
     public int major = -1;
     public int minor = -1;

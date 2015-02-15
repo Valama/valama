@@ -10,12 +10,9 @@
 		<source id="10"/>
 		<source id="13"/>
 		<source id="6"/>
-		<source id="2"/>
 		<source id="17"/>
 		<source id="7"/>
-		<source id="4"/>
 		<source id="19"/>
-		<source id="20"/>
 		<source id="23"/>
 		<source id="24"/>
 		<source id="25"/>
@@ -29,11 +26,8 @@
 		<source id="21"/>
 		<source id="22"/>
 		<source id="30"/>
-		<source id="31"/>
 		<source id="32"/>
-		<source id="33"/>
 		<source id="34"/>
-		<source id="35"/>
 		<source id="36"/>
 		<source id="37"/>
 		<source id="38"/>
@@ -43,7 +37,8 @@
 		<source id="41"/>
 		<source id="42"/>
 		<source id="9"/>
-		<metadependency name="New dependency"/>
+		<source id="4"/>
+		<source id="2"/>
 	</target>
 	<target id="18" buildsystem="valama" binary_name="testtarget">
 		<source id="16"/>
@@ -72,7 +67,6 @@
 	<valasource id="16" filename="src/Ui/Editors/Editor_Target.vala"/>
 	<valasource id="17" filename="src/Ui/Editors/Editor_ValaSource.vala"/>
 	<valasource id="19" filename="src/Ui/MainToolbar.vala"/>
-	<valasource id="20" filename="src/Units/CodeContextProvider.vala"/>
 	<valasource id="21" filename="src/Units/Unit.vala"/>
 	<valasource id="22" filename="src/Ui/Viewer.vala"/>
 	<valasource id="23" filename="src/Project/MetaDependency.vala"/>
@@ -94,11 +88,8 @@
 		<class name="Project.ProjectMemberClassDiagram" x="5" y="305"/>
 	</classdiagram>
 	<valasource id="30" filename="src/Project/ProjectMember_ClassDiagram.vala"/>
-	<valasource id="31" filename="src/Units/SymbolByName.vala"/>
 	<valasource id="32" filename="src/Ui/Editors/Editor_ClassDiagram.vala"/>
-	<valasource id="33" filename="src/Units/TraverseTypes.vala"/>
 	<valasource id="34" filename="src/Ui/ErrorList.vala"/>
-	<valasource id="35" filename="src/Units/Report.vala"/>
 	<valasource id="36" filename="src/Units/ErrorMarker.vala"/>
 	<valasource id="37" filename="src/Units/SourceBufferManager.vala"/>
 	<valasource id="38" filename="src/Units/Completion/CompletionProvider.vala"/>
@@ -106,5 +97,4 @@
 	<valasource id="40" filename="src/Units/Completion/guanako_iterators.vala"/>
 	<valasource id="41" filename="src/Units/Completion/guanako_completion.vala"/>
 	<valasource id="42" filename="src/Units/Completion/guanako_helpers.vala"/>
-	<gladeui id="43" filename="src/mywidget.ui"/>
 </project>

@@ -1,14 +1,14 @@
 namespace Units {
 
   public class CodeContextProvider : Unit {
-    public Vala.CodeContext context;
+    public Vala.CodeContext? context = null;
     //public Vala.Symbol root = null;
     public Report report = new Report();
     
     public signal void context_updated();
     
     public override void init() {
-      main_widget.main_toolbar.selected_target_changed.connect(update_code_context);
+      main_widget.main_toolbar.selected_target_changed.connect(queue_update);
       main_widget.project.member_data_changed.connect((sender, member)=>{
         if (member == current_target) {
           stdout.printf ("target changed -> update context\n");
@@ -47,11 +47,19 @@ namespace Units {
     }
 
     private int update_code_context_work() {
+      stdout.printf ("===========updating context\n");
       current_target = main_widget.main_toolbar.selected_target;
-      if (current_target == null)
+      if (current_target == null) {
+        timeout_active = false;
         return -1;
+      }
+
       Vala.CodeContext context_internal = new Vala.CodeContext();
+
       var report_internal = new Report();
+      context_internal.report = report_internal;
+
+      Vala.CodeContext.push (context_internal);
       
       context_internal.profile = Vala.Profile.GOBJECT;
       context_internal.add_define ("GOBJECT");
@@ -79,28 +87,28 @@ namespace Units {
         context_internal.add_source_file (source_file);
       }
 
-      var parser = new Vala.Parser();
-      context_internal.report = report_internal;
 
-      Vala.CodeContext.push (context_internal);
+      var parser = new Vala.Parser();
       parser.parse (context_internal);
+
       context_internal.check ();
+
       Vala.CodeContext.pop();
       
       //context = context_internal;
-      report = report_internal;
-      //stdout.printf ("old refcound: " + root.ref_count + "\n");
-      context = context_internal;
+      //report = report_internal;
+
+
 
       GLib.Idle.add (()=>{
         context_updated();
         return false;
       });
 
-      GLib.Timeout.add_seconds (5, ()=> {
+      GLib.Timeout.add_seconds (2, ()=> {
+        timeout_active = false;
         if (update_queued)
           update_code_context();
-        timeout_active = false;
         return false;
       });
       return 0;

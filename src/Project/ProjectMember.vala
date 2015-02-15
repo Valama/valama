@@ -4,13 +4,12 @@ namespace Project {
   
     //public string name;
     public string id = null;
-    public EnumProjectMember type;
+    public abstract EnumProjectMember get_project_member_type();
     public Project project;
 
     //public signal void data_changed (Object sender);
 
     public void load (Xml.Node* node) throws ProjectError {
-      type = EnumProjectMember.fromString(node->name);
       for (Xml.Attr* prop = node->properties; prop != null; prop = prop->next) {
         if (prop->name == "id")
           id = prop->children->content;
@@ -20,7 +19,7 @@ namespace Project {
       load_internal (node);
     }
     public void save (Xml.TextWriter writer) {
-      writer.start_element (type.toString());
+      writer.start_element (get_project_member_type().toString());
       writer.write_attribute ("id", id);
       save_internal (writer);
       writer.end_element();
