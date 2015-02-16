@@ -52,6 +52,7 @@ namespace Ui {
       list_targets.row_selected.connect(row_selected);
       list_ui.row_selected.connect(row_selected);
 
+      // Keep lists up to date
       main_widget.project.member_added.connect((member)=>{
         fill_list(member.get_project_member_type());
       });
@@ -60,8 +61,7 @@ namespace Ui {
       });
 
 
-      // Build toolbar
-      
+      // Add new element to project
       template.btn_add.clicked.connect (() => {
         var dlg_template = new NewMemberDialogTemplate();
         var new_member_dialog = new Dialog.with_buttons("", main_widget.window, DialogFlags.MODAL, "OK", ResponseType.OK, "Cancel", ResponseType.CANCEL);
@@ -78,6 +78,7 @@ namespace Ui {
         new_member_dialog.destroy();
       });
       
+      // Remove selected element
       template.btn_remove.clicked.connect (() => {
         // Find active list
         foreach (var listbox in mp_types_lists.values) {
@@ -109,7 +110,10 @@ namespace Ui {
         if (listbox != row.parent)
           listbox.select_row (null);
 
-      //var member = row.get_data<Project.ProjectMember>("member");
+      // Open selected member
+      var member = row.get_data<Project.ProjectMember>("member");
+      main_widget.editor_viewer.openMember(member);
+      
       template.btn_remove.sensitive = true;//member is Project.ProjectMemberValaSource || member is Project.ProjectMemberTarget;
     }
     
@@ -127,15 +131,15 @@ namespace Ui {
           continue;
         var row = new Gtk.ListBoxRow();
         var label = new Gtk.Label(member.getTitle());
+
+        // Keep label up to date
         member.project.member_data_changed.connect((sender, mb)=>{
           if (mb == member)
             label.label = member.getTitle();
         });
+
         row.add (label);
         row.set_data<Project.ProjectMember> ("member", member);
-        row.activate.connect(()=>{
-          main_widget.editor_viewer.openMember(member);
-        });
         list.add (row);
       }
       list.show_all();
