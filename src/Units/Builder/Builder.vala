@@ -1,47 +1,16 @@
+namespace Builder {
+  public abstract class Builder {
+  
+    public string build_dir;
+    public Project.ProjectMemberTarget target;
+  
+    public abstract void init_ui();
+  
+    public Gtk.Widget widget;
+  
+    public abstract void build();
+    public abstract void run();
+    public abstract void clean();
 
-/*
-  Unit:         Builder
-  Purpose:      Provide abstract functionality for building a target
-  Unit deps:    main_toolbar
-*/
-
-namespace Units {
-
-  public class Builder : Unit {
-    
-    public enum BuilderState {
-      IDLE,
-      COMPILING
-    }
-    
-    public BuilderState state = BuilderState.IDLE;
-    
-    public override void init() {
-      // Track current target
-      main_widget.main_toolbar.selected_target_changed.connect(()=>{
-        update();
-      });
-      update();
-    }
-
-
-    private void update() {
-      var current_target = main_widget.main_toolbar.selected_target;
-    }
-    
-    public void build() {
-    
-    }
-    public void rebuild() {
-    
-    }
-    public void clean() {
-    
-    }
-    
-    public override void destroy() {
-    }
-
- }
-
+  }
 }
