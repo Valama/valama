@@ -2,7 +2,7 @@
 /*
   Unit:         Builder
   Purpose:      Provide abstract functionality for building a target
-  Unit deps:    none
+  Unit deps:    main_toolbar
 */
 
 namespace Units {
@@ -17,6 +17,7 @@ namespace Units {
     public BuilderState state = BuilderState.IDLE;
     
     public override void init() {
+      // Track current target
       main_widget.main_toolbar.selected_target_changed.connect(()=>{
         update();
       });
@@ -26,7 +27,6 @@ namespace Units {
 
     private void update() {
       var current_target = main_widget.main_toolbar.selected_target;
-      
     }
     
     public void build() {

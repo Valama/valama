@@ -49,6 +49,7 @@ namespace Ui {
       widget = grid;
     }
     public void destroy() {
+      project.save ();
       foreach (var unit in units)
         unit.destroy();
     }

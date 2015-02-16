@@ -5,5 +5,7 @@
     <file compressed="true" preprocess="xml-stripblanks">src/Ui/Editors/Editor_Info.glade</file>
     <file compressed="true" preprocess="xml-stripblanks">src/Ui/Editors/Editor_Target.glade</file>
     <file compressed="true" preprocess="xml-stripblanks">src/Ui/NewProjectMember.glade</file>
+    <file compressed="true" preprocess="xml-stripblanks">src/Ui/WelcomeScreen/WelcomeScreen.glade</file>
+    <file compressed="true" preprocess="xml-stripblanks">src/Ui/WelcomeScreen/RecentEntry.glade</file>
   </gresource>
 </gresources>
