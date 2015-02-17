@@ -5,7 +5,7 @@ namespace WelcomeScreen {
         public CreateProjectPackages (ref ProjectCreationInfo info)
         {
             this.info = info;
-            listmodel = new ListStore (3, typeof (bool), typeof (string), typeof (string));
+            listmodel = new Gtk.ListStore (3, typeof (bool), typeof (string), typeof (string));
             go_to_next_clicked.connect (() => {
                 var pkgs = new string[0];
                 listmodel.foreach((m,p,i) => {
@@ -21,7 +21,7 @@ namespace WelcomeScreen {
         }
         
         private ProjectCreationInfo info;
-        ListStore listmodel;
+        Gtk.ListStore listmodel;
     
         protected override void clean_up(){}
         

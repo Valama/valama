@@ -351,7 +351,7 @@ public class ProjectBrowser : UiElement {
                                               ResponseType.ACCEPT);
 
         var tree_view = new TreeView();
-        var listmodel = new ListStore (3, typeof (bool), typeof (string), typeof (string));
+        var listmodel = new Gtk.ListStore (3, typeof (bool), typeof (string), typeof (string));
         tree_view.set_model (listmodel);
         CellRendererToggle toggle = new CellRendererToggle();
         toggle.toggled.connect ((toggle, path) => {
