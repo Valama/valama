@@ -1,10 +1,10 @@
 namespace Builder {
-  public enum EnumBuilder {
+  public enum EnumBuildsystem {
     CUSTOM,
     AUTOVALA;
 
-    public static EnumBuilder[] to_array() {
-      return new EnumBuilder[] {CUSTOM, AUTOVALA};
+    public static EnumBuildsystem[] to_array() {
+      return new EnumBuildsystem[] {CUSTOM, AUTOVALA};
     }
 
     public string toString() {
@@ -14,7 +14,7 @@ namespace Builder {
         return "autovala";
       return "";
     }
-    public static EnumBuilder fromString(string s) {
+    public static EnumBuildsystem fromString(string s) {
       if (s == "custom")
         return CUSTOM;
       if (s == "autovala")
@@ -25,23 +25,15 @@ namespace Builder {
   }
 
   public class BuilderFactory {
-    /*public static ProjectMember? createMember (EnumBuilder type, Project project) {
-      ProjectMember new_member = null;
-      if (type == EnumProjectMember.VALASOURCE)
-        new_member = new ProjectMemberValaSource();
-      else if (type == EnumProjectMember.TARGET)
-        new_member = new ProjectMemberTarget();
-      else if (type == EnumProjectMember.INFO)
-        new_member = new ProjectMemberInfo();
-      else if (type == EnumProjectMember.CLASS_DIAGRAM)
-        new_member = new ProjectMemberClassDiagram();
-      else if (type == EnumProjectMember.GLADEUI)
-        new_member = new ProjectMemberGladeUi();
-      
-      if (new_member != null)
-        new_member.project = project;
-      return new_member;
-    }*/
+    public static Builder? create_member (EnumBuildsystem type) {
+      Builder new_builder = null;
+      if (type == EnumBuildsystem.CUSTOM)
+        new_builder = new Custom();
+      else if (type == EnumBuildsystem.AUTOVALA)
+        new_builder = new Autovala();
+
+      return new_builder;
+    }
   
   }
 }

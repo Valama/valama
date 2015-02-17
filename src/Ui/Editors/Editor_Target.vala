@@ -18,6 +18,8 @@ namespace Ui {
   	public Entry ent_binary_name;
   	[GtkChild]
   	public ComboBoxText combo_buildsystem;
+  	[GtkChild]
+  	public Notebook notebook_settings;
   }
   public class EditorTarget : Editor {
 
@@ -29,12 +31,13 @@ namespace Ui {
       title = "Target";
 
       // Fill buildsystem combo and keep it in sync
-      foreach (var i in Builder.EnumBuilder.to_array())
+      foreach (var i in Builder.EnumBuildsystem.to_array())
         template.combo_buildsystem.append (i.toString(), i.toString());
-      template.combo_buildsystem.set_active_id (member.builder.toString());
+      template.combo_buildsystem.set_active_id (member.buildsystem.toString());
 
       template.combo_buildsystem.changed.connect (()=>{
-        member.builder = Builder.EnumBuilder.fromString(template.combo_buildsystem.get_active_id());
+        member.buildsystem = Builder.EnumBuildsystem.fromString(template.combo_buildsystem.get_active_id());
+        update_settings_ui();
       });
 
       // Keep sources list in sync
@@ -64,8 +67,29 @@ namespace Ui {
       // Initial list update
       update_sources_list();
       setup_dependencies_list();
+      update_settings_ui();
     }
     
+    // Buildsystem settings widget
+    // ============
+
+    Gtk.Widget settings_widget = null;
+    private inline void update_settings_ui() {
+
+      // Remove old page
+      if (settings_widget != null) {
+        var page_id = template.notebook_settings.page_num (settings_widget);
+        if (page_id >= 0)
+          template.notebook_settings.remove_page (page_id);
+      }
+
+      // Add settings page
+      var my_member = member as Project.ProjectMemberTarget;
+      settings_widget = my_member.builder.init_ui();
+      if (settings_widget != null)
+        template.notebook_settings.prepend_page (settings_widget, new Label ("Settings"));
+
+    }
 
     // Sources list
     // ============

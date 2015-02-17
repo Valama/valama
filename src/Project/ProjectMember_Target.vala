@@ -5,7 +5,17 @@ namespace Project {
       return EnumProjectMember.TARGET;
     }
 
-    public Builder.EnumBuilder builder;
+    public Builder.Builder builder = null;
+
+    private Builder.EnumBuildsystem _buildsystem;
+    public Builder.EnumBuildsystem buildsystem {
+      get { return _buildsystem; }
+      set {
+        if (value != _buildsystem || builder == null)
+          builder = Builder.BuilderFactory.create_member (value);
+        _buildsystem = value;
+      }
+    }
 
     public string binary_name = null;
     
@@ -18,8 +28,6 @@ namespace Project {
       for (Xml.Attr* prop = node->properties; prop != null; prop = prop->next) {
         if (prop->name == "binary_name")
           binary_name = prop->children->content;
-        if (prop->name == "buildsystem")
-          builder = Builder.EnumBuilder.fromString(prop->children->content);
       }
       // Read active source id's
       for (Xml.Node* iter = node->children; iter != null; iter = iter->next) {
@@ -36,6 +44,12 @@ namespace Project {
           dep.load (iter);
           metadependencies.add (dep);
         }
+        if (iter->name == "buildsystem") {
+          for (Xml.Attr* prop = iter->properties; prop != null; prop = prop->next)
+            if (prop->name == "type")
+              buildsystem = Builder.EnumBuildsystem.fromString(prop->children->content);
+          builder.load (iter);
+        }
       }
       if (binary_name == null)
         throw new ProjectError.CORRUPT_MEMBER("binary_name attribute missing in target member");
@@ -51,8 +65,11 @@ namespace Project {
       });
     }
     internal override void save_internal (Xml.TextWriter writer) {
-      writer.write_attribute ("buildsystem", builder.toString());
       writer.write_attribute ("binary_name", binary_name);
+      writer.start_element ("buildsystem");
+      writer.write_attribute ("type", buildsystem.toString());
+      builder.save (writer);
+      writer.end_element();
       foreach (string source_id in included_sources) {
         writer.start_element ("source");
         writer.write_attribute ("id", source_id);
@@ -66,6 +83,7 @@ namespace Project {
     }
     public override bool create () {
       binary_name = "NewTarget";
+      buildsystem = Builder.EnumBuildsystem.CUSTOM;
       return true;
     }
     internal override Ui.Editor createEditor_internal(Ui.MainWidget main_widget) {

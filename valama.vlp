@@ -4,7 +4,8 @@
 		<author name="Linus Seelinger" mail="S.Linus@gmx.de"/>
 	</info>
 	<valasource id="2" filename="src/main.vala"/>
-	<target id="3" buildsystem="custom" binary_name="valama">
+	<target id="3" binary_name="valama">
+		<buildsystem type="custom" build_command="./build.sh" run_command="./main" clean_command=""/>
 		<source id="14"/>
 		<source id="12"/>
 		<source id="10"/>
@@ -40,7 +41,8 @@
 		<source id="4"/>
 		<source id="2"/>
 	</target>
-	<target id="18" buildsystem="custom" binary_name="testtarget">
+	<target id="18" binary_name="testtarget">
+		<buildsystem type="custom" build_command="" run_command="" clean_command=""/>
 		<source id="16"/>
 		<source id="14"/>
 		<source id="9"/>
