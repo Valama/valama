@@ -225,7 +225,7 @@ public class GuanakoCompletion : Gtk.SourceCompletionProvider, Object {
         return -1;
     }
 
-#if GTK_SOURCE_VIEW_3_15_4
+#if GTK_SOURCE_VIEW_3_15_3
     public bool get_start_iter (Gtk.SourceCompletionContext context, Gtk.SourceCompletionProposal proposal, out Gtk.TextIter iter) {
 #else
     public bool get_start_iter (Gtk.SourceCompletionContext context, Gtk.SourceCompletionProposal proposal, Gtk.TextIter iter) {
