@@ -59,7 +59,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkComboBox" id="combo_buildsystem">
+          <object class="GtkComboBoxText" id="combo_buildsystem">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
           </object>

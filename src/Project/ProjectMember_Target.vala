@@ -5,6 +5,8 @@ namespace Project {
       return EnumProjectMember.TARGET;
     }
 
+    public Builder.EnumBuilder builder;
+
     public string binary_name = null;
     
     public Gee.ArrayList<string> included_sources = new Gee.ArrayList<string>();
@@ -16,6 +18,8 @@ namespace Project {
       for (Xml.Attr* prop = node->properties; prop != null; prop = prop->next) {
         if (prop->name == "binary_name")
           binary_name = prop->children->content;
+        if (prop->name == "buildsystem")
+          builder = Builder.EnumBuilder.fromString(prop->children->content);
       }
       // Read active source id's
       for (Xml.Node* iter = node->children; iter != null; iter = iter->next) {
@@ -47,7 +51,7 @@ namespace Project {
       });
     }
     internal override void save_internal (Xml.TextWriter writer) {
-      writer.write_attribute ("buildsystem", "valama");
+      writer.write_attribute ("buildsystem", builder.toString());
       writer.write_attribute ("binary_name", binary_name);
       foreach (string source_id in included_sources) {
         writer.start_element ("source");

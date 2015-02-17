@@ -16,6 +16,8 @@ namespace Ui {
   	public ToolButton btn_edit;
   	[GtkChild]
   	public Entry ent_binary_name;
+  	[GtkChild]
+  	public ComboBoxText combo_buildsystem;
   }
   public class EditorTarget : Editor {
 
@@ -26,6 +28,16 @@ namespace Ui {
       this.member = member;
       title = "Target";
 
+      // Fill buildsystem combo and keep it in sync
+      foreach (var i in Builder.EnumBuilder.to_array())
+        template.combo_buildsystem.append (i.toString(), i.toString());
+      template.combo_buildsystem.set_active_id (member.builder.toString());
+
+      template.combo_buildsystem.changed.connect (()=>{
+        member.builder = Builder.EnumBuilder.fromString(template.combo_buildsystem.get_active_id());
+      });
+
+      // Keep sources list in sync
       member.project.member_added.connect ((member)=>{
         if (member is Project.ProjectMemberValaSource)
           update_sources_list();
@@ -40,6 +52,7 @@ namespace Ui {
         update_sources_list();
       });
 
+      // Keep binary name entry in sync
       template.ent_binary_name.text = member.binary_name;
       template.ent_binary_name.changed.connect (()=>{
         member.binary_name = template.ent_binary_name.text;
@@ -48,6 +61,7 @@ namespace Ui {
       
       widget = template;
       
+      // Initial list update
       update_sources_list();
       setup_dependencies_list();
     }

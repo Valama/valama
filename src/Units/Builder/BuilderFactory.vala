@@ -3,6 +3,10 @@ namespace Builder {
     CUSTOM,
     AUTOVALA;
 
+    public static EnumBuilder[] to_array() {
+      return new EnumBuilder[] {CUSTOM, AUTOVALA};
+    }
+
     public string toString() {
       if (this == CUSTOM)
         return "custom";
