@@ -40,7 +40,12 @@ For a newer Vala version on Ubuntu based systems, you have to include the [Vala 
 
 On Fedora based systems install following packages:
 
-    sudo yum install vala-devel cmake gtksourceview3-devel glade3-libgladeui-devel glade-devel libgee-devel libxml2-devel libgdl-devel clutter-gtk-devel webkitgtk-devel intltool gnome-icon-theme-symbolic librsvg2 librsvg2-tools
+    sudo yum install vala-devel cmake gtksourceview3-devel glade3-libgladeui-devel glade-devel libgee-devel libxml2-devel libgdl-devel clutter-gtk-devel webkitgtk-devel webkitgtk3-devel intltool gnome-icon-theme-symbolic librsvg2 librsvg2-tools
+
+#### Ubuntu PPA ####
+
+Activate [Valama daily PPA ](https://launchpad.net/~valama-dev/+archive/valama-daily) and install `valama` package.
+
 
 ### Building ###
  1. `mkdir build && cd build`

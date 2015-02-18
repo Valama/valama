@@ -20,7 +20,12 @@ cmake_minimum_required(VERSION "2.8.4")
 
 include("${CMAKE_SOURCE_DIR}/cmake/project.cmake")
 
-project("${project_name}" C)
+if(CMAKE_MAJOR_VERSION GREATER "2")
+  cmake_policy(SET CMP0048 NEW)
+  project("${project_name}" VERSION "${${project_name}_VERSION}" LANGUAGES "C")
+else()
+  project("${project_name}" "C")
+endif()
 string(TOLOWER "${project_name}" project_name_lower)
 
 set(bindir "bin")
@@ -102,21 +107,31 @@ if(VALA_SHORTVER STREQUAL "0.20")
   list(REMOVE_ITEM required_pkgs "libvala-0.22")
   list(REMOVE_ITEM required_pkgs "libvala-0.24")
   list(REMOVE_ITEM required_pkgs "libvala-0.26")
+  list(REMOVE_ITEM required_pkgs "libvala-0.28")
   list(APPEND definitions "VALAC_0_20")
 elseif(VALA_SHORTVER STREQUAL "0.22")
   list(REMOVE_ITEM required_pkgs "libvala-0.20")
   list(REMOVE_ITEM required_pkgs "libvala-0.24")
   list(REMOVE_ITEM required_pkgs "libvala-0.26")
+  list(REMOVE_ITEM required_pkgs "libvala-0.28")
   list(APPEND definitions "VALAC_0_20")
 elseif(VALA_SHORTVER STREQUAL "0.24")
   list(REMOVE_ITEM required_pkgs "libvala-0.20")
   list(REMOVE_ITEM required_pkgs "libvala-0.22")
   list(REMOVE_ITEM required_pkgs "libvala-0.26")
+  list(REMOVE_ITEM required_pkgs "libvala-0.28")
   list(APPEND definitions "VALAC_0_20")
 elseif(VALA_SHORTVER STREQUAL "0.26")
   list(REMOVE_ITEM required_pkgs "libvala-0.20")
   list(REMOVE_ITEM required_pkgs "libvala-0.22")
   list(REMOVE_ITEM required_pkgs "libvala-0.24")
+  list(REMOVE_ITEM required_pkgs "libvala-0.28")
+  list(APPEND definitions "VALAC_0_26")
+elseif(VALA_SHORTVER STREQUAL "0.28")
+  list(REMOVE_ITEM required_pkgs "libvala-0.20")
+  list(REMOVE_ITEM required_pkgs "libvala-0.22")
+  list(REMOVE_ITEM required_pkgs "libvala-0.24")
+  list(REMOVE_ITEM required_pkgs "libvala-0.26")
   list(APPEND definitions "VALAC_0_26")
 else()
   list(REMOVE_ITEM required_pkgs "libvala-0.20")
@@ -137,7 +152,14 @@ endif()
 #gtksourceview-3.0
 pkg_check_modules(GTKSV3.0 REQUIRED "gtksourceview-3.0 >= 3.10")
 compare_version_strings("3.12" "${GTKSV3.0_VERSION}" gtksvres)
-if(gtksvres LESS 1)
+compare_version_strings("3.13.90" "${GTKSV3.0_VERSION}" gtksvres1)
+if(("${GTKSV3.0_VERSION}" VERSION_GREATER "3.15.3") OR ("${GTKSV3.0_VERSION}" VERSION_EQUAL "3.15.3"))
+  message (STATUS "Update files for GtkSourceView 3.15.3")
+  list(APPEND definitions "GTK_SOURCE_VIEW_3_15_3")
+elseif(("${GTKSV3.0_VERSION}" VERSION_GREATER "3.13.90") OR ("${GTKSV3.0_VERSION}" VERSION_EQUAL "3.13.90"))
+  message (STATUS "Update file for GtkSourceView 3.14")
+  list(APPEND definitions "GTK_SOURCE_VIEW_3_14")
+elseif(gtksvres LESS 1)
   list(APPEND definitions "GTK_SOURCE_VIEW_3_12")
 else()
   compare_version_strings("0.24" "${VALA_SHORTVER}" valares)
@@ -164,9 +186,15 @@ pkg_check_modules(GLIB2.0 REQUIRED "glib-2.0")
 # gladeui-2.0
 pkg_check_modules(GLADEUI2.0 REQUIRED "gladeui-2.0")
 list(REMOVE_ITEM required_pkgs "gladeui-2.0")
-#webkit2gtk-3.0
-message(STATUS "Use webkit2gtk-3.0 vapi from valac 0.25.1")
-list(APPEND vapidirs "--vapidir=${CMAKE_SOURCE_DIR}/extravapi/webkit2gtk-3.0")
+pkg_check_modules(WKGTK "webkit2gtk-4.0")
+if (WKGTK_FOUND)
+	list(REMOVE_ITEM required_pkgs "webkit2gtk-3.0")
+	list(APPEND required_pkgs "webkit2gtk-4.0")
+	list(APPEND definitions "WEBKIT2_GTK_4.0")
+	else()
+	message(STATUS "Use webkit2gtk-3.0 vapi from valac 0.25.1")
+	list(APPEND vapidirs "--vapidir=${CMAKE_SOURCE_DIR}/extravapi/webkit2gtk-3.0")
+endif()
 
 set(default_vala_flags
   "--thread"
@@ -265,9 +293,9 @@ if(VALADOC_FOUND)
       ${vapifiles}
     OPTIONS
       ${vapidirs}
-      "--vapidir" "${VALA_VAPIDIR}"
       "--vapidir" "${VALA_DATADIR}/vapi"
       "--vapidir" "${CMAKE_SOURCE_DIR}/vapi"
+      "--vapidir" "${VALA_VAPIDIR}"
       "--target-glib" "${GLIB2.0_VERSION}"
       ${extra_valadoc_opts}
       ${valadoc_debug}

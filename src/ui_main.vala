@@ -783,7 +783,7 @@ public class MainWidget : Box {
         debug_msg (_("Save Ui meta information: %s\n"), path);
         var writer = new TextWriter.filename (path);
         writer.set_indent (true);
-        writer.set_indent_string ("\t");
+        writer.set_indent_string ("    ");
 
         //TODO: Meta file version.
         writer.start_element ("ui-meta");
