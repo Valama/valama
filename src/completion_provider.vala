@@ -225,21 +225,6 @@ public class GuanakoCompletion : Gtk.SourceCompletionProvider, Object {
         return -1;
     }
 
-#if GTK_SOURCE_VIEW_3_15_3
-    public bool get_start_iter (Gtk.SourceCompletionContext context, Gtk.SourceCompletionProposal proposal, out Gtk.TextIter iter) {
-#else
-    public bool get_start_iter (Gtk.SourceCompletionContext context, Gtk.SourceCompletionProposal proposal, Gtk.TextIter iter) {
-#endif
-        var mark = source_viewer.current_srcbuffer.get_insert();
-        TextIter cursor_iter;
-        source_viewer.current_srcbuffer.get_iter_at_mark (out cursor_iter, mark);
-
-        var prop = ((ComplItem)proposal).guanako_proposal;
-        cursor_iter.backward_chars (prop.replace_length);
-        iter = cursor_iter;
-        return true;
-    }
-
     public void update_info (Gtk.SourceCompletionProposal proposal,
                              Gtk.SourceCompletionInfo info) {
         if (info_inner_widget != null) {
