@@ -68,38 +68,38 @@ public enum CopyRecursiveFlags {
  * using GLib;
  *
  * public static int main (string[] args) {
- * 	Gtk.init (ref args);
- * 	window_main = new Window();
- * 	window_main.title = "Test progress bar";
- * 	window_main.window_position = WindowPosition.CENTER;;
- * 	window_main.destroy.connect (main_quit);
+ *     Gtk.init (ref args);
+ *     window_main = new Window();
+ *     window_main.title = "Test progress bar";
+ *     window_main.window_position = WindowPosition.CENTER;;
+ *     window_main.destroy.connect (main_quit);
  *
- * 	var bar = new ProgressBar();
- * 	window_main.add (bar);
+ *     var bar = new ProgressBar();
+ *     window_main.add (bar);
  *
- * 	bar.set_text ("Test progress");
- * 	bar.set_show_text (true);
+ *     bar.set_text ("Test progress");
+ *     bar.set_show_text (true);
  *
- * 	window_main.show_all();
+ *     window_main.show_all();
  *
- * 	var ft = new FileTransfer ("/path/to/directory1",
- * 				"/path/to/directory2",
- * 				CopyRecursiveFlags.WARN_OVERWRITE);
+ *     var ft = new FileTransfer ("/path/to/directory1",
+ *                 "/path/to/directory2",
+ *                 CopyRecursiveFlags.WARN_OVERWRITE);
  *
- * 	ft.byte_count_changed.connect (bar.set_fraction);
- * 	ft.warn_overwrite.connect ((from, to) => {
- * 		stdout.printf ("We have some time to relax.\n");
- * 		Thread.usleep (100000);
- * 		return false;
- * 	});
- * 	ft.num_count_changed.connect ((cur, tot) => {
- * 		bar.set_text (@"$cur/$tot");
- * 	});
+ *     ft.byte_count_changed.connect (bar.set_fraction);
+ *     ft.warn_overwrite.connect ((from, to) => {
+ *         stdout.printf ("We have some time to relax.\n");
+ *         Thread.usleep (100000);
+ *         return false;
+ *     });
+ *     ft.num_count_changed.connect ((cur, tot) => {
+ *         bar.set_text (@"$cur/$tot");
+ *     });
  *
- * 	new Thread<void*>.try ("Copy file", (ThreadFunc<void*>) ft.move);
- * 	Gtk.main();
+ *     new Thread<void*>.try ("Copy file", (ThreadFunc<void*>) ft.move);
+ *     Gtk.main();
  *
- * 	return 0;
+ *     return 0;
  * }
  * }}}
  *
@@ -510,30 +510,30 @@ public class FileTransfer : Object {
     
     public static Gee.Collection<string> get_insensitive_cases (string[] data)
     {
-		var data_set = new Gee.HashSet<string>();
-		foreach(string str in data)
-			data_set.add_all (get_insensitive_case (str));
-		return data_set;
-	}
+        var data_set = new Gee.HashSet<string>();
+        foreach(string str in data)
+            data_set.add_all (get_insensitive_case (str));
+        return data_set;
+    }
     
     static Gee.Collection<string> get_insensitive_case (string data)
     {
-		var data_set = new Gee.HashSet<string>();
-		if (data.length == 0)
-			return data_set;
-		if (data.length == 1)
-		{
-			data_set.add (data.down ());
-			data_set.add (data.down ().up ());
-		}
-		else
-			foreach (var str in get_insensitive_case (data.substring (1)))
-			{
-				data_set.add (data[0].to_string().down() + str);
-				data_set.add (data[0].to_string().down().up() + str);
-			}
-		return data_set;
-	}
+        var data_set = new Gee.HashSet<string>();
+        if (data.length == 0)
+            return data_set;
+        if (data.length == 1)
+        {
+            data_set.add (data.down ());
+            data_set.add (data.down ().up ());
+        }
+        else
+            foreach (var str in get_insensitive_case (data.substring (1)))
+            {
+                data_set.add (data[0].to_string().down() + str);
+                data_set.add (data[0].to_string().down().up() + str);
+            }
+        return data_set;
+    }
 
 /**
  * Remove file or directory / directory content recursively.

@@ -54,28 +54,28 @@ public class ProjectTemplate {
         else {
             vproject = new ValamaProject.from_data ("""
 <project version="%s">
-	<name></name>
-	<buildsystem>cmake</buildsystem>
-	<version>
-		<major>0</major>
-		<minor>0</minor>
-		<patch>0</patch>
-	</version>
-	<packages>
-		<package name="glib-2.0"/>
-		<package name="gobject-2.0"/>
-	</packages>
-	<source-directories>
-		<directory>src</directory>
-		<directory>vapi</directory>
-	</source-directories>
-	<ui-directories>
-		<directory>ui</directory>
-	</ui-directories>
-	<buildsystem-directories>
-		<directory></directory>
-		<directory>cmake</directory>
-	</buildsystem-directories>
+    <name></name>
+    <buildsystem>cmake</buildsystem>
+    <version>
+        <major>0</major>
+        <minor>0</minor>
+        <patch>0</patch>
+    </version>
+    <packages>
+        <package name="glib-2.0"/>
+        <package name="gobject-2.0"/>
+    </packages>
+    <source-directories>
+        <directory>src</directory>
+        <directory>vapi</directory>
+    </source-directories>
+    <ui-directories>
+        <directory>ui</directory>
+    </ui-directories>
+    <buildsystem-directories>
+        <directory></directory>
+        <directory>cmake</directory>
+    </buildsystem-directories>
 </project>
 """.printf (TEMPLATE_VERSION_MIN), null, false);
         }

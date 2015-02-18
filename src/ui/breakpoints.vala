@@ -27,7 +27,7 @@ using Guanako;
 class UiBreakpoints : UiElement {
     TreeView tree_view;
     Guanako.FrankenStein frankenstein;
-    ListStore? store = null;
+    Gtk.ListStore? store = null;
     MainLoop resume_wait_loop = new MainLoop();
 
     InfoBar info_bar;
@@ -252,7 +252,7 @@ class UiBreakpoints : UiElement {
         TreePath old_cursor;
         tree_view.get_cursor (out old_cursor, null);
 
-        store = new ListStore (3, typeof (string), typeof (string), typeof (string));
+        store = new Gtk.ListStore (3, typeof (string), typeof (string), typeof (string));
         tree_view.set_model (store);
 
 

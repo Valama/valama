@@ -27,7 +27,7 @@ using Guanako;
  */
 class UiReport : UiElement {
     TreeView tree_view = null;
-    ListStore store;
+    Gtk.ListStore store;
     ScrolledWindow scrw;
     Gdk.Pixbuf pixmap_err;
     Gdk.Pixbuf pixmap_warn;
@@ -258,7 +258,7 @@ class UiReport : UiElement {
 
     public override void build() {
         if (showall) {
-            store = new ListStore (5, typeof (Gdk.Pixbuf),
+            store = new Gtk.ListStore (5, typeof (Gdk.Pixbuf),
                                       typeof (string),
                                       typeof (int),
                                       typeof (string),
@@ -272,7 +272,7 @@ class UiReport : UiElement {
             else
                 store.set_sort_column_id (1, SortType.ASCENDING);
         } else {
-            store = new ListStore (4, typeof (Gdk.Pixbuf),
+            store = new Gtk.ListStore (4, typeof (Gdk.Pixbuf),
                                       typeof (int),
                                       typeof (string),
                                       typeof (Reporter.Error));

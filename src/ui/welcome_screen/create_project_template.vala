@@ -30,7 +30,7 @@ using Gee;
 
 public class CreateProjectTemplate : TemplatePageWithHeader {
     private TreeView tree_view;
-    private ListStore store;
+    private Gtk.ListStore store;
     private ToggleToolButton btn_credits;
     private ToggleToolButton btn_vlpinfo;
     private ToggleToolButton btn_info;
@@ -158,7 +158,7 @@ public class CreateProjectTemplate : TemplatePageWithHeader {
         vbox.show_all();
 
 
-        store = new ListStore (3, typeof (string), typeof (Gdk.Pixbuf), typeof (string));
+        store = new Gtk.ListStore (3, typeof (string), typeof (Gdk.Pixbuf), typeof (string));
         tree_view.set_model (store);
 
         load_templates();
