@@ -22,8 +22,9 @@ namespace Project {
     public signal void member_editor_created (ProjectMember member, Ui.Editor editor);
     
     public void load (string filename) throws ProjectError {
-    
-      this.filename = filename;
+
+      GLib.Environment.set_current_dir(GLib.Path.get_dirname(filename));
+      this.filename = GLib.Path.get_basename(filename);
     
       // Load document
       Xml.Doc* doc = Xml.Parser.parse_file (filename);
