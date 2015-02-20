@@ -16,9 +16,7 @@
 		<source id="19"/>
 		<source id="23"/>
 		<source id="24"/>
-		<source id="25"/>
 		<source id="27"/>
-		<source id="26"/>
 		<source id="15"/>
 		<source id="16"/>
 		<source id="28"/>
@@ -73,8 +71,6 @@
 	<valasource id="22" filename="src/Ui/Viewer.vala"/>
 	<valasource id="23" filename="src/Project/MetaDependency.vala"/>
 	<valasource id="24" filename="src/Project/Dependency.vala"/>
-	<valasource id="25" filename="src/Project/DependencyPackage.vala"/>
-	<valasource id="26" filename="src/Project/DependencyVapi.vala"/>
 	<valasource id="27" filename="src/Ui/ViewerFactory.vala"/>
 	<valasource id="28" filename="src/Ui/ViewerClassDiagram.vala"/>
 	<classdiagram id="29" name="Grasses Diagramm2">

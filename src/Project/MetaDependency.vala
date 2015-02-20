@@ -19,15 +19,11 @@ namespace Project {
         if (iter->type != Xml.ElementType.ELEMENT_NODE)
           continue;
 
-        Dependency dep;
-        if (iter->name == "vapi")
-          dep = new DependencyVapi();
-        else if (iter->name == "package")
-          dep = new DependencyPackage();
-        else
-          continue;
-        dep.load (iter);
-        dependencies.add (dep);
+        if (iter->name == "dependency") {
+          var dep = new Dependency();
+          dep.load (iter);
+          dependencies.add (dep);
+        }
       }
     }
     public void save (Xml.TextWriter writer) {
