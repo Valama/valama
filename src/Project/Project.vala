@@ -22,11 +22,12 @@ namespace Project {
     public signal void member_editor_created (ProjectMember member, Ui.Editor editor);
     
     public void load (string filename) throws ProjectError {
-    
-      this.filename = filename;
-    
+
+      GLib.Environment.set_current_dir(GLib.Path.get_dirname(filename));
+      this.filename = GLib.Path.get_basename(filename);
+
       // Load document
-      Xml.Doc* doc = Xml.Parser.parse_file (filename);
+      Xml.Doc* doc = Xml.Parser.parse_file (this.filename);
       if (doc == null)
         throw new ProjectError.FILE("Project file not found or permissions missing");
 
@@ -104,7 +105,7 @@ namespace Project {
     }
 
     public void save () {
-      var writer = new Xml.TextWriter.filename (filename);
+      var writer = new Xml.TextWriter.filename (this.filename);
       writer.set_indent (true);
       writer.set_indent_string ("\t");
 
