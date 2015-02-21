@@ -38,6 +38,14 @@
 		<source id="9"/>
 		<source id="4"/>
 		<source id="2"/>
+		<metadependency name="New dependency">
+			<dependency type="vapi" library="">
+				<condition library="" version="" relation="greater"/>
+			</dependency>
+			<dependency type="vapi" library="">
+				<condition library="" version="" relation="greater"/>
+			</dependency>
+		</metadependency>
 	</target>
 	<target id="18" binary_name="testtarget">
 		<buildsystem type="custom" build_command="" run_command="" clean_command=""/>

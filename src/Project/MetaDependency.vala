@@ -6,10 +6,6 @@ namespace Project {
 
     public Gee.LinkedList<Dependency> dependencies = new Gee.LinkedList<Dependency>();
 
-    public void show_edit_dialog() {
-
-    }
-
     public void load (Xml.Node* node) {
       for (Xml.Attr* prop = node->properties; prop != null; prop = prop->next) {
         if (prop->name == "name")

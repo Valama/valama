@@ -21,6 +21,108 @@ namespace Ui {
   	[GtkChild]
   	public Notebook notebook_settings;
   }
+  [GtkTemplate (ui = "/src/Ui/Editors/Editor_Target_Condition.glade")]
+  private class ConditionEditorTemplate : ListBoxRow {
+    public ConditionEditorTemplate(Project.Condition condition) {
+
+    }
+  	[GtkChild]
+  	public ComboBoxText cmb_library;
+  	[GtkChild]
+  	public ComboBox cmb_relation;
+  	[GtkChild]
+  	public Button btn_remove;
+  	[GtkChild]
+  	public Entry ent_version;
+  }
+  [GtkTemplate (ui = "/src/Ui/Editors/Editor_Target_Dependency.glade")]
+  private class DependencyEditorTemplate : ListBoxRow {
+  
+    private Project.Dependency dep;
+    public DependencyEditorTemplate(Project.Dependency dep) {
+      this.dep = dep;
+
+      btn_add_condition.clicked.connect (()=>{
+        var new_cond = new Project.Condition();
+        dep.conditions.add (new_cond);
+        update_list ();
+      });
+
+      update_list ();
+    }
+
+    private void update_list () {
+      foreach (Gtk.Widget widget in list_conditions.get_children())
+        list_conditions.remove (widget);
+      foreach (var condition in dep.conditions) {
+        var new_row = new ConditionEditorTemplate (condition);
+        list_conditions.add (new_row);
+
+        // Handle removing a condition
+        new_row.btn_remove.clicked.connect (()=>{
+          dep.conditions.remove (condition);
+          update_list();
+        });
+      }
+      list_conditions.show_all();
+    }
+
+  	[GtkChild]
+  	public Image img_type;
+  	[GtkChild]
+  	public Label lbl_title;
+  	[GtkChild]
+  	public ListBox list_conditions;
+  	[GtkChild]
+  	public Button btn_add_condition;
+  }
+  [GtkTemplate (ui = "/src/Ui/Editors/Editor_Target_Meta_Dependency.glade")]
+  private class MetaDependencyEditorTemplate : Box {
+
+    private Project.MetaDependency meta_dep;
+
+    public MetaDependencyEditorTemplate(Project.MetaDependency meta_dep) {
+      this.meta_dep = meta_dep;
+
+      btn_add.clicked.connect (()=>{
+        var new_dep = new Project.Dependency();
+        meta_dep.dependencies.add (new_dep);
+        update_list ();
+      });
+      btn_remove.clicked.connect (()=>{
+        var selected_row = list_dependencies.get_selected_row();
+        if (selected_row != null)
+          meta_dep.dependencies.remove (selected_row.get_data<Project.Dependency>("dep"));
+        update_list ();
+      });
+
+      update_list ();
+    }
+    
+    private void update_list () {
+      foreach (Gtk.Widget widget in list_dependencies.get_children())
+        list_dependencies.remove (widget);
+      foreach (var dep in meta_dep.dependencies) {
+        var new_row = new DependencyEditorTemplate (dep);
+        new_row.set_data<Project.Dependency> ("dep", dep);
+        list_dependencies.add (new_row);
+      }
+    }
+ 
+  	[GtkChild]
+  	public ListBox list_dependencies;
+  	[GtkChild]
+  	public ToolButton btn_add;
+  	[GtkChild]
+  	public ToolButton btn_remove;
+  	[GtkChild]
+  	public ToolButton btn_up;
+  	[GtkChild]
+  	public ToolButton btn_down;
+  	[GtkChild]
+  	public Entry ent_name;
+  }
+
   public class EditorTarget : Editor {
 
     private TargetTemplate template = new TargetTemplate();
@@ -149,13 +251,24 @@ namespace Ui {
           return;
 
         var dep = template.deps_list.get_selected_row().get_data<Project.MetaDependency>("metadependency");
-        dep.show_edit_dialog();
-        update_dependencies_list ();
+        edit_meta_dependency (dep);
       });
 
       template.deps_list.row_selected.connect(dependencies_list_row_selected);
       update_dependencies_list();
     }
+
+    private void edit_meta_dependency (Project.MetaDependency dep) {
+      var editor = new MetaDependencyEditorTemplate(dep);
+
+      var edit_dialog = new Dialog.with_buttons("", main_widget.window, DialogFlags.MODAL, "OK", ResponseType.OK);
+      edit_dialog.get_content_area().add (editor);
+      var ret = edit_dialog.run();
+      edit_dialog.destroy();
+      
+      update_dependencies_list ();
+    }
+
     public override void load_internal (Xml.TextWriter writer) {
 
     }

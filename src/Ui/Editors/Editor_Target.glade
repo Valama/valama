@@ -119,6 +119,7 @@
               <object class="GtkScrolledWindow" id="scrolledwindow2">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <property name="vexpand">True</property>
                 <property name="shadow_type">in</property>
                 <child>
                   <object class="GtkViewport" id="viewport2">
@@ -128,6 +129,7 @@
                       <object class="GtkListBox" id="deps_list">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="selection_mode">browse</property>
                       </object>
                     </child>
                   </object>
