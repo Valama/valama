@@ -41,6 +41,17 @@ namespace Ui {
         condition.library = cmb_library.get_active_text();
       });
 
+      // Fill relation selector and keep in sync
+      cmb_relation.append (Project.ConditionRelation.GREATER.toString(), ">");
+      cmb_relation.append (Project.ConditionRelation.GREATER_EQUAL.toString(), ">=");
+      cmb_relation.append (Project.ConditionRelation.EQUAL.toString(), "==");
+      cmb_relation.append (Project.ConditionRelation.LESSER_EQUAL.toString(), "<=");
+      cmb_relation.append (Project.ConditionRelation.LESSER.toString(), "<");
+      cmb_relation.set_active_id (condition.relation.toString());
+      cmb_relation.changed.connect (()=>{
+        condition.relation = Project.ConditionRelation.fromString (cmb_relation.get_active_id());
+      });
+
       // Keep version text in sync
       ent_version.text = condition.version;
       ent_version.changed.connect (()=>{
@@ -50,7 +61,7 @@ namespace Ui {
   	[GtkChild]
   	public ComboBoxText cmb_library;
   	[GtkChild]
-  	public ComboBox cmb_relation;
+  	public ComboBoxText cmb_relation;
   	[GtkChild]
   	public Button btn_remove;
   	[GtkChild]
@@ -108,6 +119,12 @@ namespace Ui {
     public MetaDependencyEditorTemplate(Ui.MainWidget main_widget, Project.MetaDependency meta_dep) {
       this.meta_dep = meta_dep;
       this.main_widget = main_widget;
+
+      // Keep meta dep name in sync
+      ent_name.text = meta_dep.name;
+      ent_name.changed.connect (()=>{
+        meta_dep.name = ent_name.text;
+      });
 
       btn_add.clicked.connect (()=>{
         var new_dep = new Project.Dependency();

@@ -2,14 +2,20 @@ namespace Project {
 
   public enum ConditionRelation {
     GREATER,
+    GREATER_EQUAL,
     EQUAL,
+    LESSER_EQUAL,
     LESSER;
     
     public string toString() {
       if (this == GREATER)
         return "greater";
+      if (this == GREATER_EQUAL)
+        return "greater_equal";
       if (this == EQUAL)
         return "equal";
+      if (this == LESSER_EQUAL)
+        return "lesser_equal";
       if (this == LESSER)
         return "lesser";
       return "UNKNOWN";
@@ -17,8 +23,12 @@ namespace Project {
     public static ConditionRelation fromString(string s) {
       if (s == "greater")
         return GREATER;
+      if (s == "greater_equal")
+        return GREATER_EQUAL;
       if (s == "equal")
         return EQUAL;
+      if (s == "lesser_equal")
+        return LESSER_EQUAL;
       if (s == "lesser")
         return LESSER;
       return EQUAL;

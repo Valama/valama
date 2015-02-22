@@ -38,9 +38,9 @@
 		<source id="9"/>
 		<source id="4"/>
 		<source id="2"/>
-		<metadependency name="New dependency">
+		<metadependency name="GTK">
 			<dependency type="vapi" library="">
-				<condition library="gtk+-3.0" version="3.4" relation="greater"/>
+				<condition library="gtk+-3.0" version="3.4" relation="greater_equal"/>
 			</dependency>
 			<dependency type="vapi" library="">
 				<condition library="cairo-xcb-shm" version="2.4.38" relation="greater"/>
