@@ -23,8 +23,29 @@ namespace Ui {
   }
   [GtkTemplate (ui = "/src/Ui/Editors/Editor_Target_Condition.glade")]
   private class ConditionEditorTemplate : ListBoxRow {
-    public ConditionEditorTemplate(Project.Condition condition) {
+    public ConditionEditorTemplate(Ui.MainWidget main_widget, Project.Condition condition) {
+      // Build library selection combo, activate current if found
+      bool found = false;
+      foreach (var lib in main_widget.installed_libraries_provider.installed_libraries) {
+        cmb_library.append (lib.library, lib.library);
+        if (lib.library == condition.library) {
+          found = true;
+          cmb_library.set_active_id (condition.library);
+        }
+      }
+      if (!found && condition.library != "") {
+        cmb_library.prepend (condition.library, condition.library);
+        cmb_library.set_active_id (condition.library);
+      }
+      cmb_library.changed.connect (()=>{
+        condition.library = cmb_library.get_active_text();
+      });
 
+      // Keep version text in sync
+      ent_version.text = condition.version;
+      ent_version.changed.connect (()=>{
+        condition.version = ent_version.text;
+      });
     }
   	[GtkChild]
   	public ComboBoxText cmb_library;
@@ -37,10 +58,12 @@ namespace Ui {
   }
   [GtkTemplate (ui = "/src/Ui/Editors/Editor_Target_Dependency.glade")]
   private class DependencyEditorTemplate : ListBoxRow {
-  
+    private Ui.MainWidget main_widget;
     private Project.Dependency dep;
-    public DependencyEditorTemplate(Project.Dependency dep) {
+
+    public DependencyEditorTemplate(Ui.MainWidget main_widget, Project.Dependency dep) {
       this.dep = dep;
+      this.main_widget = main_widget;
 
       btn_add_condition.clicked.connect (()=>{
         var new_cond = new Project.Condition();
@@ -55,7 +78,7 @@ namespace Ui {
       foreach (Gtk.Widget widget in list_conditions.get_children())
         list_conditions.remove (widget);
       foreach (var condition in dep.conditions) {
-        var new_row = new ConditionEditorTemplate (condition);
+        var new_row = new ConditionEditorTemplate (main_widget, condition);
         list_conditions.add (new_row);
 
         // Handle removing a condition
@@ -80,9 +103,11 @@ namespace Ui {
   private class MetaDependencyEditorTemplate : Box {
 
     private Project.MetaDependency meta_dep;
+    private Ui.MainWidget main_widget;
 
-    public MetaDependencyEditorTemplate(Project.MetaDependency meta_dep) {
+    public MetaDependencyEditorTemplate(Ui.MainWidget main_widget, Project.MetaDependency meta_dep) {
       this.meta_dep = meta_dep;
+      this.main_widget = main_widget;
 
       btn_add.clicked.connect (()=>{
         var new_dep = new Project.Dependency();
@@ -103,7 +128,7 @@ namespace Ui {
       foreach (Gtk.Widget widget in list_dependencies.get_children())
         list_dependencies.remove (widget);
       foreach (var dep in meta_dep.dependencies) {
-        var new_row = new DependencyEditorTemplate (dep);
+        var new_row = new DependencyEditorTemplate (main_widget, dep);
         new_row.set_data<Project.Dependency> ("dep", dep);
         list_dependencies.add (new_row);
       }
@@ -259,7 +284,9 @@ namespace Ui {
     }
 
     private void edit_meta_dependency (Project.MetaDependency dep) {
-      var editor = new MetaDependencyEditorTemplate(dep);
+      main_widget.installed_libraries_provider.update();
+
+      var editor = new MetaDependencyEditorTemplate(main_widget, dep);
 
       var edit_dialog = new Dialog.with_buttons("", main_widget.window, DialogFlags.MODAL, "OK", ResponseType.OK);
       edit_dialog.get_content_area().add (editor);

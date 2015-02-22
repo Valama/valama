@@ -16,6 +16,7 @@ namespace Ui {
     public Units.SourceBufferManager source_buffer_manager = new Units.SourceBufferManager();
     public Units.CompletionProvider completion_provider = new Units.CompletionProvider();
     public Units.BuilderProvider builder_provider = new Units.BuilderProvider();
+    public Units.InstalledLibrariesProvider installed_libraries_provider = new Units.InstalledLibrariesProvider();
 
     private Gee.ArrayList<Units.Unit> units = new Gee.ArrayList<Units.Unit>();
     
@@ -33,7 +34,8 @@ namespace Ui {
       units.add (source_buffer_manager);
       units.add (completion_provider);
       units.add (builder_provider);
-      
+      units.add (installed_libraries_provider);
+
       foreach (var unit in units) {
         unit.main_widget = this;
         unit.init();

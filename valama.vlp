@@ -40,10 +40,10 @@
 		<source id="2"/>
 		<metadependency name="New dependency">
 			<dependency type="vapi" library="">
-				<condition library="" version="" relation="greater"/>
+				<condition library="gtk+-3.0" version="3.4" relation="greater"/>
 			</dependency>
 			<dependency type="vapi" library="">
-				<condition library="" version="" relation="greater"/>
+				<condition library="cairo-xcb-shm" version="2.4.38" relation="greater"/>
 			</dependency>
 		</metadependency>
 	</target>
