@@ -7,6 +7,7 @@
     <file compressed="true" preprocess="xml-stripblanks">src/Ui/Editors/Editor_Target_Dependency.glade</file>
     <file compressed="true" preprocess="xml-stripblanks">src/Ui/Editors/Editor_Target_Meta_Dependency.glade</file>
     <file compressed="true" preprocess="xml-stripblanks">src/Ui/Editors/Editor_Target_Condition.glade</file>
+    <file compressed="true" preprocess="xml-stripblanks">src/Ui/Editors/Editor_Target_NewDependency.glade</file>
     <file compressed="true" preprocess="xml-stripblanks">src/Ui/NewProjectMember.glade</file>
     <file compressed="true" preprocess="xml-stripblanks">src/Ui/WelcomeScreen/WelcomeScreen.glade</file>
     <file compressed="true" preprocess="xml-stripblanks">src/Ui/WelcomeScreen/RecentEntry.glade</file>

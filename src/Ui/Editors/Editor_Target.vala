@@ -2,6 +2,14 @@ using Gtk;
 
 namespace Ui {
 
+
+  [GtkTemplate (ui = "/src/Ui/Editors/Editor_Target_NewDependency.glade")]
+  private class NewDependencyDialogTemplate : ListBox {
+  	[GtkChild]
+  	public ListBoxRow row_new_package_dep;
+  	[GtkChild]
+  	public ListBoxRow row_new_vapi_dep;
+  }
   [GtkTemplate (ui = "/src/Ui/Editors/Editor_Target.glade")]
   private class TargetTemplate : Box {
   	[GtkChild]
@@ -76,6 +84,13 @@ namespace Ui {
       this.dep = dep;
       this.main_widget = main_widget;
 
+      lbl_title.label = dep.library;
+
+      if (dep.type == Project.DependencyType.PACKAGE)
+        img_type.set_from_stock (Stock.EXECUTE, IconSize.LARGE_TOOLBAR);
+      else
+        img_type.set_from_stock (Stock.FILE, IconSize.LARGE_TOOLBAR);
+
       btn_add_condition.clicked.connect (()=>{
         var new_cond = new Project.Condition();
         dep.conditions.add (new_cond);
@@ -127,9 +142,32 @@ namespace Ui {
       });
 
       btn_add.clicked.connect (()=>{
-        var new_dep = new Project.Dependency();
-        meta_dep.dependencies.add (new_dep);
-        update_list ();
+        var dlg_template = new NewDependencyDialogTemplate();
+        var new_dep_dialog = new Dialog.with_buttons("New dependency", main_widget.window, DialogFlags.MODAL, "OK", ResponseType.OK, "Cancel", ResponseType.CANCEL);
+        new_dep_dialog.get_content_area().add (dlg_template);
+        var ret = new_dep_dialog.run();
+        if (ret == ResponseType.OK) {
+          var new_dep = new Project.Dependency();
+          if (dlg_template.get_selected_row() == dlg_template.row_new_package_dep) {
+            
+            new_dep.type = Project.DependencyType.PACKAGE;
+            meta_dep.dependencies.add (new_dep);
+          } else if (dlg_template.get_selected_row() == dlg_template.row_new_vapi_dep) {
+            var file_chooser = new Gtk.FileChooserDialog ("Open Vapi file", main_widget.window,
+                                          Gtk.FileChooserAction.OPEN,
+                                          Gtk.Stock.CANCEL, Gtk.ResponseType.CANCEL,
+                                          Gtk.Stock.OPEN, Gtk.ResponseType.ACCEPT);
+            if (file_chooser.run () == Gtk.ResponseType.ACCEPT) {
+              var projectfolder = File.new_for_path (main_widget.project.filename).get_parent();
+              new_dep.library = projectfolder.get_relative_path (file_chooser.get_file());
+              new_dep.type = Project.DependencyType.VAPI;
+              meta_dep.dependencies.add (new_dep);
+            }
+            file_chooser.destroy();
+          }
+          update_list ();
+        }
+        new_dep_dialog.destroy();
       });
       btn_remove.clicked.connect (()=>{
         var selected_row = list_dependencies.get_selected_row();
