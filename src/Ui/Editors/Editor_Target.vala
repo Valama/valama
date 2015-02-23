@@ -138,6 +138,31 @@ namespace Ui {
         update_list ();
       });
 
+      btn_up.clicked.connect (()=>{
+        var selected_row = list_dependencies.get_selected_row();
+        if (selected_row == null)
+          return;
+        var dep = selected_row.get_data<Project.Dependency>("dep");
+        var index = meta_dep.dependencies.index_of (dep);
+        if (index == 0)
+          return;
+        meta_dep.dependencies.remove (dep);
+        meta_dep.dependencies.insert (index - 1, dep);
+        update_list ();
+      });
+      btn_down.clicked.connect (()=>{
+        var selected_row = list_dependencies.get_selected_row();
+        if (selected_row == null)
+          return;
+        var dep = selected_row.get_data<Project.Dependency>("dep");
+        var index = meta_dep.dependencies.index_of (dep);
+        if (index == meta_dep.dependencies.size - 1)
+          return;
+        meta_dep.dependencies.remove (dep);
+        meta_dep.dependencies.insert (index + 1, dep);
+        update_list ();
+      });
+
       update_list ();
     }
     
