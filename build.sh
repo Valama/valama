@@ -33,10 +33,10 @@ valac_version()
 
 # define some adjustement variables
 
-gtksv_res=`pkg_version gtksourceview-3.0 3.15.3`
+gtksv_res=`pkg_version gtksourceview-3.0 3.14.3`
 gtksv_define='GTK_SOURCE_VIEW_3_14'
 if [ "$gtksv_res" = "equal" ] || [ "$gtksv_res" = "greater" ]; then
-	gtksv_define='GTK_SOURCE_VIEW_3_15_3'
+	gtksv_define='GTK_SOURCE_VIEW_3_14_3'
 fi	
 
 vv=`valac_version`
