@@ -4,11 +4,37 @@ namespace Ui {
 
 
   [GtkTemplate (ui = "/src/Ui/Editors/Editor_Target_NewDependency.glade")]
-  private class NewDependencyDialogTemplate : ListBox {
+  private class NewDependencyDialogTemplate : Box {
+    File projectfolder;
+    public NewDependencyDialogTemplate (MainWidget main_widget) {
+      projectfolder = File.new_for_path (main_widget.project.filename).get_parent();
+      rbtn_package.sensitive = false;
+      foreach (var lib in main_widget.installed_libraries_provider.installed_libraries)
+        if (lib.vapi_path != null) {
+          box_package.append (lib.library, lib.library);
+          if (!rbtn_package.sensitive) {
+            box_package.set_active_id (lib.library);
+            rbtn_package.sensitive = true;
+          }
+        }
+    }
+    public bool chose_package () {
+      return rbtn_package.active;
+    }
+    public string get_selected_package() {
+      return box_package.get_active_id();
+    }
+    public string get_selected_vapi() {
+      return projectfolder.get_relative_path (vapi_chooser.get_file());
+    }
   	[GtkChild]
-  	public ListBoxRow row_new_package_dep;
+  	public RadioButton rbtn_package;
   	[GtkChild]
-  	public ListBoxRow row_new_vapi_dep;
+  	public RadioButton rbtn_vapi;
+  	[GtkChild]
+  	public ComboBoxText box_package;
+  	[GtkChild]
+  	public FileChooserWidget vapi_chooser;
   }
   [GtkTemplate (ui = "/src/Ui/Editors/Editor_Target.glade")]
   private class TargetTemplate : Box {
@@ -142,29 +168,20 @@ namespace Ui {
       });
 
       btn_add.clicked.connect (()=>{
-        var dlg_template = new NewDependencyDialogTemplate();
+        var dlg_template = new NewDependencyDialogTemplate(main_widget);
         var new_dep_dialog = new Dialog.with_buttons("New dependency", main_widget.window, DialogFlags.MODAL, "OK", ResponseType.OK, "Cancel", ResponseType.CANCEL);
         new_dep_dialog.get_content_area().add (dlg_template);
         var ret = new_dep_dialog.run();
         if (ret == ResponseType.OK) {
           var new_dep = new Project.Dependency();
-          if (dlg_template.get_selected_row() == dlg_template.row_new_package_dep) {
-            
+          if (dlg_template.chose_package()) {
             new_dep.type = Project.DependencyType.PACKAGE;
-            meta_dep.dependencies.add (new_dep);
-          } else if (dlg_template.get_selected_row() == dlg_template.row_new_vapi_dep) {
-            var file_chooser = new Gtk.FileChooserDialog ("Open Vapi file", main_widget.window,
-                                          Gtk.FileChooserAction.OPEN,
-                                          Gtk.Stock.CANCEL, Gtk.ResponseType.CANCEL,
-                                          Gtk.Stock.OPEN, Gtk.ResponseType.ACCEPT);
-            if (file_chooser.run () == Gtk.ResponseType.ACCEPT) {
-              var projectfolder = File.new_for_path (main_widget.project.filename).get_parent();
-              new_dep.library = projectfolder.get_relative_path (file_chooser.get_file());
-              new_dep.type = Project.DependencyType.VAPI;
-              meta_dep.dependencies.add (new_dep);
-            }
-            file_chooser.destroy();
+            new_dep.library = dlg_template.get_selected_package();
+          } else {
+            new_dep.type = Project.DependencyType.VAPI;
+            new_dep.library = dlg_template.get_selected_vapi();
           }
+          meta_dep.dependencies.add (new_dep);
           update_list ();
         }
         new_dep_dialog.destroy();

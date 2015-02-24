@@ -12,6 +12,7 @@ namespace Units {
     public struct InstalledLibrary {
       public string library;
       public string description;
+      public string? vapi_path;
     }
 
     public override void init() {
@@ -21,6 +22,8 @@ namespace Units {
 
     public Gee.TreeSet<InstalledLibrary?> installed_libraries = new Gee.TreeSet<InstalledLibrary?>();
     public void update() {
+      assert(main_widget.code_context_provider.context != null);
+
       installed_libraries = new Gee.TreeSet<InstalledLibrary?>((a,b) => {
         if (a.library > b.library)
           return 1;
@@ -44,6 +47,7 @@ namespace Units {
         var lib = new InstalledLibrary();
         lib.library = linesplit[0];
         lib.description = linesplit[1].chug();
+        lib.vapi_path = main_widget.code_context_provider.context.get_vapi_path (lib.library);
 
         installed_libraries.add (lib);
       }

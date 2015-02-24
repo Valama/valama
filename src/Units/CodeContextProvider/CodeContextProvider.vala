@@ -95,8 +95,8 @@ namespace Units {
 
       Vala.CodeContext.pop();
       
-      //context = context_internal;
-      //report = report_internal;
+      context = context_internal;
+      report = report_internal;
 
 
 
