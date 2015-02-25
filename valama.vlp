@@ -38,12 +38,27 @@
 		<source id="9"/>
 		<source id="4"/>
 		<source id="2"/>
-		<metadependency name="GTK">
-			<dependency type="vapi" library="">
-				<condition library="gtk+-3.0" version="3.4" relation="greater_equal"/>
+		<metadependency name="Gtk">
+			<dependency type="package" library="gtk+-3.0"/>
+		</metadependency>
+		<metadependency name="Glade">
+			<dependency type="vapi" library="vapi/gladeui-2.0.vapi"/>
+		</metadependency>
+		<metadependency name="GtkSourceView">
+			<dependency type="package" library="gtksourceview-3.0"/>
+		</metadependency>
+		<metadependency name="LibXML">
+			<dependency type="package" library="libxml-2.0"/>
+		</metadependency>
+		<metadependency name="Gee">
+			<dependency type="package" library="gee-0.8"/>
+		</metadependency>
+		<metadependency name="LibVala">
+			<dependency type="package" library="libvala-0.24">
+				<condition library="libvala-0.24" version="0.24.0" relation="equal"/>
 			</dependency>
-			<dependency type="vapi" library="">
-				<condition library="cairo-xcb-shm" version="2.4.38" relation="greater"/>
+			<dependency type="package" library="libvala-0.22">
+				<condition library="libvala-0.22" version="0.22.0" relation="equal"/>
 			</dependency>
 		</metadependency>
 	</target>

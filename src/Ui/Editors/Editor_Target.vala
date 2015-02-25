@@ -22,7 +22,7 @@ namespace Ui {
       return rbtn_package.active;
     }
     public string get_selected_package() {
-      return box_package.get_active_id();
+      return box_package.get_active_text();
     }
     public string get_selected_vapi() {
       return projectfolder.get_relative_path (vapi_chooser.get_file());
@@ -168,23 +168,7 @@ namespace Ui {
       });
 
       btn_add.clicked.connect (()=>{
-        var dlg_template = new NewDependencyDialogTemplate(main_widget);
-        var new_dep_dialog = new Dialog.with_buttons("New dependency", main_widget.window, DialogFlags.MODAL, "OK", ResponseType.OK, "Cancel", ResponseType.CANCEL);
-        new_dep_dialog.get_content_area().add (dlg_template);
-        var ret = new_dep_dialog.run();
-        if (ret == ResponseType.OK) {
-          var new_dep = new Project.Dependency();
-          if (dlg_template.chose_package()) {
-            new_dep.type = Project.DependencyType.PACKAGE;
-            new_dep.library = dlg_template.get_selected_package();
-          } else {
-            new_dep.type = Project.DependencyType.VAPI;
-            new_dep.library = dlg_template.get_selected_vapi();
-          }
-          meta_dep.dependencies.add (new_dep);
-          update_list ();
-        }
-        new_dep_dialog.destroy();
+        add_dep_dialog();
       });
       btn_remove.clicked.connect (()=>{
         var selected_row = list_dependencies.get_selected_row();
@@ -220,7 +204,26 @@ namespace Ui {
 
       update_list ();
     }
-    
+    public bool add_dep_dialog() {
+      var dlg_template = new NewDependencyDialogTemplate(main_widget);
+      var new_dep_dialog = new Dialog.with_buttons("New dependency", main_widget.window, DialogFlags.MODAL, "OK", ResponseType.OK, "Cancel", ResponseType.CANCEL);
+      new_dep_dialog.get_content_area().add (dlg_template);
+      var ret = new_dep_dialog.run();
+      if (ret == ResponseType.OK) {
+        var new_dep = new Project.Dependency();
+        if (dlg_template.chose_package()) {
+          new_dep.type = Project.DependencyType.PACKAGE;
+          new_dep.library = dlg_template.get_selected_package();
+        } else {
+          new_dep.type = Project.DependencyType.VAPI;
+          new_dep.library = dlg_template.get_selected_vapi();
+        }
+        meta_dep.dependencies.add (new_dep);
+        update_list ();
+      }
+      new_dep_dialog.destroy();
+      return ret == ResponseType.OK;
+    }
     private void update_list () {
       foreach (Gtk.Widget widget in list_dependencies.get_children())
         list_dependencies.remove (widget);
@@ -355,7 +358,8 @@ namespace Ui {
         var my_member = member as Project.ProjectMemberTarget;
         var new_dep = new Project.MetaDependency();
         new_dep.name = "New dependency";
-        my_member.metadependencies.add (new_dep);
+        if (edit_meta_dependency (new_dep, true))
+          my_member.metadependencies.add (new_dep);
         update_dependencies_list ();
       });
 
@@ -373,17 +377,22 @@ namespace Ui {
           return;
 
         var dep = template.deps_list.get_selected_row().get_data<Project.MetaDependency>("metadependency");
-        edit_meta_dependency (dep);
+        edit_meta_dependency (dep, false);
       });
 
       template.deps_list.row_selected.connect(dependencies_list_row_selected);
       update_dependencies_list();
     }
 
-    private void edit_meta_dependency (Project.MetaDependency dep) {
+    // Returns whether inital editing of a new dependency was successful. For not newly created ones, always returns true.
+    private bool edit_meta_dependency (Project.MetaDependency dep, bool newly_created) {
       main_widget.installed_libraries_provider.update();
 
       var editor = new MetaDependencyEditorTemplate(main_widget, dep);
+
+      if (newly_created)
+        if (!editor.add_dep_dialog())
+          return false;
 
       var edit_dialog = new Dialog.with_buttons("", main_widget.window, DialogFlags.MODAL, "OK", ResponseType.OK);
       edit_dialog.get_content_area().add (editor);
@@ -391,6 +400,7 @@ namespace Ui {
       edit_dialog.destroy();
       
       update_dependencies_list ();
+      return true;
     }
 
     public override void load_internal (Xml.TextWriter writer) {
