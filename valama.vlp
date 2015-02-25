@@ -61,6 +61,9 @@
 				<condition library="libvala-0.22" version="0.22.0" relation="equal"/>
 			</dependency>
 		</metadependency>
+		<define define="GTK_SOURCE_VIEW_3_14_3">
+			<condition library="gtksourceview-3.0" version="3.14.3" relation="greater_equal"/>
+		</define>
 	</target>
 	<target id="18" binary_name="testtarget">
 		<buildsystem type="custom" build_command="" run_command="" clean_command=""/>

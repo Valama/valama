@@ -23,6 +23,8 @@ namespace Project {
   
     public Gee.LinkedList<MetaDependency> metadependencies = new Gee.LinkedList<MetaDependency>();
 
+    public Gee.LinkedList<Define> defines = new Gee.LinkedList<Define>();
+
     internal override void load_internal (Xml.Node* node) throws ProjectError {
       // Read binary name
       for (Xml.Attr* prop = node->properties; prop != null; prop = prop->next) {
@@ -43,6 +45,11 @@ namespace Project {
           var dep = new MetaDependency();
           dep.load (iter);
           metadependencies.add (dep);
+        }
+        if (iter->name == "define") {
+          var def = new Define();
+          def.load (iter);
+          defines.add (def);
         }
         if (iter->name == "buildsystem") {
           for (Xml.Attr* prop = iter->properties; prop != null; prop = prop->next)
@@ -78,6 +85,11 @@ namespace Project {
       foreach (var dep in metadependencies) {
         writer.start_element ("metadependency");
         dep.save (writer);
+        writer.end_element();
+      }
+      foreach (var def in defines) {
+        writer.start_element ("define");
+        def.save (writer);
         writer.end_element();
       }
     }

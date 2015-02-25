@@ -2,6 +2,76 @@ using Gtk;
 
 namespace Ui {
 
+  [GtkTemplate (ui = "/src/Ui/Editors/Editor_Target_Define.glade")]
+  private class DefineEditorTemplate : Box {
+
+    private Project.Define define;
+    private Ui.MainWidget main_widget;
+
+    public DefineEditorTemplate(Ui.MainWidget main_widget, Project.Define define) {
+      this.define = define;
+      this.main_widget = main_widget;
+
+      // Keep meta dep name in sync
+      ent_name.text = define.define;
+      ent_name.changed.connect (()=>{
+        define.define = ent_name.text;
+      });
+
+      btn_add.clicked.connect (()=>{
+        var new_cond = new Project.Condition();
+        define.conditions.add (new_cond);
+        update_list ();
+      });
+      btn_remove.clicked.connect (()=>{
+        var selected_row = list_conditions.get_selected_row();
+        if (selected_row != null)
+          define.conditions.remove (selected_row.get_data<Project.Condition>("condition"));
+        update_list ();
+      });
+
+      update_list ();
+    }
+    /*public bool add_dep_dialog() {
+      var dlg_template = new NewDependencyDialogTemplate(main_widget);
+      var new_dep_dialog = new Dialog.with_buttons("New dependency", main_widget.window, DialogFlags.MODAL, "OK", ResponseType.OK, "Cancel", ResponseType.CANCEL);
+      new_dep_dialog.get_content_area().add (dlg_template);
+      var ret = new_dep_dialog.run();
+      if (ret == ResponseType.OK) {
+        var new_dep = new Project.Dependency();
+        if (dlg_template.chose_package()) {
+          new_dep.type = Project.DependencyType.PACKAGE;
+          new_dep.library = dlg_template.get_selected_package();
+        } else {
+          new_dep.type = Project.DependencyType.VAPI;
+          new_dep.library = dlg_template.get_selected_vapi();
+        }
+        define.conditions.add (new_dep);
+        update_list ();
+      }
+      new_dep_dialog.destroy();
+      return ret == ResponseType.OK;
+    }*/
+    private void update_list () {
+      foreach (Gtk.Widget widget in list_conditions.get_children())
+        list_conditions.remove (widget);
+      foreach (var condition in define.conditions) {
+        var new_row = new ConditionEditorTemplate (main_widget, condition);
+        new_row.set_data<Project.Condition> ("condition", condition);
+        list_conditions.add (new_row);
+      }
+      list_conditions.show_all();
+    }
+ 
+  	[GtkChild]
+  	public ListBox list_conditions;
+  	[GtkChild]
+  	public ToolButton btn_add;
+  	[GtkChild]
+  	public ToolButton btn_remove;
+  	[GtkChild]
+  	public Entry ent_name;
+  }
 
   [GtkTemplate (ui = "/src/Ui/Editors/Editor_Target_NewDependency.glade")]
   private class NewDependencyDialogTemplate : Box {
@@ -43,11 +113,19 @@ namespace Ui {
   	[GtkChild]
   	public ListBox deps_list;
   	[GtkChild]
-  	public ToolButton btn_add;
+  	public ListBox defs_list;
   	[GtkChild]
-  	public ToolButton btn_remove;
+  	public ToolButton btn_add_dep;
   	[GtkChild]
-  	public ToolButton btn_edit;
+  	public ToolButton btn_remove_dep;
+  	[GtkChild]
+  	public ToolButton btn_edit_dep;
+  	[GtkChild]
+  	public ToolButton btn_add_def;
+  	[GtkChild]
+  	public ToolButton btn_remove_def;
+  	[GtkChild]
+  	public ToolButton btn_edit_def;
   	[GtkChild]
   	public Entry ent_binary_name;
   	[GtkChild]
@@ -294,6 +372,7 @@ namespace Ui {
       // Initial list update
       update_sources_list();
       setup_dependencies_list();
+      setup_defines_list();
       update_settings_ui();
     }
     
@@ -352,9 +431,78 @@ namespace Ui {
     // Dependencies list
     // =================
 
+    private inline void setup_defines_list() {
+
+      template.btn_add_def.clicked.connect (() => {
+        var my_member = member as Project.ProjectMemberTarget;
+        var new_def = new Project.Define();
+        new_def.define = "NEW_DEFINE";
+        if (edit_define (new_def, true))
+          my_member.defines.add (new_def);
+        update_defines_list ();
+      });
+
+      template.btn_remove_def.clicked.connect (() => {
+        if (template.defs_list.get_selected_row() == null)
+          return;
+        var my_member = member as Project.ProjectMemberTarget;
+        var def = template.defs_list.get_selected_row().get_data<Project.Define>("define");
+        my_member.defines.remove (def);
+        update_defines_list ();
+      });
+
+      template.btn_edit_def.clicked.connect (() => {
+        if (template.defs_list.get_selected_row() == null)
+          return;
+
+        var def = template.defs_list.get_selected_row().get_data<Project.Define>("define");
+        edit_define (def, false);
+      });
+
+      //template.defs_list.row_selected.connect(dependencies_list_row_selected);
+      update_defines_list();
+    }
+
+    private bool edit_define (Project.Define def, bool newly_created) {
+      main_widget.installed_libraries_provider.update();
+
+      var editor = new DefineEditorTemplate(main_widget, def);
+
+      /*if (newly_created)
+        if (!editor.add_dep_dialog())
+          return false;*/
+
+      var edit_dialog = new Dialog.with_buttons("", main_widget.window, DialogFlags.MODAL, "OK", ResponseType.OK);
+      edit_dialog.get_content_area().add (editor);
+      var ret = edit_dialog.run();
+      edit_dialog.destroy();
+      
+      update_defines_list ();
+      return true;
+    }
+
+    private inline void update_defines_list() {
+      foreach (Gtk.Widget widget in template.defs_list.get_children())
+        template.defs_list.remove (widget);
+
+      var my_member = member as Project.ProjectMemberTarget;
+
+      foreach (var def in my_member.defines) {
+        var row = new Gtk.ListBoxRow();
+        row.set_data<Project.Define> ("define", def);
+        row.add (new Gtk.Label(def.define));
+        template.defs_list.add (row);
+      }
+      template.defs_list.show_all();
+    }
+
+
+    // Dependencies list
+    // =================
+
     private inline void setup_dependencies_list() {
 
-      template.btn_add.clicked.connect (() => {
+      template.btn_add_dep.clicked.connect (() => {
         var my_member = member as Project.ProjectMemberTarget;
         var new_dep = new Project.MetaDependency();
         new_dep.name = "New dependency";
@@ -363,7 +511,7 @@ namespace Ui {
         update_dependencies_list ();
       });
 
-      template.btn_remove.clicked.connect (() => {
+      template.btn_remove_dep.clicked.connect (() => {
         if (template.deps_list.get_selected_row() == null)
           return;
         var my_member = member as Project.ProjectMemberTarget;
@@ -372,7 +520,7 @@ namespace Ui {
         update_dependencies_list ();
       });
 
-      template.btn_edit.clicked.connect (() => {
+      template.btn_edit_dep.clicked.connect (() => {
         if (template.deps_list.get_selected_row() == null)
           return;
 
@@ -403,15 +551,9 @@ namespace Ui {
       return true;
     }
 
-    public override void load_internal (Xml.TextWriter writer) {
-
-    }
-    public override void save_internal (Xml.TextWriter writer) {
-
-    }
     private void dependencies_list_row_selected (Gtk.ListBoxRow? row) {
-      template.btn_remove.sensitive = row != null;
-      template.btn_edit.sensitive = row != null;
+      template.btn_remove_dep.sensitive = row != null;
+      template.btn_edit_dep.sensitive = row != null;
     }
 
     private inline void update_dependencies_list() {
@@ -429,6 +571,12 @@ namespace Ui {
       template.deps_list.show_all();
     }
 
+    public override void load_internal (Xml.TextWriter writer) {
+
+    }
+    public override void save_internal (Xml.TextWriter writer) {
+
+    }
     internal override void destroy_internal() {
 
     }
