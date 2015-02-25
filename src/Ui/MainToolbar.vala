@@ -3,10 +3,13 @@ namespace Ui {
   public class MainToolbar : Element {
     
     private Gtk.ComboBoxText target_selector;
-  
+
     public signal void selected_target_changed ();
     public Project.ProjectMemberTarget selected_target = null;
-  
+
+    private Gtk.MenuToolButton btnBuild;
+    private Gtk.ToolButton btnRun;
+
     public override void init() {
       
       main_widget.project.member_added.connect((member)=>{
@@ -40,20 +43,30 @@ namespace Ui {
                            as Project.ProjectMemberTarget;
         bool changed = new_target.id != selected_target.id;
         selected_target = new_target;
-        if (changed)
+        if (changed) {
           selected_target_changed ();
+          update_build_button();
+        }
       });
       var ti = new Gtk.ToolItem();
       ti.add (target_selector);
       toolbar.add (ti);
       
-      var btnBuild = new Gtk.MenuToolButton (null, "Build");
+      btnBuild = new Gtk.MenuToolButton (null, "Build");
       btnBuild.icon_name = "system-run";
       btnBuild.set_menu (build_build_menu());
       toolbar.add (btnBuild);
       btnBuild.set_tooltip_text ("Save current file and build project");
       btnBuild.clicked.connect (() => {
-          //project_builder.build_project();
+        selected_target.builder.build();
+      });
+
+      btnRun = new Gtk.ToolButton (null, "Run");
+      btnRun.icon_name = "system-run";
+      toolbar.add (btnRun);
+      btnRun.set_tooltip_text ("Run project");
+      btnRun.clicked.connect (() => {
+        selected_target.builder.run();
       });
 
       update_target_selector();
@@ -70,10 +83,36 @@ namespace Ui {
         if (selected_target == null) {
           selected_target = member as Project.ProjectMemberTarget;
           selected_target_changed ();
+          update_build_button();
         }
         target_selector.append (member.id, member.getTitle());
       }
       target_selector.set_active_id (selected_target.id);
+    }
+
+    // On target change
+    ulong state_change_id = -1;
+    ulong builder_change_id = -1;
+    Project.ProjectMemberTarget old_target = null;
+    private void update_build_button() {
+      if (selected_target == null) {
+        btnBuild.sensitive = false;
+        return;
+      }
+      if (state_change_id != -1) {
+        old_target.builder.disconnect (state_change_id);
+        old_target.disconnect (builder_change_id);
+      }
+      builder_change_id = selected_target.builder_changed.connect(()=>{
+        update_build_button();
+      });
+      state_change_id = selected_target.builder.state_changed.connect (()=>{
+        var building = selected_target.builder.state == Builder.BuilderState.COMPILING;
+        var running = selected_target.builder.state == Builder.BuilderState.RUNNING;
+        btnBuild.sensitive = running || building;
+        btnRun.sensitive = running || building;
+      });
+      old_target = selected_target;
     }
 
     private Gtk.Menu build_build_menu () {

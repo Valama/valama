@@ -7,12 +7,15 @@ namespace Project {
 
     public Builder.Builder builder = null;
 
+    public signal void builder_changed();
     private Builder.EnumBuildsystem _buildsystem;
     public Builder.EnumBuildsystem buildsystem {
       get { return _buildsystem; }
       set {
-        if (value != _buildsystem || builder == null)
+        if (value != _buildsystem || builder == null) {
           builder = Builder.BuilderFactory.create_member (value);
+          builder_changed();
+        }
         _buildsystem = value;
       }
     }
@@ -107,3 +110,4 @@ namespace Project {
   }
 
 }
+

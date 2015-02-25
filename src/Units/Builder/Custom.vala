@@ -51,10 +51,21 @@ namespace Builder {
       writer.write_attribute ("clean_command", clean_command);
     }
     public override void build() {
-    
+      state = BuilderState.COMPILING;
+      Timeout.add_seconds (5, ()=>{
+        state = BuilderState.COMPILED_OK;
+        return false;
+      });
     }
     public override void run() {
-    
+      state = BuilderState.RUNNING;
+      Timeout.add_seconds (5, ()=>{
+        state = BuilderState.COMPILED_OK;
+        return false;
+      });
+    }
+    public override void abort_run() {
+
     }
     public override void clean() {
     

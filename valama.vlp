@@ -45,7 +45,6 @@
 		<source id="45"/>
 		<source id="46"/>
 		<source id="47"/>
-		<source id="48"/>
 		<source id="49"/>
 		<source id="50"/>
 		<source id="51"/>
@@ -150,7 +149,6 @@
 	<valasource id="45" filename="src/Units/InstalledLibrariesProvider/InstalledLibrariesProvider.vala"/>
 	<valasource id="46" filename="src/Units/Builder/BuilderFactory.vala"/>
 	<valasource id="47" filename="src/Units/CodeContextProvider/Report.vala"/>
-	<valasource id="48" filename="src/Units/Builder/BuilderProvider.vala"/>
 	<valasource id="49" filename="src/Units/Builder/Custom.vala"/>
 	<valasource id="50" filename="src/Units/Builder/Autovala.vala"/>
 	<valasource id="51" filename="src/Units/CodeContextHelpers/SymbolByName.vala"/>
