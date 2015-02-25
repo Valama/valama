@@ -20,6 +20,46 @@ namespace Units {
     public override void destroy() {
     }
 
+    private bool check_condition (Project.Condition condition) {
+      string relation_string = "=";
+      if (condition.relation == Project.ConditionRelation.GREATER)
+        relation_string = ">";
+      else if (condition.relation == Project.ConditionRelation.GREATER_EQUAL)
+        relation_string = ">=";
+      else if (condition.relation == Project.ConditionRelation.LESSER_EQUAL)
+        relation_string = "<=";
+      else if (condition.relation == Project.ConditionRelation.LESSER)
+        relation_string = "<";
+
+      int pkg_exit;
+      var pkg_cmd = "pkg-config --exists '" + condition.library + " " + relation_string + " " + condition.version + "'";
+      Process.spawn_command_line_sync (pkg_cmd, null, null, out pkg_exit);
+      return pkg_exit == 0;
+    }
+
+    public bool check_define(Project.Define define) {
+      foreach (var condition in define.conditions)
+        if (!check_condition(condition))
+          return false;
+      return true;
+    }
+
+    public Project.Dependency? check_meta_dependency (Project.MetaDependency meta_dep) {
+      foreach (var dep in meta_dep.dependencies) {
+
+        bool conds_fulfilled = true;
+        foreach (var condition in dep.conditions)
+          if (!check_condition(condition)) {
+            conds_fulfilled = false;
+            break;
+          }
+
+        if (conds_fulfilled)
+          return dep;
+      }
+      return null;
+    }
+
     public Gee.TreeSet<InstalledLibrary?> installed_libraries = new Gee.TreeSet<InstalledLibrary?>();
     public void update() {
       assert(main_widget.code_context_provider.context != null);
