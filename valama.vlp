@@ -57,7 +57,7 @@
 			<dependency type="package" library="gtk+-3.0"/>
 		</metadependency>
 		<metadependency name="Glade">
-			<dependency type="vapi" library="vapi/gladeui-2.0.vapi"/>
+			<dependency type="vapi" library="vapi/gladeui-2.0/gladeui-2.0.vapi"/>
 		</metadependency>
 		<metadependency name="GtkSourceView">
 			<dependency type="package" library="gtksourceview-3.0"/>

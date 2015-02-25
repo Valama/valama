@@ -43,4 +43,4 @@ vv=`valac_version`
 
 glib-compile-resources ui_resources.xml --generate-source
 
-valac --define=${gtksv_define} --target-glib=2.38 --thread --gresources ui_resources.xml --pkg gladeui-2.0 --pkg gtksourceview-3.0 --pkg libxml-2.0 --pkg gee-0.8 --pkg gtk+-3.0 --pkg libvala-${vv} --pkg clutter-gtk-1.0 -X -lm -o main --vapidir=vapi ui_resources.c $(find -name *.vala -printf "%p ")
+valac --define=${gtksv_define} --target-glib=2.38 --thread --gresources ui_resources.xml --pkg gladeui-2.0 --pkg gtksourceview-3.0 --pkg libxml-2.0 --pkg gee-0.8 --pkg gtk+-3.0 --pkg libvala-${vv} --pkg clutter-gtk-1.0 -X -lm -o main --vapidir=vapi/gladeui-2.0 ui_resources.c $(find -name *.vala -printf "%p ")
