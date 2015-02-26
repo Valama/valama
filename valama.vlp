@@ -35,7 +35,6 @@
 		<source id="40"/>
 		<source id="41"/>
 		<source id="42"/>
-		<source id="9"/>
 		<source id="4"/>
 		<source id="2"/>
 		<source id="25"/>
@@ -48,10 +47,11 @@
 		<source id="49"/>
 		<source id="50"/>
 		<source id="51"/>
-		<source id="52"/>
 		<source id="53"/>
 		<source id="54"/>
 		<source id="55"/>
+		<source id="9"/>
+		<source id="48"/>
 		<metadependency name="Gtk">
 			<dependency type="package" library="gtk+-3.0"/>
 		</metadependency>
@@ -155,8 +155,25 @@
 	<valasource id="49" filename="src/Units/Builder/Custom.vala"/>
 	<valasource id="50" filename="src/Units/Builder/Autovala.vala"/>
 	<valasource id="51" filename="src/Units/CodeContextHelpers/SymbolByName.vala"/>
-	<valasource id="52" filename="src/Ui/WelcomeScreen/WelcomeScreen.glade"/>
 	<valasource id="53" filename="src/Units/CodeContextHelpers/TraverseTypes.vala"/>
 	<valasource id="54" filename="src/Project/ProjectMember_GladeUi.vala"/>
 	<valasource id="55" filename="src/Ui/Editors/Editor_GladeUi.vala"/>
+	<valasource id="48" filename="src/Ui/WelcomeScreen/WelcomeScreen.vala"/>
+	<gresource id="52" name="GladeUI">
+		<resource file="src/Ui/ConsoleView.glade" compressed="true" xml_stripblanks="true"/>
+		<resource file="src/Ui/NewProjectMember.glade" compressed="true" xml_stripblanks="true"/>
+		<resource file="src/Ui/ProjectStructure.glade" compressed="true" xml_stripblanks="true"/>
+		<resource file="src/Ui/WelcomeScreen/RecentEntry.glade" compressed="true" xml_stripblanks="true"/>
+		<resource file="src/Ui/WelcomeScreen/WelcomeScreen.glade" compressed="true" xml_stripblanks="true"/>
+		<resource file="src/Ui/Editors/Editor_GResource.glade" compressed="true" xml_stripblanks="true"/>
+		<resource file="src/Ui/Editors/Editor_GResource_entry.glade" compressed="true" xml_stripblanks="true"/>
+		<resource file="src/Ui/Editors/Editor_GResource_entry.glade" compressed="true" xml_stripblanks="true"/>
+		<resource file="src/Ui/Editors/Editor_Info.glade" compressed="true" xml_stripblanks="true"/>
+		<resource file="src/Ui/Editors/Editor_Target.glade" compressed="true" xml_stripblanks="true"/>
+		<resource file="src/Ui/Editors/Editor_Target_Condition.glade" compressed="true" xml_stripblanks="true"/>
+		<resource file="src/Ui/Editors/Editor_Target_Define.glade" compressed="true" xml_stripblanks="true"/>
+		<resource file="src/Ui/Editors/Editor_Target_Dependency.glade" compressed="true" xml_stripblanks="true"/>
+		<resource file="src/Ui/Editors/Editor_Target_Meta_Dependency.glade" compressed="true" xml_stripblanks="true"/>
+		<resource file="src/Ui/Editors/Editor_Target_NewDependency.glade" compressed="true" xml_stripblanks="true"/>
+	</gresource>
 </project>

@@ -5,6 +5,7 @@ namespace Project {
     INFO,
     CLASS_DIAGRAM,
     GLADEUI,
+    GRESOURCE,
     UNKNOWN;
 
     public string toString() {
@@ -18,6 +19,8 @@ namespace Project {
         return "classdiagram";
       if (this == GLADEUI)
         return "gladeui";
+      if (this == GRESOURCE)
+        return "gresource";
       return "UNKNOWN";
     }
     public static EnumProjectMember fromString(string s) {
@@ -31,6 +34,8 @@ namespace Project {
         return CLASS_DIAGRAM;
       if (s == "gladeui")
         return GLADEUI;
+      if (s == "gresource")
+        return GRESOURCE;
       return UNKNOWN;
     }
 
@@ -49,6 +54,8 @@ namespace Project {
         new_member = new ProjectMemberClassDiagram();
       else if (type == EnumProjectMember.GLADEUI)
         new_member = new ProjectMemberGladeUi();
+      else if (type == EnumProjectMember.GRESOURCE)
+        new_member = new ProjectMemberGResource();
       
       if (new_member != null)
         new_member.project = project;
