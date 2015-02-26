@@ -58,7 +58,7 @@ namespace Ui {
       toolbar.add (btnBuild);
       btnBuild.set_tooltip_text ("Save current file and build project");
       btnBuild.clicked.connect (() => {
-        selected_target.builder.build();
+        selected_target.builder.build(main_widget);
       });
 
       btnRun = new Gtk.ToolButton (null, "Run");
@@ -66,7 +66,7 @@ namespace Ui {
       toolbar.add (btnRun);
       btnRun.set_tooltip_text ("Run project");
       btnRun.clicked.connect (() => {
-        selected_target.builder.run();
+        selected_target.builder.run(main_widget);
       });
 
       update_target_selector();

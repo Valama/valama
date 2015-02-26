@@ -28,8 +28,8 @@ namespace Builder {
   
     public abstract Gtk.Widget? init_ui();
   
-    public abstract void build();
-    public abstract void run();
+    public abstract void build(Ui.MainWidget main_widget);
+    public abstract void run(Ui.MainWidget main_widget);
     public abstract void abort_run();
     public abstract void clean();
     public abstract void load (Xml.Node* node);

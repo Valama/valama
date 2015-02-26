@@ -78,6 +78,9 @@
 		<metadependency name="GtkClutter">
 			<dependency type="package" library="clutter-gtk-1.0"/>
 		</metadependency>
+		<metadependency name="LibVTE">
+			<dependency type="package" library="vte-2.90"/>
+		</metadependency>
 		<define define="GTK_SOURCE_VIEW_3_14_3">
 			<condition library="gtksourceview-3.0" version="3.14.3" relation="greater_equal"/>
 		</define>
