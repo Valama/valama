@@ -15,6 +15,17 @@ pkg_version()
 	fi
 }
 
+vte_version()
+{
+	v="$(pkg-config vte-2.91 --modversion 2>&1 > /dev/null)"
+	if [ -z "$v" ]
+	then
+		echo "2.91"
+	else
+		echo "2.90"
+	fi
+}
+
 valac_version()
 {
 	version=`valac --version`
@@ -41,6 +52,12 @@ fi
 
 vv=`valac_version`
 
+vte=`vte_version`
+vte_define="VTE_2_91"
+if [ "$vte" = "2.90" ]; then
+	vte_define="VTE_2_90"
+fi
+
 glib-compile-resources ui_resources.xml --generate-source
 
-valac --define=${gtksv_define} --target-glib=2.38 --thread --gresources ui_resources.xml --pkg gladeui-2.0 --pkg gtksourceview-3.0 --pkg libxml-2.0 --pkg gee-0.8 --pkg gtk+-3.0 --pkg vte-2.90 --pkg libvala-${vv} --pkg clutter-gtk-1.0 -X -lm -o main --vapidir=vapi/gladeui-2.0 ui_resources.c $(find -name *.vala -printf "%p ")
+valac --define=${vte_define} --define=${gtksv_define} --target-glib=2.38 --thread --gresources ui_resources.xml --pkg gladeui-2.0 --pkg gtksourceview-3.0 --pkg libxml-2.0 --pkg gee-0.8 --pkg gtk+-3.0 --pkg vte-${vte} --pkg libvala-${vv} --pkg clutter-gtk-1.0 -X -lm -o main --vapidir=vapi/gladeui-2.0 ui_resources.c $(find -name *.vala -printf "%p ")
