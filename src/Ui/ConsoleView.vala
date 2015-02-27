@@ -31,12 +31,13 @@ namespace Ui {
       string[] argv;
       Shell.parse_argv (command, out argv);
       Pid child_pid;
-      //Process.spawn_async (null, argv, null, SpawnFlags.DO_NOT_REAP_CHILD, null, out child_pid);
-
+#if VTE_2_91
+      Process.spawn_async (null, argv, null, SpawnFlags.DO_NOT_REAP_CHILD, null, out child_pid);
+      terminal.watch_child (child_pid);
+#else
       terminal.fork_command_full (PtyFlags.DEFAULT, null, argv, null, SpawnFlags.DO_NOT_REAP_CHILD, null, out child_pid);
-      //terminal.watch_child (child_pid);
+#endif
       return child_pid;
-
     }
 
     public override void destroy() {
