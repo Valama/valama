@@ -23,12 +23,6 @@ namespace Ui {
         define.conditions.add (new_cond);
         update_list ();
       });
-      btn_remove.clicked.connect (()=>{
-        var selected_row = list_conditions.get_selected_row();
-        if (selected_row != null)
-          define.conditions.remove (selected_row.get_data<Project.Condition>("condition"));
-        update_list ();
-      });
 
       update_list ();
     }
@@ -37,18 +31,18 @@ namespace Ui {
         list_conditions.remove (widget);
       foreach (var condition in define.conditions) {
         var new_row = new ConditionEditorTemplate (main_widget, condition);
-        new_row.set_data<Project.Condition> ("condition", condition);
+        new_row.btn_remove.clicked.connect (()=>{
+          define.conditions.remove (condition);
+          update_list ();
+        });
         list_conditions.add (new_row);
       }
-      list_conditions.show_all();
     }
  
   	[GtkChild]
   	public ListBox list_conditions;
   	[GtkChild]
   	public ToolButton btn_add;
-  	[GtkChild]
-  	public ToolButton btn_remove;
   	[GtkChild]
   	public Entry ent_name;
   }
@@ -136,6 +130,7 @@ namespace Ui {
       });
 
       // Fill relation selector and keep in sync
+      cmb_relation.append (Project.ConditionRelation.EXISTS.toString(), "exists");
       cmb_relation.append (Project.ConditionRelation.GREATER.toString(), ">");
       cmb_relation.append (Project.ConditionRelation.GREATER_EQUAL.toString(), ">=");
       cmb_relation.append (Project.ConditionRelation.EQUAL.toString(), "==");
@@ -144,7 +139,9 @@ namespace Ui {
       cmb_relation.set_active_id (condition.relation.toString());
       cmb_relation.changed.connect (()=>{
         condition.relation = Project.ConditionRelation.fromString (cmb_relation.get_active_id());
+        ent_version.visible = condition.relation != Project.ConditionRelation.EXISTS;
       });
+      ent_version.visible = condition.relation != Project.ConditionRelation.EXISTS;
 
       // Keep version text in sync
       ent_version.text = condition.version;
@@ -199,7 +196,6 @@ namespace Ui {
           update_list();
         });
       }
-      list_conditions.show_all();
     }
 
   	[GtkChild]
@@ -274,6 +270,10 @@ namespace Ui {
         if (dlg_template.chose_package()) {
           new_dep.type = Project.DependencyType.PACKAGE;
           new_dep.library = dlg_template.get_selected_package();
+          var new_cond = new Project.Condition();
+          new_cond.relation = Project.ConditionRelation.EXISTS;
+          new_cond.library = new_dep.library;
+          new_dep.conditions.add (new_cond);
         } else {
           new_dep.type = Project.DependencyType.VAPI;
           new_dep.library = dlg_template.get_selected_vapi();

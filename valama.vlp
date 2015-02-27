@@ -70,20 +70,28 @@
 		</metadependency>
 		<metadependency name="LibVala">
 			<dependency type="package" library="libvala-0.24">
-				<condition library="libvala-0.24" version="0.24.0" relation="equal"/>
+				<condition library="libvala-0.24" version="0.24.0" relation="exists"/>
 			</dependency>
 			<dependency type="package" library="libvala-0.22">
-				<condition library="libvala-0.22" version="0.22.0" relation="equal"/>
+				<condition library="libvala-0.22" version="0.22.0" relation="exists"/>
 			</dependency>
 		</metadependency>
 		<metadependency name="GtkClutter">
 			<dependency type="package" library="clutter-gtk-1.0"/>
 		</metadependency>
 		<metadependency name="LibVTE">
-			<dependency type="package" library="vte-2.90"/>
+			<dependency type="package" library="vte-2.90">
+				<condition library="vte-2.90" version="" relation="exists"/>
+			</dependency>
+			<dependency type="package" library="vte-2.91">
+				<condition library="vte-2.91" version="" relation="exists"/>
+			</dependency>
 		</metadependency>
 		<define define="GTK_SOURCE_VIEW_3_14_3">
 			<condition library="gtksourceview-3.0" version="3.14.3" relation="greater_equal"/>
+		</define>
+		<define define="VTE_2_91">
+			<condition library="vte-2.91" version="" relation="exists"/>
 		</define>
 	</target>
 	<target id="18" binary_name="testtarget">

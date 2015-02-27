@@ -5,7 +5,8 @@ namespace Project {
     GREATER_EQUAL,
     EQUAL,
     LESSER_EQUAL,
-    LESSER;
+    LESSER,
+    EXISTS;
     
     public string toString() {
       if (this == GREATER)
@@ -18,6 +19,8 @@ namespace Project {
         return "lesser_equal";
       if (this == LESSER)
         return "lesser";
+      if (this == EXISTS)
+        return "exists";
       return "UNKNOWN";
     }
     public static ConditionRelation fromString(string s) {
@@ -31,14 +34,16 @@ namespace Project {
         return LESSER_EQUAL;
       if (s == "lesser")
         return LESSER;
+      if (s == "exists")
+        return EXISTS;
       return EQUAL;
     }
   }
 
   public class Condition {
-    public string library;
-    public string version;
-    public ConditionRelation relation;
+    public string library = "";
+    public string version = "";
+    public ConditionRelation relation = ConditionRelation.EXISTS;
 
     public void load (Xml.Node* node) {
       for (Xml.Attr* prop = node->properties; prop != null; prop = prop->next) {

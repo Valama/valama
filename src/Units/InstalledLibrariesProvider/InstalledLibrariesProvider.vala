@@ -21,7 +21,7 @@ namespace Units {
     }
 
     private bool check_condition (Project.Condition condition) {
-      string relation_string = "=";
+      string relation_string = "";
       if (condition.relation == Project.ConditionRelation.GREATER)
         relation_string = ">";
       else if (condition.relation == Project.ConditionRelation.GREATER_EQUAL)
@@ -30,9 +30,14 @@ namespace Units {
         relation_string = "<=";
       else if (condition.relation == Project.ConditionRelation.LESSER)
         relation_string = "<";
+      else if (condition.relation == Project.ConditionRelation.EQUAL)
+        relation_string = "=";
+
+      if (condition.relation != Project.ConditionRelation.EXISTS)
+        relation_string += " " + condition.version;
 
       int pkg_exit;
-      var pkg_cmd = "pkg-config --exists '" + condition.library + " " + relation_string + " " + condition.version + "'";
+      var pkg_cmd = "pkg-config --exists '" + condition.library + " " + relation_string + "'";
       Process.spawn_command_line_sync (pkg_cmd, null, null, out pkg_exit);
       return pkg_exit == 0;
     }
