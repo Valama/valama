@@ -52,6 +52,7 @@
 		<source id="55"/>
 		<source id="9"/>
 		<source id="48"/>
+		<gresource id="52"/>
 		<metadependency name="Gtk">
 			<dependency type="package" library="gtk+-3.0"/>
 		</metadependency>

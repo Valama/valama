@@ -23,6 +23,7 @@ namespace Project {
     public string binary_name = null;
     
     public Gee.ArrayList<string> included_sources = new Gee.ArrayList<string>();
+    public Gee.ArrayList<string> included_gresources = new Gee.ArrayList<string>();
   
     public Gee.LinkedList<MetaDependency> metadependencies = new Gee.LinkedList<MetaDependency>();
 
@@ -42,6 +43,12 @@ namespace Project {
           for (Xml.Attr* prop = iter->properties; prop != null; prop = prop->next) {
             if (prop->name == "id")
               included_sources.add(prop->children->content);
+          }
+        }
+        if (iter->name == "gresource") {
+          for (Xml.Attr* prop = iter->properties; prop != null; prop = prop->next) {
+            if (prop->name == "id")
+              included_gresources.add(prop->children->content);
           }
         }
         if (iter->name == "metadependency") {
@@ -71,6 +78,12 @@ namespace Project {
             included_sources.remove (member_source.id);
             project.member_data_changed (this, this);
           }
+        } else if (member is ProjectMemberGResource) {
+          var member_gresource = member as ProjectMemberGResource;
+          if (member_gresource.id in included_gresources) {
+            included_gresources.remove (member_gresource.id);
+            project.member_data_changed (this, this);
+          }
         }
       });
     }
@@ -83,6 +96,11 @@ namespace Project {
       foreach (string source_id in included_sources) {
         writer.start_element ("source");
         writer.write_attribute ("id", source_id);
+        writer.end_element();
+      }
+      foreach (string gresource_id in included_gresources) {
+        writer.start_element ("gresource");
+        writer.write_attribute ("id", gresource_id);
         writer.end_element();
       }
       foreach (var dep in metadependencies) {

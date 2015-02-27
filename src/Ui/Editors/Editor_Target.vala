@@ -32,26 +32,6 @@ namespace Ui {
 
       update_list ();
     }
-    /*public bool add_dep_dialog() {
-      var dlg_template = new NewDependencyDialogTemplate(main_widget);
-      var new_dep_dialog = new Dialog.with_buttons("New dependency", main_widget.window, DialogFlags.MODAL, "OK", ResponseType.OK, "Cancel", ResponseType.CANCEL);
-      new_dep_dialog.get_content_area().add (dlg_template);
-      var ret = new_dep_dialog.run();
-      if (ret == ResponseType.OK) {
-        var new_dep = new Project.Dependency();
-        if (dlg_template.chose_package()) {
-          new_dep.type = Project.DependencyType.PACKAGE;
-          new_dep.library = dlg_template.get_selected_package();
-        } else {
-          new_dep.type = Project.DependencyType.VAPI;
-          new_dep.library = dlg_template.get_selected_vapi();
-        }
-        define.conditions.add (new_dep);
-        update_list ();
-      }
-      new_dep_dialog.destroy();
-      return ret == ResponseType.OK;
-    }*/
     private void update_list () {
       foreach (Gtk.Widget widget in list_conditions.get_children())
         list_conditions.remove (widget);
@@ -114,6 +94,8 @@ namespace Ui {
   	public ListBox deps_list;
   	[GtkChild]
   	public ListBox defs_list;
+  	[GtkChild]
+  	public ListBox gresources_list;
   	[GtkChild]
   	public ToolButton btn_add_dep;
   	[GtkChild]
@@ -354,10 +336,19 @@ namespace Ui {
         if (member is Project.ProjectMemberValaSource)
           update_sources_list();
       });
+
+      // Keep gresources list in sync
+      member.project.member_added.connect ((member)=>{
+        if (member is Project.ProjectMemberGResource)
+          update_gresources_list();
+      });
+      member.project.member_removed.connect ((member)=>{
+        if (member is Project.ProjectMemberGResource)
+          update_gresources_list();
+      });
       member.project.member_data_changed.connect((sender, mb)=>{
-        if (mb != member) return;
-        if (sender == this) return;
-        update_sources_list();
+        if (member is Project.ProjectMemberGResource)
+          update_gresources_list();
       });
 
       // Keep binary name entry in sync
@@ -371,6 +362,7 @@ namespace Ui {
       
       // Initial list update
       update_sources_list();
+      update_gresources_list();
       setup_dependencies_list();
       setup_defines_list();
       update_settings_ui();
@@ -395,6 +387,37 @@ namespace Ui {
       if (settings_widget != null)
         template.notebook_settings.prepend_page (settings_widget, new Label ("Settings"));
 
+    }
+
+    // GResources list
+    // ===============
+    
+    private inline void update_gresources_list() {
+      foreach (Gtk.Widget widget in template.gresources_list.get_children())
+        template.gresources_list.remove (widget);
+
+      var my_member = member as Project.ProjectMemberTarget;
+      
+      foreach (Project.ProjectMember m in my_member.project.members) {
+        if (!(m is Project.ProjectMemberGResource))
+          continue;
+        
+        var row = new Gtk.ListBoxRow();
+        var check = new Gtk.CheckButton();
+        check.active = m.id in my_member.included_gresources;
+        check.label = (m as Project.ProjectMemberGResource).name;
+        check.toggled.connect(()=>{
+          if (check.active)
+            my_member.included_gresources.add (m.id);
+          else
+            my_member.included_gresources.remove (m.id);
+          main_widget.project.member_data_changed (this, my_member);
+        });
+        
+        row.add (check);
+        template.gresources_list.add (row);
+      }
+      template.gresources_list.show_all();
     }
 
     // Sources list
