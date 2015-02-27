@@ -62,11 +62,14 @@ namespace Ui {
       });
 
       btnRun = new Gtk.ToolButton (null, "Run");
-      btnRun.icon_name = "system-run";
       toolbar.add (btnRun);
       btnRun.set_tooltip_text ("Run project");
       btnRun.clicked.connect (() => {
-        selected_target.builder.run(main_widget);
+        var running = selected_target.builder.state == Builder.BuilderState.RUNNING;
+        if (running)
+          selected_target.builder.abort_run();
+        else
+          selected_target.builder.run(main_widget);
       });
 
       update_target_selector();
@@ -107,11 +110,18 @@ namespace Ui {
         update_build_button();
       });
       state_change_id = selected_target.builder.state_changed.connect (()=>{
-        var building = selected_target.builder.state == Builder.BuilderState.COMPILING;
-        var running = selected_target.builder.state == Builder.BuilderState.RUNNING;
-        btnBuild.sensitive = running || building;
-        btnRun.sensitive = running || building;
+        update_build_button();
       });
+
+      var building = selected_target.builder.state == Builder.BuilderState.COMPILING;
+      var running = selected_target.builder.state == Builder.BuilderState.RUNNING;
+      btnBuild.sensitive = !(running || building);
+      btnRun.sensitive = !building;
+      if (running)
+        btnRun.icon_name = "media-playback-stop";
+      else
+        btnRun.icon_name = "media-playback-start";
+
       old_target = selected_target;
     }
 

@@ -61,15 +61,20 @@ namespace Builder {
         main_widget.console_view.disconnect (process_exited_handler);
       });
     }
+    Pid run_pid;
     public override void run(Ui.MainWidget main_widget) {
+      run_pid = main_widget.console_view.spawn_process (run_command);
+
       state = BuilderState.RUNNING;
-      Timeout.add_seconds (5, ()=>{
+
+      process_exited_handler = main_widget.console_view.process_exited.connect (()=>{
         state = BuilderState.COMPILED_OK;
-        return false;
+        main_widget.console_view.disconnect (process_exited_handler);
       });
     }
     public override void abort_run() {
-
+      Posix.kill (run_pid, 15);
+      Process.close_pid (run_pid);
     }
     public override void clean() {
     

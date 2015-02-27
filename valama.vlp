@@ -87,6 +87,9 @@
 				<condition library="vte-2.91" version="" relation="exists"/>
 			</dependency>
 		</metadependency>
+		<metadependency name="Posix">
+			<dependency type="package" library="posix"/>
+		</metadependency>
 		<define define="GTK_SOURCE_VIEW_3_14_3">
 			<condition library="gtksourceview-3.0" version="3.14.3" relation="greater_equal"/>
 		</define>

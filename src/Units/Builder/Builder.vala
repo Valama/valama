@@ -16,9 +16,10 @@ namespace Builder {
         return _state;
       }
       set {
-        if (value != _state)
-          state_changed();
+        bool changed = value != _state;
         _state = value;
+        if (changed)
+          state_changed();
       }
     }
     public signal void state_changed();
