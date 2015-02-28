@@ -5,7 +5,7 @@
 	</info>
 	<valasource id="2" filename="src/main.vala"/>
 	<target id="3" binary_name="valama">
-		<buildsystem type="custom" build_command="./build.sh" run_command="./main" clean_command=""/>
+		<buildsystem type="valama"/>
 		<source id="14"/>
 		<source id="12"/>
 		<source id="10"/>
@@ -52,6 +52,10 @@
 		<source id="55"/>
 		<source id="9"/>
 		<source id="48"/>
+		<source id="56"/>
+		<source id="57"/>
+		<source id="58"/>
+		<source id="59"/>
 		<gresource id="52"/>
 		<metadependency name="Gtk">
 			<dependency type="package" library="gtk+-3.0"/>
@@ -69,6 +73,9 @@
 			<dependency type="package" library="gee-0.8"/>
 		</metadependency>
 		<metadependency name="LibVala">
+			<dependency type="package" library="libvala-0.26">
+				<condition library="libvala-0.26" version="" relation="exists"/>
+			</dependency>
 			<dependency type="package" library="libvala-0.24">
 				<condition library="libvala-0.24" version="0.24.0" relation="exists"/>
 			</dependency>
@@ -179,7 +186,6 @@
 		<resource file="src/Ui/WelcomeScreen/WelcomeScreen.glade" compressed="true" xml_stripblanks="true"/>
 		<resource file="src/Ui/Editors/Editor_GResource.glade" compressed="true" xml_stripblanks="true"/>
 		<resource file="src/Ui/Editors/Editor_GResource_entry.glade" compressed="true" xml_stripblanks="true"/>
-		<resource file="src/Ui/Editors/Editor_GResource_entry.glade" compressed="true" xml_stripblanks="true"/>
 		<resource file="src/Ui/Editors/Editor_Info.glade" compressed="true" xml_stripblanks="true"/>
 		<resource file="src/Ui/Editors/Editor_Target.glade" compressed="true" xml_stripblanks="true"/>
 		<resource file="src/Ui/Editors/Editor_Target_Condition.glade" compressed="true" xml_stripblanks="true"/>
@@ -187,5 +193,10 @@
 		<resource file="src/Ui/Editors/Editor_Target_Dependency.glade" compressed="true" xml_stripblanks="true"/>
 		<resource file="src/Ui/Editors/Editor_Target_Meta_Dependency.glade" compressed="true" xml_stripblanks="true"/>
 		<resource file="src/Ui/Editors/Editor_Target_NewDependency.glade" compressed="true" xml_stripblanks="true"/>
+		<resource file="src/Units/Builder/Custom.glade" compressed="true" xml_stripblanks="true"/>
 	</gresource>
+	<valasource id="56" filename="src/Units/Builder/Valama.vala"/>
+	<valasource id="57" filename="src/Project/ProjectMember_GResource.vala"/>
+	<valasource id="58" filename="src/Ui/ConsoleView.vala"/>
+	<valasource id="59" filename="src/Ui/Editors/Editor_GResource.vala"/>
 </project>

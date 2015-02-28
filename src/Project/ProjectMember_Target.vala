@@ -13,7 +13,7 @@ namespace Project {
       get { return _buildsystem; }
       set {
         if (value != _buildsystem || builder == null) {
-          builder = Builder.BuilderFactory.create_member (value);
+          builder = Builder.BuilderFactory.create_member (value, this);
           builder_changed();
         }
         _buildsystem = value;
