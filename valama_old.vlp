@@ -1,0 +1,41 @@
+<project version="0.1">
+    <name>valama</name>
+    <buildsystem library="false">valama</buildsystem>
+    <version>
+        <major>0</major>
+        <minor>0</minor>
+        <patch>0</patch>
+    </version>
+    <packages>
+        <package name="atk"/>
+        <package name="cairo"/>
+        <package name="clutter-gtk-1.0"/>
+        <package name="gdk-3.0"/>
+        <package name="gdk-pixbuf-2.0"/>
+        <package name="gee-0.8"/>
+        <package name="gio-2.0"/>
+        <package name="glib-2.0"/>
+        <package name="gobject-2.0"/>
+        <package name="gtk+-3.0"/>
+        <package name="guanako"/>
+        <package name="libvala-0.26"/>
+        <package name="libxml-2.0"/>
+        <package name="pango"/>
+        <package name="vte-2.91"/>
+        <package name="x11"/>
+    </packages>
+    <source-directories>
+        <directory>src</directory>
+        <directory>src/Project</directory>
+        <directory>src/Ui</directory>
+        <directory>src/Ui/Editors</directory>
+        <directory>src/Ui/WelcomeScreen</directory>
+        <directory>src/Units</directory>
+        <directory>src/Units/Builder</directory>
+        <directory>src/Units/CodeContextHelpers</directory>
+        <directory>src/Units/CodeContextProvider</directory>
+        <directory>src/Units/Completion</directory>
+        <directory>src/Units/InstalledLibrariesProvider</directory>
+        <directory>vapi</directory>
+    </source-directories>
+</project>
