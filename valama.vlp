@@ -5,7 +5,7 @@
 	</info>
 	<valasource id="2" filename="src/main.vala"/>
 	<target id="3" binary_name="valama">
-		<buildsystem type="custom" build_command="./build.sh" run_command="./main" clean_command=""/>
+		<buildsystem type="valama"/>
 		<source id="14"/>
 		<source id="12"/>
 		<source id="10"/>
@@ -16,9 +16,7 @@
 		<source id="19"/>
 		<source id="23"/>
 		<source id="24"/>
-		<source id="25"/>
 		<source id="27"/>
-		<source id="26"/>
 		<source id="15"/>
 		<source id="16"/>
 		<source id="28"/>
@@ -37,9 +35,74 @@
 		<source id="40"/>
 		<source id="41"/>
 		<source id="42"/>
-		<source id="9"/>
 		<source id="4"/>
 		<source id="2"/>
+		<source id="25"/>
+		<source id="26"/>
+		<source id="43"/>
+		<source id="44"/>
+		<source id="45"/>
+		<source id="46"/>
+		<source id="47"/>
+		<source id="49"/>
+		<source id="50"/>
+		<source id="51"/>
+		<source id="53"/>
+		<source id="54"/>
+		<source id="55"/>
+		<source id="9"/>
+		<source id="48"/>
+		<source id="56"/>
+		<source id="57"/>
+		<source id="58"/>
+		<source id="59"/>
+		<gresource id="52"/>
+		<metadependency name="Gtk">
+			<dependency type="package" library="gtk+-3.0"/>
+		</metadependency>
+		<metadependency name="Glade">
+			<dependency type="vapi" library="vapi/gladeui-2.0/gladeui-2.0.vapi"/>
+		</metadependency>
+		<metadependency name="GtkSourceView">
+			<dependency type="package" library="gtksourceview-3.0"/>
+		</metadependency>
+		<metadependency name="LibXML">
+			<dependency type="package" library="libxml-2.0"/>
+		</metadependency>
+		<metadependency name="Gee">
+			<dependency type="package" library="gee-0.8"/>
+		</metadependency>
+		<metadependency name="LibVala">
+			<dependency type="package" library="libvala-0.26">
+				<condition library="libvala-0.26" version="" relation="exists"/>
+			</dependency>
+			<dependency type="package" library="libvala-0.24">
+				<condition library="libvala-0.24" version="0.24.0" relation="exists"/>
+			</dependency>
+			<dependency type="package" library="libvala-0.22">
+				<condition library="libvala-0.22" version="0.22.0" relation="exists"/>
+			</dependency>
+		</metadependency>
+		<metadependency name="GtkClutter">
+			<dependency type="package" library="clutter-gtk-1.0"/>
+		</metadependency>
+		<metadependency name="LibVTE">
+			<dependency type="package" library="vte-2.90">
+				<condition library="vte-2.90" version="" relation="exists"/>
+			</dependency>
+			<dependency type="package" library="vte-2.91">
+				<condition library="vte-2.91" version="" relation="exists"/>
+			</dependency>
+		</metadependency>
+		<metadependency name="Posix">
+			<dependency type="package" library="posix"/>
+		</metadependency>
+		<define define="GTK_SOURCE_VIEW_3_14_3">
+			<condition library="gtksourceview-3.0" version="3.14.3" relation="greater_equal"/>
+		</define>
+		<define define="VTE_2_91">
+			<condition library="vte-2.91" version="" relation="exists"/>
+		</define>
 	</target>
 	<target id="18" binary_name="testtarget">
 		<buildsystem type="custom" build_command="" run_command="" clean_command=""/>
@@ -73,8 +136,6 @@
 	<valasource id="22" filename="src/Ui/Viewer.vala"/>
 	<valasource id="23" filename="src/Project/MetaDependency.vala"/>
 	<valasource id="24" filename="src/Project/Dependency.vala"/>
-	<valasource id="25" filename="src/Project/DependencyPackage.vala"/>
-	<valasource id="26" filename="src/Project/DependencyVapi.vala"/>
 	<valasource id="27" filename="src/Ui/ViewerFactory.vala"/>
 	<valasource id="28" filename="src/Ui/ViewerClassDiagram.vala"/>
 	<classdiagram id="29" name="Grasses Diagramm2">
@@ -103,4 +164,39 @@
 	<gladeui id="31" filename="src/Ui/ProjectStructure.glade"/>
 	<gladeui id="33" filename="src/Ui/Editors/Editor_Info.glade"/>
 	<gladeui id="35" filename="src/Ui/Editors/Editor_Target.glade"/>
+	<valasource id="25" filename="src/Units/CodeContextProvider/CodeContextProvider.vala"/>
+	<valasource id="26" filename="src/Project/Condition.vala"/>
+	<valasource id="43" filename="src/Project/Define.vala"/>
+	<valasource id="44" filename="src/Units/Builder/Builder.vala"/>
+	<valasource id="45" filename="src/Units/InstalledLibrariesProvider/InstalledLibrariesProvider.vala"/>
+	<valasource id="46" filename="src/Units/Builder/BuilderFactory.vala"/>
+	<valasource id="47" filename="src/Units/CodeContextProvider/Report.vala"/>
+	<valasource id="49" filename="src/Units/Builder/Custom.vala"/>
+	<valasource id="50" filename="src/Units/Builder/Autovala.vala"/>
+	<valasource id="51" filename="src/Units/CodeContextHelpers/SymbolByName.vala"/>
+	<valasource id="53" filename="src/Units/CodeContextHelpers/TraverseTypes.vala"/>
+	<valasource id="54" filename="src/Project/ProjectMember_GladeUi.vala"/>
+	<valasource id="55" filename="src/Ui/Editors/Editor_GladeUi.vala"/>
+	<valasource id="48" filename="src/Ui/WelcomeScreen/WelcomeScreen.vala"/>
+	<gresource id="52" name="GladeUI">
+		<resource file="src/Ui/ConsoleView.glade" compressed="true" xml_stripblanks="true"/>
+		<resource file="src/Ui/NewProjectMember.glade" compressed="true" xml_stripblanks="true"/>
+		<resource file="src/Ui/ProjectStructure.glade" compressed="true" xml_stripblanks="true"/>
+		<resource file="src/Ui/WelcomeScreen/RecentEntry.glade" compressed="true" xml_stripblanks="true"/>
+		<resource file="src/Ui/WelcomeScreen/WelcomeScreen.glade" compressed="true" xml_stripblanks="true"/>
+		<resource file="src/Ui/Editors/Editor_GResource.glade" compressed="true" xml_stripblanks="true"/>
+		<resource file="src/Ui/Editors/Editor_GResource_entry.glade" compressed="true" xml_stripblanks="true"/>
+		<resource file="src/Ui/Editors/Editor_Info.glade" compressed="true" xml_stripblanks="true"/>
+		<resource file="src/Ui/Editors/Editor_Target.glade" compressed="true" xml_stripblanks="true"/>
+		<resource file="src/Ui/Editors/Editor_Target_Condition.glade" compressed="true" xml_stripblanks="true"/>
+		<resource file="src/Ui/Editors/Editor_Target_Define.glade" compressed="true" xml_stripblanks="true"/>
+		<resource file="src/Ui/Editors/Editor_Target_Dependency.glade" compressed="true" xml_stripblanks="true"/>
+		<resource file="src/Ui/Editors/Editor_Target_Meta_Dependency.glade" compressed="true" xml_stripblanks="true"/>
+		<resource file="src/Ui/Editors/Editor_Target_NewDependency.glade" compressed="true" xml_stripblanks="true"/>
+		<resource file="src/Units/Builder/Custom.glade" compressed="true" xml_stripblanks="true"/>
+	</gresource>
+	<valasource id="56" filename="src/Units/Builder/Valama.vala"/>
+	<valasource id="57" filename="src/Project/ProjectMember_GResource.vala"/>
+	<valasource id="58" filename="src/Ui/ConsoleView.vala"/>
+	<valasource id="59" filename="src/Ui/Editors/Editor_GResource.vala"/>
 </project>

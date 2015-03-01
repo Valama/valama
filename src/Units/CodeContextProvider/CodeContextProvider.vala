@@ -67,12 +67,43 @@ namespace Units {
       context_internal.target_glib_major = 2;
       context_internal.target_glib_minor = 18;
 
-      string pkgs[8] = {"glib-2.0", "gobject-2.0", "libxml-2.0",
-                        "gee-0.8", "gtk+-3.0", "gtksourceview-3.0", "libvala-0.22", "clutter-gtk-1.0"};
+      // Add defines
 
+      foreach (var define in current_target.defines) {
+        if (main_widget.installed_libraries_provider.check_define (define))
+          context_internal.add_define (define.define);
+      }
+
+      // Add packages
+
+      string[] new_vapi_dirs = new string[0];
+      foreach (string dir in context_internal.vapi_directories)
+        new_vapi_dirs += dir;
+
+      foreach (var meta_dep in current_target.metadependencies) {
+        var dep = main_widget.installed_libraries_provider.check_meta_dependency (meta_dep);
+        if (dep != null) {
+          if (dep.type == Project.DependencyType.PACKAGE)
+            context_internal.add_external_package (dep.library);
+          else if (dep.type == Project.DependencyType.VAPI){
+            var vapi_file = File.new_for_path (dep.library);
+            var custom_vapi_dir = vapi_file.get_parent().get_path();
+            new_vapi_dirs += custom_vapi_dir;
+            
+            // Write extended list to context, required before adding package
+            context_internal.vapi_directories = new_vapi_dirs;
+            context_internal.add_external_package (vapi_file.get_basename().replace(".vapi", ""));
+          }
+        }
+      }
+
+
+      string pkgs[2] = {"glib-2.0", "gobject-2.0"};
       foreach (string pkg in pkgs) {
         context_internal.add_external_package (pkg);
       }
+
+      // Add source files
       
       foreach (string source_id in current_target.included_sources) {
         var source = main_widget.project.getMemberFromId (source_id) as Project.ProjectMemberValaSource;
@@ -91,12 +122,12 @@ namespace Units {
       var parser = new Vala.Parser();
       parser.parse (context_internal);
 
-      context_internal.check ();
+      //context_internal.check ();
 
       Vala.CodeContext.pop();
       
-      //context = context_internal;
-      //report = report_internal;
+      context = context_internal;
+      report = report_internal;
 
 
 

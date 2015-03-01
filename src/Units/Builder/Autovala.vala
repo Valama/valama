@@ -10,11 +10,14 @@ namespace Builder {
     public override void save (Xml.TextWriter writer) {
     
     }
-    public override void build() {
+    public override void build(Ui.MainWidget main_widget) {
     
     }
-    public override void run() {
+    public override void run(Ui.MainWidget main_widget) {
     
+    }
+    public override void abort_run() {
+
     }
     public override void clean() {
     

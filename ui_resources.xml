@@ -3,10 +3,18 @@
   <gresource prefix="/">
     <file compressed="true" preprocess="xml-stripblanks">src/Ui/ProjectStructure.glade</file>
     <file compressed="true" preprocess="xml-stripblanks">src/Ui/Editors/Editor_Info.glade</file>
+    <file compressed="true" preprocess="xml-stripblanks">src/Ui/Editors/Editor_GResource.glade</file>
+    <file compressed="true" preprocess="xml-stripblanks">src/Ui/Editors/Editor_GResource_entry.glade</file>
     <file compressed="true" preprocess="xml-stripblanks">src/Ui/Editors/Editor_Target.glade</file>
+    <file compressed="true" preprocess="xml-stripblanks">src/Ui/Editors/Editor_Target_Dependency.glade</file>
+    <file compressed="true" preprocess="xml-stripblanks">src/Ui/Editors/Editor_Target_Meta_Dependency.glade</file>
+    <file compressed="true" preprocess="xml-stripblanks">src/Ui/Editors/Editor_Target_Condition.glade</file>
+    <file compressed="true" preprocess="xml-stripblanks">src/Ui/Editors/Editor_Target_NewDependency.glade</file>
+    <file compressed="true" preprocess="xml-stripblanks">src/Ui/Editors/Editor_Target_Define.glade</file>
     <file compressed="true" preprocess="xml-stripblanks">src/Ui/NewProjectMember.glade</file>
     <file compressed="true" preprocess="xml-stripblanks">src/Ui/WelcomeScreen/WelcomeScreen.glade</file>
     <file compressed="true" preprocess="xml-stripblanks">src/Ui/WelcomeScreen/RecentEntry.glade</file>
     <file compressed="true" preprocess="xml-stripblanks">src/Units/Builder/Custom.glade</file>
+    <file compressed="true" preprocess="xml-stripblanks">src/Ui/ConsoleView.glade</file>
   </gresource>
 </gresources>

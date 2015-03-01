@@ -11,11 +11,12 @@ namespace Ui {
     public ProjectStructure project_structure = new ProjectStructure();
     public MainToolbar main_toolbar = new MainToolbar();
     public ErrorList error_list = new ErrorList();
+    public ConsoleView console_view = new ConsoleView();
     public Units.CodeContextProvider code_context_provider = new Units.CodeContextProvider();
     public Units.ErrorMarker error_marker = new Units.ErrorMarker();
     public Units.SourceBufferManager source_buffer_manager = new Units.SourceBufferManager();
     public Units.CompletionProvider completion_provider = new Units.CompletionProvider();
-    public Units.BuilderProvider builder_provider = new Units.BuilderProvider();
+    public Units.InstalledLibrariesProvider installed_libraries_provider = new Units.InstalledLibrariesProvider();
 
     private Gee.ArrayList<Units.Unit> units = new Gee.ArrayList<Units.Unit>();
     
@@ -32,8 +33,9 @@ namespace Ui {
       units.add (error_marker);
       units.add (source_buffer_manager);
       units.add (completion_provider);
-      units.add (builder_provider);
-      
+      units.add (installed_libraries_provider);
+      units.add (console_view);
+
       foreach (var unit in units) {
         unit.main_widget = this;
         unit.init();
@@ -42,9 +44,10 @@ namespace Ui {
       // Build main UI out of elements
       var grid = new Gtk.Grid();
       grid.attach (main_toolbar.widget, 0, 0, 2, 1);
-      grid.attach (project_structure.widget, 0, 1, 1, 2);
+      grid.attach (project_structure.widget, 0, 1, 1, 3);
       grid.attach (editor_viewer.widget, 1, 1, 1, 1);
       grid.attach (error_list.widget, 1, 2, 1, 1);
+      grid.attach (console_view.widget, 1, 3, 1, 1);
       grid.show();
       widget = grid;
     }

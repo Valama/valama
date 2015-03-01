@@ -50,11 +50,31 @@ namespace Builder {
       writer.write_attribute ("run_command", run_command);
       writer.write_attribute ("clean_command", clean_command);
     }
-    public override void build() {
-    
+    private ulong process_exited_handler;
+    public override void build(Ui.MainWidget main_widget) {
+      Pid child_pid = main_widget.console_view.spawn_process (build_command);
+
+      state = BuilderState.COMPILING;
+
+      process_exited_handler = main_widget.console_view.process_exited.connect (()=>{
+        state = BuilderState.COMPILED_OK;
+        main_widget.console_view.disconnect (process_exited_handler);
+      });
     }
-    public override void run() {
-    
+    Pid run_pid;
+    public override void run(Ui.MainWidget main_widget) {
+      run_pid = main_widget.console_view.spawn_process (run_command);
+
+      state = BuilderState.RUNNING;
+
+      process_exited_handler = main_widget.console_view.process_exited.connect (()=>{
+        state = BuilderState.COMPILED_OK;
+        main_widget.console_view.disconnect (process_exited_handler);
+      });
+    }
+    public override void abort_run() {
+      Posix.kill (run_pid, 15);
+      Process.close_pid (run_pid);
     }
     public override void clean() {
     

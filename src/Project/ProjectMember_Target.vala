@@ -7,12 +7,15 @@ namespace Project {
 
     public Builder.Builder builder = null;
 
+    public signal void builder_changed();
     private Builder.EnumBuildsystem _buildsystem;
     public Builder.EnumBuildsystem buildsystem {
       get { return _buildsystem; }
       set {
-        if (value != _buildsystem || builder == null)
-          builder = Builder.BuilderFactory.create_member (value);
+        if (value != _buildsystem || builder == null) {
+          builder = Builder.BuilderFactory.create_member (value, this);
+          builder_changed();
+        }
         _buildsystem = value;
       }
     }
@@ -20,8 +23,11 @@ namespace Project {
     public string binary_name = null;
     
     public Gee.ArrayList<string> included_sources = new Gee.ArrayList<string>();
+    public Gee.ArrayList<string> included_gresources = new Gee.ArrayList<string>();
   
     public Gee.LinkedList<MetaDependency> metadependencies = new Gee.LinkedList<MetaDependency>();
+
+    public Gee.LinkedList<Define> defines = new Gee.LinkedList<Define>();
 
     internal override void load_internal (Xml.Node* node) throws ProjectError {
       // Read binary name
@@ -39,10 +45,21 @@ namespace Project {
               included_sources.add(prop->children->content);
           }
         }
+        if (iter->name == "gresource") {
+          for (Xml.Attr* prop = iter->properties; prop != null; prop = prop->next) {
+            if (prop->name == "id")
+              included_gresources.add(prop->children->content);
+          }
+        }
         if (iter->name == "metadependency") {
           var dep = new MetaDependency();
           dep.load (iter);
           metadependencies.add (dep);
+        }
+        if (iter->name == "define") {
+          var def = new Define();
+          def.load (iter);
+          defines.add (def);
         }
         if (iter->name == "buildsystem") {
           for (Xml.Attr* prop = iter->properties; prop != null; prop = prop->next)
@@ -61,6 +78,12 @@ namespace Project {
             included_sources.remove (member_source.id);
             project.member_data_changed (this, this);
           }
+        } else if (member is ProjectMemberGResource) {
+          var member_gresource = member as ProjectMemberGResource;
+          if (member_gresource.id in included_gresources) {
+            included_gresources.remove (member_gresource.id);
+            project.member_data_changed (this, this);
+          }
         }
       });
     }
@@ -75,9 +98,19 @@ namespace Project {
         writer.write_attribute ("id", source_id);
         writer.end_element();
       }
+      foreach (string gresource_id in included_gresources) {
+        writer.start_element ("gresource");
+        writer.write_attribute ("id", gresource_id);
+        writer.end_element();
+      }
       foreach (var dep in metadependencies) {
         writer.start_element ("metadependency");
         dep.save (writer);
+        writer.end_element();
+      }
+      foreach (var def in defines) {
+        writer.start_element ("define");
+        def.save (writer);
         writer.end_element();
       }
     }
@@ -95,3 +128,4 @@ namespace Project {
   }
 
 }
+

@@ -11,6 +11,8 @@ namespace Ui {
   	[GtkChild]
   	public Alignment algn_ui;
   	[GtkChild]
+  	public Alignment algn_gresource;
+  	[GtkChild]
   	public ToolButton btn_add;
   	[GtkChild]
   	public ToolButton btn_remove;
@@ -26,6 +28,8 @@ namespace Ui {
   	public ListBoxRow row_new_target;
   	[GtkChild]
   	public ListBoxRow row_open_gladeui;
+  	[GtkChild]
+  	public ListBoxRow row_new_gresource;
   }
 
   public class ProjectStructure : Element {
@@ -33,6 +37,7 @@ namespace Ui {
     private Gtk.ListBox list_sources = new Gtk.ListBox();
     private Gtk.ListBox list_targets = new Gtk.ListBox();
     private Gtk.ListBox list_ui = new Gtk.ListBox();
+    private Gtk.ListBox list_gresource = new Gtk.ListBox();
 
     private ProjectStructureTemplate template = new ProjectStructureTemplate();
   
@@ -44,6 +49,7 @@ namespace Ui {
       mp_types_lists[Project.EnumProjectMember.VALASOURCE] = list_sources;
       mp_types_lists[Project.EnumProjectMember.TARGET] = list_targets;
       mp_types_lists[Project.EnumProjectMember.GLADEUI] = list_ui;
+      mp_types_lists[Project.EnumProjectMember.GRESOURCE] = list_gresource;
 
       foreach (var type in mp_types_lists.keys)
         fill_list(type);
@@ -51,6 +57,7 @@ namespace Ui {
       list_sources.row_selected.connect(row_selected);
       list_targets.row_selected.connect(row_selected);
       list_ui.row_selected.connect(row_selected);
+      list_gresource.row_selected.connect(row_selected);
 
       // Keep lists up to date
       main_widget.project.member_added.connect((member)=>{
@@ -74,6 +81,8 @@ namespace Ui {
             main_widget.project.createMember (Project.EnumProjectMember.TARGET);
           else if (dlg_template.get_selected_row() == dlg_template.row_open_gladeui)
             main_widget.project.createMember (Project.EnumProjectMember.GLADEUI);
+          else if (dlg_template.get_selected_row() == dlg_template.row_new_gresource)
+            main_widget.project.createMember (Project.EnumProjectMember.GRESOURCE);
         }
         new_member_dialog.destroy();
       });
@@ -94,6 +103,7 @@ namespace Ui {
       template.algn_sources.add (list_sources);
       template.algn_targets.add (list_targets);
       template.algn_ui.add (list_ui);
+      template.algn_gresource.add (list_gresource);
       template.show_all();
       
       widget = template;
