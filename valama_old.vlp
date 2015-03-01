@@ -36,6 +36,6 @@
         <directory>src/Units/CodeContextProvider</directory>
         <directory>src/Units/Completion</directory>
         <directory>src/Units/InstalledLibrariesProvider</directory>
-        <directory>vapi</directory>
+        <directory>vapi/gladeui-2.0</directory>
     </source-directories>
 </project>
