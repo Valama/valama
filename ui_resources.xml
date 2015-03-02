@@ -18,5 +18,6 @@
     <file compressed="true" preprocess="xml-stripblanks">src/Ui/WelcomeScreen/RecentEntry.glade</file>
     <file compressed="true" preprocess="xml-stripblanks">src/Units/Builder/Custom.glade</file>
     <file compressed="true" preprocess="xml-stripblanks">src/Ui/ConsoleView.glade</file>
+    <file compressed="true" preprocess="xml-stripblanks">src/Ui/MainWidget.glade</file>
   </gresource>
 </gresources>
