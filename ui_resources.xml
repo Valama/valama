@@ -4,6 +4,8 @@
     <file compressed="true" preprocess="xml-stripblanks">src/Ui/ProjectStructure.glade</file>
     <file compressed="true" preprocess="xml-stripblanks">src/Ui/Editors/Editor_Info.glade</file>
     <file compressed="true" preprocess="xml-stripblanks">src/Ui/Editors/Editor_GResource.glade</file>
+    <file compressed="true" preprocess="xml-stripblanks">src/Ui/Editors/Editor_Data.glade</file>
+    <file compressed="true" preprocess="xml-stripblanks">src/Ui/Editors/Editor_Data_entry.glade</file>
     <file compressed="true" preprocess="xml-stripblanks">src/Ui/Editors/Editor_GResource_entry.glade</file>
     <file compressed="true" preprocess="xml-stripblanks">src/Ui/Editors/Editor_Target.glade</file>
     <file compressed="true" preprocess="xml-stripblanks">src/Ui/Editors/Editor_Target_Dependency.glade</file>

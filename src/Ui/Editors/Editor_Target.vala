@@ -89,6 +89,8 @@ namespace Ui {
   	[GtkChild]
   	public ListBox defs_list;
   	[GtkChild]
+  	public ListBox data_list;
+  	[GtkChild]
   	public ListBox gresources_list;
   	[GtkChild]
   	public ToolButton btn_add_dep;
@@ -351,6 +353,20 @@ namespace Ui {
           update_gresources_list();
       });
 
+      // Keep gresources list in sync
+      member.project.member_added.connect ((member)=>{
+        if (member is Project.ProjectMemberData)
+          update_data_list();
+      });
+      member.project.member_removed.connect ((member)=>{
+        if (member is Project.ProjectMemberData)
+          update_data_list();
+      });
+      member.project.member_data_changed.connect((sender, mb)=>{
+        if (member is Project.ProjectMemberData)
+          update_data_list();
+      });
+
       // Keep binary name entry in sync
       template.ent_binary_name.text = member.binary_name;
       template.ent_binary_name.changed.connect (()=>{
@@ -363,6 +379,7 @@ namespace Ui {
       // Initial list update
       update_sources_list();
       update_gresources_list();
+      update_data_list();
       setup_dependencies_list();
       setup_defines_list();
       update_settings_ui();
@@ -418,6 +435,37 @@ namespace Ui {
         template.gresources_list.add (row);
       }
       template.gresources_list.show_all();
+    }
+
+    // Data list
+    // ===============
+    
+    private inline void update_data_list() {
+      foreach (Gtk.Widget widget in template.data_list.get_children())
+        template.data_list.remove (widget);
+
+      var my_member = member as Project.ProjectMemberTarget;
+      
+      foreach (Project.ProjectMember m in my_member.project.members) {
+        if (!(m is Project.ProjectMemberData))
+          continue;
+        
+        var row = new Gtk.ListBoxRow();
+        var check = new Gtk.CheckButton();
+        check.active = m.id in my_member.included_data;
+        check.label = (m as Project.ProjectMemberData).name;
+        check.toggled.connect(()=>{
+          if (check.active)
+            my_member.included_data.add (m.id);
+          else
+            my_member.included_data.remove (m.id);
+          main_widget.project.member_data_changed (this, my_member);
+        });
+        
+        row.add (check);
+        template.data_list.add (row);
+      }
+      template.data_list.show_all();
     }
 
     // Sources list
