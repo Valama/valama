@@ -1,4 +1,20 @@
+using Gtk;
+
 namespace Ui {
+
+  [GtkTemplate (ui = "/src/Ui/MainWidget.glade")]
+  private class MainWidgetTemplate : Box {
+  	[GtkChild]
+  	public Alignment algn_toolbar;
+  	[GtkChild]
+  	public Alignment algn_project_structure;
+  	[GtkChild]
+  	public Alignment algn_viewer;
+  	[GtkChild]
+  	public Alignment algn_errors;
+  	[GtkChild]
+  	public Alignment algn_console;
+  }
 
   public class MainWidget : Object {
   
@@ -6,6 +22,8 @@ namespace Ui {
     public weak Gtk.Window window;
 
     public Project.Project project;
+
+    private MainWidgetTemplate template = new MainWidgetTemplate();
     
     public EditorViewer editor_viewer = new EditorViewer();
     public ProjectStructure project_structure = new ProjectStructure();
@@ -41,15 +59,14 @@ namespace Ui {
         unit.init();
       }
 
-      // Build main UI out of elements
-      var grid = new Gtk.Grid();
-      grid.attach (main_toolbar.widget, 0, 0, 2, 1);
-      grid.attach (project_structure.widget, 0, 1, 1, 3);
-      grid.attach (editor_viewer.widget, 1, 1, 1, 1);
-      grid.attach (error_list.widget, 1, 2, 1, 1);
-      grid.attach (console_view.widget, 1, 3, 1, 1);
-      grid.show();
-      widget = grid;
+      // Add elements to main UI
+      template.algn_toolbar.add(main_toolbar.widget);
+      template.algn_project_structure.add(project_structure.widget);
+      template.algn_viewer.add(editor_viewer.widget);
+      template.algn_errors.add(error_list.widget);
+      template.algn_console.add(console_view.widget);
+
+      widget = template;
     }
     public void destroy() {
       project.save ();

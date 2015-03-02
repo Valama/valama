@@ -56,6 +56,8 @@
 		<source id="57"/>
 		<source id="58"/>
 		<source id="59"/>
+		<source id="60"/>
+		<source id="61"/>
 		<gresource id="52"/>
 		<metadependency name="Gtk">
 			<dependency type="package" library="gtk+-3.0"/>
@@ -194,9 +196,14 @@
 		<resource file="src/Ui/Editors/Editor_Target_Meta_Dependency.glade" compressed="true" xml_stripblanks="true"/>
 		<resource file="src/Ui/Editors/Editor_Target_NewDependency.glade" compressed="true" xml_stripblanks="true"/>
 		<resource file="src/Units/Builder/Custom.glade" compressed="true" xml_stripblanks="true"/>
+		<resource file="src/Ui/Editors/Editor_Data.glade" compressed="true" xml_stripblanks="true"/>
+		<resource file="src/Ui/Editors/Editor_Data_entry.glade" compressed="true" xml_stripblanks="true"/>
+		<resource file="src/Ui/MainWidget.glade" compressed="true" xml_stripblanks="true"/>
 	</gresource>
 	<valasource id="56" filename="src/Units/Builder/Valama.vala"/>
 	<valasource id="57" filename="src/Project/ProjectMember_GResource.vala"/>
 	<valasource id="58" filename="src/Ui/ConsoleView.vala"/>
 	<valasource id="59" filename="src/Ui/Editors/Editor_GResource.vala"/>
+	<valasource id="60" filename="src/Project/ProjectMember_Data.vala"/>
+	<valasource id="61" filename="src/Ui/Editors/Editor_Data.vala"/>
 </project>
