@@ -7,8 +7,6 @@ namespace Ui {
   private class ConsoleViewTemplate : Box {
   	[GtkChild]
   	public Viewport vwp_console;
-  	[GtkChild]
-  	public ToolButton tbtn_hide;
   }
 
   public class ConsoleView : Element {
@@ -18,6 +16,7 @@ namespace Ui {
     public override void init() {
       template.vwp_console.add(terminal);
       terminal.show();
+
       widget = template;
       terminal.child_exited.connect (()=>{
         process_exited();
@@ -28,9 +27,14 @@ namespace Ui {
 
     public Pid spawn_process (string command) {
 
+      // Clear terminal
+      terminal.reset(true, true);
+
+      // Get argument vector from command
       string[] argv;
       Shell.parse_argv (command, out argv);
       Pid child_pid;
+      // Spawn the process
 #if VTE_2_91
       Process.spawn_async (null, argv, null, SpawnFlags.DO_NOT_REAP_CHILD, null, out child_pid);
       terminal.watch_child (child_pid);
