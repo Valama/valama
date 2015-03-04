@@ -11,32 +11,23 @@ namespace Project {
   
     public string name;
     public string id;
-
+    
     public Gee.ArrayList<ProjectMember> members = new Gee.ArrayList<ProjectMember>();
     
     public string filename;
-    public string basepath;
 
     public signal void member_added (ProjectMember member);
     public signal void member_removed (ProjectMember member);
     public signal void member_data_changed (Object sender, ProjectMember member);
     public signal void member_editor_created (ProjectMember member, Ui.Editor editor);
-
-    public string build_absolute_path(string relpath) {
-      if (GLib.Path.is_absolute(relpath))
-        return relpath;
-      else
-        return GLib.Path.build_filename(this.basepath,relpath);
-    }
-
+    
     public void load (string filename) throws ProjectError {
 
-      this.basepath = GLib.Path.get_dirname(filename);
+      GLib.Environment.set_current_dir(GLib.Path.get_dirname(filename));
       this.filename = GLib.Path.get_basename(filename);
-      //GLib.Environment.set_current_dir(this.basepath);
 
       // Load document
-      Xml.Doc* doc = Xml.Parser.parse_file (this.build_absolute_path(this.filename));
+      Xml.Doc* doc = Xml.Parser.parse_file (this.filename);
       if (doc == null)
         throw new ProjectError.FILE(_("Project file not found or permissions missing"));
 
@@ -114,7 +105,7 @@ namespace Project {
     }
 
     public void save () {
-      var writer = new Xml.TextWriter.filename (this.build_absolute_path(this.filename));
+      var writer = new Xml.TextWriter.filename (this.filename);
       writer.set_indent (true);
       writer.set_indent_string ("\t");
 

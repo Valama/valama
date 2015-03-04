@@ -1,5 +1,4 @@
 namespace Project {
-
   public class ProjectMemberValaSource : ProjectMember {
 
     public string filename = null;
@@ -10,21 +9,15 @@ namespace Project {
     }
 
     internal override void load_internal (Xml.Node* node) throws ProjectError {
-      string full_filename;
       for (Xml.Attr* prop = node->properties; prop != null; prop = prop->next) {
         if (prop->name == "filename")
           filename = prop->children->content;
       }
       if (filename == null)
         throw new ProjectError.CORRUPT_MEMBER(_("filename attribute missing in valasource member"));
-      if (this.project != null) {
-        full_filename = this.project.build_absolute_path(this.filename);
-      } else {
-        full_filename = filename;
-      }
       // Load file content
       string content = null;
-      FileUtils.get_contents (full_filename, out content);
+      FileUtils.get_contents (filename, out content);
       buffer.begin_not_undoable_action();
       buffer.text = content;
       buffer.end_not_undoable_action();
@@ -56,7 +49,7 @@ namespace Project {
       return new Ui.EditorValaSource(this, main_widget);
     }
     public override string getTitle() {
-      return GLib.Path.get_basename(this.filename);
+      return filename;
     }
   }
 
