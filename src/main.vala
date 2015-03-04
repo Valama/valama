@@ -1,7 +1,7 @@
 static int main (string[] args) {
 
   GtkClutter.init (ref args);
-  
+
   var window = new Gtk.Window ();
   window.set_default_size (600, 500);
 

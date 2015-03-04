@@ -29,10 +29,26 @@ namespace Project {
         return GLib.Path.build_filename(this.basepath,relpath);
     }
 
+    public string get_relative_path(string abspath) {
+      if (GLib.Path.is_absolute(abspath)) {
+        if (abspath.has_prefix(this.basepath)) {
+          var relpath = abspath.substring(this.basepath.length);
+          if (relpath[0]==GLib.Path.DIR_SEPARATOR) {
+            relpath = relpath.substring(1);
+          }
+          return relpath;
+        }
+      }
+      return abspath;
+    }
+
     public void load (string filename) throws ProjectError {
 
-      this.basepath = GLib.Path.get_dirname(filename);
-      this.filename = GLib.Path.get_basename(filename);
+      // This trick gives us an absolute path even when passing a relative one
+      var tmpfilename = GLib.File.new_for_path(filename).get_path();
+      this.basepath = GLib.Path.get_dirname(tmpfilename);
+      this.filename = GLib.Path.get_basename(tmpfilename);
+      GLib.stdout.printf("Basepath: %s; %s\n",this.basepath,this.filename);
       //GLib.Environment.set_current_dir(this.basepath);
 
       // Load document
