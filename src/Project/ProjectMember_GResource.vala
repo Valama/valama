@@ -2,7 +2,7 @@ namespace Project {
 
   public class GResource {
     public string file;
-    public string relative_filename;
+    public string full_filename;
     public bool compressed;
     public bool xml_stripblanks;
 
@@ -11,10 +11,9 @@ namespace Project {
         if (prop->name == "file") {
           file = prop->children->content;
           if (project != null) {
-            this.file = project.build_absolute_path(this.file);
-            this.relative_filename = project.get_relative_path(this.file);
+            this.full_filename = project.build_absolute_path(this.file);
           } else {
-            this.relative_filename = this.file;
+            this.full_filename = this.file;
           }
         }
         else if (prop->name == "compressed")
@@ -24,8 +23,7 @@ namespace Project {
       }
     }
     public void save (Xml.TextWriter writer) {
-
-      writer.write_attribute ("file", this.relative_filename);
+      writer.write_attribute ("file", file);
       writer.write_attribute ("compressed", compressed.to_string());
       writer.write_attribute ("xml_stripblanks", xml_stripblanks.to_string());
     }
