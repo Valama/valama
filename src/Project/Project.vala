@@ -11,23 +11,48 @@ namespace Project {
   
     public string name;
     public string id;
-    
+
     public Gee.ArrayList<ProjectMember> members = new Gee.ArrayList<ProjectMember>();
     
     public string filename;
+    public string basepath;
 
     public signal void member_added (ProjectMember member);
     public signal void member_removed (ProjectMember member);
     public signal void member_data_changed (Object sender, ProjectMember member);
     public signal void member_editor_created (ProjectMember member, Ui.Editor editor);
-    
+
+    public string build_absolute_path(string relpath) {
+      if (GLib.Path.is_absolute(relpath))
+        return relpath;
+      else
+        return GLib.Path.build_filename(this.basepath,relpath);
+    }
+
+    public string get_relative_path(string abspath) {
+      if (GLib.Path.is_absolute(abspath)) {
+        if (abspath.has_prefix(this.basepath)) {
+          var relpath = abspath.substring(this.basepath.length);
+          if (relpath[0]==GLib.Path.DIR_SEPARATOR) {
+            relpath = relpath.substring(1);
+          }
+          return relpath;
+        }
+      }
+      return abspath;
+    }
+
     public void load (string filename) throws ProjectError {
 
-      GLib.Environment.set_current_dir(GLib.Path.get_dirname(filename));
-      this.filename = GLib.Path.get_basename(filename);
+      // This trick gives us an absolute path even when passing a relative one
+      var tmpfilename = GLib.File.new_for_path(filename).get_path();
+      this.basepath = GLib.Path.get_dirname(tmpfilename);
+      this.filename = GLib.Path.get_basename(tmpfilename);
+      GLib.stdout.printf("Basepath: %s; %s\n",this.basepath,this.filename);
+      //GLib.Environment.set_current_dir(this.basepath);
 
       // Load document
-      Xml.Doc* doc = Xml.Parser.parse_file (this.filename);
+      Xml.Doc* doc = Xml.Parser.parse_file (this.build_absolute_path(this.filename));
       if (doc == null)
         throw new ProjectError.FILE(_("Project file not found or permissions missing"));
 
@@ -105,7 +130,7 @@ namespace Project {
     }
 
     public void save () {
-      var writer = new Xml.TextWriter.filename (this.filename);
+      var writer = new Xml.TextWriter.filename (this.build_absolute_path(this.filename));
       writer.set_indent (true);
       writer.set_indent_string ("\t");
 

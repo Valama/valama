@@ -1,4 +1,5 @@
 namespace Project {
+
   public class ProjectMemberValaSource : ProjectMember {
 
     public string filename = null;
@@ -15,6 +16,9 @@ namespace Project {
       }
       if (filename == null)
         throw new ProjectError.CORRUPT_MEMBER(_("filename attribute missing in valasource member"));
+      if (this.project != null) {
+        this.filename = this.project.build_absolute_path(this.filename);
+      }
       // Load file content
       string content = null;
       FileUtils.get_contents (filename, out content);
@@ -24,7 +28,13 @@ namespace Project {
     }
 
     internal override void save_internal (Xml.TextWriter writer) {
-      writer.write_attribute ("filename", filename);
+      string final_path;
+      if (this.project != null) {
+        final_path = this.project.get_relative_path(this.filename);
+      } else {
+        final_path = this.filename;
+      }
+      writer.write_attribute ("filename", final_path);
     }
     public override bool create () {
       var file_chooser = new Gtk.FileChooserDialog ("Open File", null,
@@ -49,7 +59,7 @@ namespace Project {
       return new Ui.EditorValaSource(this, main_widget);
     }
     public override string getTitle() {
-      return filename;
+      return GLib.Path.get_basename(this.filename);
     }
   }
 

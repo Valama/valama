@@ -1,7 +1,10 @@
 static int main (string[] args) {
 
   GtkClutter.init (ref args);
-  
+
+  var configpath = GLib.File.new_for_path(GLib.Environment.get_home_dir() + "/.config/valama");
+  configpath.make_directory_with_parents();
+
   var window = new Gtk.Window ();
   window.set_default_size (600, 500);
 

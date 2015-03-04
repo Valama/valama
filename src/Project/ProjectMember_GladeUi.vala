@@ -6,6 +6,7 @@ namespace Project {
     }
 
     public string filename = null;
+    public string relative_filename = null;
 
     internal override void load_internal (Xml.Node* node) throws ProjectError {
       for (Xml.Attr* prop = node->properties; prop != null; prop = prop->next) {
@@ -14,11 +15,18 @@ namespace Project {
       }
       if (filename == null)
         throw new ProjectError.CORRUPT_MEMBER(_("filename attribute missing in GladeUi member"));
-      // Load file content
+      if (this.project != null) {
+        this.filename = this.project.build_absolute_path(this.filename);
+        this.relative_filename = this.project.get_relative_path(this.filename);
+      } else {
+        this.relative_filename = this.filename;
+      }
+
+      // Load file content using full_filename
     }
 
     internal override void save_internal (Xml.TextWriter writer) {
-      writer.write_attribute ("filename", filename);
+      writer.write_attribute ("filename", this.relative_filename);
     }
     public override bool create () {
       var file_chooser = new Gtk.FileChooserDialog ("Open File", null,
