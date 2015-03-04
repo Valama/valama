@@ -14,7 +14,7 @@ namespace Project {
           filename = prop->children->content;
       }
       if (filename == null)
-        throw new ProjectError.CORRUPT_MEMBER("filename attribute missing in valasource member");
+        throw new ProjectError.CORRUPT_MEMBER(_("filename attribute missing in valasource member"));
       // Load file content
       string content = null;
       FileUtils.get_contents (filename, out content);

@@ -29,11 +29,11 @@ namespace Project {
       // Load document
       Xml.Doc* doc = Xml.Parser.parse_file (this.filename);
       if (doc == null)
-        throw new ProjectError.FILE("Project file not found or permissions missing");
+        throw new ProjectError.FILE(_("Project file not found or permissions missing"));
 
       Xml.Node* root = doc->get_root_element ();
       if (root == null)
-        throw new ProjectError.FILE("Project file empty");
+        throw new ProjectError.FILE(_("Project file empty"));
       
       // Check file format version
       string format_version = null;
@@ -46,12 +46,12 @@ namespace Project {
       }
       
       if (format_version == null)
-        throw new ProjectError.VERSION ("Project file format version missing");
+        throw new ProjectError.VERSION (_("Project file format version missing"));
       if (int.parse(format_version) > 1)
-        throw new ProjectError.VERSION ("Project file format newer than supported");
+        throw new ProjectError.VERSION (_("Project file format newer than supported"));
       
       if (id == null)
-        throw new ProjectError.FILE ("Project ID missing");
+        throw new ProjectError.FILE (_("Project ID missing"));
       
       // Iterate first level of project file, pass on to project members
       for (Xml.Node* iter = root->children; iter != null; iter = iter->next) {

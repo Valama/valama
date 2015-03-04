@@ -17,6 +17,7 @@
         <package name="glib-2.0"/>
         <package name="gobject-2.0"/>
         <package name="gtk+-3.0"/>
+        <package name="gtksourceview-3.0"/>
         <package name="guanako"/>
         <package name="libvala-0.26"/>
         <package name="libxml-2.0"/>

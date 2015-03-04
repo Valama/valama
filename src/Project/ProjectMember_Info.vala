@@ -44,9 +44,9 @@ namespace Project {
       }
 
       if (major == -1 || minor == -1 || patch == -1)
-        throw new ProjectError.CORRUPT_MEMBER("version attribute missing in info member");
+        throw new ProjectError.CORRUPT_MEMBER(_("version attribute missing in info member"));
       if (name == null)
-        throw new ProjectError.CORRUPT_MEMBER("name attribute missing in info member");
+        throw new ProjectError.CORRUPT_MEMBER(_("name attribute missing in info member"));
     }
     internal override void save_internal (Xml.TextWriter writer) {
       writer.write_attribute ("name", name);

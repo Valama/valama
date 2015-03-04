@@ -13,7 +13,7 @@ namespace Project {
           filename = prop->children->content;
       }
       if (filename == null)
-        throw new ProjectError.CORRUPT_MEMBER("filename attribute missing in GladeUi member");
+        throw new ProjectError.CORRUPT_MEMBER(_("filename attribute missing in GladeUi member"));
       // Load file content
     }
 

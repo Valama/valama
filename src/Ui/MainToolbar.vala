@@ -56,14 +56,14 @@ namespace Ui {
       btnBuild.icon_name = "system-run";
       btnBuild.set_menu (build_build_menu());
       toolbar.add (btnBuild);
-      btnBuild.set_tooltip_text ("Save current file and build project");
+      btnBuild.set_tooltip_text (_("Save current file and build project"));
       btnBuild.clicked.connect (() => {
         selected_target.builder.build(main_widget);
       });
 
       btnRun = new Gtk.ToolButton (null, "Run");
       toolbar.add (btnRun);
-      btnRun.set_tooltip_text ("Run project");
+      btnRun.set_tooltip_text (_("Run project"));
       btnRun.clicked.connect (() => {
         var running = selected_target.builder.state == Builder.BuilderState.RUNNING;
         if (running)
@@ -128,13 +128,13 @@ namespace Ui {
     private Gtk.Menu build_build_menu () {
         var menu_build = new Gtk.Menu();
 
-        var item_build_rebuild = new Gtk.ImageMenuItem.with_label ("Rebuild");
+        var item_build_rebuild = new Gtk.ImageMenuItem.with_label (_("Rebuild"));
         menu_build.append (item_build_rebuild);
         item_build_rebuild.activate.connect (() => {
             //project_builder.build_project (true);
         });
 
-        var item_build_clean = new Gtk.ImageMenuItem.with_mnemonic ("_Clean");
+        var item_build_clean = new Gtk.ImageMenuItem.with_mnemonic (_("_Clean"));
         /*var image_build_clean = new Image();
         image_build_clean.icon_name = "edit-clear";
         item_build_clean.image = image_build_clean;*/

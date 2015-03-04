@@ -76,7 +76,7 @@ namespace Project {
         }
       }
       if (binary_name == null)
-        throw new ProjectError.CORRUPT_MEMBER("binary_name attribute missing in target member");
+        throw new ProjectError.CORRUPT_MEMBER(_("binary_name attribute missing in target member"));
       // Handle removed sources
       project.member_removed.connect ((member)=>{
         if (member is ProjectMemberValaSource) {
