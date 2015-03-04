@@ -11,7 +11,7 @@ namespace Units {
       main_widget.main_toolbar.selected_target_changed.connect(queue_update);
       main_widget.project.member_data_changed.connect((sender, member)=>{
         if (member == current_target) {
-          stdout.printf ("target changed -> update context\n");
+          stdout.printf (_("target changed -> update context\n"));
           queue_update();
         }
       });
@@ -47,7 +47,7 @@ namespace Units {
     }
 
     private int update_code_context_work() {
-      stdout.printf ("===========updating context\n");
+      stdout.printf (_("===========updating context\n"));
       current_target = main_widget.main_toolbar.selected_target;
       if (current_target == null) {
         timeout_active = false;

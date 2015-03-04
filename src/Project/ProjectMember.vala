@@ -15,7 +15,7 @@ namespace Project {
           id = prop->children->content;
       }
       if (id == null)
-        throw new ProjectError.CORRUPT_MEMBER("id attribute missing in member");
+        throw new ProjectError.CORRUPT_MEMBER(_("id attribute missing in member"));
       load_internal (node);
     }
     public void save (Xml.TextWriter writer) {

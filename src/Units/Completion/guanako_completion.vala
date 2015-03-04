@@ -158,7 +158,7 @@ public class GuanakoCompletion : Gtk.SourceCompletionProvider, Object {
                 return null;
             });
         } catch (GLib.Error e) {
-            errmsg ("Could not launch completion thread successfully: %s\n", e.message);
+            errmsg (_("Could not launch completion thread successfully: %s\n"), e.message);
         }
     }
 
@@ -168,7 +168,7 @@ public class GuanakoCompletion : Gtk.SourceCompletionProvider, Object {
             try {
                 this.icon = theme.load_icon ("dialog-information", 16, 0);
             } catch (GLib.Error e) {
-                errmsg ("Could not load theme icon: %s\n", e.message);
+                errmsg (_("Could not load theme icon: %s\n"), e.message);
             }
         }
         return this.icon;
@@ -242,11 +242,9 @@ public class GuanakoCompletion : Gtk.SourceCompletionProvider, Object {
             else
                 // TRANSLATORS: Context: Parameters: none
                 param_string = "none";
-            vbox.pack_start (new Label ("Parameters:\n" + param_string + "\n\n"
                              // TRANSLATORS:
                              // Returns a return value (programming).
-                                        + "Returns:\n" +
-                                        mth.return_type.data_type.name));
+            vbox.pack_start (new Label (_("Parameters:\n%s\n\nReturns:\n%s").printf(param_string,mth.return_type.data_type.name)));
             info_inner_widget = vbox;
         } else
             info_inner_widget = new Label (prop.symbol.name);

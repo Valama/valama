@@ -75,7 +75,7 @@ namespace Ui {
       // Add new element to project
       template.btn_add.clicked.connect (() => {
         var dlg_template = new NewMemberDialogTemplate();
-        var new_member_dialog = new Dialog.with_buttons("", main_widget.window, DialogFlags.MODAL, "OK", ResponseType.OK, "Cancel", ResponseType.CANCEL);
+        var new_member_dialog = new Dialog.with_buttons("", main_widget.window, DialogFlags.MODAL, _("OK"), ResponseType.OK, _("Cancel"), ResponseType.CANCEL);
         new_member_dialog.get_content_area().add (dlg_template);
         var ret = new_member_dialog.run();
         if (ret == ResponseType.OK) {

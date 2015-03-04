@@ -278,7 +278,7 @@ namespace Guanako {
                 accessible = parent_project.get_accessible_symbols (file, line, col);
 
                 if (!parent_project.map_syntax.has_key (initial_rule_name)) {
-                    error_msg ("Entry point '%s' not found in syntax file. Trying to segfault me, huh??", initial_rule_name);
+                    error_msg (_("Entry point '%s' not found in syntax file. Trying to segfault me, huh??"), initial_rule_name);
                     return null;
                 }
                 Gee.LinkedList<Symbol> init_private_cur_stack = new Gee.LinkedList<Symbol>();
@@ -394,7 +394,7 @@ namespace Guanako {
                     Regex r = /^push_cur\>\{(?P<param>\w*)\}$/;
                     MatchInfo info;
                     if (!r.match (current_rule.expr, 0, out info)) {
-                        errmsg ("Malformed rule: '%s'\n", compare_rule[0].expr);
+                        errmsg (_("Malformed rule: '%s'\n"), compare_rule[0].expr);
                         return;
                     }
                     var push_param = find_param (call_params, info.fetch_named ("param"), current_rule.rule_id);
@@ -406,7 +406,7 @@ namespace Guanako {
                     Regex r = /^pop_cur\>\{(?P<param>\w*)\}$/;
                     MatchInfo info;
                     if (!r.match (current_rule.expr, 0, out info)) {
-                        errmsg ("Malformed rule: '%s'\n", compare_rule[0].expr);
+                        errmsg (_("Malformed rule: '%s'\n"), compare_rule[0].expr);
                         return;
                     }
                     var pop_param = find_param (call_params, info.fetch_named ("param"), current_rule.rule_id);
@@ -416,7 +416,7 @@ namespace Guanako {
                             compare (rule[1:rule.length], written, call_params, depth + 1, ref ret, ref private_cur_stack);
                             return;
                         }
-                    warning_msg ("pop_cur symbol not found! '%s'\n", compare_rule[0].expr);
+                    warning_msg (_("pop_cur symbol not found! '%s'\n"), compare_rule[0].expr);
                     return;
                 }
 
@@ -424,7 +424,7 @@ namespace Guanako {
                     Regex r = /^\{(?P<parent>.*)\}\>(?P<child>\w*)(\<(?P<binding>.*)\>)?(\{(?P<write_to>\w*)\})?$/;
                     MatchInfo info;
                     if (!r.match (current_rule.expr, 0, out info)) {
-                        errmsg ("Malformed rule: '%s'\n", compare_rule[0].expr);
+                        errmsg (_("Malformed rule: '%s'\n"), compare_rule[0].expr);
                         return;
                     }
 
@@ -435,7 +435,7 @@ namespace Guanako {
 
                     var parent_param = find_param (call_params, parent_param_name, current_rule.rule_id);
                     if (parent_param == null) {
-                        errmsg ("Variable '%s' not found! >%s<\n", parent_param_name, compare_rule[0].expr);
+                        errmsg (_("Variable '%s' not found! >%s<\n"), parent_param_name, compare_rule[0].expr);
                         return;
                     }
                     Vala.List<Symbol>[] children;
@@ -494,7 +494,7 @@ namespace Guanako {
                     Regex r = /^\$(?P<call>\w*)(\{(?P<pass>(\w*|\@))\})?(\>\{(?P<ret>.*)\})?$/;
                     MatchInfo info;
                     if (!r.match (current_rule.expr, 0, out info)) {
-                        errmsg ("Malformed rule: '%s'\n", compare_rule[0].expr);
+                        errmsg (_("Malformed rule: '%s'\n"), compare_rule[0].expr);
                         return;
                     }
                     var call = info.fetch_named ("call");
@@ -502,7 +502,7 @@ namespace Guanako {
                     var ret_param = info.fetch_named ("ret");
 
                     if (!parent_project.map_syntax.has_key (call)) {
-                        errmsg ("Call '%s' not found in '%s'\n", call, compare_rule[0].expr);
+                        errmsg (_("Call '%s' not found in '%s'\n"), call, compare_rule[0].expr);
                         return;
                     }
 
@@ -525,7 +525,7 @@ namespace Guanako {
                         child_param.for_rule_id = local_rule_id_count;
                         var param = find_param (call_params, pass_param, current_rule.rule_id);
                         if (param == null) {
-                            errmsg ("Parameter '%s' not found in '%s'\n", pass_param, compare_rule[0].expr);
+                            errmsg (_("Parameter '%s' not found in '%s'\n"), pass_param, compare_rule[0].expr);
                             return;
                         }
                         child_param.symbol = param.symbol;

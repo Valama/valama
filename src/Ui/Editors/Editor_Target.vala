@@ -264,7 +264,7 @@ namespace Ui {
     }
     public bool add_dep_dialog() {
       var dlg_template = new NewDependencyDialogTemplate(main_widget);
-      var new_dep_dialog = new Dialog.with_buttons("New dependency", main_widget.window, DialogFlags.MODAL, "OK", ResponseType.OK, "Cancel", ResponseType.CANCEL);
+      var new_dep_dialog = new Dialog.with_buttons(_("New dependency"), main_widget.window, DialogFlags.MODAL, _("OK"), ResponseType.OK, _("Cancel"), ResponseType.CANCEL);
       new_dep_dialog.get_content_area().add (dlg_template);
       var ret = new_dep_dialog.run();
       if (ret == ResponseType.OK) {
@@ -317,7 +317,7 @@ namespace Ui {
     public EditorTarget(Project.ProjectMemberTarget member, Ui.MainWidget main_widget) {
       this.main_widget = main_widget;
       this.member = member;
-      title = "Target";
+      title = _("Target");
 
       // Fill buildsystem combo and keep it in sync
       foreach (var i in Builder.EnumBuildsystem.to_array())
@@ -402,7 +402,7 @@ namespace Ui {
       var my_member = member as Project.ProjectMemberTarget;
       settings_widget = my_member.builder.init_ui();
       if (settings_widget != null)
-        template.notebook_settings.prepend_page (settings_widget, new Label ("Settings"));
+        template.notebook_settings.prepend_page (settings_widget, new Label (_("Settings")));
 
     }
 
@@ -543,7 +543,7 @@ namespace Ui {
         if (!editor.add_dep_dialog())
           return false;*/
 
-      var edit_dialog = new Dialog.with_buttons("", main_widget.window, DialogFlags.MODAL, "OK", ResponseType.OK);
+      var edit_dialog = new Dialog.with_buttons("", main_widget.window, DialogFlags.MODAL, _("OK"), ResponseType.OK);
       edit_dialog.get_content_area().add (editor);
       var ret = edit_dialog.run();
       edit_dialog.destroy();
@@ -613,7 +613,7 @@ namespace Ui {
         if (!editor.add_dep_dialog())
           return false;
 
-      var edit_dialog = new Dialog.with_buttons("", main_widget.window, DialogFlags.MODAL, "OK", ResponseType.OK);
+      var edit_dialog = new Dialog.with_buttons("", main_widget.window, DialogFlags.MODAL, _("OK"), ResponseType.OK);
       edit_dialog.get_content_area().add (editor);
       var ret = edit_dialog.run();
       edit_dialog.destroy();

@@ -47,13 +47,13 @@ namespace Guanako {
         if  (directories != null)
             //TRANSLATORS: E.g.: Checking .vapi directory: /usr/share/vala/vapi
             foreach (var dir in directories) {
-                debug_msg ("Checking %s directory: %s\n", ext, dir);
+                debug_msg (_("Checking %s directory: %s\n"), ext, dir);
                 var filename = Path.build_path (Path.DIR_SEPARATOR_S, dir, pkg + ext);
                 if (FileUtils.test (filename, FileTest.EXISTS))
                     return filename;
             }
         foreach (var dir in get_vapi_dirs()) {
-            debug_msg ("Checking %s directory: %s\n", ext, dir);
+            debug_msg (_("Checking %s directory: %s\n"), ext, dir);
             var filename = Path.build_path (Path.DIR_SEPARATOR_S, dir, pkg + ext);
             if (FileUtils.test (filename, FileTest.EXISTS))
                 return filename;
@@ -102,7 +102,7 @@ namespace Guanako {
         foreach (var path in get_vapi_dirs()) {
             if (!FileUtils.test (path, FileTest.IS_DIR))
                 continue;
-            debug_msg ("Checking %s directory: %s\n", ".vapi", path);
+            debug_msg (_("Checking %s directory: %s\n"), ".vapi", path);
             try {
                 var enumerator = File.new_for_path (path).enumerate_children (FileAttribute.STANDARD_NAME, 0);
                 FileInfo file_info;
@@ -112,7 +112,7 @@ namespace Guanako {
                         available_packages[filename.substring (0, filename.length - 5)] = filename;
                 }
             } catch (GLib.Error e) {
-                msg ("Could not update vapi files: %s\n", e.message);
+                msg (_("Could not update vapi files: %s\n"), e.message);
             }
         }
 
@@ -193,10 +193,9 @@ namespace Guanako {
                         lblstr.append ("public ");
                         break;
                     default:
-                        errmsg ("No valid %s type: %u - %s\n",
+                        errmsg (_("No valid %s type: %u - %s\nPlease report a bug!\n"),
                                 "SymbolAccessibility", mth.access,
                                 "CompletionProposal.proposal");
-                        errmsg ("Please report a bug!\n");
                         break;
                 }
                 if (mth.binding == MemberBinding.STATIC)
@@ -457,8 +456,7 @@ namespace Guanako {
 
     private static string datatype_to_string (DataType? vt, string? relname) {
         if (vt == null) {
-            errmsg ("DataType is null: %s\n", relname);
-            errmsg ("Please report a bug!\n");
+            errmsg (_("DataType is null: %s\nPlease report a bug!\n"), relname);
             return "UNKNOWN";
         }
 
@@ -505,7 +503,7 @@ namespace Guanako {
             } else if (vt is InvalidType) {  // happens if some vapi conflicts
                 lblstr.append ("INVALID");
                 //TODO; Communicate to UI.
-                errmsg ("Should not happen, you might have problems with conflicting vapis: %s\n",
+                errmsg (_("Should not happen, you might have problems with conflicting vapis: %s\n"),
                         "InvalidType");
             // } else if (vt is FieldPrototype) {
             //     stdout.printf ("FieldPrototype\n");
@@ -524,8 +522,7 @@ namespace Guanako {
             // } else if (vt is CType) {
             //     stdout.printf ("CType\n");
             } else {
-                errmsg ("Unknown type: %s (%s)\n", vt.to_qualified_string(), relname);
-                errmsg ("Please report a bug!\n");
+                errmsg (_("Unknown type: %s (%s)\nPlease report a bug!\n"), vt.to_qualified_string(), relname);
                 lblstr.append ("UNKNOWN");
             }
 
@@ -667,7 +664,7 @@ namespace Guanako {
         if (smb is UnresolvedSymbol)
             return "Unresolved symbol";
 
-        errmsg ("Could not get type name of: %s\n", smb.name);
+        errmsg (_("Could not get type name of: %s\n"), smb.name);
         return "";
     }
 }
