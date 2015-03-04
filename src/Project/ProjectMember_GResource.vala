@@ -2,12 +2,20 @@ namespace Project {
 
   public class GResource {
     public string file;
+    public string full_filename;
     public bool compressed;
     public bool xml_stripblanks;
-    public void load (Xml.Node* node) {
+
+    public void load (Xml.Node* node,Project? project) {
       for (Xml.Attr* prop = node->properties; prop != null; prop = prop->next) {
-        if (prop->name == "file")
+        if (prop->name == "file") {
           file = prop->children->content;
+          if (project != null) {
+            this.full_filename = project.build_absolute_path(this.file);
+          } else {
+            this.full_filename = this.file;
+          }
+        }
         else if (prop->name == "compressed")
           compressed = prop->children->content == "true";
         else if (prop->name == "xml_stripblanks")
@@ -42,7 +50,7 @@ namespace Project {
           continue;
         if (iter->name == "resource") {
           var res = new GResource();
-          res.load (iter);
+          res.load (iter,this.project);
           resources.add (res);
         }
       }
