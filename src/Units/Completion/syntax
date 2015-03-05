@@ -1,0 +1,299 @@
+#
+# This file is part of Guanako
+#
+# Copyright (C) 2012, 2013, Valama development team
+#
+
+init_method
+?_ $MetaLeftSide|$VarStatement|$IfStatement|$WhileStatement|$ForeachStatement|$ReturnStatement
+
+init_deep_space
+?_ $UsingStatement|$NamespaceDeclaration|$ClassDeclaration|$FieldDeclaration
+
+# Using
+
+UsingStatement
+using _ {@}>Namespace{child} ?$NamespaceChild{child} ?_ ;
+
+NamespaceChild : parent
+. {parent}>Namespace{child} ?$NamespaceChild{child}
+
+ClassDeclaration
+?$AccessModifier ?$ClassAbstract class _ *word
+
+ClassAbstract
+abstract _
+
+AccessModifier
+public|private|internal _
+
+FieldDeclaration
+?$AccessModifier $Type _ *word ?_ $AssgEndAssg|;
+
+NamespaceDeclaration
+namespace _ $NamespaceDeclarationNewName|$NamespaceDeclarationExisting
+
+NamespaceDeclarationNewName
+*word ?$NamespaceDeclarationNewNameChild
+NamespaceDeclarationNewNameChild
+. *word ?$NamespaceDeclarationNewNameChild
+
+NamespaceDeclarationExisting
+{@}>Namespace{child} ?$NamespaceDeclarationExistingChild{child}
+
+NamespaceDeclarationExistingChild : parent
+. {parent}>Namespace{child} ?$NamespaceDeclarationExistingChild{child}|?$NamespaceDeclarationNewNameChild
+
+# ==============
+# All kinds of statements
+# ==============
+
+ReturnStatement
+return _ $BoolExp ?_ ;
+
+IfStatement
+if ?_ ( ?_ $BoolExp ?_ ) $Block
+
+WhileStatement
+while ?_ ( ?_ $BoolExp ?_ ) $Block
+
+ForeachStatement
+foreach ?_ ( ?_ $Type _ *word _ in _ $Value ?_ ) $Block
+
+Block
+?_ ~{|$init_method
+
+# ==============
+# Boolean expression
+# ==============
+
+BoolExp
+$BoolExpOptComp|$BoolExpNeg|$BoolExpBrackets ?$BoolExpAnd
+# $Value should be limited to bool values
+#|$BoolExpOr
+
+BoolExpOptComp
+$Value|true|false ?$BoolExpComp
+
+BoolExpComp
+_ $BoolExpValComp|$BoolExpTypeComp
+
+BoolExpValComp
+==|<=|>=|!=|<|> _ $BoolExp
+
+BoolExpTypeComp
+is _ $Type
+
+BoolExpNeg
+! ?_ $BoolExp
+
+#BoolExpOr
+#$BoolExpComp|$BoolExpNeg|$BoolExpBrackets _ || _ $BoolExp
+
+BoolExpAnd
+_ && _ $BoolExp
+
+BoolExpBrackets
+( ?_ $BoolExp ?_ )
+
+# ==============
+# var declaration
+# ==============
+
+VarStatement
+var _ *word $AssgEndAssg
+
+
+# ==============
+# Big rule covering function calls, signal connecting and assignments
+# ==============
+
+MetaLeftSide
+$AssgInst{@}|$AssgStat{@}
+
+AssgIterInst : parent
+. $AssgInst{parent}
+
+AssgIterStat : parent
+. $AssgStat{parent}
+
+AssgInst : parent
+$AssgInstContinue{parent}|$AssgChildSignalConnect{parent}|$AssgChildMethodInst{parent}
+AssgInstContinue : parent
+$ChildVariableInst{parent}>{a}|$ChildPropertyInst{parent}>{a} $AssgIterInst{a}|$AssgEndAssg
+
+AssgStat : parent
+$AssgChildTypeStat{parent}|$AssgChildNamespaceStat{parent}|$AssgChildVariablesStat{parent}|$AssgChildMethodStat{parent}
+
+AssgChildNamespaceStat : parent
+{parent}>Namespace{a} $AssgIterStat{a}
+
+AssgChildTypeStat : parent
+{parent}>Class{a}|{parent}>Struct{a} $AssgIterStat{a}|$MLSdeclaration
+
+AssgChildVariablesStat : parent
+$ChildVariableStat{parent}>{a}|$ChildPropertyStat{parent}>{a} $AssgIterInst{a}|$AssgEndAssg
+
+# TODO: Handle arrays
+AssgChildMethodStat : parent
+{parent}>Method<static>{a} push_cur>{a} ?_ $ParamBrackets pop_cur>{a} ?_ $AssgIterInst{a}|;
+
+AssgChildMethodInst : parent
+{parent}>Method<instance>{a} push_cur>{a} ?_ $ParamBrackets pop_cur>{a} ?_ $AssgIterInst{a}|;
+
+AssgChildSignalConnect : parent
+{parent}>Signal{a} .connect ?_ ( ?_ $MethodName ?_ ) ?_ ;
+
+AssgEndAssg
+?_ = ?_ $BoolExp|$NewType ?_ ;
+
+MLSdeclaration
+?$ArrayBracketsOptContent ?_ *word $AssgEndAssg|;
+
+# ==============
+# Parameter brackets (e.g. for method calls)
+# ==============
+
+ParamBrackets
+( ?_ ?$ParamBracketsChild ?_ )
+ParamBracketsChild
+?$ParamBracketsMod $BoolExp ?$ParamBracketsIter
+ParamBracketsIter
+?_ , ?_ $ParamBracketsChild
+ParamBracketsMod
+ref|out _
+
+# ==============
+# A value that could be used for assignments etc
+# ==============
+
+Value
+$ValInst{@}|$ValStat{@}|$ValString|$ValNumber
+
+ValString
+" *string "
+
+ValNumber
+*number ?$ValNumberDecimal ?f
+
+ValNumberDecimal
+. *number
+
+ValIterInst : parent
+. $ValInst{parent}
+
+ValIterStat : parent
+. $ValStat{parent}
+
+ValInst : parent
+$ChildVariableInst{parent}>{a}|$ChildPropertyInst{parent}>{a}|$ValChildMethodInst{parent}|$ChildConst{parent}>{a} ?$ValIterInst{a}
+
+ValStat : parent
+$ValChildStuffStat{parent}|$ValChildVariablesStat{parent}|$ValChildMethodStat{parent}
+
+ValChildStuffStat : parent
+{parent}>Namespace{a}|{parent}>Class{a} $ValIterStat{a}
+
+ValChildVariablesStat : parent
+$ChildVariableStat{parent}>{a}|$ChildPropertyStat{parent}>{a}|$ChildConst{parent}>{a}|{parent}>Enum{a} ?$ValIterInst{a}
+
+# TODO: Handle arrays
+ValChildMethodStat : parent
+{parent}>Method<static>{a} push_cur>{a} ?_ $ParamBrackets pop_cur>{a} ?_ ?$ValIterInst{a}
+
+ValChildMethodInst : parent
+{parent}>Method<instance>{a} push_cur>{a} ?_ $ParamBrackets pop_cur>{a} ?_ ?$ValIterInst{a}
+
+
+# ==============
+# An instance creation
+# ==============
+
+# TODO: Correct struct initialization
+NewType
+new _ $Type>{a} $NewTypeCreationCall{a}|$ArrayBracketsWithContent
+
+NewTypeCreationCall : parent
+?$NewTypeCreationMth{parent}>{parent} push_cur>{parent} ?_ $ParamBrackets pop_cur>{parent}
+
+NewTypeCreationMth : parent
+. {parent}>CreationMethod{ret}
+
+
+ArrayBracketsWithContent
+?_ [ $ArrayBracketsContent ]
+
+ArrayBracketsOptContent
+?_ [ ?$ArrayBracketsContent ]
+
+ArrayBracketsContent
+?_ $Value ?$ArrayBracketsContentRep ?_
+
+ArrayBracketsContentRep
+?_ , ?_ $Value ?$ArrayBracketsContentRep
+
+# ==============
+# A class or a struct
+# ==============
+
+Type
+$TypeNamespace{@}>{ret}|$TypeClass{@}>{ret}
+
+TypeIter : parent
+. $TypeNamespace{parent}>{ret}|$TypeClass{parent}>{ret}
+
+TypeNamespace : parent
+{parent}>Namespace{a} $TypeIter{a}>{ret}
+
+TypeClass : parent
+{parent}>Class{ret}|{parent}>Struct{ret} ?$TypeIter{ret}>{ret}
+
+
+# ==============
+# Only the name of a method (e.g. for connecting a signal to it)
+# ==============
+
+MethodName
+$MethodNameStat{@}|$MethodNameInst{@}|{@}>Method
+
+MethodNameStat : parent
+$MethodNameStatClasses{parent}|$MethodNameStatVariables{parent}
+
+MethodNameStatClasses : parent
+{parent}>Namespace{a}|{parent}>Class{a} . $MethodNameStat{a}|{a}>Method<static>
+MethodNameStatVariables : parent
+{parent}>Field<static>{a}|{parent}>Property<static>{a} . $MethodNameInst{a}|{a}>Method<instance>
+
+MethodNameInst : parent
+{parent}>Field<instance>{a}|{parent}>Property<instance>{a} . $MethodNameInst{a}|{a}>Method<instance>
+
+
+# ==============
+# Helper functions to abstract single vs array types
+# ==============
+
+ChildConst : parent
+{parent}>Constant<instance,array>{ret}|{parent}>Constant<instance,single>{ret}|$ChildConstArrEl{parent}>{ret}
+ChildConstArrEl : parent
+{parent}>Constant<instance,arr_el>{ret} $ArrayBracketsWithContent
+
+ChildVariableInst : parent
+{parent}>Field<instance,array>{ret}|{parent}>Field<instance,single>{ret}|$ChildVariableInstArrEl{parent}>{ret}
+ChildVariableInstArrEl : parent
+{parent}>Field<instance,arr_el>{ret} $ArrayBracketsWithContent
+
+ChildVariableStat : parent
+{parent}>Field<static,array>{ret}|{parent}>Field<static,single>{ret}|$ChildVariableStatArrEl{parent}>{ret}
+ChildVariableStatArrEl : parent
+{parent}>Field<static,arr_el>{ret} $ArrayBracketsWithContent
+
+ChildPropertyInst : parent
+{parent}>Property<instance,array>{ret}|{parent}>Property<instance,single>{ret}|$ChildPropertyInstArrEl{parent}>{ret}
+ChildPropertyInstArrEl : parent
+{parent}>Property<instance,arr_el>{ret} $ArrayBracketsWithContent
+
+ChildPropertyStat : parent
+{parent}>Property<static,array>{ret}|{parent}>Property<static,single>{ret}|$ChildPropertyStatArrEl{parent}>{ret}
+ChildPropertyStatArrEl : parent
+{parent}>Property<static,arr_el>{ret} $ArrayBracketsWithContent
+

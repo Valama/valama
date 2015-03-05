@@ -12,6 +12,8 @@ namespace Ui {
   	public ToolButton tb_remove;
   	[GtkChild]
   	public Entry ent_name;
+  	[GtkChild]
+  	public Entry ent_basedir;
   }
 
   [GtkTemplate (ui = "/src/Ui/Editors/Editor_Data_entry.glade")]
@@ -42,6 +44,12 @@ namespace Ui {
       template.ent_name.text = member.name;
       template.ent_name.changed.connect (()=>{
         member.name = template.ent_name.text;
+        member.project.member_data_changed (this, member);
+      });
+
+      template.ent_basedir.text = member.basedir;
+      template.ent_basedir.changed.connect (()=>{
+        member.basedir = template.ent_basedir.text;
         member.project.member_data_changed (this, member);
       });
 
