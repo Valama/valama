@@ -10,7 +10,7 @@ namespace Ui {
       this.main_widget = main_widget;
       this.member = member;
       my_member = member as Project.ProjectMemberValaSource;
-      title = member.filename;
+      title = member.file.get_rel();
 
       sourceview.buffer = member.buffer;
 
@@ -83,7 +83,7 @@ namespace Ui {
     public override void save_internal (Xml.TextWriter writer) {
     }
     internal override void destroy_internal() {
-      save_file (my_member.filename, my_member.buffer.text);
+      save_file (my_member.file.get_abs(), my_member.buffer.text);
     }
   }
 

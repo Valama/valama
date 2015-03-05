@@ -116,7 +116,7 @@ namespace Builder {
       // Add sources
       foreach (string id in target.included_sources) {
         var source = target.project.getMemberFromId (id) as Project.ProjectMemberValaSource;
-        cmd_build.append ("'" + source.filename + "' ");
+        cmd_build.append ("'" + source.file.get_rel() + "' ");
       }
 
       cmd_build.append (""" """");

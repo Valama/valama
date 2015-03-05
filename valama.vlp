@@ -58,6 +58,7 @@
 		<source id="59"/>
 		<source id="60"/>
 		<source id="61"/>
+		<source id="63"/>
 		<gresource id="52"/>
 		<data id="62"/>
 		<metadependency name="Gtk">
@@ -210,4 +211,5 @@
 	<data id="62" name="Guanako" basedir="DATA_DIR">
 		<target file="src/Units/Completion/syntax" target="guanako/syntax"/>
 	</data>
+	<valasource id="63" filename="src/Project/FileRef.vala"/>
 </project>

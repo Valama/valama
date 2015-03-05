@@ -81,7 +81,7 @@ namespace Units {
       foreach (var member in main_widget.project.members)
         if (member is Project.ProjectMemberValaSource) {
           source_member = member as Project.ProjectMemberValaSource;
-          if (source_member.filename == filename)
+          if (source_member.file.get_rel() == filename)
             break;
         }
       return source_member;
