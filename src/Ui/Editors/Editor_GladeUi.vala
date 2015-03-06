@@ -9,27 +9,27 @@ namespace Ui {
     private Project.ProjectMemberGladeUi my_member = null;
 
 
-	  private Glade.Project glade_project = new Glade.Project();
-	  private Glade.Inspector inspector = new Glade.Inspector();
-	  private Glade.DesignView design_view;
-	  private Glade.Palette palette = new Glade.Palette();
-	  private Glade.Editor editor = new Glade.Editor();
-	  private Glade.SignalEditor signals = new Glade.SignalEditor();
+    private Glade.Project glade_project = new Glade.Project();
+    private Glade.Inspector inspector = new Glade.Inspector();
+    private Glade.DesignView design_view;
+    private Glade.Palette palette = new Glade.Palette();
+    private Glade.Editor editor = new Glade.Editor();
+    private Glade.SignalEditor signals = new Glade.SignalEditor();
   
     public EditorGladeUi(Project.ProjectMemberGladeUi member, Ui.MainWidget main_widget) {
       this.main_widget = main_widget;
       this.member = member;
       my_member = member as Project.ProjectMemberGladeUi;
-      title = member.filename;
+      title = member.getTitle();
 
       var grid = new Gtk.Grid();
       Glade.App.set_window (main_widget.window);
 
-		  glade_project = Glade.Project.load (member.filename);
-		  design_view = new Glade.DesignView (glade_project);
-		  Glade.App.add_project (glade_project);
-		  inspector.project = glade_project;
-		  palette.project = glade_project;
+      glade_project = Glade.Project.load (member.file.get_abs());
+      design_view = new Glade.DesignView (glade_project);
+      Glade.App.add_project (glade_project);
+      inspector.project = glade_project;
+      palette.project = glade_project;
 
       inspector.selection_changed.connect (() => {
         var w = inspector.get_selected_items().nth_data (0);
@@ -69,7 +69,7 @@ namespace Ui {
     public override void save_internal (Xml.TextWriter writer) {
     }
     internal override void destroy_internal() {
-      glade_project.save (my_member.filename);
+      glade_project.save (my_member.file.get_abs());
       Glade.App.remove_project (glade_project);
     }
   }

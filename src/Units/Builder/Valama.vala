@@ -38,7 +38,7 @@ namespace Builder {
         dos.put_string ("""<gresource prefix="/">""" + "\n");
         
         foreach (var res in gresource.resources) {
-          dos.put_string ("""<file>""" + res.file + """</file>""" + "\n");
+          dos.put_string ("""<file>""" + res.file.get_rel() + """</file>""" + "\n");
         }
 
         dos.put_string ("""</gresource>""" + "\n");
