@@ -17,7 +17,7 @@ namespace Ui {
   [GtkTemplate (ui = "/src/Ui/Editors/Editor_GResource_entry.glade")]
   private class EditorGResourceEntryTemplate : ListBoxRow {
     public EditorGResourceEntryTemplate (Project.GResource resource) {
-      lbl_file.label = resource.file;
+      lbl_file.label = resource.file.get_rel();
       chk_compressed.active = resource.compressed;
       chk_compressed.toggled.connect (()=>{
         resource.compressed = chk_compressed.active;
@@ -27,12 +27,12 @@ namespace Ui {
         resource.xml_stripblanks = chk_xml_stripblanks.active;
       });
     }
-  	[GtkChild]
-  	public CheckButton chk_xml_stripblanks;
-  	[GtkChild]
-  	public CheckButton chk_compressed;
-  	[GtkChild]
-  	public Label lbl_file;
+    [GtkChild]
+    public CheckButton chk_xml_stripblanks;
+    [GtkChild]
+    public CheckButton chk_compressed;
+    [GtkChild]
+    public Label lbl_file;
   }
 
 
@@ -58,8 +58,7 @@ namespace Ui {
                                       Gtk.Stock.OPEN, Gtk.ResponseType.ACCEPT);
         if (file_chooser.run () == Gtk.ResponseType.ACCEPT) {
           var new_res = new Project.GResource();
-          var projectfolder = File.new_for_path (main_widget.project.filename).get_parent();
-          new_res.file = projectfolder.get_relative_path (file_chooser.get_file());
+          new_res.file = new Project.FileRef.from_file (main_widget.project, file_chooser.get_file());
           member.resources.add (new_res);
           update_list();
         }

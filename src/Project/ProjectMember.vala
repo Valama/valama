@@ -18,17 +18,22 @@ namespace Project {
         throw new ProjectError.CORRUPT_MEMBER(_("id attribute missing in member"));
       load_internal (node);
     }
+
     public void save (Xml.TextWriter writer) {
       writer.start_element (get_project_member_type().toString());
       writer.write_attribute ("id", id);
       save_internal (writer);
       writer.end_element();
     }
+
     internal abstract void load_internal (Xml.Node* node) throws ProjectError;
+
     internal abstract void save_internal (Xml.TextWriter writer);
+
     public abstract bool create ();
     
     internal abstract Ui.Editor createEditor_internal(Ui.MainWidget main_widget);
+
     public Ui.Editor? createEditor(Ui.MainWidget main_widget) {
       if (editor != null) {
         return null;
@@ -40,7 +45,9 @@ namespace Project {
       project.member_editor_created (this, editor);
       return editor;
     }
+
     public Ui.Editor editor {public get; private set; default = null;}
+
     public abstract string getTitle();
   }
 

@@ -1,24 +1,28 @@
 namespace Project {
 
   public class GResource {
-    public string file;
+
+    public FileRef file = null;
     public bool compressed;
     public bool xml_stripblanks;
-    public void load (Xml.Node* node) {
+
+    public void load (Xml.Node* node, Project project) {
       for (Xml.Attr* prop = node->properties; prop != null; prop = prop->next) {
         if (prop->name == "file")
-          file = prop->children->content;
+          file = new FileRef.from_rel (project, prop->children->content);
         else if (prop->name == "compressed")
           compressed = prop->children->content == "true";
         else if (prop->name == "xml_stripblanks")
           xml_stripblanks = prop->children->content == "true";
       }
     }
+
     public void save (Xml.TextWriter writer) {
-      writer.write_attribute ("file", file);
+      writer.write_attribute ("file", file.get_rel());
       writer.write_attribute ("compressed", compressed.to_string());
       writer.write_attribute ("xml_stripblanks", xml_stripblanks.to_string());
     }
+
   }
 
   public class ProjectMemberGResource : ProjectMember {
@@ -42,11 +46,12 @@ namespace Project {
           continue;
         if (iter->name == "resource") {
           var res = new GResource();
-          res.load (iter);
+          res.load (iter,this.project);
           resources.add (res);
         }
       }
     }
+
     internal override void save_internal (Xml.TextWriter writer) {
       writer.write_attribute ("name", name);
       foreach (var res in resources) {
@@ -55,17 +60,19 @@ namespace Project {
         writer.end_element();
       }
     }
+
     public override bool create () {
       name = "New resource";
       return true;
     }
+
     internal override Ui.Editor createEditor_internal(Ui.MainWidget main_widget) {
       return new Ui.EditorGResource(this, main_widget);
     }
+
     public override string getTitle() {
       return name;
     }
   }
-
 }
 

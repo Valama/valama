@@ -26,6 +26,7 @@ namespace Project {
     internal override void save_internal (Xml.TextWriter writer) {
       writer.write_attribute ("filename", file.get_rel());
     }
+
     public override bool create () {
       var file_chooser = new Gtk.FileChooserDialog ("Open File", null,
                                     Gtk.FileChooserAction.OPEN,
@@ -45,12 +46,13 @@ namespace Project {
       file_chooser.destroy ();
       return file != null;
     }
+
     internal override Ui.Editor createEditor_internal(Ui.MainWidget main_widget) {
       return new Ui.EditorValaSource(this, main_widget);
     }
+
     public override string getTitle() {
       return file.get_rel();
     }
   }
-
 }
