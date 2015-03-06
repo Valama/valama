@@ -484,7 +484,7 @@ namespace Ui {
         var row = new Gtk.ListBoxRow();
         var check = new Gtk.CheckButton();
         check.active = m.id in my_member.included_sources;
-        check.label = (m as Project.ProjectMemberValaSource).filename;
+        check.label = (m as Project.ProjectMemberValaSource).file.get_rel();
         check.toggled.connect(()=>{
           if (check.active)
             my_member.included_sources.add (m.id);

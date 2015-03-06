@@ -20,7 +20,7 @@ namespace Builder {
       DirUtils.create_with_parents (build_dir, 509); // = 775 octal
 
       var cmd_build = new StringBuilder();
-      cmd_build.append (""" /bin/sh -c " """);
+      cmd_build.append ("""/bin/sh -c " """);
 
       // Write gresource files and compile them
       foreach (string id in target.included_gresources) {
@@ -29,9 +29,8 @@ namespace Builder {
         var res_path = ".gresource_" + id + ".xml";
 
         var file = File.new_for_path (res_path);
-        if (file.query_exists ()) {
+        if (file.query_exists ())
           file.delete ();
-        }
 
         var dos = new DataOutputStream (file.create (FileCreateFlags.REPLACE_DESTINATION));
         dos.put_string ("""<?xml version="1.0" encoding="UTF-8"?>""" + "\n");
@@ -53,6 +52,33 @@ namespace Builder {
       cmd_build.append ("--target-glib=2.38 ");
       cmd_build.append ("--thread -X -lm ");
       cmd_build.append ("-o '" + build_dir + target.binary_name + "' ");
+
+      // Copy data files, write basedir config vapi
+      var vapi = File.new_for_path (build_dir + "config.vapi");
+      if (vapi.query_exists ())
+        vapi.delete ();
+      var dos = new DataOutputStream (vapi.create (FileCreateFlags.REPLACE_DESTINATION));
+      dos.put_string ("""[CCode (cprefix = "", lower_case_cprefix = "")]""" + "\n");
+      dos.put_string ("namespace Config {\n");
+
+      foreach (string id in target.included_data) {
+        var data = target.project.getMemberFromId (id) as Project.ProjectMemberData;
+        dos.put_string ("  public const string " + data.basedir + ";\n");
+        cmd_build.append ("-X -D" + data.basedir + """='\"""" + build_dir + "data/" + data.basedir + """/\"' """);
+
+        foreach (var target in data.targets) {
+          var target_file = File.new_for_path (build_dir + "data/" + data.basedir + "/" + target.target);
+          var orig_file = File.new_for_path (target.file);
+          DirUtils.create_with_parents (target_file.get_parent().get_path(), 509); // = 775 octal
+          orig_file.copy (target_file, FileCopyFlags.OVERWRITE, null, null);
+        }
+      }
+
+      dos.put_string ("}\n");
+      // TODO: Get rid of this once translation support is there
+      cmd_build.append ("""-X -DGETTEXT_PACKAGE='\"valamang\"' """);
+
+      cmd_build.append ("'" + build_dir + "config.vapi' ");
 
       // Add defines
       foreach (var define in target.defines) {
@@ -90,11 +116,11 @@ namespace Builder {
       // Add sources
       foreach (string id in target.included_sources) {
         var source = target.project.getMemberFromId (id) as Project.ProjectMemberValaSource;
-        cmd_build.append ("'" + source.filename + "' ");
+        cmd_build.append ("'" + source.file.get_rel() + "' ");
       }
 
-      cmd_build.append (""" " """);
-
+      cmd_build.append (""" """");
+      // "
       Pid child_pid = main_widget.console_view.spawn_process (cmd_build.str);
 
       state = BuilderState.COMPILING;

@@ -108,8 +108,8 @@ namespace Units {
       foreach (string source_id in current_target.included_sources) {
         var source = main_widget.project.getMemberFromId (source_id) as Project.ProjectMemberValaSource;
 
-			  var source_file = new Vala.SourceFile (context_internal, Vala.SourceFileType.SOURCE, source.filename, source.buffer.text, false);
-			  source_file.relative_filename = source.filename;
+			  var source_file = new Vala.SourceFile (context_internal, Vala.SourceFileType.SOURCE, source.file.get_abs(), source.buffer.text, false);
+			  source_file.relative_filename = source.file.get_rel();
 
 			  var ns_ref = new Vala.UsingDirective (new Vala.UnresolvedSymbol (null, "GLib", null));
 			  source_file.add_using_directive (ns_ref);
