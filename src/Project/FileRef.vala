@@ -34,6 +34,5 @@ namespace Project {
       return proj_dir.get_relative_path (file);
     }
   }
-
 }
 
