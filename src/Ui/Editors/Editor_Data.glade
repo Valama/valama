@@ -129,12 +129,25 @@
             <property name="toolbar_style">icons</property>
             <property name="icon_size">2</property>
             <child>
-              <object class="GtkToolButton" id="tb_add">
+              <object class="GtkToolButton" id="tb_add_file">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="label" translatable="yes">Add</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-add</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToolButton" id="tb_add_dir">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Add</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-directory</property>
               </object>
               <packing>
                 <property name="expand">False</property>

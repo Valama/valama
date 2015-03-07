@@ -209,7 +209,7 @@
 	<valasource id="60" filename="src/Project/ProjectMember_Data.vala"/>
 	<valasource id="61" filename="src/Ui/Editors/Editor_Data.vala"/>
 	<data id="62" name="Guanako" basedir="DATA_DIR">
-		<target file="src/Units/Completion/syntax" target="guanako/syntax"/>
+		<target file="src/Units/Completion/syntax" target="guanako/syntax" is_folder="false"/>
 	</data>
 	<valasource id="63" filename="src/Project/FileRef.vala"/>
 </project>
