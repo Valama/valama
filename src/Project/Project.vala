@@ -23,8 +23,8 @@ namespace Project {
     
     public void load (string filename) throws ProjectError {
 
-      GLib.Environment.set_current_dir(GLib.Path.get_dirname(filename));
-      this.filename = GLib.Path.get_basename(filename);
+      var ftemp = File.new_for_path(filename);
+      this.filename = ftemp.get_path();
 
       // Load document
       Xml.Doc* doc = Xml.Parser.parse_file (this.filename);
