@@ -6,10 +6,12 @@ namespace Ui {
   private class EditorDataTemplate : Box {
   	[GtkChild]
   	public ListBox list_targets;
-  	[GtkChild]
-  	public ToolButton tb_add;
-  	[GtkChild]
-  	public ToolButton tb_remove;
+    [GtkChild]
+    public ToolButton tb_add_file;
+    [GtkChild]
+    public ToolButton tb_add_dir;
+    [GtkChild]
+    public ToolButton tb_remove;
   	[GtkChild]
   	public Entry ent_name;
   	[GtkChild]
@@ -24,11 +26,17 @@ namespace Ui {
       ent_target.changed.connect (()=>{
         target.target = ent_target.text;
       });
+      if (target.is_folder)
+        img_type.set_from_stock (Stock.DIRECTORY, IconSize.LARGE_TOOLBAR);
+      else
+        img_type.set_from_stock (Stock.FILE, IconSize.LARGE_TOOLBAR);
     }
   	[GtkChild]
   	public Label lbl_file;
   	[GtkChild]
   	public Entry ent_target;
+  	[GtkChild]
+  	public Image img_type;
   }
 
 
@@ -53,7 +61,7 @@ namespace Ui {
         member.project.member_data_changed (this, member);
       });
 
-      template.tb_add.clicked.connect (()=>{
+      template.tb_add_file.clicked.connect (()=>{
         string? selected_file = null;
         var file_chooser = new Gtk.FileChooserDialog ("Open File", null,
                                       Gtk.FileChooserAction.OPEN,
@@ -68,6 +76,26 @@ namespace Ui {
         if (selected_file != null) {
           var new_data_target = new Project.DataTarget();
           new_data_target.file = selected_file;
+          member.targets.add (new_data_target);
+          update_list();
+        }
+      });
+      template.tb_add_dir.clicked.connect (()=>{
+        string? selected_file = null;
+        var file_chooser = new Gtk.FileChooserDialog ("Open Directory", null,
+                                      Gtk.FileChooserAction.SELECT_FOLDER,
+                                      Gtk.Stock.CANCEL, Gtk.ResponseType.CANCEL,
+                                      Gtk.Stock.OPEN, Gtk.ResponseType.ACCEPT);
+        if (file_chooser.run () == Gtk.ResponseType.ACCEPT) {
+          var projectfolder = File.new_for_path (member.project.filename).get_parent();
+          selected_file = projectfolder.get_relative_path (file_chooser.get_file());
+        }
+        file_chooser.destroy ();
+
+        if (selected_file != null) {
+          var new_data_target = new Project.DataTarget();
+          new_data_target.file = selected_file;
+          new_data_target.is_folder = true;
           member.targets.add (new_data_target);
           update_list();
         }

@@ -15,19 +15,6 @@
         <property name="row_spacing">10</property>
         <property name="column_spacing">10</property>
         <child>
-          <object class="GtkLabel" id="label1">
-            <property name="visible">True</property>
-            <property name="sensitive">False</property>
-            <property name="can_focus">False</property>
-            <property name="halign">end</property>
-            <property name="label" translatable="yes">File</property>
-          </object>
-          <packing>
-            <property name="left_attach">0</property>
-            <property name="top_attach">0</property>
-          </packing>
-        </child>
-        <child>
           <object class="GtkLabel" id="label2">
             <property name="visible">True</property>
             <property name="sensitive">False</property>
@@ -60,6 +47,17 @@
           <packing>
             <property name="left_attach">1</property>
             <property name="top_attach">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkImage" id="img_type">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="stock">gtk-missing-image</property>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">0</property>
           </packing>
         </child>
       </object>

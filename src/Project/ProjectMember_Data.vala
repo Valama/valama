@@ -3,17 +3,21 @@ namespace Project {
   public class DataTarget {
     public string file = "";
     public string target = "";
+    public bool is_folder = false;
     public void load (Xml.Node* node) {
       for (Xml.Attr* prop = node->properties; prop != null; prop = prop->next) {
         if (prop->name == "file")
           file = prop->children->content;
         else if (prop->name == "target")
           target = prop->children->content;
+        else if (prop->name == "is_folder")
+          is_folder = prop->children->content == "true";
       }
     }
     public void save (Xml.TextWriter writer) {
       writer.write_attribute ("file", file);
       writer.write_attribute ("target", target);
+      writer.write_attribute ("is_folder", is_folder.to_string());
     }
   }
 

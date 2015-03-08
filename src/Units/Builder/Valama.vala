@@ -70,7 +70,7 @@ namespace Builder {
           var target_file = File.new_for_path (build_dir + "data/" + data.basedir + "/" + target.target);
           var orig_file = File.new_for_path (target.file);
           DirUtils.create_with_parents (target_file.get_parent().get_path(), 509); // = 775 octal
-          orig_file.copy (target_file, FileCopyFlags.OVERWRITE, null, null);
+          copy_recursive (orig_file, target_file, FileCopyFlags.OVERWRITE, null);
         }
       }
 
@@ -136,6 +136,32 @@ namespace Builder {
         main_widget.console_view.disconnect (process_exited_handler);
       });
     }
+
+    // Recursive copying
+    // From http://stackoverflow.com/questions/16453739/how-do-i-recursively-copy-a-directory-using-vala
+    private bool copy_recursive (GLib.File src, GLib.File dest, GLib.FileCopyFlags flags = GLib.FileCopyFlags.NONE, GLib.Cancellable? cancellable = null) throws GLib.Error {
+      GLib.FileType src_type = src.query_file_type (GLib.FileQueryInfoFlags.NONE, cancellable);
+      if (src_type == GLib.FileType.DIRECTORY ) {
+        dest.make_directory (cancellable);
+        src.copy_attributes (dest, flags, cancellable);
+
+        string src_path = src.get_path ();
+        string dest_path = dest.get_path ();
+        GLib.FileEnumerator enumerator = src.enumerate_children (GLib.FileAttribute.STANDARD_NAME, GLib.FileQueryInfoFlags.NONE, cancellable);
+        for ( GLib.FileInfo? info = enumerator.next_file (cancellable) ; info != null ; info = enumerator.next_file (cancellable) ) {
+          copy_recursive (
+            GLib.File.new_for_path (GLib.Path.build_filename (src_path, info.get_name ())),
+            GLib.File.new_for_path (GLib.Path.build_filename (dest_path, info.get_name ())),
+            flags,
+            cancellable);
+        }
+      } else if ( src_type == GLib.FileType.REGULAR ) {
+        src.copy (dest, flags, cancellable);
+      }
+
+      return true;
+    }
+
     Pid run_pid;
     public override void run(Ui.MainWidget main_widget) {
       var build_dir = "build/" + target.binary_name + "/valama/";
@@ -148,10 +174,12 @@ namespace Builder {
         main_widget.console_view.disconnect (process_exited_handler);
       });
     }
+
     public override void abort_run() {
       Posix.kill (run_pid, 15);
       Process.close_pid (run_pid);
     }
+
     public override void clean() {
     
     }
