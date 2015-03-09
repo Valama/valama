@@ -56,7 +56,7 @@ namespace Builder {
           var target_file = File.new_for_path (build_dir + "data/" + data.basedir + "/" + target.target);
           var orig_file = File.new_for_path (target.file);
           DirUtils.create_with_parents (target_file.get_parent().get_path(), 509); // = 775 octal
-          copy_recursive (orig_file, target_file, FileCopyFlags.OVERWRITE, null);
+          Helper.copy_recursive (orig_file, target_file, FileCopyFlags.OVERWRITE, null);
         }
       }
 

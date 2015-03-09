@@ -20,7 +20,7 @@ namespace Builder {
     }
 
     public static void write_config_vapi (Project.ProjectMemberTarget target, string path) {
-      var vapi = File.new_for_path (build_dir + "config.vapi");
+      var vapi = File.new_for_path (path);
       if (vapi.query_exists ())
         vapi.delete ();
       var dos = new DataOutputStream (vapi.create (FileCreateFlags.REPLACE_DESTINATION));
@@ -37,7 +37,7 @@ namespace Builder {
 
     // Recursive copying
     // From http://stackoverflow.com/questions/16453739/how-do-i-recursively-copy-a-directory-using-vala
-    public bool copy_recursive (GLib.File src, GLib.File dest, GLib.FileCopyFlags flags = GLib.FileCopyFlags.NONE, GLib.Cancellable? cancellable = null) throws GLib.Error {
+    public static bool copy_recursive (GLib.File src, GLib.File dest, GLib.FileCopyFlags flags = GLib.FileCopyFlags.NONE, GLib.Cancellable? cancellable = null) throws GLib.Error {
       GLib.FileType src_type = src.query_file_type (GLib.FileQueryInfoFlags.NONE, cancellable);
       if (src_type == GLib.FileType.DIRECTORY ) {
         if (!dest.query_exists())
@@ -64,4 +64,4 @@ namespace Builder {
 
   }
 
-}P
+}
