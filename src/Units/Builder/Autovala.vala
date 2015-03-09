@@ -10,6 +10,12 @@ namespace Builder {
     public override void save (Xml.TextWriter writer) {
     
     }
+    public override bool can_export () {
+      return false;
+    }
+    public override void export (Ui.MainWidget main_widget) {
+    
+    }
     public override void build(Ui.MainWidget main_widget) {
     
     }

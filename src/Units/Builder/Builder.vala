@@ -28,7 +28,9 @@ namespace Builder {
     public Project.ProjectMemberTarget target;
   
     public abstract Gtk.Widget? init_ui();
-  
+
+    public abstract bool can_export();
+    public abstract void export(Ui.MainWidget main_widget);
     public abstract void build(Ui.MainWidget main_widget);
     public abstract void run(Ui.MainWidget main_widget);
     public abstract void abort_run();

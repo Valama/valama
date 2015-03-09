@@ -51,6 +51,12 @@ namespace Builder {
       writer.write_attribute ("clean_command", clean_command);
     }
     private ulong process_exited_handler;
+    public override bool can_export () {
+      return false;
+    }
+    public override void export (Ui.MainWidget main_widget) {
+
+    }
     public override void build(Ui.MainWidget main_widget) {
       Pid child_pid = main_widget.console_view.spawn_process (build_command);
 

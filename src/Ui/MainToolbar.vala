@@ -122,26 +122,29 @@ namespace Ui {
       else
         btnRun.icon_name = "media-playback-start";
 
+      item_build_export.sensitive = selected_target.builder.can_export();
+
       old_target = selected_target;
     }
 
+    private Gtk.ImageMenuItem item_build_export;
     private Gtk.Menu build_build_menu () {
         var menu_build = new Gtk.Menu();
 
-        var item_build_rebuild = new Gtk.ImageMenuItem.with_label (_("Rebuild"));
-        menu_build.append (item_build_rebuild);
-        item_build_rebuild.activate.connect (() => {
-            //project_builder.build_project (true);
+        item_build_export = new Gtk.ImageMenuItem.with_label (_("Export"));
+        menu_build.append (item_build_export);
+        item_build_export.activate.connect (() => {
+          selected_target.builder.export(main_widget);
         });
 
-        var item_build_clean = new Gtk.ImageMenuItem.with_mnemonic (_("_Clean"));
+        //var item_build_clean = new Gtk.ImageMenuItem.with_mnemonic (_("_Clean"));
         /*var image_build_clean = new Image();
         image_build_clean.icon_name = "edit-clear";
         item_build_clean.image = image_build_clean;*/
-        menu_build.append (item_build_clean);
+        /*menu_build.append (item_build_clean);
         item_build_clean.activate.connect (() => {
             //project_builder.clean_project();
-        });
+        });*/
         menu_build.show_all();
         return menu_build;
     }
