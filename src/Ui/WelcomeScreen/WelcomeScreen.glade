@@ -88,7 +88,6 @@
             <property name="halign">center</property>
             <property name="valign">start</property>
             <property name="margin_bottom">10</property>
-            <property name="selection_mode">none</property>
             <child>
               <object class="GtkListBoxRow" id="row_new_project">
                 <property name="width_request">100</property>

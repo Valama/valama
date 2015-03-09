@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<project format_version="1" project_id="300720142332">
+	<info id="1" name="ValamaNG" major="0" minor="5" patch="0">
+		<author name="Linus Seelinger" mail="S.Linus@gmx.de"/>
+	</info>
+	<valasource id="2" filename="src/main.vala"/>
+	<target id="3" binary_name="main">
+		<buildsystem type="valama"/>
+		<source id="2"/>
+	</target>
+</project>

@@ -1,0 +1,16 @@
+<template format_version="1">
+    <author>
+        <name>Yannick Inizan</name>
+        <mail>inizan.yannick@gmail.com</mail>
+    </author>
+    <name>
+        <en>Plain Vala Library</en>
+        <de>Vala-Library-Hello-World</de>>
+        <fr>Bibliothèque Hello World Vala</fr>>
+    </name>
+    <description>
+        <en>Simple Vala library project</en>
+        <de>Einfaches Vala-Library-Projekt.</de>>
+        <fr>Projet bibliothèque Vala simple.</fr>>
+    </description>
+</template>

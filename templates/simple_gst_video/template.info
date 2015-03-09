@@ -1,0 +1,16 @@
+<template format_version="1">
+    <author>
+        <name>Yannick Inizan</name>
+        <mail>inizan.yannick@gmail.com</mail>
+    </author>
+    <name>
+        <en>Simple video GStreamer</en>
+        <de>Video-GStreamer Beispiel</de>
+        <fr>Exemple GStreamer vidéo</fr>
+    </name>
+    <description>
+        <en>Simple GStreamer video project</en>
+        <de>Einfaches Video-GStreamer-Projekt</de>
+        <fr>Projet GStreamer vidéo simple</fr>
+    </description>
+</template>

@@ -1,0 +1,29 @@
+<project version="0.1">
+	<name></name>
+	<buildsystem>cmake</buildsystem>
+	<version>
+		<major>0</major>
+		<minor>0</minor>
+		<patch>0</patch>
+	</version>
+	<packages>
+		<package name="gio-2.0"/>
+		<package name="glib-2.0"/>
+		<package name="gobject-2.0"/>
+		<package name="gtk+-3.0"/>
+	</packages>
+	<source-directories>
+		<directory>src</directory>
+		<directory>vapi</directory>
+	</source-directories>
+	<ui-directories>
+		<directory>ui</directory>
+	</ui-directories>
+	<buildsystem-directories>
+		<directory></directory>
+		<directory>cmake</directory>
+	</buildsystem-directories>
+	<opened-files>
+		<file>src/main.vala</file>
+	</opened-files>
+</project>

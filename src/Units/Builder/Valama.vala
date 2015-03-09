@@ -142,7 +142,8 @@ namespace Builder {
     private bool copy_recursive (GLib.File src, GLib.File dest, GLib.FileCopyFlags flags = GLib.FileCopyFlags.NONE, GLib.Cancellable? cancellable = null) throws GLib.Error {
       GLib.FileType src_type = src.query_file_type (GLib.FileQueryInfoFlags.NONE, cancellable);
       if (src_type == GLib.FileType.DIRECTORY ) {
-        dest.make_directory (cancellable);
+        if (!dest.query_exists())
+          dest.make_directory (cancellable);
         src.copy_attributes (dest, flags, cancellable);
 
         string src_path = src.get_path ();

@@ -10,7 +10,7 @@ namespace Project {
   public class Project {
   
     public string name;
-    public string id;
+    public string id = null;
     
     public Gee.ArrayList<ProjectMember> members = new Gee.ArrayList<ProjectMember>();
     
@@ -37,7 +37,6 @@ namespace Project {
       
       // Check file format version
       string format_version = null;
-      id = null;
       for (Xml.Attr* prop = root->properties; prop != null; prop = prop->next) {
         if (prop->name == "format_version")
           format_version = prop->children->content;

@@ -1,0 +1,16 @@
+<template format_version="1">
+    <author>
+        <name>Yannick Inizan</name>
+        <mail>inizan.yannick@gmail.com</mail>
+    </author>
+    <name>
+        <en>Simple audio GStreamer</en>
+        <de>Audio-GStreamer Beispiel</de>
+        <fr>Exemple GStreamer audio</fr>
+    </name>
+    <description>
+        <en>Simple GStreamer audio project</en>
+        <de>Einfaches Audio-GStreamer-Projekt</de>
+        <fr>Projet GStreamer audio simple</fr>
+    </description>
+</template>

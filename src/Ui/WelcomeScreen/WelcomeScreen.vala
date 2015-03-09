@@ -58,6 +58,35 @@ namespace Ui {
         project_selected (project);
       });
 
+      // Handle selection of actions
+      template.list_actions.row_activated.connect ((row)=>{
+        if (row == null)
+          return;
+        if (template.list_actions.get_selected_row() == template.row_open_project) {
+          var file_chooser = new Gtk.FileChooserDialog ("Open Project", null,
+                                        Gtk.FileChooserAction.OPEN,
+                                        Gtk.Stock.CANCEL, Gtk.ResponseType.CANCEL,
+                                        Gtk.Stock.OPEN, Gtk.ResponseType.ACCEPT);
+          if (file_chooser.run () == Gtk.ResponseType.ACCEPT) {
+            var project = new Project.Project();
+            project.load (file_chooser.get_file().get_path());
+            project_selected (project);
+          }
+          file_chooser.destroy ();
+        } else if (template.list_actions.get_selected_row() == template.row_new_project) {
+          var template_chooser = new TemplateSelector();
+          if (template_chooser.run () == Gtk.ResponseType.ACCEPT) {
+
+            // Install to selected directory
+            var proj_dir = template_chooser.directory + "/" + template_chooser.project_name;
+            var project = template_chooser.template.install (template_chooser.project_name, proj_dir);
+
+            project_selected (project);
+          }
+          template_chooser.destroy ();
+        }
+      });
+
       widget = template;
     }
 
