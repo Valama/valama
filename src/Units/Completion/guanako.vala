@@ -27,7 +27,7 @@ namespace Guanako {
      */
     public bool debug = false;
 
-    public class CompletionProposal {
+    public class CompletionProposal : Object {
         public CompletionProposal (Symbol smb, int rep_length) {
             this.symbol = smb;
             this.replace_length = rep_length;
@@ -36,7 +36,7 @@ namespace Guanako {
         public int replace_length;
     }
 
-    public class Project {
+    public class Project : Object {
         CodeContext context;
 
         public Project (CodeContext context, string filename) throws IOError, Error {
@@ -102,7 +102,7 @@ namespace Guanako {
             }
         }
 
-        public class ProposalSet {
+        public class ProposalSet : Object {
             public ProposalSet() {
                 // TreeSet with custom sorting function
                 comp_sets = new TreeSet<CompletionProposal>[27];
@@ -180,7 +180,7 @@ namespace Guanako {
             public TreeSet<CompletionProposal>[] comp_sets;
         }
 
-        public class CompletionRun {
+        public class CompletionRun : Object {
             public CompletionRun(Project parent_project) {
                 this.parent_project = parent_project;
                 universal_parameter = new CallParameter();
@@ -192,7 +192,7 @@ namespace Guanako {
             Symbol[] accessible;
             bool abort_flag = false;
 
-            private class CallParameter {
+            private class CallParameter : Object {
                 public int for_rule_id;
                 public string name;
 
@@ -681,7 +681,7 @@ namespace Guanako {
                 return new Thread<void*> ("Guanako Completion", compare_thd.run);
             }
 
-            class CompareThread {
+            class CompareThread : Object {
                 public CompareThread (CompletionRun comp_run,
                                     RuleExpression[] compare_rule,
                                     string written,

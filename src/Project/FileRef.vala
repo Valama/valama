@@ -1,7 +1,7 @@
 
 namespace Project {
 
-  public class FileRef {
+  public class FileRef : Object {
     private File file;
     private Project project;
 

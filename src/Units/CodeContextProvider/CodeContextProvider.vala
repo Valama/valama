@@ -55,11 +55,10 @@ namespace Units {
       }
 
       Vala.CodeContext context_internal = new Vala.CodeContext();
+      Vala.CodeContext.push (context_internal);
 
       var report_internal = new Report();
       context_internal.report = report_internal;
-
-      Vala.CodeContext.push (context_internal);
       
       context_internal.profile = Vala.Profile.GOBJECT;
       context_internal.add_define ("GOBJECT");
@@ -123,20 +122,23 @@ namespace Units {
       parser.parse (context_internal);
 
       //context_internal.check ();
-
-      Vala.CodeContext.pop();
-      
-      context = context_internal;
+      if (report_internal.get_errors() == 0)
+        context_internal.resolver.resolve (context_internal);
+      /*if (report_internal.get_errors() == 0)
+        context_internal.analyzer.analyze (context_internal);
+      if (report_internal.get_errors() == 0)
+        context_internal.flow_analyzer.analyze (context_internal);*/
       report = report_internal;
 
-
+      context = (owned) context_internal; // Take ownership of the context...
+      Vala.CodeContext.pop(); // and release it from the libvala stack
 
       GLib.Idle.add (()=>{
         context_updated();
         return false;
       });
 
-      GLib.Timeout.add_seconds (2, ()=> {
+      GLib.Timeout.add_seconds (1, ()=> {
         timeout_active = false;
         if (update_queued)
           update_code_context();
@@ -144,6 +146,7 @@ namespace Units {
       });
       return 0;
     }
+
   }
 
 }

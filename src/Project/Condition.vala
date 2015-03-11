@@ -40,7 +40,7 @@ namespace Project {
     }
   }
 
-  public class Condition {
+  public class Condition : Object {
     public string library = "";
     public string version = "";
     public ConditionRelation relation = ConditionRelation.EXISTS;

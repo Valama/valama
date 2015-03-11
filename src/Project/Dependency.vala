@@ -20,7 +20,7 @@ namespace Project {
     }
   }
 
-  public class Dependency {
+  public class Dependency : Object {
     public string library;
     public DependencyType type;
     public Gee.ArrayList<Condition> conditions = new Gee.ArrayList<Condition>();

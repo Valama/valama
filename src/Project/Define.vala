@@ -1,6 +1,6 @@
 namespace Project {
 
-  public class Define {
+  public class Define : Object {
 
     public string define = "";
 
