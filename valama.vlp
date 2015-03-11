@@ -310,9 +310,10 @@
 	<valasource id="59" filename="src/Ui/Editors/Editor_GResource.vala"/>
 	<valasource id="60" filename="src/Project/ProjectMember_Data.vala"/>
 	<valasource id="61" filename="src/Ui/Editors/Editor_Data.vala"/>
-	<data id="62" name="Guanako" basedir="DATA_DIR">
+	<data id="62" name="Data" basedir="DATA_DIR">
 		<target file="src/Units/Completion/syntax" target="guanako/syntax" is_folder="false"/>
 		<target file="templates" target="templates" is_folder="true"/>
+		<target file="src/Units/Builder/Data" target="builder" is_folder="true"/>
 	</data>
 	<valasource id="63" filename="src/Project/FileRef.vala"/>
 	<valasource id="64" filename="src/ProjectTemplates/TemplateProvider.vala"/>
