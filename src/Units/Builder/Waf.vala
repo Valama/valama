@@ -18,31 +18,16 @@ namespace Builder {
 
     public class Waf : Builder {
     
-        private string waf_command = "./waf";
+        private string waf_command;
         
-        private string configure_command = " configure --out=";
-        private string build_command = " build";
-        private string run_command = " run";
-        private string clean_command = " distclean"; // also clean possible, but then without removing configure files
+        private string configure_command;
+        private string build_command;
+        private string run_command;
+        private string clean_command; // also clean possible, but then without removing configure files
         
         private ulong process_exited_handler;
         Pid run_pid;
         Ui.MainWidget main_widget;
-    
-        public Waf () {
-            // check waf executable location
-            // ... TODO: code here ...
-            
-            // set build path
-            build_dir = "build/" + target.binary_name + "/waf/";
-            configure_command += build_dir;
-            
-            // set waf commands
-            configure_command   = waf_command + configure_command;
-            build_command       = waf_command + build_command;
-            run_command         = build_dir + target.binary_name;
-            clean_command       = waf_command + clean_command;
-        }
     
         public override Gtk.Widget? init_ui() {
             // Keep command entries in sync
@@ -70,20 +55,42 @@ namespace Builder {
             });
             return template;
         }
+
+        public override void set_defaults() {
+          waf_command = "./waf";
+          configure_command = " configure --out=";
+          build_command = " build";
+          run_command = " run";
+          clean_command = " distclean";
+        }
+
         public override void load (Xml.Node* node) {
-            for (Xml.Attr* prop = node->properties; prop != null; prop = prop->next) {
+          // check waf executable location
+          // ... TODO: code here ...
+
+          // set build path
+          build_dir = "build/" + target.binary_name + "/waf/";
+          configure_command += build_dir;
+
+          for (Xml.Attr* prop = node->properties; prop != null; prop = prop->next) {
             if (prop->name == "build_command")
                 build_command = prop->children->content;
             else if (prop->name == "run_command")
                 run_command = prop->children->content;
             else if (prop->name == "clean_command")
                 clean_command = prop->children->content;
-            }
+            else if (prop->name == "configure_command")
+                configure_command = prop->children->content;
+            else if (prop->name == "waf_command")
+                waf_command = prop->children->content;
+          }
         }
         public override void save (Xml.TextWriter writer) {
           writer.write_attribute ("build_command", build_command);
           writer.write_attribute ("run_command", run_command);
           writer.write_attribute ("clean_command", clean_command);
+          writer.write_attribute ("configure_command", configure_command);
+          writer.write_attribute ("waf_command", waf_command);
         }
         public override bool can_export () {
             return false;

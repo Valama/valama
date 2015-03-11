@@ -4,6 +4,9 @@ namespace Builder {
     public override Gtk.Widget? init_ui() {
       return null;
     }
+    public override void set_defaults() {
+
+    }
     public override void load (Xml.Node* node) {
     
     }

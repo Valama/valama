@@ -29,6 +29,7 @@ namespace Builder {
   
     public abstract Gtk.Widget? init_ui();
 
+    public abstract void set_defaults();
     public abstract bool can_export();
     public abstract void export(Ui.MainWidget main_widget);
     public abstract void build(Ui.MainWidget main_widget);

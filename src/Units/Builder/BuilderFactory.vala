@@ -47,6 +47,7 @@ namespace Builder {
         new_builder = new Waf();
 
       new_builder.target = target;
+      new_builder.set_defaults();
       return new_builder;
     }
   

@@ -35,6 +35,11 @@ namespace Builder {
       });
       return template;
     }
+
+    public override void set_defaults() {
+
+    }
+
     public override void load (Xml.Node* node) {
       for (Xml.Attr* prop = node->properties; prop != null; prop = prop->next) {
         if (prop->name == "build_command")

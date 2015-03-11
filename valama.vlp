@@ -62,6 +62,7 @@
 		<source id="64"/>
 		<source id="65"/>
 		<source id="66"/>
+		<source id="67"/>
 		<gresource id="52"/>
 		<data id="62"/>
 		<metadependency name="Gtk">
@@ -111,8 +112,8 @@
 			<condition library="vte-2.91" version="" relation="exists"/>
 		</define>
 	</target>
-	<target id="18" binary_name="testtarget">
-		<buildsystem type="custom" build_command="" run_command="" clean_command=""/>
+	<target id="18" binary_name="waftest">
+		<buildsystem type="waf" build_command=" build" run_command=" run" clean_command=" distclean" configure_command=" configure --out=" waf_command="./waf"/>
 		<source id="16"/>
 		<source id="14"/>
 		<source id="9"/>
@@ -123,6 +124,101 @@
 		<source id="2"/>
 		<source id="17"/>
 		<source id="7"/>
+		<source id="5"/>
+		<source id="8"/>
+		<source id="11"/>
+		<source id="10"/>
+		<source id="12"/>
+		<source id="19"/>
+		<source id="21"/>
+		<source id="22"/>
+		<source id="23"/>
+		<source id="24"/>
+		<source id="27"/>
+		<source id="28"/>
+		<source id="30"/>
+		<source id="32"/>
+		<source id="34"/>
+		<source id="36"/>
+		<source id="37"/>
+		<source id="38"/>
+		<source id="39"/>
+		<source id="40"/>
+		<source id="41"/>
+		<source id="42"/>
+		<source id="25"/>
+		<source id="26"/>
+		<source id="43"/>
+		<source id="45"/>
+		<source id="44"/>
+		<source id="46"/>
+		<source id="49"/>
+		<source id="47"/>
+		<source id="50"/>
+		<source id="51"/>
+		<source id="53"/>
+		<source id="54"/>
+		<source id="55"/>
+		<source id="48"/>
+		<source id="56"/>
+		<source id="57"/>
+		<source id="58"/>
+		<source id="59"/>
+		<source id="60"/>
+		<source id="61"/>
+		<source id="63"/>
+		<source id="64"/>
+		<source id="65"/>
+		<source id="66"/>
+		<source id="67"/>
+		<gresource id="52"/>
+		<data id="62"/>
+		<metadependency name="Gtk">
+			<dependency type="package" library="gtk+-3.0"/>
+		</metadependency>
+		<metadependency name="Glade">
+			<dependency type="vapi" library="vapi/gladeui-2.0/gladeui-2.0.vapi"/>
+		</metadependency>
+		<metadependency name="GtkSourceView">
+			<dependency type="package" library="gtksourceview-3.0"/>
+		</metadependency>
+		<metadependency name="LibXML">
+			<dependency type="package" library="libxml-2.0"/>
+		</metadependency>
+		<metadependency name="Gee">
+			<dependency type="package" library="gee-0.8"/>
+		</metadependency>
+		<metadependency name="LibVala">
+			<dependency type="package" library="libvala-0.26">
+				<condition library="libvala-0.26" version="" relation="exists"/>
+			</dependency>
+			<dependency type="package" library="libvala-0.24">
+				<condition library="libvala-0.24" version="0.24.0" relation="exists"/>
+			</dependency>
+			<dependency type="package" library="libvala-0.22">
+				<condition library="libvala-0.22" version="0.22.0" relation="exists"/>
+			</dependency>
+		</metadependency>
+		<metadependency name="GtkClutter">
+			<dependency type="package" library="clutter-gtk-1.0"/>
+		</metadependency>
+		<metadependency name="LibVTE">
+			<dependency type="package" library="vte-2.90">
+				<condition library="vte-2.90" version="" relation="exists"/>
+			</dependency>
+			<dependency type="package" library="vte-2.91">
+				<condition library="vte-2.91" version="" relation="exists"/>
+			</dependency>
+		</metadependency>
+		<metadependency name="Posix">
+			<dependency type="package" library="posix"/>
+		</metadependency>
+		<define define="GTK_SOURCE_VIEW_3_14_3">
+			<condition library="gtksourceview-3.0" version="3.14.3" relation="greater_equal"/>
+		</define>
+		<define define="VTE_2_91">
+			<condition library="vte-2.91" version="" relation="exists"/>
+		</define>
 	</target>
 	<valasource id="6" filename="src/Project/ProjectMember.vala"/>
 	<valasource id="4" filename="src/Project/Project.vala"/>
@@ -222,4 +318,5 @@
 	<valasource id="64" filename="src/ProjectTemplates/TemplateProvider.vala"/>
 	<valasource id="65" filename="src/Ui/WelcomeScreen/TemplateSelector.vala"/>
 	<valasource id="66" filename="src/Units/Builder/Helper.vala"/>
+	<valasource id="67" filename="src/Units/Builder/Waf.vala"/>
 </project>
