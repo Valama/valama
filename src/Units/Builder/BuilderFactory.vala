@@ -2,10 +2,11 @@ namespace Builder {
   public enum EnumBuildsystem {
     CUSTOM,
     AUTOVALA,
-    VALAMA;
+    VALAMA,
+    WAF;
 
     public static EnumBuildsystem[] to_array() {
-      return new EnumBuildsystem[]  {VALAMA, CUSTOM, AUTOVALA};
+      return new EnumBuildsystem[]  {VALAMA, CUSTOM, AUTOVALA, WAF};
     }
 
     public string toString() {
@@ -15,6 +16,8 @@ namespace Builder {
         return "autovala";
       if (this == VALAMA)
         return "valama";
+      if (this == WAF)
+        return "waf";
       return "";
     }
     public static EnumBuildsystem fromString(string s) {
@@ -24,6 +27,8 @@ namespace Builder {
         return AUTOVALA;
       if (s == "valama")
         return VALAMA;
+      if (s == "waf")
+        return WAF;
       return CUSTOM;
     }
 
@@ -38,6 +43,8 @@ namespace Builder {
         new_builder = new Autovala();
       else if (type == EnumBuildsystem.VALAMA)
         new_builder = new Valama();
+      else if (type == EnumBuildsystem.WAF)
+        new_builder = new Waf();
 
       new_builder.target = target;
       return new_builder;
