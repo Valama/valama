@@ -201,6 +201,7 @@
 		<resource file="src/Ui/Editors/Editor_Target_Meta_Dependency.glade" compressed="true" xml_stripblanks="true"/>
 		<resource file="src/Ui/Editors/Editor_Target_NewDependency.glade" compressed="true" xml_stripblanks="true"/>
 		<resource file="src/Units/Builder/Custom.glade" compressed="true" xml_stripblanks="true"/>
+		<resource file="src/Units/Builder/Waf.glade" compressed="true" xml_stripblanks="true"/>
 		<resource file="src/Ui/Editors/Editor_Data.glade" compressed="true" xml_stripblanks="true"/>
 		<resource file="src/Ui/Editors/Editor_Data_entry.glade" compressed="true" xml_stripblanks="true"/>
 		<resource file="src/Ui/MainWidget.glade" compressed="true" xml_stripblanks="true"/>
