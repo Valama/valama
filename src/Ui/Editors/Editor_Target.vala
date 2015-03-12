@@ -172,9 +172,9 @@ namespace Ui {
       lbl_title.label = dep.library;
 
       if (dep.type == Project.DependencyType.PACKAGE)
-        img_type.set_from_stock (Stock.EXECUTE, IconSize.LARGE_TOOLBAR);
+        img_type.set_from_icon_name (_("_Execute"), IconSize.LARGE_TOOLBAR);
       else
-        img_type.set_from_stock (Stock.FILE, IconSize.LARGE_TOOLBAR);
+        img_type.set_from_icon_name (_("_File"), IconSize.LARGE_TOOLBAR);
 
       btn_add_condition.clicked.connect (()=>{
         var new_cond = new Project.Condition();

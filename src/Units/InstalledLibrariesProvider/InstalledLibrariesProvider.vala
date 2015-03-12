@@ -89,7 +89,7 @@ namespace Units {
 
         var linesplit = line.split (" ", 2);
 
-        var lib = new InstalledLibrary();
+        var lib = InstalledLibrary();
         lib.library = linesplit[0];
         lib.description = linesplit[1].chug();
         lib.vapi_path = main_widget.code_context_provider.context.get_vapi_path (lib.library);

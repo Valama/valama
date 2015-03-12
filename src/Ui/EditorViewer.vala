@@ -73,7 +73,7 @@ namespace Ui {
       var title_box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 0);
       title_box.add (new Gtk.Label(editor.title));
       
-      var button_close = new Gtk.Button.from_stock(Gtk.Stock.CLOSE);
+      var button_close = new Gtk.Button.with_label(_("_Close"));
       button_close.label = "x";
       button_close.always_show_image = true;
       button_close.set_relief(Gtk.ReliefStyle.NONE);

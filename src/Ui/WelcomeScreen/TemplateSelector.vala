@@ -43,8 +43,8 @@ namespace Ui {
       var provider = new ProjectTemplateProvider();
       ui_template = new TemplateSelectorTemplate(provider);
 
-      add_button (Stock.CANCEL, ResponseType.CANCEL);
-      add_button (Stock.OPEN, ResponseType.ACCEPT);
+      add_button (_("_Cancel"), ResponseType.CANCEL);
+      add_button (_("_Open"), ResponseType.ACCEPT);
       set_default_response (ResponseType.ACCEPT);
 
       get_content_area().add (ui_template);

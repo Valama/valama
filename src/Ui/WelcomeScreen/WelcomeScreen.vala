@@ -65,8 +65,8 @@ namespace Ui {
         if (template.list_actions.get_selected_row() == template.row_open_project) {
           var file_chooser = new Gtk.FileChooserDialog ("Open Project", null,
                                         Gtk.FileChooserAction.OPEN,
-                                        Gtk.Stock.CANCEL, Gtk.ResponseType.CANCEL,
-                                        Gtk.Stock.OPEN, Gtk.ResponseType.ACCEPT);
+                                        _("_Cancel"), Gtk.ResponseType.CANCEL,
+                                        _("_Open"), Gtk.ResponseType.ACCEPT);
           if (file_chooser.run () == Gtk.ResponseType.ACCEPT) {
             var project = new Project.Project();
             project.load (file_chooser.get_file().get_path());

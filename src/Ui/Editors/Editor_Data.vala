@@ -27,9 +27,9 @@ namespace Ui {
         target.target = ent_target.text;
       });
       if (target.is_folder)
-        img_type.set_from_stock (Stock.DIRECTORY, IconSize.LARGE_TOOLBAR);
+        img_type.set_from_icon_name ("folder", IconSize.LARGE_TOOLBAR);
       else
-        img_type.set_from_stock (Stock.FILE, IconSize.LARGE_TOOLBAR);
+        img_type.set_from_icon_name (_("_File"), IconSize.LARGE_TOOLBAR);
     }
   	[GtkChild]
   	public Label lbl_file;
@@ -65,8 +65,8 @@ namespace Ui {
         string? selected_file = null;
         var file_chooser = new Gtk.FileChooserDialog ("Open File", null,
                                       Gtk.FileChooserAction.OPEN,
-                                      Gtk.Stock.CANCEL, Gtk.ResponseType.CANCEL,
-                                      Gtk.Stock.OPEN, Gtk.ResponseType.ACCEPT);
+                                      _("_Cancel"), Gtk.ResponseType.CANCEL,
+                                      _("_Open"), Gtk.ResponseType.ACCEPT);
         if (file_chooser.run () == Gtk.ResponseType.ACCEPT) {
           var projectfolder = File.new_for_path (member.project.filename).get_parent();
           selected_file = projectfolder.get_relative_path (file_chooser.get_file());
@@ -84,8 +84,8 @@ namespace Ui {
         string? selected_file = null;
         var file_chooser = new Gtk.FileChooserDialog ("Open Directory", null,
                                       Gtk.FileChooserAction.SELECT_FOLDER,
-                                      Gtk.Stock.CANCEL, Gtk.ResponseType.CANCEL,
-                                      Gtk.Stock.OPEN, Gtk.ResponseType.ACCEPT);
+                                      _("_Cancel"), Gtk.ResponseType.CANCEL,
+                                      _("_Open"), Gtk.ResponseType.ACCEPT);
         if (file_chooser.run () == Gtk.ResponseType.ACCEPT) {
           var projectfolder = File.new_for_path (member.project.filename).get_parent();
           selected_file = projectfolder.get_relative_path (file_chooser.get_file());
