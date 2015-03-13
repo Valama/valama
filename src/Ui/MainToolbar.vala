@@ -127,11 +127,11 @@ namespace Ui {
       old_target = selected_target;
     }
 
-    private Gtk.ImageMenuItem item_build_export;
+    private Gtk.MenuItem item_build_export;
     private Gtk.Menu build_build_menu () {
         var menu_build = new Gtk.Menu();
 
-        item_build_export = new Gtk.ImageMenuItem.with_label (_("Export"));
+        item_build_export = new Gtk.MenuItem.with_label (_("Export"));
         menu_build.append (item_build_export);
         item_build_export.activate.connect (() => {
           selected_target.builder.export(main_widget);

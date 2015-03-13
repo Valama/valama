@@ -54,8 +54,8 @@ namespace Ui {
       template.tb_add.clicked.connect (()=>{
         var file_chooser = new Gtk.FileChooserDialog ("Open File", null,
                                       Gtk.FileChooserAction.OPEN,
-                                      Gtk.Stock.CANCEL, Gtk.ResponseType.CANCEL,
-                                      Gtk.Stock.OPEN, Gtk.ResponseType.ACCEPT);
+                                      _("_Cancel"), Gtk.ResponseType.CANCEL,
+                                      _("_Open"), Gtk.ResponseType.ACCEPT);
         if (file_chooser.run () == Gtk.ResponseType.ACCEPT) {
           var new_res = new Project.GResource();
           new_res.file = new Project.FileRef.from_file (main_widget.project, file_chooser.get_file());
