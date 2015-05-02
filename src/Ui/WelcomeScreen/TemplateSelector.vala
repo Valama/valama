@@ -8,15 +8,25 @@ namespace Ui {
       foreach (var template in provider.templates) {
         list_templates.add (new TemplateSelectorEntryTemplate(template));
       }
+      list_templates.row_selected.connect((row)=>{
+        if (row == null)
+          return;
+        // Update UI for selected template
+        var template = row as TemplateSelectorEntryTemplate;
+        lbl_author.label = template.template.author_name;
+        lbl_description.label = template.template.description;
+      });
     }
-  	[GtkChild]
-  	public Label lbl_description;
-  	[GtkChild]
-  	public ListBox list_templates;
-  	[GtkChild]
-  	public Entry ent_project_name;
-  	[GtkChild]
-  	public FileChooserButton fch_dir;
+    [GtkChild]
+    public Label lbl_description;
+    [GtkChild]
+    public Label lbl_author;
+    [GtkChild]
+    public ListBox list_templates;
+    [GtkChild]
+    public Entry ent_project_name;
+    [GtkChild]
+    public FileChooserButton fch_dir;
   }
 
   [GtkTemplate (ui = "/src/Ui/WelcomeScreen/TemplateSelectorEntry.glade")]
@@ -24,6 +34,8 @@ namespace Ui {
     public TemplateSelectorEntryTemplate (ProjectTemplate template) {
       this.template = template;
       lbl_name.label = template.name;
+      if (template.icon_path != null)
+        img_icon.set_from_file (template.icon_path);
     }
     public ProjectTemplate template;
   	[GtkChild]

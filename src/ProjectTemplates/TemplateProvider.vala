@@ -6,9 +6,14 @@ public class ProjectTemplate {
   public string author_mail;
   public string description;
   public string template_path;
+  public string? icon_path;
 
   public ProjectTemplate(string path) {
     template_path = path + "/template";
+
+    icon_path = path + "/icon.png";
+    if (!File.new_for_path(icon_path).query_exists())
+      icon_path = null;
     // Load document
     Xml.Doc* doc = Xml.Parser.parse_file (path + "/template.info");
     // if (doc == null)
