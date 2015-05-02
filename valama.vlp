@@ -63,6 +63,7 @@
 		<source id="65"/>
 		<source id="66"/>
 		<source id="67"/>
+		<source id="68"/>
 		<gresource id="52"/>
 		<data id="62"/>
 		<metadependency name="Gtk">
@@ -171,6 +172,7 @@
 		<source id="65"/>
 		<source id="66"/>
 		<source id="67"/>
+		<source id="68"/>
 		<gresource id="52"/>
 		<data id="62"/>
 		<metadependency name="Gtk">
@@ -320,4 +322,5 @@
 	<valasource id="65" filename="src/Ui/WelcomeScreen/TemplateSelector.vala"/>
 	<valasource id="66" filename="src/Units/Builder/Helper.vala"/>
 	<valasource id="67" filename="src/Units/Builder/Waf.vala"/>
+	<valasource id="68" filename="src/Ui/FileTreeBox.vala"/>
 </project>
