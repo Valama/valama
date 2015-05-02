@@ -38,16 +38,16 @@ namespace Ui {
 
   public class ProjectStructure : Element {
   
-    private Gtk.ListBox list_sources = new Gtk.ListBox();
-    private Gtk.ListBox list_targets = new Gtk.ListBox();
-    private Gtk.ListBox list_ui = new Gtk.ListBox();
-    private Gtk.ListBox list_gresource = new Gtk.ListBox();
-    private Gtk.ListBox list_data = new Gtk.ListBox();
+    private FileTreeBox list_sources = new FileTreeBox();
+    private FileTreeBox list_targets = new FileTreeBox();
+    private FileTreeBox list_ui = new FileTreeBox();
+    private FileTreeBox list_gresource = new FileTreeBox();
+    private FileTreeBox list_data = new FileTreeBox();
 
     private ProjectStructureTemplate template = new ProjectStructureTemplate();
   
     // Maps project member types to corresponding list boxes
-    private Gee.HashMap<Project.EnumProjectMember, Gtk.ListBox> mp_types_lists = new Gee.HashMap<Project.EnumProjectMember, Gtk.ListBox>();
+    private Gee.HashMap<Project.EnumProjectMember, FileTreeBox> mp_types_lists = new Gee.HashMap<Project.EnumProjectMember, FileTreeBox>();
 
     public override void init() {
 
@@ -61,7 +61,7 @@ namespace Ui {
         fill_list(type);
 
       foreach (var list in mp_types_lists.values)
-        list.row_selected.connect(row_selected);
+        list.file_selected.connect(file_selected);
 
       // Keep lists up to date
       main_widget.project.member_added.connect((member)=>{
@@ -97,69 +97,50 @@ namespace Ui {
       template.btn_remove.clicked.connect (() => {
         // Find active list
         foreach (var listbox in mp_types_lists.values) {
-          var selected_row = listbox.get_selected_row();
-          if (selected_row != null) {
-            main_widget.project.removeMember (selected_row.get_data<Project.ProjectMember>("member"));
+          if (listbox.selection_filename != null) {
+            main_widget.project.removeMember (listbox.selection_data as Project.ProjectMember);
             break;
           }
         }
       });
       
       
-      template.algn_sources.add (list_sources);
-      template.algn_targets.add (list_targets);
-      template.algn_ui.add (list_ui);
-      template.algn_gresource.add (list_gresource);
-      template.algn_data.add (list_data);
+      template.algn_sources.add (list_sources.update());
+      template.algn_targets.add (list_targets.update());
+      template.algn_ui.add (list_ui.update());
+      template.algn_gresource.add (list_gresource.update());
+      template.algn_data.add (list_data.update());
       template.show_all();
       
       widget = template;
     }
     
-    private void row_selected (Gtk.ListBoxRow? row) {
-      if (row == null) {
+    private void file_selected (string filename, Object data) {
+      if (filename == null) {
         template.btn_remove.sensitive = false;
         return;
       }
 
       // Deactivate other lists
       foreach (var listbox in mp_types_lists.values)
-        if (listbox != row.parent)
-          listbox.select_row (null);
+        listbox.deselect (filename);
 
       // Open selected member
-      var member = row.get_data<Project.ProjectMember>("member");
-      main_widget.editor_viewer.openMember(member);
+      main_widget.editor_viewer.openMember(data as Project.ProjectMember);
       
       template.btn_remove.sensitive = true;//member is Project.ProjectMemberValaSource || member is Project.ProjectMemberTarget;
     }
     
     private void fill_list(Project.EnumProjectMember type) {
       
-      Gtk.ListBox list = mp_types_lists[type];
+      FileTreeBox box = mp_types_lists[type];
       
-      // Clear list
-      foreach (Gtk.Widget widget in list.get_children())
-        list.remove (widget);
-        
       // Fill with project members of right type
       foreach (Project.ProjectMember member in main_widget.project.members) {
         if (member.get_project_member_type() != type)
           continue;
-        var row = new Gtk.ListBoxRow();
-        var label = new Gtk.Label(member.getTitle());
-
-        // Keep label up to date
-        member.project.member_data_changed.connect((sender, mb)=>{
-          if (mb == member)
-            label.label = member.getTitle();
-        });
-
-        row.add (label);
-        row.set_data<Project.ProjectMember> ("member", member);
-        list.add (row);
+        box.add_file (member.getTitle(), member);
       }
-      list.show_all();
     }
     
     public override void destroy() {
