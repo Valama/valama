@@ -99,6 +99,7 @@ namespace Ui {
         foreach (var listbox in mp_types_lists.values) {
           if (listbox.selection_filename != null) {
             main_widget.project.removeMember (listbox.selection_data as Project.ProjectMember);
+            listbox.remove_file (listbox.selection_filename);
             break;
           }
         }

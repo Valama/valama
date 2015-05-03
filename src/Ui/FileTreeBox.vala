@@ -34,8 +34,10 @@ namespace Ui {
     private class DirEntry {
       public DirEntry (FileTreeBox file_tree_box, string dir) {
         expander = new Gtk.Expander(dir);
-        expander.add (box_meta);
-        box_meta.margin_left = 10;
+        if (dir != "") {
+          expander.add (box_meta);
+          box_meta.margin_left = 15;
+        }
         box_meta.add (box_dirs);
         box_meta.add (listbox);
 
@@ -74,7 +76,12 @@ namespace Ui {
           new_row.set_data<FileEntry>("fileentry", file);
           listbox.add (new_row);
         }
-        return expander;
+        box_dirs.show_all();
+        listbox.show_all();
+        if (dir == "")
+          return box_meta;
+        else
+          return expander;
       }
       public void deselect(string? except_file) {
         foreach (var child in child_dirs)
@@ -99,8 +106,10 @@ namespace Ui {
       public void add_file (string[] path, string filename, Project.ProjectMember member) {
         // If the path has been followed entirely, add file
         if (path.length == 0) {
-          if (get_child_file (filename) == null)
+          if (get_child_file (filename) == null) {
             child_files.add (new FileEntry (file_tree_box, filename, member));
+            update();
+          }
           return;
         }
         // Otherwise, find or create next subdirectory entry
@@ -108,8 +117,28 @@ namespace Ui {
         if (child == null) {
           child = new DirEntry (file_tree_box, path[0]);
           child_dirs.add (child);
+          update();
         }
         child.add_file (path[1:path.length], filename, member);
+      }
+      public void remove_file (string[] path, string filename) {
+        // If the path has been followed entirely, remove file and update UI
+        if (path.length == 0) {
+          var file_entry = get_child_file (filename);
+          child_files.remove (file_entry);
+          update();
+          return;
+        }
+        // Otherwise, pass on to child
+        var child = get_child_dir (path[0]);
+        if (child == null)
+          return;
+        child.remove_file (path[1:path.length], filename);
+        // And if child has no children itself, remove it
+        if (child.child_files.size == 0 && child.child_dirs.size == 0) {
+          child_dirs.remove (child);
+          update();
+        }
       }
     }
 
@@ -124,6 +153,10 @@ namespace Ui {
     public void add_file (string path, Project.ProjectMember member) {
       var splt = path.split ("/");
       root.add_file (splt[0:splt.length - 1], path, member);
+    }
+    public void remove_file (string path) {
+      var splt = path.split ("/");
+      root.remove_file (splt[0:splt.length - 1], path);
     }
   }
 
