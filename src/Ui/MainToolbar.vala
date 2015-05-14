@@ -73,7 +73,8 @@ namespace Ui {
       });
 
       update_target_selector();
-      
+      update_build_button();
+
       toolbar.show_all();
       widget = toolbar;
     }
@@ -116,7 +117,7 @@ namespace Ui {
       var building = selected_target.builder.state == Builder.BuilderState.COMPILING;
       var running = selected_target.builder.state == Builder.BuilderState.RUNNING;
       btnBuild.sensitive = !(running || building);
-      btnRun.sensitive = !building;
+      btnRun.sensitive = running || selected_target.builder.state == Builder.BuilderState.COMPILED_OK;
       if (running)
         btnRun.icon_name = "media-playback-stop";
       else

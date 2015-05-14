@@ -1,15 +1,18 @@
 namespace Builder {
   public enum EnumBuildsystem {
     CUSTOM,
+    CMAKE,
     AUTOVALA,
     VALAMA,
     WAF;
 
     public static EnumBuildsystem[] to_array() {
-      return new EnumBuildsystem[]  {VALAMA, CUSTOM, AUTOVALA, WAF};
+      return new EnumBuildsystem[]  {CMAKE, VALAMA, CUSTOM, AUTOVALA, WAF};
     }
 
     public string toString() {
+      if (this == CMAKE)
+        return "cmake";
       if (this == CUSTOM)
         return "custom";
       if (this == AUTOVALA)
@@ -21,6 +24,8 @@ namespace Builder {
       return "";
     }
     public static EnumBuildsystem fromString(string s) {
+      if (s == "cmake")
+        return CMAKE;
       if (s == "custom")
         return CUSTOM;
       if (s == "autovala")
@@ -37,7 +42,9 @@ namespace Builder {
   public class BuilderFactory {
     public static Builder? create_member (EnumBuildsystem type, Project.ProjectMemberTarget target) {
       Builder new_builder = null;
-      if (type == EnumBuildsystem.CUSTOM)
+      if (type == EnumBuildsystem.CMAKE)
+        new_builder = new CMake();
+      else if (type == EnumBuildsystem.CUSTOM)
         new_builder = new Custom();
       else if (type == EnumBuildsystem.AUTOVALA)
         new_builder = new Autovala();

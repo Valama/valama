@@ -25,7 +25,7 @@ namespace Ui {
 
     public signal void process_exited();
 
-    public Pid spawn_process (string command) {
+    public Pid spawn_process (string command, string? working_directory = null) {
 
       // Clear terminal
       terminal.reset(true, true);
@@ -36,7 +36,7 @@ namespace Ui {
       Pid child_pid;
       // Spawn the process
 #if VTE_2_91
-      Process.spawn_async (null, argv, null, SpawnFlags.DO_NOT_REAP_CHILD, null, out child_pid);
+      Process.spawn_async (working_directory, argv, null, SpawnFlags.DO_NOT_REAP_CHILD, null, out child_pid);
       terminal.watch_child (child_pid);
 #else
       terminal.fork_command_full (PtyFlags.DEFAULT, null, argv, null, SpawnFlags.DO_NOT_REAP_CHILD, null, out child_pid);

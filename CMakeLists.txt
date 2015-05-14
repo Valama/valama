@@ -1,0 +1,328 @@
+cmake_minimum_required(VERSION "2.8.4")
+
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/buildsystems/cmaketest/cmake/cmake_modules")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/buildsystems/cmaketest/cmake/cmake_modules/vala")
+
+find_package(PkgConfig)
+find_package(Vala)
+
+set(project_name "cmaketest")
+string(TOLOWER "${project_name}" project_name_lower)
+
+add_definitions(-DGETTEXT_PACKAGE="${project_name_lower}")
+
+set(srcfiles
+  "src/Ui/Editors/Editor_Target.vala"
+  "src/Ui/Editors/Editor.vala"
+  "src/Project/ProjectMember_ValaSource.vala"
+  "src/Ui/Editors/Editor_Info.vala"
+  "src/Project/Project.vala"
+  "src/Ui/ProjectStructure.vala"
+  "src/Project/ProjectMember.vala"
+  "src/main.vala"
+  "src/Ui/Editors/Editor_ValaSource.vala"
+  "src/Project/ProjectMember_Info.vala"
+  "src/Project/ProjectMemberFactory.vala"
+  "src/Project/ProjectMember_Target.vala"
+  "src/Ui/Element.vala"
+  "src/Ui/EditorViewer.vala"
+  "src/Ui/MainWidget.vala"
+  "src/Ui/MainToolbar.vala"
+  "src/Units/Unit.vala"
+  "src/Ui/Viewer.vala"
+  "src/Project/MetaDependency.vala"
+  "src/Project/Dependency.vala"
+  "src/Ui/ViewerFactory.vala"
+  "src/Ui/ViewerClassDiagram.vala"
+  "src/Project/ProjectMember_ClassDiagram.vala"
+  "src/Ui/Editors/Editor_ClassDiagram.vala"
+  "src/Ui/ErrorList.vala"
+  "src/Units/ErrorMarker.vala"
+  "src/Units/SourceBufferManager.vala"
+  "src/Units/Completion/CompletionProvider.vala"
+  "src/Units/Completion/guanako.vala"
+  "src/Units/Completion/guanako_iterators.vala"
+  "src/Units/Completion/guanako_completion.vala"
+  "src/Units/Completion/guanako_helpers.vala"
+  "src/Units/CodeContextProvider/CodeContextProvider.vala"
+  "src/Project/Condition.vala"
+  "src/Project/Define.vala"
+  "src/Units/InstalledLibrariesProvider/InstalledLibrariesProvider.vala"
+  "src/Units/Builder/Builder.vala"
+  "src/Units/Builder/BuilderFactory.vala"
+  "src/Units/Builder/Custom.vala"
+  "src/Units/CodeContextProvider/Report.vala"
+  "src/Units/Builder/Autovala.vala"
+  "src/Units/CodeContextHelpers/SymbolByName.vala"
+  "src/Units/CodeContextHelpers/TraverseTypes.vala"
+  "src/Project/ProjectMember_GladeUi.vala"
+  "src/Ui/Editors/Editor_GladeUi.vala"
+  "src/Ui/WelcomeScreen/WelcomeScreen.vala"
+  "src/Units/Builder/Valama.vala"
+  "src/Project/ProjectMember_GResource.vala"
+  "src/Ui/ConsoleView.vala"
+  "src/Ui/Editors/Editor_GResource.vala"
+  "src/Project/ProjectMember_Data.vala"
+  "src/Ui/Editors/Editor_Data.vala"
+  "src/Project/FileRef.vala"
+  "src/ProjectTemplates/TemplateProvider.vala"
+  "src/Ui/WelcomeScreen/TemplateSelector.vala"
+  "src/Units/Builder/Helper.vala"
+  "src/Units/Builder/Waf.vala"
+  "src/Ui/FileTreeBox.vala"
+  "src/Units/Builder/CMake.vala"
+)
+
+message ("-- checking dependency Gtk")
+set (found FALSE)
+if (NOT found)
+  message ("--  checking option gtk+-3.0")
+  set (cond_found TRUE)
+  if (cond_found)
+    set (found TRUE)
+    list(APPEND required_pkgs "gtk+-3.0")
+  endif ()
+endif ()
+if (NOT found)
+  message ("PROBLEM!!")
+endif ()
+
+message ("-- checking dependency Glade")
+set (found FALSE)
+if (NOT found)
+  message ("--  checking option vapi/gladeui-2.0/gladeui-2.0.vapi")
+  set (cond_found TRUE)
+  if (cond_found)
+    set (found TRUE)
+    list(APPEND vapidirs "--vapidir=${CMAKE_SOURCE_DIR}/vapi/gladeui-2.0")
+    list(APPEND required_pkgs "gladeui-2.0")
+  endif ()
+endif ()
+if (NOT found)
+  message ("PROBLEM!!")
+endif ()
+
+message ("-- checking dependency GtkSourceView")
+set (found FALSE)
+if (NOT found)
+  message ("--  checking option gtksourceview-3.0")
+  set (cond_found TRUE)
+  if (cond_found)
+    set (found TRUE)
+    list(APPEND required_pkgs "gtksourceview-3.0")
+  endif ()
+endif ()
+if (NOT found)
+  message ("PROBLEM!!")
+endif ()
+
+message ("-- checking dependency LibXML")
+set (found FALSE)
+if (NOT found)
+  message ("--  checking option libxml-2.0")
+  set (cond_found TRUE)
+  if (cond_found)
+    set (found TRUE)
+    list(APPEND required_pkgs "libxml-2.0")
+  endif ()
+endif ()
+if (NOT found)
+  message ("PROBLEM!!")
+endif ()
+
+message ("-- checking dependency Gee")
+set (found FALSE)
+if (NOT found)
+  message ("--  checking option gee-0.8")
+  set (cond_found TRUE)
+  if (cond_found)
+    set (found TRUE)
+    list(APPEND required_pkgs "gee-0.8")
+  endif ()
+endif ()
+if (NOT found)
+  message ("PROBLEM!!")
+endif ()
+
+message ("-- checking dependency LibVala")
+set (found FALSE)
+if (NOT found)
+  message ("--  checking option libvala-0.26")
+  set (cond_found TRUE)
+  pkg_check_modules (DEP_libvala-0.26 QUIET libvala-0.26)
+  if (NOT DEP_libvala-0.26_VERSION)
+    set (cond_found FALSE)
+  endif ()
+  if (cond_found)
+    set (found TRUE)
+    list(APPEND required_pkgs "libvala-0.26")
+  endif ()
+endif ()
+if (NOT found)
+  message ("--  checking option libvala-0.24")
+  set (cond_found TRUE)
+  pkg_check_modules (DEP_libvala-0.24 QUIET libvala-0.24)
+  if (NOT DEP_libvala-0.24_VERSION)
+    set (cond_found FALSE)
+  endif ()
+  if (cond_found)
+    set (found TRUE)
+    list(APPEND required_pkgs "libvala-0.24")
+  endif ()
+endif ()
+if (NOT found)
+  message ("--  checking option libvala-0.22")
+  set (cond_found TRUE)
+  pkg_check_modules (DEP_libvala-0.22 QUIET libvala-0.22)
+  if (NOT DEP_libvala-0.22_VERSION)
+    set (cond_found FALSE)
+  endif ()
+  if (cond_found)
+    set (found TRUE)
+    list(APPEND required_pkgs "libvala-0.22")
+  endif ()
+endif ()
+if (NOT found)
+  message ("PROBLEM!!")
+endif ()
+
+message ("-- checking dependency GtkClutter")
+set (found FALSE)
+if (NOT found)
+  message ("--  checking option clutter-gtk-1.0")
+  set (cond_found TRUE)
+  if (cond_found)
+    set (found TRUE)
+    list(APPEND required_pkgs "clutter-gtk-1.0")
+  endif ()
+endif ()
+if (NOT found)
+  message ("PROBLEM!!")
+endif ()
+
+message ("-- checking dependency LibVTE")
+set (found FALSE)
+if (NOT found)
+  message ("--  checking option vte-2.90")
+  set (cond_found TRUE)
+  pkg_check_modules (DEP_vte-2.90 QUIET vte-2.90)
+  if (NOT DEP_vte-2.90_VERSION)
+    set (cond_found FALSE)
+  endif ()
+  if (cond_found)
+    set (found TRUE)
+    list(APPEND required_pkgs "vte-2.90")
+  endif ()
+endif ()
+if (NOT found)
+  message ("--  checking option vte-2.91")
+  set (cond_found TRUE)
+  pkg_check_modules (DEP_vte-2.91 QUIET vte-2.91)
+  if (NOT DEP_vte-2.91_VERSION)
+    set (cond_found FALSE)
+  endif ()
+  if (cond_found)
+    set (found TRUE)
+    list(APPEND required_pkgs "vte-2.91")
+  endif ()
+endif ()
+if (NOT found)
+  message ("PROBLEM!!")
+endif ()
+
+message ("-- checking dependency Posix")
+set (found FALSE)
+if (NOT found)
+  message ("--  checking option posix")
+  set (cond_found TRUE)
+  if (cond_found)
+    set (found TRUE)
+    list(APPEND required_pkgs "posix {nocheck}")
+  endif ()
+endif ()
+if (NOT found)
+  message ("PROBLEM!!")
+endif ()
+
+message ("-- checking dependency GLib")
+set (found FALSE)
+if (NOT found)
+  message ("--  checking option glib-2.0")
+  set (cond_found TRUE)
+  if (cond_found)
+    set (found TRUE)
+    list(APPEND required_pkgs "glib-2.0")
+  endif ()
+endif ()
+if (NOT found)
+  message ("PROBLEM!!")
+endif ()
+
+set (cond_found TRUE)
+pkg_check_modules (DEP_gtksourceview-3.0 QUIET gtksourceview-3.0)
+if (DEP_gtksourceview-3.0_VERSION VERSION_LESS "3.14.3")
+  set (cond_found FALSE)
+endif ()
+if (cond_found)
+  list(APPEND definitions "GTK_SOURCE_VIEW_3_14_3")
+endif ()
+
+set (cond_found TRUE)
+pkg_check_modules (DEP_vte-2.91 QUIET vte-2.91)
+if (NOT DEP_vte-2.91_VERSION)
+  set (cond_found FALSE)
+endif ()
+if (cond_found)
+  list(APPEND definitions "VTE_2_91")
+endif ()
+
+add_custom_command(
+  OUTPUT
+    "${CMAKE_BINARY_DIR}/gresource_52.c"
+  WORKING_DIRECTORY
+    ${CMAKE_SOURCE_DIR}
+  COMMAND
+    glib-compile-resources "${CMAKE_SOURCE_DIR}/gresource_52.xml" --generate-source --target="${CMAKE_BINARY_DIR}/gresource_52.c"
+  COMMENT "Building resource GladeUI"
+)
+list(APPEND vapidirs --gresources "${CMAKE_SOURCE_DIR}/gresource_52.xml")
+list(APPEND vapifiles "${CMAKE_BINARY_DIR}/gresource_52.c")
+list(APPEND compiled_resources "${CMAKE_BINARY_DIR}/gresource_52.c")
+
+list(APPEND vapifiles "buildsystems/cmaketest/cmake/config.vapi")
+install(FILES "src/Units/Completion/syntax" DESTINATION "${CMAKE_INSTALL_PREFIX}/share/valamang/guanako")
+install(DIRECTORY "templates" DESTINATION "${CMAKE_INSTALL_PREFIX}/share/valamang")
+install(DIRECTORY "src/Units/Builder/Data" DESTINATION "${CMAKE_INSTALL_PREFIX}/share/valamang")
+add_definitions(-DDATA_DIR="${CMAKE_INSTALL_PREFIX}/share/valamang")
+
+set(default_vala_flags
+  "--thread"
+  "--target-glib=2.38"
+  "--enable-experimental"
+)
+
+include(ValaPkgs)
+vala_pkgs(VALA_C
+  PACKAGES
+    ${required_pkgs}
+  DEFINITIONS
+    ${definitions}
+  SRCFILES
+    ${srcfiles}
+  VAPIS
+    ${vapifiles}
+  OPTIONS
+    ${default_vala_flags}
+    ${vapidirs}
+)
+
+add_executable("${project_name_lower}" ${VALA_C} ${compiled_resources})
+
+target_link_libraries("${project_name_lower}"
+  ${PROJECT_LDFLAGS}
+  -lm
+)
+
+add_definitions(
+  ${PROJECT_C_FLAGS}
+)

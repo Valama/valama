@@ -64,6 +64,7 @@
 		<source id="66"/>
 		<source id="67"/>
 		<source id="68"/>
+		<source id="69"/>
 		<gresource id="52"/>
 		<data id="62"/>
 		<metadependency name="Gtk">
@@ -113,8 +114,8 @@
 			<condition library="vte-2.91" version="" relation="exists"/>
 		</define>
 	</target>
-	<target id="18" binary_name="waftest">
-		<buildsystem type="waf" build_command=" build" run_command=" run" clean_command=" distclean" configure_command=" configure --out=" waf_command="./waf"/>
+	<target id="18" binary_name="cmaketest">
+		<buildsystem type="cmake"/>
 		<source id="16"/>
 		<source id="14"/>
 		<source id="9"/>
@@ -173,6 +174,7 @@
 		<source id="66"/>
 		<source id="67"/>
 		<source id="68"/>
+		<source id="69"/>
 		<gresource id="52"/>
 		<data id="62"/>
 		<metadependency name="Gtk">
@@ -214,6 +216,9 @@
 		</metadependency>
 		<metadependency name="Posix">
 			<dependency type="package" library="posix"/>
+		</metadependency>
+		<metadependency name="GLib">
+			<dependency type="package" library="glib-2.0"/>
 		</metadependency>
 		<define define="GTK_SOURCE_VIEW_3_14_3">
 			<condition library="gtksourceview-3.0" version="3.14.3" relation="greater_equal"/>
@@ -313,9 +318,9 @@
 	<valasource id="60" filename="src/Project/ProjectMember_Data.vala"/>
 	<valasource id="61" filename="src/Ui/Editors/Editor_Data.vala"/>
 	<data id="62" name="Data" basedir="DATA_DIR">
-		<target file="src/Units/Completion/syntax" target="guanako/syntax" is_folder="false"/>
-		<target file="templates" target="templates" is_folder="true"/>
-		<target file="src/Units/Builder/Data" target="builder" is_folder="true"/>
+		<target file="src/Units/Completion/syntax" target="/guanako" is_folder="false"/>
+		<target file="templates" target="" is_folder="true"/>
+		<target file="src/Units/Builder/Data" target="" is_folder="true"/>
 	</data>
 	<valasource id="63" filename="src/Project/FileRef.vala"/>
 	<valasource id="64" filename="src/ProjectTemplates/TemplateProvider.vala"/>
@@ -323,4 +328,5 @@
 	<valasource id="66" filename="src/Units/Builder/Helper.vala"/>
 	<valasource id="67" filename="src/Units/Builder/Waf.vala"/>
 	<valasource id="68" filename="src/Ui/FileTreeBox.vala"/>
+	<valasource id="69" filename="src/Units/Builder/CMake.vala"/>
 </project>
