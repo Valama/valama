@@ -54,44 +54,43 @@ namespace Units {
         return -1;
       }
 
-      Vala.CodeContext context_internal = new Vala.CodeContext();
-      Vala.CodeContext.push (context_internal);
+      context = new Vala.CodeContext();
+      Vala.CodeContext.push (context);
 
-      var report_internal = new Report();
-      context_internal.report = report_internal;
+      context.report = report;
       
-      context_internal.profile = Vala.Profile.GOBJECT;
-      context_internal.add_define ("GOBJECT");
+      context.profile = Vala.Profile.GOBJECT;
+      context.add_define ("GOBJECT");
 
-      context_internal.target_glib_major = 2;
-      context_internal.target_glib_minor = 18;
+      context.target_glib_major = 2;
+      context.target_glib_minor = 18;
 
       // Add defines
 
       foreach (var define in current_target.defines) {
         if (main_widget.installed_libraries_provider.check_define (define))
-          context_internal.add_define (define.define);
+          context.add_define (define.define);
       }
 
       // Add packages
 
       string[] new_vapi_dirs = new string[0];
-      foreach (string dir in context_internal.vapi_directories)
+      foreach (string dir in context.vapi_directories)
         new_vapi_dirs += dir;
 
       foreach (var meta_dep in current_target.metadependencies) {
         var dep = main_widget.installed_libraries_provider.check_meta_dependency (meta_dep);
         if (dep != null) {
           if (dep.type == Project.DependencyType.PACKAGE)
-            context_internal.add_external_package (dep.library);
+            context.add_external_package (dep.library);
           else if (dep.type == Project.DependencyType.VAPI){
             var vapi_file = File.new_for_path (dep.library);
             var custom_vapi_dir = vapi_file.get_parent().get_path();
             new_vapi_dirs += custom_vapi_dir;
             
             // Write extended list to context, required before adding package
-            context_internal.vapi_directories = new_vapi_dirs;
-            context_internal.add_external_package (vapi_file.get_basename().replace(".vapi", ""));
+            context.vapi_directories = new_vapi_dirs;
+            context.add_external_package (vapi_file.get_basename().replace(".vapi", ""));
           }
         }
       }
@@ -99,7 +98,7 @@ namespace Units {
 
       string pkgs[2] = {"glib-2.0", "gobject-2.0"};
       foreach (string pkg in pkgs) {
-        context_internal.add_external_package (pkg);
+        context.add_external_package (pkg);
       }
 
       // Add source files
@@ -107,30 +106,28 @@ namespace Units {
       foreach (string source_id in current_target.included_sources) {
         var source = main_widget.project.getMemberFromId (source_id) as Project.ProjectMemberValaSource;
 
-			  var source_file = new Vala.SourceFile (context_internal, Vala.SourceFileType.SOURCE, source.file.get_abs(), source.buffer.text, false);
+			  var source_file = new Vala.SourceFile (context, Vala.SourceFileType.SOURCE, source.file.get_abs(), source.buffer.text, false);
 			  source_file.relative_filename = source.file.get_rel();
 
 			  var ns_ref = new Vala.UsingDirective (new Vala.UnresolvedSymbol (null, "GLib", null));
 			  source_file.add_using_directive (ns_ref);
-			  context_internal.root.add_using_directive (ns_ref);
+			  context.root.add_using_directive (ns_ref);
 
-        context_internal.add_source_file (source_file);
+        context.add_source_file (source_file);
       }
 
 
       var parser = new Vala.Parser();
-      parser.parse (context_internal);
+      parser.parse (context);
 
-      //context_internal.check ();
-      if (report_internal.get_errors() == 0)
-        context_internal.resolver.resolve (context_internal);
-      /*if (report_internal.get_errors() == 0)
-        context_internal.analyzer.analyze (context_internal);
-      if (report_internal.get_errors() == 0)
-        context_internal.flow_analyzer.analyze (context_internal);*/
-      report = report_internal;
-
-      context = (owned) context_internal; // Take ownership of the context...
+      //context.check ();
+      if (report.get_errors() == 0)
+        context.resolver.resolve (context);
+      /*if (report.get_errors() == 0)
+        context.analyzer.analyze (context);
+      if (report.get_errors() == 0)
+        context.flow_analyzer.analyze (context);*/
+      
       Vala.CodeContext.pop(); // and release it from the libvala stack
 
       GLib.Idle.add (()=>{
