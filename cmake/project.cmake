@@ -82,7 +82,6 @@ set(srcfiles
 )
 set(vapifiles
   "vapi/config.vapi"
-  "vapi/gladeui-2.0.vapi"
 )
 set(uifiles
 )

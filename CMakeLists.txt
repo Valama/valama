@@ -88,8 +88,8 @@ if(TRANSLATION)
 endif()
 
 # Custom library version checks.
-set(definitions)
 set(vapidirs)
+set(definitions)
 find_package(PkgConfig)
 # Unix or Windows
 if(WIN32)
@@ -155,6 +155,9 @@ else()
   list(APPEND required_pkgs "libvala-${VALA_SHORTVER}")
   list(APPEND definitions "VALAC_0_20")
 endif()
+
+list(APPEND vapidirs "--vapidir=${CMAKE_SOURCE_DIR}/vapi")
+
 # gtk+-3.0
 pkg_check_modules(GTK3.0 REQUIRED "gtk+-3.0 >= 3.10")
 compare_version_strings("${VALA_SHORTVER}" "0.20" valares)
@@ -199,7 +202,6 @@ endif()
 pkg_check_modules(GLIB2.0 REQUIRED "glib-2.0")
 # gladeui-2.0
 pkg_check_modules(GLADEUI2.0 REQUIRED "gladeui-2.0")
-list(REMOVE_ITEM required_pkgs "gladeui-2.0")
 pkg_check_modules(WKGTK "webkit2gtk-4.0")
 if (WKGTK_FOUND)
 	list(REMOVE_ITEM required_pkgs "webkit2gtk-3.0")
