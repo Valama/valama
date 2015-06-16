@@ -27,6 +27,7 @@ set(required_pkgs
   "libvala-0.24"
   "libvala-0.26"
   "libvala-0.28"
+  "libvala-0.30"
   "libxml-2.0"
   "pango {nolink}"
   "pangocairo {nolink}"

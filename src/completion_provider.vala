@@ -224,8 +224,8 @@ public class GuanakoCompletion : Gtk.SourceCompletionProvider, Object {
     public int get_interactive_delay() {
         return -1;
     }
-
-#if GTK_SOURCE_VIEW_3_15_3
+    
+#if GTK_SOURCE_VIEW_3_14_3
     public bool get_start_iter (Gtk.SourceCompletionContext context, Gtk.SourceCompletionProposal proposal, out Gtk.TextIter iter) {
 #else
     public bool get_start_iter (Gtk.SourceCompletionContext context, Gtk.SourceCompletionProposal proposal, Gtk.TextIter iter) {
