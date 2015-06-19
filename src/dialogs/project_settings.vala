@@ -136,6 +136,17 @@ public void ui_project_dialog (ValamaProject? project) {
     row.add (box);
     standardize_listbox_row (row);
     list.add (row);
+    
+    row = new ListBoxRow();
+    var flags_lbl = new Label (_("Additional flags"));
+    var flags_entry = new Entry();
+    if (project.flags != null)
+		flags_entry.text = project.flags;
+    box = new Box (Orientation.VERTICAL, 0);
+    box.pack_start (flags_lbl, false, false);
+    box.pack_start (flags_entry, true, false);
+    row.add (box);
+    list.add (row);
 
     /* Save changes only when "OK" button is clicked. Reset on "Discard". */
     dlg.response.connect ((response_id) => {
@@ -148,7 +159,7 @@ public void ui_project_dialog (ValamaProject? project) {
                 project.version_major = (int) ent_major.value;
                 project.version_minor = (int) ent_minor.value;
                 project.version_patch = (int) ent_patch.value;
-                //project.version_special = ent_version_special;
+                project.flags = flags_entry.text;
                 project.library = library_chekbtn.active;
                 if (bslist.active >= 0)
                     project.buildsystem = bslist.get_active_text();

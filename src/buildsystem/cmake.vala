@@ -193,14 +193,21 @@ public class BuilderCMake : BuildSystem {
         ${vapidirs}
     )
     """);
+    string rflags = "";
+    if (project.flags != null) {
+		var flags = project.flags.split (" ");
+		for (var i = 0; i < flags.length - 1; i++)
+			if (flags[i] == "-X")
+				rflags += " " + flags[i + 1];
+	}
     if (library) {
         cml_stream.put_string ("""add_library("${project_name_lower}" SHARED ${VALA_C})
     set_target_properties("${project_name_lower}" PROPERTIES
         VERSION "${${project_name}_VERSION}"
         SOVERSION "${soversion}"
     )
-    target_link_libraries("${project_name_lower}" ${PROJECT_LDFLAGS})
-    add_definitions(${PROJECT_C_FLAGS})""");
+    target_link_libraries("${project_name_lower}" ${PROJECT_LDFLAGS} %s)
+    add_definitions(${PROJECT_C_FLAGS})""".printf (rflags));
     }
     cml_stream.put_string ("""# Set common C-macros.
     add_definitions(-DPACKAGE_NAME="${project_name}")
@@ -220,11 +227,12 @@ public class BuilderCMake : BuildSystem {
         cml_stream.put_string ("""add_executable("${project_name_lower}" ${VALA_C})
     target_link_libraries("${project_name_lower}"
       ${PROJECT_LDFLAGS}
+      %s
     )
     add_definitions(
       ${PROJECT_C_FLAGS}
     )
-    install(TARGETS ${project_name_lower} DESTINATION "${bindir}")""");
+    install(TARGETS ${project_name_lower} DESTINATION "${bindir}")""".printf (rflags));
     } else {
         cml_stream.put_string ("""install(TARGETS "${project_name_lower}" DESTINATION "${libdir}")
     install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${project_name_lower}.pc" DESTINATION "lib/pkgconfig")
