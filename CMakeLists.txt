@@ -232,6 +232,7 @@ vala_pkgs(VALA_C
   OPTIONS
     ${default_vala_flags}
     ${vapidirs}
+    "--vapidir" "${CMAKE_SOURCE_DIR}/vapi"
 )
 
 

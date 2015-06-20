@@ -77,6 +77,8 @@ public class ProjectFile : Object {
     public int version_major { get; set; default = 0; }
     public int version_minor { get; set; default = 0; }
     public int version_patch { get; set; default = 0; }
+    
+    public string flags { get; set; }
 
     public ArrayList<PkgChoice?> package_choices { get; private set; default = new ArrayList<PkgChoice?>(); }
 
@@ -176,6 +178,9 @@ public class ProjectFile : Object {
             if (i->type != ElementType.ELEMENT_NODE)
                 continue;
             switch (i->name) {
+				case "flags":
+					flags = i->get_content();
+					break;
                 case "name":
                     project_name = i->get_content();
                     break;
@@ -396,6 +401,8 @@ public class ProjectFile : Object {
         writer.write_element ("minor", version_minor.to_string());
         writer.write_element ("patch", version_patch.to_string());
         writer.end_element();
+        
+        writer.write_element ("flags", flags);
 
         if (packages.size > 0 || package_choices.size > 0) {
             writer.start_element ("packages");

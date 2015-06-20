@@ -165,7 +165,14 @@ public class BuilderAutotools : BuildSystem
                 libname += ".la";
                 lower_libname = libname.replace ("-","_").replace (".","_");
                 data_stream.put_string ("lib_LTLIBRARIES = "+libname+"\n\n");
-                data_stream.put_string (lower_libname+"_LIBADD = $("+str_name.up()+"_LIBS)\n\n");
+                data_stream.put_string (lower_libname+"_LIBADD = $("+str_name.up()+"_LIBS)");
+				if (project.flags != null) {
+					var flags = project.flags.split (" ");
+					for (var i = 0; i < flags.length - 1; i++)
+						if (flags[i] == "-X")
+							data_stream.put_string (flags[i + 1] + " ");
+				}
+				data_stream.put_string ("\n\n");
                 data_stream.put_string (str_name.down()+"includedir = $(includedir)\n");
                 data_stream.put_string (str_name.down()+@"include_HEADERS = $(str_name.down()).h\n\n");
                 data_stream.put_string ("pkgconfigdir = $(libdir)/pkgconfig\n");
@@ -175,7 +182,14 @@ public class BuilderAutotools : BuildSystem
             }
             else {
                 data_stream.put_string ("bin_PROGRAMS = "+project.project_name+"\n\n");
-                data_stream.put_string (str_name+"_LDADD = $("+str_name.up()+"_LIBS)\n\n");
+                data_stream.put_string (str_name+"_LDADD = $("+str_name.up()+"_LIBS) ");
+                if (project.flags != null) {
+					var flags = project.flags.split (" ");
+					for (var i = 0; i < flags.length - 1; i++)
+						if (flags[i] == "-X")
+							data_stream.put_string (flags[i + 1] + " ");
+				}
+				data_stream.put_string ("\n\n");
             }
             var str_files = new StringBuilder ((library ? lower_libname : str_name.down())+"_SOURCES = ");
             foreach (var filepath in project.files) {
