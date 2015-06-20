@@ -164,12 +164,12 @@ public class UiStructureView : UiElement {
 
             box.reactive = true;
             box.enter_event.connect(()=>{
-                foreach (Clutter.Rectangle rect in ref_lines)
+                foreach (Clutter.Actor rect in ref_lines)
                     rect.opacity = 255;
                 return false;
             });
             box.leave_event.connect(()=>{
-                foreach (Clutter.Rectangle rect in ref_lines)
+                foreach (Clutter.Actor rect in ref_lines)
                     rect.opacity = 25;
                 return false;
             });
@@ -186,7 +186,7 @@ public class UiStructureView : UiElement {
             box.add_child (vbox_public);
         }
         public void update_ref_lines (Clutter.Actor stage) {
-            foreach (Clutter.Rectangle r in ref_lines)
+            foreach (Clutter.Actor r in ref_lines)
                 r.destroy();
             foreach (reference refe in references) {
                 var box1 = refe.from_text.get_allocation_box();
@@ -216,12 +216,16 @@ public class UiStructureView : UiElement {
         public Clutter.Actor box = new Clutter.Actor();
         public Clutter.Actor vbox_public = new Clutter.Actor();
         public Clutter.Actor vbox_private = new Clutter.Actor();
-        public Gee.LinkedList<Clutter.Rectangle> ref_lines = new Gee.LinkedList<Clutter.Rectangle>();
+        public Gee.LinkedList<Clutter.Actor> ref_lines = new Gee.LinkedList<Clutter.Actor>();
         public Gee.LinkedList<reference?> references = new Gee.LinkedList<reference?>();
         public Gee.HashMap <Symbol, Clutter.Text> map_symbols = new Gee.HashMap <Symbol, Clutter.Text> ();
 
-        Clutter.Rectangle draw_line (float x1, float y1, float x2, float y2, Clutter.Color color) {
-            var r = new Clutter.Rectangle ();
+        Clutter.Actor draw_line (float x1, float y1, float x2, float y2, Clutter.Color color) {
+            #if VALA_0_28
+			    var r = new Clutter.Actor();
+			#else
+			    var r = new Clutter.Rectangle();
+			#endif
             var dist = Math.sqrtf ((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2));
 
             r.width = 2;
@@ -235,7 +239,11 @@ public class UiStructureView : UiElement {
             r.set_easing_mode (Clutter.AnimationMode.EASE_OUT_QUAD);
             r.set_easing_duration (250);
             r.opacity = 25;
-            r.color = color;
+            #if VALA_0_28
+                r.background_color = color;
+            #else
+			    r.color = color;
+			#endif
             return r;
         }
     }
