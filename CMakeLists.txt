@@ -199,7 +199,7 @@ endif()
 pkg_check_modules(GLIB2.0 REQUIRED "glib-2.0")
 # gladeui-2.0
 pkg_check_modules(GLADEUI2.0 REQUIRED "gladeui-2.0")
-list(REMOVE_ITEM required_pkgs "gladeui-2.0")
+list(APPEND vapidirs "--vapidir=${CMAKE_SOURCE_DIR}/vapi")
 pkg_check_modules(WKGTK "webkit2gtk-4.0")
 if (WKGTK_FOUND)
 	list(REMOVE_ITEM required_pkgs "webkit2gtk-3.0")
@@ -232,7 +232,6 @@ vala_pkgs(VALA_C
   OPTIONS
     ${default_vala_flags}
     ${vapidirs}
-    "--vapidir" "${CMAKE_SOURCE_DIR}/vapi"
 )
 
 
