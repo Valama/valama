@@ -1,5 +1,7 @@
 # Valama #
 
+[![Join the chat at https://gitter.im/Valama/valama](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/Valama/valama?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 #### *The next gen Vala IDE.* ####
 
 Discussion and support on IRC channel [#valama](http://webchat.freenode.net/?channels=#valama) (freenode).
