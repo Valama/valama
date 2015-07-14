@@ -26,6 +26,7 @@ using Vala;
 public class SuperSourceView : Gtk.SourceView {
     public SuperSourceView(SourceBuffer bfr) {
         this.buffer = bfr;
+        bfr.style_scheme = source_style;
         int old_line = -1;
 
         this.motion_notify_event.connect ((event)=>{
