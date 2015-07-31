@@ -25,6 +25,32 @@ namespace Ui {
 
       widget = srcw_sourceview;
       widget.show_all();
+
+      main_widget.main_toolbar.selected_target_changed.connect(hook_save_on_compile);
+      sourceview.buffer.changed.connect (()=>{
+        foreach (var pmember in my_member.project.members) {
+          if (pmember is Project.ProjectMemberTarget) {
+            var target = pmember as Project.ProjectMemberTarget;
+            if (target.included_sources.contains (my_member.id))
+              target.builder.state = Builder.BuilderState.NOT_COMPILED;
+          }
+        }
+      });
+    }
+
+    // Before compiling, save file (if it is part of the selected target)
+    ulong hook = 0;
+    Builder.Builder hooked_builder = null;
+    private void hook_save_on_compile() {
+      if (hooked_builder != null) // track selected target
+        hooked_builder.disconnect (hook);
+      var builder = main_widget.main_toolbar.selected_target.builder;
+      hook = builder.state_changed.connect (()=>{
+        if (builder.state == Builder.BuilderState.COMPILING)
+          if (main_widget.main_toolbar.selected_target.included_sources.contains (my_member.id))
+            save_file (my_member.file.get_abs(), my_member.buffer.text);
+      });
+      hooked_builder = builder;
     }
 
     private Gtk.TextIter iter_from_location (Vala.SourceLocation location) {
