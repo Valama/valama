@@ -55,7 +55,6 @@ namespace Builder {
       writer.write_attribute ("run_command", run_command);
       writer.write_attribute ("clean_command", clean_command);
     }
-    private ulong process_exited_handler;
     public override bool can_export () {
       return false;
     }
@@ -67,6 +66,7 @@ namespace Builder {
 
       state = BuilderState.COMPILING;
 
+      ulong process_exited_handler = 0;
       process_exited_handler = main_widget.console_view.process_exited.connect (()=>{
         state = BuilderState.COMPILED_OK;
         main_widget.console_view.disconnect (process_exited_handler);
@@ -78,6 +78,7 @@ namespace Builder {
 
       state = BuilderState.RUNNING;
 
+      ulong process_exited_handler = 0;
       process_exited_handler = main_widget.console_view.process_exited.connect (()=>{
         state = BuilderState.COMPILED_OK;
         main_widget.console_view.disconnect (process_exited_handler);

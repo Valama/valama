@@ -13,7 +13,6 @@ namespace Builder {
     }
     public override void save (Xml.TextWriter writer) {
     }
-    private ulong process_exited_handler;
     public override bool can_export () {
       return false;
     }
@@ -112,6 +111,7 @@ namespace Builder {
 
       state = BuilderState.COMPILING;
 
+      ulong process_exited_handler = 0;
       process_exited_handler = main_widget.console_view.process_exited.connect (()=>{
         foreach (string id in target.included_gresources) {
           var gresource = target.project.getMemberFromId (id) as Project.ProjectMemberGResource;
@@ -131,6 +131,7 @@ namespace Builder {
 
       state = BuilderState.RUNNING;
 
+      ulong process_exited_handler = 0;
       process_exited_handler = main_widget.console_view.process_exited.connect (()=>{
         state = BuilderState.COMPILED_OK;
         main_widget.console_view.disconnect (process_exited_handler);

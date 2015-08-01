@@ -56,7 +56,7 @@ namespace Ui {
       btnBuild.icon_name = "system-run";
       btnBuild.set_menu (build_build_menu());
       toolbar.add (btnBuild);
-      btnBuild.set_tooltip_text (_("Save current file and build project"));
+      btnBuild.set_tooltip_text (_("Build project"));
       btnBuild.clicked.connect (() => {
         selected_target.builder.build(main_widget);
       });
@@ -65,11 +65,26 @@ namespace Ui {
       toolbar.add (btnRun);
       btnRun.set_tooltip_text (_("Run project"));
       btnRun.clicked.connect (() => {
-        var running = selected_target.builder.state == Builder.BuilderState.RUNNING;
-        if (running)
+        var state = selected_target.builder.state;
+        if (state == Builder.BuilderState.RUNNING)
           selected_target.builder.abort_run();
-        else
+        else if (state == Builder.BuilderState.COMPILED_OK)
           selected_target.builder.run(main_widget);
+        else {
+          // If not compiled, first compile, then run
+          ulong hook_id = 0;
+          var target = selected_target; // Keep target in case it is changed in between
+          hook_id = selected_target.builder.state_changed.connect (()=>{
+            var state_new = target.builder.state;
+            if (state_new == Builder.BuilderState.COMPILED_OK) {
+              target.builder.run(main_widget);
+            }
+            else if (state_new != Builder.BuilderState.COMPILED_ERROR)
+              return;
+            target.builder.disconnect (hook_id);
+          });
+          target.builder.build(main_widget);
+        }
       });
 
       update_target_selector();
@@ -95,15 +110,16 @@ namespace Ui {
     }
 
     // On target change
-    ulong state_change_id = -1;
-    ulong builder_change_id = -1;
+    ulong state_change_id = 0;
+    ulong builder_change_id = 0;
     Project.ProjectMemberTarget old_target = null;
     private void update_build_button() {
       if (selected_target == null) {
         btnBuild.sensitive = false;
         return;
       }
-      if (state_change_id != -1) {
+      // Track builders and states
+      if (state_change_id != 0) {
         old_target.builder.disconnect (state_change_id);
         old_target.disconnect (builder_change_id);
       }
@@ -114,11 +130,10 @@ namespace Ui {
         update_build_button();
       });
 
-      var building = selected_target.builder.state == Builder.BuilderState.COMPILING;
-      var running = selected_target.builder.state == Builder.BuilderState.RUNNING;
-      btnBuild.sensitive = !(running || building);
-      btnRun.sensitive = running || selected_target.builder.state == Builder.BuilderState.COMPILED_OK;
-      if (running)
+      var state = selected_target.builder.state;
+      btnBuild.sensitive = !(state == Builder.BuilderState.RUNNING || state == Builder.BuilderState.COMPILING);
+      btnRun.sensitive = state != Builder.BuilderState.COMPILING;
+      if (state == Builder.BuilderState.RUNNING)
         btnRun.icon_name = "media-playback-stop";
       else
         btnRun.icon_name = "media-playback-start";

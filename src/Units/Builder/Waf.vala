@@ -25,7 +25,6 @@ namespace Builder {
         private string run_command;
         private string clean_command; // also clean possible, but then without removing configure files
         
-        private ulong process_exited_handler;
         Pid run_pid;
         Ui.MainWidget main_widget;
     
@@ -104,6 +103,7 @@ namespace Builder {
 
             state = BuilderState.COMPILING;
 
+            ulong process_exited_handler = 0;
             process_exited_handler = main_widget.console_view.process_exited.connect (()=>{
                 state = BuilderState.COMPILED_OK;
                 main_widget.console_view.disconnect (process_exited_handler);
@@ -114,6 +114,7 @@ namespace Builder {
             
             state = BuilderState.RUNNING;
 
+            ulong process_exited_handler = 0;
             process_exited_handler = main_widget.console_view.process_exited.connect (()=>{
                 state = BuilderState.COMPILED_OK;
                 main_widget.console_view.disconnect (process_exited_handler);
@@ -128,6 +129,7 @@ namespace Builder {
 
             state = BuilderState.NOT_COMPILED;
 
+            ulong process_exited_handler = 0;
             process_exited_handler = main_widget.console_view.process_exited.connect (()=>{
                 state = BuilderState.NOT_COMPILED;
                 main_widget.console_view.disconnect (process_exited_handler);

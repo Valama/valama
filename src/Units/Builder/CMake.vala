@@ -13,7 +13,6 @@ namespace Builder {
     }
     public override void save (Xml.TextWriter writer) {
     }
-    private ulong process_exited_handler;
     public override bool can_export () {
       return false;
     }
@@ -21,6 +20,8 @@ namespace Builder {
     
     }
     public override void build(Ui.MainWidget main_widget) {
+
+      state = BuilderState.COMPILING;
 
       var build_dir = "build/" + target.binary_name + "/cmake/";
       
@@ -229,8 +230,7 @@ namespace Builder {
       // Execute cmake and make
       Pid child_pid = main_widget.console_view.spawn_process ("/bin/sh -c \"cd '" + build_dir + "/build' && cmake ../../../../ && make\"", build_dir + "/build");
 
-      state = BuilderState.COMPILING;
-
+      ulong process_exited_handler = 0;
       process_exited_handler = main_widget.console_view.process_exited.connect (()=>{
         /*foreach (string id in target.included_gresources) {
           var gresource = target.project.getMemberFromId (id) as Project.ProjectMemberGResource;
@@ -239,6 +239,7 @@ namespace Builder {
           FileUtils.remove (res_path.replace (".xml", ".c"));
         }*/
         state = BuilderState.COMPILED_OK;
+
         main_widget.console_view.disconnect (process_exited_handler);
       });
     }
@@ -250,7 +251,8 @@ namespace Builder {
 
       state = BuilderState.RUNNING;
 
-      process_exited_handler = main_widget.console_view.process_exited.connect (()=>{
+     ulong process_exited_handler = 0;
+     process_exited_handler = main_widget.console_view.process_exited.connect (()=>{
         state = BuilderState.COMPILED_OK;
         main_widget.console_view.disconnect (process_exited_handler);
       });
