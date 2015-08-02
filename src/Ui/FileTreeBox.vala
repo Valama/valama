@@ -91,6 +91,18 @@ namespace Ui {
             return;
         listbox.select_row (null);
       }
+      public void select(string file) {
+        foreach (var child in child_dirs)
+          child.select (file);
+
+        foreach (var row in listbox.get_children()) {
+          if (row.get_data<FileEntry>("fileentry").filename == file) {
+            listbox.select_row (row as ListBoxRow);
+            return;
+          }
+        }
+        listbox.select_row (null);
+      }
       private FileEntry? get_child_file (string filename) {
         foreach (var child in child_files)
           if (child.filename == filename)
@@ -149,6 +161,9 @@ namespace Ui {
     }
     public void deselect(string? except_file) {
       root.deselect(except_file);
+    }
+    public void select(string file) {
+      root.select(file);
     }
     public void add_file (string path, Project.ProjectMember member) {
       var splt = path.split ("/");

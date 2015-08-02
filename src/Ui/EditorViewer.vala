@@ -3,7 +3,9 @@ namespace Ui {
   public class EditorViewer : Element {
   
     Gee.ArrayList<Viewer> viewers = new Gee.ArrayList<Editor>();
-  
+
+    public signal void viewer_selected (Viewer viewer);
+
     private Gtk.Notebook notebook;
 
     public override void init() {
@@ -48,10 +50,15 @@ namespace Ui {
         if (prop->name == "activetab")
           notebook.set_current_page(int.parse(prop->children->content));
       }
-      
+
       delete doc;
+
+      notebook.switch_page.connect ((page, page_num)=>{
+        var viewer = notebook.get_nth_page((int)page_num).get_data<Viewer> ("viewer");
+        viewer_selected (viewer);
+      });
     }
-  
+
     public void openMember (Project.ProjectMember member) {
       // Check if member is shown already
       foreach (var viewer in viewers) {

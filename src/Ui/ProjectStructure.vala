@@ -63,6 +63,14 @@ namespace Ui {
       foreach (var list in mp_types_lists.values)
         list.file_selected.connect(file_selected);
 
+      // Select entry when editor is activated
+      main_widget.editor_viewer.viewer_selected.connect ((viewer)=>{
+        if (viewer is Editor) {
+          var member = (viewer as Editor).member;
+          mp_types_lists[member.get_project_member_type()].select (member.getTitle());
+        }
+      });
+
       // Keep lists up to date
       main_widget.project.member_added.connect((member)=>{
         fill_list(member.get_project_member_type());
@@ -92,7 +100,7 @@ namespace Ui {
         }
         new_member_dialog.destroy();
       });
-      
+
       // Remove selected element
       template.btn_remove.clicked.connect (() => {
         // Find active list
@@ -104,18 +112,18 @@ namespace Ui {
           }
         }
       });
-      
-      
+
+
       template.algn_sources.add (list_sources.update());
       template.algn_targets.add (list_targets.update());
       template.algn_ui.add (list_ui.update());
       template.algn_gresource.add (list_gresource.update());
       template.algn_data.add (list_data.update());
       template.show_all();
-      
+
       widget = template;
     }
-    
+
     private void file_selected (string filename, Object data) {
       if (filename == null) {
         template.btn_remove.sensitive = false;
