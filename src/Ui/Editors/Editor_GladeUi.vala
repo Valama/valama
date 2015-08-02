@@ -25,8 +25,9 @@ namespace Ui {
       var grid = new Gtk.Grid();
       Glade.App.set_window (main_widget.window);
 
-      glade_project = Glade.Project.load (member.file.get_abs());
+      glade_project = new Glade.Project();
       design_view = new Glade.DesignView (glade_project);
+      glade_project.load_from_file (member.file.get_abs());
       Glade.App.add_project (glade_project);
       inspector.project = glade_project;
       palette.project = glade_project;
@@ -45,7 +46,10 @@ namespace Ui {
       
       var paned_palette_design_view = new Gtk.Paned(Gtk.Orientation.HORIZONTAL);
       paned_palette_design_view.add1 (palette);
-      paned_palette_design_view.add2 (design_view);
+      var scrw = new ScrolledWindow(null, null);
+      scrw.add (design_view);
+      scrw.show();
+      paned_palette_design_view.add2 (scrw);
       paned_palette_design_view.expand = true;
       palette.show();
       design_view.show();
