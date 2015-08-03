@@ -63,14 +63,6 @@ namespace Ui {
       foreach (var list in mp_types_lists.values)
         list.file_selected.connect(file_selected);
 
-      // Select entry when editor is activated
-      main_widget.editor_viewer.viewer_selected.connect ((viewer)=>{
-        if (viewer is Editor) {
-          var member = (viewer as Editor).member;
-          mp_types_lists[member.get_project_member_type()].select (member.getTitle());
-        }
-      });
-
       // Keep lists up to date
       main_widget.project.member_added.connect((member)=>{
         fill_list(member.get_project_member_type());
@@ -79,27 +71,29 @@ namespace Ui {
         fill_list(member.get_project_member_type());
       });
 
-
-      // Add new element to project
+      // Popover for adding project members
+      var popover = new Popover (template.btn_add);
+      var dlg_template = new NewMemberDialogTemplate();
+      popover.add (dlg_template);
+      dlg_template.show_all();
       template.btn_add.clicked.connect (() => {
-        var dlg_template = new NewMemberDialogTemplate();
-        var new_member_dialog = new Dialog.with_buttons("", main_widget.window, DialogFlags.MODAL, _("OK"), ResponseType.OK, _("Cancel"), ResponseType.CANCEL);
-        new_member_dialog.get_content_area().add (dlg_template);
-        var ret = new_member_dialog.run();
-        if (ret == ResponseType.OK) {
-          if (dlg_template.get_selected_row() == dlg_template.row_open_source)
-            main_widget.project.createMember (Project.EnumProjectMember.VALASOURCE);
-          else if (dlg_template.get_selected_row() == dlg_template.row_new_target)
-            main_widget.project.createMember (Project.EnumProjectMember.TARGET);
-          else if (dlg_template.get_selected_row() == dlg_template.row_open_gladeui)
-            main_widget.project.createMember (Project.EnumProjectMember.GLADEUI);
-          else if (dlg_template.get_selected_row() == dlg_template.row_new_gresource)
-            main_widget.project.createMember (Project.EnumProjectMember.GRESOURCE);
-          else if (dlg_template.get_selected_row() == dlg_template.row_new_data)
-            main_widget.project.createMember (Project.EnumProjectMember.DATA);
-        }
-        new_member_dialog.destroy();
+        popover.show();
       });
+
+      dlg_template.row_activated.connect ((row)=>{
+        popover.hide();
+        if (row == dlg_template.row_open_source)
+          main_widget.project.createMember (Project.EnumProjectMember.VALASOURCE);
+        else if (row == dlg_template.row_new_target)
+          main_widget.project.createMember (Project.EnumProjectMember.TARGET);
+        else if (row == dlg_template.row_open_gladeui)
+          main_widget.project.createMember (Project.EnumProjectMember.GLADEUI);
+        else if (row == dlg_template.row_new_gresource)
+          main_widget.project.createMember (Project.EnumProjectMember.GRESOURCE);
+        else if (row == dlg_template.row_new_data)
+          main_widget.project.createMember (Project.EnumProjectMember.DATA);
+      });
+
 
       // Remove selected element
       template.btn_remove.clicked.connect (() => {
@@ -120,6 +114,19 @@ namespace Ui {
       template.algn_gresource.add (list_gresource.update());
       template.algn_data.add (list_data.update());
       template.show_all();
+
+      // Select entry when editor is activated
+      var viewer = main_widget.editor_viewer.getSelectedViewer();
+      if (viewer is Editor) {
+        var member = (viewer as Editor).member;
+        mp_types_lists[member.get_project_member_type()].select (member.getTitle());
+      }
+      main_widget.editor_viewer.viewer_selected.connect ((viewer)=>{
+        if (viewer is Editor) {
+          var member = (viewer as Editor).member;
+          mp_types_lists[member.get_project_member_type()].select (member.getTitle());
+        }
+      });
 
       widget = template;
     }

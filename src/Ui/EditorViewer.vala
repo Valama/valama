@@ -11,6 +11,7 @@ namespace Ui {
     public override void init() {
       
       notebook = new Gtk.Notebook();
+      notebook.scrollable = true;
       notebook.show();
       widget = notebook;
       widget.hexpand = true;
@@ -53,10 +54,13 @@ namespace Ui {
 
       delete doc;
 
-      notebook.switch_page.connect ((page, page_num)=>{
-        var viewer = notebook.get_nth_page((int)page_num).get_data<Viewer> ("viewer");
-        viewer_selected (viewer);
+      notebook.switch_page.connect_after ((page, page_num)=>{
+        viewer_selected (getSelectedViewer());
       });
+    }
+
+    public Viewer getSelectedViewer() {
+      return notebook.get_nth_page(notebook.get_current_page()).get_data<Viewer> ("viewer");
     }
 
     public void openMember (Project.ProjectMember member) {
