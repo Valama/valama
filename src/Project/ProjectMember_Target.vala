@@ -132,11 +132,6 @@ namespace Project {
         writer.end_element();
       }
     }
-    public override bool create () {
-      binary_name = "NewTarget";
-      buildsystem = Builder.EnumBuildsystem.CUSTOM;
-      return true;
-    }
     internal override Ui.Editor createEditor_internal(Ui.MainWidget main_widget) {
       return new Ui.EditorTarget(this, main_widget);
     }

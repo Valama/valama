@@ -157,9 +157,6 @@ namespace Project {
         display.save (writer);
       }
     }
-    public override bool create () {
-      return false;
-    }
     internal override Ui.Editor createEditor_internal(Ui.MainWidget main_widget) {
       return new Ui.EditorClassDiagram(this, main_widget);
     }

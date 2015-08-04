@@ -60,9 +60,6 @@ namespace Project {
         writer.end_element();
       }
     }
-    public override bool create () {
-      return false;
-    }
     internal override Ui.Editor createEditor_internal(Ui.MainWidget main_widget) {
       return new Ui.EditorInfo(this, main_widget);
     }

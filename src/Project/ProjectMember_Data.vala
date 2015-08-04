@@ -59,11 +59,6 @@ namespace Project {
         writer.end_element();
       }
     }
-    public override bool create () {
-      name = "New data";
-      basedir = "BASE_DIR";
-      return true;
-    }
     internal override Ui.Editor createEditor_internal(Ui.MainWidget main_widget) {
       return new Ui.EditorData(this, main_widget);
     }

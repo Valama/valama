@@ -75,8 +75,7 @@ namespace Project {
       return null;
     }
     
-    public void createMember (EnumProjectMember type) {
-      var new_member = ProjectMemberFactory.createMember(type, this);
+    public void addNewMember (ProjectMember new_member) {
       // Find new unique ID
       int cnt = 0;
       while (true) {
@@ -91,10 +90,7 @@ namespace Project {
           break;
       }
       new_member.id = cnt.to_string();
-      // Add member if created successfully
-      if (!new_member.create())
-        return;
-      
+
       members.add (new_member);
       member_added (new_member);
     }

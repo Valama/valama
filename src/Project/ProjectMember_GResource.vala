@@ -61,11 +61,6 @@ namespace Project {
       }
     }
 
-    public override bool create () {
-      name = "New resource";
-      return true;
-    }
-
     internal override Ui.Editor createEditor_internal(Ui.MainWidget main_widget) {
       return new Ui.EditorGResource(this, main_widget);
     }

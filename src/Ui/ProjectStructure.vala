@@ -82,16 +82,23 @@ namespace Ui {
 
       dlg_template.row_activated.connect ((row)=>{
         popover.hide();
+
+        Project.ProjectMember? member = null;
         if (row == dlg_template.row_open_source)
-          main_widget.project.createMember (Project.EnumProjectMember.VALASOURCE);
+          member = Ui.ProjectMemberCreator.createValaSourceOpen (main_widget.project);
+        else if (row == dlg_template.row_new_source)
+          member = Ui.ProjectMemberCreator.createValaSourceNew (main_widget.project);
         else if (row == dlg_template.row_new_target)
-          main_widget.project.createMember (Project.EnumProjectMember.TARGET);
+          member = Ui.ProjectMemberCreator.createTarget (main_widget.project);
         else if (row == dlg_template.row_open_gladeui)
-          main_widget.project.createMember (Project.EnumProjectMember.GLADEUI);
+          member = Ui.ProjectMemberCreator.createGladeUi (main_widget.project);
         else if (row == dlg_template.row_new_gresource)
-          main_widget.project.createMember (Project.EnumProjectMember.GRESOURCE);
+          member = Ui.ProjectMemberCreator.createGResource (main_widget.project);
         else if (row == dlg_template.row_new_data)
-          main_widget.project.createMember (Project.EnumProjectMember.DATA);
+          member = Ui.ProjectMemberCreator.createData (main_widget.project);
+
+        if (member != null)
+          main_widget.project.addNewMember (member);
       });
 
 

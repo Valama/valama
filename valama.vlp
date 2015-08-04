@@ -65,6 +65,11 @@
 		<source id="67"/>
 		<source id="68"/>
 		<source id="69"/>
+		<source id="70"/>
+		<source id="71"/>
+		<source id="72"/>
+		<source id="73"/>
+		<source id="74"/>
 		<gresource id="52"/>
 		<data id="62"/>
 		<metadependency name="Gtk">
@@ -175,6 +180,11 @@
 		<source id="67"/>
 		<source id="68"/>
 		<source id="69"/>
+		<source id="70"/>
+		<source id="71"/>
+		<source id="72"/>
+		<source id="73"/>
+		<source id="74"/>
 		<gresource id="52"/>
 		<data id="62"/>
 		<metadependency name="Gtk">
@@ -329,4 +339,26 @@
 	<valasource id="67" filename="src/Units/Builder/Waf.vala"/>
 	<valasource id="68" filename="src/Ui/FileTreeBox.vala"/>
 	<valasource id="69" filename="src/Units/Builder/CMake.vala"/>
+	<valasource id="70" filename="src/Ui/ProjectMemberCreators/Creator_ValaSource.vala"/>
+	<valasource id="71" filename="src/Ui/ProjectMemberCreators/Creator_Target.vala"/>
+	<valasource id="72" filename="src/Ui/ProjectMemberCreators/Creator_Data.vala"/>
+	<valasource id="73" filename="src/Ui/ProjectMemberCreators/Creator_GladeUi.vala"/>
+	<valasource id="74" filename="src/Ui/ProjectMemberCreators/Creator_GResource.vala"/>
+	<gladeui id="75" filename="src/Ui/ConsoleView.glade"/>
+	<gladeui id="76" filename="src/Ui/MainWidget.glade"/>
+	<gladeui id="77" filename="src/Ui/WelcomeScreen/RecentEntry.glade"/>
+	<gladeui id="78" filename="src/Ui/WelcomeScreen/TemplateSelector.glade"/>
+	<gladeui id="79" filename="src/Ui/WelcomeScreen/TemplateSelectorEntry.glade"/>
+	<gladeui id="80" filename="src/Ui/WelcomeScreen/WelcomeScreen.glade"/>
+	<gladeui id="81" filename="src/Ui/Editors/Editor_Data.glade"/>
+	<gladeui id="82" filename="src/Ui/Editors/Editor_Data_entry.glade"/>
+	<gladeui id="83" filename="src/Ui/Editors/Editor_GResource.glade"/>
+	<gladeui id="84" filename="src/Ui/Editors/Editor_GResource_entry.glade"/>
+	<gladeui id="85" filename="src/Ui/Editors/Editor_Target_Condition.glade"/>
+	<gladeui id="86" filename="src/Ui/Editors/Editor_Target_Define.glade"/>
+	<gladeui id="87" filename="src/Ui/Editors/Editor_Target_Dependency.glade"/>
+	<gladeui id="88" filename="src/Ui/Editors/Editor_Target_Meta_Dependency.glade"/>
+	<gladeui id="89" filename="src/Ui/Editors/Editor_Target_NewDependency.glade"/>
+	<gladeui id="90" filename="src/Units/Builder/Custom.glade"/>
+	<gladeui id="91" filename="src/Units/Builder/Waf.glade"/>
 </project>

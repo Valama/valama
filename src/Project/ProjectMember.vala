@@ -29,8 +29,6 @@ namespace Project {
     internal abstract void load_internal (Xml.Node* node) throws ProjectError;
 
     internal abstract void save_internal (Xml.TextWriter writer);
-
-    public abstract bool create ();
     
     internal abstract Ui.Editor createEditor_internal(Ui.MainWidget main_widget);
 

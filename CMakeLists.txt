@@ -71,6 +71,11 @@ set(srcfiles
   "src/Units/Builder/Waf.vala"
   "src/Ui/FileTreeBox.vala"
   "src/Units/Builder/CMake.vala"
+  "src/Ui/ProjectMemberCreators/Creator_ValaSource.vala"
+  "src/Ui/ProjectMemberCreators/Creator_Target.vala"
+  "src/Ui/ProjectMemberCreators/Creator_Data.vala"
+  "src/Ui/ProjectMemberCreators/Creator_GladeUi.vala"
+  "src/Ui/ProjectMemberCreators/Creator_GResource.vala"
 )
 
 message ("-- checking dependency Gtk")
