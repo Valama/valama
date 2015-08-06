@@ -90,13 +90,10 @@ namespace Ui {
         hooked_builder.disconnect (hook);
       var builder = main_widget.main_toolbar.selected_target.builder;
       hook = builder.state_changed.connect (()=>{
-        stdout.printf ("hook!\n");
         if (glade_project.modified)
           if (builder.state == Builder.BuilderState.COMPILING)
-            if (main_widget.main_toolbar.selected_target.included_gladeuis.contains (my_member.id)) {
-        stdout.printf ("hook saved!\n");
+            if (main_widget.main_toolbar.selected_target.included_gladeuis.contains (my_member.id))
               glade_project.save (my_member.file.get_abs());
-              }
       });
       hooked_builder = builder;
     }
