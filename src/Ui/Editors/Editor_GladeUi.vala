@@ -14,7 +14,6 @@ namespace Ui {
     private Glade.DesignView design_view;
     private Glade.Palette palette = new Glade.Palette();
     private Glade.Editor editor = new Glade.Editor();
-    private Glade.SignalEditor signals = new Glade.SignalEditor();
   
     public EditorGladeUi(Project.ProjectMemberGladeUi member, Ui.MainWidget main_widget) {
       this.main_widget = main_widget;
@@ -50,13 +49,12 @@ namespace Ui {
       inspector.selection_changed.connect (() => {
         var w = inspector.get_selected_items().nth_data (0);
         w.show();
-        editor.load_widget (w);
+        editor.widget = w;
       });
       inspector.item_activated.connect (() => {
         var w = inspector.get_selected_items().nth_data (0);
         w.show();
-        editor.load_widget (w);
-        signals.load_widget (w);
+        editor.widget = w;
       });
       
       var paned_palette_design_view = new Gtk.Paned(Gtk.Orientation.HORIZONTAL);
@@ -70,10 +68,9 @@ namespace Ui {
       design_view.show();
 
       design_view.expand = true;
-      grid.attach (paned_palette_design_view, 0, 0, 1, 1);
+      grid.attach (paned_palette_design_view, 0, 0, 1, 2);
       grid.attach (inspector, 1, 0, 1, 1);
-      grid.attach (editor, 2, 0, 1, 1);
-      grid.attach (signals, 3, 0, 1, 1);
+      grid.attach (editor, 1, 1, 1, 1);
 
       editor.show();
       grid.expand = true;
