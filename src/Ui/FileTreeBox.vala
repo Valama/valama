@@ -4,7 +4,8 @@ namespace Ui {
 
   public class FileTreeBox {
 
-    public FileTreeBox() {
+    public FileTreeBox(bool checkable = false) {
+      this.checkable = checkable;
       root = new DirEntry (this, "");
       file_selected.connect ((filename, data)=>{
         // Deselect all ListBoxes except for filename
@@ -16,16 +17,29 @@ namespace Ui {
     public string? selection_filename;
     public Object? selection_data;
     public signal void file_selected (string filename, Object data);
+    public signal void file_checked (string filename, Object data, bool checked);
+    protected bool checkable;
 
     private class FileEntry {
-      public FileEntry (FileTreeBox file_tree_box, string filename, Object data) {
+      public FileEntry (FileTreeBox file_tree_box, string filename, bool check, Object data) {
         this.filename = filename;
+        this.check = check;
         this.file_tree_box = file_tree_box;
         this.data = data;
       }
       public Widget get_widget() {
-        return new Label (filename);
+        if (file_tree_box.checkable) {
+          var chk = new CheckButton.with_label (filename);
+          chk.active = check;
+          chk.toggled.connect (()=>{
+            check = chk.active;
+            file_tree_box.file_checked (filename, data, check);
+          });
+          return chk;
+        } else
+          return new Label (filename);
       }
+      bool check;
       private weak FileTreeBox file_tree_box;
       public string filename;
       public Object data;
@@ -115,11 +129,11 @@ namespace Ui {
             return child;
         return null;
       }
-      public void add_file (string[] path, string filename, Project.ProjectMember member) {
+      public void add_file (string[] path, string filename, Project.ProjectMember member, bool checked = false) {
         // If the path has been followed entirely, add file
         if (path.length == 0) {
           if (get_child_file (filename) == null) {
-            child_files.add (new FileEntry (file_tree_box, filename, member));
+            child_files.add (new FileEntry (file_tree_box, filename, checked, member));
             update();
           }
           return;
@@ -131,7 +145,7 @@ namespace Ui {
           child_dirs.add (child);
           update();
         }
-        child.add_file (path[1:path.length], filename, member);
+        child.add_file (path[1:path.length], filename, member, checked);
       }
       public void remove_file (string[] path, string filename) {
         // If the path has been followed entirely, remove file and update UI
@@ -160,16 +174,24 @@ namespace Ui {
       return root.update();
     }
     public void deselect(string? except_file) {
+      if (except_file != selection_filename) {
+        selection_filename = null;
+        selection_data = null;
+      }
       root.deselect(except_file);
     }
     public void select(string file) {
       root.select(file);
     }
-    public void add_file (string path, Project.ProjectMember member) {
+    public void add_file (string path, Project.ProjectMember member, bool checked = false) {
       var splt = path.split ("/");
-      root.add_file (splt[0:splt.length - 1], path, member);
+      root.add_file (splt[0:splt.length - 1], path, member, checked);
     }
     public void remove_file (string path) {
+      if (path == selection_filename) {
+        selection_filename = null;
+        selection_data = null;
+      }
       var splt = path.split ("/");
       root.remove_file (splt[0:splt.length - 1], path);
     }
