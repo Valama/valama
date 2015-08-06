@@ -26,6 +26,21 @@ namespace Ui {
       Glade.App.set_window (main_widget.window);
 
       glade_project = new Glade.Project();
+
+      main_widget.main_toolbar.selected_target_changed.connect(hook_save_on_compile);
+      hook_save_on_compile();
+
+      // When content is changed, invalidate all targets depending on this file
+      glade_project.changed.connect(()=>{
+        foreach (var pmember in my_member.project.members) {
+          if (pmember is Project.ProjectMemberTarget) {
+            var target = pmember as Project.ProjectMemberTarget;
+            if (target.included_gladeuis.contains (my_member.id))
+              target.builder.state = Builder.BuilderState.NOT_COMPILED;
+          }
+        }
+      });
+
       design_view = new Glade.DesignView (glade_project);
       glade_project.load_from_file (member.file.get_abs());
       Glade.App.add_project (glade_project);
@@ -65,6 +80,25 @@ namespace Ui {
 
       widget = grid;
       widget.show_all();
+    }
+
+    // Before compiling, save file (if it is part of the selected target)
+    ulong hook = 0;
+    Builder.Builder hooked_builder = null;
+    private void hook_save_on_compile() {
+      if (hooked_builder != null) // track selected target
+        hooked_builder.disconnect (hook);
+      var builder = main_widget.main_toolbar.selected_target.builder;
+      hook = builder.state_changed.connect (()=>{
+        stdout.printf ("hook!\n");
+        if (glade_project.modified)
+          if (builder.state == Builder.BuilderState.COMPILING)
+            if (main_widget.main_toolbar.selected_target.included_gladeuis.contains (my_member.id)) {
+        stdout.printf ("hook saved!\n");
+              glade_project.save (my_member.file.get_abs());
+              }
+      });
+      hooked_builder = builder;
     }
 
     public override void load_internal (Xml.TextWriter writer) {
