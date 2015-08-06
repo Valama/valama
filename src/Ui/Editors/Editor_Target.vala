@@ -83,7 +83,9 @@ namespace Ui {
   [GtkTemplate (ui = "/src/Ui/Editors/Editor_Target.glade")]
   private class TargetTemplate : Box {
   	[GtkChild]
-  	public ListBox sources_list;
+    public Viewport vp_sources;
+    [GtkChild]
+    public ListBox gladeui_list;
   	[GtkChild]
   	public ListBox deps_list;
   	[GtkChild]
@@ -329,16 +331,6 @@ namespace Ui {
         update_settings_ui();
       });
 
-      // Keep sources list in sync
-      member.project.member_added.connect ((member)=>{
-        if (member is Project.ProjectMemberValaSource)
-          update_sources_list();
-      });
-      member.project.member_removed.connect ((member)=>{
-        if (member is Project.ProjectMemberValaSource)
-          update_sources_list();
-      });
-
       // Keep gresources list in sync
       member.project.member_added.connect ((member)=>{
         if (member is Project.ProjectMemberGResource)
@@ -353,7 +345,7 @@ namespace Ui {
           update_gresources_list();
       });
 
-      // Keep gresources list in sync
+      // Keep data list in sync
       member.project.member_added.connect ((member)=>{
         if (member is Project.ProjectMemberData)
           update_data_list();
@@ -365,6 +357,20 @@ namespace Ui {
       member.project.member_data_changed.connect((sender, mb)=>{
         if (member is Project.ProjectMemberData)
           update_data_list();
+      });
+
+      // Keep gladeui list in sync
+      member.project.member_added.connect ((member)=>{
+        if (member is Project.ProjectMemberGladeUi)
+          update_gladeui_list();
+      });
+      member.project.member_removed.connect ((member)=>{
+        if (member is Project.ProjectMemberGladeUi)
+          update_gladeui_list();
+      });
+      member.project.member_data_changed.connect((sender, mb)=>{
+        if (member is Project.ProjectMemberGladeUi)
+          update_gladeui_list();
       });
 
       // Keep binary name entry in sync
@@ -377,9 +383,10 @@ namespace Ui {
       widget = template;
       
       // Initial list update
-      update_sources_list();
+      init_sources_list();
       update_gresources_list();
       update_data_list();
+      update_gladeui_list();
       setup_dependencies_list();
       setup_defines_list();
       update_settings_ui();
@@ -471,32 +478,69 @@ namespace Ui {
     // Sources list
     // ============
     
-    private inline void update_sources_list() {
-      foreach (Gtk.Widget widget in template.sources_list.get_children())
-        template.sources_list.remove (widget);
-
+    private inline void init_sources_list() {
+      var treebox = new FileTreeBox (true);
       var my_member = member as Project.ProjectMemberTarget;
-      
       foreach (Project.ProjectMember m in my_member.project.members) {
         if (!(m is Project.ProjectMemberValaSource))
           continue;
-        
+        var path = (m as Project.ProjectMemberValaSource).file.get_rel();
+        treebox.add_file (path, m, m.id in my_member.included_sources);
+      }
+      treebox.file_checked.connect ((filename, data, checked)=>{
+        var member = data as Project.ProjectMemberValaSource;
+        if (checked)
+          my_member.included_sources.add (member.id);
+        else
+          my_member.included_sources.remove (member.id);
+        main_widget.project.member_data_changed (this, my_member);
+      });
+      template.vp_sources.add (treebox.update());
+      template.vp_sources.show_all();
+      // Keep in sync
+      member.project.member_added.connect ((member)=>{
+        if (member is Project.ProjectMemberValaSource) {
+          var path = (member as Project.ProjectMemberValaSource).file.get_rel();
+          treebox.add_file (path, member, member.id in my_member.included_sources);
+        }
+      });
+      member.project.member_removed.connect ((member)=>{
+        if (member is Project.ProjectMemberValaSource) {
+          var path = (member as Project.ProjectMemberValaSource).file.get_rel();
+          treebox.remove_file (path);
+        }
+      });
+    }
+
+    // Gladeui list
+    // ============
+
+    private inline void update_gladeui_list() {
+      foreach (Gtk.Widget widget in template.gladeui_list.get_children())
+        template.gladeui_list.remove (widget);
+
+      var my_member = member as Project.ProjectMemberTarget;
+
+      foreach (Project.ProjectMember m in my_member.project.members) {
+        if (!(m is Project.ProjectMemberGladeUi))
+          continue;
+
         var row = new Gtk.ListBoxRow();
         var check = new Gtk.CheckButton();
-        check.active = m.id in my_member.included_sources;
-        check.label = (m as Project.ProjectMemberValaSource).file.get_rel();
+        check.active = m.id in my_member.included_gladeuis;
+        check.label = (m as Project.ProjectMemberGladeUi).file.get_rel();
         check.toggled.connect(()=>{
           if (check.active)
-            my_member.included_sources.add (m.id);
+            my_member.included_gladeuis.add (m.id);
           else
-            my_member.included_sources.remove (m.id);
+            my_member.included_gladeuis.remove (m.id);
           main_widget.project.member_data_changed (this, my_member);
         });
-        
+
         row.add (check);
-        template.sources_list.add (row);
+        template.gladeui_list.add (row);
       }
-      template.sources_list.show_all();
+      template.gladeui_list.show_all();
     }
 
     // Dependencies list

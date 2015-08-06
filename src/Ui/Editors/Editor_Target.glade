@@ -87,14 +87,11 @@
             <property name="can_focus">True</property>
             <property name="shadow_type">in</property>
             <child>
-              <object class="GtkViewport" id="viewport1">
+              <object class="GtkViewport" id="vp_sources">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <child>
-                  <object class="GtkListBox" id="sources_list">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                  </object>
+                  <placeholder/>
                 </child>
               </object>
             </child>
@@ -309,12 +306,60 @@
           </packing>
         </child>
         <child>
-          <object class="GtkListBox" id="gresources_list">
+          <object class="GtkScrolledWindow" id="scrolledwindow4">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
+            <property name="can_focus">True</property>
+            <property name="shadow_type">in</property>
+            <child>
+              <object class="GtkViewport" id="viewport4">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <child>
+                  <object class="GtkListBox" id="gladeui_list">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="selection_mode">none</property>
+                  </object>
+                </child>
+              </object>
+            </child>
           </object>
           <packing>
             <property name="position">3</property>
+          </packing>
+        </child>
+        <child type="tab">
+          <object class="GtkLabel" id="label8">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">GladeUI</property>
+          </object>
+          <packing>
+            <property name="position">3</property>
+            <property name="tab_fill">False</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkScrolledWindow" id="scrolledwindow5">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="shadow_type">in</property>
+            <child>
+              <object class="GtkViewport" id="viewport6">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <child>
+                  <object class="GtkListBox" id="gresources_list">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="selection_mode">none</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="position">4</property>
           </packing>
         </child>
         <child type="tab">
@@ -324,17 +369,31 @@
             <property name="label" translatable="yes">Resources</property>
           </object>
           <packing>
-            <property name="position">3</property>
+            <property name="position">4</property>
             <property name="tab_fill">False</property>
           </packing>
         </child>
         <child>
-          <object class="GtkListBox" id="data_list">
+          <object class="GtkScrolledWindow" id="scrolledwindow6">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
+            <property name="can_focus">True</property>
+            <property name="shadow_type">in</property>
+            <child>
+              <object class="GtkViewport" id="viewport5">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <child>
+                  <object class="GtkListBox" id="data_list">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="selection_mode">none</property>
+                  </object>
+                </child>
+              </object>
+            </child>
           </object>
           <packing>
-            <property name="position">4</property>
+            <property name="position">5</property>
           </packing>
         </child>
         <child type="tab">
@@ -344,7 +403,7 @@
             <property name="label" translatable="yes">Data</property>
           </object>
           <packing>
-            <property name="position">4</property>
+            <property name="position">5</property>
             <property name="tab_fill">False</property>
           </packing>
         </child>

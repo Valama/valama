@@ -25,6 +25,7 @@ namespace Project {
     public Gee.ArrayList<string> included_sources = new Gee.ArrayList<string>();
     public Gee.ArrayList<string> included_gresources = new Gee.ArrayList<string>();
     public Gee.ArrayList<string> included_data = new Gee.ArrayList<string>();
+    public Gee.ArrayList<string> included_gladeuis = new Gee.ArrayList<string>();
   
     public Gee.LinkedList<MetaDependency> metadependencies = new Gee.LinkedList<MetaDependency>();
 
@@ -56,6 +57,12 @@ namespace Project {
           for (Xml.Attr* prop = iter->properties; prop != null; prop = prop->next) {
             if (prop->name == "id")
               included_data.add(prop->children->content);
+          }
+        }
+        if (iter->name == "gladeui") {
+          for (Xml.Attr* prop = iter->properties; prop != null; prop = prop->next) {
+            if (prop->name == "id")
+              included_gladeuis.add(prop->children->content);
           }
         }
         if (iter->name == "metadependency") {
@@ -119,6 +126,11 @@ namespace Project {
       foreach (string data_id in included_data) {
         writer.start_element ("data");
         writer.write_attribute ("id", data_id);
+        writer.end_element();
+      }
+      foreach (string gladeui_id in included_gladeuis) {
+        writer.start_element ("gladeui");
+        writer.write_attribute ("id", gladeui_id);
         writer.end_element();
       }
       foreach (var dep in metadependencies) {

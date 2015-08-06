@@ -72,6 +72,27 @@
 		<source id="74"/>
 		<gresource id="52"/>
 		<data id="62"/>
+		<gladeui id="20"/>
+		<gladeui id="31"/>
+		<gladeui id="33"/>
+		<gladeui id="35"/>
+		<gladeui id="75"/>
+		<gladeui id="76"/>
+		<gladeui id="77"/>
+		<gladeui id="78"/>
+		<gladeui id="79"/>
+		<gladeui id="80"/>
+		<gladeui id="81"/>
+		<gladeui id="82"/>
+		<gladeui id="83"/>
+		<gladeui id="84"/>
+		<gladeui id="85"/>
+		<gladeui id="86"/>
+		<gladeui id="87"/>
+		<gladeui id="88"/>
+		<gladeui id="89"/>
+		<gladeui id="90"/>
+		<gladeui id="91"/>
 		<metadependency name="Gtk">
 			<dependency type="package" library="gtk+-3.0"/>
 		</metadependency>
@@ -130,7 +151,6 @@
 		<source id="6"/>
 		<source id="2"/>
 		<source id="17"/>
-		<source id="7"/>
 		<source id="5"/>
 		<source id="8"/>
 		<source id="11"/>
@@ -185,8 +205,30 @@
 		<source id="72"/>
 		<source id="73"/>
 		<source id="74"/>
+		<source id="7"/>
 		<gresource id="52"/>
 		<data id="62"/>
+		<gladeui id="20"/>
+		<gladeui id="82"/>
+		<gladeui id="31"/>
+		<gladeui id="33"/>
+		<gladeui id="35"/>
+		<gladeui id="77"/>
+		<gladeui id="80"/>
+		<gladeui id="83"/>
+		<gladeui id="84"/>
+		<gladeui id="85"/>
+		<gladeui id="86"/>
+		<gladeui id="87"/>
+		<gladeui id="88"/>
+		<gladeui id="89"/>
+		<gladeui id="90"/>
+		<gladeui id="91"/>
+		<gladeui id="75"/>
+		<gladeui id="79"/>
+		<gladeui id="76"/>
+		<gladeui id="81"/>
+		<gladeui id="78"/>
 		<metadependency name="Gtk">
 			<dependency type="package" library="gtk+-3.0"/>
 		</metadependency>
