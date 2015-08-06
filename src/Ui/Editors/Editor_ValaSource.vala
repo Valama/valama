@@ -6,6 +6,8 @@ namespace Ui {
   
     private Project.ProjectMemberValaSource my_member = null;
   
+    private bool unsaved_changes = false;
+
     public EditorValaSource(Project.ProjectMemberValaSource member, Ui.MainWidget main_widget) {
       this.main_widget = main_widget;
       this.member = member;
@@ -27,7 +29,12 @@ namespace Ui {
       widget.show_all();
 
       main_widget.main_toolbar.selected_target_changed.connect(hook_save_on_compile);
+      hook_save_on_compile();
+
+      // When content is changed, invalidate all targets depending on this file
       sourceview.buffer.changed.connect (()=>{
+        unsaved_changes = true;
+
         foreach (var pmember in my_member.project.members) {
           if (pmember is Project.ProjectMemberTarget) {
             var target = pmember as Project.ProjectMemberTarget;
@@ -46,9 +53,10 @@ namespace Ui {
         hooked_builder.disconnect (hook);
       var builder = main_widget.main_toolbar.selected_target.builder;
       hook = builder.state_changed.connect (()=>{
-        if (builder.state == Builder.BuilderState.COMPILING)
-          if (main_widget.main_toolbar.selected_target.included_sources.contains (my_member.id))
-            save_file (my_member.file.get_abs(), my_member.buffer.text);
+        if (unsaved_changes)
+          if (builder.state == Builder.BuilderState.COMPILING)
+            if (main_widget.main_toolbar.selected_target.included_sources.contains (my_member.id))
+              save_file (my_member.file.get_abs(), my_member.buffer.text);
       });
       hooked_builder = builder;
     }
@@ -84,6 +92,9 @@ namespace Ui {
     }
     
     private bool save_file (string filename, string text) {
+
+      unsaved_changes = false;
+
       var file = File.new_for_path (filename);
 
       /* TODO: First parameter can be used to check if file has changed.
