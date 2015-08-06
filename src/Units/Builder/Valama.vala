@@ -21,6 +21,8 @@ namespace Builder {
     }
     public override void build(Ui.MainWidget main_widget) {
 
+      state = BuilderState.COMPILING;
+
       var build_dir = "build/" + target.binary_name + "/valama/";
       
       // Create build directory if not existing yet
@@ -108,8 +110,6 @@ namespace Builder {
       cmd_build.append (""" """");
       // "
       Pid child_pid = main_widget.console_view.spawn_process (cmd_build.str);
-
-      state = BuilderState.COMPILING;
 
       ulong process_exited_handler = 0;
       process_exited_handler = main_widget.console_view.process_exited.connect (()=>{
