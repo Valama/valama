@@ -76,6 +76,7 @@ set(srcfiles
   "src/Ui/ProjectMemberCreators/Creator_GladeUi.vala"
   "src/Ui/ProjectMemberCreators/Creator_GResource.vala"
   "src/Project/ProjectMember_Info.vala"
+  "src/Units/Builder/Autotools.vala"
 )
 
 message ("-- checking dependency Gtk")

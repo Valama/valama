@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.18.3 -->
+<!-- Generated with glade 3.19.0 -->
 <interface>
   <requires lib="gtk+" version="3.12"/>
   <template class="UiConsoleViewTemplate" parent="GtkBox">
@@ -14,14 +14,7 @@
         <property name="vexpand">True</property>
         <property name="shadow_type">in</property>
         <child>
-          <object class="GtkViewport" id="vwp_console">
-            <property name="width_request">400</property>
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <child>
-              <placeholder/>
-            </child>
-          </object>
+          <placeholder/>
         </child>
       </object>
       <packing>
