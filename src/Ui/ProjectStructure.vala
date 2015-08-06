@@ -67,9 +67,6 @@ namespace Ui {
       main_widget.project.member_added.connect((member)=>{
         fill_list(member.get_project_member_type());
       });
-      main_widget.project.member_removed.connect((member)=>{
-        fill_list(member.get_project_member_type());
-      });
 
       // Popover for adding project members
       var popover = new Popover (template.btn_add);
@@ -107,8 +104,9 @@ namespace Ui {
         // Find active list
         foreach (var listbox in mp_types_lists.values) {
           if (listbox.selection_filename != null) {
+            var remove_file = listbox.selection_filename;
             main_widget.project.removeMember (listbox.selection_data as Project.ProjectMember);
-            listbox.remove_file (listbox.selection_filename);
+            listbox.remove_file (remove_file);
             break;
           }
         }
