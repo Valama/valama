@@ -161,6 +161,10 @@ namespace Builder {
         dos.put_string ("    ${CMAKE_SOURCE_DIR}\n");
         dos.put_string ("  COMMAND\n");
         dos.put_string ("    glib-compile-resources \"${CMAKE_SOURCE_DIR}/" + res_path + "\" --generate-source --target=\"" + res_out_path + "\"\n");
+        dos.put_string ("  DEPENDS\n");
+        foreach (var res in gresource.resources) {
+          dos.put_string ("   \"" + res.file.get_rel() + "\"\n");
+        }
         dos.put_string ("  COMMENT \"Building resource " + gresource.name + "\"\n");
         dos.put_string (")\n");
 

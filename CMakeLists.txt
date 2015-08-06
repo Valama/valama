@@ -21,7 +21,6 @@ set(srcfiles
   "src/Project/ProjectMember.vala"
   "src/main.vala"
   "src/Ui/Editors/Editor_ValaSource.vala"
-  "src/Project/ProjectMember_Info.vala"
   "src/Project/ProjectMemberFactory.vala"
   "src/Project/ProjectMember_Target.vala"
   "src/Ui/Element.vala"
@@ -76,6 +75,7 @@ set(srcfiles
   "src/Ui/ProjectMemberCreators/Creator_Data.vala"
   "src/Ui/ProjectMemberCreators/Creator_GladeUi.vala"
   "src/Ui/ProjectMemberCreators/Creator_GResource.vala"
+  "src/Project/ProjectMember_Info.vala"
 )
 
 message ("-- checking dependency Gtk")
@@ -288,6 +288,28 @@ add_custom_command(
     ${CMAKE_SOURCE_DIR}
   COMMAND
     glib-compile-resources "${CMAKE_SOURCE_DIR}/gresource_52.xml" --generate-source --target="${CMAKE_BINARY_DIR}/gresource_52.c"
+  DEPENDS
+   "src/Ui/ConsoleView.glade"
+   "src/Ui/NewProjectMember.glade"
+   "src/Ui/ProjectStructure.glade"
+   "src/Ui/WelcomeScreen/RecentEntry.glade"
+   "src/Ui/WelcomeScreen/WelcomeScreen.glade"
+   "src/Ui/Editors/Editor_GResource.glade"
+   "src/Ui/Editors/Editor_GResource_entry.glade"
+   "src/Ui/Editors/Editor_Info.glade"
+   "src/Ui/Editors/Editor_Target.glade"
+   "src/Ui/Editors/Editor_Target_Condition.glade"
+   "src/Ui/Editors/Editor_Target_Define.glade"
+   "src/Ui/Editors/Editor_Target_Dependency.glade"
+   "src/Ui/Editors/Editor_Target_Meta_Dependency.glade"
+   "src/Ui/Editors/Editor_Target_NewDependency.glade"
+   "src/Units/Builder/Custom.glade"
+   "src/Units/Builder/Waf.glade"
+   "src/Ui/Editors/Editor_Data.glade"
+   "src/Ui/Editors/Editor_Data_entry.glade"
+   "src/Ui/MainWidget.glade"
+   "src/Ui/WelcomeScreen/TemplateSelector.glade"
+   "src/Ui/WelcomeScreen/TemplateSelectorEntry.glade"
   COMMENT "Building resource GladeUI"
 )
 list(APPEND vapidirs --gresources "${CMAKE_SOURCE_DIR}/gresource_52.xml")
