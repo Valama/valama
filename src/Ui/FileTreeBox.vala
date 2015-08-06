@@ -7,25 +7,24 @@ namespace Ui {
     public FileTreeBox(bool checkable = false) {
       this.checkable = checkable;
       root = new DirEntry (this, "");
-      file_selected.connect ((filename, data)=>{
-        // Deselect all ListBoxes except for filename
-        selection_filename = filename;
-        selection_data = data;
-        root.deselect (filename);
+      file_selected_internal.connect ((entry)=>{
+        // Update selection
+        selection = entry;
       });
     }
-    public string? selection_filename;
-    public Object? selection_data;
-    public signal void file_selected (string filename, Object data);
+    public FileEntry? selection;
+    public signal void file_selected (FileEntry entry);
+    protected signal void file_selected_internal (FileEntry entry);
     public signal void file_checked (string filename, Object data, bool checked);
     protected bool checkable;
 
-    private class FileEntry {
-      public FileEntry (FileTreeBox file_tree_box, string filename, bool check, Object data) {
+    public class FileEntry {
+      public FileEntry (FileTreeBox file_tree_box, string filename, bool check, Object data, DirEntry parent) {
         this.filename = filename;
         this.check = check;
         this.file_tree_box = file_tree_box;
         this.data = data;
+        this.parent = parent;
       }
       public Widget get_widget() {
         if (file_tree_box.checkable) {
@@ -41,11 +40,13 @@ namespace Ui {
       }
       bool check;
       private weak FileTreeBox file_tree_box;
+      public weak DirEntry parent;
       public string filename;
       public Object data;
+      public string path;
     }
 
-    private class DirEntry {
+    public class DirEntry {
       public DirEntry (FileTreeBox file_tree_box, string dir) {
         expander = new Gtk.Expander(dir);
         if (dir != "") {
@@ -55,11 +56,18 @@ namespace Ui {
         box_meta.add (box_dirs);
         box_meta.add (listbox);
 
+        // Deselect listbox if the child of another directory is selected
+        file_tree_box.file_selected_internal.connect((file)=>{
+          if (!(file in child_files))
+            listbox.select_row (null);
+        });
+
         listbox.row_selected.connect ((row)=>{
           if (row == null)
             return;
           var file = row.get_data<FileEntry>("fileentry");
-          file_tree_box.file_selected (file.filename, file.data);
+          file_tree_box.file_selected_internal (file);
+          file_tree_box.file_selected (file);
         });
 
         this.dir = dir;
@@ -97,20 +105,14 @@ namespace Ui {
         else
           return expander;
       }
-      public void deselect(string? except_file) {
+      public void deselect() {
         foreach (var child in child_dirs)
-          child.deselect (except_file);
-        if (except_file != null)
-          if (get_child_file (except_file) != null)
-            return;
+          child.deselect ();
         listbox.select_row (null);
       }
-      public void select(string file) {
-        foreach (var child in child_dirs)
-          child.select (file);
-
+      public void select_child (FileEntry entry) {
         foreach (var row in listbox.get_children()) {
-          if (row.get_data<FileEntry>("fileentry").filename == file) {
+          if (row.get_data<FileEntry>("fileentry") == entry) {
             listbox.select_row (row as ListBoxRow);
             return;
           }
@@ -133,7 +135,7 @@ namespace Ui {
         // If the path has been followed entirely, add file
         if (path.length == 0) {
           if (get_child_file (filename) == null) {
-            child_files.add (new FileEntry (file_tree_box, filename, checked, member));
+            child_files.add (new FileEntry (file_tree_box, filename, checked, member, this));
             update();
           }
           return;
@@ -147,24 +149,21 @@ namespace Ui {
         }
         child.add_file (path[1:path.length], filename, member, checked);
       }
-      public void remove_file (string[] path, string filename) {
-        // If the path has been followed entirely, remove file and update UI
-        if (path.length == 0) {
-          var file_entry = get_child_file (filename);
-          child_files.remove (file_entry);
-          update();
-          return;
-        }
-        // Otherwise, pass on to child
+      public void remove_child_file (FileEntry entry) {
+        if (file_tree_box.selection == entry)
+          file_tree_box.selection = null;
+
+        child_files.remove (entry);
+        update();
+      }
+      public FileEntry? get_entry (string[] path) {
+        if (path.length == 1)
+          return get_child_file (path[0]);
+        // Pass on to child
         var child = get_child_dir (path[0]);
         if (child == null)
-          return;
-        child.remove_file (path[1:path.length], filename);
-        // And if child has no children itself, remove it
-        if (child.child_files.size == 0 && child.child_dirs.size == 0) {
-          child_dirs.remove (child);
-          update();
-        }
+          return null;
+        return child.get_entry (path[1:path.length]);
       }
     }
 
@@ -173,27 +172,23 @@ namespace Ui {
       var row = new Gtk.ListBoxRow();
       return root.update();
     }
-    public void deselect(string? except_file) {
-      if (except_file != selection_filename) {
-        selection_filename = null;
-        selection_data = null;
-      }
-      root.deselect(except_file);
+    public void deselect() {
+      selection = null;
+      root.deselect();
     }
-    public void select(string file) {
-      root.select(file);
+    public void select(FileEntry entry) {
+      entry.parent.select_child (entry);
     }
     public void add_file (string path, Project.ProjectMember member, bool checked = false) {
       var splt = path.split ("/");
-      root.add_file (splt[0:splt.length - 1], path, member, checked);
+      root.add_file (splt[0:splt.length - 1], splt[splt.length - 1], member, checked);
     }
-    public void remove_file (string path) {
-      if (path == selection_filename) {
-        selection_filename = null;
-        selection_data = null;
-      }
-      var splt = path.split ("/");
-      root.remove_file (splt[0:splt.length - 1], path);
+    public FileEntry? get_entry (string file) {
+      var splt = file.split ("/");
+      return root.get_entry (splt);
+    }
+    public void remove_file (FileEntry entry) {
+      entry.parent.remove_child_file (entry);
     }
   }
 

@@ -507,7 +507,7 @@ namespace Ui {
       member.project.member_removed.connect ((member)=>{
         if (member is Project.ProjectMemberValaSource) {
           var path = (member as Project.ProjectMemberValaSource).file.get_rel();
-          treebox.remove_file (path);
+          treebox.remove_file (treebox.get_entry(path));
         }
       });
     }

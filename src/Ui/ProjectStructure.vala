@@ -103,10 +103,10 @@ namespace Ui {
       template.btn_remove.clicked.connect (() => {
         // Find active list
         foreach (var listbox in mp_types_lists.values) {
-          if (listbox.selection_filename != null) {
-            var remove_file = listbox.selection_filename;
-            main_widget.project.removeMember (listbox.selection_data as Project.ProjectMember);
+          if (listbox.selection != null) {
+            var remove_file = listbox.selection;
             listbox.remove_file (remove_file);
+            main_widget.project.removeMember (remove_file.data as Project.ProjectMember);
             break;
           }
         }
@@ -124,30 +124,35 @@ namespace Ui {
       var viewer = main_widget.editor_viewer.getSelectedViewer();
       if (viewer is Editor) {
         var member = (viewer as Editor).member;
-        mp_types_lists[member.get_project_member_type()].select (member.getTitle());
+        var list = mp_types_lists[member.get_project_member_type()];
+        list.select (list.get_entry(member.getTitle()));
       }
       main_widget.editor_viewer.viewer_selected.connect ((viewer)=>{
         if (viewer is Editor) {
           var member = (viewer as Editor).member;
-          mp_types_lists[member.get_project_member_type()].select (member.getTitle());
+          var list = mp_types_lists[member.get_project_member_type()];
+          list.select (list.get_entry(member.getTitle()));
         }
       });
 
       widget = template;
     }
 
-    private void file_selected (string filename, Object data) {
-      if (filename == null) {
+    private void file_selected (FileTreeBox.FileEntry entry) {
+      if (entry == null) {
         template.btn_remove.sensitive = false;
         return;
       }
 
+      var member = entry.data as Project.ProjectMember;
+
       // Deactivate other lists
       foreach (var listbox in mp_types_lists.values)
-        listbox.deselect (filename);
+        if (listbox != mp_types_lists[member.get_project_member_type()])
+          listbox.deselect ();
 
       // Open selected member
-      main_widget.editor_viewer.openMember(data as Project.ProjectMember);
+      main_widget.editor_viewer.openMember(member);
       
       template.btn_remove.sensitive = true;//member is Project.ProjectMemberValaSource || member is Project.ProjectMemberTarget;
     }
