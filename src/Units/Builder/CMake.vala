@@ -257,7 +257,8 @@ namespace Builder {
       dos.put_string (")\n");
 
       // Execute cmake and make
-      Pid child_pid = main_widget.console_view.spawn_process ("/bin/sh -c \"cd '" + Environment.get_current_dir() + "/" + build_dir + "/build' && cmake ../../../../ && make\"", build_dir + "/build");
+      var project_dir = File.new_for_path (target.project.filename).get_parent().get_path();
+      Pid child_pid = main_widget.console_view.spawn_process ("/bin/sh -c \"cd '" + project_dir + "/" + build_dir + "/build' && cmake ../../../../ && make\"", build_dir + "/build");
 
       ulong process_exited_handler = 0;
       process_exited_handler = main_widget.console_view.process_exited.connect (()=>{

@@ -75,15 +75,17 @@ namespace Ui {
           file_chooser.destroy ();
         } else if (template.list_actions.get_selected_row() == template.row_new_project) {
           var template_chooser = new TemplateSelector();
-          if (template_chooser.run () == Gtk.ResponseType.ACCEPT) {
+          Gtk.ResponseType r = (Gtk.ResponseType)template_chooser.run();
+          print ("run: %s\n", r.to_string());
+          if (r == Gtk.ResponseType.ACCEPT) {
 
             // Install to selected directory
             var proj_dir = template_chooser.directory + "/" + template_chooser.project_name;
+            print ("project-dir: %s\n", proj_dir);
             var project = template_chooser.template.install (template_chooser.project_name, proj_dir);
 
             project_selected (project);
           }
-          template_chooser.destroy ();
         }
       });
 

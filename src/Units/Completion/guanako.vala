@@ -41,7 +41,7 @@ namespace Guanako {
 
         public Project (CodeContext context, string filename) throws IOError, Error {
             this.context = context;
-
+print ("filename: %s\n", filename);
             build_syntax_map (filename);
         }
 

@@ -5,8 +5,6 @@ namespace Ui {
   [GtkTemplate (ui = "/src/Ui/MainWidget.glade")]
   private class MainWidgetTemplate : Box {
   	[GtkChild]
-  	public Alignment algn_toolbar;
-  	[GtkChild]
   	public Alignment algn_project_structure;
   	[GtkChild]
   	public Alignment algn_viewer;
@@ -60,7 +58,7 @@ namespace Ui {
       }
 
       // Add elements to main UI
-      template.algn_toolbar.add(main_toolbar.widget);
+      window.set_titlebar (main_toolbar.widget);
       template.algn_project_structure.add(project_structure.widget);
       template.algn_viewer.add(editor_viewer.widget);
       template.algn_errors.add(error_list.widget);
