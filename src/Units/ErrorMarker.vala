@@ -39,6 +39,8 @@ namespace Units {
         if (error.source == null)
           return;
         string myfilename = error.source.file.get_relative_filename();
+        if (myfilename == null)
+			return;
         var member = get_source_member_by_file (myfilename);
         
         var iter_start = iter_from_location (member.buffer, error.source.begin);
