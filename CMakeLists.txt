@@ -76,6 +76,7 @@ set(srcfiles
   "src/Ui/ProjectMemberCreators/Creator_GladeUi.vala"
   "src/Ui/ProjectMemberCreators/Creator_GResource.vala"
   "src/Project/ProjectMember_Info.vala"
+  "src/Units/Builder/Autotools.vala"
 )
 
 message ("-- checking dependency Gtk")
@@ -151,6 +152,30 @@ endif ()
 
 message ("-- checking dependency LibVala")
 set (found FALSE)
+if (NOT found)
+  message ("--  checking option libvala-0.30")
+  set (cond_found TRUE)
+  pkg_check_modules (DEP_libvala-0.30 QUIET libvala-0.30)
+  if (NOT DEP_libvala-0.30_VERSION)
+    set (cond_found FALSE)
+  endif ()
+  if (cond_found)
+    set (found TRUE)
+    list(APPEND required_pkgs "libvala-0.30")
+  endif ()
+endif ()
+if (NOT found)
+  message ("--  checking option libvala-0.28")
+  set (cond_found TRUE)
+  pkg_check_modules (DEP_libvala-0.28 QUIET libvala-0.28)
+  if (NOT DEP_libvala-0.28_VERSION)
+    set (cond_found FALSE)
+  endif ()
+  if (cond_found)
+    set (found TRUE)
+    list(APPEND required_pkgs "libvala-0.28")
+  endif ()
+endif ()
 if (NOT found)
   message ("--  checking option libvala-0.26")
   set (cond_found TRUE)

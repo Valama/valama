@@ -75,7 +75,7 @@ namespace Ui {
           file_chooser.destroy ();
         } else if (template.list_actions.get_selected_row() == template.row_new_project) {
           var template_chooser = new TemplateSelector();
-          if (template_chooser.run () == Gtk.ResponseType.ACCEPT) {
+          if ((Gtk.ResponseType)template_chooser.run() == Gtk.ResponseType.ACCEPT) {
 
             // Install to selected directory
             var proj_dir = template_chooser.directory + "/" + template_chooser.project_name;
@@ -83,7 +83,6 @@ namespace Ui {
 
             project_selected (project);
           }
-          template_chooser.destroy ();
         }
       });
 

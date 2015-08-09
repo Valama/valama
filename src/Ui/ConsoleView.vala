@@ -6,7 +6,7 @@ namespace Ui {
   [GtkTemplate (ui = "/src/Ui/ConsoleView.glade")]
   private class ConsoleViewTemplate : Box {
   	[GtkChild]
-  	public Viewport vwp_console;
+  	public ScrolledWindow scrw_console;
   }
 
   public class ConsoleView : Element {
@@ -14,7 +14,7 @@ namespace Ui {
     private ConsoleViewTemplate template = new ConsoleViewTemplate();
     private Terminal terminal = new Terminal();
     public override void init() {
-      template.vwp_console.add(terminal);
+      template.scrw_console.add(terminal);
       terminal.show();
 
       widget = template;
@@ -36,10 +36,10 @@ namespace Ui {
       Pid child_pid;
       // Spawn the process
 #if VTE_2_91
-      Process.spawn_async (working_directory, argv, null, SpawnFlags.DO_NOT_REAP_CHILD, null, out child_pid);
+      terminal.spawn_sync (PtyFlags.DEFAULT, working_directory, argv, null, SpawnFlags.DO_NOT_REAP_CHILD, null, out child_pid);
       terminal.watch_child (child_pid);
 #else
-      terminal.fork_command_full (PtyFlags.DEFAULT, null, argv, null, SpawnFlags.DO_NOT_REAP_CHILD, null, out child_pid);
+      terminal.fork_command_full (PtyFlags.DEFAULT, working_directory, argv, null, SpawnFlags.DO_NOT_REAP_CHILD, null, out child_pid);
 #endif
       return child_pid;
     }

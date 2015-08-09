@@ -23,7 +23,7 @@ namespace Builder {
 
       state = BuilderState.COMPILING;
 
-      var build_dir = "build/" + target.binary_name + "/cmake/";
+      var build_dir = "build/" + target.binary_name + "/cmake";
       
       // Create build directory if not existing yet
       DirUtils.create_with_parents (build_dir + "/build", 509); // = 775 octal
@@ -213,14 +213,39 @@ namespace Builder {
       dos.put_string ("    ${srcfiles}\n");
       dos.put_string ("  VAPIS\n");
       dos.put_string ("    ${vapifiles}\n");
+      
+      Project.ProjectMemberInfo info = null;
+      foreach (var pm in target.project.members) {
+        if (pm is Project.ProjectMemberInfo) {
+	      info = pm as Project.ProjectMemberInfo;
+	      break;
+        }
+      }
+
+      if (target.library) {
+		dos.put_string ("  LIBRARY\n"); 
+		dos.put_string ("    \"${project_name_lower}\"\n");
+		dos.put_string ("  GIRFILE\n");
+		string gir_version = "0.1";
+        if (info != null)
+          gir_version = "%d.%d".printf (info.major, info.minor);
+		dos.put_string ("    \"${project_name}-" + gir_version + "\"\n");
+	  }
       dos.put_string ("  OPTIONS\n");
       dos.put_string ("    ${default_vala_flags}\n");
       dos.put_string ("    ${vapidirs}\n");
       dos.put_string (")\n");
       dos.put_string ("\n");
 
-
-      dos.put_string ("add_executable(\"${project_name_lower}\" ${VALA_C} ${compiled_resources})\n");
+      if (target.library) {
+		dos.put_string ("add_library(\"${project_name_lower}\" SHARED ${VALA_C} ${compiled_resources})\n");
+		dos.put_string ("set_target_properties(\"${project_name_lower}\" PROPERTIES\n");
+		dos.put_string ("  VERSION \"${${project_name}_VERSION}\"\n");
+		dos.put_string ("  SOVERSION %d\n".printf (info == null ? 0 : info.major));
+		dos.put_string (")\n");
+	  }
+	  else
+        dos.put_string ("add_executable(\"${project_name_lower}\" ${VALA_C} ${compiled_resources})\n");
       dos.put_string ("\n");
       dos.put_string ("target_link_libraries(\"${project_name_lower}\"\n");
       dos.put_string ("  ${PROJECT_LDFLAGS}\n");
@@ -232,7 +257,8 @@ namespace Builder {
       dos.put_string (")\n");
 
       // Execute cmake and make
-      Pid child_pid = main_widget.console_view.spawn_process ("/bin/sh -c \"cd '" + build_dir + "/build' && cmake ../../../../ && make\"", build_dir + "/build");
+      var project_dir = File.new_for_path (target.project.filename).get_parent().get_path();
+      Pid child_pid = main_widget.console_view.spawn_process ("/bin/sh -c \"cd '" + project_dir + "/" + build_dir + "/build' && cmake ../../../../ && make\"", build_dir + "/build");
 
       ulong process_exited_handler = 0;
       process_exited_handler = main_widget.console_view.process_exited.connect (()=>{

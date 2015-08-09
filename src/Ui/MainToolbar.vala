@@ -31,7 +31,10 @@ namespace Ui {
       });
 
       // Build toolbar
-      var toolbar = new Gtk.Toolbar();
+      var toolbar = new Gtk.HeaderBar();
+      toolbar.title = "Valama";
+      toolbar.subtitle = "Next generation of an amazing IDE";
+      toolbar.show_close_button = true;
       var toolbar_scon = toolbar.get_style_context();
       toolbar_scon.add_class (Gtk.STYLE_CLASS_PRIMARY_TOOLBAR);
       target_selector = new Gtk.ComboBoxText();
@@ -48,21 +51,20 @@ namespace Ui {
           update_build_button();
         }
       });
-      var ti = new Gtk.ToolItem();
-      ti.add (target_selector);
-      toolbar.add (ti);
+      
+      toolbar.pack_start (target_selector);
       
       btnBuild = new Gtk.MenuToolButton (null, "Build");
       btnBuild.icon_name = "system-run";
       btnBuild.set_menu (build_build_menu());
-      toolbar.add (btnBuild);
+      toolbar.pack_start (btnBuild);
       btnBuild.set_tooltip_text (_("Build project"));
       btnBuild.clicked.connect (() => {
         selected_target.builder.build(main_widget);
       });
 
       btnRun = new Gtk.ToolButton (null, "Run");
-      toolbar.add (btnRun);
+      toolbar.pack_start (btnRun);
       btnRun.set_tooltip_text (_("Run project"));
       btnRun.clicked.connect (() => {
         var state = selected_target.builder.state;

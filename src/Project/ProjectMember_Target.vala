@@ -22,6 +22,8 @@ namespace Project {
 
     public string binary_name = null;
     
+    public bool library;
+    
     public Gee.ArrayList<string> included_sources = new Gee.ArrayList<string>();
     public Gee.ArrayList<string> included_gresources = new Gee.ArrayList<string>();
     public Gee.ArrayList<string> included_data = new Gee.ArrayList<string>();
@@ -36,6 +38,8 @@ namespace Project {
       for (Xml.Attr* prop = node->properties; prop != null; prop = prop->next) {
         if (prop->name == "binary_name")
           binary_name = prop->children->content;
+        if (prop->name == "library")
+		  library = bool.parse (prop->children->content);
       }
       // Read active source id's
       for (Xml.Node* iter = node->children; iter != null; iter = iter->next) {
@@ -109,6 +113,7 @@ namespace Project {
     }
     internal override void save_internal (Xml.TextWriter writer) {
       writer.write_attribute ("binary_name", binary_name);
+      writer.write_attribute ("library", library.to_string());
       writer.start_element ("buildsystem");
       writer.write_attribute ("type", buildsystem.toString());
       builder.save (writer);

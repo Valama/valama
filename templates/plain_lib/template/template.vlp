@@ -1,23 +1,11 @@
-<project version="0.1">
-	<name></name>
-	<buildsystem library="true">autotools</buildsystem>
-	<version>
-		<major>0</major>
-		<minor>0</minor>
-		<patch>0</patch>
-	</version>
-	<packages>
-		<package name="gio-2.0"/>
-		<package name="glib-2.0"/>
-		<package name="gobject-2.0"/>
-	</packages>
-	<source-directories>
-		<directory>src</directory>
-	</source-directories>
-	<buildsystem-directories>
-		<directory></directory>
-	</buildsystem-directories>
-	<opened-files>
-		<file>src/lib.vala</file>
-	</opened-files>
+<?xml version="1.0" ?>
+<project format_version="1" project_id="300720142332">
+	<info id="1" name="SampleLibrary" major="0" minor="1" patch="0">
+		<author name="Yannick Inizan" mail="inizan.yannick@gmail.com"/>
+	</info>
+	<valasource id="2" filename="src/lib.vala"/>
+	<target id="3" binary_name="mylib" library="true">
+		<buildsystem type="cmake"/>
+		<source id="2"/>
+	</target>
 </project>

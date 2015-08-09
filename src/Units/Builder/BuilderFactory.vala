@@ -4,37 +4,22 @@ namespace Builder {
     CMAKE,
     AUTOVALA,
     VALAMA,
-    WAF;
+    WAF,
+    AUTOTOOLS;
 
     public static EnumBuildsystem[] to_array() {
-      return new EnumBuildsystem[]  {CMAKE, VALAMA, CUSTOM, AUTOVALA, WAF};
+      return new EnumBuildsystem[]  {CMAKE, VALAMA, CUSTOM, AUTOVALA, WAF, AUTOTOOLS};
     }
 
     public string toString() {
-      if (this == CMAKE)
-        return "cmake";
-      if (this == CUSTOM)
-        return "custom";
-      if (this == AUTOVALA)
-        return "autovala";
-      if (this == VALAMA)
-        return "valama";
-      if (this == WAF)
-        return "waf";
-      return "";
+      var klass = (EnumClass)typeof (EnumBuildsystem).class_ref();
+      var eval = klass.get_value (this);
+      return eval == null ? "" : eval.value_nick;
     }
     public static EnumBuildsystem fromString(string s) {
-      if (s == "cmake")
-        return CMAKE;
-      if (s == "custom")
-        return CUSTOM;
-      if (s == "autovala")
-        return AUTOVALA;
-      if (s == "valama")
-        return VALAMA;
-      if (s == "waf")
-        return WAF;
-      return CUSTOM;
+      var klass = (EnumClass)typeof (EnumBuildsystem).class_ref();
+      var eval = klass.get_value_by_nick (s);
+      return eval == null ? CUSTOM : (EnumBuildsystem)eval.value;
     }
 
   }
@@ -52,6 +37,8 @@ namespace Builder {
         new_builder = new Valama();
       else if (type == EnumBuildsystem.WAF)
         new_builder = new Waf();
+      else if (type == EnumBuildsystem.AUTOTOOLS)
+		new_builder = new Autotools();
 
       new_builder.target = target;
       new_builder.set_defaults();

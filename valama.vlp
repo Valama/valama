@@ -93,6 +93,7 @@
 		<gladeui id="89"/>
 		<gladeui id="90"/>
 		<gladeui id="91"/>
+		<valasource id="92" />
 		<metadependency name="Gtk">
 			<dependency type="package" library="gtk+-3.0"/>
 		</metadependency>
@@ -229,6 +230,7 @@
 		<gladeui id="76"/>
 		<gladeui id="81"/>
 		<gladeui id="78"/>
+		<valasource id="92" />
 		<metadependency name="Gtk">
 			<dependency type="package" library="gtk+-3.0"/>
 		</metadependency>
@@ -403,4 +405,5 @@
 	<gladeui id="89" filename="src/Ui/Editors/Editor_Target_NewDependency.glade"/>
 	<gladeui id="90" filename="src/Units/Builder/Custom.glade"/>
 	<gladeui id="91" filename="src/Units/Builder/Waf.glade"/>
+	<valasource id="92" filename="src/Units/Builder/Autotools.vala" />
 </project>
