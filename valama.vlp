@@ -4,7 +4,7 @@
 		<author name="Linus Seelinger" mail="S.Linus@gmx.de"/>
 	</info>
 	<valasource id="2" filename="src/main.vala"/>
-	<target id="3" binary_name="valama">
+	<target id="3" binary_name="valama" library="false">
 		<buildsystem type="valama"/>
 		<source id="14"/>
 		<source id="12"/>
@@ -70,6 +70,7 @@
 		<source id="72"/>
 		<source id="73"/>
 		<source id="74"/>
+		<source id="92"/>
 		<gresource id="52"/>
 		<data id="62"/>
 		<gladeui id="20"/>
@@ -93,7 +94,6 @@
 		<gladeui id="89"/>
 		<gladeui id="90"/>
 		<gladeui id="91"/>
-		<valasource id="92" />
 		<metadependency name="Gtk">
 			<dependency type="package" library="gtk+-3.0"/>
 		</metadependency>
@@ -110,6 +110,12 @@
 			<dependency type="package" library="gee-0.8"/>
 		</metadependency>
 		<metadependency name="LibVala">
+			<dependency type="package" library="libvala-0.30">
+				<condition library="libvala-0.30" version="" relation="exists"/>
+			</dependency>
+			<dependency type="package" library="libvala-0.28">
+				<condition library="libvala-0.28" version="" relation="exists"/>
+			</dependency>
 			<dependency type="package" library="libvala-0.26">
 				<condition library="libvala-0.26" version="" relation="exists"/>
 			</dependency>
@@ -141,7 +147,7 @@
 			<condition library="vte-2.91" version="" relation="exists"/>
 		</define>
 	</target>
-	<target id="18" binary_name="cmaketest">
+	<target id="18" binary_name="cmaketest" library="false">
 		<buildsystem type="cmake"/>
 		<source id="16"/>
 		<source id="14"/>
@@ -207,6 +213,7 @@
 		<source id="73"/>
 		<source id="74"/>
 		<source id="7"/>
+		<source id="92"/>
 		<gresource id="52"/>
 		<data id="62"/>
 		<gladeui id="20"/>
@@ -230,7 +237,6 @@
 		<gladeui id="76"/>
 		<gladeui id="81"/>
 		<gladeui id="78"/>
-		<valasource id="92" />
 		<metadependency name="Gtk">
 			<dependency type="package" library="gtk+-3.0"/>
 		</metadependency>
@@ -247,6 +253,12 @@
 			<dependency type="package" library="gee-0.8"/>
 		</metadependency>
 		<metadependency name="LibVala">
+			<dependency type="package" library="libvala-0.30">
+				<condition library="libvala-0.30" version="" relation="exists"/>
+			</dependency>
+			<dependency type="package" library="libvala-0.28">
+				<condition library="libvala-0.28" version="" relation="exists"/>
+			</dependency>
 			<dependency type="package" library="libvala-0.26">
 				<condition library="libvala-0.26" version="" relation="exists"/>
 			</dependency>
@@ -391,8 +403,6 @@
 	<gladeui id="75" filename="src/Ui/ConsoleView.glade"/>
 	<gladeui id="76" filename="src/Ui/MainWidget.glade"/>
 	<gladeui id="77" filename="src/Ui/WelcomeScreen/RecentEntry.glade"/>
-	<gladeui id="78" filename="src/Ui/WelcomeScreen/TemplateSelector.glade"/>
-	<gladeui id="79" filename="src/Ui/WelcomeScreen/TemplateSelectorEntry.glade"/>
 	<gladeui id="80" filename="src/Ui/WelcomeScreen/WelcomeScreen.glade"/>
 	<gladeui id="81" filename="src/Ui/Editors/Editor_Data.glade"/>
 	<gladeui id="82" filename="src/Ui/Editors/Editor_Data_entry.glade"/>
@@ -405,5 +415,5 @@
 	<gladeui id="89" filename="src/Ui/Editors/Editor_Target_NewDependency.glade"/>
 	<gladeui id="90" filename="src/Units/Builder/Custom.glade"/>
 	<gladeui id="91" filename="src/Units/Builder/Waf.glade"/>
-	<valasource id="92" filename="src/Units/Builder/Autotools.vala" />
+	<valasource id="92" filename="src/Units/Builder/Autotools.vala"/>
 </project>
