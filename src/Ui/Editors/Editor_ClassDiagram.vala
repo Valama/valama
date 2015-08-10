@@ -116,7 +116,7 @@ namespace Ui {
     }
     private inline Gtk.Label descriptionLabel (string text) {
       var label = new Gtk.Label (text);
-      label.xalign = 1.0f;
+      //label.xalign = 1.0f;
       return label;
     }
     internal override void destroy_internal() {

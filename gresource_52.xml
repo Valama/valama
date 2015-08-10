@@ -20,7 +20,5 @@
 <file>src/Ui/Editors/Editor_Data.glade</file>
 <file>src/Ui/Editors/Editor_Data_entry.glade</file>
 <file>src/Ui/MainWidget.glade</file>
-<file>src/Ui/WelcomeScreen/TemplateSelector.glade</file>
-<file>src/Ui/WelcomeScreen/TemplateSelectorEntry.glade</file>
 </gresource>
 </gresources>

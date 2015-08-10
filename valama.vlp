@@ -374,8 +374,6 @@
 		<resource file="src/Ui/Editors/Editor_Data.glade" compressed="true" xml_stripblanks="true"/>
 		<resource file="src/Ui/Editors/Editor_Data_entry.glade" compressed="true" xml_stripblanks="true"/>
 		<resource file="src/Ui/MainWidget.glade" compressed="true" xml_stripblanks="true"/>
-		<resource file="src/Ui/WelcomeScreen/TemplateSelector.glade" compressed="true" xml_stripblanks="true"/>
-		<resource file="src/Ui/WelcomeScreen/TemplateSelectorEntry.glade" compressed="true" xml_stripblanks="true"/>
 	</gresource>
 	<valasource id="56" filename="src/Units/Builder/Valama.vala"/>
 	<valasource id="57" filename="src/Project/ProjectMember_GResource.vala"/>

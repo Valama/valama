@@ -333,8 +333,6 @@ add_custom_command(
    "src/Ui/Editors/Editor_Data.glade"
    "src/Ui/Editors/Editor_Data_entry.glade"
    "src/Ui/MainWidget.glade"
-   "src/Ui/WelcomeScreen/TemplateSelector.glade"
-   "src/Ui/WelcomeScreen/TemplateSelectorEntry.glade"
   COMMENT "Building resource GladeUI"
 )
 list(APPEND vapidirs --gresources "${CMAKE_SOURCE_DIR}/gresource_52.xml")
