@@ -124,10 +124,10 @@ namespace Units {
       //context_internal.check ();
       if (report_internal.get_errors() == 0)
         context_internal.resolver.resolve (context_internal);
-      /*if (report_internal.get_errors() == 0)
+      if (report_internal.get_errors() == 0)
         context_internal.analyzer.analyze (context_internal);
       if (report_internal.get_errors() == 0)
-        context_internal.flow_analyzer.analyze (context_internal);*/
+        context_internal.flow_analyzer.analyze (context_internal);
       report = report_internal;
 
       context = (owned) context_internal; // Take ownership of the context...
