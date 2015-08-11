@@ -49,15 +49,14 @@ namespace Builder {
       
       string binary_name = target.binary_name;
       if (target.library) {
-		cmd_build.append ("-H " + build_dir + target.binary_name + ".h ");
-		cmd_build.append ("--vapi " + build_dir + target.binary_name + ".vapi ");
-		cmd_build.append ("--gir " + build_dir + target.binary_name + ".gir ");
-		cmd_build.append ("--library " + target.binary_name + " -X -fPIC -X -shared ");
-		binary_name = "lib" + binary_name + ".so";
-	  }
-	 
-	  cmd_build.append ("-o '" + build_dir + binary_name + "' ");
-	    
+        cmd_build.append ("-H " + build_dir + target.binary_name + ".h ");
+        cmd_build.append ("--vapi " + build_dir + target.binary_name + ".vapi ");
+        cmd_build.append ("--gir " + build_dir + target.binary_name + ".gir ");
+        cmd_build.append ("--library " + target.binary_name + " -X -fPIC -X -shared ");
+        binary_name = "lib" + binary_name + ".so";
+      }
+
+      cmd_build.append ("-o '" + build_dir + binary_name + "' ");
 
       // Copy data files, write basedir config vapi
       Helper.write_config_vapi (target, build_dir + "config.vapi");

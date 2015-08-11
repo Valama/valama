@@ -28,6 +28,7 @@ namespace Builder {
       // Create build directory if not existing yet
       DirUtils.create_with_parents (build_dir + "/build", 509); // = 775 octal
       DirUtils.create_with_parents (build_dir + "/gresources", 509);
+      DirUtils.create_with_parents (build_dir + "/install", 509);
 
       var buildsystem_dir = "buildsystems/" + target.binary_name + "/cmake";
 
@@ -188,7 +189,7 @@ namespace Builder {
           string type_string = "FILES";
           if (data_target.is_folder)
             type_string = "DIRECTORY";
-          
+
           dos.put_string ("install(" + type_string + " \"" + data_target.file + "\" DESTINATION \"" + target_dir + data_target.target + "\")\n");
         }
         dos.put_string ("add_definitions(-D" + data.basedir + "=\"" + target_dir + "\")\n");
@@ -223,14 +224,14 @@ namespace Builder {
       }
 
       if (target.library) {
-		dos.put_string ("  LIBRARY\n"); 
-		dos.put_string ("    \"${project_name_lower}\"\n");
-		dos.put_string ("  GIRFILE\n");
-		string gir_version = "0.1";
+		    dos.put_string ("  LIBRARY\n");
+		    dos.put_string ("    \"${project_name_lower}\"\n");
+		    dos.put_string ("  GIRFILE\n");
+		    string gir_version = "0.1";
         if (info != null)
           gir_version = "%d.%d".printf (info.major, info.minor);
-		dos.put_string ("    \"${project_name}-" + gir_version + "\"\n");
-	  }
+        dos.put_string ("    \"${project_name}-" + gir_version + "\"\n");
+      }
       dos.put_string ("  OPTIONS\n");
       dos.put_string ("    ${default_vala_flags}\n");
       dos.put_string ("    ${vapidirs}\n");
@@ -238,27 +239,32 @@ namespace Builder {
       dos.put_string ("\n");
 
       if (target.library) {
-		dos.put_string ("add_library(\"${project_name_lower}\" SHARED ${VALA_C} ${compiled_resources})\n");
-		dos.put_string ("set_target_properties(\"${project_name_lower}\" PROPERTIES\n");
-		dos.put_string ("  VERSION \"${${project_name}_VERSION}\"\n");
-		dos.put_string ("  SOVERSION %d\n".printf (info == null ? 0 : info.major));
-		dos.put_string (")\n");
-	  }
-	  else
+        dos.put_string ("add_library(\"${project_name_lower}\" SHARED ${VALA_C} ${compiled_resources})\n");
+        dos.put_string ("set_target_properties(\"${project_name_lower}\" PROPERTIES\n");
+        dos.put_string ("  VERSION \"${${project_name}_VERSION}\"\n");
+        dos.put_string ("  SOVERSION %d\n".printf (info == null ? 0 : info.major));
+        dos.put_string (")\n");
+      }
+      else
         dos.put_string ("add_executable(\"${project_name_lower}\" ${VALA_C} ${compiled_resources})\n");
       dos.put_string ("\n");
+
       dos.put_string ("target_link_libraries(\"${project_name_lower}\"\n");
       dos.put_string ("  ${PROJECT_LDFLAGS}\n");
       dos.put_string ("  -lm\n");
       dos.put_string (")\n");
       dos.put_string ("\n");
+
       dos.put_string ("add_definitions(\n");
       dos.put_string ("  ${PROJECT_C_FLAGS}\n");
       dos.put_string (")\n");
 
       // Execute cmake and make
       var project_dir = File.new_for_path (target.project.filename).get_parent().get_path();
-      Pid child_pid = main_widget.console_view.spawn_process ("/bin/sh -c \"cd '" + project_dir + "/" + build_dir + "/build' && cmake ../../../../ && make\"", build_dir + "/build");
+      var local_install_dir = project_dir + "/" + build_dir + "/install";
+      Pid child_pid = main_widget.console_view.spawn_process (
+              "/bin/sh -c \"cd '" + project_dir + "/" + build_dir + "/build' && cmake -DCMAKE_INSTALL_PREFIX:PATH='" + local_install_dir + "' ../../../../ && make && make install\"",
+              build_dir + "/build");
 
       ulong process_exited_handler = 0;
       process_exited_handler = main_widget.console_view.process_exited.connect (()=>{
