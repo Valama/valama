@@ -34,7 +34,7 @@ namespace Builder {
 
       DirUtils.create_with_parents (buildsystem_dir + "/cmake_modules", 509);
 
-      Helper.copy_recursive (File.new_for_path (Config.DATA_DIR + "/Data/CMake"), File.new_for_path (buildsystem_dir + "/cmake_modules"), FileCopyFlags.OVERWRITE, null);
+      Helper.copy_recursive (File.new_for_path (Config.DATA_DIR + "/share/valama/Data/CMake"), File.new_for_path (buildsystem_dir + "/cmake_modules"), FileCopyFlags.OVERWRITE, null);
 
       var file = File.new_for_path ("CMakeLists.txt");
       if (file.query_exists ())
@@ -184,13 +184,16 @@ namespace Builder {
       foreach (string id in target.included_data) {
         var data = target.project.getMemberFromId (id) as Project.ProjectMemberData;
         //TODO: Generalize
-        string target_dir = "${CMAKE_INSTALL_PREFIX}/share/valamang";
+        string target_dir = "${CMAKE_INSTALL_PREFIX}";
         foreach (var data_target in data.targets) {
-          string type_string = "FILES";
           if (data_target.is_folder)
-            type_string = "DIRECTORY";
-
-          dos.put_string ("install(" + type_string + " \"" + data_target.file + "\" DESTINATION \"" + target_dir + data_target.target + "\")\n");
+            dos.put_string ("install(DIRECTORY \"" + data_target.file + "/\" DESTINATION \"" + target_dir + data_target.target + "\")\n");
+          else {
+            var splt = data_target.target.split("/");
+            var dest_filename = splt[splt.length - 1];
+            var dest_path = target_dir + data_target.target.substring(0, data_target.target.length - dest_filename.length);
+            dos.put_string ("install(FILES \"" + data_target.file + "\" DESTINATION \"" + dest_path + "\" RENAME \"" + dest_filename + "\")\n");
+          }
         }
         dos.put_string ("add_definitions(-D" + data.basedir + "=\"" + target_dir + "\")\n");
         dos.put_string ("\n");

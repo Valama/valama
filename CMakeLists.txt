@@ -340,10 +340,10 @@ list(APPEND vapifiles "${CMAKE_BINARY_DIR}/gresource_52.c")
 list(APPEND compiled_resources "${CMAKE_BINARY_DIR}/gresource_52.c")
 
 list(APPEND vapifiles "buildsystems/cmaketest/cmake/config.vapi")
-install(FILES "src/Units/Completion/syntax" DESTINATION "${CMAKE_INSTALL_PREFIX}/share/valamang/guanako")
-install(DIRECTORY "templates" DESTINATION "${CMAKE_INSTALL_PREFIX}/share/valamang")
-install(DIRECTORY "src/Units/Builder/Data" DESTINATION "${CMAKE_INSTALL_PREFIX}/share/valamang")
-add_definitions(-DDATA_DIR="${CMAKE_INSTALL_PREFIX}/share/valamang")
+install(FILES "src/Units/Completion/syntax" DESTINATION "${CMAKE_INSTALL_PREFIX}/share/valama/guanako/" RENAME "syntax")
+install(DIRECTORY "templates/" DESTINATION "${CMAKE_INSTALL_PREFIX}/share/valama/templates")
+install(DIRECTORY "src/Units/Builder/Data/" DESTINATION "${CMAKE_INSTALL_PREFIX}/share/valama/Data")
+add_definitions(-DDATA_DIR="${CMAKE_INSTALL_PREFIX}")
 
 set(default_vala_flags
   "--thread"

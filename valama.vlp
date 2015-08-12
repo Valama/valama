@@ -382,9 +382,9 @@
 	<valasource id="60" filename="src/Project/ProjectMember_Data.vala"/>
 	<valasource id="61" filename="src/Ui/Editors/Editor_Data.vala"/>
 	<data id="62" name="Data" basedir="DATA_DIR">
-		<target file="src/Units/Completion/syntax" target="/guanako" is_folder="false"/>
-		<target file="templates" target="" is_folder="true"/>
-		<target file="src/Units/Builder/Data" target="" is_folder="true"/>
+		<target file="src/Units/Completion/syntax" target="/share/valama/guanako/syntax" is_folder="false"/>
+		<target file="templates" target="/share/valama/templates" is_folder="true"/>
+		<target file="src/Units/Builder/Data" target="/share/valama/Data" is_folder="true"/>
 	</data>
 	<valasource id="63" filename="src/Project/FileRef.vala"/>
 	<valasource id="64" filename="src/ProjectTemplates/TemplateProvider.vala"/>

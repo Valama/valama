@@ -118,7 +118,7 @@ public class ProjectTemplate {
 public class ProjectTemplateProvider {
   public Gee.LinkedList<ProjectTemplate?> templates = new Gee.LinkedList<ProjectTemplate?>();
   public ProjectTemplateProvider() {
-    var templates_path = Config.DATA_DIR + "/templates";
+    var templates_path = Config.DATA_DIR + "/share/valama/templates";
     var templates_dir = File.new_for_path (templates_path);
 
     FileEnumerator enumerator = templates_dir.enumerate_children (GLib.FileAttribute.STANDARD_NAME, GLib.FileQueryInfoFlags.NONE);

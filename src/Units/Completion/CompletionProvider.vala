@@ -6,7 +6,7 @@ namespace Units {
     
     public override void init() {
 
-      guanako_project = new Guanako.Project(main_widget.code_context_provider.context, Config.DATA_DIR + "/guanako/syntax");
+      guanako_project = new Guanako.Project(main_widget.code_context_provider.context, Config.DATA_DIR + "/share/valama/guanako/syntax");
 
       // Register provider on existing and following source members
       main_widget.project.member_editor_created.connect((member, new_editor)=>{
