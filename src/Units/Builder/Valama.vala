@@ -42,6 +42,9 @@ namespace Builder {
         cmd_build.append ("glib-compile-resources '" + res_path + "' --generate-source && ");
       }
 
+      Helper.write_gladeui_gresource_xml (target, "gresource_gladeui.xml");
+      cmd_build.append ("glib-compile-resources 'gresource_gladeui.xml' --generate-source && ");
+
       // Compiler call
       cmd_build.append ("valac ");
       cmd_build.append ("--target-glib=2.38 ");
@@ -110,6 +113,8 @@ namespace Builder {
 
         cmd_build.append ("--gresources '" + res_path + "' '" + res_path.replace(".xml",".c") + "' ");
       }
+
+      cmd_build.append ("--gresources 'gresource_gladeui.xml' 'gresource_gladeui.c' ");
 
       // Add sources
       foreach (string id in target.included_sources) {

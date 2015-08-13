@@ -19,6 +19,25 @@ namespace Builder {
       dos.put_string ("""</gresources>""" + "\n");    
     }
 
+    public static void write_gladeui_gresource_xml (Project.ProjectMemberTarget target, string path) {
+      var file = File.new_for_path (path);
+      if (file.query_exists ())
+        file.delete ();
+
+      var dos = new DataOutputStream (file.create (FileCreateFlags.REPLACE_DESTINATION));
+      dos.put_string ("""<?xml version="1.0" encoding="UTF-8"?>""" + "\n");
+      dos.put_string ("""<gresources>""" + "\n");
+      dos.put_string ("""<gresource prefix="/">""" + "\n");
+
+      foreach (var id in target.included_gladeuis) {
+        var gladeui = target.project.getMemberFromId(id) as Project.ProjectMemberGladeUi;
+        dos.put_string ("""<file>""" + gladeui.file.get_rel() + """</file>""" + "\n");
+      }
+
+      dos.put_string ("""</gresource>""" + "\n");
+      dos.put_string ("""</gresources>""" + "\n");
+    }
+
     public static void write_config_vapi (Project.ProjectMemberTarget target, string path) {
       var vapi = File.new_for_path (path);
       if (vapi.query_exists ())

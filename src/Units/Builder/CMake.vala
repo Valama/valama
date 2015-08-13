@@ -177,6 +177,27 @@ namespace Builder {
         dos.put_string ("\n");
       }
 
+      Helper.write_gladeui_gresource_xml (target, "gresource_gladeui.xml");
+      dos.put_string ("add_custom_command(\n");
+      dos.put_string ("  OUTPUT\n");
+      dos.put_string ("    \"${CMAKE_BINARY_DIR}/gresource_gladeui.c\"\n");
+      dos.put_string ("  WORKING_DIRECTORY\n");
+      dos.put_string ("    ${CMAKE_SOURCE_DIR}\n");
+      dos.put_string ("  COMMAND\n");
+      dos.put_string ("    glib-compile-resources \"${CMAKE_SOURCE_DIR}/gresource_gladeui.xml\" --generate-source --target=\"${CMAKE_BINARY_DIR}/gresource_gladeui.c\"\n");
+      dos.put_string ("  DEPENDS\n");
+      foreach (var id in target.included_gladeuis) {
+        var gladeui = target.project.getMemberFromId(id) as Project.ProjectMemberGladeUi;
+        dos.put_string ("   \"" + gladeui.file.get_rel() + "\"\n");
+      }
+      dos.put_string ("  COMMENT \"Building GladeUI gresource\"\n");
+      dos.put_string (")\n");
+      dos.put_string ("list(APPEND vapidirs --gresources \"${CMAKE_SOURCE_DIR}/gresource_gladeui.xml\")\n");
+      dos.put_string ("list(APPEND vapifiles \"${CMAKE_BINARY_DIR}/gresource_gladeui.c\")\n");
+      dos.put_string ("list(APPEND compiled_resources \"${CMAKE_BINARY_DIR}/gresource_gladeui.c\")\n");
+
+      dos.put_string ("\n");
+
       // Copy data files, write basedir config vapi
       Helper.write_config_vapi (target, buildsystem_dir + "/config.vapi");
       dos.put_string ("list(APPEND vapifiles \"" + buildsystem_dir + "/config.vapi\")\n");

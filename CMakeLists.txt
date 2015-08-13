@@ -308,21 +308,21 @@ endif ()
 
 add_custom_command(
   OUTPUT
-    "${CMAKE_BINARY_DIR}/gresource_52.c"
+    "${CMAKE_BINARY_DIR}/gresource_gladeui.c"
   WORKING_DIRECTORY
     ${CMAKE_SOURCE_DIR}
   COMMAND
-    glib-compile-resources "${CMAKE_SOURCE_DIR}/gresource_52.xml" --generate-source --target="${CMAKE_BINARY_DIR}/gresource_52.c"
+    glib-compile-resources "${CMAKE_SOURCE_DIR}/gresource_gladeui.xml" --generate-source --target="${CMAKE_BINARY_DIR}/gresource_gladeui.c"
   DEPENDS
-   "src/Ui/ConsoleView.glade"
    "src/Ui/NewProjectMember.glade"
+   "src/Ui/Editors/Editor_Data_entry.glade"
    "src/Ui/ProjectStructure.glade"
+   "src/Ui/Editors/Editor_Info.glade"
+   "src/Ui/Editors/Editor_Target.glade"
    "src/Ui/WelcomeScreen/RecentEntry.glade"
    "src/Ui/WelcomeScreen/WelcomeScreen.glade"
    "src/Ui/Editors/Editor_GResource.glade"
    "src/Ui/Editors/Editor_GResource_entry.glade"
-   "src/Ui/Editors/Editor_Info.glade"
-   "src/Ui/Editors/Editor_Target.glade"
    "src/Ui/Editors/Editor_Target_Condition.glade"
    "src/Ui/Editors/Editor_Target_Define.glade"
    "src/Ui/Editors/Editor_Target_Dependency.glade"
@@ -330,14 +330,14 @@ add_custom_command(
    "src/Ui/Editors/Editor_Target_NewDependency.glade"
    "src/Units/Builder/Custom.glade"
    "src/Units/Builder/Waf.glade"
-   "src/Ui/Editors/Editor_Data.glade"
-   "src/Ui/Editors/Editor_Data_entry.glade"
+   "src/Ui/ConsoleView.glade"
    "src/Ui/MainWidget.glade"
-  COMMENT "Building resource GladeUI"
+   "src/Ui/Editors/Editor_Data.glade"
+  COMMENT "Building GladeUI gresource"
 )
-list(APPEND vapidirs --gresources "${CMAKE_SOURCE_DIR}/gresource_52.xml")
-list(APPEND vapifiles "${CMAKE_BINARY_DIR}/gresource_52.c")
-list(APPEND compiled_resources "${CMAKE_BINARY_DIR}/gresource_52.c")
+list(APPEND vapidirs --gresources "${CMAKE_SOURCE_DIR}/gresource_gladeui.xml")
+list(APPEND vapifiles "${CMAKE_BINARY_DIR}/gresource_gladeui.c")
+list(APPEND compiled_resources "${CMAKE_BINARY_DIR}/gresource_gladeui.c")
 
 list(APPEND vapifiles "buildsystems/cmaketest/cmake/config.vapi")
 install(FILES "src/Units/Completion/syntax" DESTINATION "${CMAKE_INSTALL_PREFIX}/share/valama/guanako/" RENAME "syntax")

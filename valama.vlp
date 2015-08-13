@@ -80,8 +80,6 @@
 		<gladeui id="75"/>
 		<gladeui id="76"/>
 		<gladeui id="77"/>
-		<gladeui id="78"/>
-		<gladeui id="79"/>
 		<gladeui id="80"/>
 		<gladeui id="81"/>
 		<gladeui id="82"/>
@@ -214,7 +212,6 @@
 		<source id="74"/>
 		<source id="7"/>
 		<source id="92"/>
-		<gresource id="52"/>
 		<data id="62"/>
 		<gladeui id="20"/>
 		<gladeui id="82"/>
@@ -233,10 +230,8 @@
 		<gladeui id="90"/>
 		<gladeui id="91"/>
 		<gladeui id="75"/>
-		<gladeui id="79"/>
 		<gladeui id="76"/>
 		<gladeui id="81"/>
-		<gladeui id="78"/>
 		<metadependency name="Gtk">
 			<dependency type="package" library="gtk+-3.0"/>
 		</metadependency>

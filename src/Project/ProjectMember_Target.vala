@@ -108,6 +108,12 @@ namespace Project {
             included_data.remove (member_data.id);
             project.member_data_changed (this, this);
           }
+        } else if (member is ProjectMemberGladeUi) {
+          var member_gladeui = member as ProjectMemberGladeUi;
+          if (member_gladeui.id in included_gladeuis) {
+            included_gladeuis.remove (member_gladeui.id);
+            project.member_data_changed (this, this);
+          }
         }
       });
     }
