@@ -2,15 +2,12 @@
 <gresources>
 <gresource prefix="/">
 <file>src/Ui/NewProjectMember.glade</file>
+<file>src/Ui/Editors/Editor_Data_entry.glade</file>
 <file>src/Ui/ProjectStructure.glade</file>
 <file>src/Ui/Editors/Editor_Info.glade</file>
 <file>src/Ui/Editors/Editor_Target.glade</file>
-<file>src/Ui/ConsoleView.glade</file>
-<file>src/Ui/MainWidget.glade</file>
 <file>src/Ui/WelcomeScreen/RecentEntry.glade</file>
 <file>src/Ui/WelcomeScreen/WelcomeScreen.glade</file>
-<file>src/Ui/Editors/Editor_Data.glade</file>
-<file>src/Ui/Editors/Editor_Data_entry.glade</file>
 <file>src/Ui/Editors/Editor_GResource.glade</file>
 <file>src/Ui/Editors/Editor_GResource_entry.glade</file>
 <file>src/Ui/Editors/Editor_Target_Condition.glade</file>
@@ -20,5 +17,8 @@
 <file>src/Ui/Editors/Editor_Target_NewDependency.glade</file>
 <file>src/Units/Builder/Custom.glade</file>
 <file>src/Units/Builder/Waf.glade</file>
+<file>src/Ui/ConsoleView.glade</file>
+<file>src/Ui/MainWidget.glade</file>
+<file>src/Ui/Editors/Editor_Data.glade</file>
 </gresource>
 </gresources>

@@ -12,6 +12,7 @@ namespace Builder {
     public override void load (Xml.Node* node) {
     }
     public override void save (Xml.TextWriter writer) {
+      writeCMakeFiles();
     }
     public override bool can_export () {
       return false;
@@ -19,16 +20,8 @@ namespace Builder {
     public override void export (Ui.MainWidget main_widget) {
     
     }
-    public override void build(Ui.MainWidget main_widget) {
 
-      state = BuilderState.COMPILING;
-
-      var build_dir = "build/" + target.binary_name + "/cmake";
-      
-      // Create build directory if not existing yet
-      DirUtils.create_with_parents (build_dir + "/build", 509); // = 775 octal
-      DirUtils.create_with_parents (build_dir + "/gresources", 509);
-      DirUtils.create_with_parents (build_dir + "/install", 509);
+    private void writeCMakeFiles() {
 
       var buildsystem_dir = "buildsystems/" + target.binary_name + "/cmake";
 
@@ -204,8 +197,8 @@ namespace Builder {
 
       foreach (string id in target.included_data) {
         var data = target.project.getMemberFromId (id) as Project.ProjectMemberData;
-        //TODO: Generalize
         string target_dir = "${CMAKE_INSTALL_PREFIX}";
+
         foreach (var data_target in data.targets) {
           if (data_target.is_folder)
             dos.put_string ("install(DIRECTORY \"" + data_target.file + "/\" DESTINATION \"" + target_dir + data_target.target + "\")\n");
@@ -216,6 +209,7 @@ namespace Builder {
             dos.put_string ("install(FILES \"" + data_target.file + "\" DESTINATION \"" + dest_path + "\" RENAME \"" + dest_filename + "\")\n");
           }
         }
+
         dos.put_string ("add_definitions(-D" + data.basedir + "=\"" + target_dir + "\")\n");
         dos.put_string ("\n");
       }
@@ -282,6 +276,19 @@ namespace Builder {
       dos.put_string ("add_definitions(\n");
       dos.put_string ("  ${PROJECT_C_FLAGS}\n");
       dos.put_string (")\n");
+    }
+
+    public override void build(Ui.MainWidget main_widget) {
+
+      state = BuilderState.COMPILING;
+
+      var build_dir = "build/" + target.binary_name + "/cmake";
+
+      // Create build directory if not existing yet
+      DirUtils.create_with_parents (build_dir + "/build", 509); // = 775 octal
+      DirUtils.create_with_parents (build_dir + "/install", 509);
+
+      writeCMakeFiles();
 
       // Execute cmake and make
       var project_dir = File.new_for_path (target.project.filename).get_parent().get_path();
