@@ -71,6 +71,7 @@
 		<source id="73"/>
 		<source id="74"/>
 		<source id="92"/>
+		<source id="78"/>
 		<gresource id="52"/>
 		<data id="62"/>
 		<gladeui id="20"/>
@@ -212,6 +213,7 @@
 		<source id="74"/>
 		<source id="7"/>
 		<source id="92"/>
+		<source id="78"/>
 		<data id="62"/>
 		<gladeui id="20"/>
 		<gladeui id="82"/>
@@ -409,4 +411,5 @@
 	<gladeui id="90" filename="src/Units/Builder/Custom.glade"/>
 	<gladeui id="91" filename="src/Units/Builder/Waf.glade"/>
 	<valasource id="92" filename="src/Units/Builder/Autotools.vala"/>
+	<valasource id="78" filename="src/Units/Builder/CMakeSwitchWriter.vala"/>
 </project>

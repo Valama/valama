@@ -33,6 +33,7 @@ namespace Ui {
     public Units.SourceBufferManager source_buffer_manager = new Units.SourceBufferManager();
     public Units.CompletionProvider completion_provider = new Units.CompletionProvider();
     public Units.InstalledLibrariesProvider installed_libraries_provider = new Units.InstalledLibrariesProvider();
+    public Units.CMakeSwitchWriter cmake_switch_writer = new Units.CMakeSwitchWriter();
 
     private Gee.ArrayList<Units.Unit> units = new Gee.ArrayList<Units.Unit>();
     
@@ -51,6 +52,7 @@ namespace Ui {
       units.add (completion_provider);
       units.add (installed_libraries_provider);
       units.add (console_view);
+      units.add (cmake_switch_writer);
 
       foreach (var unit in units) {
         unit.main_widget = this;

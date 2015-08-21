@@ -29,7 +29,7 @@ namespace Builder {
 
       Helper.copy_recursive (File.new_for_path (Config.DATA_DIR + "/share/valama/Data/CMake"), File.new_for_path (buildsystem_dir + "/cmake_modules"), FileCopyFlags.OVERWRITE, null);
 
-      var file = File.new_for_path ("CMakeLists.txt");
+      var file = File.new_for_path ("CMake_" + target.binary_name + ".txt");
       if (file.query_exists ())
           file.delete ();
 
@@ -294,7 +294,7 @@ namespace Builder {
       var project_dir = File.new_for_path (target.project.filename).get_parent().get_path();
       var local_install_dir = project_dir + "/" + build_dir + "/install";
       Pid child_pid = main_widget.console_view.spawn_process (
-              "/bin/sh -c \"cd '" + project_dir + "/" + build_dir + "/build' && cmake -DCMAKE_INSTALL_PREFIX:PATH='" + local_install_dir + "' ../../../../ && make && make install\"",
+              "/bin/sh -c \"cd '" + project_dir + "/" + build_dir + "/build' && cmake -DTARGET='" + target.binary_name + "' -DCMAKE_INSTALL_PREFIX:PATH='" + local_install_dir + "' ../../../../ && make && make install\"",
               build_dir + "/build");
 
       ulong process_exited_handler = 0;

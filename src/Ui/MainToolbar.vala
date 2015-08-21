@@ -121,7 +121,7 @@ namespace Ui {
         return;
       }
       // Track builders and states
-      if (state_change_id != 0) {
+      if (old_target != null) {
         old_target.builder.disconnect (state_change_id);
         old_target.disconnect (builder_change_id);
       }
