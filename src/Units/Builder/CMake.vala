@@ -191,9 +191,8 @@ namespace Builder {
 
       dos.put_string ("\n");
 
-      // Copy data files, write basedir config vapi
-      Helper.write_config_vapi (target, buildsystem_dir + "/config.vapi");
-      dos.put_string ("list(APPEND vapifiles \"" + buildsystem_dir + "/config.vapi\")\n");
+      // Copy data files, include config.vapi
+      dos.put_string ("list(APPEND vapifiles \"buildsystems/" + target.binary_name + "/config.vapi\")\n");
 
       foreach (string id in target.included_data) {
         var data = target.project.getMemberFromId (id) as Project.ProjectMemberData;

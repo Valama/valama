@@ -61,9 +61,7 @@ namespace Builder {
 
       cmd_build.append ("-o '" + build_dir + binary_name + "' ");
 
-      // Copy data files, write basedir config vapi
-      Helper.write_config_vapi (target, build_dir + "config.vapi");
-
+      // Copy data files
       foreach (string id in target.included_data) {
         var data = target.project.getMemberFromId (id) as Project.ProjectMemberData;
         cmd_build.append ("-X -D" + data.basedir + """='\"""" + build_dir + "data/" + data.basedir + """/\"' """);
@@ -79,7 +77,7 @@ namespace Builder {
       // TODO: Get rid of this once translation support is there
       cmd_build.append ("""-X -DGETTEXT_PACKAGE='\"valamang\"' """);
 
-      cmd_build.append ("'" + build_dir + "config.vapi' ");
+      cmd_build.append ("'buildsystems/" + target.binary_name + "/config.vapi' ");
 
       // Add defines
       foreach (var define in target.defines) {

@@ -103,7 +103,7 @@ namespace Units {
       }
 
       // Add source files
-      
+
       foreach (string source_id in current_target.included_sources) {
         var source = main_widget.project.getMemberFromId (source_id) as Project.ProjectMemberValaSource;
 
@@ -117,6 +117,8 @@ namespace Units {
         context_internal.add_source_file (source_file);
       }
 
+      var config_vapi_file = new Project.FileRef.from_rel (main_widget.project, "buildsystems/" + current_target.binary_name + "/config.vapi");
+      context_internal.add_source_filename (config_vapi_file.get_abs());
 
       var parser = new Vala.Parser();
       parser.parse (context_internal);

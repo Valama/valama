@@ -34,6 +34,7 @@ namespace Ui {
     public Units.CompletionProvider completion_provider = new Units.CompletionProvider();
     public Units.InstalledLibrariesProvider installed_libraries_provider = new Units.InstalledLibrariesProvider();
     public Units.CMakeSwitchWriter cmake_switch_writer = new Units.CMakeSwitchWriter();
+    public Units.ConfigVapiWriter config_vapi_writer = new Units.ConfigVapiWriter();
 
     private Gee.ArrayList<Units.Unit> units = new Gee.ArrayList<Units.Unit>();
     
@@ -53,6 +54,7 @@ namespace Ui {
       units.add (installed_libraries_provider);
       units.add (console_view);
       units.add (cmake_switch_writer);
+      units.add (config_vapi_writer);
 
       foreach (var unit in units) {
         unit.main_widget = this;
