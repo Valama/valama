@@ -12,6 +12,8 @@ namespace Ui {
   	public Alignment algn_errors;
   	[GtkChild]
   	public Alignment algn_console;
+  	[GtkChild]
+  	public Notebook nb_lower;
   }
 
   public class MainWidget : Object {
@@ -41,6 +43,27 @@ namespace Ui {
     public MainWidget(Project.Project project, Gtk.Window window) {
       this.project = project;
       this.window = window;
+
+      // Remove border from notebook
+      string style = """
+          #nb-lower {
+            border-width:0px;
+          }
+          #nb-lower tab {
+            border-width:1px;
+            border-left:0px;
+            border-right:1px;
+            border-radius:0px;
+          }
+          #nb-lower tab:first-child {
+            border-top:0px;
+          }
+      """;
+      var cssprovider = new Gtk.CssProvider();
+      cssprovider.load_from_data(style,-1);
+      template.nb_lower.name = "nb-lower";
+      template.nb_lower.get_style_context().add_provider(cssprovider, -1);
+      template.nb_lower.get_style_context().add_class("nb-lower");
 
       // Initialize all elements
       units.add (main_toolbar);

@@ -12,6 +12,28 @@ namespace Ui {
       
       notebook = new Gtk.Notebook();
       notebook.scrollable = true;
+      notebook.name = "editor-notebook";
+
+      // Remove border
+      string style = """
+          #editor-notebook {
+            border-width:0px;
+          }
+          #editor-notebook tab {
+            border-width:1px;
+            border-top:0px;
+            border-bottom:1px;
+            border-radius:0px;
+          }
+          #editor-notebook tab:first-child {
+            border-left:0px;
+          }
+      """;
+      var cssprovider = new Gtk.CssProvider();
+      cssprovider.load_from_data(style,-1);
+      notebook.get_style_context().add_provider(cssprovider, -1);
+      notebook.get_style_context().add_class("editor-notebook");
+
       notebook.show();
       widget = notebook;
       widget.hexpand = true;
