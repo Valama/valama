@@ -79,6 +79,9 @@ set(srcfiles
   "src/Units/Builder/Autotools.vala"
   "src/Units/Builder/CMakeSwitchWriter.vala"
   "src/Units/Builder/ConfigVapiWriter.vala"
+  "src/Ui/SearchView.vala"
+  "src/Search/SearchProvider.vala"
+  "src/Search/SearchProviderValaSource.vala"
 )
 
 message ("-- checking dependency Gtk")
@@ -335,6 +338,7 @@ add_custom_command(
    "src/Ui/ConsoleView.glade"
    "src/Ui/MainWidget.glade"
    "src/Ui/Editors/Editor_Data.glade"
+   "src/Ui/SearchView.glade"
   COMMENT "Building GladeUI gresource"
 )
 list(APPEND vapidirs --gresources "${CMAKE_SOURCE_DIR}/gresource_gladeui.xml")

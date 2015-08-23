@@ -35,6 +35,7 @@ namespace Ui {
       Shell.parse_argv (command, out argv);
       Pid child_pid;
       // Spawn the process
+      terminal.scrollback_lines = 1024;
 #if VTE_2_91
       terminal.spawn_sync (PtyFlags.DEFAULT, working_directory, argv, null, SpawnFlags.DO_NOT_REAP_CHILD, null, out child_pid);
       terminal.watch_child (child_pid);

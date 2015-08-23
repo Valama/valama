@@ -73,6 +73,9 @@
 		<source id="92"/>
 		<source id="78"/>
 		<source id="79"/>
+		<source id="93"/>
+		<source id="95"/>
+		<source id="96"/>
 		<gresource id="52"/>
 		<data id="62"/>
 		<gladeui id="20"/>
@@ -94,6 +97,7 @@
 		<gladeui id="89"/>
 		<gladeui id="90"/>
 		<gladeui id="91"/>
+		<gladeui id="94"/>
 		<metadependency name="Gtk">
 			<dependency type="package" library="gtk+-3.0"/>
 		</metadependency>
@@ -216,6 +220,9 @@
 		<source id="92"/>
 		<source id="78"/>
 		<source id="79"/>
+		<source id="93"/>
+		<source id="95"/>
+		<source id="96"/>
 		<data id="62"/>
 		<gladeui id="20"/>
 		<gladeui id="82"/>
@@ -236,6 +243,7 @@
 		<gladeui id="75"/>
 		<gladeui id="76"/>
 		<gladeui id="81"/>
+		<gladeui id="94"/>
 		<metadependency name="Gtk">
 			<dependency type="package" library="gtk+-3.0"/>
 		</metadependency>
@@ -415,4 +423,8 @@
 	<valasource id="92" filename="src/Units/Builder/Autotools.vala"/>
 	<valasource id="78" filename="src/Units/Builder/CMakeSwitchWriter.vala"/>
 	<valasource id="79" filename="src/Units/Builder/ConfigVapiWriter.vala"/>
+	<valasource id="93" filename="src/Ui/SearchView.vala"/>
+	<gladeui id="94" filename="src/Ui/SearchView.glade"/>
+	<valasource id="95" filename="src/Search/SearchProvider.vala"/>
+	<valasource id="96" filename="src/Search/SearchProviderValaSource.vala"/>
 </project>

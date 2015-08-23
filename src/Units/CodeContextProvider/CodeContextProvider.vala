@@ -140,7 +140,7 @@ namespace Units {
         return false;
       });
 
-      GLib.Timeout.add_seconds (1, ()=> {
+      GLib.Timeout.add_seconds (5, ()=> {
         timeout_active = false;
         if (update_queued)
           update_code_context();

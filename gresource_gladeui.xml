@@ -20,5 +20,6 @@
 <file>src/Ui/ConsoleView.glade</file>
 <file>src/Ui/MainWidget.glade</file>
 <file>src/Ui/Editors/Editor_Data.glade</file>
+<file>src/Ui/SearchView.glade</file>
 </gresource>
 </gresources>

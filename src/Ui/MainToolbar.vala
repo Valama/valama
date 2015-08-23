@@ -89,6 +89,13 @@ namespace Ui {
         }
       });
 
+      var btnSearch = new Gtk.ToggleToolButton();
+      btnSearch.toggled.connect (()=>{
+        main_widget.search_view.show (btnSearch.active);
+      });
+      btnSearch.icon_name = "system-search-symbolic";
+      toolbar.pack_end (btnSearch);
+
       update_target_selector();
       update_build_button();
 

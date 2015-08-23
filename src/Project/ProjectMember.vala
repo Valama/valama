@@ -2,12 +2,10 @@ namespace Project {
 
   public abstract class ProjectMember : Object {
   
-    //public string name;
     public string id = null;
     public abstract EnumProjectMember get_project_member_type();
     public Project project;
-
-    //public signal void data_changed (Object sender);
+    public Search.SearchProvider? search_provider = null;
 
     public void load (Xml.Node* node) throws ProjectError {
       for (Xml.Attr* prop = node->properties; prop != null; prop = prop->next) {

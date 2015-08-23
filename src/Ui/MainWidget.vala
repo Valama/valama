@@ -13,6 +13,8 @@ namespace Ui {
   	[GtkChild]
   	public Alignment algn_console;
   	[GtkChild]
+  	public Alignment algn_search;
+  	[GtkChild]
   	public Notebook nb_lower;
   }
 
@@ -37,6 +39,7 @@ namespace Ui {
     public Units.InstalledLibrariesProvider installed_libraries_provider = new Units.InstalledLibrariesProvider();
     public Units.CMakeSwitchWriter cmake_switch_writer = new Units.CMakeSwitchWriter();
     public Units.ConfigVapiWriter config_vapi_writer = new Units.ConfigVapiWriter();
+    public SearchView search_view = new SearchView();
 
     private Gee.ArrayList<Units.Unit> units = new Gee.ArrayList<Units.Unit>();
     
@@ -78,6 +81,7 @@ namespace Ui {
       units.add (console_view);
       units.add (cmake_switch_writer);
       units.add (config_vapi_writer);
+      units.add (search_view);
 
       foreach (var unit in units) {
         unit.main_widget = this;
@@ -90,6 +94,7 @@ namespace Ui {
       template.algn_viewer.add(editor_viewer.widget);
       template.algn_errors.add(error_list.widget);
       template.algn_console.add(console_view.widget);
+      template.algn_search.add(search_view.widget);
 
       widget = template;
     }

@@ -1,6 +1,10 @@
 namespace Project {
   public class ProjectMemberValaSource : ProjectMember {
 
+    public ProjectMemberValaSource() {
+      search_provider = new Search.SearchProviderValaSource (this);
+    }
+
     public FileRef file = null;
     public Gtk.SourceBuffer buffer = new Gtk.SourceBuffer(null);
 

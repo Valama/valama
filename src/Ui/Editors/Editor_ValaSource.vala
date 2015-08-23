@@ -72,6 +72,10 @@ namespace Ui {
       var iter_begin = iter_from_location (sourceref.begin);
       var iter_end = iter_from_location (sourceref.end);
       iter_end.forward_char();
+      jump_to_iter (iter_begin, iter_end);
+    }
+
+    public void jump_to_iter (Gtk.TextIter iter_begin, Gtk.TextIter iter_end) {
       my_member.buffer.select_range (iter_begin, iter_end);
       GLib.Idle.add(()=>{
           sourceview.grab_focus();
@@ -83,12 +87,7 @@ namespace Ui {
     public void jump_to_position (int line, int col) {
       Gtk.TextIter titer;
       my_member.buffer.get_iter_at_line_offset (out titer, line, col);
-      my_member.buffer.select_range (titer, titer);
-      GLib.Idle.add(()=>{
-          sourceview.grab_focus();
-          sourceview.scroll_to_iter (titer, 0.42, true, 1.0, 1.0);
-          return false;
-      });
+      jump_to_iter (titer, titer);
     }
     
     private bool save_file (string filename, string text) {
