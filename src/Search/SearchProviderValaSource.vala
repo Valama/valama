@@ -7,6 +7,7 @@ namespace Search {
 
       buffer = start.get_buffer();
       buffer.add_mark (mark_start, start);
+      buffer.add_mark (mark_end, end);
       if (!end.ends_line())
         end.forward_to_line_end();
       end.forward_to_line_end();
@@ -21,14 +22,16 @@ namespace Search {
     public override void activate () {
       main_widget.editor_viewer.openMember (member);
       var editor = member.editor as Ui.EditorValaSource;
-      Gtk.TextIter iter;
-      buffer.get_iter_at_mark (out iter, mark_start);
-      editor.jump_to_iter (iter, iter);
+      Gtk.TextIter iter_start, iter_end;
+      buffer.get_iter_at_mark (out iter_start, mark_start);
+      buffer.get_iter_at_mark (out iter_end, mark_end);
+      editor.jump_to_iter (iter_start, iter_end);
     }
 
     Gtk.TextBuffer buffer = null;
     Ui.MainWidget main_widget = null;
     Gtk.TextMark mark_start = new Gtk.TextMark(null);
+    Gtk.TextMark mark_end = new Gtk.TextMark(null);
     weak Project.ProjectMemberValaSource member;
   }
 
