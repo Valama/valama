@@ -79,7 +79,7 @@ namespace Ui {
       my_member.buffer.select_range (iter_begin, iter_end);
       GLib.Idle.add(()=>{
           sourceview.grab_focus();
-          sourceview.scroll_to_iter (iter_begin, 0.42, true, 1.0, 1.0);
+          sourceview.scroll_to_iter (iter_begin, 0.1, false, 1.0, 1.0);
           return false;
       });
     }
