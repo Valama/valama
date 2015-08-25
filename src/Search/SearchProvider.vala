@@ -6,6 +6,7 @@ namespace Search {
   }
 
   public abstract class SearchProvider : Object {
+    public abstract void reset();
     public abstract Gee.LinkedList<SearchResult> search(Ui.MainWidget main_widget, string text);
   }
 }

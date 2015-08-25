@@ -40,6 +40,14 @@ namespace Search {
 
     public SearchProviderValaSource (Project.ProjectMemberValaSource member) {
       this.member = member;
+      var tag = member.buffer.create_tag ("search", null);
+      tag.background_rgba = Gdk.RGBA() { red = 1.0, green = 1.0, blue = 0, alpha = 0.8 };
+    }
+    public override void reset() {
+      Gtk.TextIter iter_start, iter_end;
+      member.buffer.get_start_iter(out iter_start);
+      member.buffer.get_end_iter(out iter_end);
+      member.buffer.remove_tag_by_name ("search", iter_start, iter_end);
     }
     public override Gee.LinkedList<SearchResult> search(Ui.MainWidget main_widget, string text) {
       Gee.LinkedList<SearchResult> results = new Gee.LinkedList<SearchResult>();
@@ -51,6 +59,7 @@ namespace Search {
 
       while (iter.forward_search (text, Gtk.TextSearchFlags.CASE_INSENSITIVE, out match_start, out match_end, null)) {
         iter = match_end;
+        member.buffer.apply_tag_by_name ("search", match_start, match_end);
         results.add (new SearchResultValaSource (main_widget, member, match_start, match_end));
       }
 

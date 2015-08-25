@@ -18,8 +18,11 @@ namespace Ui {
 
     public void show (bool visible) {
       template.rev_search.reveal_child = visible;
-      if (visible)
+      if (visible) {
         template.ent_search.grab_focus();
+        search();
+      } else
+        reset();
     }
 
     public override void init() {
@@ -36,14 +39,26 @@ namespace Ui {
       });
     }
 
-    private void search() {
+    private void reset() {
       foreach (Gtk.Widget widget in template.list_results.get_children())
         template.list_results.remove (widget);
+      foreach (var member in main_widget.project.members) {
+        if (member.search_provider == null)
+          continue;
+        member.search_provider.reset();
+      }
+    }
+
+    private void search() {
+      reset();
+      if (template.ent_search.text.length < 2)
+        return;
 
       var search_text = template.ent_search.text;
       foreach (var member in main_widget.project.members) {
         if (member.search_provider == null)
           continue;
+        member.search_provider.reset();
         var results = member.search_provider.search (main_widget, search_text);
         foreach (var result in results) {
           var row = new Gtk.ListBoxRow ();
