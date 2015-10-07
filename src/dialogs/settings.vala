@@ -11,16 +11,10 @@ void load_source_style() {
     }
 }
 
-void select_item(ListBoxRow? row) {
-    var item = (Label)row.get_child ();
-    var settings = new GLib.Settings ("org.valama");
-    settings.set_string ("current-color-scheme", item.label);
-    load_source_style ();
-}
-
 public class IDESettingsWindow : Window {
-    string[] color_scheme_list;
-    string current_color_scheme;
+    private string[] color_scheme_list;
+    private string current_color_scheme;
+    public signal void color_scheme_changed();
     
     public IDESettingsWindow () {
         this.title = "IDE Settings";
@@ -43,5 +37,13 @@ public class IDESettingsWindow : Window {
         var scrolled = new ScrolledWindow (null, null);
         scrolled.add (items);
         notebook.append_page (scrolled, new Label ("Color scheme"));
+    }
+    
+    private void select_item(ListBoxRow? row) {
+        var item = (Label)row.get_child ();
+        var settings = new GLib.Settings ("org.valama");
+        settings.set_string ("current-color-scheme", item.label);
+        load_source_style ();
+        color_scheme_changed();
     }
 }

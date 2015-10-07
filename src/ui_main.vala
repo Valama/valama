@@ -46,6 +46,7 @@ static UiValadocBrowser wdg_valadoc_browser;
 
 static Gee.HashMap<string, Gdk.Pixbuf> map_icons;
 
+static IDESettingsWindow settings_window;
 
 /**
  * Main window class. Setup {@link Gdl.Dock} and {@link Gdl.DockBar} stuff.
@@ -186,6 +187,7 @@ public class MainWidget : Box {
      * Initialize ui_elements, menu and toolbars.
      */
     public void init() {
+        settings_window = new IDESettingsWindow ();
         source_viewer = new UiSourceViewer();
         source_viewer.add_srcitem (project.open_new_buffer ("", "", true));
 
@@ -526,7 +528,6 @@ public class MainWidget : Box {
         var item_setting = new ImageMenuItem.with_mnemonic (_("_IDE Setting"));
         this.menu.append (item_setting);
         item_setting.activate.connect ( () => {
-            var settings_window = new IDESettingsWindow ();
             settings_window.show_all ();
         } );
 
