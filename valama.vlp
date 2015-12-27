@@ -4,7 +4,7 @@
 		<author name="Linus Seelinger" mail="S.Linus@gmx.de"/>
 	</info>
 	<valasource id="2" filename="src/main.vala"/>
-	<target id="3" binary_name="valama" library="false">
+	<target id="3" binary_name="valama" library="false" gettext_active="false" gettext_package_name="">
 		<buildsystem type="valama"/>
 		<source id="14"/>
 		<source id="12"/>
@@ -76,8 +76,12 @@
 		<source id="93"/>
 		<source id="95"/>
 		<source id="96"/>
+		<source id="97"/>
+		<source id="98"/>
+		<source id="99"/>
 		<gresource id="52"/>
 		<data id="62"/>
+		<gettext id="100"/>
 		<gladeui id="20"/>
 		<gladeui id="31"/>
 		<gladeui id="33"/>
@@ -98,6 +102,7 @@
 		<gladeui id="90"/>
 		<gladeui id="91"/>
 		<gladeui id="94"/>
+		<gladeui id="101"/>
 		<metadependency name="Gtk">
 			<dependency type="package" library="gtk+-3.0"/>
 		</metadependency>
@@ -151,7 +156,7 @@
 			<condition library="vte-2.91" version="" relation="exists"/>
 		</define>
 	</target>
-	<target id="18" binary_name="cmaketest" library="false">
+	<target id="18" binary_name="cmaketest" library="false" gettext_active="true" gettext_package_name="valama">
 		<buildsystem type="cmake"/>
 		<source id="16"/>
 		<source id="14"/>
@@ -223,7 +228,11 @@
 		<source id="93"/>
 		<source id="95"/>
 		<source id="96"/>
+		<source id="98"/>
+		<source id="97"/>
+		<source id="99"/>
 		<data id="62"/>
+		<gettext id="100"/>
 		<gladeui id="20"/>
 		<gladeui id="82"/>
 		<gladeui id="31"/>
@@ -244,6 +253,7 @@
 		<gladeui id="76"/>
 		<gladeui id="81"/>
 		<gladeui id="94"/>
+		<gladeui id="101"/>
 		<metadependency name="Gtk">
 			<dependency type="package" library="gtk+-3.0"/>
 		</metadependency>
@@ -427,4 +437,86 @@
 	<gladeui id="94" filename="src/Ui/SearchView.glade"/>
 	<valasource id="95" filename="src/Search/SearchProvider.vala"/>
 	<valasource id="96" filename="src/Search/SearchProviderValaSource.vala"/>
+	<valasource id="97" filename="src/Project/ProjectMember_Gettext.vala"/>
+	<valasource id="98" filename="src/Ui/ProjectMemberCreators/Creator_Gettext.vala"/>
+	<valasource id="99" filename="src/Ui/Editors/Editor_Gettext.vala"/>
+	<gettext id="100" potfile="locale/valama.pot" translation_name="Valama">
+		<source id="96"/>
+		<source id="95"/>
+		<source id="64"/>
+		<source id="36"/>
+		<source id="21"/>
+		<source id="53"/>
+		<source id="51"/>
+		<source id="37"/>
+		<source id="45"/>
+		<source id="44"/>
+		<source id="46"/>
+		<source id="49"/>
+		<source id="50"/>
+		<source id="56"/>
+		<source id="66"/>
+		<source id="67"/>
+		<source id="69"/>
+		<source id="92"/>
+		<source id="78"/>
+		<source id="79"/>
+		<source id="25"/>
+		<source id="47"/>
+		<source id="42"/>
+		<source id="41"/>
+		<source id="40"/>
+		<source id="39"/>
+		<source id="38"/>
+		<source id="93"/>
+		<source id="68"/>
+		<source id="58"/>
+		<source id="34"/>
+		<source id="28"/>
+		<source id="27"/>
+		<source id="22"/>
+		<source id="19"/>
+		<source id="13"/>
+		<source id="12"/>
+		<source id="10"/>
+		<source id="11"/>
+		<source id="98"/>
+		<source id="74"/>
+		<source id="73"/>
+		<source id="71"/>
+		<source id="72"/>
+		<source id="70"/>
+		<source id="65"/>
+		<source id="48"/>
+		<source id="99"/>
+		<source id="61"/>
+		<source id="59"/>
+		<source id="55"/>
+		<source id="32"/>
+		<source id="17"/>
+		<source id="16"/>
+		<source id="15"/>
+		<source id="14"/>
+		<source id="97"/>
+		<source id="63"/>
+		<source id="60"/>
+		<source id="57"/>
+		<source id="54"/>
+		<source id="43"/>
+		<source id="26"/>
+		<source id="30"/>
+		<source id="24"/>
+		<source id="23"/>
+		<source id="9"/>
+		<source id="8"/>
+		<source id="7"/>
+		<source id="5"/>
+		<source id="4"/>
+		<source id="6"/>
+		<source id="2"/>
+		<gladeui id="31"/>
+		<language id="de"/>
+		<language id="fr"/>
+	</gettext>
+	<gladeui id="101" filename="src/Ui/Editors/Editor_Gettext.glade"/>
 </project>

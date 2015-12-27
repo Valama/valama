@@ -26,6 +26,7 @@ namespace Ui {
 
       glade_project = new Glade.Project();
 
+      // Save when compiling
       main_widget.main_toolbar.selected_target_changed.connect(hook_save_on_compile);
       hook_save_on_compile();
 

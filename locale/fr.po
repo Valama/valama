@@ -1,0 +1,258 @@
+# French translations for PACKAGE package.
+# Copyright (C) 2015 THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# Linus Seelinger <linus@linus-ge60-2oc-2od-2oe>, 2015.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-09-01 21:33-0400\n"
+"PO-Revision-Date: 2015-09-01 21:33-0400\n"
+"Last-Translator: Linus Seelinger <linus@linus-ge60-2oc-2od-2oe>\n"
+"Language-Team: French\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=ASCII\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: src/Units/CodeContextProvider/CodeContextProvider.vala:50
+#, c-format
+msgid "===========updating context\n"
+msgstr ""
+
+#: src/Ui/MainToolbar.vala:61
+msgid "Build project"
+msgstr ""
+
+#: src/Units/Completion/guanako.vala:504
+#, c-format
+msgid "Call '%s' not found in '%s'\n"
+msgstr ""
+
+#: src/Ui/Editors/Editor_Target.vala:271
+msgid "Cancel"
+msgstr ""
+
+#: src/Units/Completion/guanako_helpers.vala:50
+#: src/Units/Completion/guanako_helpers.vala:56
+#: src/Units/Completion/guanako_helpers.vala:105
+#, c-format
+msgid "Checking %s directory: %s\n"
+msgstr ""
+
+#: src/Ui/WelcomeScreen/TemplateSelector.vala:87
+msgid "Choose template for your project"
+msgstr ""
+
+#: src/Units/Completion/guanako_helpers.vala:667
+#, c-format
+msgid "Could not get type name of: %s\n"
+msgstr ""
+
+#: src/Units/Completion/guanako_completion.vala:161
+#, c-format
+msgid "Could not launch completion thread successfully: %s\n"
+msgstr ""
+
+#: src/Units/Completion/guanako_completion.vala:171
+#, c-format
+msgid "Could not load theme icon: %s\n"
+msgstr ""
+
+#: src/Units/Completion/guanako_helpers.vala:115
+#, c-format
+msgid "Could not update vapi files: %s\n"
+msgstr ""
+
+#: src/Units/Completion/guanako_helpers.vala:459
+#, c-format
+msgid ""
+"DataType is null: %s\n"
+"Please report a bug!\n"
+msgstr ""
+
+#: src/Ui/WelcomeScreen/TemplateSelector.vala:85
+msgid "Directory"
+msgstr ""
+
+#: src/Units/Completion/guanako.vala:280
+#, c-format
+msgid "Entry point '%s' not found in syntax file. Trying to segfault me, huh??"
+msgstr ""
+
+#: src/Ui/MainToolbar.vala:159
+msgid "Export"
+msgstr ""
+
+#: src/Units/Completion/guanako.vala:396 src/Units/Completion/guanako.vala:408
+#: src/Units/Completion/guanako.vala:426 src/Units/Completion/guanako.vala:496
+#, c-format
+msgid "Malformed rule: '%s'\n"
+msgstr ""
+
+#: src/Ui/Editors/Editor_Target.vala:271
+msgid "New dependency"
+msgstr ""
+
+#: src/Units/Completion/guanako_helpers.vala:196
+#, c-format
+msgid ""
+"No valid %s type: %u - %s\n"
+"Please report a bug!\n"
+msgstr ""
+
+#: src/Ui/Editors/Editor_Target.vala:271 src/Ui/Editors/Editor_Target.vala:630
+#: src/Ui/Editors/Editor_Target.vala:700
+msgid "OK"
+msgstr ""
+
+#: src/Units/Completion/guanako.vala:527
+#, c-format
+msgid "Parameter '%s' not found in '%s'\n"
+msgstr ""
+
+#: src/Units/Completion/guanako_completion.vala:247
+#, c-format
+msgid ""
+"Parameters:\n"
+"%s\n"
+"\n"
+"Returns:\n"
+"%s"
+msgstr ""
+
+#: src/Ui/WelcomeScreen/TemplateSelector.vala:81
+msgid "Project"
+msgstr ""
+
+#: src/Project/Project.vala:53
+msgid "Project ID missing"
+msgstr ""
+
+#: src/Project/Project.vala:36
+msgid "Project file empty"
+msgstr ""
+
+#: src/Project/Project.vala:50
+msgid "Project file format newer than supported"
+msgstr ""
+
+#: src/Project/Project.vala:48
+msgid "Project file format version missing"
+msgstr ""
+
+#: src/Project/Project.vala:32
+msgid "Project file not found or permissions missing"
+msgstr ""
+
+#: src/Ui/MainToolbar.vala:68
+msgid "Run project"
+msgstr ""
+
+#: src/Ui/WelcomeScreen/TemplateSelector.vala:33
+msgid "Select folder"
+msgstr ""
+
+#: src/Ui/Editors/Editor_Target.vala:415
+msgid "Settings"
+msgstr ""
+
+#: src/Units/Completion/guanako_helpers.vala:506
+#, c-format
+msgid "Should not happen, you might have problems with conflicting vapis: %s\n"
+msgstr ""
+
+#: src/Ui/Editors/Editor_Target.vala:324
+msgid "Target"
+msgstr ""
+
+#: src/Ui/WelcomeScreen/TemplateSelector.vala:86
+msgid "Template Selector"
+msgstr ""
+
+#: src/Units/Completion/guanako_helpers.vala:525
+#, c-format
+msgid ""
+"Unknown type: %s (%s)\n"
+"Please report a bug!\n"
+msgstr ""
+
+#: src/Units/Completion/guanako.vala:437
+#, c-format
+msgid "Variable '%s' not found! >%s<\n"
+msgstr ""
+
+#: src/Ui/ProjectMemberCreators/Creator_Gettext.vala:15
+#: src/Ui/ProjectMemberCreators/Creator_GladeUi.vala:15
+#: src/Ui/ProjectMemberCreators/Creator_ValaSource.vala:15
+#: src/Ui/ProjectMemberCreators/Creator_ValaSource.vala:45
+#: src/Ui/WelcomeScreen/WelcomeScreen.vala:68
+#: src/Ui/Editors/Editor_Data.vala:68 src/Ui/Editors/Editor_Data.vala:87
+#: src/Ui/Editors/Editor_GResource.vala:57
+msgid "_Cancel"
+msgstr ""
+
+#: src/Ui/EditorViewer.vala:109
+msgid "_Close"
+msgstr ""
+
+#: src/Ui/Editors/Editor_Target.vala:179
+msgid "_Execute"
+msgstr ""
+
+#: src/Ui/Editors/Editor_Data.vala:32 src/Ui/Editors/Editor_Target.vala:181
+msgid "_File"
+msgstr ""
+
+#: src/Ui/ProjectMemberCreators/Creator_GladeUi.vala:16
+#: src/Ui/ProjectMemberCreators/Creator_ValaSource.vala:16
+#: src/Ui/WelcomeScreen/WelcomeScreen.vala:69
+#: src/Ui/Editors/Editor_Data.vala:69 src/Ui/Editors/Editor_Data.vala:88
+#: src/Ui/Editors/Editor_GResource.vala:58
+msgid "_Open"
+msgstr ""
+
+#: src/Ui/ProjectMemberCreators/Creator_Gettext.vala:16
+#: src/Ui/ProjectMemberCreators/Creator_ValaSource.vala:46
+msgid "_Save"
+msgstr ""
+
+#: src/Project/ProjectMember_Target.vala:97
+msgid "binary_name attribute missing in target member"
+msgstr ""
+
+#: src/Project/ProjectMember_GladeUi.vala:16
+msgid "filename attribute missing in GladeUi member"
+msgstr ""
+
+#: src/Project/ProjectMember_ValaSource.vala:21
+msgid "filename attribute missing in valasource member"
+msgstr ""
+
+#: src/Project/ProjectMember.vala:16
+msgid "id attribute missing in member"
+msgstr ""
+
+#: src/Project/ProjectMember_Info.vala:49
+msgid "name attribute missing in info member"
+msgstr ""
+
+#: src/Units/Completion/guanako.vala:418
+#, c-format
+msgid "pop_cur symbol not found! '%s'\n"
+msgstr ""
+
+#: src/Project/ProjectMember_Gettext.vala:52
+msgid "potfile attribute missing in Gettext member"
+msgstr ""
+
+#: src/Units/CodeContextProvider/CodeContextProvider.vala:14
+#, c-format
+msgid "target changed -> update context\n"
+msgstr ""
+
+#: src/Project/ProjectMember_Info.vala:47
+msgid "version attribute missing in info member"
+msgstr ""

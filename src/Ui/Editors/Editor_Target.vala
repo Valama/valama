@@ -39,12 +39,12 @@ namespace Ui {
       }
     }
  
-  	[GtkChild]
-  	public ListBox list_conditions;
-  	[GtkChild]
-  	public ToolButton btn_add;
-  	[GtkChild]
-  	public Entry ent_name;
+    [GtkChild]
+    public ListBox list_conditions;
+    [GtkChild]
+    public ToolButton btn_add;
+    [GtkChild]
+    public Entry ent_name;
   }
 
   [GtkTemplate (ui = "/src/Ui/Editors/Editor_Target_NewDependency.glade")]
@@ -71,47 +71,49 @@ namespace Ui {
     public string get_selected_vapi() {
       return projectfolder.get_relative_path (vapi_chooser.get_file());
     }
-  	[GtkChild]
-  	public RadioButton rbtn_package;
-  	[GtkChild]
-  	public RadioButton rbtn_vapi;
-  	[GtkChild]
-  	public ComboBoxText box_package;
-  	[GtkChild]
-  	public FileChooserWidget vapi_chooser;
+    [GtkChild]
+    public RadioButton rbtn_package;
+    [GtkChild]
+    public RadioButton rbtn_vapi;
+    [GtkChild]
+    public ComboBoxText box_package;
+    [GtkChild]
+    public FileChooserWidget vapi_chooser;
   }
   [GtkTemplate (ui = "/src/Ui/Editors/Editor_Target.glade")]
   private class TargetTemplate : Box {
-  	[GtkChild]
+    [GtkChild]
     public Viewport vp_sources;
     [GtkChild]
+    public Viewport vp_gettext;
+    [GtkChild]
     public ListBox gladeui_list;
-  	[GtkChild]
-  	public ListBox deps_list;
-  	[GtkChild]
-  	public ListBox defs_list;
-  	[GtkChild]
-  	public ListBox data_list;
-  	[GtkChild]
-  	public ListBox gresources_list;
-  	[GtkChild]
-  	public ToolButton btn_add_dep;
-  	[GtkChild]
-  	public ToolButton btn_remove_dep;
-  	[GtkChild]
-  	public ToolButton btn_edit_dep;
-  	[GtkChild]
-  	public ToolButton btn_add_def;
-  	[GtkChild]
-  	public ToolButton btn_remove_def;
-  	[GtkChild]
-  	public ToolButton btn_edit_def;
-  	[GtkChild]
-  	public Entry ent_binary_name;
-  	[GtkChild]
-  	public ComboBoxText combo_buildsystem;
-  	[GtkChild]
-  	public Notebook notebook_settings;
+    [GtkChild]
+    public ListBox deps_list;
+    [GtkChild]
+    public ListBox defs_list;
+    [GtkChild]
+    public ListBox data_list;
+    [GtkChild]
+    public ListBox gresources_list;
+    [GtkChild]
+    public ToolButton btn_add_dep;
+    [GtkChild]
+    public ToolButton btn_remove_dep;
+    [GtkChild]
+    public ToolButton btn_edit_dep;
+    [GtkChild]
+    public ToolButton btn_add_def;
+    [GtkChild]
+    public ToolButton btn_remove_def;
+    [GtkChild]
+    public ToolButton btn_edit_def;
+    [GtkChild]
+    public Entry ent_binary_name;
+    [GtkChild]
+    public ComboBoxText combo_buildsystem;
+    [GtkChild]
+    public Notebook notebook_settings;
   }
   [GtkTemplate (ui = "/src/Ui/Editors/Editor_Target_Condition.glade")]
   private class ConditionEditorTemplate : ListBoxRow {
@@ -153,14 +155,14 @@ namespace Ui {
         condition.version = ent_version.text;
       });
     }
-  	[GtkChild]
-  	public ComboBoxText cmb_library;
-  	[GtkChild]
-  	public ComboBoxText cmb_relation;
-  	[GtkChild]
-  	public Button btn_remove;
-  	[GtkChild]
-  	public Entry ent_version;
+    [GtkChild]
+    public ComboBoxText cmb_library;
+    [GtkChild]
+    public ComboBoxText cmb_relation;
+    [GtkChild]
+    public Button btn_remove;
+    [GtkChild]
+    public Entry ent_version;
   }
   [GtkTemplate (ui = "/src/Ui/Editors/Editor_Target_Dependency.glade")]
   private class DependencyEditorTemplate : ListBoxRow {
@@ -202,14 +204,14 @@ namespace Ui {
       }
     }
 
-  	[GtkChild]
-  	public Image img_type;
-  	[GtkChild]
-  	public Label lbl_title;
-  	[GtkChild]
-  	public ListBox list_conditions;
-  	[GtkChild]
-  	public Button btn_add_condition;
+    [GtkChild]
+    public Image img_type;
+    [GtkChild]
+    public Label lbl_title;
+    [GtkChild]
+    public ListBox list_conditions;
+    [GtkChild]
+    public Button btn_add_condition;
   }
   [GtkTemplate (ui = "/src/Ui/Editors/Editor_Target_Meta_Dependency.glade")]
   private class MetaDependencyEditorTemplate : Box {
@@ -298,18 +300,18 @@ namespace Ui {
       }
     }
  
-  	[GtkChild]
-  	public ListBox list_dependencies;
-  	[GtkChild]
-  	public ToolButton btn_add;
-  	[GtkChild]
-  	public ToolButton btn_remove;
-  	[GtkChild]
-  	public ToolButton btn_up;
-  	[GtkChild]
-  	public ToolButton btn_down;
-  	[GtkChild]
-  	public Entry ent_name;
+    [GtkChild]
+    public ListBox list_dependencies;
+    [GtkChild]
+    public ToolButton btn_add;
+    [GtkChild]
+    public ToolButton btn_remove;
+    [GtkChild]
+    public ToolButton btn_up;
+    [GtkChild]
+    public ToolButton btn_down;
+    [GtkChild]
+    public Entry ent_name;
   }
 
   public class EditorTarget : Editor {
@@ -387,6 +389,7 @@ namespace Ui {
       update_gresources_list();
       update_data_list();
       update_gladeui_list();
+      init_gettext_list();
       setup_dependencies_list();
       setup_defines_list();
       update_settings_ui();
@@ -512,6 +515,43 @@ namespace Ui {
       });
     }
 
+    // Gettext list
+    // ============
+
+    private inline void init_gettext_list() {
+      var treebox = new FileTreeBox (true);
+      var my_member = member as Project.ProjectMemberTarget;
+      foreach (Project.ProjectMember m in my_member.project.members) {
+        if (!(m is Project.ProjectMemberGettext))
+          continue;
+        var path = (m as Project.ProjectMemberGettext).potfile.get_rel();
+        treebox.add_file (path, m, m.id in my_member.included_gettexts);
+      }
+      treebox.file_checked.connect ((filename, data, checked)=>{
+        var member = data as Project.ProjectMemberGettext;
+        if (checked)
+          my_member.included_gettexts.add (member.id);
+        else
+          my_member.included_gettexts.remove (member.id);
+        main_widget.project.member_data_changed (this, my_member);
+      });
+      template.vp_gettext.add (treebox.update());
+      template.vp_gettext.show_all();
+      // Keep in sync
+      member.project.member_added.connect ((member)=>{
+        if (member is Project.ProjectMemberGettext) {
+          var path = (member as Project.ProjectMemberGettext).potfile.get_rel();
+          treebox.add_file (path, member, member.id in my_member.included_gettexts);
+        }
+      });
+      member.project.member_removed.connect ((member)=>{
+        if (member is Project.ProjectMemberGettext) {
+          var path = (member as Project.ProjectMemberGettext).potfile.get_rel();
+          treebox.remove_file (treebox.get_entry(path));
+        }
+      });
+    }
+
     // Gladeui list
     // ============
 
@@ -543,7 +583,7 @@ namespace Ui {
       template.gladeui_list.show_all();
     }
 
-    // Dependencies list
+    // Defines list
     // =================
 
     private inline void setup_defines_list() {

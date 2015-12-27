@@ -21,14 +21,18 @@ namespace Project {
     }
 
     public string binary_name = null;
-    
+
     public bool library;
-    
+
     public Gee.ArrayList<string> included_sources = new Gee.ArrayList<string>();
     public Gee.ArrayList<string> included_gresources = new Gee.ArrayList<string>();
     public Gee.ArrayList<string> included_data = new Gee.ArrayList<string>();
     public Gee.ArrayList<string> included_gladeuis = new Gee.ArrayList<string>();
-  
+    public Gee.ArrayList<string> included_gettexts = new Gee.ArrayList<string>();
+
+    public string gettext_package_name = "";
+    public bool gettext_active = false;
+
     public Gee.LinkedList<MetaDependency> metadependencies = new Gee.LinkedList<MetaDependency>();
 
     public Gee.LinkedList<Define> defines = new Gee.LinkedList<Define>();
@@ -38,8 +42,12 @@ namespace Project {
       for (Xml.Attr* prop = node->properties; prop != null; prop = prop->next) {
         if (prop->name == "binary_name")
           binary_name = prop->children->content;
+        if (prop->name == "gettext_active")
+          gettext_active = bool.parse (prop->children->content);
+        if (prop->name == "gettext_package_name")
+          gettext_package_name = prop->children->content;
         if (prop->name == "library")
-		  library = bool.parse (prop->children->content);
+          library = bool.parse (prop->children->content);
       }
       // Read active source id's
       for (Xml.Node* iter = node->children; iter != null; iter = iter->next) {
@@ -61,6 +69,12 @@ namespace Project {
           for (Xml.Attr* prop = iter->properties; prop != null; prop = prop->next) {
             if (prop->name == "id")
               included_data.add(prop->children->content);
+          }
+        }
+        if (iter->name == "gettext") {
+          for (Xml.Attr* prop = iter->properties; prop != null; prop = prop->next) {
+            if (prop->name == "id")
+              included_gettexts.add(prop->children->content);
           }
         }
         if (iter->name == "gladeui") {
@@ -108,6 +122,12 @@ namespace Project {
             included_data.remove (member_data.id);
             project.member_data_changed (this, this);
           }
+        } else if (member is ProjectMemberGettext) {
+          var member_gettext = member as ProjectMemberGettext;
+          if (member_gettext.id in included_gettexts) {
+            included_gettexts.remove (member_gettext.id);
+            project.member_data_changed (this, this);
+          }
         } else if (member is ProjectMemberGladeUi) {
           var member_gladeui = member as ProjectMemberGladeUi;
           if (member_gladeui.id in included_gladeuis) {
@@ -120,8 +140,11 @@ namespace Project {
     internal override void save_internal (Xml.TextWriter writer) {
       writer.write_attribute ("binary_name", binary_name);
       writer.write_attribute ("library", library.to_string());
+      writer.write_attribute ("gettext_active", gettext_active.to_string());
+      writer.write_attribute ("gettext_package_name", gettext_package_name);
       writer.start_element ("buildsystem");
       writer.write_attribute ("type", buildsystem.toString());
+
       builder.save (writer);
       writer.end_element();
       foreach (string source_id in included_sources) {
@@ -137,6 +160,11 @@ namespace Project {
       foreach (string data_id in included_data) {
         writer.start_element ("data");
         writer.write_attribute ("id", data_id);
+        writer.end_element();
+      }
+      foreach (string gettext_id in included_gettexts) {
+        writer.start_element ("gettext");
+        writer.write_attribute ("id", gettext_id);
         writer.end_element();
       }
       foreach (string gladeui_id in included_gladeuis) {

@@ -9,8 +9,6 @@ find_package(Vala)
 set(project_name "cmaketest")
 string(TOLOWER "${project_name}" project_name_lower)
 
-add_definitions(-DGETTEXT_PACKAGE="${project_name_lower}")
-
 set(srcfiles
   "src/Ui/Editors/Editor_Target.vala"
   "src/Ui/Editors/Editor.vala"
@@ -82,6 +80,9 @@ set(srcfiles
   "src/Ui/SearchView.vala"
   "src/Search/SearchProvider.vala"
   "src/Search/SearchProviderValaSource.vala"
+  "src/Ui/ProjectMemberCreators/Creator_Gettext.vala"
+  "src/Project/ProjectMember_Gettext.vala"
+  "src/Ui/Editors/Editor_Gettext.vala"
 )
 
 message ("-- checking dependency Gtk")
@@ -339,6 +340,7 @@ add_custom_command(
    "src/Ui/MainWidget.glade"
    "src/Ui/Editors/Editor_Data.glade"
    "src/Ui/SearchView.glade"
+   "src/Ui/Editors/Editor_Gettext.glade"
   COMMENT "Building GladeUI gresource"
 )
 list(APPEND vapidirs --gresources "${CMAKE_SOURCE_DIR}/gresource_gladeui.xml")
@@ -350,6 +352,36 @@ install(FILES "src/Units/Completion/syntax" DESTINATION "${CMAKE_INSTALL_PREFIX}
 install(DIRECTORY "templates/" DESTINATION "${CMAKE_INSTALL_PREFIX}/share/valama/templates")
 install(DIRECTORY "src/Units/Builder/Data/" DESTINATION "${CMAKE_INSTALL_PREFIX}/share/valama/Data")
 add_definitions(-DDATA_DIR="${CMAKE_INSTALL_PREFIX}")
+
+# Gettext
+
+add_definitions(-DGETTEXT_PACKAGE="valama")
+
+add_definitions(-DGETTEXT_PACKAGE_DOMAIN="${CMAKE_INSTALL_PREFIX}/share/locale")
+
+file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/locale/18/de")
+add_custom_command(
+  OUTPUT
+    "${CMAKE_BINARY_DIR}/locale/18/de/valama.mo"
+  COMMAND
+    msgfmt --check --verbose -o "${CMAKE_BINARY_DIR}/locale/18/de/valama.mo" /media/datassd/source/valamang/locale/de.po
+  DEPENDS
+    /media/datassd/source/valamang/locale/de.po
+)
+list(APPEND compiled_gettext "${CMAKE_BINARY_DIR}/locale/18/de/valama.mo")
+install(FILES "${CMAKE_BINARY_DIR}/locale/18/de/valama.mo" DESTINATION "${CMAKE_INSTALL_PREFIX}/share/locale/de/LC_MESSAGES/")
+
+file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/locale/18/fr")
+add_custom_command(
+  OUTPUT
+    "${CMAKE_BINARY_DIR}/locale/18/fr/valama.mo"
+  COMMAND
+    msgfmt --check --verbose -o "${CMAKE_BINARY_DIR}/locale/18/fr/valama.mo" /media/datassd/source/valamang/locale/fr.po
+  DEPENDS
+    /media/datassd/source/valamang/locale/fr.po
+)
+list(APPEND compiled_gettext "${CMAKE_BINARY_DIR}/locale/18/fr/valama.mo")
+install(FILES "${CMAKE_BINARY_DIR}/locale/18/fr/valama.mo" DESTINATION "${CMAKE_INSTALL_PREFIX}/share/locale/fr/LC_MESSAGES/")
 
 set(default_vala_flags
   "--thread"
@@ -372,7 +404,7 @@ vala_pkgs(VALA_C
     ${vapidirs}
 )
 
-add_executable("${project_name_lower}" ${VALA_C} ${compiled_resources})
+add_executable("${project_name_lower}" ${VALA_C} ${compiled_resources} ${compiled_gettext})
 
 target_link_libraries("${project_name_lower}"
   ${PROJECT_LDFLAGS}

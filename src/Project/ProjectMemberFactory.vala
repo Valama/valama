@@ -4,6 +4,7 @@ namespace Project {
     TARGET,
     INFO,
     CLASS_DIAGRAM,
+    GETTEXT,
     GLADEUI,
     GRESOURCE,
     DATA,
@@ -24,6 +25,8 @@ namespace Project {
         return "gresource";
       if (this == DATA)
         return "data";
+      if (this == GETTEXT)
+        return "gettext";
       return "UNKNOWN";
     }
     public static EnumProjectMember fromString(string s) {
@@ -41,6 +44,8 @@ namespace Project {
         return GRESOURCE;
       if (s == "data")
         return DATA;
+      if (s == "gettext")
+        return GETTEXT;
       return UNKNOWN;
     }
 
@@ -57,6 +62,8 @@ namespace Project {
         new_member = new ProjectMemberInfo();
       else if (type == EnumProjectMember.CLASS_DIAGRAM)
         new_member = new ProjectMemberClassDiagram();
+      else if (type == EnumProjectMember.GETTEXT)
+        new_member = new ProjectMemberGettext();
       else if (type == EnumProjectMember.GLADEUI)
         new_member = new ProjectMemberGladeUi();
       else if (type == EnumProjectMember.GRESOURCE)

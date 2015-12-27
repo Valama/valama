@@ -50,9 +50,6 @@ namespace Builder {
       dos.put_string ("string(TOLOWER \"${project_name}\" project_name_lower)\n");
       dos.put_string ("\n");
 
-      dos.put_string ("add_definitions(-DGETTEXT_PACKAGE=\"${project_name_lower}\")\n");
-      dos.put_string ("\n");
-
       // Add sources
       dos.put_string ("set(srcfiles\n");
       foreach (string id in target.included_sources) {
@@ -213,6 +210,54 @@ namespace Builder {
         dos.put_string ("\n");
       }
 
+      // Build gettext localization
+      if (target.gettext_active) {
+
+        dos.put_string ("# Gettext\n\n");
+        dos.put_string ("add_definitions(-DGETTEXT_PACKAGE=\"" + target.gettext_package_name + "\")\n\n");
+        dos.put_string ("add_definitions(-DGETTEXT_PACKAGE_DOMAIN=\"${CMAKE_INSTALL_PREFIX}/share/locale\")\n\n");
+
+        // First, find all available languages
+        var languages = new Gee.LinkedList<string>();
+        foreach (string id in target.included_gettexts) {
+          var gettext = target.project.getMemberFromId (id) as Project.ProjectMemberGettext;
+          foreach (var lang in gettext.languages)
+            languages.add (lang);
+        }
+
+        // Then, put together mo files for all languages
+        foreach (var lang in languages) {
+          // Find all po files contributing to that language
+          var po_files = new Gee.LinkedList<string>();
+          foreach (string id in target.included_gettexts) {
+            var gettext = target.project.getMemberFromId (id) as Project.ProjectMemberGettext;
+            if (lang in gettext.languages)
+              po_files.add (gettext.get_po_file(lang).get_path());
+          }
+
+          var lang_compile_dir = "${CMAKE_BINARY_DIR}/locale/" + target.id + "/" + lang;
+          var mo_file = lang_compile_dir + "/" + target.gettext_package_name + ".mo";
+
+          dos.put_string ("file(MAKE_DIRECTORY \"" + lang_compile_dir + "\")\n");
+          dos.put_string ("add_custom_command(\n");
+          dos.put_string ("  OUTPUT\n");
+          dos.put_string ("    \"" + mo_file + "\"\n");
+          dos.put_string ("  COMMAND\n");
+          dos.put_string ("    msgfmt --check --verbose -o \"" + mo_file + "\"");
+          foreach (var po_file in po_files)
+            dos.put_string (" " + po_file);
+          dos.put_string ("\n  DEPENDS\n");
+          foreach (var po_file in po_files)
+            dos.put_string ("    " + po_file + "\n");
+          dos.put_string (")\n");
+          dos.put_string ("list(APPEND compiled_gettext \"" + mo_file + "\")\n");
+          //TODO: variable install dir
+          dos.put_string ("install(FILES \"" + mo_file + "\" DESTINATION \"${CMAKE_INSTALL_PREFIX}/share/locale/" + lang + "/LC_MESSAGES/\")\n");
+          dos.put_string ("\n");
+        }
+
+      }
+
       dos.put_string ("set(default_vala_flags\n");
       dos.put_string ("  \"--thread\"\n");
       dos.put_string ("  \"--target-glib=2.38\"\n");
@@ -256,14 +301,14 @@ namespace Builder {
       dos.put_string ("\n");
 
       if (target.library) {
-        dos.put_string ("add_library(\"${project_name_lower}\" SHARED ${VALA_C} ${compiled_resources})\n");
+        dos.put_string ("add_library(\"${project_name_lower}\" SHARED ${VALA_C} ${compiled_resources} ${compiled_gettext})\n");
         dos.put_string ("set_target_properties(\"${project_name_lower}\" PROPERTIES\n");
         dos.put_string ("  VERSION \"${${project_name}_VERSION}\"\n");
         dos.put_string ("  SOVERSION %d\n".printf (info == null ? 0 : info.major));
         dos.put_string (")\n");
       }
       else
-        dos.put_string ("add_executable(\"${project_name_lower}\" ${VALA_C} ${compiled_resources})\n");
+        dos.put_string ("add_executable(\"${project_name_lower}\" ${VALA_C} ${compiled_resources} ${compiled_gettext})\n");
       dos.put_string ("\n");
 
       dos.put_string ("target_link_libraries(\"${project_name_lower}\"\n");

@@ -50,6 +50,8 @@ namespace Builder {
         var data = target.project.getMemberFromId (id) as Project.ProjectMemberData;
         dos.put_string ("  public const string " + data.basedir + ";\n");
       }
+
+      dos.put_string ("  public const string GETTEXT_PACKAGE_DOMAIN;\n");
       dos.put_string ("}\n");
     }
 

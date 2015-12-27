@@ -21,5 +21,6 @@
 <file>src/Ui/MainWidget.glade</file>
 <file>src/Ui/Editors/Editor_Data.glade</file>
 <file>src/Ui/SearchView.glade</file>
+<file>src/Ui/Editors/Editor_Gettext.glade</file>
 </gresource>
 </gresources>

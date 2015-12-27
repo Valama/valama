@@ -15,6 +15,8 @@ namespace Ui {
   	[GtkChild]
   	public Alignment algn_gresource;
   	[GtkChild]
+  	public Alignment algn_gettext;
+  	[GtkChild]
   	public ToolButton btn_add;
   	[GtkChild]
   	public ToolButton btn_remove;
@@ -33,6 +35,8 @@ namespace Ui {
   	[GtkChild]
   	public ListBoxRow row_new_gresource;
   	[GtkChild]
+  	public ListBoxRow row_new_gettext;
+  	[GtkChild]
   	public ListBoxRow row_new_data;
   }
 
@@ -43,6 +47,7 @@ namespace Ui {
     private FileTreeBox list_ui = new FileTreeBox();
     private FileTreeBox list_gresource = new FileTreeBox();
     private FileTreeBox list_data = new FileTreeBox();
+    private FileTreeBox list_gettext = new FileTreeBox();
 
     private ProjectStructureTemplate template = new ProjectStructureTemplate();
   
@@ -56,6 +61,7 @@ namespace Ui {
       mp_types_lists[Project.EnumProjectMember.GLADEUI] = list_ui;
       mp_types_lists[Project.EnumProjectMember.GRESOURCE] = list_gresource;
       mp_types_lists[Project.EnumProjectMember.DATA] = list_data;
+      mp_types_lists[Project.EnumProjectMember.GETTEXT] = list_gettext;
 
       foreach (var type in mp_types_lists.keys)
         fill_list(type);
@@ -93,6 +99,8 @@ namespace Ui {
           member = Ui.ProjectMemberCreator.createGResource (main_widget.project);
         else if (row == dlg_template.row_new_data)
           member = Ui.ProjectMemberCreator.createData (main_widget.project);
+        else if (row == dlg_template.row_new_gettext)
+          member = Ui.ProjectMemberCreator.createGettextNew (main_widget.project);
 
         if (member != null)
           main_widget.project.addNewMember (member);
@@ -118,6 +126,7 @@ namespace Ui {
       template.algn_ui.add (list_ui.update());
       template.algn_gresource.add (list_gresource.update());
       template.algn_data.add (list_data.update());
+      template.algn_gettext.add (list_gettext.update());
       template.show_all();
 
       // Select entry when editor is activated
