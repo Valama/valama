@@ -35,8 +35,11 @@ namespace Ui {
             file_tree_box.file_checked (filename, data, check);
           });
           return chk;
-        } else
-          return new Label (filename);
+        } else {
+          var lbl = new Label (filename);
+          lbl.xalign = 0.0f;
+          return lbl;
+        }
       }
       bool check;
       private weak FileTreeBox file_tree_box;
