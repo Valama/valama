@@ -42,8 +42,8 @@ namespace Ui {
         var box_child = child.get_child() as TemplateBoxChild;
         lbl_author.label = box_child.template.author_name;
         lbl_description.label = box_child.template.description;
-        template_changed (box_child.template);
         current_template = box_child.template;
+        template_changed();
       });
 
       pack_start (list_templates);
@@ -52,7 +52,7 @@ namespace Ui {
         current_template = provider.templates[0];
     }
 
-    public signal void template_changed (ProjectTemplate template);
+    public signal void template_changed();
     
     public ProjectTemplate current_template { get; private set; }
 
@@ -98,7 +98,7 @@ namespace Ui {
       add (selector);
 
       selector.template_changed.connect (tmp => {
-        template = tmp;
+        template = selector.current_template;
       });
       selector.pn_entry.changed.connect (self => {
         project_name = (self as Entry).text;
