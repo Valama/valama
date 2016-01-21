@@ -159,6 +159,18 @@ endif ()
 message ("-- checking dependency LibVala")
 set (found FALSE)
 if (NOT found)
+  message ("--  checking option libvala-0.32")
+  set (cond_found TRUE)
+  pkg_check_modules (DEP_libvala-0.32 QUIET libvala-0.32)
+  if (NOT DEP_libvala-0.32_VERSION)
+    set (cond_found FALSE)
+  endif ()
+  if (cond_found)
+    set (found TRUE)
+    list(APPEND required_pkgs "libvala-0.32")
+  endif ()
+endif ()
+if (NOT found)
   message ("--  checking option libvala-0.30")
   set (cond_found TRUE)
   pkg_check_modules (DEP_libvala-0.30 QUIET libvala-0.30)
@@ -364,9 +376,9 @@ add_custom_command(
   OUTPUT
     "${CMAKE_BINARY_DIR}/locale/18/de/valama.mo"
   COMMAND
-    msgfmt --check --verbose -o "${CMAKE_BINARY_DIR}/locale/18/de/valama.mo" /media/datassd/source/valamang/locale/de.po
+    msgfmt --check --verbose -o "${CMAKE_BINARY_DIR}/locale/18/de/valama.mo" ${CMAKE_SOURCE_DIR}/locale/de.po
   DEPENDS
-    /media/datassd/source/valamang/locale/de.po
+    ${CMAKE_SOURCE_DIR}/locale/de.po
 )
 list(APPEND compiled_gettext "${CMAKE_BINARY_DIR}/locale/18/de/valama.mo")
 install(FILES "${CMAKE_BINARY_DIR}/locale/18/de/valama.mo" DESTINATION "${CMAKE_INSTALL_PREFIX}/share/locale/de/LC_MESSAGES/")
@@ -376,9 +388,9 @@ add_custom_command(
   OUTPUT
     "${CMAKE_BINARY_DIR}/locale/18/fr/valama.mo"
   COMMAND
-    msgfmt --check --verbose -o "${CMAKE_BINARY_DIR}/locale/18/fr/valama.mo" /media/datassd/source/valamang/locale/fr.po
+    msgfmt --check --verbose -o "${CMAKE_BINARY_DIR}/locale/18/fr/valama.mo" ${CMAKE_SOURCE_DIR}/locale/fr.po
   DEPENDS
-    /media/datassd/source/valamang/locale/fr.po
+    ${CMAKE_SOURCE_DIR}/locale/fr.po
 )
 list(APPEND compiled_gettext "${CMAKE_BINARY_DIR}/locale/18/fr/valama.mo")
 install(FILES "${CMAKE_BINARY_DIR}/locale/18/fr/valama.mo" DESTINATION "${CMAKE_INSTALL_PREFIX}/share/locale/fr/LC_MESSAGES/")
