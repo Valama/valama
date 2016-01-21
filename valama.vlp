@@ -79,6 +79,7 @@
 		<source id="97"/>
 		<source id="98"/>
 		<source id="99"/>
+		<source id="102"/>
 		<gresource id="52"/>
 		<data id="62"/>
 		<gettext id="100"/>
@@ -119,6 +120,9 @@
 			<dependency type="package" library="gee-0.8"/>
 		</metadependency>
 		<metadependency name="LibVala">
+			<dependency type="package" library="libvala-0.32">
+				<condition library="libvala-0.32" version="" relation="exists"/>
+			</dependency>
 			<dependency type="package" library="libvala-0.30">
 				<condition library="libvala-0.30" version="" relation="exists"/>
 			</dependency>
@@ -231,6 +235,7 @@
 		<source id="98"/>
 		<source id="97"/>
 		<source id="99"/>
+		<source id="102"/>
 		<data id="62"/>
 		<gettext id="100"/>
 		<gladeui id="20"/>
@@ -272,6 +277,9 @@
 		<metadependency name="LibVala">
 			<dependency type="package" library="libvala-0.30">
 				<condition library="libvala-0.30" version="" relation="exists"/>
+			</dependency>
+			<dependency type="package" library="libvala-0.32">
+				<condition library="libvala-0.32" version="" relation="exists"/>
 			</dependency>
 			<dependency type="package" library="libvala-0.28">
 				<condition library="libvala-0.28" version="" relation="exists"/>
@@ -519,4 +527,5 @@
 		<language id="fr"/>
 	</gettext>
 	<gladeui id="101" filename="src/Ui/Editors/Editor_Gettext.glade"/>
+	<valasource id="102" filename="buildsystems/config.vapi"/>
 </project>

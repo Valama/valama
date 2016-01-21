@@ -5,9 +5,6 @@ namespace Units {
     private Guanako.Project guanako_project = null;
     
     public override void init() {
-
-      guanako_project = new Guanako.Project(main_widget.code_context_provider.context, Config.DATA_DIR + "/share/valama/guanako/syntax");
-
       // Register provider on existing and following source members
       main_widget.project.member_editor_created.connect((member, new_editor)=>{
         if (member is Project.ProjectMemberValaSource) {
@@ -33,6 +30,9 @@ namespace Units {
     }
 
     private void completify_editor (Project.ProjectMemberValaSource member, Ui.EditorValaSource editor) {
+	  //create guanako project & context only if provider's context is not null.
+	  if (guanako_project == null && main_widget.code_context_provider.context != null)
+        guanako_project = new Guanako.Project(main_widget.code_context_provider.context, Config.DATA_DIR + "/share/valama/guanako/syntax");
       var sourcefile = main_widget.code_context_provider.get_sourcefile_by_name (member.file.get_abs());
       var comp_provider = new Guanako.GuanakoCompletion();
       comp_provider.srcview = editor.sourceview;

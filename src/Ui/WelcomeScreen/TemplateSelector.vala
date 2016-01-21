@@ -42,13 +42,19 @@ namespace Ui {
         var box_child = child.get_child() as TemplateBoxChild;
         lbl_author.label = box_child.template.author_name;
         lbl_description.label = box_child.template.description;
-        child_activated (box_child);
+        current_template = box_child.template;
+        template_changed();
       });
 
       pack_start (list_templates);
+      // use first template by default if any
+      if (provider.templates.size > 0)
+        current_template = provider.templates[0];
     }
 
-    public signal void child_activated (TemplateBoxChild child);
+    public signal void template_changed();
+    
+    public ProjectTemplate current_template { get; private set; }
 
     public ProjectTemplateProvider provider { get; construct; }
     public FlowBox list_templates { get; private set; }
@@ -66,6 +72,8 @@ namespace Ui {
     construct {
       var provider = new ProjectTemplateProvider();
       var selector = new TemplateBox (provider);
+      // if no template was selected, use current template (first by default).
+      template = selector.current_template;
 
       var btn_cancel = new Button.from_icon_name ("dialog-cancel", IconSize.LARGE_TOOLBAR);
       btn_cancel.clicked.connect (() => {
@@ -89,8 +97,8 @@ namespace Ui {
 
       add (selector);
 
-      selector.child_activated.connect (child => {
-        template = child.template;
+      selector.template_changed.connect (tmp => {
+        template = selector.current_template;
       });
       selector.pn_entry.changed.connect (self => {
         project_name = (self as Entry).text;
