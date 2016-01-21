@@ -286,3 +286,15 @@ msgstr ""
 #: src/Project/ProjectMember_Info.vala:47
 msgid "version attribute missing in info member"
 msgstr ""
+
+#: src/Ui/WelcomeScreen/RecentEntry.glade:45
+msgid "New project"
+msgstr ""
+
+#: src/Ui/WelcomeScreen/RecentEntry.glade:59
+msgid "Last edited"
+msgstr ""
+
+#: src/Ui/WelcomeScreen/RecentEntry.glade:80
+msgid "Recent element's path"
+msgstr ""

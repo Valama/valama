@@ -13,7 +13,7 @@ msgstr ""
 "Language-Team: German\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=ASCII\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
@@ -285,4 +285,16 @@ msgstr ""
 
 #: src/Project/ProjectMember_Info.vala:47
 msgid "version attribute missing in info member"
+msgstr ""
+
+#: src/Ui/WelcomeScreen/RecentEntry.glade:45
+msgid "New project"
+msgstr ""
+
+#: src/Ui/WelcomeScreen/RecentEntry.glade:59
+msgid "Last edited"
+msgstr ""
+
+#: src/Ui/WelcomeScreen/RecentEntry.glade:80
+msgid "Recent element's path"
 msgstr ""

@@ -359,7 +359,7 @@ list(APPEND vapidirs --gresources "${CMAKE_SOURCE_DIR}/gresource_gladeui.xml")
 list(APPEND vapifiles "${CMAKE_BINARY_DIR}/gresource_gladeui.c")
 list(APPEND compiled_resources "${CMAKE_BINARY_DIR}/gresource_gladeui.c")
 
-list(APPEND vapifiles "buildsystems/cmaketest/config.vapi")
+list(APPEND vapifiles "buildsystems/config.vapi")
 install(FILES "src/Units/Completion/syntax" DESTINATION "${CMAKE_INSTALL_PREFIX}/share/valama/guanako/" RENAME "syntax")
 install(DIRECTORY "templates/" DESTINATION "${CMAKE_INSTALL_PREFIX}/share/valama/templates")
 install(DIRECTORY "src/Units/Builder/Data/" DESTINATION "${CMAKE_INSTALL_PREFIX}/share/valama/Data")
