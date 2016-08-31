@@ -86,6 +86,7 @@ public static int main (string[] args) {
         }
 
     load_icons();
+    load_source_style();
 
     gtk_app = new Valama ();
     return gtk_app.run();
