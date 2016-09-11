@@ -206,7 +206,7 @@ namespace Ui {
         // Load translation
         var file = my_member.get_po_file (current_lang);
         string content;
-        FileUtils.get_contents (file.get_path(), out content);
+        FileUtils.get_contents (file.get_abs(), out content);
 
         if (change_hook != 0)
           template.srcview.buffer.disconnect (change_hook);
@@ -229,7 +229,7 @@ namespace Ui {
 
     private void save_language (string lang) {
       var my_member = member as Project.ProjectMemberGettext;
-      var file = my_member.get_po_file (current_lang);
+      var file = File.new_for_path(my_member.get_po_file (current_lang).get_abs());
       var fos = file.replace (null, false, FileCreateFlags.REPLACE_DESTINATION);
       var dos = new DataOutputStream (fos);
       dos.put_string (template.srcview.buffer.text);
@@ -261,7 +261,7 @@ namespace Ui {
         // Initialize po file
         var cmd_build = new StringBuilder();
         cmd_build.append ("/bin/sh -c \"");
-        cmd_build.append ("msginit -l " + entry.text + " -o '" + my_member.get_po_file(entry.text).get_path() + "' -i " + my_member.potfile.get_abs());
+        cmd_build.append ("msginit -l " + entry.text + " -o '" + my_member.get_po_file(entry.text).get_abs() + "' -i " + my_member.potfile.get_abs());
         cmd_build.append ("\"");
         main_widget.console_view.spawn_process (cmd_build.str);
       }

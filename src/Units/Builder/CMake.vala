@@ -232,7 +232,7 @@ namespace Builder {
           foreach (string id in target.included_gettexts) {
             var gettext = target.project.getMemberFromId (id) as Project.ProjectMemberGettext;
             if (lang in gettext.languages)
-              po_files.add (gettext.get_po_file(lang).get_path());
+              po_files.add ("${CMAKE_SOURCE_DIR}/" + gettext.get_po_file(lang).get_rel());
           }
 
           var lang_compile_dir = "${CMAKE_BINARY_DIR}/locale/" + target.id + "/" + lang;

@@ -11,8 +11,8 @@ namespace Project {
     public Gee.ArrayList<string> included_gladeuis = new Gee.ArrayList<string>();
     public Gee.ArrayList<string> languages = new Gee.ArrayList<string>();
 
-    public File get_po_file (string language) {
-      return File.new_for_path (potfile.get_abs()).get_parent().get_child(language + ".po");
+    public FileRef get_po_file (string language) {
+      return new FileRef.from_abs(project, File.new_for_path (potfile.get_abs()).get_parent().get_child(language + ".po").get_path());
     }
 
     internal override void load_internal (Xml.Node* node) throws ProjectError {
