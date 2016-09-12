@@ -247,13 +247,14 @@
 		<gladeui id="87"/>
 		<gladeui id="88"/>
 		<gladeui id="89"/>
-		<gladeui id="90"/>
 		<gladeui id="91"/>
 		<gladeui id="75"/>
 		<gladeui id="76"/>
 		<gladeui id="81"/>
 		<gladeui id="94"/>
 		<gladeui id="101"/>
+		<gladeui id="102"/>
+		<gladeui id="90"/>
 		<metadependency name="Gtk">
 			<dependency type="package" library="gtk+-3.0"/>
 		</metadependency>
@@ -519,4 +520,5 @@
 		<language id="fr"/>
 	</gettext>
 	<gladeui id="101" filename="src/Ui/Editors/Editor_Gettext.glade"/>
+	<gladeui id="102" filename="src/Ui/Editors/Editor_GladeUi.glade"/>
 </project>

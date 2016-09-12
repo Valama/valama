@@ -2,19 +2,32 @@ using Gtk;
 
 namespace Ui {
 
+  [GtkTemplate (ui = "/src/Ui/Editors/Editor_GladeUi.glade")]
+  private class EditorGladeUiTemplate : Alignment {
+    [GtkChild]
+    public Alignment algn_palette;
+    [GtkChild]
+    public Alignment algn_designer;
+    [GtkChild]
+    public Alignment algn_inspector;
+    [GtkChild]
+    public Alignment algn_editor;
+  }
+
   public class EditorGladeUi : Editor {
-  
+
     public Gtk.SourceView sourceview = new Gtk.SourceView ();
-  
+
     private Project.ProjectMemberGladeUi my_member = null;
 
+    private EditorGladeUiTemplate template = new EditorGladeUiTemplate();
 
     private Glade.Project glade_project = new Glade.Project();
     private Glade.Inspector inspector = new Glade.Inspector();
     private Glade.DesignView design_view;
     private Glade.Palette palette = new Glade.Palette();
     private Glade.Editor editor = new Glade.Editor();
-  
+
     public EditorGladeUi(Project.ProjectMemberGladeUi member, Ui.MainWidget main_widget) {
       this.main_widget = main_widget;
       this.member = member;
@@ -57,27 +70,21 @@ namespace Ui {
         w.show();
         editor.widget = w;
       });
-      
-      var paned_palette_design_view = new Gtk.Paned(Gtk.Orientation.HORIZONTAL);
-      paned_palette_design_view.add1 (palette);
-      var scrw = new ScrolledWindow(null, null);
-      scrw.add (design_view);
-      scrw.show();
-      paned_palette_design_view.add2 (scrw);
-      paned_palette_design_view.expand = true;
-      palette.show();
-      design_view.show();
 
-      design_view.expand = true;
-      grid.attach (paned_palette_design_view, 0, 0, 1, 2);
-      grid.attach (inspector, 1, 0, 1, 1);
-      grid.attach (editor, 1, 1, 1, 1);
+      template.show_all();
+
+      template.algn_editor.add(editor);
+      template.algn_inspector.add(inspector);
+      template.algn_designer.add(design_view);
+      template.algn_palette.add(palette);
 
       editor.show();
-      grid.expand = true;
+      inspector.show();
+      design_view.show();
+      palette.show();
 
-      widget = grid;
-      widget.show_all();
+      template.expand = true;
+      widget = template;
     }
 
     // Before compiling, save file (if it is part of the selected target)

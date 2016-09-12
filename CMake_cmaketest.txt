@@ -334,13 +334,14 @@ add_custom_command(
    "src/Ui/Editors/Editor_Target_Dependency.glade"
    "src/Ui/Editors/Editor_Target_Meta_Dependency.glade"
    "src/Ui/Editors/Editor_Target_NewDependency.glade"
-   "src/Units/Builder/Custom.glade"
    "src/Units/Builder/Waf.glade"
    "src/Ui/ConsoleView.glade"
    "src/Ui/MainWidget.glade"
    "src/Ui/Editors/Editor_Data.glade"
    "src/Ui/SearchView.glade"
    "src/Ui/Editors/Editor_Gettext.glade"
+   "src/Ui/Editors/Editor_GladeUi.glade"
+   "src/Units/Builder/Custom.glade"
   COMMENT "Building GladeUI gresource"
 )
 list(APPEND vapidirs --gresources "${CMAKE_SOURCE_DIR}/gresource_gladeui.xml")

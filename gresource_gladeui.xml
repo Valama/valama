@@ -15,12 +15,13 @@
 <file>src/Ui/Editors/Editor_Target_Dependency.glade</file>
 <file>src/Ui/Editors/Editor_Target_Meta_Dependency.glade</file>
 <file>src/Ui/Editors/Editor_Target_NewDependency.glade</file>
-<file>src/Units/Builder/Custom.glade</file>
 <file>src/Units/Builder/Waf.glade</file>
 <file>src/Ui/ConsoleView.glade</file>
 <file>src/Ui/MainWidget.glade</file>
 <file>src/Ui/Editors/Editor_Data.glade</file>
 <file>src/Ui/SearchView.glade</file>
 <file>src/Ui/Editors/Editor_Gettext.glade</file>
+<file>src/Ui/Editors/Editor_GladeUi.glade</file>
+<file>src/Units/Builder/Custom.glade</file>
 </gresource>
 </gresources>
