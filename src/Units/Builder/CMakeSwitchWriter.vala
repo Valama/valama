@@ -18,8 +18,13 @@ namespace Units {
         if (member is Project.ProjectMemberTarget) {
           var target_member = member as Project.ProjectMemberTarget;
           setup_target (target_member);
-          if (target_member.buildsystem == Builder.EnumBuildsystem.CMAKE)
-            write();
+          write();
+        }
+      });
+      main_widget.project.member_removed.connect ((member)=>{
+        if (member is Project.ProjectMemberTarget) {
+          var target_member = member as Project.ProjectMemberTarget;
+          write();
         }
       });
     }
@@ -56,6 +61,7 @@ namespace Units {
 
       dos.put_string ("cmake_minimum_required(VERSION \"2.8.4\")\n\n");
       dos.put_string ("set(TARGET \"" + first_name + "\" CACHE STRING \"Target\")\n");
+      dos.put_string ("set(target_specified FALSE)\n");
 
       // Build switch for every CMake target
       foreach (var member in main_widget.project.members) {
@@ -65,9 +71,13 @@ namespace Units {
         if (target_member.buildsystem == Builder.EnumBuildsystem.CMAKE) {
           dos.put_string ("if (\"${TARGET}\" STREQUAL \"" + target_member.binary_name + "\")\n");
           dos.put_string ("  include(\"CMake_" + target_member.binary_name + ".txt\")\n");
-          dos.put_string ("endif (\"${TARGET}\" STREQUAL \"" + target_member.binary_name + "\")\n");
+          dos.put_string ("  set(target_specified TRUE)\n");
+          dos.put_string ("endif ()\n");
         }
       }
+      dos.put_string ("if (NOT target_specified)\n");
+      dos.put_string ("  message( FATAL_ERROR \"Specify a target via 'cmake -DTARGET=my_target ...'\" )\n");
+      dos.put_string ("endif ()");
     }
 
     public override void destroy() {
