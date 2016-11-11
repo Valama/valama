@@ -271,6 +271,12 @@
 			<dependency type="package" library="gee-0.8"/>
 		</metadependency>
 		<metadependency name="LibVala">
+			<dependency type="package" library="libvala-0.34">
+				<condition library="libvala-0.34" version="" relation="exists"/>
+			</dependency>
+			<dependency type="package" library="libvala-0.32">
+				<condition library="libvala-0.32" version="" relation="exists"/>
+			</dependency>
 			<dependency type="package" library="libvala-0.30">
 				<condition library="libvala-0.30" version="" relation="exists"/>
 			</dependency>

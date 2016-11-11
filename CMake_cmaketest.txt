@@ -159,6 +159,30 @@ endif ()
 message ("-- checking dependency LibVala")
 set (found FALSE)
 if (NOT found)
+  message ("--  checking option libvala-0.34")
+  set (cond_found TRUE)
+  pkg_check_modules (DEP_libvala-0.34 QUIET libvala-0.34)
+  if (NOT DEP_libvala-0.34_VERSION)
+    set (cond_found FALSE)
+  endif ()
+  if (cond_found)
+    set (found TRUE)
+    list(APPEND required_pkgs "libvala-0.34")
+  endif ()
+endif ()
+if (NOT found)
+  message ("--  checking option libvala-0.32")
+  set (cond_found TRUE)
+  pkg_check_modules (DEP_libvala-0.32 QUIET libvala-0.32)
+  if (NOT DEP_libvala-0.32_VERSION)
+    set (cond_found FALSE)
+  endif ()
+  if (cond_found)
+    set (found TRUE)
+    list(APPEND required_pkgs "libvala-0.32")
+  endif ()
+endif ()
+if (NOT found)
   message ("--  checking option libvala-0.30")
   set (cond_found TRUE)
   pkg_check_modules (DEP_libvala-0.30 QUIET libvala-0.30)
@@ -318,7 +342,7 @@ add_custom_command(
   WORKING_DIRECTORY
     ${CMAKE_SOURCE_DIR}
   COMMAND
-    glib-compile-resources "${CMAKE_SOURCE_DIR}/gresource_gladeui.xml" --generate-source --target="${CMAKE_BINARY_DIR}/gresource_gladeui.c"
+    glib-compile-resources "${CMAKE_SOURCE_DIR}/gresource_gladeui_18.xml" --generate-source --target="${CMAKE_BINARY_DIR}/gresource_gladeui.c"
   DEPENDS
    "src/Ui/NewProjectMember.glade"
    "src/Ui/Editors/Editor_Data_entry.glade"
@@ -344,7 +368,7 @@ add_custom_command(
    "src/Units/Builder/Custom.glade"
   COMMENT "Building GladeUI gresource"
 )
-list(APPEND vapidirs --gresources "${CMAKE_SOURCE_DIR}/gresource_gladeui.xml")
+list(APPEND vapidirs --gresources "${CMAKE_SOURCE_DIR}/gresource_gladeui_18.xml")
 list(APPEND vapifiles "${CMAKE_BINARY_DIR}/gresource_gladeui.c")
 list(APPEND compiled_resources "${CMAKE_BINARY_DIR}/gresource_gladeui.c")
 
