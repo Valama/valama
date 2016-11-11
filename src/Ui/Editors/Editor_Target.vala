@@ -114,6 +114,8 @@ namespace Ui {
     public ComboBoxText combo_buildsystem;
     [GtkChild]
     public Notebook notebook_settings;
+    [GtkChild]
+    public CheckButton chk_gettext_active;
   }
   [GtkTemplate (ui = "/src/Ui/Editors/Editor_Target_Condition.glade")]
   private class ConditionEditorTemplate : ListBoxRow {
@@ -322,6 +324,12 @@ namespace Ui {
       this.main_widget = main_widget;
       this.member = member;
       title = _("Target");
+
+      template.chk_gettext_active.active = member.gettext_active;
+      template.chk_gettext_active.toggled.connect(()=>{
+        member.gettext_active = template.chk_gettext_active.active;
+        member.project.member_data_changed (this, member);
+      });
 
       // Fill buildsystem combo and keep it in sync
       foreach (var i in Builder.EnumBuildsystem.to_array())
