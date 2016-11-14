@@ -21,6 +21,7 @@ namespace Project {
     }
 
     public string binary_name = null;
+    public string binary_install_directory = null;
 
     public bool library;
 
@@ -40,6 +41,8 @@ namespace Project {
     internal override void load_internal (Xml.Node* node) throws ProjectError {
       // Read binary name
       for (Xml.Attr* prop = node->properties; prop != null; prop = prop->next) {
+        if (prop->name == "binary_install_directory")
+          binary_install_directory = prop->children->content;
         if (prop->name == "binary_name")
           binary_name = prop->children->content;
         if (prop->name == "gettext_active")
@@ -137,8 +140,10 @@ namespace Project {
         }
       });
     }
+
     internal override void save_internal (Xml.TextWriter writer) {
       writer.write_attribute ("binary_name", binary_name);
+      writer.write_attribute ("binary_install_directory", binary_install_directory);
       writer.write_attribute ("library", library.to_string());
       writer.write_attribute ("gettext_active", gettext_active.to_string());
       writer.write_attribute ("gettext_package_name", gettext_package_name);

@@ -430,6 +430,7 @@ vala_pkgs(VALA_C
 )
 
 add_executable("${project_name_lower}" ${VALA_C} ${compiled_resources} ${compiled_gettext})
+install(TARGETS "${project_name_lower}" DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
 
 target_link_libraries("${project_name_lower}"
   ${PROJECT_LDFLAGS}

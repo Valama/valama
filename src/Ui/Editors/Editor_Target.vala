@@ -111,6 +111,8 @@ namespace Ui {
     [GtkChild]
     public Entry ent_binary_name;
     [GtkChild]
+    public Entry ent_binary_install_dir;
+    [GtkChild]
     public ComboBoxText combo_buildsystem;
     [GtkChild]
     public Notebook notebook_settings;
@@ -326,8 +328,10 @@ namespace Ui {
       title = _("Target");
 
       template.chk_gettext_active.active = member.gettext_active;
+      template.vp_gettext.sensitive = member.gettext_active;
       template.chk_gettext_active.toggled.connect(()=>{
         member.gettext_active = template.chk_gettext_active.active;
+        template.vp_gettext.sensitive = member.gettext_active;
         member.project.member_data_changed (this, member);
       });
 
@@ -387,6 +391,13 @@ namespace Ui {
       template.ent_binary_name.text = member.binary_name;
       template.ent_binary_name.changed.connect (()=>{
         member.binary_name = template.ent_binary_name.text;
+        member.project.member_data_changed (this, member);
+      });
+
+      // Keep binary install directory entry in sync
+      template.ent_binary_install_dir.text = member.binary_install_directory;
+      template.ent_binary_install_dir.changed.connect (()=>{
+        member.binary_install_directory = template.ent_binary_install_dir.text;
         member.project.member_data_changed (this, member);
       });
       

@@ -4,7 +4,7 @@
 		<author name="Linus Seelinger" mail="S.Linus@gmx.de"/>
 	</info>
 	<valasource id="2" filename="src/main.vala"/>
-	<target id="3" binary_name="valama" library="false" gettext_active="false" gettext_package_name="">
+	<target id="3" binary_name="valama" binary_install_directory="" library="false" gettext_active="false" gettext_package_name="">
 		<buildsystem type="valama"/>
 		<source id="14"/>
 		<source id="12"/>
@@ -156,7 +156,7 @@
 			<condition library="vte-2.91" version="" relation="exists"/>
 		</define>
 	</target>
-	<target id="18" binary_name="cmaketest" library="false" gettext_active="true" gettext_package_name="valama">
+	<target id="18" binary_name="cmaketest" binary_install_directory="/bin" library="false" gettext_active="true" gettext_package_name="valama">
 		<buildsystem type="cmake"/>
 		<source id="16"/>
 		<source id="14"/>
