@@ -39,6 +39,7 @@ namespace Ui {
     public Units.InstalledLibrariesProvider installed_libraries_provider = new Units.InstalledLibrariesProvider();
     public Units.CMakeSwitchWriter cmake_switch_writer = new Units.CMakeSwitchWriter();
     public Units.ConfigVapiWriter config_vapi_writer = new Units.ConfigVapiWriter();
+    public Units.IconProvider icon_provider = new Units.IconProvider();
     public SearchView search_view = new SearchView();
 
     private Gee.ArrayList<Units.Unit> units = new Gee.ArrayList<Units.Unit>();
@@ -69,6 +70,7 @@ namespace Ui {
       template.nb_lower.get_style_context().add_class("nb-lower");
 
       // Initialize all elements
+      units.add (icon_provider);
       units.add (main_toolbar);
       units.add (editor_viewer);
       units.add (project_structure);
