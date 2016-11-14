@@ -146,8 +146,23 @@ namespace Guanako {
     /*
      * Get parent's children.
      */
-    Gee.LinkedList<Symbol> get_child_symbols (Symbol parent) {
-        var ret = new Gee.LinkedList<Symbol>();
+    Gee.TreeSet<Symbol> get_child_symbols (Symbol parent) {
+        var ret = new Gee.TreeSet<Vala.Symbol>((a,b) => {
+                        var name_a = ((Vala.Symbol)a).name;
+                        var name_b = ((Vala.Symbol)b).name;
+                        var name_a_case = name_a.casefold();
+                        var name_b_case = name_b.casefold();
+                        if (name_a_case < name_b_case)
+                            return -1;
+                        if (name_a_case > name_b_case)
+                            return 1;
+                        if (name_a < name_b)
+                            return -1;
+                        if (name_a > name_b)
+                            return 1;
+
+                        return 0;
+                    });
         if (parent is Class) {
             //If parent is a Class, add its base class and types (i.e. interfaces it implements etc)
             var p = (Class) parent;
@@ -562,6 +577,12 @@ namespace Guanako {
             var st = (LockStatement) statement;
             if (st.body != null)
                 if (!iter_statement (st.body, callback, depth + 1, "lock_statement"))
+                    return false;
+        }
+        if (statement is LambdaExpression) {
+            var st = (LambdaExpression) statement;
+            if (st.statement_body != null)
+                if (!iter_statement (st.statement_body, callback, depth + 1, "lambda_statement"))
                     return false;
         }
         if (statement is TryStatement) {

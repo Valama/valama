@@ -83,6 +83,8 @@ set(srcfiles
   "src/Ui/ProjectMemberCreators/Creator_Gettext.vala"
   "src/Project/ProjectMember_Gettext.vala"
   "src/Ui/Editors/Editor_Gettext.vala"
+  "codecontextd/Error.vala"
+  "src/Units/IconProvider.vala"
 )
 
 message ("-- checking dependency Gtk")
@@ -373,9 +375,9 @@ list(APPEND vapifiles "${CMAKE_BINARY_DIR}/gresource_gladeui.c")
 list(APPEND compiled_resources "${CMAKE_BINARY_DIR}/gresource_gladeui.c")
 
 list(APPEND vapifiles "buildsystems/cmaketest/config.vapi")
-install(FILES "src/Units/Completion/syntax" DESTINATION "${CMAKE_INSTALL_PREFIX}/share/valama/guanako/" RENAME "syntax")
 install(DIRECTORY "templates/" DESTINATION "${CMAKE_INSTALL_PREFIX}/share/valama/templates")
 install(DIRECTORY "src/Units/Builder/Data/" DESTINATION "${CMAKE_INSTALL_PREFIX}/share/valama/Data")
+install(DIRECTORY "pixmaps/" DESTINATION "${CMAKE_INSTALL_PREFIX}/share/valama/pixmaps")
 add_definitions(-DDATA_DIR="${CMAKE_INSTALL_PREFIX}")
 
 # Gettext

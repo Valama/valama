@@ -22,33 +22,6 @@ using Vala;
 
 namespace Units {
 
-    public enum EnumReportType {
-        ERROR,
-        WARNING,
-        DEPRECATED,
-        EXPERIMENTAL,
-        NOTE;
-
-        /*public const ReportType ALL = ERROR | WARNING | DEPRECATED | EXPERIMENTAL | NOTE;
-
-        public string? to_string() {
-            switch (this) {
-                case ERROR:
-                    return ("Error");
-                case WARNING:
-                    return ("Warning");
-                case DEPRECATED:
-                    return ("Deprecated");
-                case EXPERIMENTAL:
-                    return ("Experimental");
-                case NOTE:
-                    return ("Note");
-                default:
-                    assert_not_reached();
-            }
-        }*/
-    }
-
     public class Report : Vala.Report {
         public Gee.ArrayList<Error> errlist = new Gee.ArrayList<Error>();
 
@@ -87,22 +60,22 @@ namespace Units {
             errlist = errlist_new;
         }
 
-        protected virtual inline void show_note (SourceReference? source, string message) {}
-        protected override void note (SourceReference? source, string message) {
+        protected virtual inline void show_note (Vala.SourceReference? source, string message) {}
+        protected override void note (Vala.SourceReference? source, string message) {
             show_note (source, message);
             errlist.add (new Error (source, message, EnumReportType.NOTE));
         }
 
-        protected virtual inline void show_deprecated (SourceReference? source, string message) {}
-        protected override void depr (SourceReference? source, string message) {
+        protected virtual inline void show_deprecated (Vala.SourceReference? source, string message) {}
+        protected override void depr (Vala.SourceReference? source, string message) {
             show_deprecated (source, message);
             ++warnings;
             errlist.add (new Error (source, message, EnumReportType.DEPRECATED));
         }
 
-        protected virtual inline void show_experimental (SourceReference? source, string message) {}
-        protected virtual inline void show_warning (SourceReference? source, string message) {}
-        protected override void warn (SourceReference? source, string message) {
+        protected virtual inline void show_experimental (Vala.SourceReference? source, string message) {}
+        protected virtual inline void show_warning (Vala.SourceReference? source, string message) {}
+        protected override void warn (Vala.SourceReference? source, string message) {
             EnumReportType type;
             if (message.has_suffix ("are experimental")) {
                 show_experimental (source, message);
@@ -115,8 +88,8 @@ namespace Units {
             errlist.add (new Error (source, message, type));
         }
 
-        protected virtual inline void show_error (SourceReference? source, string message) {}
-        protected override void err (SourceReference? source, string message) {
+        protected virtual inline void show_error (Vala.SourceReference? source, string message) {}
+        protected override void err (Vala.SourceReference? source, string message) {
             show_error (source, message);
             ++errors;
             errlist.add (new Error (source, message, EnumReportType.ERROR));

@@ -1,13 +1,35 @@
 namespace Units {
 
+  [DBus (name = "org.valama.codecontextd")]
+  public interface CodeContextDaemon : Object {
+    public abstract void initialize (string[] defines, string[] vapi_directories, string[] libraries, string[] source_files) throws IOError;
+
+    public abstract string[] completion (string filename, int line, int col, string statement) throws IOError;
+
+    public abstract string[] completion_simple (string filename, int line, int col, string[] fragments) throws IOError;
+
+    public abstract string[] get_errors_serialized() throws IOError;
+
+    public abstract void quitd() throws IOError;
+  }
+
   public class CodeContextProvider : Unit {
-    public Vala.CodeContext? context = null;
+
+
+    public CodeContextDaemon daemon = null;
+    private Pid? daemon_pid = null;
+
+    public Vala.CodeContext context = new Vala.CodeContext();
     //public Vala.Symbol root = null;
     public Report report = new Report();
-    
+
+    public Gee.ArrayList<CompilerError> compiler_errors = new Gee.ArrayList<CompilerError>();
+
     public signal void context_updated();
+    public signal void report_updated();
     
     public override void init() {
+
       main_widget.main_toolbar.selected_target_changed.connect(queue_update);
       main_widget.project.member_data_changed.connect((sender, member)=>{
         if (member == current_target) {
@@ -15,10 +37,16 @@ namespace Units {
           queue_update();
         }
       });
-      
+
       update_code_context();
     }
+
     public override void destroy() {
+      if (daemon != null) {
+        try {
+          daemon.quitd();
+        } catch {}
+      }
     }
 
     private Project.ProjectMemberTarget current_target;
@@ -46,6 +74,7 @@ namespace Units {
       return null;
     }
 
+    private int daemon_id_counter = 0;
     private int update_code_context_work() {
       stdout.printf (_("===========updating context\n"));
       current_target = main_widget.main_toolbar.selected_target;
@@ -54,93 +83,105 @@ namespace Units {
         return -1;
       }
 
-      Vala.CodeContext context_internal = new Vala.CodeContext();
-      Vala.CodeContext.push (context_internal);
+      /*if (daemon_pid != null) {
+        Process.close_pid (daemon_pid);
+      }*/
 
-      var report_internal = new Report();
-      context_internal.report = report_internal;
-      
-      context_internal.profile = Vala.Profile.GOBJECT;
-      context_internal.add_define ("GOBJECT");
+      daemon_id_counter++;
+      string daemon_id = ((int)Posix.getpid()).to_string() + "-" + daemon_id_counter.to_string();
 
-      context_internal.target_glib_major = 2;
-      context_internal.target_glib_minor = 18;
+      string[] spawn_args = {Config.DATA_DIR + "/bin/valama-codecontextd", daemon_id};
+		  string[] spawn_env = Environ.get ();
+
+		  Process.spawn_async ("/", spawn_args, spawn_env,
+                           SpawnFlags.SEARCH_PATH,// | SpawnFlags.DO_NOT_REAP_CHILD,
+                           null,
+                           out daemon_pid);
+
+      CodeContextDaemon new_daemon = null;
+      while (new_daemon == null) {
+        try {
+          new_daemon = Bus.get_proxy_sync (BusType.SESSION, "org.valama.codecontextd" + daemon_id,
+                                                  "/org/valama/codecontextd");
+        } catch {
+          new_daemon = null;
+          GLib.Thread.usleep (10 * 1000);
+        }
+      }
 
       // Add defines
 
+      string[] daemon_defines = new string[0];
+
       foreach (var define in current_target.defines) {
-        if (main_widget.installed_libraries_provider.check_define (define))
-          context_internal.add_define (define.define);
+        if (main_widget.installed_libraries_provider.check_define (define)) {
+          daemon_defines += define.define;
+        }
       }
 
       // Add packages
 
-      string[] new_vapi_dirs = new string[0];
-      foreach (string dir in context_internal.vapi_directories)
-        new_vapi_dirs += dir;
+      string[] daemon_vapi_dirs = new string[0];
+      string[] daemon_pkgs = new string[0];
 
       foreach (var meta_dep in current_target.metadependencies) {
         var dep = main_widget.installed_libraries_provider.check_meta_dependency (meta_dep);
         if (dep != null) {
-          if (dep.type == Project.DependencyType.PACKAGE)
-            context_internal.add_external_package (dep.library);
-          else if (dep.type == Project.DependencyType.VAPI){
+          if (dep.type == Project.DependencyType.PACKAGE) {
+            daemon_pkgs += dep.library;
+          } else if (dep.type == Project.DependencyType.VAPI){
             var vapi_file = File.new_for_path (dep.library);
             var custom_vapi_dir = vapi_file.get_parent().get_path();
-            new_vapi_dirs += custom_vapi_dir;
-            
-            // Write extended list to context, required before adding package
-            context_internal.vapi_directories = new_vapi_dirs;
-            context_internal.add_external_package (vapi_file.get_basename().replace(".vapi", ""));
+
+            daemon_vapi_dirs += custom_vapi_dir;
+            daemon_pkgs += vapi_file.get_basename().replace(".vapi", "");
           }
         }
       }
 
-
-      string pkgs[2] = {"glib-2.0", "gobject-2.0"};
-      foreach (string pkg in pkgs) {
-        context_internal.add_external_package (pkg);
-      }
-
       // Add source files
+      string[] daemon_sources = new string[0];
 
       foreach (string source_id in current_target.included_sources) {
         var source = main_widget.project.getMemberFromId (source_id) as Project.ProjectMemberValaSource;
 
-			  var source_file = new Vala.SourceFile (context_internal, Vala.SourceFileType.SOURCE, source.file.get_abs(), source.buffer.text, false);
-			  source_file.relative_filename = source.file.get_rel();
-
-			  var ns_ref = new Vala.UsingDirective (new Vala.UnresolvedSymbol (null, "GLib", null));
-			  source_file.add_using_directive (ns_ref);
-			  context_internal.root.add_using_directive (ns_ref);
-
-        context_internal.add_source_file (source_file);
+        daemon_sources += source.file.get_abs();
       }
 
       var config_vapi_file = new Project.FileRef.from_rel (main_widget.project, "buildsystems/" + current_target.binary_name + "/config.vapi");
-      context_internal.add_source_filename (config_vapi_file.get_abs());
+      daemon_sources += config_vapi_file.get_abs();
 
-      var parser = new Vala.Parser();
-      parser.parse (context_internal);
+      try {
+        new_daemon.initialize (daemon_defines, daemon_vapi_dirs, daemon_pkgs, daemon_sources);
+      } catch {}
 
-      //context_internal.check ();
-      if (report_internal.get_errors() == 0)
-        context_internal.resolver.resolve (context_internal);
-      if (report_internal.get_errors() == 0)
-        context_internal.analyzer.analyze (context_internal);
-      if (report_internal.get_errors() == 0)
-        context_internal.flow_analyzer.analyze (context_internal);
-      report = report_internal;
 
-      context = (owned) context_internal; // Take ownership of the context...
-      Vala.CodeContext.pop(); // and release it from the libvala stack
+      // Deserialize received compiler errors
+      var compiler_errors_internal = new Gee.ArrayList<CompilerError>();
 
+      try {
+        foreach (var error_serialized in new_daemon.get_errors_serialized()) {
+          compiler_errors_internal.add (new CompilerError.deserialize (error_serialized));
+        }
+      } catch {}
+      compiler_errors = compiler_errors_internal;
       GLib.Idle.add (()=>{
-        context_updated();
+        report_updated();
         return false;
       });
 
-      GLib.Timeout.add_seconds (5, ()=> {
+      // Make new daemon instance public and quit old one
+      CodeContextDaemon old_daemon = daemon;
+      daemon = new_daemon;
+
+      if (old_daemon != null) {
+        try {
+          old_daemon.quitd();
+        } catch {}
+      }
+
+
+      GLib.Timeout.add (5000, ()=> {
         timeout_active = false;
         if (update_queued)
           update_code_context();

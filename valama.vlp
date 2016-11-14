@@ -231,6 +231,8 @@
 		<source id="98"/>
 		<source id="97"/>
 		<source id="99"/>
+		<source id="105"/>
+		<source id="108"/>
 		<data id="62"/>
 		<gettext id="100"/>
 		<gladeui id="20"/>
@@ -406,9 +408,9 @@
 	<valasource id="60" filename="src/Project/ProjectMember_Data.vala"/>
 	<valasource id="61" filename="src/Ui/Editors/Editor_Data.vala"/>
 	<data id="62" name="Data" basedir="DATA_DIR">
-		<target file="src/Units/Completion/syntax" target="/share/valama/guanako/syntax" is_folder="false"/>
 		<target file="templates" target="/share/valama/templates" is_folder="true"/>
 		<target file="src/Units/Builder/Data" target="/share/valama/Data" is_folder="true"/>
+		<target file="pixmaps" target="/share/valama/pixmaps" is_folder="true"/>
 	</data>
 	<valasource id="63" filename="src/Project/FileRef.vala"/>
 	<valasource id="64" filename="src/ProjectTemplates/TemplateProvider.vala"/>
@@ -527,4 +529,58 @@
 	</gettext>
 	<gladeui id="101" filename="src/Ui/Editors/Editor_Gettext.glade"/>
 	<gladeui id="102" filename="src/Ui/Editors/Editor_GladeUi.glade"/>
+	<valasource id="103" filename="codecontextd/main.vala"/>
+	<target id="104" binary_name="valama-codecontextd" binary_install_directory="/bin" library="false" gettext_active="true" gettext_package_name="">
+		<buildsystem type="cmake"/>
+		<source id="103"/>
+		<source id="106"/>
+		<source id="105"/>
+		<source id="39"/>
+		<source id="40"/>
+		<source id="42"/>
+		<data id="107"/>
+		<metadependency name="gio-2.0">
+			<dependency type="package" library="gio-2.0">
+				<condition library="gio-2.0" version="" relation="exists"/>
+			</dependency>
+		</metadependency>
+		<metadependency name="LibVala">
+			<dependency type="package" library="libvala-0.30">
+				<condition library="libvala-0.30" version="" relation="exists"/>
+			</dependency>
+			<dependency type="package" library="libvala-0.28">
+				<condition library="libvala-0.28" version="" relation="exists"/>
+			</dependency>
+			<dependency type="package" library="libvala-0.26">
+				<condition library="libvala-0.26" version="" relation="exists"/>
+			</dependency>
+			<dependency type="package" library="libvala-0.24">
+				<condition library="libvala-0.24" version="0.24.0" relation="exists"/>
+			</dependency>
+			<dependency type="package" library="libvala-0.22">
+				<condition library="libvala-0.22" version="0.22.0" relation="exists"/>
+			</dependency>
+		</metadependency>
+		<metadependency name="gee-0.8">
+			<dependency type="package" library="gee-0.8">
+				<condition library="gee-0.8" version="" relation="exists"/>
+			</dependency>
+		</metadependency>
+		<metadependency name="GTK+3">
+			<dependency type="package" library="gtk+-3.0">
+				<condition library="gtk+-3.0" version="" relation="exists"/>
+			</dependency>
+		</metadependency>
+		<metadependency name="gtksourceview-3.0">
+			<dependency type="package" library="gtksourceview-3.0">
+				<condition library="gtksourceview-3.0" version="" relation="exists"/>
+			</dependency>
+		</metadependency>
+	</target>
+	<valasource id="105" filename="codecontextd/Error.vala"/>
+	<valasource id="106" filename="codecontextd/Report.vala"/>
+	<data id="107" name="codecontextd data" basedir="DATA_DIR">
+		<target file="src/Units/Completion/syntax" target="/share/valama/guanako/syntax" is_folder="false"/>
+	</data>
+	<valasource id="108" filename="src/Units/IconProvider.vala"/>
 </project>

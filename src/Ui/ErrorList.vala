@@ -54,24 +54,24 @@ namespace Ui {
       //revealer.set_reveal_child (true);
       widget = revealer;
       
-      main_widget.code_context_provider.context_updated.connect (update);
+      main_widget.code_context_provider.report_updated.connect (update);
       update();
     }
 
     private void update() {
-      var report = main_widget.code_context_provider.report;
-      revealer.set_reveal_child (report.errlist.size != 0);
+      var errlist = main_widget.code_context_provider.compiler_errors;
+      revealer.set_reveal_child (errlist.size != 0);
 
       foreach (Gtk.Widget widget in list.get_children())
         list.remove (widget);
-      foreach (var error in report.errlist) {
+      foreach (var error in errlist) {
         var row = new Gtk.ListBoxRow();
         var label = new Gtk.Label(error.message);
-        
+
         row.activate.connect(()=>{
           if (error.source == null)
             return;
-          string myfilename = error.source.file.get_relative_filename();
+          string myfilename = error.source.file;
           var editor = get_editor_by_file (myfilename);
           editor.jump_to_sourceref (error.source);
         });
@@ -93,7 +93,7 @@ namespace Ui {
       foreach (var member in main_widget.project.members)
         if (member is Project.ProjectMemberValaSource) {
           source_member = member as Project.ProjectMemberValaSource;
-          if (source_member.file.get_rel() == filename)
+          if (source_member.file.get_abs() == filename)
             break;
         }
       return source_member;

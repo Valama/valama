@@ -308,9 +308,12 @@ namespace Builder {
         dos.put_string ("  VERSION \"${${project_name}_VERSION}\"\n");
         dos.put_string ("  SOVERSION %d\n".printf (info == null ? 0 : info.major));
         dos.put_string (")\n");
+        // TODO: install library!
       }
-      else
+      else {
         dos.put_string ("add_executable(\"${project_name_lower}\" ${VALA_C} ${compiled_resources} ${compiled_gettext})\n");
+        dos.put_string ("install(TARGETS \"${project_name_lower}\" DESTINATION \"${CMAKE_INSTALL_PREFIX}" + target.binary_install_directory + "\")\n");
+      }
       dos.put_string ("\n");
 
       dos.put_string ("target_link_libraries(\"${project_name_lower}\"\n");
@@ -364,8 +367,8 @@ namespace Builder {
 
       state = BuilderState.RUNNING;
 
-     ulong process_exited_handler = 0;
-     process_exited_handler = main_widget.console_view.process_exited.connect (()=>{
+      ulong process_exited_handler = 0;
+      process_exited_handler = main_widget.console_view.process_exited.connect (()=>{
         state = BuilderState.COMPILED_OK;
         main_widget.console_view.disconnect (process_exited_handler);
       });

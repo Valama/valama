@@ -2,11 +2,7 @@ namespace Units {
 
   public class CompletionProvider : Unit {
     
-    private Guanako.Project guanako_project = null;
-    
     public override void init() {
-
-      guanako_project = new Guanako.Project(main_widget.code_context_provider.context, Config.DATA_DIR + "/share/valama/guanako/syntax");
 
       // Register provider on existing and following source members
       main_widget.project.member_editor_created.connect((member, new_editor)=>{
@@ -33,24 +29,14 @@ namespace Units {
     }
 
     private void completify_editor (Project.ProjectMemberValaSource member, Ui.EditorValaSource editor) {
-      var sourcefile = main_widget.code_context_provider.get_sourcefile_by_name (member.file.get_abs());
-      var comp_provider = new Guanako.GuanakoCompletion();
+      var comp_provider = new GuanakoCompletion(main_widget, member);
       comp_provider.srcview = editor.sourceview;
       comp_provider.srcbuffer = member.buffer;
-      comp_provider.guanako_project = guanako_project;
-      comp_provider.source_file = sourcefile;
       editor.sourceview.completion.add_provider (comp_provider);
     }
 
     private void update() {
       
-    }
-
-    private Gtk.TextIter iter_from_location (Gtk.SourceBuffer buffer, Vala.SourceLocation location) {
-      Gtk.TextIter titer;
-      buffer.get_iter_at_line (out titer, location.line -1);
-      titer.forward_chars (location.column - 1);
-      return titer;
     }
 
     private Project.ProjectMemberValaSource get_source_member_by_file (string filename) {

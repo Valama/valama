@@ -18,7 +18,7 @@ namespace Units {
       });
 
       // Update with every context update
-      main_widget.code_context_provider.context_updated.connect (update);
+      main_widget.code_context_provider.report_updated.connect (update);
       update();
     }
 
@@ -32,26 +32,27 @@ namespace Units {
           //clear_tag (source_member.buffer, "EM_warn");
         }
       }
-      
+
       // Then, add new error tags
-      var report = main_widget.code_context_provider.report;
-      foreach (var error in report.errlist) {
+      foreach (var error in main_widget.code_context_provider.compiler_errors) {
         if (error.source == null)
           return;
-        string myfilename = error.source.file.get_relative_filename();
+        string myfilename = error.source.file;
         var member = get_source_member_by_file (myfilename);
-        
+
         var iter_start = iter_from_location (member.buffer, error.source.begin);
         var iter_end = iter_from_location (member.buffer, error.source.end);
         iter_end.forward_char();
-        
-        member.buffer.apply_tag_by_name ("EM_err", iter_start, iter_end);
-        
+
+        if (error.type == EnumReportType.ERROR)
+          member.buffer.apply_tag_by_name ("EM_err", iter_start, iter_end);
+        else
+          member.buffer.apply_tag_by_name ("EM_warn", iter_start, iter_end);
       }
 
     }
 
-    private Gtk.TextIter iter_from_location (Gtk.SourceBuffer buffer, Vala.SourceLocation location) {
+    private Gtk.TextIter iter_from_location (Gtk.SourceBuffer buffer, SourceLocation location) {
       Gtk.TextIter titer;
       buffer.get_iter_at_line (out titer, location.line -1);
       titer.forward_chars (location.column - 1);
@@ -81,7 +82,7 @@ namespace Units {
       foreach (var member in main_widget.project.members)
         if (member is Project.ProjectMemberValaSource) {
           source_member = member as Project.ProjectMemberValaSource;
-          if (source_member.file.get_rel() == filename)
+          if (source_member.file.get_abs() == filename)
             break;
         }
       return source_member;

@@ -570,7 +570,7 @@ namespace Guanako {
                 return;
             }
 
-            static Symbol? get_type_of_symbol (Symbol smb, bool resolve_array) {
+            public static Symbol? get_type_of_symbol (Symbol smb, bool resolve_array) {
                 if (smb is Class || smb is Namespace || smb is Struct || smb is Enum)
                     return smb;
 
@@ -796,7 +796,7 @@ namespace Guanako {
                 iter_symbol (context.root,
                              (smb, depth) => {
                                 if (smb.name != null) {
-                                    SourceReference sref = smb.source_reference;
+                                    Vala.SourceReference sref = smb.source_reference;
                                     if (sref == null)
                                         return IterCallbackReturns.CONTINUE;
 

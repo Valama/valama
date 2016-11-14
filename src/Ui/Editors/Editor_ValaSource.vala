@@ -61,14 +61,14 @@ namespace Ui {
       hooked_builder = builder;
     }
 
-    private Gtk.TextIter iter_from_location (Vala.SourceLocation location) {
+    private Gtk.TextIter iter_from_location (SourceLocation location) {
       Gtk.TextIter titer;
       my_member.buffer.get_iter_at_line (out titer, location.line -1);
       titer.forward_chars (location.column - 1);
       return titer;
     }
 
-    public void jump_to_sourceref (Vala.SourceReference sourceref) {
+    public void jump_to_sourceref (SourceReference sourceref) {
       var iter_begin = iter_from_location (sourceref.begin);
       var iter_end = iter_from_location (sourceref.end);
       iter_end.forward_char();
