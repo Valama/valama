@@ -25,6 +25,7 @@ namespace Units {
 
     public Gee.ArrayList<CompilerError> compiler_errors = new Gee.ArrayList<CompilerError>();
 
+    public signal void pre_context_update();
     public signal void context_updated();
     public signal void report_updated();
     
@@ -63,6 +64,7 @@ namespace Units {
       timeout_active = true;
       update_queued = false;
 
+      pre_context_update();
       new Thread<int> ("Context updater", update_code_context_work);
     }
 

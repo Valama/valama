@@ -5,8 +5,11 @@ namespace Ui {
     public Gtk.SourceView sourceview = new Gtk.SourceView ();
   
     private Project.ProjectMemberValaSource my_member = null;
-  
+
     private bool unsaved_changes = false;
+    public bool has_unsaved_changes() {
+      return unsaved_changes;
+    }
 
     public EditorValaSource(Project.ProjectMemberValaSource member, Ui.MainWidget main_widget) {
       this.main_widget = main_widget;
@@ -56,7 +59,7 @@ namespace Ui {
         if (unsaved_changes)
           if (builder.state == Builder.BuilderState.COMPILING)
             if (main_widget.main_toolbar.selected_target.included_sources.contains (my_member.id))
-              save_file (my_member.file.get_abs(), my_member.buffer.text);
+              save_file ();
       });
       hooked_builder = builder;
     }
@@ -89,19 +92,19 @@ namespace Ui {
       my_member.buffer.get_iter_at_line_offset (out titer, line, col);
       jump_to_iter (titer, titer);
     }
-    
-    private bool save_file (string filename, string text) {
+
+    public bool save_file () {
 
       unsaved_changes = false;
 
-      var file = File.new_for_path (filename);
+      var file = File.new_for_path (my_member.file.get_abs());
 
       /* TODO: First parameter can be used to check if file has changed.
        *       The second parameter can enable/disable backup file. */
       try {
           var fos = file.replace (null, false, FileCreateFlags.REPLACE_DESTINATION);
           var dos = new DataOutputStream (fos);
-          dos.put_string (text);
+          dos.put_string (my_member.buffer.text);
           dos.flush();
           dos.close();
           //msg (_("File saved: %s\n"), file.get_path());
@@ -119,7 +122,7 @@ namespace Ui {
     public override void save_internal (Xml.TextWriter writer) {
     }
     internal override void destroy_internal() {
-      save_file (my_member.file.get_abs(), my_member.buffer.text);
+      save_file ();
     }
   }
 

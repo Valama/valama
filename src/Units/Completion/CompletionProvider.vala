@@ -33,6 +33,10 @@ namespace Units {
       comp_provider.srcview = editor.sourceview;
       comp_provider.srcbuffer = member.buffer;
       editor.sourceview.completion.add_provider (comp_provider);
+      main_widget.code_context_provider.pre_context_update.connect (()=>{
+        if (editor.has_unsaved_changes())
+          editor.save_file();
+      });
     }
 
     private void update() {
