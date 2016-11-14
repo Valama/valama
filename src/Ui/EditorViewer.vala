@@ -105,21 +105,23 @@ namespace Ui {
       // Create title for new tab
       var title_box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 0);
       title_box.add (new Gtk.Label(editor.title));
-      
-      var button_close = new Gtk.Button.with_label(_("_Close"));
-      button_close.label = "x";
-      button_close.always_show_image = true;
-      button_close.set_relief(Gtk.ReliefStyle.NONE);
-      button_close.set_focus_on_click(false);
-      
+
+      // Close "button" (use image and wrap it in EventBox to capture input
+      var button_close = new Gtk.Image.from_icon_name ("gtk-close", Gtk.IconSize.SMALL_TOOLBAR);
+      var event_box = new Gtk.EventBox ();
+      event_box.above_child = true;
+      event_box.add (button_close);
+
       main_widget.project.member_removed.connect ((removed_member)=>{
         if (removed_member == member)
           remove_viewer (editor);
       });
-      button_close.clicked.connect(()=>{
+      event_box.button_press_event.connect(()=>{
         remove_viewer (editor);
+        return true;
       });
-      title_box.add (button_close);
+
+      title_box.add (event_box);
       title_box.show_all();
       
       // Add page and focus
