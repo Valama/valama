@@ -30,7 +30,9 @@ namespace Ui {
           }
       """;
       var cssprovider = new Gtk.CssProvider();
+      try {
       cssprovider.load_from_data(style,-1);
+      } catch { assert_not_reached(); }
       notebook.get_style_context().add_provider(cssprovider, -1);
       notebook.get_style_context().add_class("editor-notebook");
 

@@ -64,7 +64,9 @@ namespace Ui {
           }
       """;
       var cssprovider = new Gtk.CssProvider();
-      cssprovider.load_from_data(style,-1);
+      try {
+        cssprovider.load_from_data(style,-1);
+      } catch {assert_not_reached();}
       template.nb_lower.name = "nb-lower";
       template.nb_lower.get_style_context().add_provider(cssprovider, -1);
       template.nb_lower.get_style_context().add_class("nb-lower");

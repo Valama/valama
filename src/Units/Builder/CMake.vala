@@ -21,7 +21,7 @@ namespace Builder {
     
     }
 
-    private void writeCMakeFiles() {
+    private void writeCMakeFiles() throws IOError, GLib.Error {
 
       var buildsystem_dir = "buildsystems/" + target.binary_name + "/cmake";
 

@@ -227,7 +227,7 @@ namespace Ui {
       }
     }
 
-    private void save_language (string lang) {
+    private void save_language (string lang) throws Error {
       var my_member = member as Project.ProjectMemberGettext;
       var file = File.new_for_path(my_member.get_po_file (current_lang).get_abs());
       var fos = file.replace (null, false, FileCreateFlags.REPLACE_DESTINATION);

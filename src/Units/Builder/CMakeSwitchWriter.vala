@@ -38,7 +38,7 @@ namespace Units {
     }
 
     // Write a CMakeLists.txt that allows switching between targets
-    private void write() {
+    private void write() throws IOError, Error {
       var file = File.new_for_path ("CMakeLists.txt");
       if (file.query_exists ())
           file.delete ();

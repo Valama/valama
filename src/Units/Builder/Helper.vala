@@ -1,7 +1,7 @@
 namespace Builder {
 
   public class Helper {
-    public static void write_gresource_xml (Project.ProjectMemberGResource member, string path) {
+    public static void write_gresource_xml (Project.ProjectMemberGResource member, string path) throws Error {
       var file = File.new_for_path (path);
       if (file.query_exists ())
         file.delete ();
@@ -19,7 +19,7 @@ namespace Builder {
       dos.put_string ("""</gresources>""" + "\n");    
     }
 
-    public static void write_gladeui_gresource_xml (Project.ProjectMemberTarget target, string path) {
+    public static void write_gladeui_gresource_xml (Project.ProjectMemberTarget target, string path) throws Error {
       var file = File.new_for_path (path);
       if (file.query_exists ())
         file.delete ();
@@ -38,7 +38,7 @@ namespace Builder {
       dos.put_string ("""</gresources>""" + "\n");
     }
 
-    public static void write_config_vapi (Project.ProjectMemberTarget target, string path) {
+    public static void write_config_vapi (Project.ProjectMemberTarget target, string path) throws Error {
       var vapi = File.new_for_path (path);
       if (vapi.query_exists ())
         vapi.delete ();
