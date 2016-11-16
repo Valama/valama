@@ -196,15 +196,35 @@ public class DemoServer : Object {
         if (current_symbol == null)
             current_symbol = context.root;
 
+        // Add namespaces referenced in current file
         foreach (Vala.UsingDirective directive in file.current_using_directives) {
             var children = Guanako.get_child_symbols (directive.namespace_symbol);
             foreach (Vala.Symbol s in children)
                 ret.add(s);
         }
 
-        for (Vala.Scope scope = current_symbol.scope; scope != null; scope = scope.parent_scope) {
-            foreach (var s in scope.get_symbol_table().get_values())
-                ret.add(s);
+        // Add symbols of current scope and it's parents
+        var scopes_todo = new Gee.LinkedList<Vala.Scope>();
+        scopes_todo.add (current_symbol.scope);
+
+        while (scopes_todo.size > 0) {
+          var current_scope = scopes_todo[0];
+          scopes_todo.remove (current_scope);
+
+          // Queue parent's scope
+          if (current_scope.parent_scope != null)
+            scopes_todo.add (current_scope.parent_scope);
+
+          // Queue base class
+          if (current_scope.owner is Vala.Class) {
+            var scope_class = current_scope.owner as Vala.Class;
+            if (scope_class.base_class != null)
+              scopes_todo.add (scope_class.base_class.scope);
+          }
+
+          // Add scope's symbols
+          foreach (var s in current_scope.get_symbol_table().get_values())
+            ret.add(s);
         }
 
         /*
