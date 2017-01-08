@@ -15,5 +15,12 @@
       </description>
     </key>
 
+    <key name="current-color-scheme" type="s">
+      <default l10n="messages">"classic"</default>
+      <summary>Current color scheme</summary>
+      <description>
+      </description>
+    </key>
+
   </schema>
 </schemalist>
