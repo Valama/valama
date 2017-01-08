@@ -522,6 +522,14 @@ public class MainWidget : Box {
         this.menu.append (item_help_about);
         item_help_about.activate.connect (ui_about_dialog);
 
+        /* IDE Setting */
+        var item_setting = new ImageMenuItem.with_mnemonic (_("_IDE Setting"));
+        this.menu.append (item_setting);
+        item_setting.activate.connect ( () => {
+            var settings_window = new IDESettingsWindow ();
+            settings_window.show_all ();
+        } );
+
         /* Quit */
         var item_file_quit = new ImageMenuItem.with_mnemonic (_("_Quit"));
         var image_file_quit = new Image();
