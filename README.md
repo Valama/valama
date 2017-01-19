@@ -36,7 +36,12 @@ Discussion and support on IRC channel [#valama](http://webchat.freenode.net/?cha
 
 On Debian based systems install following packages:
 
-    sudo apt-get install build-essential valac-0.24 libvala-0.24-dev cmake pkg-config libgtksourceview-3.0-dev libgee-0.8-dev libxml2-dev libgdl-3-dev libgladeui-dev libclutter-gtk-1.0-dev libwebkit2gtk-3.0-dev intltool gnome-icon-theme-symbolic librsvg2-bin
+    sudo apt-get install build-essential valac libvala-dev cmake pkg-config libgtksourceview-3.0-dev libgee-0.8-dev libxml2-dev libgdl-3-dev libgladeui-dev libclutter-gtk-1.0-dev libwebkitgtk-dev intltool gnome-icon-theme-symbolic librsvg2-bin libwebkit2gtk-4.0-37 libwebkit2gtk-4.0-dev
+    
+
+On Debian 8 based systems install following packages:
+
+    sudo apt-get install build-essential valac libvala-dev cmake pkg-config libgtksourceview-3.0-dev libgee-0.8-dev libxml2-dev libgdl-3-dev libgladeui-dev libclutter-gtk-1.0-dev libwebkitgtk-dev intltool gnome-icon-theme-symbolic librsvg2-bin libwebkit2gtk-4.0-37 libwebkit2gtk-4.0-dev
 
 For a newer Vala version on Ubuntu based systems, you have to include the [Vala Team PPA](https://launchpad.net/~vala-team/+archive/ppa) first.
 
